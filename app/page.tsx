@@ -1,5 +1,5 @@
-import SimulatorApp from "@/components/SimulatorApp";
+import { Home } from '@/components/shell/Home';
 
 export default function HomePage() {
-  return <SimulatorApp defaultTopic="week-2" />;
+  return <Home />;
 }

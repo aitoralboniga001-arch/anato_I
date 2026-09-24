@@ -1,14 +1,16 @@
 # Embriologia interaktiboa
 
-Production MVP lokala, lehen mailako Medikuntzarako, giza enbriologiaren 1. eta 2. asteen ikaskuntza bisual eta interaktiborako. Interfazearen hizkuntza nagusia euskara da; edukien iturburu nagusiak erabiltzaileak emandako bi DOCX zuzenduta dira.
+Lehen mailako Medikuntzarako giza enbriologiaren lehen lau asteen ikaskuntza bisual eta interaktiboa. Interfazea, egituren izenak eta azalpenak euskaraz daude. Edukien iturburu nagusiak erabiltzaileak emandako lau apunte zuzenduta dira.
 
 ## Zer dago barruan
 
-- `/`: simulator nagusia, 1. eta 2. asteekin.
+- `/`: simulagailu nagusia, 1.–4. asteekin.
 - `/topics/week-1`: 1. astearen ikuspegi zuzena.
-- `/topics/week-2`: 2. astearen ikuspegi zuzena, Day 8, Day 9, Days 11-12 eta Day 13 etapekin.
-- Ikusi, Ulertu eta Ikasi moduak; denbora-lerroa play/pause, reverse, scrub eta 0.5x/1x/1.5x/2x abiadurekin.
-- SVG anatomiko eta zelularra, egitura-hautaketa, inspectorra, glosarioa eta test laburra.
+- `/topics/week-2`: 2. astearen ikuspegi zuzena, 8., 9., 11.–12. eta 13. egunekin.
+- `/topics/week-3`: gastrulazioa, notokorda, alantoidea eta korion-biloxken garapena.
+- `/topics/week-4`: tolespenak, neurulazioa, mesodermoaren bereizketa eta heste primitiboa.
+- Ikusi, Ulertu eta Ikasi moduak; lehen bi asteetarako denbora-lerroa eta 3.–4. asteetarako ikasketa-ibilbidea, play/pause, reverse, scrub eta 0.5x/1x/1.5x/2x abiadurekin. Azken bi asteetako prozesu batzuk aldi berean gertatzen dira.
+- SVG anatomiko eta zelularrak, egitura-hautaketa, egituren ikuskatzailea, glosarioa eta test laburra. Irudiak eskematikoak dira eta ez daude eskalara.
 - AI tutorea prest dago baina desaktibatuta dago uneko MVP-an; azalpen estatikoek ez dute kanpoko APIrik behar.
 - Reduced-motion eta teklatu bidezko erabilerarako oinarrizko bideak.
 
@@ -42,16 +44,18 @@ npm run lint
 npm run build
 ```
 
-Testek `TimelineEngine` determinista egiaztatzen dute. Browser bidezko QA-an bi topic-ak, 2. asteko lau etapak, erreprodukzioa, alderantzizko norabidea, inspectorra, glosarioa, quiz-a, tutorearen fallback-a eta mobile/desktop layout-a egiaztatu dira.
+Testek `TimelineEngine` determinista egiaztatzen dute. Lau asteetako edukiaren, egituren eta eszenen egiaztapenak ere egin behar dira aldaketak argitaratu aurretik.
 
 ## Arkitektura eta iturriak
 
-Ikusi [ARCHITECTURE.md](ARCHITECTURE.md) domeinuaren, motor deterministaren eta UI geruzen banaketa. DOCX originalak ez dira aldatu:
+Ikusi [ARCHITECTURE.md](ARCHITECTURE.md) domeinuaren, motor deterministaren eta UI geruzen banaketa. Jatorrizko apunteak ez dira aldatu:
 
-- `Anato lehenengo gaia (zuzenduta).docx`
-- `2. ENBRIOLOGIA_GARAPENAREN BIGARREN ASTEA (zuzenduta).docx`
+- `1. ENBRIOLOGIA_GARAPENAREN LEHENGO ASTEA (zuzenduta).docx`
+- `2. ENBRIOLOGIA_GARAPENAREN BIGARREN ASTEA (zuzenduta).pdf`
+- `3. Enbriologia_Garapenaren hirugarren astea .pdf`
+- `4. Enbriologia_Garapenaren laugarren astea (ZUZENDUTA).pdf`
 
-Iturburuko anbiguotasun eta terminologia-arazo guztiak [SOURCE_ISSUES.md](SOURCE_ISSUES.md)-n daude erregistratuta; ez dira isilpean zuzendu.
+Identifikatutako iturri-anbiguotasun eta terminologia-arazo nagusiak [SOURCE_ISSUES.md](SOURCE_ISSUES.md)-n daude erregistratuta; ez dira isilpean zuzendu.
 
 Progress lokalak `LocalStorageProgressRepository` erabiltzen du eta `ProgressRepository` interfazearen bidez beste biltegi baterako prest dago. Supabase/RAG eta Three.js etorkizuneko adapter gisa utzi dira, ez MVP honetan beharrezkoak diren dependentzia operatibo gisa.
 

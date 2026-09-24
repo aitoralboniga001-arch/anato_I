@@ -7,5 +7,6 @@ export default defineConfig([
     ".next/**",
     "node_modules/**",
     "_source-review/**",
+    "_legacy/**",
   ]),
 ]);

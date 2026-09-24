@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       question ? `Ikaslearen galdera: ${question}` : "",
       `Eszena-testuingurua: ${JSON.stringify(context)}`,
     ].filter(Boolean).join("\n");
-    const result = await generateText({ model, system: "Egin azalpen labur, zehatz eta source-grounded bat. Basque primary terminology is required; Spanish may appear only as a secondary synonym.", prompt, abortSignal: AbortSignal.timeout(12000) });
+    const result = await generateText({ model, system: "Egin iturrietan oinarritutako azalpen labur eta zehatza, osorik euskaraz. Ez erabili gaztelaniazko sinonimorik edo iturrian egiaztatu gabeko daturik.", prompt, abortSignal: AbortSignal.timeout(12000) });
     return NextResponse.json({ answer: result.text.slice(0, 1800), fallback: false });
   } catch {
     return NextResponse.json({ answer: "Tutorea ez dago erabilgarri orain. Eszenaren azalpen estatikoa mantendu da.", fallback: true }, { status: 200 });

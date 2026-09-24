@@ -1,0 +1,57 @@
+import { useSyncExternalStore } from 'react';
+
+const KEY = 'enbrioatlas:visited';
+
+type Store = Record<string, string[]>;
+
+const read = (): Store => {
+  try {
+    return JSON.parse(window.localStorage.getItem(KEY) ?? '{}') as Store;
+  } catch {
+    return {};
+  }
+};
+
+// Snapshots are cached per week so useSyncExternalStore sees a stable array until it changes.
+const cache = new Map<number, string[]>();
+const listeners = new Set<() => void>();
+const NONE: string[] = [];
+
+const subscribe = (cb: () => void) => {
+  listeners.add(cb);
+  return () => {
+    listeners.delete(cb);
+  };
+};
+
+/** Stage ids the viewer has opened in a week (per-browser convenience only). */
+export const readVisited = (week: number): string[] => {
+  let list = cache.get(week);
+  if (!list) {
+    list = read()[week] ?? NONE;
+    cache.set(week, list);
+  }
+  return list;
+};
+
+export const markVisited = (week: number, stageId: string) => {
+  if (readVisited(week).includes(stageId)) return;
+  const all = read();
+  const list = [...(all[week] ?? []), stageId];
+  all[week] = list;
+  try {
+    window.localStorage.setItem(KEY, JSON.stringify(all));
+  } catch {
+    // Storage unavailable (private mode): progress simply isn't remembered.
+  }
+  cache.set(week, list);
+  listeners.forEach((l) => l());
+};
+
+/** Visited stage ids for a week; empty on the server and during hydration. */
+export const useVisited = (week: number) =>
+  useSyncExternalStore(
+    subscribe,
+    () => readVisited(week),
+    () => NONE,
+  );
