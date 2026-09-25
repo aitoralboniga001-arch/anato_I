@@ -1,6 +1,7 @@
 'use client';
 
-import { Label, Note, Part, ellipsePts, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Label, Note, Part, ellipsePts, lerp, lerpPt, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { EarlyEmbryo, earlyGeom } from './EarlyEmbryo';
 import { AgeHud, SKIN, SkinDefs, atDay, limbGeom, polar, ramp, sampleSpine, spineAt, trunkPath, win, type LimbPose, type Num } from './skin';
 
 /**
@@ -708,7 +709,7 @@ export function EmbryoFigure({ day, kick = 0 }: { day: number; kick?: number }) 
 
 const day28to32 = (t: number) => (t < 0.62 ? 28 : t < 0.74 ? lerp(28, 32, seg(t, 0.62, 0.74)) : 32);
 const day42to56 = (t: number) => {
-  if (t < 0.13) return lerp(32, 42, seg(t, 0, 0.13));
+  if (t < 0.13) return lerp(36, 42, seg(t, 0, 0.13));
   if (t < 0.44) return 42;
   if (t < 0.5) return lerp(42, 48, seg(t, 0.44, 0.5));
   if (t < 0.72) return 48;
@@ -721,22 +722,25 @@ const vis = (t: number, a: number, b = 2) => Math.min(seg(t, a, a + 0.03), 1 - s
 
 export function Embryo28to32({ t }: SceneProps) {
   const day = day28to32(t);
-  const { b, S, arm, leg, cordEnd } = embryoGeom(day);
-  const cran = b.cran;
-  const vertex = polar(cran, -112, cran[3] * 0.98);
-  const rump = spineAt(S, 0.8, 0).p;
+  const g = earlyGeom(day);
+  const { S, cran, heart } = g;
+  const beat = Math.sin(t * 160);
+  const vertex = polar(cran, -100, Math.max(cran[2], cran[3]) * 0.98);
+  const rump = spineAt(S, 0.72, 0).p;
   const crl = vis(t, 0.25, 0.48);
-  const heartTop = polar(b.heart, -40, b.heart[2] * 0.7);
-  const archC: Pt = [b.arch[0] + 12, b.arch[1] + 8];
-  const groove: Pt = [b.arch[0] + 20, b.arch[1] + 16];
-  const sinus: Pt = [b.arch[0] + 0.78 * 58, b.arch[1] + 0.62 * 58];
-  const tail = spineAt(S, 0.985, 2).p;
-  const v4 = spineAt(S, 0.02, 22).p;
-  const meso = spineAt(S, 0.6, 54).p;
-  const som = spineAt(S, 0.72, 10).p;
+  const b0 = g.bars[0];
+  const b1 = g.bars[1];
+  const archC = lerpPt(b0.top, b0.bot, 0.5);
+  const groove: Pt = [(b0.top[0] + b1.top[0]) / 2 + 1, lerp(b0.top[1], b0.bot[1], 0.45)];
+  const bl = g.bars[g.bars.length - 1];
+  const sinus: Pt = [bl.top[0] + 18, bl.top[1] + g.archLen[3] * 0.5];
+  const heartTop = g.atrium;
+  const meso = g.meso[2];
+  const som = spineAt(S, 0.6, 16).p;
+  const mesen = polar(cran, -150, cran[2] * 0.75);
   return (
     <g>
-      <EmbryoFigure day={day} />
+      <EarlyEmbryo day={day} beat={beat} />
 
       {crl > 0.02 && (
         <Part id="luzera-zefalokaudala" show={crl}>
@@ -747,24 +751,24 @@ export function Embryo28to32({ t }: SceneProps) {
       )}
 
       {/* Left gutter */}
-      <Label id="mesentzefaloa" x={290} y={100} ax={polar(cran, -150, cran[2] * 0.8)[0]} ay={polar(cran, -150, cran[3] * 0.8)[1]} show={vis(t, 0.37)} />
-      <Label id="kristalinoaren-plaka" x={290} y={165} ax={b.eye[0] - 8} ay={b.eye[1]} show={vis(t, 0.37, 0.7)} />
-      <Label id="kristalinoaren-hobitxoa" x={290} y={165} ax={b.eye[0] - 8} ay={b.eye[1]} show={vis(t, 0.74)} />
-      <Label id="sudur-plaka" x={290} y={225} ax={b.nose[0] - 6} ay={b.nose[1]} show={vis(t, 0.74)} />
-      <Label id="bihotz-goragunea" x={290} y={345} ax={b.heart[0] - b.heart[2] * 0.5} ay={b.heart[1]} show={vis(t, 0.48)} />
-      <Label id="ezkerreko-bentrikulua" x={290} y={390} ax={b.heart[0] - 10} ay={b.heart[1] + b.heart[3] * 0.45} show={vis(t, 0.48, 0.74)} />
-      <Label id="zilborrestea" x={290} y={440} ax={cordEnd[0]} ay={cordEnd[1]} show={vis(t, 0.6)} />
-      <Label id="goragune-kaudala" x={290} y={492} ax={tail[0]} ay={tail[1]} show={vis(t, 0.6)} />
-      <Label id="beheko-gorputz-adarraren-hasikina" x={300} y={540} ax={leg.joints.mid[0]} ay={leg.joints.mid[1]} show={vis(t, 0.6)} />
+      <Label id="mesentzefaloa" x={290} y={100} ax={mesen[0]} ay={mesen[1]} show={vis(t, 0.37)} />
+      <Label id="kristalinoaren-plaka" x={290} y={165} ax={g.eye[0] - 8} ay={g.eye[1]} show={vis(t, 0.37, 0.7)} />
+      <Label id="kristalinoaren-hobitxoa" x={290} y={165} ax={g.eye[0] - 8} ay={g.eye[1]} show={vis(t, 0.74)} />
+      <Label id="sudur-plaka" x={290} y={225} ax={g.nose[0] - 6} ay={g.nose[1]} show={vis(t, 0.74)} />
+      <Label id="bihotz-goragunea" x={290} y={345} ax={heart[0] - heart[2] * 0.3} ay={heart[1] + heart[3] * 0.2} show={vis(t, 0.48)} />
+      <Label id="ezkerreko-bentrikulua" x={290} y={390} ax={heart[0]} ay={heart[1] + heart[3] * 0.4} show={vis(t, 0.48, 0.74)} />
+      <Label id="zilborrestea" x={290} y={440} ax={g.cordTip[0]} ay={g.cordTip[1]} show={vis(t, 0.6)} />
+      <Label id="goragune-kaudala" x={290} y={492} ax={g.tail[0]} ay={g.tail[1]} show={vis(t, 0.6)} />
+      <Label id="beheko-gorputz-adarraren-hasikina" x={300} y={540} ax={g.leg[0]} ay={g.leg[1]} show={vis(t, 0.6)} />
 
       {/* Right gutter */}
-      <Label id="laugarren-bentrikulua" x={770} y={60} ax={v4[0]} ay={v4[1]} show={vis(t, 0.86)} />
-      <Label id="entzumen-plaka" x={770} y={105} ax={b.ear[0] + 8} ay={b.ear[1]} show={vis(t, 0.37, 0.7)} />
+      <Label id="laugarren-bentrikulua" x={770} y={60} ax={g.v4[0]} ay={g.v4[1]} show={vis(t, 0.86)} />
+      <Label id="entzumen-plaka" x={770} y={105} ax={g.ear[0] + 8} ay={g.ear[1]} show={vis(t, 0.37, 0.7)} />
       <Label id="faringe-arkuak" x={770} y={150} ax={archC[0]} ay={archC[1]} />
       <Label id="arrialdura-brankialak" x={770} y={195} ax={groove[0]} ay={groove[1]} show={vis(t, 0.86)} />
       <Label id="lepoko-sinua" x={770} y={240} ax={sinus[0]} ay={sinus[1]} show={vis(t, 0.86)} />
-      <Label id="ezkerreko-aurikula" x={765} y={272} ax={heartTop[0]} ay={heartTop[1]} show={vis(t, 0.48, 0.74)} />
-      <Label id="goiko-gorputz-adarraren-hasikina" x={765} y={372} ax={arm.joints.mid[0]} ay={arm.joints.mid[1]} show={vis(t, 0.48)} />
+      <Label id="ezkerreko-aurikula" x={770} y={285} ax={heartTop[0]} ay={heartTop[1]} show={vis(t, 0.48, 0.74)} />
+      <Label id="goiko-gorputz-adarraren-hasikina" x={770} y={372} ax={g.arm[0]} ay={g.arm[1]} show={vis(t, 0.48)} />
       <Label id="mesonefros-gandorra" x={770} y={440} ax={meso[0]} ay={meso[1]} show={vis(t, 0.86)} />
       <Label id="somitak" x={770} y={520} ax={som[0]} ay={som[1]} />
       <Label id="luzera-zefalokaudala" x={770} y={585} ax={lerp(vertex[0], rump[0], 0.55)} ay={lerp(vertex[1], rump[1], 0.55)} show={crl} />
