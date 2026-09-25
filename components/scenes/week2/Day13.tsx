@@ -148,10 +148,29 @@ function Day13Drawing({ t }: SceneProps) {
         <path d={syncytioPath(g)} fill="url(#p-syncytio)" fillRule="evenodd" stroke={C.syncytioDeep} strokeWidth={1.2} />
       </Part>
       <Part id="biloxka-primarioa" show={villi}>
+        {/* Cytotrophoblast fingers growing out of the cyto ring into the syncytium (villus cores). */}
         {VILLI_A.map((a, i) => {
           const th = synTh(a, villi);
-          const p = synAt(g, a, 0.62);
-          return <ellipse key={i} cx={f1(p[0])} cy={f1(p[1])} rx={4.2} ry={Math.min(9, th * 0.28)} fill={C.cyto} stroke="#4a9d63" strokeWidth={0.7} transform={`rotate(${a + 90} ${f1(p[0])} ${f1(p[1])})`} />;
+          const len = th * 0.72 * villi;
+          if (len < 2) return null;
+          const u: Pt = [Math.cos(rad(a)), Math.sin(rad(a))];
+          const n: Pt = [-u[1], u[0]];
+          const w = Math.min(7, 3 + th * 0.06);
+          const at = (r: number, side: number, k = 1): Pt => [cx + u[0] * r + n[0] * w * side * k, cy + u[1] * r + n[1] * w * side * k];
+          const r0 = Rc - 3;
+          const r1 = Rc + len;
+          const b1 = at(r0, -1);
+          const t1 = at(r1, -1, 0.75);
+          const t2 = at(r1, 1, 0.75);
+          const b2 = at(r0, 1);
+          const tip = at(r1 + w * 1.3, 0);
+          const nuc = at(Rc + len * 0.55, 0);
+          return (
+            <g key={i}>
+              <path d={`M${f1(b1[0])},${f1(b1[1])} L${f1(t1[0])},${f1(t1[1])} Q${f1(tip[0])},${f1(tip[1])} ${f1(t2[0])},${f1(t2[1])} L${f1(b2[0])},${f1(b2[1])}Z`} fill={C.cyto} stroke="#4a9d63" strokeWidth={0.8} />
+              {len > 14 && <circle cx={f1(nuc[0])} cy={f1(nuc[1])} r={1.8} fill="#2f7a4a" />}
+            </g>
+          );
         })}
       </Part>
 
@@ -211,7 +230,7 @@ function anchors(t: number) {
     chorion: s(t, W.chorion),
     cyto: (a: number) => polar(g, a, g.Rc - CYTO / 2),
     syn: (a: number) => synAt(g, a, 0.5),
-    villus: (i: number) => synAt(g, VILLI_A[i], 0.62),
+    villus: (i: number) => synAt(g, VILLI_A[i], 0.4),
     meso: (a: number, r: number) => polar(g, a, r),
     amnios: [cx - 22, (cy - INNER + epiTop) / 2 + 2] as Pt,
     epi: [cx + 38, (epiTop + discY) / 2] as Pt,
@@ -236,7 +255,7 @@ export function Day13Section(props: SceneProps) {
       {L('umetoki-guruina', 190, 100, [266, 250])}
       {L('endometrio-epitelioa', 190, 150, [300, W2.surfaceY - 8])}
       {L('sinzitiotrofoblastoa', 190, 380, k.syn(150))}
-      {L('biloxka-primarioa', 190, 430, k.villus(4), k.villi)}
+      {L('biloxka-primarioa', 190, 430, k.villus(11), k.villi)}
       {L('zitotrofoblastoa', 190, 475, k.cyto(140))}
       {L('finkapen-pedikulua', 190, 520, k.stalk)}
       {L('korion-plaka', 190, 565, k.meso(300, (k.g.Rc - CYTO + INNER) / 2), k.plaka)}
@@ -257,8 +276,8 @@ export function Day13Section(props: SceneProps) {
 export function Day13Villi(props: SceneProps) {
   const { t } = props;
   const k = anchors(t);
-  const { cx, cy } = k.g;
-  const z = zoom(cx + 60, cy - 60, 2.6, 500, 320);
+  const c = polar(k.g, 292, k.g.Rc + 30);
+  const z = zoom(c[0], c[1], 2.3, 500, 320);
   const L = makeL(z.at);
   return (
     <g>
@@ -266,11 +285,11 @@ export function Day13Villi(props: SceneProps) {
       <g transform={z.transform}>
         <Day13Drawing {...props} />
       </g>
-      {L('zitotrofoblastoa', 180, 130, k.cyto(96))}
-      {L('biloxka-primarioa', 180, 200, k.villus(2), k.villi)}
-      {L('sinzitiotrofoblastoa', 180, 270, k.syn(76))}
-      {L('korion-plaka', 800, 130, k.meso(70, (k.g.Rc - CYTO + INNER) / 2), k.plaka)}
-      {L('korion-barrunbea', 800, 200, k.meso(50, (INNER + k.g.Rc - CYTO) / 2))}
+      {L('zitotrofoblastoa', 180, 130, k.cyto(262))}
+      {L('biloxka-primarioa', 180, 200, synAt(k.g, VILLI_A[14], 0.4), k.villi)}
+      {L('sinzitiotrofoblastoa', 180, 270, k.syn(276))}
+      {L('korion-plaka', 800, 400, k.meso(300, k.g.Rc - CYTO - 3), k.plaka)}
+      {L('korion-barrunbea', 800, 460, k.meso(305, (INNER + k.g.Rc - CYTO) / 2))}
       <Note x={500} y={585} tone="accent" show={k.villi}>
         Zitotrofoblastoaren zelulak sinzitiotrofoblastoaren erdian sartzen dira: biloxka primarioen biloak
       </Note>

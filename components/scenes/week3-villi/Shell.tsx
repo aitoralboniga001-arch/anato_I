@@ -294,7 +294,7 @@ export function ShellClose({ t, reduced }: SceneProps) {
       <Label id="zitotrofoblastoa" x={180} y={310} ax={at(cx - 17, Y.shellSplit + 40)[0]} ay={at(cx - 17, Y.shellSplit + 40)[1]} />
       <Label id="sinzitiotrofoblastoa" x={180} y={420} ax={at(cx - trunk.hw + 4, Y.shellSplit + 4)[0]} ay={at(cx - trunk.hw + 4, Y.shellSplit + 4)[1]} />
       <Label id="biloxka-enborra" x={180} y={520} ax={at(cx, Y.shellSplit + 140)[0]} ay={at(cx, Y.shellSplit + 140)[1]} text="Enborrezko biloxka" />
-      <Note x={500} y={580} tone="accent" show={seg(t, W.penetrate[0], W.penetrate[0] + 0.06) * (1 - seg(t, 0.28, 0.34))}>
+      <Note x={500} y={612} tone="accent" show={seg(t, W.penetrate[0], W.penetrate[0] + 0.06) * (1 - seg(t, 0.28, 0.34))}>
         Zitotrofoblasto-zelulak sinzitioa zeharkatu eta dezidua basalera iristen dira
       </Note>
     </g>

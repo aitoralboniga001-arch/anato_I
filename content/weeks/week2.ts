@@ -723,7 +723,7 @@ export const week2: WeekDef = {
         { at: 0.62, text: 'Hasierako bitelo zakuaren zatiak korion barrunbean geratzen dira: kiste exozelomikoak.', focus: ['kiste-exozelomikoak'] },
         { at: 0.74, text: 'Finkapen pedikuluaren bitartez, korion plakatik bi barrunbe eskegita daude: amnios barrunbea eta bitelo zaku sekundarioa (bi orriko diskoa haien artean). Hemendik garatuko da zilbor-hestea.', focus: ['finkapen-pedikulua', 'amnios-barrunbea', 'bitelo-zaku-sekundarioa'] },
         { at: 0.86, text: 'Korioia: sinzitiotrofoblastoa + zitotrofoblastoa + korion plaka (enbrioi kanpoko mesodermo somatikoa).', focus: ['korioia', 'korion-plaka'] },
-        { at: 0.94, text: 'Egun honetan umetokiko odol-jario bat gerta daiteke (normala): ez nahastu hilekoarekin, erditze-data kalkulatzeko garrantzitsua baita.', focus: ['endometrio-epitelioa'] },
+        { at: 0.94, text: 'Egun honetan umetokiko odol-jario bat gerta daiteke (normala): endometriotik sinzitiotrofoblastora (apurtutako odol hodietatik) odol-fluxu handiagoa iristen delako. Ez nahastu hilekoarekin (28. eguna), erditze-data kalkulatzeko garrantzitsua baita.', focus: ['endometrio-epitelioa'] },
       ],
       structures: [
         'endometrio-estroma',
@@ -752,7 +752,7 @@ export const week2: WeekDef = {
         'Korion barrunbea handitzen da; zitoaren barruko aurpegiko enbrioi kanpoko mesodermoa = korion plaka.',
         'Hipoblastoak Heuser-en mintzaren barrualdea estaltzen du → bitelo zaku sekundarioa (txikiagoa); hondarrak = kiste exozelomikoak.',
         'Finkapen pedikulutik eskegita: amnios barrunbea eta bitelo zaku sekundarioa. Zilbor-hestearen jatorria.',
-        'Habiratze-odoljarioa 13. egunean: normala, ez hilekoa.',
+        'Habiratze-odoljarioa 13. egunean: normala, ez hilekoa. Kausa: endometriotik sinzitiotrofoblastora odol-fluxu handiagoa iristen da.',
       ],
       cautions: [
         'Biloxka primarioan ez dago mesodermorik ez odol-hodirik: zitotrofoblastoa (erdigunea) + sinzitiotrofoblastoa (azala) bakarrik.',

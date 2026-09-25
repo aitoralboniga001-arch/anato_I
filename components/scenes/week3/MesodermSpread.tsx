@@ -14,7 +14,7 @@ import { CellCluster, DiscDrawing, MembraneMark, makeDisc } from './DiscSection'
  *    .55–.7 the two membranes stand out as mesoderm-free gaps · .7–.85 prechordal plate.
  */
 const D = { cx: 500, cy: 320, rx: 190, ry: 145 };
-const SRC: Pt = [D.cx, D.cy + 40];
+const STREAK: [Pt, Pt] = [[D.cx, D.cy + 10], [D.cx, D.cy + D.ry - 42]];
 const CRANIAL: Pt = [D.cx, D.cy - D.ry + 14];
 const CAUDAL: Pt = [D.cx, D.cy + D.ry - 14];
 const MEMBR_R = 17;
@@ -25,7 +25,9 @@ function DorsalDrawing({ t }: SceneProps) {
   const growth = seg(t, 0.1, 0.75);
   const membranes = seg(t, 0.55, 0.7);
   const prechordal = seg(t, 0.7, 0.85);
-  const revealR = lerp(24, 430, growth);
+  // The mesoderm leaves the streak (caudal half) and spreads cranially and laterally.
+  const rev = { cx: D.cx, cy: lerp(STREAK[0][1] + 40, D.cy - 20, growth), rx: lerp(16, 420, growth), ry: lerp(58, 420, growth) };
+  const push = seg(t, 0.1, 0.6) * (1 - seg(t, 0.62, 0.7));
 
   return (
     <g>
@@ -42,7 +44,7 @@ function DorsalDrawing({ t }: SceneProps) {
 
       <mask id="w3-meso-reveal">
         <rect x={0} y={0} width={1000} height={640} fill="#000" />
-        <circle cx={SRC[0]} cy={SRC[1]} r={revealR} fill="#fff" />
+        <ellipse cx={rev.cx} cy={rev.cy} rx={rev.rx} ry={rev.ry} fill="#fff" />
       </mask>
       <g mask="url(#w3-meso-reveal)">
         <path d={outline} fill="none" />
@@ -57,6 +59,21 @@ function DorsalDrawing({ t }: SceneProps) {
           </Part>
         </g>
       </g>
+
+      {/* Primitive streak and node (in the ectoderm, so on top in a dorsal view) */}
+      <Part id="ildo-primitiboa">
+        <path d={`M${STREAK[0][0]},${STREAK[0][1]} L${STREAK[1][0]},${STREAK[1][1]}`} stroke="#0b1020" strokeWidth={7} strokeLinecap="round" />
+      </Part>
+      <Part id="nodo-primitiboa">
+        <circle cx={STREAK[0][0]} cy={STREAK[0][1] - 4} r={9} fill="#0b1020" stroke="rgba(232,238,252,0.6)" strokeWidth={1.2} />
+      </Part>
+      {[
+        [STREAK[0][0], STREAK[0][1] + 20, STREAK[0][0], STREAK[0][1] - 90],
+        [STREAK[0][0] - 10, STREAK[0][1] + 50, STREAK[0][0] - 130, STREAK[0][1] + 10],
+        [STREAK[0][0] + 10, STREAK[0][1] + 50, STREAK[0][0] + 130, STREAK[0][1] + 10],
+      ].map(([x0, y0, x1, y1], i) => (
+        <Arrow key={i} from={[x0, y0]} to={[x1, y1]} bend={i === 0 ? 0 : i === 1 ? 0.12 : -0.12} color="#fde68a" width={2} head={8} show={push} progress={Math.min(1, push * 1.4)} />
+      ))}
 
       <Part id="mintz-bukofaringeoa" show={membranes}>
         <circle cx={CRANIAL[0]} cy={CRANIAL[1]} r={MEMBR_R - 3} fill="#dfe6f7" opacity={0.85} />
@@ -84,6 +101,8 @@ function dorsalLabels(t: number) {
     <>
       {L('enbrioi-kanpoko-mesodermoa', 190, 150, [D.cx, D.cy - D.ry - 11], exMeso)}
       {L('mesodermo-intraenbrionarioa', 190, 220, [D.cx - D.rx * 0.55, D.cy], growth)}
+      {L('ildo-primitiboa', 810, 400, [STREAK[0][0] + 3, (STREAK[0][1] + STREAK[1][1]) / 2])}
+      {L('nodo-primitiboa', 810, 350, [STREAK[0][0] + 8, STREAK[0][1] - 4])}
       {L('mintz-bukofaringeoa', 810, 245, CRANIAL, membranes)}
       {L('plaka-prekordala', 810, 280, [CRANIAL[0] + 16, CRANIAL[1] + MEMBR_R + 14], prechordal)}
       {L('kloaka-mintza', 810, 470, CAUDAL, membranes)}

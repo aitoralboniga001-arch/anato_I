@@ -132,7 +132,7 @@ export function Implantation({ t }: SceneProps) {
       <Label id="miometrioa" x={812} y={layer(40)[1]} ax={layer(40)[0] - 60} ay={layer(40)[1]} align="start" show={over} />
       <Label id="endometrioa" x={812} y={layer(360)[1]} ax={layer(360)[0] - 60} ay={layer(360)[1]} align="start" show={over} />
       <Label id="umetoki-barrunbea" x={812} y={Math.min(600, layer(SURF + 60)[1])} ax={layer(SURF + 60)[0] - 60} ay={layer(SURF + 60)[1]} align="start" show={over} />
-      <Label id="blastozistoa" x={150} y={560} ax={P(cx - RB, cy)[0]} ay={P(cx - RB, cy)[1]} show={vis(t, 0.1, 0.4)} />
+      <Label id="blastozistoa" x={190} y={470} ax={P(cx - RB, cy)[0]} ay={P(cx - RB, cy)[1]} show={vis(t, 0.1, 0.4)} />
 
       {/* Close-up */}
       <Label id="endometrio-epitelioa" x={812} y={262} ax={epi[0]} ay={epi[1]} align="start" show={close} />

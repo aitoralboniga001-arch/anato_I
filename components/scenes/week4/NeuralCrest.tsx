@@ -1,8 +1,9 @@
 'use client';
 
-import { C, Label, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
+import { C, Label, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { spineAt } from '@/components/scenes/week5/skin';
+import { Embryo28Outline, G28, onEll } from './BrainVesicles';
 import { SectionDrawing, makeSection } from '@/components/scenes/section/Section';
-import { bodyLoop, dorsalPt, ventralPt, type Pt } from './common';
 
 /**
  * Stage `gandor-neurala` — crest cells detach from the neural fold edges (epithelial→mesenchymal),
@@ -80,22 +81,30 @@ interface Dest {
   group: number;
 }
 
+const g = G28;
+const sp = (u: number, d: number): Pt => spineAt(g.S, u, d).p;
+const mid = (a: Pt, b: Pt, k = 0.5): Pt => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k];
+const L = 330;
+const R = 740;
+
 const DESTS: Dest[] = [
-  { id: 'buru-aurpegi-hezurrak', at: [dorsalPt(0.03, 1, 30)[0], dorsalPt(0.03, 1, 30)[1]], x: 770, y: 250, group: 0 },
-  { id: 'meningeak-kraneal', at: [dorsalPt(0.06, 1, 12)[0], dorsalPt(0.06, 1, 12)[1]], x: 190, y: 130, group: 0 },
-  { id: 'nerbio-kranialen-gongoilak', at: [dorsalPt(0.1, 1, 4)[0], dorsalPt(0.1, 1, 4)[1]], x: 770, y: 290, group: 0 },
-  { id: 'buru-lepo-dermisa', at: [dorsalPt(0.14, 1, -10)[0], dorsalPt(0.14, 1, -10)[1]], x: 190, y: 170, group: 0 },
-  { id: 'melanozitoak', at: [dorsalPt(0.2, 1, -8)[0], dorsalPt(0.2, 1, -8)[1]], x: 770, y: 130, group: 1 },
-  { id: 'odontoblastoak', at: [dorsalPt(0.04, 1, 40)[0], dorsalPt(0.04, 1, 40)[1]], x: 190, y: 210, group: 1 },
-  { id: 'tiroide-c-zelulak', at: [ventralPt(0.25, 1, 30)[0], ventralPt(0.25, 1, 30)[1]], x: 770, y: 170, group: 1 },
-  { id: 'bihotz-trenkada-tronkokonala', at: [ventralPt(0.3, 1, 10)[0], ventralPt(0.3, 1, 10)[1]], x: 190, y: 250, group: 1 },
-  { id: 'aurpegi-hodi-muskulu-leuna', at: [dorsalPt(0.08, 1, 20)[0], dorsalPt(0.08, 1, 20)[1]], x: 770, y: 330, group: 2 },
-  { id: 'schwann-zelulak', at: [dorsalPt(0.5, 1, 20)[0], dorsalPt(0.5, 1, 20)[1]], x: 190, y: 290, group: 2 },
-  { id: 'glia-zelulak', at: [dorsalPt(0.6, 1, 12)[0], dorsalPt(0.6, 1, 12)[1]], x: 770, y: 210, group: 2 },
-  { id: 'gongoil-errakideoak', at: [dorsalPt(0.45, 1, 4)[0], dorsalPt(0.45, 1, 4)[1]], x: 190, y: 330, group: 3 },
-  { id: 'gongoil-sinpatikoak', at: [ventralPt(0.55, 1, 30)[0], ventralPt(0.55, 1, 30)[1]], x: 770, y: 370, group: 3 },
-  { id: 'giltzurrun-gaineko-muina', at: [ventralPt(0.62, 1, 34)[0], ventralPt(0.62, 1, 34)[1]], x: 190, y: 370, group: 3 },
-  { id: 'gongoil-parasinpatikoak', at: [ventralPt(0.4, 1, 36)[0], ventralPt(0.4, 1, 36)[1]], x: 770, y: 410, group: 3 },
+  // Head: skull/face bones, meninges, cranial ganglia, dermis, odontoblasts, facial vessel muscle
+  { id: 'meningeak-kraneal', at: onEll(g.cran, -150, 0.78), x: L, y: 145, group: 0 },
+  { id: 'buru-aurpegi-hezurrak', at: onEll(g.cran, 175, 0.72), x: L, y: 190, group: 0 },
+  { id: 'nerbio-kranialen-gongoilak', at: mid(g.bars[1].top, sp(0.0, 30), 0.55), x: L, y: 100, group: 0 },
+  { id: 'buru-lepo-dermisa', at: sp(0.02, 3), x: R, y: 80, group: 0 },
+  { id: 'odontoblastoak', at: mid(g.bars[0].top, g.bars[0].bot, 0.75), x: L, y: 235, group: 1 },
+  { id: 'aurpegi-hodi-muskulu-leuna', at: [g.face[0] - 10, g.face[1]], x: L, y: 280, group: 1 },
+  { id: 'tiroide-c-zelulak', at: mid(g.bars[3].top, g.bars[3].bot, 0.8), x: R, y: 200, group: 1 },
+  { id: 'bihotz-trenkada-tronkokonala', at: onEll(g.heart, -150, 0.55), x: L, y: 325, group: 1 },
+  // Trunk: skin melanocytes, peripheral nerve glia, ganglia, adrenal medulla
+  { id: 'melanozitoak', at: sp(0.38, 2), x: R, y: 320, group: 2 },
+  { id: 'glia-zelulak', at: sp(0.3, 12), x: R, y: 250, group: 2 },
+  { id: 'schwann-zelulak', at: sp(0.62, 24), x: R, y: 545, group: 2 },
+  { id: 'gongoil-errakideoak', at: sp(0.42, 22), x: R, y: 390, group: 3 },
+  { id: 'gongoil-sinpatikoak', at: sp(0.46, 44), x: R, y: 440, group: 3 },
+  { id: 'giltzurrun-gaineko-muina', at: sp(0.55, 62), x: R, y: 490, group: 3 },
+  { id: 'gongoil-parasinpatikoak', at: sp(0.5, 78), x: L, y: 420, group: 3 },
 ];
 
 function groupShow(t: number, group: number) {
@@ -106,7 +115,9 @@ function groupShow(t: number, group: number) {
 function MapDrawing({ t }: SceneProps) {
   return (
     <g>
-      <path d={bodyLoop(1, 0)} fill="rgba(122,150,220,0.07)" stroke="rgba(232,238,252,0.28)" strokeWidth={1.2} />
+      <Embryo28Outline />
+      {/* Origin: the crest along the dorsal neural tube */}
+      <path d={smoothPath(Array.from({ length: 30 }, (_, i) => sp(0.02 + (0.93 * i) / 29, 8)), false)} fill="none" stroke={C.neuralCrest} strokeWidth={3} strokeDasharray="2 5" strokeLinecap="round" opacity={0.6} />
       {DESTS.map((d) => {
         const show = groupShow(t, d.group);
         return (

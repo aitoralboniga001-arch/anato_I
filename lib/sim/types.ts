@@ -59,6 +59,8 @@ export interface StageDef {
   dayRange: [number, number];
   title: string;
   subtitle?: string;
+  /** Optional one-paragraph preview of what the stage shows (defaults to the view description). */
+  intro?: string;
   /** Playback seconds at 1x. */
   duration: number;
   views: ViewDef[];
@@ -117,7 +119,7 @@ export interface QuizQuestion {
 }
 
 export interface WeekDef {
-  week: 1 | 2 | 3 | 4 | 5;
+  week: 1 | 2 | 3 | 4 | 5 | 6;
   slug: string;
   title: string;
   subtitle: string;

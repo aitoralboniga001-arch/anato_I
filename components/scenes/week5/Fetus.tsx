@@ -50,13 +50,14 @@ function Ruler({ pxcm, step, max }: { pxcm: number; step: number; max: number })
 
 /** Week, length and weight read-out from the notes' table. */
 function Readout({ day }: { day: number }) {
-  const w = weekOf(day);
-  const cm = interp(LEN, w);
-  const g = interp(WT, w);
+  // Read the table at the whole week shown, so the three numbers always agree with it.
+  const wk = Math.min(38, Math.ceil(day / 7));
+  const cm = interp(LEN, wk);
+  const g = interp(WT, wk);
   const [wv, wu] = fmtWeight(g);
   return (
     <g pointerEvents="none">
-      <AgeHud value={Math.min(38, Math.ceil(day / 7))} unit=". astea" caption="Fetuaren adina" />
+      <AgeHud value={wk} unit=". astea" caption="Fetuaren adina" />
       {[
         ['Luzera', cm.toFixed(0), ' cm'],
         ['Pisua', wv, wu],

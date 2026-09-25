@@ -188,6 +188,7 @@ export const week1: WeekDef = {
       dayRange: [0, 6],
       title: 'Obulutegitik endometriora',
       subtitle: 'Emakumearen ugal aparatua eta ibilbidea',
+      intro: 'Giza garapenak 25 urte baino gehiago irauten ditu, baina prozesu garrantzitsuenak lehenengo 6–8 asteetan gertatzen dira. Enbriologiak hiru aldi bereizten ditu: lehenengo bi asteak, enbrioi aroa (3.–8. astea) eta fetu aroa (9. astetik jaiotzara). Etapa honetan ernetze-zelularen ibilbidea ikusiko dugu: obulutegitik endometriora.',
       duration: 36,
       source: src('4.1 Emakumearen ugal aparatua'),
       views: [
@@ -203,7 +204,7 @@ export const week1: WeekDef = {
       beats: [
         { at: 0, text: 'Emakumearen ugal aparatua, mozketa koronalean: umetokiaren pareta (endometrioa, miometrioa, perimetrioa), tronpa (atal interstiziala, istmoa, anpulua, infundibulua, finbriak) eta obulutegia.', focus: ['umetoki-tronpa', 'obulutegia', 'endometrioa'] },
         { at: 0.12, text: 'Obulazioa (ziklo obarikoaren 14. eguna): anpulua finbriekin obulutegira hurbiltzen da; folikulu heldua apurtu eta obozito sekundarioa, mintz peluzidoarekin eta koroa erradiatuarekin, anpulura askatzen da.', focus: ['obulazioa', 'finbriak', 'folikulu-heldua'] },
-        { at: 0.24, text: 'Ernalkuntza normalean tronparen anpuluan gertatzen da (12–24 ordu). Obozitoa egun bakarra mantentzen da bizirik.', focus: ['ernalkuntza', 'anpulua'] },
+        { at: 0.24, text: 'Istmoan zain zeuden espermatozoideak anpulura hurbiltzen dira, koroa erradiatuak kanporatutako substantzien eraginez. Ernalkuntza normalean tronparen anpuluan gertatzen da (12–24 ordu). Obozitoa egun bakarra mantentzen da bizirik.', focus: ['ernalkuntza', 'anpulua'] },
         { at: 0.36, text: 'Zigotoa tronpatik umetokirantz mugitzen da eta bidean zatitzen da: 2 zelula 30 ordutara.', focus: ['zigotoa', 'blastomeroak'] },
         { at: 0.5, text: '3. eguna: morula (12–16 zelula) tronparen istmotik mugitzen da.', focus: ['morula', 'istmoa'] },
         { at: 0.62, text: '4. eguna: ~32 zelula; umetoki-gorputzaren barrunbera sartzen da eta mintz peluzidoa galtzen du.', focus: ['morula', 'umetoki-barrunbea'] },
@@ -216,7 +217,8 @@ export const week1: WeekDef = {
         'Umetokiaren pareta: endometrioa (barrukoa) → miometrioa (muskularra) → perimetrioa (kanpokoa).',
         'Obulazioa ziklo obarikoaren 14. egunean; ernalkuntza normalean tronparen anpuluan.',
         'Ibilbidea: 2 zelula 30 ordutara · morula 3. egunean istmoan · 4. egunean umetokian (~32 zelula) · blastozistoa 4,5–5 · habiratzea 5,5–6.',
-        'Espermatozoideak: baginan 200–300 milioi; %1 igarotzen da lepora (500–600 anpulura); 4–5 egun bizirik, istmoan obulazioaren zain.',
+        'Espermatozoideak: baginan 200–300 milioi; %1 igarotzen da lepora (500–600 anpulura); 4–5 egun bizirik, istmoan obulazioaren zain. Obulazioan anpulura hurbiltzen dira, koroa erradiatuak kanporatutako substantzien eraginez.',
+        'Garapenaren aldiak: lehenengo bi asteak · enbrioi aroa (3.–8. astea) · fetu aroa (9. astetik jaiotzara). Garapenak 25 urte baino gehiago irauten du, baina prozesu garrantzitsuenak lehenengo 6–8 asteetan.',
       ],
       cautions: ['Obozitoa egun BAKARRA mantentzen da bizirik ugal aparatuan; espermatozoideak 4–5 egun.'],
     },
@@ -249,7 +251,7 @@ export const week1: WeekDef = {
       ],
       structures: ['obozito-sekundarioa', 'koroa-erradiatua', 'mintz-peluzidoa', 'espermatozoidea', 'akrosoma', 'kapazitazioa', 'akrosoma-erreakzioa', 'erreakzio-kortikala', 'gorpuskulu-polarrak', 'obulua', 'pronukleoak', 'zigotoa', 'ernalkuntza'],
       keyPoints: [
-        'Ernalkuntza = bi gameto haploideren fusioa → zigotoa. Normalean tronparen anpuluan.',
+        'Ernalkuntza = bi gameto haploideren (n, 23 kromosoma) fusioa → zigoto diploidea (46 kromosoma: 44 autosoma + XX emea edo XY arra). Normalean tronparen anpuluan.',
         'Hiru fase: (1) koroa erradiatua zeharkatu (kapazitazioa), (2) mintz peluzidoa zeharkatu (akrosoma erreakzioa), (3) mintz plasmatikoen fusioa.',
         'Erreakzio kortikala (gune erreakzioa): mintz peluzidoa iragazgaitza → espermatozoide bakarra sartzen da.',
         'Obozito sekundarioak II. zatiketa meiotikoa ernalkuntzan bakarrik amaitzen du → obulua.',

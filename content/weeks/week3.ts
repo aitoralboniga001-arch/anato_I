@@ -265,7 +265,7 @@ const stagesA: StageDef[] = [
     beats: [
       { at: 0, text: 'Kanpotik trofoblastoa: barruan zitotrofoblastoa, kanpoan sinzitiotrofoblastoa. Zitotrofoblasto-zelulak sinzitiotrofoblastoan sartzen (penetratzen) direnean, biloxka primarioak sortzen dira.', focus: ['biloxka-primarioa'] },
       { at: 0.12, text: 'Korion barrunbea (enbrioi kanpoko zeloma): biloxka primarioen eta germen diskoaren artean dagoen barrunbe handia.', focus: ['korion-barrunbea'] },
-      { at: 0.22, text: 'Korion plaka: sinzitiotrofoblasto + zitotrofoblasto + enbrioi kanpoko mesodermoz osatutako pareta.', focus: ['korion-plaka'] },
+      { at: 0.22, text: 'Korion plaka: zitotrofoblastoaren barruko aurpegia estaltzen duen enbrioi kanpoko mesodermoa. Korion plaka + zitotrofoblastoa + sinzitiotrofoblastoa = korioia.', focus: ['korion-plaka'] },
       { at: 0.32, text: 'Finkapen pedikulua: enbrioi kanpoko mesodermoz osatutako zubia, germen diskoa korion plakari lotzen diona.', focus: ['finkapen-pedikulua'] },
       { at: 0.42, text: 'Amnios barrunbea diskoaren gainean (dortsalean); amnioblastoek sabaia osatzen dute.', focus: ['amnios-barrunbea', 'amnioblastoak'] },
       { at: 0.52, text: 'Bi orriko ernetze diskoa: epiblastoa (goian, zilindrikoa) eta hipoblastoa (behean, kubikoa). Alde zefaliko/kraneala eta kaudala bereizten dira; espazioan edozein kokapenetan egon daiteke.', focus: ['epiblastoa', 'hipoblastoa', 'bi-orriko-diskoa'] },
@@ -411,6 +411,8 @@ const stagesA: StageDef[] = [
       'kloaka-mintza',
       'plaka-prekordala',
       'hobitxo-primitiboa',
+      'ildo-primitiboa',
+      'nodo-primitiboa',
     ],
     keyPoints: [
       'Enbrioi barruko mesodermoa ildo primitibotik alde kraneal eta lateraletara hedatzen da, disko osoa okupatu arte.',
@@ -532,7 +534,7 @@ const stagesA: StageDef[] = [
       'amnios-barrunbea',
     ],
     keyPoints: [
-      'Hiru orriko ernetze diskoak jada polaritate finkatua du: kraneo-kaudala, dortso-bentrala eta lateralitatea (ezker-eskuina); organoen kokapena hortik dator.',
+      'Hiru orriko ernetze diskoak jada polaritate finkatua du: kraneo-kaudala, dortso-bentrala eta lateralitatea (ezker-eskuina); organoen kokapena hortik dator. Organo batzuk simetrikoak dira (begiak); beste batzuk bakoitiak (gibela, barea) eta kokapen jakin bat behar dute.',
       'Diskoaren hazkuntza ez da uniformea: alde kraneala askoz gehiago hazten da, gastrulazioa han lehenago bukatzen delako eta organoen agerpena handik hasten delako.',
       'Diskoaren alde kaudalean gastrulazioak jarraitzen du 4. astearen bukaeraraino: ildo primitiboa erregreditzen (laburtzen eta atzeratzen) doa.',
       'Alantoidea (~16. eguna) bitelo zakuaren atzeko paretatik sortzen den dibertikulua da, finkapen pedikuluan kokatzen dena; geroago zilbor-hodien eraketan parte hartuko du.',

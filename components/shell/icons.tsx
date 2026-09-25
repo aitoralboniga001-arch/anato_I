@@ -139,6 +139,20 @@ export const IconLoop = ({ size }: P) => (
     <path d="M4 20v-5h5" />
   </svg>
 );
+/** Guided (slow, explained) playback: an open book with a pointer. */
+export const IconGuide = ({ size }: P) => (
+  <svg {...base(size)}>
+    <path d="M12 6.5C10.2 5.2 7.6 4.6 4 4.8v12.6c3.6-.2 6.2.4 8 1.7 1.8-1.3 4.4-1.9 8-1.7V4.8c-3.6-.2-6.2.4-8 1.7z" />
+    <path d="M12 6.5v12.6" />
+  </svg>
+);
+export const IconVoice = ({ size }: P) => (
+  <svg {...base(size)}>
+    <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+    <path d="M15.5 9a4 4 0 0 1 0 6" />
+    <path d="M18 6.5a7.5 7.5 0 0 1 0 11" />
+  </svg>
+);
 export const IconHome = ({ size }: P) => (
   <svg {...base(size)}>
     <path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" />

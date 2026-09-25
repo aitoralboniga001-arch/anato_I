@@ -266,7 +266,8 @@ export function BarrierClose({ t, reduced }: SceneProps) {
       <Label id="zitotrofoblastoa" x={190} y={370} ax={(BX.syn1 + BX.cyto1) / 2} ay={BY.top + 30} />
       <Label id="enbrioi-kanpoko-mesodermoa" x={190} y={430} ax={(BX.cyto1 + BX.meso1) / 2} ay={BY.top + 30} text="Kanpoko mesodermoa" />
       <Label id="karena-muga" x={190} y={510} ax={BX.ivs1} ay={BY.top - 14} />
-      <Label id="biloxka-kapilarrak" x={810} y={240} ax={(BX.meso1 + BX.endo1) / 2} ay={BY.top + 30} text="Biloxka kapilarrak" />
+      <Label id="endotelioa" x={810} y={240} ax={(BX.meso1 + BX.endo1) / 2} ay={BY.top + 30} show={seg(layers, 0.6, 1)} />
+      <Label id="biloxka-kapilarrak" x={810} y={380} ax={BX.endo1 + 40} ay={BY.top + 60} />
       <Note x={500} y={70} show={o2}>
         O2 eta elikagaiak: amaren odoletik fetuarenera
       </Note>

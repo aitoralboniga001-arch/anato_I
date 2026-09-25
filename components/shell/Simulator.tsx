@@ -7,7 +7,7 @@ import { SceneContext, type QuizFlash, type SceneContextValue } from '@/componen
 import { getWeek, nameOf, structures, weeks } from '@/content/registry';
 import { ageLabel, ageParts, spanOf } from '@/lib/sim/age';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
-import type { StructureCategory, WeekDef } from '@/lib/sim/types';
+import type { StageDef, StructureCategory, StructureDef, WeekDef } from '@/lib/sim/types';
 import { Glossary } from './Glossary';
 import { IconBook, IconInfo, IconLayers, IconPlay, IconQuiz, IconTag, IconTarget, IconTree, PlaneGlyph } from './icons';
 import { Wordmark, isWip } from './LandNav';
@@ -15,6 +15,8 @@ import { Player } from './Player';
 import { Questions } from './Questions';
 import { Inspector, Outline, StageInfo } from './SidePanel';
 import { Viewport } from './Viewport';
+import { hush, speak } from './narrate';
+import { setPref, usePref } from './prefs';
 import { markVisited, useVisited } from './progress';
 
 interface Pos {
@@ -28,6 +30,32 @@ interface FindQuiz {
   tries: number;
   message: string | null;
 }
+
+/** Quick preview of a whole stage before the detailed playback (seconds), then a short rest. */
+const PREVIEW_S = 5.5;
+const PREVIEW_REST = 0.18;
+/** Guided mode plays the animation slower and holds each step until it has had time to be read. */
+const GUIDED_RATE = 0.6;
+
+const beatIndexAt = (stage: StageDef, t: number) => {
+  let k = 0;
+  stage.beats.forEach((b, i) => {
+    if (b.at <= t + 1e-6) k = i;
+  });
+  return k;
+};
+
+/** Structures a step brings into focus for the first time in its stage. */
+const freshAt = (stage: StageDef, k: number): StructureDef[] => {
+  const seen = new Set<string>();
+  stage.beats.slice(0, k).forEach((b) => b.focus?.forEach((id) => seen.add(id)));
+  return (stage.beats[k]?.focus ?? []).filter((id) => !seen.has(id) && structures.has(id)).map((id) => structures.get(id)!);
+};
+
+/** Reading time for a step in guided mode: the caption plus a moment per new structure card. */
+const readMs = (stage: StageDef, k: number) => 1800 + (stage.beats[k]?.text.length ?? 0) * 62 + freshAt(stage, k).length * 2200;
+
+const easeInOut = (x: number) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 
@@ -92,6 +120,18 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const [find, setFind] = useState<FindQuiz | null>(null);
   const [flash, setFlash] = useState<QuizFlash>(null);
   const [panelOpen, setPanelOpen] = useState(false);
+  const guided = usePref('guided');
+  const voice = usePref('voice');
+  // Stage preview progress (0..1 + rest) while the quick overview animation runs; null otherwise.
+  const [intro, setIntro] = useState<number | null>(null);
+  // Guided mode: the step's animation is done but its text is still being read.
+  const [waiting, setWaiting] = useState(false);
+  // The playback loop owns these between frames; `live` mirrors the committed position.
+  const live = useRef<Pos>({ i: 0, t: 0 });
+  const introRef = useRef<number | null>(null);
+  const clock = useRef({ key: '', start: 0 });
+  const speaking = useRef(false);
+  const skipHold = useRef(false);
   // Scenes use floating-point geometry; render them only on the client to avoid hydration mismatches.
   const mounted = useHydrated();
   const visited = useVisited(week.week);
@@ -114,14 +154,25 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const stage = week.stages[pos.i];
   const view = stage.views.find((v) => v.id === viewByStage[stage.id]) ?? stage.views[0];
   const Scene = view.scene;
-  const activeBeat = useMemo(() => {
-    let k = 0;
-    stage.beats.forEach((b, i) => {
-      if (b.at <= pos.t + 1e-6) k = i;
-    });
-    return k;
-  }, [stage, pos.t]);
+  const activeBeat = beatIndexAt(stage, pos.t);
   const beat = stage.beats[activeBeat];
+  const fresh = freshAt(stage, activeBeat);
+
+  // Cross-fade: when the scene changes (stage or view), the previous one fades out over the new one.
+  const sceneKey = `${week.week}/${stage.id}/${view.id}`;
+  const [shown, setShown] = useState<{ key: string; w: number; i: number; view: string } | null>(null);
+  const [ghost, setGhost] = useState<{ key: string; i: number; view: string; t: number } | null>(null);
+  if (mounted && shown?.key !== sceneKey) {
+    if (shown && shown.w === week.week) setGhost({ key: shown.key, i: shown.i, view: shown.view, t: shown.i === pos.i ? pos.t : shown.i < pos.i ? 1 : 0 });
+    setShown({ key: sceneKey, w: week.week, i: pos.i, view: view.id });
+  }
+  useEffect(() => {
+    if (!ghost) return;
+    const id = window.setTimeout(() => setGhost(null), 1000);
+    return () => window.clearTimeout(id);
+  }, [ghost]);
+  const ghostStage = ghost ? week.stages[ghost.i] : undefined;
+  const GhostScene = ghost && ghostStage ? (ghostStage.views.find((v) => v.id === ghost.view) ?? ghostStage.views[0]).scene : null;
 
   useEffect(() => {
     if (linkedWeek !== week.week) return;
@@ -133,6 +184,21 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     markVisited(week.week, stage.id);
   }, [linkedWeek, week.week, stage.id, view.id]);
 
+  // While paused, the loop's position follows the committed one (deep links, scrubbing). While
+  // playing, the loop owns it and every other move goes through `place`, so a late commit can't
+  // drag it back to an older frame.
+  useEffect(() => {
+    if (!playing) live.current = pos;
+  }, [pos, playing]);
+
+  // Pausing silences the narration and restarts the current step's reading clock on resume.
+  useEffect(() => {
+    if (playing) return;
+    hush();
+    speaking.current = false;
+    clock.current.key = '';
+  }, [playing]);
+
   // Playback loop.
   useEffect(() => {
     if (!playing) return;
@@ -141,46 +207,120 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     const step = (now: number) => {
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
-      setPos((p) => {
-        const st = week.stages[p.i];
-        const t = p.t + (dt * speed) / st.duration;
-        if (t < 1) return { i: p.i, t };
-        if (autoContinue && p.i < week.stages.length - 1) return { i: p.i + 1, t: 0 };
-        return { i: p.i, t: 1 };
-      });
       raf = requestAnimationFrame(step);
+
+      // 1) Quick overview of the whole stage.
+      if (introRef.current !== null) {
+        const it = introRef.current + dt / PREVIEW_S;
+        if (it >= 1 + PREVIEW_REST) {
+          introRef.current = null;
+          clock.current.key = '';
+          setIntro(null);
+        } else {
+          introRef.current = it;
+          setIntro(it);
+        }
+        return;
+      }
+
+      // 2) Detailed playback, step by step.
+      const p = live.current;
+      const st = week.stages[p.i];
+      let t = p.t + (dt * speed * (guided ? GUIDED_RATE : 1)) / st.duration;
+      if (guided) {
+        const k = beatIndexAt(st, p.t);
+        const key = `${st.id}:${k}`;
+        if (clock.current.key !== key) {
+          clock.current = { key, start: now };
+          skipHold.current = false;
+          if (voice) {
+            speaking.current = true;
+            speak(st.beats[k].text, () => {
+              speaking.current = false;
+            });
+          }
+        }
+        const boundary = k + 1 < st.beats.length ? st.beats[k + 1].at : 1;
+        const ready = skipHold.current || (now - clock.current.start >= readMs(st, k) && !speaking.current);
+        const hold = t >= boundary - 1e-4 && !ready;
+        if (hold) t = Math.max(p.t, boundary - 1e-4);
+        setWaiting(hold);
+      }
+      let next: Pos = { i: p.i, t: Math.min(t, 1) };
+      if (t >= 1 && autoContinue && p.i < week.stages.length - 1) {
+        next = { i: p.i + 1, t: 0 };
+        introRef.current = 0;
+        setIntro(0);
+      }
+      live.current = next;
+      setPos(next);
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [playing, speed, autoContinue, week]);
+  }, [playing, speed, autoContinue, week, guided, voice]);
 
   // Auto-stop at the end of the stage (or of the week, when auto-continuing).
-  if (playing && pos.t >= 1 && (!autoContinue || pos.i === week.stages.length - 1)) setPlaying(false);
+  if (playing && intro === null && pos.t >= 1 && (!autoContinue || pos.i === week.stages.length - 1)) setPlaying(false);
 
   // Plain functions: nothing downstream depends on their identity (no memo'd children), and the
   // React Compiler lint can't preserve manual useCallback here, so memoization is left to it.
-  const seek = (i: number, t: number) => setPos({ i, t });
+  const place = (next: Pos) => {
+    live.current = next;
+    setPos(next);
+  };
+  const startIntro = () => {
+    introRef.current = 0;
+    setIntro(0);
+  };
+  const endIntro = () => {
+    introRef.current = null;
+    clock.current.key = '';
+    setIntro(null);
+  };
+  const seek = (i: number, t: number) => {
+    endIntro();
+    place({ i, t });
+  };
   const togglePlay = () => {
-    if (!playing && pos.t >= 1) setPos((p) => ({ ...p, t: 0 }));
+    if (!playing && pos.t >= 1) place({ ...pos, t: 0 });
+    if (!playing && intro === null && !find && (pos.t <= 0.001 || pos.t >= 1)) startIntro();
     setPlaying(!playing);
   };
+  /** Guided mode: stop waiting for the current step and move on. */
+  const continueHold = () => {
+    skipHold.current = true;
+    hush();
+    speaking.current = false;
+  };
   const gotoStage = (delta: number) => {
-    setPos((p) => ({ i: Math.min(week.stages.length - 1, Math.max(0, p.i + delta)), t: 0 }));
+    // While playing, a new stage opens with its quick preview.
+    if (playing && pos.i + delta >= 0 && pos.i + delta < week.stages.length) startIntro();
+    else endIntro();
+    place({ i: Math.min(week.stages.length - 1, Math.max(0, pos.i + delta)), t: 0 });
     setSelected(null);
   };
+  /** "Hurrengo etapa" at the end of a stage: move on and keep playing, preview first. */
+  const continueNext = () => {
+    if (pos.i >= week.stages.length - 1) return;
+    gotoStage(1);
+    startIntro();
+    setPlaying(true);
+  };
   const gotoBeat = (k: number) => {
+    endIntro();
     const b = stage.beats[Math.max(0, Math.min(stage.beats.length - 1, k))];
-    setPos((p) => ({ i: p.i, t: b.at + 0.001 }));
+    place({ i: pos.i, t: b.at + 0.001 });
   };
   const stepBeat = (delta: number) => {
+    endIntro();
     const k = activeBeat + delta;
     if (k < 0) {
-      if (pos.i > 0) setPos({ i: pos.i - 1, t: 0.999 });
+      if (pos.i > 0) place({ i: pos.i - 1, t: 0.999 });
       return;
     }
     if (k >= stage.beats.length) {
-      if (pos.t < 0.999) setPos({ i: pos.i, t: 1 });
-      else if (pos.i < week.stages.length - 1) setPos({ i: pos.i + 1, t: 0 });
+      if (pos.t < 0.999) place({ i: pos.i, t: 1 });
+      else if (pos.i < week.stages.length - 1) place({ i: pos.i + 1, t: 0 });
       return;
     }
     gotoBeat(k);
@@ -189,7 +329,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const gotoWeekStage = (w: number, stageId: string, structureId?: string) => {
     if (w === week.week) {
       const idx = week.stages.findIndex((s) => s.id === stageId);
-      if (idx >= 0) setPos({ i: idx, t: 1 });
+      if (idx >= 0) place({ i: idx, t: 1 });
       setQuestionsOpen(false);
       return;
     }
@@ -309,8 +449,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const ctx: SceneContextValue = {
     selected: find || !selectedLit ? null : selected,
     hovered: find ? hovered : hovered,
-    focus: find ? [] : beat?.focus ?? [],
-    showLabels,
+    focus: find || intro !== null ? [] : beat?.focus ?? [],
+    showLabels: showLabels && intro === null,
     quiz: !!find,
     quizFlash: flash,
     nameOf,
@@ -330,6 +470,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 
   const day = lerpDay(stage.dayRange, pos.t);
   const nextStage = week.stages[pos.i + 1];
+  const prevWeek = weeks[weeks.indexOf(week) - 1];
+  const prevStage = week.stages[pos.i - 1] ?? prevWeek?.stages[prevWeek.stages.length - 1];
+  const sceneT = intro !== null ? easeInOut(Math.min(1, intro)) : pos.t;
   const pad = (n: number) => String(n).padStart(2, '0');
 
   return (
@@ -382,7 +525,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           activeBeat={activeBeat}
           visited={visited}
           onStage={(i) => {
-            setPos({ i, t: 0 });
+            if (playing) startIntro();
+            else endIntro();
+            place({ i, t: 0 });
             setSelected(null);
           }}
           onBeat={gotoBeat}
@@ -441,10 +586,45 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       ))}
                     </div>
                   )}
-                  <p key={`${stage.id}/${view.id}`} className="view-desc">
-                    <PlaneGlyph plane={view.plane} size={14} /> {view.description}
-                  </p>
-                  {!playing && pos.t === 0 && !find && (
+                  {intro === null && (
+                    <p key={`${stage.id}/${view.id}`} className="view-desc">
+                      <PlaneGlyph plane={view.plane} size={14} /> {view.description}
+                    </p>
+                  )}
+                  {intro !== null && (
+                    <div className="pv-card" key={`intro-${stage.id}`}>
+                      <div className="pv-top">
+                        <span className="pv-kicker">
+                          Aurrebista · {pad(pos.i + 1)}/{pad(week.stages.length)} · {stage.day}
+                        </span>
+                        <button className="btn small ghost" onClick={endIntro}>
+                          Saltatu <span aria-hidden>→</span>
+                        </button>
+                      </div>
+                      {prevStage && (
+                        <p className="pv-prev">
+                          <span>Aurreko etapa</span> {prevStage.title}
+                        </p>
+                      )}
+                      <h3>{stage.title}</h3>
+                      {stage.subtitle && <p className="pv-sub">{stage.subtitle}</p>}
+                      {stage.intro && <p className="pv-desc">{stage.intro}</p>}
+                      {stage.keyPoints.length > 0 && (
+                        <ul className="pv-keys">
+                          {stage.keyPoints.slice(0, 3).map((k) => (
+                            <li key={k}>{k}</li>
+                          ))}
+                        </ul>
+                      )}
+                      <div className="pv-foot">
+                        <span className="pv-bar">
+                          <i style={{ transform: `scaleX(${Math.min(1, intro)})` }} />
+                        </span>
+                        <small>{intro < 1 ? 'Animazio azkarra' : 'Orain, urratsez urrats'}</small>
+                      </div>
+                    </div>
+                  )}
+                  {!playing && pos.t === 0 && !find && intro === null && (
                     <button className="start" onClick={togglePlay}>
                       <span className="start-icon">
                         <IconPlay size={14} />
@@ -482,8 +662,13 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               }
             >
               <g key={`${stage.id}/${view.id}`} className="scene-enter">
-                {mounted && <Scene t={pos.t} reduced={reduced} />}
+                {mounted && <Scene t={sceneT} reduced={reduced} />}
               </g>
+              {ghost && GhostScene && (
+                <g key={`ghost-${ghost.key}`} className="scene-ghost" pointerEvents="none" aria-hidden>
+                  <GhostScene t={ghost.t} reduced={reduced} />
+                </g>
+              )}
             </Viewport>
           </SceneContext.Provider>
 
@@ -504,6 +689,15 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             onBeat={stepBeat}
             onSpeed={setSpeed}
             onAutoContinue={setAutoContinue}
+            guided={guided}
+            voice={voice}
+            waiting={waiting && playing && intro === null}
+            fresh={guided && intro === null ? fresh : []}
+            onGuided={(v) => setPref('guided', v)}
+            onVoice={(v) => setPref('voice', v)}
+            onContinue={continueHold}
+            onNextStage={continueNext}
+            onPick={onSelect}
           />
         </main>
 

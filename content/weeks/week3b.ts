@@ -340,6 +340,7 @@ export const stagesB: StageDef[] = [
       'zilbor-hodiak',
       'enbrioi-kanpoko-hodiak',
       'biloxka-kapilarrak',
+      'endotelioa',
       'karena-muga',
       'finkapen-pedikulua',
       'korion-plaka',

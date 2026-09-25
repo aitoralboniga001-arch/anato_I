@@ -387,7 +387,7 @@ export const week5: WeekDef = {
       beats: [
         { at: 0, text: 'Azken lau hilabeteetan (6.–9.) fetuak batez ere pisua irabazten du: gantza metatzen da hipodermisean.', focus: ['fetuaren-pisua', 'gantz-metaketa'] },
         { at: 0.16, text: '5.–6. hilabetean oraindik gantz metaketa handirik ez: larruazala ximurra eta gorrixka da.', focus: ['gantz-metaketa'] },
-        { at: 0.3, text: '6. hilabetean jaiotzen bada zaila da bizirik mantentzea: arnas aparatuaren eta erdiko nerbio sistemaren arteko koordinazioa ez dago guztiz garatuta.' },
+        { at: 0.3, text: '6. hilabetean jaiotzen bada zaila da bizirik mantentzea: arnas aparatuaren eta erdiko nerbio sistemaren arteko koordinazioa ez dago guztiz garatuta. Hala ere, gaur egungo teknikei esker bizirauteko probabilitateak handiagoak dira.' },
         { at: 0.44, text: '7. hilabetean jaiotzen bada, bizirauteko probabilitatea %90 ingurukoa da: tenperatura, arnasketa eta elkartrukea hobeto kontrolatzen ditu.' },
         { at: 0.58, text: 'Azken bi hilabeteetan gantza metatu eta gorputza borobiltzen da (7.–8. hilabeteetan irabazten du pisu gehiena).', focus: ['gantz-metaketa', 'fetuaren-pisua'] },
         { at: 0.72, text: '8. eta 9. hilabeteetan larruazaleko guruinek vernix caseosa jariatzen dute: gai zurixka eta koipetsua, likido amniotikotik babesten duena.', focus: ['vernix-caseosa'] },
@@ -448,6 +448,7 @@ export const week5: WeekDef = {
         'Fetuaren adina kalkulatzeko: luzera zefalokaudala, vertex–orpo luzera, eta ultrasonografiaz beste neurketa batzuk (bi pareta hezurren artekoa…).',
         'Goiztiarra: espero baino lehen jaiotakoa. Berantiarra: beranduago jaiotakoa.',
         'Aurreko urteko apunteak: jaio aurretiko teknika erabiliena ultrasonografia (ekografia) da. Arrisku handiko haurdunaldietan (adib. 35 urtetik gorako ama): amniozentesia (14. astetik aurrera, arriskutsua), billoxka korionikoen biopsia (8. astetik aurrera), kordozentesia…',
+        'Oharra (ezagutza zaharra): biloxka korionikoen biopsia gaur egun 10.–13. asteen artean egiten da, ez 8. astetik; lehenago egitean gorputz-adarretako akatsak lotu ziren. Amniozentesia 15.–20. asteen artean egin ohi da (6. gaia: ezin lehen 14 asteetan).',
       ],
       cautions: ['Bi kontaketen arteko aldea ~14 egun da (280 − 266): hilekoaren hasieratik obulazio/ernalkuntzara arteko tartea.'],
     },

@@ -529,6 +529,7 @@ export const week4: WeekDef = {
       dayRange: [22, 28],
       title: 'Zeharkako eta zefalokaudal tolespenak',
       subtitle: 'Hiru orriko diskoa enbrioi zilindriko C-itxuran biltzen da',
+      intro: '3.–8. astea enbrioi aroa da, enbriogenesi edo organogenesi garaia: ernetze-orri bakoitzetik gorputzaren sistema guztietako organoak sortzen dira. Eratorriak sortzen diren bitartean, diskoa laua izatetik tolestu egiten da, bi tolespen ALDI BEREAN eginez: zeharkakoa eta zefalokaudala. 8. asterako organo eta ehun guztiak agertuta daude.',
       duration: 28,
       source: { file: FILE, section: '1. Sarrera' },
       views: [
@@ -588,7 +589,9 @@ export const week4: WeekDef = {
         'barrunbe-perikardikoa',
       ],
       keyPoints: [
+        'Enbrioi aroa (3.–8. astea) = enbriogenesi edo organogenesi garaia. Enbrioi aroaren amaierarako (2. hilabetea, 8. astea) sistema guztietako organo eta ehunak agertuta daude eta kanpoko ezaugarri nagusiak nabariak dira.',
         'Bi tolespen motak (zeharkakoa eta zefalokaudala) aldi berean gertatzen dira, eta biek batera eratzen dituzte enbrioiaren gorputza eta gorputz-pareta.',
+        'Mozketa zeharkakoetan diskoaren alboko ertzak ikusten dira; mozketa sagital edo koronaletan, berriz, alde zefalikoa eta kaudala.',
         'Zeharkako tolespena somiten hazkuntzagatik gertatzen da; tolespen zefalokaudala erdiko nerbio sistemaren luzetarako hazkuntzagatik.',
         'Endodermoa eta bitelo-zakuaren zati handi bat enbrioi gorputzera sartu eta hestea osatzen dute: mintz bukofaringeotik kloaka-mintzara.',
         'Erdiko hestea ez dago erabat barneratuta: hodi onfalomesenterikoaren bidez kanpoko bitelo-zakuarekin komunikatuta jarraitzen du.',
@@ -768,9 +771,10 @@ export const week4: WeekDef = {
         'Nerbio-sistemarekin lotutako eratorriak: erdiko nerbio sistemako meningeak (aurreko aldean), nerbio periferikoko gongoilak (errakideoak, sinpatikoak, parasinpatikoak), Schwann eta glia zelulak.',
         'Nerbio-sistemarekin zuzenean lotu gabeko eratorriak: buru-aurpegiko hezurrak, odontoblastoak, tiroideko C zelulak, bihotzeko trenkada tronkokonala, giltzurrun gaineko muina, melanozitoak, aurpegiko odol-hodietako muskulu leuna.',
         'Gandor neurala ez da bakarrik nerbio-egituren iturri: hezur, muskulu eta guruin-zelulak ere sortzen ditu.',
+        'Ektodermoaren eratorriak, laburbilduz: erdiko nerbio sistema (hodi neurala), nerbio sistema periferikoa eta begetatiboa (gandor neurala), usaimen-, ikusmen- eta entzumen-epitelio sentikorrak, larruazalaren epidermisa (ile-folikuluak, azazkalak), guruinak (hipofisia, izerdi-, titi- eta gantz-guruinak), meningeak, hortz-esmaltea eta aurpegiko hezurrak.',
       ],
       cautions: [
-        'Ile-folikuluak eta azazkalak EZ dira gandor neuraletik: azaleko ektodermotik sortzen dira (apunteko akatsa zuzenduta).',
+        'Apunteek diote epidermisera iristen diren gandor-zelulek melanozitoak, ile-folikuluak eta azazkalak sortzen dituztela. Liburuen arabera (Langman, Moore), ordea, gandor neuraletik melanozitoak bakarrik datoz; ile-folikuluak eta azazkalak azaleko ektodermotik (epidermisetik) sortzen dira.',
         'Giltzurrun gaineko guruinaren muina soilik da gandor-jatorrikoa; kortexa mesodermotik dator.',
         'Tiroideko C zelulak (kaltzitonina) gandor-jatorrikoak dira; tiroideko folikulu-zelula gehienak, ostera, endodermotik (hodi tiroglosotik) datoz.',
       ],

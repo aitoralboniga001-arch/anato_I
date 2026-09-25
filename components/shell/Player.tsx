@@ -1,8 +1,9 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import type { StageDef } from '@/lib/sim/types';
-import { IconLoop, IconNext, IconPause, IconPlay, IconPrev, IconSkipNext, IconSkipPrev } from './icons';
+import type { StageDef, StructureDef } from '@/lib/sim/types';
+import { IconGuide, IconLoop, IconNext, IconPause, IconPlay, IconPrev, IconSkipNext, IconSkipPrev, IconVoice } from './icons';
+import { canNarrate } from './narrate';
 
 interface PlayerProps {
   stage: StageDef;
@@ -21,6 +22,18 @@ interface PlayerProps {
   onBeat: (delta: number) => void;
   onSpeed: (s: number) => void;
   onAutoContinue: (v: boolean) => void;
+  /** Guided mode: slower, holds each step until read, shows the step's new structures. */
+  guided: boolean;
+  voice: boolean;
+  /** The step's animation has finished and it is waiting for the reading time. */
+  waiting: boolean;
+  /** Structures introduced by the current step (only filled in guided mode). */
+  fresh: StructureDef[];
+  onGuided: (v: boolean) => void;
+  onVoice: (v: boolean) => void;
+  onContinue: () => void;
+  onNextStage: () => void;
+  onPick: (id: string) => void;
 }
 
 const SPEEDS = [0.5, 1, 1.5, 2];
@@ -51,19 +64,41 @@ export function Player(p: PlayerProps) {
   };
 
   return (
-    <div className="dock">
+    <div className={`dock${p.guided ? ' is-guided' : ''}`}>
       <div className="cap" aria-live="polite">
         <span className="cap-n">
           {pad(p.activeBeat + 1)}
           <i>/{pad(n)}</i>
         </span>
-        <p key={`${p.stage.id}-${p.activeBeat}`}>{beat?.text}</p>
+        <div className="cap-body">
+          <p key={`${p.stage.id}-${p.activeBeat}`}>{beat?.text}</p>
+          {p.fresh.length > 0 && (
+            <ul className="fresh" key={`f-${p.stage.id}-${p.activeBeat}`}>
+              {p.fresh.map((s, k) => (
+                <li key={s.id} style={{ animationDelay: `${0.25 + k * 0.35}s` }}>
+                  <button onClick={() => p.onPick(s.id)} title="Ireki fitxa">
+                    <span className="fresh-tag">Berria</span>
+                    <b>{s.name}</b>
+                    {s.es && <i>{s.es}</i>}
+                    <span className="fresh-def">{s.definition}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
         <div className="cap-nav">
           <button className="icon-btn" onClick={() => p.onBeat(-1)} aria-label="Aurreko urratsa" title="Aurreko urratsa (←)">
             <IconPrev />
           </button>
+          {p.waiting && (
+            <button className="btn small ghost cap-wait" onClick={p.onContinue} title="Irakurtzeko denbora: klik jarraitzeko">
+              <span className="cap-wait-dot" aria-hidden />
+              Jarraitu
+            </button>
+          )}
           {atEnd && p.nextTitle ? (
-            <button className="btn btn-light" onClick={() => p.onStage(1)} title={p.nextTitle}>
+            <button className="btn btn-light" onClick={p.onNextStage} title={p.nextTitle}>
               Hurrengo etapa <span aria-hidden>→</span>
             </button>
           ) : (
@@ -136,6 +171,26 @@ export function Player(p: PlayerProps) {
         </span>
 
         <div className="tp-opts">
+          <button
+            className={`tp-guide${p.guided ? ' is-on' : ''}`}
+            onClick={() => p.onGuided(!p.guided)}
+            title={p.guided ? 'Modu gidatua: aktibatuta — mantsoago, urrats bakoitza irakurri arte itxaroten du' : 'Modu gidatua: mantsoago, azalpen eta egitura berriekin'}
+            aria-pressed={p.guided}
+          >
+            <IconGuide size={16} />
+            <span>Gidatua</span>
+          </button>
+          {p.guided && canNarrate() && (
+            <button
+              className={`icon-btn${p.voice ? ' is-on' : ''}`}
+              onClick={() => p.onVoice(!p.voice)}
+              title={p.voice ? 'Ahotsa: aktibatuta' : 'Ahotsa: azalpenak ozen irakurri'}
+              aria-pressed={p.voice}
+              aria-label="Azalpenak ozen irakurri"
+            >
+              <IconVoice size={16} />
+            </button>
+          )}
           <button
             className="tp-speed"
             onClick={() => p.onSpeed(SPEEDS[(SPEEDS.indexOf(p.speed) + 1) % SPEEDS.length])}

@@ -4,8 +4,9 @@ import { week2 } from './weeks/week2';
 import { week3 } from './weeks/week3';
 import { week4 } from './weeks/week4';
 import { week5 } from './weeks/week5';
+import { week6 } from './weeks/week6';
 
-export const weeks: WeekDef[] = [week1, week2, week3, week4, week5];
+export const weeks: WeekDef[] = [week1, week2, week3, week4, week5, week6];
 
 /** All structures, deduplicated by id. The week that introduces a structure owns its definition. */
 export const structures: Map<string, StructureDef> = (() => {
