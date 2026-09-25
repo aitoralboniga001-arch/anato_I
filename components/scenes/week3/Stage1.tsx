@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Label, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, Note, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
 import { Cells } from '@/components/scenes/section/Section';
 import { f1 } from './common';
 import { DiscDrawing, makeDisc } from './DiscSection';
@@ -31,7 +31,11 @@ function villus(deg: number, len: number) {
   const core = [onRing(R_CYTO + 4, deg - w * 0.45), onRing(R_OUT + len - 5, deg - w * 0.18), onRing(R_OUT + len - 2, deg), onRing(R_OUT + len - 5, deg + w * 0.18), onRing(R_CYTO + 4, deg + w * 0.45)];
   return { syn: pathD(syn) + 'Z', core: pathD(core) + 'Z', tip: onRing(R_OUT + len + 5, deg) };
 }
-const VILLI = Array.from({ length: 24 }, (_, i) => villus((i / 24) * 360 + 7, 12 + ((i * 7) % 3) * 5));
+const villi = (grow: number) => Array.from({ length: 24 }, (_, i) => villus((i / 24) * 360 + 7, (12 + ((i * 7) % 3) * 5) * grow));
+const VILLI = villi(1);
+
+/** The recap builds up beat by beat (beats at 0, .12, .22, .32, .42, .52, .62, .72, .88). */
+const from = (t: number, a: number) => (a <= 0 ? 1 : seg(t, a, a + 0.04));
 
 function embryo(k: number, cx: number, y: number, amnionH: number, yolkH: number) {
   return makeDisc({ cx, y, k, w: 270, amnionH, yolkH });
@@ -40,6 +44,11 @@ const IDS = { amnionWall: 'amnioblastoak' };
 
 function Stage1Drawing({ t }: SceneProps) {
   const s = embryo(0.6, 485, 336, 150, 160);
+  // Primary villi: cytotrophoblast cores push into the syncytium.
+  const V = villi(lerp(0.15, 1, seg(t, 0, 0.1)));
+  const stalkN = Math.round(lerp(1, 20, seg(t, 0.32, 0.4)));
+  const embryoO = lerp(0.22, 1, seg(t, 0.42, 0.48));
+  const sheath = Math.min(seg(t, 0.72, 0.76), 1 - seg(t, 0.86, 0.9));
   const base: P2 = [s.p.cx + s.rx + 6, s.cyA - 4];
   const end = onRing(R_MESO - 2, -28);
   const stalk = Array.from({ length: 21 }, (_, i): P2 => {
@@ -64,7 +73,7 @@ function Stage1Drawing({ t }: SceneProps) {
       </Part>
       {/* Primary villi, then the chorionic plate over their roots. */}
       <Part id="biloxka-primarioa">
-        {VILLI.map((v, i) => (
+        {V.map((v, i) => (
           <g key={i}>
             <path d={v.syn} fill="#b7824f" stroke="#7c5230" strokeWidth={0.7} />
             <path d={v.core} fill="#e3c58f" stroke="rgba(90,60,20,0.6)" strokeWidth={0.6} />
@@ -82,14 +91,18 @@ function Stage1Drawing({ t }: SceneProps) {
         <Cells outer={ring(R_CYTO)} inner={ring(R_MESO)} n={90} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={82} />
       </Part>
       <Part id="finkapen-pedikulua">
-        <path d={pathD([...side(-11), ...side(11).reverse()]) + 'Z'} fill={C.mesoExtra} stroke="#c96b45" strokeWidth={1.1} />
-        {stalk.slice(2, -1).map((q, i) => (
+        <path d={pathD([...side(-11).slice(0, stalkN + 1), ...side(11).slice(0, stalkN + 1).reverse()]) + 'Z'} fill={C.mesoExtra} stroke="#c96b45" strokeWidth={1.1} />
+        {stalk.slice(2, Math.max(2, stalkN)).map((q, i) => (
           <ellipse key={i} cx={q[0] + ((i * 37) % 9) - 4} cy={q[1] + ((i * 53) % 9) - 4} rx={2.2} ry={1.7} fill="rgba(150,70,50,0.7)" />
         ))}
       </Part>
 
-      <DiscDrawing s={s} ids={IDS} />
-      <Part id="bi-orriko-diskoa" quiet>
+      <g opacity={embryoO}>
+        <DiscDrawing s={s} ids={IDS} />
+      </g>
+      {/* The extra-embryonic mesoderm lines every cavity: chorionic, amniotic and yolk sac. */}
+      {sheath > 0.01 && <path d={pathD(ring(R_MESO + 4))} fill="none" stroke="#fbbf24" strokeWidth={1.6} strokeDasharray="6 6" opacity={sheath * 0.8} />}
+      <Part id="bi-orriko-diskoa" quiet show={seg(t, 0.52, 0.56)}>
         <path d={pathD([...Array.from({ length: 31 }, (_, i) => s.map(lerp(-270, 270, i / 30), -1.5)), ...Array.from({ length: 31 }, (_, i) => s.map(lerp(270, -270, i / 30), s.dEnd(lerp(270, -270, i / 30)) + 9.5))]) + 'Z'} fill="none" stroke="#e8eefc" strokeWidth={0.9} strokeDasharray="4 3" opacity={0.5} />
       </Part>
       <Arrow from={[CH.cx, 40]} to={[CH.cx, 600]} bend={0} color="#93c5fd" show={pol * 0.5} progress={pol} width={1.4} dashed />
@@ -100,40 +113,52 @@ function Stage1Drawing({ t }: SceneProps) {
 const L = (id: string, x: number, y: number, p: Pt, show = 1) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} small />;
 
 export function Stage1Sagittal(props: SceneProps) {
+  const { t } = props;
   const s = embryo(0.6, 485, 336, 150, 160);
   return (
     <g>
       <Stage1Drawing {...props} />
-      {L('biloxka-primarioa', 190, 150, VILLI[16].tip)}
-      {L('korion-plaka', 190, 200, onRing(R_SYN, 218))}
-      {L('korion-barrunbea', 190, 400, [300, 420])}
-      {L('enbrioi-kanpoko-mesodermoa', 190, 440, onRing(R_MESO + 5, 150))}
-      {L('epiblastoa', 190, 480, s.at.epiblast)}
-      {L('bi-orriko-diskoa', 190, 520, s.map(-150, 20))}
-      {L('finkapen-pedikulua', 810, 235, onRing(R_MESO - 20, -28))}
-      {L('amnios-barrunbea', 810, 270, s.at.amnion)}
-      {L('amnioblastoak', 810, 380, s.at.amnionWall.map((v, i) => (i ? v : 2 * s.p.cx - v)) as Pt)}
-      {L('hipoblastoa', 810, 420, s.map(120, s.dEnd(120) + 4))}
-      {L('bitelo-zaku-sekundarioa', 810, 460, s.at.yolk)}
+      {L('biloxka-primarioa', 190, 150, VILLI[16].tip, from(t, 0))}
+      {L('korion-plaka', 190, 200, onRing(R_SYN, 218), from(t, 0.22))}
+      {L('korion-barrunbea', 190, 400, [300, 420], from(t, 0.12))}
+      {L('enbrioi-kanpoko-mesodermoa', 190, 440, onRing(R_MESO + 5, 150), from(t, 0.22))}
+      {L('epiblastoa', 190, 480, s.at.epiblast, from(t, 0.52))}
+      {L('bi-orriko-diskoa', 190, 520, s.map(-150, 20), from(t, 0.52))}
+      {L('finkapen-pedikulua', 810, 235, onRing(R_MESO - 20, -28), from(t, 0.34))}
+      {L('amnios-barrunbea', 810, 270, s.at.amnion, from(t, 0.42))}
+      {L('amnioblastoak', 810, 380, s.at.amnionWall.map((v, i) => (i ? v : 2 * s.p.cx - v)) as Pt, from(t, 0.42))}
+      {L('hipoblastoa', 810, 420, s.map(120, s.dEnd(120) + 4), from(t, 0.52))}
+      {L('bitelo-zaku-sekundarioa', 810, 460, s.at.yolk, from(t, 0.62))}
     </g>
   );
 }
 
 /** Close-up of the bilaminar disc: columnar epiblast continuous with the amnioblasts, cuboidal hypoblast continuous with the yolk-sac lining. */
-export function Stage1Disc(props: SceneProps) {
-  void props;
+export function Stage1Disc({ t }: SceneProps) {
   const s = makeDisc({});
+  const amnion = from(t, 0.42);
+  const disc = from(t, 0.52);
+  const yolk = from(t, 0.62);
+  const sheath = from(t, 0.72);
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
-      <DiscDrawing s={s} ids={IDS} />
-      {L('amnios-barrunbea', 810, 160, s.at.amnion)}
-      {L('amnioblastoak', 190, 170, s.at.amnionWall)}
-      {L('epiblastoa', 190, 215, s.at.epiblast)}
-      {L('bi-orriko-diskoa', 810, 420, s.map(120, 14))}
-      {L('hipoblastoa', 190, 440, s.at.hypo)}
-      {L('enbrioi-kanpoko-mesodermoa', 810, 470, s.at.extraMesoYolk)}
-      {L('bitelo-zaku-sekundarioa', 810, 510, s.at.yolk)}
+      <g opacity={lerp(0.3, 1, Math.max(amnion, seg(t, 0, 0.06) * 0.4))}>
+        <DiscDrawing s={s} ids={IDS} />
+      </g>
+      {L('amnios-barrunbea', 810, 160, s.at.amnion, amnion)}
+      {L('amnioblastoak', 190, 170, s.at.amnionWall, amnion)}
+      {L('epiblastoa', 190, 215, s.at.epiblast, disc)}
+      {L('bi-orriko-diskoa', 810, 420, s.map(120, 14), disc)}
+      {L('hipoblastoa', 190, 440, s.at.hypo, disc)}
+      {L('enbrioi-kanpoko-mesodermoa', 810, 470, s.at.extraMesoYolk, sheath)}
+      {L('bitelo-zaku-sekundarioa', 810, 510, s.at.yolk, yolk)}
+      <Note x={500} y={606} tone="accent" show={Math.min(disc, 1 - seg(t, 0.6, 0.64))}>
+        Epiblastoa zilindrikoa (dortsala) · hipoblastoa kubikoa (bentrala)
+      </Note>
+      <Note x={500} y={606} show={seg(t, 0.88, 0.92)}>
+        Oraindik bi orri: gastrulazioa hurrengo etapan
+      </Note>
     </g>
   );
 }
