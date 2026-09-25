@@ -31,9 +31,8 @@ interface FindQuiz {
   message: string | null;
 }
 
-/** Quick preview of a whole stage before the detailed playback (seconds), then a short rest. */
-const PREVIEW_S = 5.5;
-const PREVIEW_REST = 0.18;
+/** Quick preview of a whole stage before the detailed playback (seconds). */
+const PREVIEW_S = 8;
 /** Guided mode plays the animation slower and holds each step until it has had time to be read. */
 const GUIDED_RATE = 0.6;
 
@@ -55,7 +54,36 @@ const freshAt = (stage: StageDef, k: number): StructureDef[] => {
 /** Reading time for a step in guided mode: the caption plus a moment per new structure card. */
 const readMs = (stage: StageDef, k: number) => 1800 + (stage.beats[k]?.text.length ?? 0) * 62 + freshAt(stage, k).length * 2200;
 
-const easeInOut = (x: number) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
+/** The preview card stays up until it has had time to be read (ms at 1×). */
+const previewMs = (stage: StageDef) => 2500 + ((stage.intro ?? '').length + stage.keyPoints.slice(0, 3).join('').length) * 40;
+
+/** Guided tour: how long each structure stays lit (ms at 1×), from its definition. */
+const tourMs = (id: string) => Math.min(5200, 1600 + (structures.get(id)?.definition.length ?? 0) * 28);
+
+/**
+ * Stage time the animation holds at while a step's tour runs: by default three quarters into the
+ * step, when its new structures have formed but before step-bound elements fade out.
+ */
+const tourAtOf = (stage: StageDef, k: number) => {
+  const b = stage.beats[k];
+  const end = k + 1 < stage.beats.length ? stage.beats[k + 1].at : 1;
+  return b.tourAt ?? b.at + (end - b.at) * 0.75;
+};
+
+/** Is the structure visibly drawn (as a part or a label) in the scene right now? */
+const drawnIn = (svg: SVGSVGElement | null, id: string) =>
+  !!svg && [...svg.querySelectorAll(`[data-part="${CSS.escape(id)}"], [data-label="${CSS.escape(id)}"]`)].some((el) => Number(el.getAttribute('opacity') ?? 1) > 0.3);
+
+interface Tour {
+  key: string;
+  items: string[];
+  idx: number;
+  /** When the current item was lit (0 = not yet, e.g. after a pause). */
+  start: number;
+  said: boolean;
+}
+
+const easeInOut =(x: number) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 
@@ -132,6 +160,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const clock = useRef({ key: '', start: 0 });
   const speaking = useRef(false);
   const skipHold = useRef(false);
+  const introClock = useRef(0);
+  // Guided tour of the current step: the loop owns `tourRef`; `tour` mirrors it for rendering.
+  const tourRef = useRef<Tour | null>(null);
+  const toured = useRef('');
+  const [tour, setTour] = useState<{ items: string[]; idx: number } | null>(null);
   // Scenes use floating-point geometry; render them only on the client to avoid hydration mismatches.
   const mounted = useHydrated();
   const visited = useVisited(week.week);
@@ -197,6 +230,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     hush();
     speaking.current = false;
     clock.current.key = '';
+    if (tourRef.current) {
+      tourRef.current.start = 0;
+      tourRef.current.said = false;
+    }
+    introClock.current = 0;
   }, [playing]);
 
   // Playback loop.
@@ -209,16 +247,27 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       last = now;
       raf = requestAnimationFrame(step);
 
-      // 1) Quick overview of the whole stage.
+      // 1) Quick overview of the whole stage; the card then stays until it has been read
+      //    (in guided mode, until the viewer presses "Hasi").
       if (introRef.current !== null) {
-        const it = introRef.current + dt / PREVIEW_S;
-        if (it >= 1 + PREVIEW_REST) {
+        const st = week.stages[live.current.i];
+        if (!introClock.current) {
+          introClock.current = now;
+          if (guided && voice && introRef.current === 0) {
+            speaking.current = true;
+            speak(`${st.title}. ${st.intro ?? st.subtitle ?? ''}`, () => {
+              speaking.current = false;
+            });
+          }
+        }
+        const it = Math.min(1, introRef.current + dt / PREVIEW_S);
+        introRef.current = it;
+        setIntro(it);
+        const read = now - introClock.current >= previewMs(st) / speed && !speaking.current;
+        if (it >= 1 && !guided && read) {
           introRef.current = null;
           clock.current.key = '';
           setIntro(null);
-        } else {
-          introRef.current = it;
-          setIntro(it);
         }
         return;
       }
@@ -227,8 +276,63 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       const p = live.current;
       const st = week.stages[p.i];
       let t = p.t + (dt * speed * (guided ? GUIDED_RATE : 1)) / st.duration;
+      const k = beatIndexAt(st, p.t);
+
+      // 2a) Tour: light the step's structures one at a time while the animation holds.
+      const tkey = `${p.i}:${k}`;
+      let tr = tourRef.current;
+      if (tr && tr.key !== tkey) {
+        tr = null;
+        tourRef.current = null;
+        setTour(null);
+      }
+      const tourAt = tourAtOf(st, k);
+      if (!tr && toured.current !== tkey && t >= tourAt) {
+        toured.current = tkey;
+        const b = st.beats[k];
+        const items = (b.tour ?? (guided ? freshAt(st, k).map((s) => s.id) : [])).filter((id) => drawnIn(svgRef.current, id));
+        if (items.length >= (b.tour ? 1 : 2)) {
+          tr = { key: tkey, items, idx: 0, start: 0, said: false };
+          tourRef.current = tr;
+          setTour({ items, idx: 0 });
+        }
+      }
+      if (tr) {
+        t = Math.max(p.t, Math.min(t, tourAt));
+        // With narration, let the step's caption finish before naming the first structure.
+        if (!(speaking.current && !tr.said)) {
+          if (!tr.start) tr.start = now;
+          const id = tr.items[tr.idx];
+          if (guided && voice && !tr.said) {
+            tr.said = true;
+            const s = structures.get(id);
+            if (s) {
+              speaking.current = true;
+              speak(`${s.name}. ${s.definition}`, () => {
+                speaking.current = false;
+              });
+            }
+          }
+          if (now - tr.start >= tourMs(id) / speed && !speaking.current) {
+            if (tr.idx + 1 < tr.items.length) {
+              tr.idx += 1;
+              tr.start = now;
+              tr.said = false;
+              setTour({ items: tr.items, idx: tr.idx });
+            } else {
+              tourRef.current = null;
+              setTour(null);
+            }
+          }
+        }
+        setWaiting(false);
+        const held = { i: p.i, t };
+        live.current = held;
+        setPos(held);
+        return;
+      }
+
       if (guided) {
-        const k = beatIndexAt(st, p.t);
         const key = `${st.id}:${k}`;
         if (clock.current.key !== key) {
           clock.current = { key, start: now };
@@ -250,6 +354,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       if (t >= 1 && autoContinue && p.i < week.stages.length - 1) {
         next = { i: p.i + 1, t: 0 };
         introRef.current = 0;
+        introClock.current = 0;
         setIntro(0);
       }
       live.current = next;
@@ -268,21 +373,47 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     live.current = next;
     setPos(next);
   };
+  const clearTour = () => {
+    tourRef.current = null;
+    toured.current = '';
+    setTour(null);
+  };
   const startIntro = () => {
     introRef.current = 0;
+    introClock.current = 0;
+    clearTour();
     setIntro(0);
   };
   const endIntro = () => {
+    if (introRef.current !== null && speaking.current) {
+      hush();
+      speaking.current = false;
+    }
     introRef.current = null;
     clock.current.key = '';
     setIntro(null);
   };
   const seek = (i: number, t: number) => {
     endIntro();
+    clearTour();
     place({ i, t });
   };
+  const skipTour = () => {
+    tourRef.current = null;
+    setTour(null);
+    hush();
+    speaking.current = false;
+  };
   const togglePlay = () => {
-    if (!playing && pos.t >= 1) place({ ...pos, t: 0 });
+    // The preview has finished and is waiting to be read: start the step-by-step playback.
+    if (playing && intro !== null && intro >= 1) {
+      endIntro();
+      return;
+    }
+    if (!playing && pos.t >= 1) {
+      clearTour();
+      place({ ...pos, t: 0 });
+    }
     if (!playing && intro === null && !find && (pos.t <= 0.001 || pos.t >= 1)) startIntro();
     setPlaying(!playing);
   };
@@ -296,6 +427,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     // While playing, a new stage opens with its quick preview.
     if (playing && pos.i + delta >= 0 && pos.i + delta < week.stages.length) startIntro();
     else endIntro();
+    clearTour();
     place({ i: Math.min(week.stages.length - 1, Math.max(0, pos.i + delta)), t: 0 });
     setSelected(null);
   };
@@ -308,10 +440,38 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   };
   const gotoBeat = (k: number) => {
     endIntro();
-    const b = stage.beats[Math.max(0, Math.min(stage.beats.length - 1, k))];
+    clearTour();
+    const kk = Math.max(0, Math.min(stage.beats.length - 1, k));
+    const b = stage.beats[kk];
+    // Paused on a step with a tour: show its first structure; the arrows walk through the rest.
+    if (!playing && b.tour?.length) {
+      const key = `${pos.i}:${kk}`;
+      toured.current = key;
+      tourRef.current = { key, items: b.tour, idx: 0, start: 0, said: false };
+      setTour({ items: b.tour, idx: 0 });
+      place({ i: pos.i, t: tourAtOf(stage, kk) });
+      return;
+    }
     place({ i: pos.i, t: b.at + 0.001 });
   };
   const stepBeat = (delta: number) => {
+    const tr = tourRef.current;
+    if (tr && intro === null && tr.key === `${pos.i}:${activeBeat}`) {
+      const j = tr.idx + delta;
+      if (j >= tr.items.length) {
+        skipTour();
+        return;
+      }
+      if (j >= 0) {
+        tr.idx = j;
+        tr.start = 0;
+        tr.said = false;
+        hush();
+        speaking.current = false;
+        setTour({ items: tr.items, idx: j });
+        return;
+      }
+    }
     endIntro();
     const k = activeBeat + delta;
     if (k < 0) {
@@ -329,7 +489,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const gotoWeekStage = (w: number, stageId: string, structureId?: string) => {
     if (w === week.week) {
       const idx = week.stages.findIndex((s) => s.id === stageId);
-      if (idx >= 0) place({ i: idx, t: 1 });
+      if (idx >= 0) {
+        clearTour();
+        place({ i: idx, t: 1 });
+      }
       setQuestionsOpen(false);
       return;
     }
@@ -450,6 +613,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     selected: find || !selectedLit ? null : selected,
     hovered: find ? hovered : hovered,
     focus: find || intro !== null ? [] : beat?.focus ?? [],
+    spotlight: !find && intro === null && tour ? tour.items[tour.idx] : null,
     showLabels: showLabels && intro === null,
     quiz: !!find,
     quizFlash: flash,
@@ -527,6 +691,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           onStage={(i) => {
             if (playing) startIntro();
             else endIntro();
+            clearTour();
             place({ i, t: 0 });
             setSelected(null);
           }}
@@ -597,9 +762,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                         <span className="pv-kicker">
                           Aurrebista · {pad(pos.i + 1)}/{pad(week.stages.length)} · {stage.day}
                         </span>
-                        <button className="btn small ghost" onClick={endIntro}>
-                          Saltatu <span aria-hidden>→</span>
-                        </button>
+                        {intro < 1 && (
+                          <button className="btn small ghost" onClick={endIntro}>
+                            Saltatu <span aria-hidden>→</span>
+                          </button>
+                        )}
                       </div>
                       {prevStage && (
                         <p className="pv-prev">
@@ -620,7 +787,12 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                         <span className="pv-bar">
                           <i style={{ transform: `scaleX(${Math.min(1, intro)})` }} />
                         </span>
-                        <small>{intro < 1 ? 'Animazio azkarra' : 'Orain, urratsez urrats'}</small>
+                        <small>{intro < 1 ? 'Aurrebista: prozesu osoa' : guided ? 'Irakurri lasai; prest zaudenean, hasi' : 'Orain, urratsez urrats'}</small>
+                        {intro >= 1 && (
+                          <button className="btn small btn-light pv-go" onClick={endIntro} title="Hasi urratsez urrats (Zuriunea)">
+                            Hasi <span aria-hidden>→</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}
@@ -692,7 +864,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             guided={guided}
             voice={voice}
             waiting={waiting && playing && intro === null}
-            fresh={guided && intro === null ? fresh : []}
+            fresh={guided && intro === null && !tour ? fresh : []}
+            tour={tour && intro === null && structures.get(tour.items[tour.idx]) ? { item: structures.get(tour.items[tour.idx])!, idx: tour.idx, n: tour.items.length } : null}
+            onSkipTour={skipTour}
             onGuided={(v) => setPref('guided', v)}
             onVoice={(v) => setPref('voice', v)}
             onContinue={continueHold}

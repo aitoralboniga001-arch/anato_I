@@ -44,6 +44,13 @@ export interface Beat {
   at: number;
   text: string;
   focus?: string[];
+  /**
+   * Guided tour: structures lit one at a time (in their own colour, the rest shaded) while the
+   * animation holds at `tourAt`, so the viewer meets each part before the process starts.
+   */
+  tour?: string[];
+  /** Stage time the animation holds at during the tour (defaults to three quarters into the step). */
+  tourAt?: number;
 }
 
 export interface SourceRef {

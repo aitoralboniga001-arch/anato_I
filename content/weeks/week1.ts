@@ -202,7 +202,7 @@ export const week1: WeekDef = {
         },
       ],
       beats: [
-        { at: 0, text: 'Emakumearen ugal aparatua, mozketa koronalean: umetokiaren pareta (endometrioa, miometrioa, perimetrioa), tronpa (atal interstiziala, istmoa, anpulua, infundibulua, finbriak) eta obulutegia.', focus: ['umetoki-tronpa', 'obulutegia', 'endometrioa'] },
+        { at: 0, text: 'Emakumearen ugal aparatua, mozketa koronalean: umetokiaren pareta (endometrioa, miometrioa, perimetrioa), tronpa (atal interstiziala, istmoa, anpulua, infundibulua, finbriak) eta obulutegia.', focus: ['umetoki-tronpa', 'obulutegia', 'endometrioa'], tour: ['umetoki-tronpa', 'atal-interstiziala', 'istmoa', 'anpulua', 'infundibulua', 'finbriak', 'obulutegia', 'folikulu-heldua', 'umetokiaren-fundusa', 'umetoki-barrunbea', 'endometrioa', 'miometrioa', 'perimetrioa'], tourAt: 0.05 },
         { at: 0.12, text: 'Obulazioa (ziklo obarikoaren 14. eguna): anpulua finbriekin obulutegira hurbiltzen da; folikulu heldua apurtu eta obozito sekundarioa, mintz peluzidoarekin eta koroa erradiatuarekin, anpulura askatzen da.', focus: ['obulazioa', 'finbriak', 'folikulu-heldua'] },
         { at: 0.24, text: 'Istmoan zain zeuden espermatozoideak anpulura hurbiltzen dira, koroa erradiatuak kanporatutako substantzien eraginez. Ernalkuntza normalean tronparen anpuluan gertatzen da (12–24 ordu). Obozitoa egun bakarra mantentzen da bizirik.', focus: ['ernalkuntza', 'anpulua'] },
         { at: 0.36, text: 'Zigotoa tronpatik umetokirantz mugitzen da eta bidean zatitzen da: 2 zelula 30 ordutara.', focus: ['zigotoa', 'blastomeroak'] },

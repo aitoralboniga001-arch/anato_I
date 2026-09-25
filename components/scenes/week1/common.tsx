@@ -84,7 +84,7 @@ export function Hud({ value, unit, caption, second }: { value: string | number; 
         </tspan>
       </text>
       {second && (
-        <g transform="translate(190 0)">
+        <g transform="translate(250 0)">
           <text x={0} y={572} fill="#7c7870" fontSize={11} letterSpacing="0.12em" style={{ textTransform: 'uppercase' }}>
             {second[0]}
           </text>

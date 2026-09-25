@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import type { StageDef, StructureDef } from '@/lib/sim/types';
 import { IconGuide, IconLoop, IconNext, IconPause, IconPlay, IconPrev, IconSkipNext, IconSkipPrev, IconVoice } from './icons';
+import { categoryColor } from '@/lib/sim/palette';
 import { canNarrate } from './narrate';
 
 interface PlayerProps {
@@ -29,6 +30,9 @@ interface PlayerProps {
   waiting: boolean;
   /** Structures introduced by the current step (only filled in guided mode). */
   fresh: StructureDef[];
+  /** Guided tour of the step: the structure lit right now. */
+  tour: { item: StructureDef; idx: number; n: number } | null;
+  onSkipTour: () => void;
   onGuided: (v: boolean) => void;
   onVoice: (v: boolean) => void;
   onContinue: () => void;
@@ -72,6 +76,31 @@ export function Player(p: PlayerProps) {
         </span>
         <div className="cap-body">
           <p key={`${p.stage.id}-${p.activeBeat}`}>{beat?.text}</p>
+          {p.tour && (
+            <div className="tour">
+              <div className="tour-top">
+                <span className="tour-kicker">
+                  Ezagutu egiturak · {p.tour.idx + 1}/{p.tour.n}
+                </span>
+                <span className="tour-dots" aria-hidden>
+                  {Array.from({ length: p.tour.n }, (_, k) => (
+                    <i key={k} className={k < p.tour!.idx ? 'is-past' : k === p.tour!.idx ? 'is-on' : ''} />
+                  ))}
+                </span>
+                <button className="btn small ghost" onClick={p.onSkipTour} title="Egituren bira saltatu">
+                  Saltatu <span aria-hidden>→</span>
+                </button>
+              </div>
+              <button className="tour-card" key={p.tour.item.id} onClick={() => p.onPick(p.tour!.item.id)} title="Ireki fitxa">
+                <i className="tour-swatch" style={{ background: p.tour.item.color ?? categoryColor[p.tour.item.category] }} />
+                <span>
+                  <b>{p.tour.item.name}</b>
+                  {p.tour.item.es && <em>{p.tour.item.es}</em>}
+                  <span className="tour-def">{p.tour.item.definition}</span>
+                </span>
+              </button>
+            </div>
+          )}
           {p.fresh.length > 0 && (
             <ul className="fresh" key={`f-${p.stage.id}-${p.activeBeat}`}>
               {p.fresh.map((s, k) => (

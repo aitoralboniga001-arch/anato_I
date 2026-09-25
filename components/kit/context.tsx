@@ -9,6 +9,8 @@ export interface SceneContextValue {
   hovered: string | null;
   /** Structures highlighted by the active narrative beat. */
   focus: readonly string[];
+  /** Guided tour: the one structure lit right now; everything else is shaded. */
+  spotlight?: string | null;
   showLabels: boolean;
   /** When quiz mode is on, labels are hidden and clicks answer the prompt. */
   quiz: boolean;
@@ -35,10 +37,11 @@ export const SceneContext = createContext<SceneContextValue>({
 export const useScene = () => useContext(SceneContext);
 
 /** Visual state of a structure id given the current interaction state. */
-export function partState(ctx: SceneContextValue, id: string): 'active' | 'dim' | 'focus' | 'idle' {
+export function partState(ctx: SceneContextValue, id: string): 'active' | 'dim' | 'focus' | 'idle' | 'spot' | 'shade' {
   const pointed = ctx.hovered ?? ctx.selected;
   if (ctx.quizFlash?.id === id) return 'active';
   if (pointed) return pointed === id ? 'active' : 'dim';
+  if (ctx.spotlight) return ctx.spotlight === id ? 'spot' : 'shade';
   if (ctx.focus.length) return ctx.focus.includes(id) ? 'focus' : 'idle';
   return 'idle';
 }

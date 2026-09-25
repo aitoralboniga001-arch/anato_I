@@ -99,6 +99,14 @@ const tubeWidth = (u: number) =>
 
 export const U = { ampulla: 0.2, isthmus: 0.74, interstitial: 0.92 };
 
+/** Parts of the tube along its length (arc fractions from the fimbrial end). */
+const TUBE_PARTS: [string, number, number][] = [
+  ['infundibulua', 0, 0.08],
+  ['anpulua', 0.08, 0.58],
+  ['istmoa', 0.58, 0.84],
+  ['atal-interstiziala', 0.84, 1],
+];
+
 export interface TractProps {
   /** 0..1 infundibulum and fimbriae sweeping over the ovary (ovulation). */
   reach?: number;
@@ -116,6 +124,21 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
   const tubeOuter = [...offset(T, TN, w), ...offset(T, TN, (i) => -w(i)).reverse()];
   const lum = (i: number) => w(i) * 0.62;
   const tubeLumen = [...offset(T, TN, lum), ...offset(T, TN, (i) => -lum(i)).reverse()];
+  // One piece of the tube between arc fractions u0..u1 (its parts, so each can be lit on its own).
+  const tubePiece = (u0: number, u1: number) => {
+    const n = T.length - 1;
+    const a = Math.round(u0 * n);
+    const b = Math.round(u1 * n) + 1;
+    const s = T.slice(a, b);
+    const sn = TN.slice(a, b);
+    const wi = (i: number) => w(i + a);
+    const li = (i: number) => lum(i + a);
+    return {
+      outer: poly([...offset(s, sn, wi), ...offset(s, sn, (i) => -wi(i)).reverse()]),
+      lumen: poly([...offset(s, sn, li), ...offset(s, sn, (i) => -li(i)).reverse()]),
+    };
+  };
+  const pieces = TUBE_PARTS.map(([id, u0, u1]) => ({ id, ...tubePiece(u0, u1) }));
   // Fimbriae: finger-like fringes around the mouth, spreading over the ovary at ovulation.
   const m = T[0];
   const d = [T[0][0] - T[3][0], T[0][1] - T[3][1]];
@@ -147,8 +170,14 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
     return line(pts);
   });
   const fol: Pt = [300, 338];
+  const fundus = poly([...OUTER.filter((p) => p[1] < 170), ...INNER.filter((p) => p[1] < 170).reverse()]);
   return (
     <g>
+      {/* Uterine cavity (lumen), behind everything else */}
+      <Part id="umetoki-barrunbea">
+        <path d={poly([...INNER, [1000, 640]])} fill="rgba(255, 214, 226, 0.07)" />
+      </Part>
+
       {/* Ovary */}
       <Part id="obulutegia">
         <ellipse cx={374} cy={292} rx={98} ry={60} transform="rotate(-12 374 292)" fill={C.ovary} stroke="rgba(60,30,20,0.55)" strokeWidth={1.4} />
@@ -189,6 +218,11 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
         <path d={wall} fill={C.myometrium} />
         <path d={wall} fill="url(#p-muscle)" opacity={0.35} />
       </Part>
+      {/* Fundus: the top of the uterine body, above the openings of the tubes */}
+      <Part id="umetokiaren-fundusa">
+        <path d={fundus} fill={C.myometrium} />
+        <path d={fundus} fill="url(#p-muscle)" opacity={0.35} />
+      </Part>
       <Part id="perimetrioa">
         <path d={peri} fill={C.perimetrium} opacity={0.9} />
       </Part>
@@ -201,14 +235,18 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
         </g>
         <path d={line(INNER)} fill="none" stroke={C.epithelium} strokeWidth={3} />
       </Part>
-      <Part id="umetokiaren-fundusa" quiet>
-        <path d={line(OUTER.slice(0, 20))} fill="none" stroke="transparent" strokeWidth={30} />
-      </Part>
-
-      {/* Tube */}
+      {/* Tube: the whole tube, then each of its parts on top (same look, lit one by one in the tour) */}
       <Part id="umetoki-tronpa">
         <path d={poly(tubeOuter)} fill={C.tube} stroke="rgba(60,10,30,0.6)" strokeWidth={1.3} />
         <path d={poly(tubeLumen)} fill="#3a1b2e" />
+      </Part>
+      {pieces.map((q) => (
+        <Part key={q.id} id={q.id}>
+          <path d={q.outer} fill={C.tube} stroke="rgba(60,10,30,0.45)" strokeWidth={1} />
+          <path d={q.lumen} fill="#3a1b2e" />
+        </Part>
+      ))}
+      <Part id="finbriak">
         <g fill="none" stroke={C.tube} strokeWidth={8} strokeLinecap="round">
           {fingers.map((f, i) => (
             <path key={i} d={f} />
