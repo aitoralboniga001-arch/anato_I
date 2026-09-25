@@ -49,7 +49,7 @@ function DorsalDrawing({ t, reduced }: SceneProps) {
 
   return (
     <g>
-      <rect x={0} y={0} width={1000} height={640} fill="#0c1220" />
+      <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <Part id="hiru-orriko-diskoa" quiet>
         <path d={outline} fill="#1a2540" stroke="rgba(232,238,252,0.25)" strokeWidth={1.2} />
       </Part>
@@ -165,7 +165,7 @@ export function GastrulationTransverse({ t }: SceneProps) {
   const L = (id: string, x: number, y: number, p: Pt, show = 1, small = false) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} small={small} />;
   return (
     <g>
-      <rect x={0} y={0} width={1000} height={640} fill="#0c1220" />
+      <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <DiscDrawing s={s} ids={{ epiblast: g.ecto >= 0.5 ? 'ektodermoa' : 'epiblastoa' }} />
 
       {/* Epiblast cells converge on the streak, then (after invaginating) spread laterally between the layers. */}

@@ -5,13 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useEffectEvent, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { SceneContext, type QuizFlash, type SceneContextValue } from '@/components/kit/context';
 import { getWeek, nameOf, structures, weeks } from '@/content/registry';
+import { ageLabel, ageParts, spanOf } from '@/lib/sim/age';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { StructureCategory, WeekDef } from '@/lib/sim/types';
 import { Glossary } from './Glossary';
-import { BrandMark, IconBook, IconLayers, IconNext, IconPrev, IconQuiz, IconTag, IconTarget, IconTree, PlaneGlyph, planeName } from './icons';
+import { IconBook, IconInfo, IconLayers, IconPlay, IconQuiz, IconTag, IconTarget, IconTree, PlaneGlyph } from './icons';
+import { Wordmark, isWip } from './LandNav';
+import { Player } from './Player';
 import { Questions } from './Questions';
-import { Inspector, StagePanel } from './SidePanel';
-import { Timeline } from './Timeline';
+import { Inspector, Outline, StageInfo } from './SidePanel';
 import { Viewport } from './Viewport';
 import { markVisited, useVisited } from './progress';
 
@@ -81,6 +83,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const [viewByStage, setViewByStage] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
+  // Only highlight (and dim the rest) when the picked structure is actually drawn in this view.
+  const [selectedLit, setSelectedLit] = useState(false);
   const [showLabels, setShowLabels] = useState(true);
   const [legendOpen, setLegendOpen] = useState(false);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
@@ -247,12 +251,25 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     }, 1500);
   };
 
+  // Re-check after the scene renders (deep links, view switches): is the selection drawn here?
+  useEffect(() => {
+    if (!selected) return;
+    const raf = requestAnimationFrame(() => setSelectedLit(!!svgRef.current?.querySelector(`[data-part="${CSS.escape(selected)}"]`)));
+    return () => cancelAnimationFrame(raf);
+  }, [selected, stage.id, view.id, mounted]);
+
+  const inScene = (id: string) => !!svgRef.current?.querySelector(`[data-part="${CSS.escape(id)}"]`);
+  const pick = (id: string) => {
+    setSelected(id);
+    setSelectedLit(inScene(id));
+  };
+
   const onSelect = (id: string) => {
     if (find) {
       answerFind(id);
       return;
     }
-    setSelected(id);
+    pick(id);
     setPanelOpen(true);
   };
 
@@ -277,6 +294,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       setFind(null);
       setGlossaryOpen(false);
       setQuestionsOpen(false);
+      setPanelOpen(false);
     } else if (/^[1-9]$/.test(e.key)) {
       const v = stage.views[Number(e.key) - 1];
       if (v) setViewByStage((m) => ({ ...m, [stage.id]: v.id }));
@@ -289,7 +307,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   }, []);
 
   const ctx: SceneContextValue = {
-    selected: find ? null : selected,
+    selected: find || !selectedLit ? null : selected,
     hovered: find ? hovered : hovered,
     focus: find ? [] : beat?.focus ?? [],
     showLabels,
@@ -310,105 +328,91 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     return [...seen.entries()];
   }, [stage]);
 
-  const atEnd = pos.t >= 1 && pos.i < week.stages.length - 1;
+  const day = lerpDay(stage.dayRange, pos.t);
+  const nextStage = week.stages[pos.i + 1];
+  const pad = (n: number) => String(n).padStart(2, '0');
 
   return (
     <div className="app">
       <header className="topbar">
-        <Link href="/" className="brand" title="Hasiera">
-          <BrandMark size={26} />
-          <span className="brand-text">
-            Enbrio<b>Atlas</b>
-          </span>
+        <Link href="/" className="tb-brand" title="Hasiera">
+          <Wordmark size={20} />
         </Link>
-        <nav className="week-tabs" aria-label="Asteak">
+        <nav className="tb-weeks" aria-label="Gaiak">
           {weeks.map((w) => (
-            <Link key={w.week} href={`/astea/${w.week}`} className={`week-tab${w.week === week.week ? ' is-on' : ''}`}>
-              <span className="week-n">{w.week}. astea</span>
-              <span className="week-days">
-                {w.dayRange[0]}–{w.dayRange[1]}. eg.
+            <Link
+              key={w.week}
+              href={`/astea/${w.week}`}
+              className={`tb-week${w.week === week.week ? ' is-on' : ''}${isWip(w) ? ' is-wip' : ''}`}
+              title={`${w.week}. gaia — ${w.title} (${spanOf(w).long})${isWip(w) ? ' · prestatzen' : ''}`}
+              aria-current={w.week === week.week ? 'page' : undefined}
+            >
+              <span className="tb-week-n">{pad(w.week)}</span>
+              <span className="tb-week-d">
+                {spanOf(w).short}
               </span>
             </Link>
           ))}
         </nav>
-        <DayRuler day={lerpDay(stage.dayRange, pos.t)} />
-        <div className="top-actions">
-          <button className={`btn ghost${find ? ' is-on' : ''}`} onClick={() => (find ? setFind(null) : startFind())} title="Aurkitu egitura irudian">
+        <DayRuler day={day} index={weeks.indexOf(week)} />
+        <div className="tb-tools">
+          <button className={`tool${find ? ' is-on' : ''}`} onClick={() => (find ? setFind(null) : startFind())} title="Aurkitu egitura irudian">
             <IconTarget size={16} /> <span>Aurkitu</span>
           </button>
-          <button className="btn ghost" onClick={() => setQuestionsOpen(true)} title="Azterketa-galderak">
+          <button className="tool" onClick={() => setQuestionsOpen(true)} title="Azterketa-galderak">
             <IconQuiz size={16} /> <span>Galderak</span>
           </button>
-          <Link className="btn ghost" href="/leinuak" title="Ernetze orrien leinuak">
+          <button className="tool" onClick={() => setGlossaryOpen(true)} title="Glosarioa">
+            <IconBook size={16} /> <span>Glosarioa</span>
+          </button>
+          <Link className="tool" href="/leinuak" title="Ernetze orrien leinuak">
             <IconTree size={16} /> <span>Leinuak</span>
           </Link>
-          <button className="btn ghost" onClick={() => setGlossaryOpen(true)} title="Glosarioa">
-            <IconBook size={16} /> <span>Glosarioa</span>
+          <button className={`tool tool-panel${panelOpen ? ' is-on' : ''}`} onClick={() => setPanelOpen((v) => !v)} title="Azalpen-panela" aria-expanded={panelOpen}>
+            <IconInfo size={16} /> <span>Azalpena</span>
           </button>
         </div>
       </header>
 
       <div className={`workspace${panelOpen ? ' panel-open' : ''}`}>
-        <aside className="rail" aria-label="Etapak">
-          <div className="rail-head">
-            <p className="eyebrow">{week.week}. gaia</p>
-            <h1>{week.title}</h1>
-            <p className="rail-sub">{week.subtitle}</p>
-          </div>
-          <ol className="stage-list">
-            {week.stages.map((s, i) => (
-              <li key={s.id}>
-                <button
-                  className={`stage-item${i === pos.i ? ' is-current' : ''}${visited.includes(s.id) ? ' is-visited' : ''}`}
-                  onClick={() => {
-                    setPos({ i, t: 0 });
-                    setSelected(null);
-                  }}
-                >
-                  <span className="stage-num" aria-hidden>
-                    {visited.includes(s.id) && i !== pos.i ? '✓' : i + 1}
-                  </span>
-                  <span className="stage-body">
-                    <span className="stage-title">{s.title}</span>
-                    <span className="stage-day">
-                      {s.day}
-                      {s.optional && <em className="tag-optional">azterketatik kanpo</em>}
-                    </span>
-                  </span>
-                  <span className="stage-progress" style={{ transform: `scaleX(${i < pos.i ? 1 : i === pos.i ? pos.t : 0})` }} />
-                </button>
-              </li>
-            ))}
-          </ol>
-        </aside>
+        <Outline
+          week={week}
+          current={pos.i}
+          t={pos.t}
+          activeBeat={activeBeat}
+          visited={visited}
+          onStage={(i) => {
+            setPos({ i, t: 0 });
+            setSelected(null);
+          }}
+          onBeat={gotoBeat}
+        />
 
-        <main className="center">
-          <div className="stage-head">
-            <div className="stage-head-text">
-              <span className="day-chip">{stage.day}</span>
-              <div>
-                <h2>{stage.title}</h2>
-                {stage.subtitle && <p>{stage.subtitle}</p>}
+        <main className="stage">
+          <div className="stage-bar">
+            <div className="stage-heading">
+              <p className="kicker">
+                {pad(pos.i + 1)} / {pad(week.stages.length)} · {stage.day}
+              </p>
+              <h2>{stage.title}</h2>
+            </div>
+            {stage.views.length > 1 && (
+              <div className="seg" role="tablist" aria-label="Ikuspegiak">
+                {stage.views.map((v, k) => (
+                  <button
+                    key={v.id}
+                    role="tab"
+                    aria-selected={v.id === view.id}
+                    className={v.id === view.id ? 'is-on' : ''}
+                    onClick={() => setViewByStage((m) => ({ ...m, [stage.id]: v.id }))}
+                    title={`${v.description} (${k + 1})`}
+                  >
+                    <PlaneGlyph plane={v.plane} size={18} />
+                    <span>{v.label}</span>
+                  </button>
+                ))}
               </div>
-            </div>
-            <div className="view-tabs" role="tablist" aria-label="Ikuspegiak">
-              {stage.views.map((v, k) => (
-                <button
-                  key={v.id}
-                  role="tab"
-                  aria-selected={v.id === view.id}
-                  className={`view-tab${v.id === view.id ? ' is-on' : ''}`}
-                  onClick={() => setViewByStage((m) => ({ ...m, [stage.id]: v.id }))}
-                  title={`${v.description} (${k + 1})`}
-                >
-                  <PlaneGlyph plane={v.plane} />
-                  <span>
-                    <b>{v.label}</b>
-                    {!v.label.toLowerCase().includes(v.plane.slice(0, 6)) && <small>{planeName[v.plane]}</small>}
-                  </span>
-                </button>
-              ))}
-            </div>
+            )}
           </div>
 
           <SceneContext.Provider value={ctx}>
@@ -420,11 +424,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               overlay={
                 <>
                   <div className="view-tools">
-                    <button className={`icon-btn${showLabels ? ' is-on' : ''}`} onClick={() => setShowLabels((v) => !v)} title="Etiketak (L)" aria-label="Etiketak">
-                      <IconTag />
+                    <button className={`icon-btn${showLabels ? ' is-on' : ''}`} onClick={() => setShowLabels((v) => !v)} title="Etiketak (L)" aria-label="Etiketak" aria-pressed={showLabels}>
+                      <IconTag size={16} />
                     </button>
-                    <button className={`icon-btn${legendOpen ? ' is-on' : ''}`} onClick={() => setLegendOpen((v) => !v)} title="Kolore-kodea" aria-label="Kolore-kodea">
-                      <IconLayers />
+                    <button className={`icon-btn${legendOpen ? ' is-on' : ''}`} onClick={() => setLegendOpen((v) => !v)} title="Kolore-kodea" aria-label="Kolore-kodea" aria-pressed={legendOpen}>
+                      <IconLayers size={16} />
                     </button>
                   </div>
                   {legendOpen && (
@@ -438,15 +442,24 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                     </div>
                   )}
                   <p key={`${stage.id}/${view.id}`} className="view-desc">
-                    {view.description}
+                    <PlaneGlyph plane={view.plane} size={14} /> {view.description}
                   </p>
+                  {!playing && pos.t === 0 && !find && (
+                    <button className="start" onClick={togglePlay}>
+                      <span className="start-icon">
+                        <IconPlay size={14} />
+                      </span>
+                      Erreproduzitu etapa
+                      <kbd>Zuriunea</kbd>
+                    </button>
+                  )}
                   {find && (
                     <div className="find-bar">
-                      <IconTarget size={18} />
+                      <IconTarget size={16} />
                       <div className="find-text">
                         {find.target ? (
                           <>
-                            <small>Klikatu irudian:</small>
+                            <small>Klikatu irudian</small>
                             <strong>{nameOf(find.target)}</strong>
                           </>
                         ) : (
@@ -474,60 +487,41 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             </Viewport>
           </SceneContext.Provider>
 
-          <div className="caption" aria-live="polite">
-            <button className="icon-btn" onClick={() => stepBeat(-1)} aria-label="Aurreko urratsa" title="Aurreko urratsa (←)">
-              <IconPrev />
-            </button>
-            <div className="caption-body" key={`${stage.id}-${activeBeat}`}>
-              <span className="caption-step">
-                {activeBeat + 1}/{stage.beats.length}
-              </span>
-              <p>{beat?.text}</p>
-            </div>
-            {atEnd ? (
-              <button className="btn primary" onClick={() => gotoStage(1)}>
-                Hurrengo etapa →
-              </button>
-            ) : (
-              <button className="icon-btn" onClick={() => stepBeat(1)} aria-label="Hurrengo urratsa" title="Hurrengo urratsa (→)">
-                <IconNext />
-              </button>
-            )}
-          </div>
-
-          <Timeline
-            stages={week.stages}
+          <Player
+            stage={stage}
             stageIndex={pos.i}
+            stageCount={week.stages.length}
+            nextTitle={nextStage?.title}
             t={pos.t}
+            activeBeat={activeBeat}
             playing={playing}
             speed={speed}
             autoContinue={autoContinue}
-            onSeek={seek}
+            day={ageLabel(day)}
+            onSeek={(t) => seek(pos.i, t)}
             onTogglePlay={togglePlay}
-            onRestart={() => setPos((p) => ({ i: p.i, t: 0 }))}
             onStage={gotoStage}
+            onBeat={stepBeat}
             onSpeed={setSpeed}
             onAutoContinue={setAutoContinue}
           />
         </main>
 
-        <aside className="panel" aria-label="Azalpena">
-          <button className="panel-toggle" onClick={() => setPanelOpen((v) => !v)}>
-            {panelOpen ? 'Ezkutatu' : 'Azalpena'}
-          </button>
+        <aside className="info" aria-label="Azalpena">
           {selected ? (
             <Inspector
               id={selected}
               week={week}
               currentStageId={stage.id}
               onClose={() => setSelected(null)}
-              onSelect={(id) => setSelected(id)}
+              onSelect={pick}
               onGoto={(w, sid) => gotoWeekStage(w, sid, selected)}
             />
           ) : (
-            <StagePanel stage={stage} activeBeat={activeBeat} onBeat={gotoBeat} onSelect={onSelect} />
+            <StageInfo key={stage.id} stage={stage} onSelect={onSelect} onDismiss={() => setPanelOpen(false)} onHover={(id) => setHovered(id && inScene(id) ? id : null)} />
           )}
         </aside>
+        {panelOpen && <button className="info-scrim" aria-label="Itxi panela" onClick={() => setPanelOpen(false)} />}
       </div>
 
       {glossaryOpen && (
@@ -535,7 +529,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           onClose={() => setGlossaryOpen(false)}
           onPick={(id) => {
             setGlossaryOpen(false);
-            setSelected(id);
+            pick(id);
             setPanelOpen(true);
           }}
         />
@@ -547,18 +541,22 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 
 const lerpDay = (r: [number, number], t: number) => r[0] + (r[1] - r[0]) * t;
 
-/** Compact 0–28 day ruler showing where in development we are. */
-function DayRuler({ day }: { day: number }) {
+/** One equal segment per topic (they span very different numbers of days); the head sits inside the current one. */
+function DayRuler({ day, index }: { day: number; index: number }) {
+  const n = weeks.length;
+  const [a, b] = weeks[index].dayRange;
+  const head = (index + Math.min(1, Math.max(0, (day - a) / Math.max(1, b - a)))) / n;
   return (
-    <div className="day-ruler" title={`Garapenaren ${Math.round(day)}. eguna`}>
+    <div className="day-ruler" title={`Garapenaren ${ageLabel(day)}`}>
       <div className="day-ruler-track">
-        {weeks.map((w) => (
-          <span key={w.week} className="day-ruler-week" style={{ left: `${(w.dayRange[0] / 28) * 100}%`, width: `${((w.dayRange[1] - w.dayRange[0] + 1) / 28) * 100}%` }} />
+        {weeks.map((w, i) => (
+          <span key={w.week} className={`day-ruler-week${i < index ? ' is-past' : ''}`} style={{ left: `${(i / n) * 100}%`, width: `${100 / n}%` }} />
         ))}
-        <span className="day-ruler-head" style={{ left: `${(Math.min(28, day) / 28) * 100}%` }} />
+        <span className="day-ruler-head" style={{ left: `${head * 100}%` }} />
       </div>
       <span className="day-ruler-label">
-        <b>{Math.round(day)}.</b> eguna
+        <b>{ageParts(day)[0]}</b>
+        {ageParts(day)[1]}
       </span>
     </div>
   );

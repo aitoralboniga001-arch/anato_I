@@ -146,14 +146,14 @@ export function PharynxClose({ t }: SceneProps) {
   const L = (id: string, x: number, y: number, p: P2, show = 1) => <Label key={id} id={id} x={x} y={y} ax={at(p)[0]} ay={at(p)[1]} show={show} small />;
   return (
     <g>
-      <rect x={0} y={0} width={1000} height={640} fill="#0c1220" />
+      <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <g transform={transform}>
         <FoldBody f={f} kloakaShow={0}>
           <GutFeatures e={e} tm={{ ...tm, phar: 1, pouches: Math.max(0.5, tm.pouches) }} />
         </FoldBody>
       </g>
-      <rect x={690} y={96} width={290} height={176} rx={10} fill="#0b1220" opacity={0.82 * tm.pouches} />
-      <rect x={0} y={566} width={1000} height={60} fill="#0b1220" opacity={0.85} />
+      <rect x={690} y={96} width={290} height={176} rx={10} fill="#0c0c0e" opacity={0.82 * tm.pouches} />
+      <rect x={0} y={566} width={1000} height={60} fill="#0c0c0e" opacity={0.85} />
       {e.pouch.map((q, i) => {
         const [x, y] = at(q);
         return (

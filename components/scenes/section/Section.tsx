@@ -666,7 +666,7 @@ export function SectionDrawing({ s, show = {} }: { s: Section; show?: Partial<Re
       {/* Neural groove (amniotic fluid inside the U) and the neuroepithelium. */}
       {grooveOpen && amnionShow > 0.01 && (
         <Part id={s.id('groove')} show={ss((p.neural - 0.08) / 0.15)}>
-          <path d={smoothPath(grooveD.map((q) => map(q[0], q[1])), true, 0.2)} fill="#0b1220" />
+          <path d={smoothPath(grooveD.map((q) => map(q[0], q[1])), true, 0.2)} fill="#0c0c0e" />
           <path d={smoothPath(grooveD.map((q) => map(q[0], q[1])), true, 0.2)} fill="rgba(120,170,255,0.13)" />
         </Part>
       )}

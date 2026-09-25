@@ -50,7 +50,7 @@ function BodyOutline({ t }: { t: number }) {
           C${500 + halfW},${Y_BOT} ${500 - halfW},${Y_BOT} ${500 - halfW},${bot}
           Z`}
       fill="#182238"
-      stroke="#33415c"
+      stroke="#3a3a40"
       strokeWidth={1.4}
       opacity={0.9}
     />

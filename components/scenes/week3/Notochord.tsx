@@ -66,7 +66,7 @@ export function NotochordSagittal({ t }: SceneProps) {
   const L = (id: string, x: number, y: number, p: Pt, show = 1) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} />;
   return (
     <g>
-      <rect x={0} y={0} width={1000} height={640} fill="#0c1220" />
+      <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <DiscDrawing s={s} ids={{ epiblast: 'ektodermoa' }} />
 
       <Part id="plaka-prekordala">
@@ -156,7 +156,7 @@ export function NotochordTransverse({ t }: SceneProps) {
   const notoAt = g.rod >= 0.5 ? cranial.at.noto : g.plate >= 0.5 ? cranial.at.plate : cranial.at.pre;
   return (
     <g>
-      <rect x={0} y={0} width={1000} height={640} fill="#0c1220" />
+      <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <DiscDrawing s={cranial} ids={{ epiblast: 'ektodermoa' }} />
       <DiscDrawing s={caudal} ids={{ epiblast: 'ektodermoa' }} />
       <text x={500} y={86} textAnchor="middle" fontSize={14} fill="#93c5fd" fontWeight={700}>

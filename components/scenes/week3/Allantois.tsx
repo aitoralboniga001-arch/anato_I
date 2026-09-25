@@ -37,7 +37,7 @@ function DorsalDrawing({ t }: SceneProps) {
 
   return (
     <g>
-      <rect x={0} y={0} width={1000} height={640} fill="#0c1220" />
+      <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <Part id="hiru-orriko-diskoa" show={1}>
         <path d={outline} fill="#1a2540" stroke="rgba(232,238,252,0.3)" strokeWidth={1.4} />
       </Part>
@@ -198,7 +198,7 @@ export function AllantoisSagittal({ t }: SceneProps) {
   const outline = pathD([...xs.map((x) => s.map(x, s.top(x) - 1.5)), ...xs.slice().reverse().map((x) => s.map(x, s.dEnd(x) + 11.5))]) + 'Z';
   return (
     <g>
-      <rect x={0} y={0} width={1000} height={640} fill="#0c1220" />
+      <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <Part id="korion-barrunbea" quiet>
         <path d={pathD(ring(0))} fill="#141c30" />
       </Part>

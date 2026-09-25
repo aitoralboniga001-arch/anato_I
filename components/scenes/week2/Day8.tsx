@@ -301,10 +301,10 @@ export function Day8Disc(props: SceneProps) {
       <Arrow from={[962, yMid]} to={[962, yTop - 50]} bend={0} color="#93c5fd" show={pol} progress={pol} />
       <Arrow from={[962, yMid]} to={[962, yBot + 100]} bend={0} color="#fcd34d" show={pol} progress={pol} />
       <g opacity={pol} pointerEvents="none" fontSize={14} fontWeight={700} textAnchor="middle">
-        <text transform={`translate(984 ${(yMid + yTop - 50) / 2}) rotate(-90)`} fill="#93c5fd" stroke="#0b1220" strokeWidth={3} paintOrder="stroke">
+        <text transform={`translate(984 ${(yMid + yTop - 50) / 2}) rotate(-90)`} fill="#93c5fd" stroke="#0c0c0e" strokeWidth={3} paintOrder="stroke">
           Dortsala
         </text>
-        <text transform={`translate(984 ${(yMid + yBot + 100) / 2}) rotate(-90)`} fill="#fcd34d" stroke="#0b1220" strokeWidth={3} paintOrder="stroke">
+        <text transform={`translate(984 ${(yMid + yBot + 100) / 2}) rotate(-90)`} fill="#fcd34d" stroke="#0c0c0e" strokeWidth={3} paintOrder="stroke">
           Bentrala
         </text>
       </g>

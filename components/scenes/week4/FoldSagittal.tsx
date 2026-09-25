@@ -403,11 +403,11 @@ export function computeFold(t: number, spMax = 5) {
 export type Fold = ReturnType<typeof computeFold>;
 
 /** The cellular folded-embryo section (no labels). `children` are drawn over the gut, under the surface ectoderm. */
-export function FoldBody({ f, kloakaShow, children }: { f: Fold; kloakaShow: number; children?: ReactNode }) {
+export function FoldBody({ f, kloakaShow, children, bare = false }: { f: Fold; kloakaShow: number; children?: ReactNode; bare?: boolean }) {
   const { g, LF, pit, ecto, ectoIn, pieces, loopIn, pieceIn, meso, ntTop, ntBot, lumTop, lumBot, noTop, noBot, splO, splI, somO, somI, cavPoly, vSplit, heartO, heartI, stalkS, stalkPoly, allC, allO1, allI1, allO2, allI2, amn, amnIn, amnOut, dots, bmMid, cmMid, kloakaRing, pits } = f;
   return (
     <g>
-      <rect x={0} y={0} width={1000} height={640} fill="#0c1220" />
+      {!bare && <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />}
       {/* amniotic cavity */}
       <Part id="amnios-barrunbea" quiet>
         <path d={pathD([...amn, ...ecto.slice().reverse()], true)} fill={C.amnionCavity} />

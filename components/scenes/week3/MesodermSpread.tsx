@@ -29,7 +29,7 @@ function DorsalDrawing({ t }: SceneProps) {
 
   return (
     <g>
-      <rect x={0} y={0} width={1000} height={640} fill="#0c1220" />
+      <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
 
       <Part id="enbrioi-kanpoko-mesodermoa" show={exMeso}>
         <path d={discOutlinePath(D.cx, D.cy, D.rx + 22, D.rx + 22, D.ry + 22, D.ry + 22)} fill={W3C.mesoExtra} opacity={0.35} />
@@ -52,8 +52,8 @@ function DorsalDrawing({ t }: SceneProps) {
         <g clipPath="url(#w3-disc-clip)">
           <Part id="mesodermo-intraenbrionarioa">
             <rect x={D.cx - D.rx - 10} y={D.cy - D.ry - 10} width={2 * D.rx + 20} height={2 * D.ry + 20} fill="url(#w3-meso-intra-dorsal)" />
-            <circle cx={CRANIAL[0]} cy={CRANIAL[1]} r={MEMBR_R} fill="#0c1220" opacity={membranes} />
-            <circle cx={CAUDAL[0]} cy={CAUDAL[1]} r={MEMBR_R} fill="#0c1220" opacity={membranes} />
+            <circle cx={CRANIAL[0]} cy={CRANIAL[1]} r={MEMBR_R} fill="#0f0f11" opacity={membranes} />
+            <circle cx={CAUDAL[0]} cy={CAUDAL[1]} r={MEMBR_R} fill="#0f0f11" opacity={membranes} />
           </Part>
         </g>
       </g>
@@ -159,7 +159,7 @@ export function MesodermSagittal({ t }: SceneProps) {
   const exL: Pt = [s.p.cx - (s.rx + 8 * s.k) * Math.cos(0.55), s.cyA - (s.p.amnionH * s.k + 8 * s.k) * Math.sin(0.55)];
   return (
     <g>
-      <rect x={0} y={0} width={1000} height={640} fill="#0c1220" />
+      <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <DiscDrawing s={s} ids={{ epiblast: 'ektodermoa' }} />
       <Arrow from={mid(40)} to={mid(lerp(20, -150, g.growth))} bend={0} color="#fde68a" width={1.8} head={7} show={g.growth * (1 - seg(t, 0.46, 0.52))} />
       <Part id="mintz-bukofaringeoa" show={g.bucco}>

@@ -135,7 +135,7 @@ export function MesoSplitDorsal({ t }: SceneProps) {
 
       {/* Cross-section inset: shows the true dorsoventral stack (dortsala top) once the coelom forms. */}
       <g opacity={coelom}>
-        <rect x={insetX - insetW - 14} y={insetY - 70} width={2 * insetW + 28} height={150} rx={10} fill="#0c1322" stroke="#33415c" strokeWidth={1} />
+        <rect x={insetX - insetW - 14} y={insetY - 70} width={2 * insetW + 28} height={150} rx={10} fill="#141416" stroke="#3a3a40" strokeWidth={1} />
         <text x={insetX} y={insetY - 78} textAnchor="middle" fontSize={11} fill="#8a97b3">Zeharkako mozketa (eskema)</text>
         <Part id="paretako-orria" show={coelom}>
           <rect x={insetX - insetW} y={insetY - 55} width={2 * insetW} height={26} rx={4} fill={C.mesoLateral} />

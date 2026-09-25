@@ -160,10 +160,10 @@ function DorsalDrawing({ t }: SceneProps) {
 
       {/* Neuropores. */}
       <Part id="neuroporo-kraneala" show={cranialOpen}>
-        <ellipse cx={500} cy={yAt(0.05)} rx={22 * cranialOpen + 4} ry={12 * cranialOpen + 3} fill="#0b1220" stroke={C.neural} strokeWidth={2} />
+        <ellipse cx={500} cy={yAt(0.05)} rx={22 * cranialOpen + 4} ry={12 * cranialOpen + 3} fill="#0c0c0e" stroke={C.neural} strokeWidth={2} />
       </Part>
       <Part id="neuroporo-kaudala" show={caudalOpen}>
-        <ellipse cx={500} cy={yAt(0.95)} rx={16 * caudalOpen + 4} ry={20 * caudalOpen + 3} fill="#0b1220" stroke={C.neural} strokeWidth={2} />
+        <ellipse cx={500} cy={yAt(0.95)} rx={16 * caudalOpen + 4} ry={20 * caudalOpen + 3} fill="#0c0c0e" stroke={C.neural} strokeWidth={2} />
       </Part>
 
       <Note x={500} y={100} tone="warn" show={seg(t, 0.75, 0.95) * (1 - seg(t, 0.97, 1))}>

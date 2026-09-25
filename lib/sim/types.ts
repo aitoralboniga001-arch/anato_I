@@ -117,11 +117,13 @@ export interface QuizQuestion {
 }
 
 export interface WeekDef {
-  week: 1 | 2 | 3 | 4;
+  week: 1 | 2 | 3 | 4 | 5;
   slug: string;
   title: string;
   subtitle: string;
   dayRange: [number, number];
+  /** How the span is written when days are not a natural unit (e.g. the fetal period). */
+  span?: { long: string; short: string };
   stages: StageDef[];
   structures: StructureDef[];
   quiz: QuizQuestion[];

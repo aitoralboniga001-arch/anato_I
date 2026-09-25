@@ -90,7 +90,7 @@ export function IntermediateSection({ t }: SceneProps) {
 
       {/* The three coelom-derived cavities are at different craniocaudal levels: shown as a caption, not spots here. */}
       <g opacity={g.fateCoelom}>
-        <rect x={700} y={128} width={216} height={112} rx={10} fill="#0c1322" stroke="#33415c" strokeWidth={1} />
+        <rect x={700} y={128} width={216} height={112} rx={10} fill="#141416" stroke="#3a3a40" strokeWidth={1} />
         <text x={710} y={114} fontSize={11} fill="#8a97b3">
           Maila kraneokaudal desberdinetan:
         </text>

@@ -224,18 +224,11 @@ export const planeName: Record<PlaneKind, string> = {
   eskema: 'Eskema',
 };
 
-/** EnbrioAtlas logo: a C-shaped (folded) embryo inside the chorion. */
+/** EnbrioAtlas mark: a C-shaped (folded) embryo inside the zona, drawn in a single line weight. */
 export const BrandMark = ({ size = 28 }: P) => (
   <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" className="brand-mark-svg">
-    <defs>
-      <linearGradient id="bm-g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stopColor="#6ee7c8" />
-        <stop offset="1" stopColor="#5b8def" />
-      </linearGradient>
-    </defs>
-    <rect x="1" y="1" width="30" height="30" rx="9" fill="url(#bm-g)" />
-    <path d="M21.5 10.5a7.2 7.2 0 1 0 0.6 10.4" fill="none" stroke="#06281f" strokeWidth="4" strokeLinecap="round" />
-    <path d="M21.5 10.5a7.2 7.2 0 1 0 0.6 10.4" fill="none" stroke="#e8fff8" strokeWidth="1.6" strokeLinecap="round" />
-    <circle cx="22.4" cy="21.2" r="2.1" fill="#fbbf24" />
+    <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeOpacity="0.35" strokeWidth="1.2" />
+    <path d="M21.2 10.4a7.4 7.4 0 1 0 0.9 10.6" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+    <circle cx="22.3" cy="21.3" r="2" fill="var(--signal, #ff6a3d)" />
   </svg>
 );

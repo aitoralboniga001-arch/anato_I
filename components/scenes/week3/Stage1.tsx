@@ -58,7 +58,7 @@ function Stage1Drawing({ t }: SceneProps) {
   const pol = seg(t, 0.88, 1);
   return (
     <g>
-      <rect x={0} y={0} width={1000} height={640} fill="#0c1220" />
+      <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <Part id="korion-barrunbea" quiet>
         <path d={pathD(ring(R_MESO))} fill="#141c30" />
       </Part>
@@ -125,7 +125,7 @@ export function Stage1Disc(props: SceneProps) {
   const s = makeDisc({});
   return (
     <g>
-      <rect x={0} y={0} width={1000} height={640} fill="#0c1220" />
+      <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <DiscDrawing s={s} ids={IDS} />
       {L('amnios-barrunbea', 810, 160, s.at.amnion)}
       {L('amnioblastoak', 190, 170, s.at.amnionWall)}
