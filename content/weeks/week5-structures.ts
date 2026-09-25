@@ -555,15 +555,6 @@ export const structures5: StructureDef[] = [
     related: ['ernalkuntza', 'erditze-data'],
   },
   {
-    id: 'ernalkuntza',
-    name: 'Ernalkuntza',
-    es: 'Fecundación',
-    category: 'prozesua',
-    definition: 'Garapenaren 0. eguna. Hortik haurdunaldiak 38 aste edo 266 egun irauten ditu.',
-    caution: 'Zaila da jakitea noiz eman zen: obulazioa aldakorra da eta espermatozoideak 6 egunez mantentzen dira ugal aparatuan.',
-    related: ['azken-hilekoa', 'erditze-data'],
-  },
-  {
     id: 'erditze-data',
     name: 'Erditze-data',
     es: 'Fecha del parto',

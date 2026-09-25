@@ -18,7 +18,7 @@ const FIGS = [
 ];
 
 /** Front view of a standing fetus whose head is `h` of the total height. */
-function Standing({ id, cx, h }: { id: string; cx: number; h: number }) {
+export function Standing({ id, cx, h }: { id: string; cx: number; h: number }) {
   const k = (0.5 - h) / 0.25; // 0 → early fetus, 1 → newborn
   const hh = H * h;
   const headRx = hh * lerp(0.35, 0.4, k);

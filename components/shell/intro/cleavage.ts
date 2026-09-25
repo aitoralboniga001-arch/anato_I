@@ -17,6 +17,8 @@ export interface Cell {
   /** Membrane contrast 0..1 (compaction blurs the borders between blastomeres). */
   rim: number;
   kind: 'blastomero' | 'trofoblasto' | 'enbrioblasto';
+  /** What the cell will become (known from the last cleavage on): outer vs inner cell mass. */
+  fate?: 'trofoblasto' | 'enbrioblasto';
 }
 
 /** A dividing pair is drawn with a goo filter so the cleavage furrow reads as a pinch. */
@@ -36,8 +38,8 @@ export interface Frame {
 
 export const ZONA = 132;
 
-const R = [112, 68, 54, 43, 34];
-const D = [0, 44, 38, 30, 24];
+const R = [112, 68, 54, 43, 34, 27];
+const D = [0, 44, 38, 30, 24, 19];
 
 interface Node {
   x: number;
@@ -84,10 +86,10 @@ function relax(nodes: Node[], inner: number) {
   }
 }
 
-/** Generation k (0..4) layouts, each child keeps the index of its parent in the previous generation. */
+/** Generation k (0..5: 1 → 32 cells) layouts, each child keeps the index of its parent in the previous generation. */
 const GENS: Node[][] = (() => {
   const gens: Node[][] = [[{ x: 0, y: 0, r: R[0], z: 0.5, axis: -32, parent: -1 }]];
-  for (let k = 1; k <= 4; k++) {
+  for (let k = 1; k <= 5; k++) {
     const prev = gens[k - 1];
     const next: Node[] = [];
     prev.forEach((p, pi) => {
@@ -99,7 +101,7 @@ const GENS: Node[][] = (() => {
           x: p.x + Math.cos(a) * D[k] * s,
           y: p.y + Math.sin(a) * D[k] * s,
           r: R[k],
-          z: Math.min(1, Math.max(0, p.z + s * (k === 3 ? 0.35 : 0.18) + (hash(pi * 3 + k) - 0.5) * 0.3)),
+          z: Math.min(1, Math.max(0, p.z + s * (k === 3 ? 0.35 : k === 5 ? 0.12 : 0.18) + (hash(pi * 3 + k) - 0.5) * 0.3)),
           axis,
           parent: pi,
         });
@@ -112,13 +114,14 @@ const GENS: Node[][] = (() => {
 })();
 
 /** Blastocyst targets: outer cells flatten into the trophoblast ring, inner ones gather at one pole. */
-const BLAST = (() => {
-  const morula = GENS[4];
+function blastTargets(gen: number) {
+  const morula = GENS[gen];
   const pole = { x: -0.68, y: -0.73 };
   const order = morula
     .map((c, i) => ({ i, d: (c.x / ZONA - pole.x * 0.5) ** 2 + (c.y / ZONA - pole.y * 0.5) ** 2 }))
     .sort((a, b) => a.d - b.d);
-  const inner = new Set(order.slice(0, 5).map((o) => o.i));
+  const nIn = gen === 4 ? 5 : 9;
+  const inner = new Set(order.slice(0, nIn).map((o) => o.i));
   const ring = morula
     .map((c, i) => ({ i, ang: Math.atan2(c.y, c.x) }))
     .filter((o) => !inner.has(o.i))
@@ -138,19 +141,33 @@ const BLAST = (() => {
       kind: 'trofoblasto',
     });
   });
-  const icm = [
-    [0, 0],
-    [-25, 16],
-    [22, -14],
-    [-8, -28],
-    [26, 18],
-  ];
+  const icm =
+    gen === 4
+      ? [
+          [0, 0],
+          [-25, 16],
+          [22, -14],
+          [-8, -28],
+          [26, 18],
+        ]
+      : [
+          [0, 0],
+          [-24, 12],
+          [22, -12],
+          [-6, -26],
+          [24, 16],
+          [-30, -14],
+          [4, 24],
+          [30, -30],
+          [-18, 32],
+        ];
   const c0 = { x: pole.x * 72, y: pole.y * 72 };
   [...inner].forEach((i, k) => {
-    targets.set(i, { x: c0.x + icm[k][0], y: c0.y + icm[k][1], rx: 23, ry: 21, rot: k * 40, kind: 'enbrioblasto' });
+    targets.set(i, { x: c0.x + icm[k][0], y: c0.y + icm[k][1], rx: gen === 4 ? 23 : 19, ry: gen === 4 ? 21 : 17, rot: k * 40, kind: 'enbrioblasto' });
   });
   return { targets, RB };
-})();
+}
+const BLAST = [4, 5].map((g) => blastTargets(g));
 
 const clamp = (v: number) => Math.min(1, Math.max(0, v));
 const ease = (v: number) => {
@@ -166,20 +183,20 @@ const mixAng = (a: number, b: number, t: number) => {
 const toCell = (n: Node, nuc = 1): Cell => ({ x: n.x, y: n.y, rx: n.r, ry: n.r, rot: n.axis, z: n.z, nuc, rim: 1, kind: 'blastomero' });
 
 /**
- * Progress p in 0..6:
+ * Progress p in 0..(gens + 2), `gens` = 4 (morula of 16) or 5 (32 cells, 4th day):
  *  0..1  zygote (pronuclei meet)
- *  1..2  first cleavage, 2..3 second, 3..4 third, 4..5 fourth (morula)
- *  5..6  compaction and cavitation (blastocyst)
+ *  1..2  first cleavage, 2..3 second, … up to generation `gens`
+ *  gens+1..gens+2  compaction and cavitation (blastocyst)
  * `wobble` (seconds) adds a faint living jitter.
  */
-export function cleavageFrame(p: number, wobble = 0): Frame {
+export function cleavageFrame(p: number, wobble = 0, gens: 4 | 5 = 4): Frame {
   const base: Frame = { cells: [], pairs: [], zonaR: ZONA, zonaO: 1, cavR: 0, cavO: 0, pro: { sep: 0, o: 0 } };
 
   if (p < 1) {
     const u = clamp(p);
     base.cells = [toCell(GENS[0][0], 0)];
     base.pro = { sep: 1 - ease(u / 0.85), o: 1 - clamp((u - 0.85) / 0.15) };
-  } else if (p < 5) {
+  } else if (p < gens + 1) {
     const k = Math.floor(p);
     const u = p - k;
     const prev = GENS[k - 1];
@@ -213,16 +230,18 @@ export function cleavageFrame(p: number, wobble = 0): Frame {
           nuc: clamp((split - 0.7) / 0.3),
           rim: 1,
           kind: 'blastomero',
+          fate: k === gens ? BLAST[gens - 4].targets.get(idx)!.kind as Cell['fate'] : undefined,
         });
       });
       if (split < 0.97) for (let i = 0; i < next.length; i += 2) base.pairs.push([i, i + 1]);
     }
   } else {
-    const u = clamp(p - 5);
+    const u = clamp(p - gens - 1);
+    const BL = BLAST[gens - 4];
     const compact = ease(u / 0.35);
     const cav = ease((u - 0.3) / 0.7);
-    base.cells = GENS[4].map((n, i) => {
-      const t = BLAST.targets.get(i)!;
+    base.cells = GENS[gens].map((n, i) => {
+      const t = BL.targets.get(i)!;
       const cx = n.x * (1 - 0.06 * compact);
       const cy = n.y * (1 - 0.06 * compact);
       const r = n.r * (1 + 0.1 * compact);
@@ -236,11 +255,12 @@ export function cleavageFrame(p: number, wobble = 0): Frame {
         nuc: 1,
         rim: mix(1, 0.35, compact) + 0.55 * cav,
         kind: cav > 0.5 ? t.kind : 'blastomero',
+        fate: t.kind as Cell['fate'],
       };
     });
-    base.zonaR = mix(ZONA, BLAST.RB + 6, cav);
+    base.zonaR = mix(ZONA, BL.RB + 6, cav);
     base.zonaO = 1 - cav;
-    base.cavR = mix(20, BLAST.RB - 22, cav);
+    base.cavR = mix(20, BL.RB - 22, cav);
     base.cavO = clamp(cav * 1.4);
   }
 

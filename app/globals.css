@@ -311,6 +311,7 @@ kbd {
   display: flex;
   align-items: baseline;
   gap: 7px;
+  white-space: nowrap;
   height: 30px;
   padding: 0 10px;
   border-radius: 7px;
@@ -345,6 +346,13 @@ kbd {
 
 .tb-week.is-wip {
   opacity: 0.5;
+}
+
+/* Five topics do not fit with their spans next to the day ruler and tools. */
+@media (max-width: 1380px) {
+  .tb-week-d {
+    display: none;
+  }
 }
 
 .day-ruler {
