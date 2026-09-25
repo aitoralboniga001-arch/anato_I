@@ -1,7 +1,7 @@
 import type { WeekDef } from '@/lib/sim/types';
 import { Embryo28to32, Embryo42to56 } from '@/components/scenes/week5/Embryo';
 import { LimbDevelopment } from '@/components/scenes/week5/Limbs';
-import { Fetus3rdMonth, Fetus4to5, Fetus6to9 } from '@/components/scenes/week5/Fetus';
+import { Fetus3rdMonth, Fetus4to5, Fetus6to9, FetusLineup } from '@/components/scenes/week5/Fetus';
 import { HeadProportions } from '@/components/scenes/week5/Proportions';
 import { GrowthChartLength, GrowthChartWeight } from '@/components/scenes/week5/GrowthChart';
 import { UmbilicalHernia } from '@/components/scenes/week5/Hernia';
@@ -12,6 +12,8 @@ const FILE = '5. GAIA_Enbrioi eta fetuaren ezaugarri nagusiak (zuzenduta).pdf';
 const src = (section: string) => ({ file: FILE, section });
 
 const LATERAL = { top: 'Kraneala', bottom: 'Kaudala', left: 'Bentrala', right: 'Dortsala' };
+/** The fetus figures face right, as in the course figures. */
+const LATERAL_R = { top: 'Kraneala', bottom: 'Kaudala', left: 'Dortsala', right: 'Bentrala' };
 
 export const week5: WeekDef = {
   week: 5,
@@ -226,8 +228,8 @@ export const week5: WeekDef = {
           id: 'fetua',
           label: 'Fetua',
           plane: 'kanpokoa',
-          description: 'Fetua 9. astetik 12. astera, ezkerreko aldetik: aurpegia, gorputz-adarrak, hezurtzapena eta zilborrestea.',
-          orientation: LATERAL,
+          description: 'Fetua 9. astetik 12. astera, eskuineko aldetik: aurpegia, gorputz-adarrak, hezurtzapena eta zilborrestea.',
+          orientation: LATERAL_R,
           scene: Fetus3rdMonth,
         },
         {
@@ -316,8 +318,8 @@ export const week5: WeekDef = {
           id: 'fetua',
           label: 'Fetua',
           plane: 'kanpokoa',
-          description: 'Fetua 13. astetik 20. astera, ezkerreko aldetik: luzera handitzen da, lanugoa eta ilea agertzen dira.',
-          orientation: LATERAL,
+          description: 'Fetua 13. astetik 20. astera, eskuineko aldetik: luzera handitzen da, lanugoa eta ilea agertzen dira.',
+          orientation: LATERAL_R,
           scene: Fetus4to5,
         },
         {
@@ -356,8 +358,8 @@ export const week5: WeekDef = {
           id: 'fetua',
           label: 'Fetua',
           plane: 'kanpokoa',
-          description: 'Fetua 21. astetik jaiotzara, ezkerreko aldetik: gantza metatu eta gorputza borobiltzen da; vernix caseosa.',
-          orientation: LATERAL,
+          description: 'Fetua 21. astetik jaiotzara, eskuineko aldetik: gantza metatu eta gorputza borobiltzen da; vernix caseosa.',
+          orientation: LATERAL_R,
           scene: Fetus6to9,
         },
         {
@@ -366,6 +368,13 @@ export const week5: WeekDef = {
           plane: 'eskema',
           description: 'Apunteetako taula grafiko gisa: 21.–38. asteak, pisuaren gehikuntza nabarmena.',
           scene: GrowthChartWeight,
+        },
+        {
+          id: 'eskala',
+          label: 'Fetuak eskalan',
+          plane: 'kanpokoa',
+          description: 'Apunteetako irudia: 9., 12., 20., 28. eta 38. asteetako fetuak eskala berean (A–E).',
+          scene: FetusLineup,
         },
         {
           id: 'gertaerak',
