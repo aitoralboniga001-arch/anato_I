@@ -3544,8 +3544,10 @@ a.ln-chip:hover {
   .pv-keys {
     display: none;
   }
-  .tp-guide span {
-    display: none;
+  .tp-guide {
+    gap: 4px;
+    padding: 0 7px;
+    font-size: 10.5px;
   }
 }
 

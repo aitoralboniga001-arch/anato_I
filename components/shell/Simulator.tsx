@@ -34,7 +34,8 @@ interface FindQuiz {
 /** Quick preview of a whole stage before the detailed playback (seconds). */
 const PREVIEW_S = 8;
 /** Guided mode plays the animation slower and holds each step until it has had time to be read. */
-const GUIDED_RATE = 0.6;
+const NORMAL_RATE = 0.8;
+const GUIDED_RATE = 0.4;
 
 const beatIndexAt = (stage: StageDef, t: number) => {
   let k = 0;
@@ -51,14 +52,17 @@ const freshAt = (stage: StageDef, k: number): StructureDef[] => {
   return (stage.beats[k]?.focus ?? []).filter((id) => !seen.has(id) && structures.has(id)).map((id) => structures.get(id)!);
 };
 
-/** Reading time for a step in guided mode: the caption plus a moment per new structure card. */
-const readMs = (stage: StageDef, k: number) => 1800 + (stage.beats[k]?.text.length ?? 0) * 62 + freshAt(stage, k).length * 2200;
+/** Minimum caption dwell in normal playback, with extra time for longer explanations. */
+const captionDwellMs = (stage: StageDef, k: number) => Math.max(5500, (stage.beats[k]?.text.length ?? 0) * 80);
 
 /** The preview card stays up until it has had time to be read (ms at 1×). */
 const previewMs = (stage: StageDef) => 2500 + ((stage.intro ?? '').length + stage.keyPoints.slice(0, 3).join('').length) * 40;
 
-/** Guided tour: how long each structure stays lit (ms at 1×), from its definition. */
-const tourMs = (id: string) => Math.min(5200, 1600 + (structures.get(id)?.definition.length ?? 0) * 28);
+/** Structure spotlight time (ms at 1×); guided mode gives longer definitions more reading time. */
+const tourMs = (id: string, guided: boolean) => {
+  const length = structures.get(id)?.definition.length ?? 0;
+  return guided ? Math.min(8000, 2800 + length * 55) : Math.min(5200, 1600 + length * 28);
+};
 
 /**
  * Stage time the animation holds at while a step's tour runs: by default three quarters into the
@@ -275,7 +279,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       // 2) Detailed playback, step by step.
       const p = live.current;
       const st = week.stages[p.i];
-      let t = p.t + (dt * speed * (guided ? GUIDED_RATE : 1)) / st.duration;
+      let t = p.t + (dt * speed * NORMAL_RATE * (guided ? GUIDED_RATE : 1)) / st.duration;
       const k = beatIndexAt(st, p.t);
 
       // 2a) Tour: light the step's structures one at a time while the animation holds.
@@ -313,7 +317,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               });
             }
           }
-          if (now - tr.start >= tourMs(id) / speed && !speaking.current) {
+          if (now - tr.start >= tourMs(id, guided) / speed && !speaking.current) {
             if (tr.idx + 1 < tr.items.length) {
               tr.idx += 1;
               tr.start = now;
@@ -332,24 +336,22 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         return;
       }
 
-      if (guided) {
-        const key = `${st.id}:${k}`;
-        if (clock.current.key !== key) {
-          clock.current = { key, start: now };
-          skipHold.current = false;
-          if (voice) {
-            speaking.current = true;
-            speak(st.beats[k].text, () => {
-              speaking.current = false;
-            });
-          }
+      const key = `${st.id}:${k}`;
+      if (clock.current.key !== key) {
+        clock.current = { key, start: now };
+        skipHold.current = false;
+        if (guided && voice) {
+          speaking.current = true;
+          speak(st.beats[k].text, () => {
+            speaking.current = false;
+          });
         }
-        const boundary = k + 1 < st.beats.length ? st.beats[k + 1].at : 1;
-        const ready = skipHold.current || (now - clock.current.start >= readMs(st, k) && !speaking.current);
-        const hold = t >= boundary - 1e-4 && !ready;
-        if (hold) t = Math.max(p.t, boundary - 1e-4);
-        setWaiting(hold);
       }
+      const boundary = k + 1 < st.beats.length ? st.beats[k + 1].at : 1;
+      const elapsed = now - clock.current.start;
+      const hold = t >= boundary - 1e-4 && (guided ? !skipHold.current : elapsed < captionDwellMs(st, k) && !skipHold.current);
+      if (hold) t = Math.max(p.t, boundary - 1e-4);
+      setWaiting(hold);
       let next: Pos = { i: p.i, t: Math.min(t, 1) };
       if (t >= 1 && autoContinue && p.i < week.stages.length - 1) {
         next = { i: p.i + 1, t: 0 };
@@ -417,7 +419,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     if (!playing && intro === null && !find && (pos.t <= 0.001 || pos.t >= 1)) startIntro();
     setPlaying(!playing);
   };
-  /** Guided mode: stop waiting for the current step and move on. */
+  /** Advance from a reading hold; in guided mode this also lets the learner stop narration. */
   const continueHold = () => {
     skipHold.current = true;
     hush();

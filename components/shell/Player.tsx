@@ -203,11 +203,11 @@ export function Player(p: PlayerProps) {
           <button
             className={`tp-guide${p.guided ? ' is-on' : ''}`}
             onClick={() => p.onGuided(!p.guided)}
-            title={p.guided ? 'Modu gidatua: aktibatuta — mantsoago, urrats bakoitza irakurri arte itxaroten du' : 'Modu gidatua: mantsoago, azalpen eta egitura berriekin'}
+            title={p.guided ? 'Ikasteko modua: mantsoago; urrats bakoitzean zuk erabakitzen duzu noiz jarraitu' : 'Ikasteko modua: azalpen motelagoak eta urrats bakoitzean egiturak aztertzeko denbora'}
             aria-pressed={p.guided}
           >
             <IconGuide size={16} />
-            <span>Gidatua</span>
+            <span>Ikasteko</span>
           </button>
           {p.guided && canNarrate() && (
             <button

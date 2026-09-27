@@ -18,9 +18,10 @@ const readPref = (k: PrefKey) => {
   let v = cache.get(k);
   if (v === undefined) {
     try {
-      v = window.localStorage.getItem(KEY(k)) === '1';
+      const saved = window.localStorage.getItem(KEY(k));
+      v = saved === null ? k === 'guided' : saved === '1';
     } catch {
-      v = false;
+      v = k === 'guided';
     }
     cache.set(k, v);
   }
