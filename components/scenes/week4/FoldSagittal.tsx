@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Label, Note, Part, clamp, lerp, rand, seg, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, Note, Part, clamp, lerp, rand, seg, type SceneProps } from '@/components/kit';
 import type { ReactNode } from 'react';
 import { Cells } from '@/components/scenes/section/Section';
 
@@ -103,8 +103,8 @@ const ring = (c: P2, rx: number, ry: number, rot: number, n = 28): P2[] =>
 
 export function foldTiming(t: number) {
   return {
-    hf: seg(t, 0.04, 0.8), // head fold
-    tf: seg(t, 0.14, 0.85), // tail fold
+    hf: seg(t, 0.06, 0.5), // head fold (well under way during its own step)
+    tf: seg(t, 0.26, 0.56), // tail fold
     mf: seg(t, 0.04, 0.85), // whole-body curvature
     nc: seg(t, 0.02, 0.45), // neural tube closing (lumen)
     duct: seg(t, 0.3, 0.82), // yolk sac neck → vitelline duct
@@ -531,13 +531,71 @@ export function FoldBody({ f, kloakaShow, children, bare = false }: { f: Fold; k
   );
 }
 
+/** Screen positions of the structures whose relations change, cached per t (trails sample many t). */
+type Anchors = Record<'heart' | 'bm' | 'cm' | 'all' | 'stalk', P2>;
+const anchorCache = new Map<number, Anchors>();
+function anchorsAt(t: number): Anchors {
+  const key = Math.round(t * 100);
+  let a = anchorCache.get(key);
+  if (!a) {
+    const f = computeFold(key / 100);
+    a = { heart: f.heartC, bm: f.bmMid, cm: f.cmMid, all: f.allC[Math.floor(f.allC.length * 0.8)], stalk: f.stalkS[18] };
+    anchorCache.set(key, a);
+  }
+  return a;
+}
+
+/** Relation tracking: dashed ghost where the structure started (t=0), dotted trail of its path, dot where it is now. */
+function Track({ t, id, k, from, color, show, tag = false }: { t: number; id: string; k: keyof Anchors; from: number; color: string; show: number; tag?: boolean }) {
+  if (show <= 0.02) return null;
+  const pts: P2[] = [];
+  for (let u = 0; u <= t + 1e-6; u += 0.02) pts.push(anchorsAt(u)[k]);
+  const now = anchorsAt(t)[k];
+  pts.push(now);
+  const g0 = pts[0];
+  const moved = Math.hypot(now[0] - g0[0], now[1] - g0[1]) > 6;
+  return (
+    <g opacity={show} pointerEvents="none" data-track={id}>
+      <circle cx={g0[0]} cy={g0[1]} r={11} fill="none" stroke={color} strokeWidth={1.4} strokeDasharray="3 3" />
+      {tag && (
+        <text x={g0[0]} y={g0[1] - 16} textAnchor="middle" className="note note-dim" style={{ fontSize: 10.5 }}>
+          hasieran
+        </text>
+      )}
+      {moved && t > from && <path d={pathD(pts)} fill="none" stroke={color} strokeWidth={1.8} strokeDasharray="1 4" strokeLinecap="round" />}
+      {moved && <circle cx={now[0]} cy={now[1]} r={4} fill={color} />}
+    </g>
+  );
+}
+
+/** Before/after of the relations (one line per beat), in the words of the notes. */
+const RELATIONS: [number, number, string][] = [
+  [0.08, 0.3, 'Hasieran bihotz-eremua mintz bukofaringeoaren AURREAN (kranealean) → tolestu ondoren haren AZPIAN (bentralean)'],
+  [0.3, 0.44, 'Hasieran alantoidea eta pedikulua kloaka-mintzaren ATZEAN (kaudalean) → tolestu ondoren alde BENTRALEAN'],
+  [0.66, 0.72, 'Pedikulua eta hodi onfalomesenterikoa alde bentralean elkartzen dira: zilbor-hestearen hasiera'],
+];
+
 export function FoldingSagittal({ t }: SceneProps) {
   const f = computeFold(t);
   const { g, X, map, fH, fT, LF, LFT, pit, pieces, heartC, stalkS, allC, bmMid, cmMid, kloakaC, pits } = f;
   const L = (id: string, x: number, y: number, p: P2, show = 1, small = false) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} small={small} />;
-  const gutLabel = seg(t, 0.08, 0.14);
-  const heartLabel = seg(t, 0.1, 0.18);
+  // Labels arrive with the step that talks about them (a beginner meets ~6 names first, not 22).
+  const at = (a: number) => seg(t, a, a + 0.04);
+  const head = at(0.08);
+  const tail = at(0.3);
+  const layers = at(0.44);
+  const gut = at(0.56);
   const kloakaShow = seg(t, 0.7, 0.8);
+  // Trails: strong in their own step, faint afterwards (the path stays readable), gone by the stomodeum step.
+  const trail = (a: number, b: number) => Math.max(seg(t, a, a + 0.03) * (1 - seg(t, b, b + 0.03)), 0.35 * seg(t, a, a + 0.03) * (1 - seg(t, 0.86, 0.9)));
+  const headTr = trail(0.08, 0.3);
+  const tailTr = trail(0.3, 0.44);
+  const stalkTr = Math.max(tailTr, seg(t, 0.66, 0.69) * (1 - seg(t, 0.72, 0.75)));
+  const cause = seg(t, 0.08, 0.11) * (1 - seg(t, 0.42, 0.44));
+  const tipH = X(map(g.sHT + 4, g.cen(g.sHT)));
+  const tipT = X(map(g.sTT - 4, g.cen(g.sTT)));
+  const tH = g.tangent(g.sHT);
+  const tT = g.tangent(g.sTT);
 
   return (
     <g>
@@ -545,30 +603,52 @@ export function FoldingSagittal({ t }: SceneProps) {
       <Note x={500} y={612} tone="warn" show={seg(t, 0, 0.03) * (1 - seg(t, 0.09, 0.12))}>
         Zeharkako tolespena eta tolespen zefalokaudala aldi berean gertatzen dira
       </Note>
+      {RELATIONS.map(([a, b, txt]) => (
+        <Note key={a} x={500} y={612} tone="accent" show={seg(t, a, a + 0.02) * (1 - seg(t, b - 0.01, b))}>
+          {txt}
+        </Note>
+      ))}
+
+      {/* cause: longitudinal growth of the CNS pushes both ends (notes) */}
+      {cause > 0.02 && (
+        <g>
+          <Arrow from={tipH} to={[tipH[0] - tH[0] * 46, tipH[1] - tH[1] * 46]} color="#f97316" width={2.6} show={cause} />
+          <Arrow from={tipT} to={[tipT[0] + tT[0] * 46, tipT[1] + tT[1] * 46]} color="#f97316" width={2.6} show={cause} />
+          <Note x={500} y={588} tone="accent" show={cause}>
+            Eragilea: nerbio-sistema zentrala luzetara hazten da → muturrak bentralera makurtzen dira
+          </Note>
+        </g>
+      )}
+
+      <Track t={t} id="bihotz-hodia" k="heart" from={0.08} tag color="#f87171" show={headTr} />
+      <Track t={t} id="mintz-bukofaringeoa" k="bm" from={0.08} color="#e8eefc" show={headTr} />
+      <Track t={t} id="kloaka-mintza" k="cm" from={0.3} color="#e8eefc" show={tailTr} />
+      <Track t={t} id="alantoidea" k="all" from={0.3} tag color="#fde68a" show={tailTr} />
+      <Track t={t} id="finkapen-pedikulua" k="stalk" from={0.3} color="#f0a27a" show={stalkTr} />
 
       {L('amnios-barrunbea', 190, 110, X(map(-0.35 * LH, -NT0 - 40)))}
       {L('ektodermoa', 190, 145, X(map(-0.25 * LH, g.cen(-0.25 * LH) - g.NTe(-0.25 * LH) - 3)))}
       {L('hodi-neurala', 190, 180, X(map(-0.6 * LH, g.cen(-0.6 * LH))))}
-      {L('aurreko-hestea', 190, 215, X(fH(LF * 0.3, 0)), gutLabel)}
-      {L('errai-orria', 190, 320, X(fH(LF * 0.3, H0 + ENDO + 2.5)), 1, true)}
-      {L('enbrioi-barruko-zeloma', 190, 250, X(fH(LF * 0.88, H0 + ENDO + g.sp(LF) + g.cav(LF * 0.88) * 0.5)), 1, true)}
-      {L('paretako-orria', 190, 285, X(fH(LF * 0.6, g.WH(LF * 0.6) - 7.5)), 1, true)}
-      {L('barrunbe-perikardikoa', 190, 355, X(fH(LF * 0.22, H0 + ENDO + g.sp(LF * 0.22) + g.cav(LF * 0.22) * 0.55)), heartLabel, true)}
-      {L('bihotz-hodia', 190, 390, heartC, heartLabel)}
+      {L('aurreko-hestea', 190, 215, X(fH(LF * 0.3, 0)), head)}
+      {L('errai-orria', 190, 320, X(fH(LF * 0.3, H0 + ENDO + 2.5)), layers, true)}
+      {L('enbrioi-barruko-zeloma', 190, 250, X(fH(LF * 0.88, H0 + ENDO + g.sp(LF) + g.cav(LF * 0.88) * 0.5)), layers, true)}
+      {L('paretako-orria', 190, 285, X(fH(LF * 0.6, g.WH(LF * 0.6) - 7.5)), layers, true)}
+      {L('barrunbe-perikardikoa', 190, 355, X(fH(LF * 0.22, H0 + ENDO + g.sp(LF * 0.22) + g.cav(LF * 0.22) * 0.55)), head, true)}
+      {L('bihotz-hodia', 190, 390, heartC, head)}
       {L('mintz-bukofaringeoa', 190, 430, bmMid)}
       {L('estomodeoa', 190, 470, pits[0].c, pit)}
-      {L('hodi-onfalomesenterikoa', 190, 530, pieces[5][Math.floor(pieces[5].length * 0.45)], seg(t, 0.4, 0.5))}
+      {L('hodi-onfalomesenterikoa', 190, 530, pieces[5][Math.floor(pieces[5].length * 0.45)], gut)}
       {L('bitelo-zaku-sekundarioa', 190, 580, pieces[4][Math.floor(pieces[4].length * 0.62)])}
 
       {L('notokorda', 810, 110, X(map(0.3 * LH, NT0 + 5)))}
-      {L('mesodermo-intraenbrionarioa', 810, 248, X(map(0.45 * LH, NT0 + 9)), 1, true)}
-      {L('erdiko-hestea', 810, 150, X(map((g.sAIP + g.sCIP) / 2, D_ROOF + 9)), gutLabel)}
-      {L('atzeko-hestea', 810, 190, X(fT(LFT * 0.45, 0)), gutLabel)}
+      {L('mesodermo-intraenbrionarioa', 810, 248, X(map(0.45 * LH, NT0 + 9)), layers, true)}
+      {L('erdiko-hestea', 810, 150, X(map((g.sAIP + g.sCIP) / 2, D_ROOF + 9)), gut)}
+      {L('atzeko-hestea', 810, 190, X(fT(LFT * 0.45, 0)), tail)}
       {L('kloaka', 810, 318, kloakaC, kloakaShow)}
       {L('kloaka-mintza', 810, 275, cmMid)}
       {L('proktodeoa', 810, 360, pits[1].c, pit)}
-      {L('alantoidea', 810, 420, allC[Math.floor(allC.length * 0.8)])}
-      {L('finkapen-pedikulua', 810, 480, stalkS[18])}
+      {L('alantoidea', 810, 420, allC[Math.floor(allC.length * 0.8)], tail)}
+      {L('finkapen-pedikulua', 810, 480, stalkS[18], tail)}
     </g>
   );
 }

@@ -19,16 +19,16 @@ import { SectionDrawing, makeSection } from '@/components/scenes/section/Section
 const FOLD = 0.22;
 const D = { ecto0: -16, ecto1: 14, meso0: 14, meso1: 90, endo0: 90, endo1: 112 };
 
-// Fade-in windows end exactly at each beat's `at` (week4b.ts: 0, .1, .24, .38, .5, .62, .74, .86),
-// starting ~0.06-0.08 earlier, so the focus structure is fully visible AT its beat.
+// Each change happens INSIDE its own step (week4b.ts beats: 0, .1, .24, .38, .5, .62, .74, .86):
+// the text announces it and the student watches it happen, instead of it being done already.
 function geometry(t: number) {
-  const paraxial = seg(t, 0.03, 0.1);
-  const lateral = seg(t, 0.16, 0.24);
-  const vacuoles = seg(t, 0.3, 0.38) * (1 - seg(t, 0.44, 0.5));
-  const coelom = seg(t, 0.42, 0.5);
-  const somato = seg(t, 0.54, 0.62);
-  const splanchno = seg(t, 0.66, 0.74);
-  const intermediate = seg(t, 0.78, 0.86);
+  const paraxial = seg(t, 0.1, 0.18);
+  const lateral = seg(t, 0.24, 0.3);
+  const vacuoles = seg(t, 0.38, 0.44) * (1 - seg(t, 0.5, 0.56));
+  const coelom = seg(t, 0.5, 0.58);
+  const somato = seg(t, 0.62, 0.68);
+  const splanchno = seg(t, 0.74, 0.8);
+  const intermediate = seg(t, 0.86, 0.92);
   return { paraxial, lateral, vacuoles, coelom, somato, splanchno, intermediate };
 }
 
@@ -37,7 +37,8 @@ function mesoSection(t: number) {
   const s = makeSection({
     fold: 0,
     neural: 0,
-    meso: 0.1 + 0.16 * g.paraxial + 0.18 * seg(t, 0.3, 0.38) + 0.28 * g.coelom,
+    // .33 = paraxial block drawn, no vesicles yet; .48 = vesicles; .72 = one coelom.
+    meso: 0.1 + 0.23 * g.paraxial + 0.15 * seg(t, 0.38, 0.46) + 0.24 * g.coelom,
     somite: 0,
     crest: 0,
     aorta: 0,

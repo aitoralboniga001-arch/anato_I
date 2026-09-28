@@ -43,6 +43,8 @@ for (const w of weeks) {
       for (const st of w.stages) {
         for (const id of st.structures) if (!structures.has(id)) missing.push(`${st.id}.structures: ${id}`);
         for (const b of st.beats) for (const id of [...(b.focus ?? []), ...(b.tour ?? [])]) if (!structures.has(id)) missing.push(`${st.id}.beat@${b.at}: ${id}`);
+        for (const b of st.beats) if (b.view && !st.views.some((v) => v.id === b.view)) missing.push(`${st.id}.beat@${b.at}.view: ${b.view}`);
+        for (const b of st.beats) for (const id of b.recall ?? []) if (!structures.has(id)) missing.push(`${st.id}.beat@${b.at}.recall: ${id}`);
         const ats = st.beats.map((b) => b.at);
         expect(ats, `${st.id} beats sorted`).toEqual([...ats].sort((a, b) => a - b));
         expect(st.beats[0]?.at, `${st.id} first beat at 0`).toBe(0);

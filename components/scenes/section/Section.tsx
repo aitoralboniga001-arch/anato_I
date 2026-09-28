@@ -30,6 +30,8 @@ export interface SectionParams {
   meso: number;
   somite: number;
   crest: number;
+  /** When crest cells first show at the fold tips (0..1); defaults to following `neural`. */
+  crestAppear?: number;
   /** Zoom around the canvas centre. */
   k: number;
   /** Offsets after zoom (svg units). */
@@ -470,7 +472,7 @@ export function SectionDrawing({ s, show = {} }: { s: Section; show?: Partial<Re
   const ectoL = ectoLine(-1).reverse();
 
   // --- crest cells
-  const crestShow = ss((p.neural - 0.55) / 0.2);
+  const crestShow = p.crestAppear ?? ss((p.neural - 0.55) / 0.2);
   const cr = clamp(p.crest);
   const crestCells: { side: 1 | -1; pt: Pt; kind: 'home' | 'dorsal' | 'ventral' }[] = [];
   if (crestShow > 0.02)

@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "file": "langman-4-3.png",
+      "title": "Enbrioiaren tolestura zefalokaudala (ebaki sagitala)",
+      "source": "Langman, 4. kapitulua (ikasgaiko diapositibak)",
+      "plane": "sagitala",
+      "hotspots": [
+        { "id": "bihotz-hodia", "x": 0.21, "y": 0.62, "r": 0.05 },
+        { "id": "aurreko-hestea", "x": 0.33, "y": 0.55, "r": 0.05 },
+        { "id": "alantoidea", "x": 0.82, "y": 0.6, "r": 0.04 },
+        { "id": "nerbio-hodia", "label": "Nerbio-hodia", "x": 0.5, "y": 0.28, "r": 0.06 }
+      ]
+    }
+  ]
+}

@@ -38,3 +38,9 @@ export const appearances: Map<string, StageRef[]> = (() => {
 export const getWeek = (n: number) => weeks.find((w) => w.week === n);
 
 export const nameOf = (id: string) => structures.get(id)?.name ?? id;
+
+/** A space (cavity / lacuna) rather than a tissue. */
+export const isSpace = (id: string) => {
+  const s = structures.get(id);
+  return !!s && (s.category === 'barrunbea' || !!s.space);
+};

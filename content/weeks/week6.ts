@@ -120,7 +120,7 @@ export const week6: WeekDef = {
         { at: 0, text: 'Hurrengo 2.–3. hilabeteetan biloxka tertziarioen enborrak adarkatzen hasten dira; adarkadurak geroz eta txikiagoak dira.', focus: ['biloxka-enborra', 'biloxka-tertziarioa'] },
         { at: 0.16, text: 'Adarkadura guzti hauek biloxka askeak dira: poliki-poliki biloxka arteko espazioa okupatzen dute.', focus: ['biloxka-askea', 'biloxka-arteko-espazioa'] },
         { at: 0.34, text: '4. hilabetetik aurrera biloxka askeen paretetan desagerpen prozesua: lehenik adarkadura txikiko biloxketan, gero handiagoetan.', focus: ['karena-mugaren-meheketa', 'biloxka-askea'] },
-        { at: 0.5, text: 'Zitotrofoblastoa eta ehun konektiboko zelulak desagertzen dira: karena muga bi geruzakoa da (endotelioa + sinzitiotrofoblastoa), askoz meheagoa eta eraginkorragoa.', focus: ['karena-muga', 'endotelioa', 'sinzitiotrofoblastoa'] },
+        { at: 0.5, exam: 'Azterketan: 4. hilabetetik aurrera karena muga = endotelioa + sinzitiotrofoblastoa.', text: 'Zitotrofoblastoa eta ehun konektiboko zelulak desagertzen dira: karena muga bi geruzakoa da (endotelioa + sinzitiotrofoblastoa), askoz meheagoa eta eraginkorragoa.', focus: ['karena-muga', 'endotelioa', 'sinzitiotrofoblastoa'] },
         { at: 0.66, text: 'Desagerpena ez da inoiz enborrezko/aingurazko biloxketara heltzen: hauek ez dute elkartrukeetan parte hartzen, biloxka askeek bakarrik.', focus: ['biloxka-enborra', 'biloxka-askea'] },
         { at: 0.8, text: 'Enbrioi kanpoko sistema zirkulatorioa: fetuaren odola zilbor-hestetik korion orriko odol-hodietara eta biloxketara; amaren odola biloxka arteko espazioetara. Ez dute zuzeneko kontakturik, baina trukea badago.', focus: ['enbrioi-kanpoko-zirkulazioa', 'zilbor-hodiak', 'korion-plaka'] },
       ],
@@ -180,7 +180,7 @@ export const week6: WeekDef = {
         { at: 0.4, text: 'Dezidua: endometrioaren geruza funtzionala. Dezidua basala korion hostotsuarekin kontaktuan (oso trinkoa, zelulak lipido eta glukogenoz aberatsak); dezidua kapsularra korion leunarekin; paretako dezidua gainerako umetoki paretan.', focus: ['dezidua-basala', 'dezidua-kapsularra', 'paretako-dezidua'] },
         { at: 0.56, text: 'Korion hostotsua + dezidua basala = karena. Soilik korion hostotsuak hartzen du parte elkartrukeetan.', focus: ['korion-hostotsua', 'dezidua-basala', 'karena'] },
         { at: 0.7, text: 'Korion barrunbea handitzean dezidua kapsularra endekatzen da; korion leuna paretako deziduarekin fusionatzen da eta umetoki gorputzaren barrunbea itxita geratzen da.', focus: ['dezidua-kapsularra', 'korion-leuna', 'paretako-dezidua', 'umetoki-barrunbea'] },
-        { at: 0.86, text: 'Amnios barrunbea hazten da (likido gehiago) eta korion barrunbea okupatzen du: amnios pareta korion leunarekin fusionatzen da → mintz amniokorionikoa, erditzean apurtzen dena.', focus: ['amnios-barrunbea', 'mintz-amniokorionikoa', 'korion-barrunbea'] },
+        { at: 0.86, exam: 'Azterketan: mintz amniokorionikoan korion LEUNA dago (ez hostotsua).', text: 'Amnios barrunbea hazten da (likido gehiago) eta korion barrunbea okupatzen du: amnios pareta korion leunarekin fusionatzen da → mintz amniokorionikoa, erditzean apurtzen dena.', focus: ['amnios-barrunbea', 'mintz-amniokorionikoa', 'korion-barrunbea'] },
       ],
       structures: [
         'korion-hostotsua',

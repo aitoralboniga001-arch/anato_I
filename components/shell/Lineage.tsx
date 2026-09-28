@@ -3,49 +3,21 @@ import type { ReactNode } from 'react';
 import { appearances, structures } from '@/content/registry';
 import { categoryColor } from '@/lib/sim/palette';
 import { LandFoot, LandNav } from './LandNav';
+import { EARLY as ROOT, LAYERS, type LNode } from '@/content/lineage';
 
-/** Lineage tree node: a structure id (linked to its first stage) or a plain label, with children. */
-type N = { id?: string; label?: string; note?: string; kids?: N[] };
+/** The page starts the early tree at the blastocyst (cleavage is shown in the simulator). */
+const EARLY: N[] = [findNode(ROOT, 'blastozistoa') ?? ROOT];
 
-const n = (id: string, kids?: N[], note?: string): N => ({ id, kids, note });
+function findNode(node: LNode, id: string): LNode | null {
+  if (node.id === id) return node;
+  for (const k of node.kids ?? []) {
+    const f = findNode(k, id);
+    if (f) return f;
+  }
+  return null;
+}
 
-const EARLY: N[] = [
-  n('blastozistoa', [
-    n('enbrioblastoa', [n('epiblastoa', [n('amnioblastoak'), { label: 'Gastrulazioa →', note: 'hiru ernetze orriak' }]), n('hipoblastoa', [n('hasierako-bitelo-zakua'), n('heuser-mintza')])]),
-    n('trofoblastoa', [n('zitotrofoblastoa', [n('biloxka-primarioa')]), n('sinzitiotrofoblastoa', [n('lakuak'), n('sare-lakunarra')])]),
-  ]),
-];
-
-const LAYERS: { id: string; title: string; kids: N[] }[] = [
-  {
-    id: 'ektodermoa',
-    title: 'Ektodermoa',
-    kids: [
-      n('azaleko-ektodermoa', [n('estomodeoa'), n('proktodeoa')], 'epidermisa, ilea, azazkalak'),
-      n('plaka-neurala', [n('hodi-neurala', [n('prosentzefaloa'), n('mesentzefaloa'), n('erronbentzefaloa'), n('ornomuina')])]),
-      n('gandor-neurala', [n('nerbio-kranialen-gongoilak'), n('gongoil-errakideoak'), n('giltzurrun-gaineko-muina'), n('schwann-zelulak'), n('melanozitoak'), n('buru-aurpegi-hezurrak'), n('odontoblastoak')]),
-    ],
-  },
-  {
-    id: 'mesodermo-intraenbrionarioa',
-    title: 'Mesodermoa',
-    kids: [
-      n('notokorda'),
-      n('mesodermo-paraxiala', [n('somitak', [n('esklerotoma', [n('ornoak'), n('saihetsak')]), n('dermatoma'), n('miotoma')])]),
-      n('bitarteko-mesodermoa', [n('nefrotomak'), n('kordoi-nefrogenoa', [n('giltzurruna'), n('gonadak')])]),
-      n('alboko-mesodermoa', [n('paretako-orria', [n('esternoia')]), n('errai-orria', [n('bihotz-hodia')]), n('enbrioi-barruko-zeloma', [n('perikardio-barrunbea'), n('pleura-barrunbea'), n('peritoneo-barrunbea')])]),
-    ],
-  },
-  {
-    id: 'endodermoa',
-    title: 'Endodermoa',
-    kids: [
-      n('aurreko-hestea', [n('faringe-hestea', [n('faringe-poltsak'), n('hodi-tiroglosoa')]), n('arnas-hastapena')]),
-      n('erdiko-hestea', [n('hodi-onfalomesenterikoa')]),
-      n('atzeko-hestea', [n('kloaka')]),
-    ],
-  },
-];
+type N = LNode;
 
 function Chip({ node }: { node: N }) {
   const s = node.id ? structures.get(node.id) : undefined;

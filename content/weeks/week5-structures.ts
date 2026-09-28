@@ -141,7 +141,7 @@ export const structures5: StructureDef[] = [
     es: 'Ojo',
     aka: ['Begi pigmentatua'],
     category: 'anatomia',
-    definition: 'Kristalinoaren hobitxotik aurrera garatzen den begia; 42. egunean pigmentatuta ikusten da.',
+    definition: 'Ikusmen-organoa; kristalinoaren plakatik eta hobitxotik aurrera garatzen da, eta 42. egunean pigmentatuta ikusten da.',
     location: 'Enbrioian buruaren alboan; 3. hilabetean aurpegiaren aurrekaldera (alde bentralera) mugitzen da.',
     related: ['kristalinoaren-hobitxoa', 'betazala'],
   },

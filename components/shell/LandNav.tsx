@@ -25,8 +25,9 @@ export function LandNav() {
         <Wordmark />
       </Link>
       <nav>
-        <Link href="/#kronologia">Kronologia</Link>
+        <Link href="/kronologia">Kronologia</Link>
         <Link href="/#gaiak">Gaiak</Link>
+        <Link href="/irudiak">Irudiak</Link>
         <Link href="/leinuak">Leinuak</Link>
         <Link href={`/astea/${firstReady.week}`} className="btn btn-light small">
           Ireki simulagailua
@@ -40,7 +41,7 @@ export function LandFoot({ children }: { children?: ReactNode }) {
   return (
     <footer className="land-foot">
       <Wordmark size={18} />
-      <p>Iturria: Giza Anatomia I ikasgaiko apunteak (1.–5. gaiak) eta haietako irudiak (Langman). Simulagailu honek ez du ordezkatzen irakaslearen irizpidea.</p>
+      <p>Iturria: Giza Anatomia I ikasgaiko apunteak (1.–6. gaiak) eta haietako irudiak (Langman). Simulagailu honek ez du ordezkatzen irakaslearen irizpidea.</p>
       {children}
     </footer>
   );

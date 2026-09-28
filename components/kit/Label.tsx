@@ -27,13 +27,14 @@ export function Label({ id, x, y, ax, ay, align, show = 1, text, small }: LabelP
   const state = partState(ctx, id);
   const anchor = align ?? (ax !== undefined && ax > x ? 'end' : 'start');
   const hasLeader = ax !== undefined && ay !== undefined;
+  const space = !!ctx.isSpace?.(id);
   // Leader starts at the text edge and bends horizontally first, like textbook call-outs.
   const lx = x + (anchor === 'end' ? 4 : anchor === 'start' ? -4 : 0);
   const elbowX = hasLeader ? lx + (ax! - lx) * 0.35 : lx;
   return (
     <g
       data-label={id}
-      className={`label label-${state}${small ? ' label-small' : ''}`}
+      className={`label label-${state}${small ? ' label-small' : ''}${space ? ' label-space' : ''}`}
       opacity={show}
       onClick={(e) => {
         e.stopPropagation();
@@ -45,7 +46,7 @@ export function Label({ id, x, y, ax, ay, align, show = 1, text, small }: LabelP
       {hasLeader && (
         <>
           <path className="label-leader" d={`M${lx},${y} L${elbowX},${y} L${ax},${ay}`} />
-          <circle className="label-dot" cx={ax} cy={ay} r={2.6} />
+          <circle className="label-dot" cx={ax} cy={ay} r={space ? 3.4 : 2.6} />
         </>
       )}
       <text x={x} y={y} dy="0.35em" textAnchor={anchor} className="label-text">

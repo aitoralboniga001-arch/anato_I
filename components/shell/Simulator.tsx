@@ -4,20 +4,27 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useEffectEvent, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { SceneContext, type QuizFlash, type SceneContextValue } from '@/components/kit/context';
-import { getWeek, nameOf, structures, weeks } from '@/content/registry';
+import { getWeek, isSpace, nameOf, structures, weeks } from '@/content/registry';
+import { firstSeenOf, periodOf, weekOfDay } from '@/content/chronology';
 import { ageLabel, ageParts, spanOf } from '@/lib/sim/age';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { StageDef, StructureCategory, StructureDef, WeekDef } from '@/lib/sim/types';
 import { Glossary } from './Glossary';
-import { IconBook, IconInfo, IconLayers, IconPlay, IconQuiz, IconTag, IconTarget, IconTree, PlaneGlyph } from './icons';
+import { IconBook, IconClock, IconExpand, IconImage, IconInfo, IconLayers, IconPlay, IconQuiz, IconTag, IconTarget, IconTree, PlaneGlyph } from './icons';
 import { Wordmark, isWip } from './LandNav';
-import { Player } from './Player';
+import { AskCard, Player, TourCard, ideaOf } from './Player';
+import { Help, useHelpOnce } from './Help';
 import { Questions } from './Questions';
-import { Inspector, Outline, StageInfo } from './SidePanel';
+import { Inspector } from './Inspector';
+import { NowCard } from './NowCard';
+import { Locator } from './Locator';
+import { IconRail, Outline, StageInfo } from './SidePanel';
 import { Viewport } from './Viewport';
 import { hush, speak } from './narrate';
-import { setPref, usePref } from './prefs';
+import { setPlayMode, setPref, usePref, type PlayMode } from './prefs';
 import { markVisited, useVisited } from './progress';
+import { recordAnswer } from './answers';
+import { imageId } from '@/content/pool';
 
 interface Pos {
   i: number;
@@ -36,6 +43,8 @@ const PREVIEW_S = 8;
 /** Guided mode plays the animation slower and holds each step until it has had time to be read. */
 const NORMAL_RATE = 0.8;
 const GUIDED_RATE = 0.4;
+/** Quick replay: a whole stage in well under a minute, main ideas only. */
+const QUICK_RATE = 1.7;
 
 const beatIndexAt = (stage: StageDef, t: number) => {
   let k = 0;
@@ -49,11 +58,16 @@ const beatIndexAt = (stage: StageDef, t: number) => {
 const freshAt = (stage: StageDef, k: number): StructureDef[] => {
   const seen = new Set<string>();
   stage.beats.slice(0, k).forEach((b) => b.focus?.forEach((id) => seen.add(id)));
+  // What the step asks to remember ("Gogoratu") is old by definition, not new.
+  stage.beats[k]?.recall?.forEach((id) => seen.add(id));
   return (stage.beats[k]?.focus ?? []).filter((id) => !seen.has(id) && structures.has(id)).map((id) => structures.get(id)!);
 };
 
 /** Minimum caption dwell in normal playback, with extra time for longer explanations. */
 const captionDwellMs = (stage: StageDef, k: number) => Math.max(5500, (stage.beats[k]?.text.length ?? 0) * 80);
+
+/** Quick replay dwell: just long enough to read the step's main idea. */
+const quickDwellMs = (stage: StageDef, k: number) => Math.max(1600, ideaOf(stage.beats[k]).length * 38);
 
 /** The preview card stays up until it has had time to be read (ms at 1×). */
 const previewMs = (stage: StageDef) => 2500 + ((stage.intro ?? '').length + stage.keyPoints.slice(0, 3).join('').length) * 40;
@@ -87,7 +101,7 @@ interface Tour {
   said: boolean;
 }
 
-const easeInOut =(x: number) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
+const easeInOut = (x: number) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 
@@ -116,19 +130,49 @@ function useHydrated() {
   );
 }
 
-/** Deep link: ?etapa=<stageId>&ikuspegia=<viewId>&egitura=<structureId> */
+/** Deep link: ?etapa=<stageId>&ikuspegia=<viewId>&egitura=<structureId>&une=<0..1>&jolastu=1&aurkitu=<structureId> */
 function readDeepLink(week: WeekDef) {
   const params = new URLSearchParams(window.location.search);
   const sid = params.get('etapa');
   const vid = params.get('ikuspegia');
   const eg = params.get('egitura');
+  const une = Number(params.get('une'));
   const idx = sid ? week.stages.findIndex((s) => s.id === sid) : -1;
   return {
     stageIndex: idx >= 0 ? idx : null,
     viewId: idx >= 0 ? vid : null,
     structure: eg && structures.has(eg) ? eg : null,
+    t: idx >= 0 && une > 0 && une <= 1 ? une : 0,
+    play: idx >= 0 && params.get('jolastu') === '1',
+    find: idx >= 0 && structures.has(params.get('aurkitu') ?? '') ? params.get('aurkitu') : null,
   };
 }
+
+/** Where "Bueltatu" returns to after the time machine jumped to where a structure forms. */
+interface Back {
+  week: number;
+  stage: string;
+  t: number;
+  /** The view the viewer was looking at (a return must land on the same picture). */
+  view?: string;
+  selected: string | null;
+  title: string;
+  /** Another page to return to (the image lab), instead of a stage. */
+  href?: string;
+  /** When it was written: a return older than half an hour is stale. */
+  at?: number;
+}
+const BACK_KEY = 'enbrioatlas:back';
+
+const readBack = (week: number, stage: string): Back | null => {
+  try {
+    const raw = window.sessionStorage.getItem(BACK_KEY);
+    const b = raw ? (JSON.parse(raw) as Back & { to: string }) : null;
+    return b && b.to === `${week}/${stage}` && (!b.at || Date.now() - b.at < 1_800_000) ? b : null;
+  } catch {
+    return null;
+  }
+};
 
 export function Simulator({ weekNumber }: { weekNumber: number }) {
   const week = getWeek(weekNumber) ?? weeks[0];
@@ -152,8 +196,21 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const [find, setFind] = useState<FindQuiz | null>(null);
   const [flash, setFlash] = useState<QuizFlash>(null);
   const [panelOpen, setPanelOpen] = useState(false);
-  const guided = usePref('guided');
+  const [focusMode, setFocusMode] = useState(false);
+  // Exam-style image: the find quiz in black and white, like the printed exam figures.
+  const [print, setPrint] = useState(false);
+  const [back, setBack] = useState<Back | null>(null);
+  const [helpOpen, setHelpOpen, firstVisit] = useHelpOnce();
+  const [nowOpen, setNowOpen] = useState(false);
+  const guidedPref = usePref('guided');
+  const quick = usePref('quick');
+  const guided = guidedPref && !quick;
+  const mode: PlayMode = quick ? 'azkarra' : guided ? 'gidatua' : 'arrunta';
   const voice = usePref('voice');
+  // Micro-questions already answered or skipped on this visit (stage:step).
+  const [asked, setAsked] = useState<string[]>([]);
+  const outlineOpen = usePref('outline');
+  const infoOpen = usePref('panel');
   // Stage preview progress (0..1 + rest) while the quick overview animation runs; null otherwise.
   const [intro, setIntro] = useState<number | null>(null);
   // Guided mode: the step's animation is done but its text is still being read.
@@ -173,19 +230,44 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const mounted = useHydrated();
   const visited = useVisited(week.week);
 
+  const [manualView, setManualView] = useState<Record<string, boolean>>({});
+  // "Irudian aurkitu": a structure to ask for in the find quiz once the scene is drawn.
+  const [pendingFind, setPendingFind] = useState<string | null>(null);
+  const [questionsConcept, setQuestionsConcept] = useState<string | undefined>(undefined);
+
   // Deep links are applied once per week, on the first client render (the server can't see the query).
   // The URL-sync effect below waits for this, so it can't rewrite the query before it has been read.
   const [linkedWeek, setLinkedWeek] = useState<number | null>(null);
-  if (mounted && linkedWeek !== week.week) {
+  // A "play" deep link hands its position to the loop before the loop's first frame.
+  const [linkPos, setLinkPos] = useState<Pos | null>(null);
+  // After a client-side navigation the first render can come before the router has written the new
+  // URL: wait for it (a few frames at most), or the link would be read from the previous page.
+  const [urlWaits, setUrlWaits] = useState(0);
+  const urlHere = mounted && window.location.pathname.replace(/\/$/, '') === `/astea/${week.week}`;
+  useEffect(() => {
+    if (!mounted || linkedWeek === week.week || urlHere || urlWaits >= 3) return;
+    const raf = requestAnimationFrame(() => setUrlWaits((n) => n + 1));
+    return () => cancelAnimationFrame(raf);
+  });
+  if (mounted && linkedWeek !== week.week && (urlHere || urlWaits >= 3)) {
     setLinkedWeek(week.week);
     const link = readDeepLink(week);
     if (link.stageIndex !== null) {
-      setPos({ i: link.stageIndex, t: 0 });
+      setPos({ i: link.stageIndex, t: link.t });
       const sid = week.stages[link.stageIndex].id;
       const vid = link.viewId;
-      if (vid) setViewByStage((m) => ({ ...m, [sid]: vid }));
+      if (vid) {
+        setViewByStage((m) => ({ ...m, [sid]: vid }));
+        setManualView((m) => ({ ...m, [sid]: true }));
+      }
+      if (link.play) {
+        setLinkPos({ i: link.stageIndex, t: link.t });
+        setPlaying(true);
+      }
+      setBack(readBack(week.week, sid));
     }
     if (link.structure) setSelected(link.structure);
+    if (link.find) setPendingFind(link.find);
   }
 
   const stage = week.stages[pos.i];
@@ -194,13 +276,44 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const activeBeat = beatIndexAt(stage, pos.t);
   const beat = stage.beats[activeBeat];
   const fresh = freshAt(stage, activeBeat);
+  const askKey = `${stage.id}:${activeBeat}`;
+
+  // Each step opens in the view where it is best seen, unless the viewer chose a view for this stage.
+  const [autoViewKey, setAutoViewKey] = useState('');
+  if (mounted && autoViewKey !== askKey) {
+    setAutoViewKey(askKey);
+    const want = beat?.view;
+    if (want && !manualView[stage.id] && stage.views.some((v) => v.id === want) && view.id !== want) setViewByStage((m) => ({ ...m, [stage.id]: want }));
+  }
+  const chooseView = (id: string) => {
+    setManualView((m) => ({ ...m, [stage.id]: true }));
+    setViewByStage((m) => ({ ...m, [stage.id]: id }));
+  };
+  // Guided mode asks the step's micro-question once its animation is done, before moving on.
+  const askNow = guided && playing && waiting && intro === null && !tour && !!beat?.ask && !asked.includes(askKey);
 
   // Cross-fade: when the scene changes (stage or view), the previous one fades out over the new one.
   const sceneKey = `${week.week}/${stage.id}/${view.id}`;
-  const [shown, setShown] = useState<{ key: string; w: number; i: number; view: string } | null>(null);
-  const [ghost, setGhost] = useState<{ key: string; i: number; view: string; t: number } | null>(null);
+  const [shown, setShown] = useState<{
+    key: string;
+    w: number;
+    i: number;
+    view: string;
+  } | null>(null);
+  const [ghost, setGhost] = useState<{
+    key: string;
+    i: number;
+    view: string;
+    t: number;
+  } | null>(null);
   if (mounted && shown?.key !== sceneKey) {
-    if (shown && shown.w === week.week) setGhost({ key: shown.key, i: shown.i, view: shown.view, t: shown.i === pos.i ? pos.t : shown.i < pos.i ? 1 : 0 });
+    if (shown && shown.w === week.week)
+      setGhost({
+        key: shown.key,
+        i: shown.i,
+        view: shown.view,
+        t: shown.i === pos.i ? pos.t : shown.i < pos.i ? 1 : 0,
+      });
     setShown({ key: sceneKey, w: week.week, i: pos.i, view: view.id });
   }
   useEffect(() => {
@@ -216,7 +329,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     const url = new URL(window.location.href);
     url.searchParams.set('etapa', stage.id);
     url.searchParams.set('ikuspegia', view.id);
-    url.searchParams.delete('egitura');
+    for (const k of ['egitura', 'une', 'jolastu']) url.searchParams.delete(k);
     window.history.replaceState(null, '', url);
     markVisited(week.week, stage.id);
   }, [linkedWeek, week.week, stage.id, view.id]);
@@ -227,6 +340,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   useEffect(() => {
     if (!playing) live.current = pos;
   }, [pos, playing]);
+
+  useEffect(() => {
+    if (linkPos) live.current = linkPos;
+  }, [linkPos]);
 
   // Pausing silences the narration and restarts the current step's reading clock on resume.
   useEffect(() => {
@@ -253,6 +370,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 
       // 1) Quick overview of the whole stage; the card then stays until it has been read
       //    (in guided mode, until the viewer presses "Hasi").
+      if (introRef.current !== null && quick) {
+        introRef.current = null;
+        clock.current.key = '';
+        setIntro(null);
+      }
       if (introRef.current !== null) {
         const st = week.stages[live.current.i];
         if (!introClock.current) {
@@ -279,7 +401,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       // 2) Detailed playback, step by step.
       const p = live.current;
       const st = week.stages[p.i];
-      let t = p.t + (dt * speed * NORMAL_RATE * (guided ? GUIDED_RATE : 1)) / st.duration;
+      let t = p.t + (dt * speed * NORMAL_RATE * (guided ? GUIDED_RATE : quick ? QUICK_RATE : 1)) / st.duration;
       const k = beatIndexAt(st, p.t);
 
       // 2a) Tour: light the step's structures one at a time while the animation holds.
@@ -291,7 +413,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         setTour(null);
       }
       const tourAt = tourAtOf(st, k);
-      if (!tr && toured.current !== tkey && t >= tourAt) {
+      if (!tr && !quick && toured.current !== tkey && t >= tourAt) {
         toured.current = tkey;
         const b = st.beats[k];
         const items = (b.tour ?? (guided ? freshAt(st, k).map((s) => s.id) : [])).filter((id) => drawnIn(svgRef.current, id));
@@ -342,29 +464,33 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         skipHold.current = false;
         if (guided && voice) {
           speaking.current = true;
-          speak(st.beats[k].text, () => {
+          const b = st.beats[k];
+          speak(b.idea ? `${b.idea} ${b.text}` : b.text, () => {
             speaking.current = false;
           });
         }
       }
       const boundary = k + 1 < st.beats.length ? st.beats[k + 1].at : 1;
       const elapsed = now - clock.current.start;
-      const hold = t >= boundary - 1e-4 && (guided ? !skipHold.current : elapsed < captionDwellMs(st, k) && !skipHold.current);
+      const dwell = quick ? quickDwellMs(st, k) : captionDwellMs(st, k);
+      const hold = t >= boundary - 1e-4 && (guided ? !skipHold.current : elapsed < dwell && !skipHold.current);
       if (hold) t = Math.max(p.t, boundary - 1e-4);
       setWaiting(hold);
       let next: Pos = { i: p.i, t: Math.min(t, 1) };
       if (t >= 1 && autoContinue && p.i < week.stages.length - 1) {
         next = { i: p.i + 1, t: 0 };
-        introRef.current = 0;
-        introClock.current = 0;
-        setIntro(0);
+        if (!quick) {
+          introRef.current = 0;
+          introClock.current = 0;
+          setIntro(0);
+        }
       }
       live.current = next;
       setPos(next);
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [playing, speed, autoContinue, week, guided, voice]);
+  }, [playing, speed, autoContinue, week, guided, quick, voice]);
 
   // Auto-stop at the end of the stage (or of the week, when auto-continuing).
   if (playing && intro === null && pos.t >= 1 && (!autoContinue || pos.i === week.stages.length - 1)) setPlaying(false);
@@ -381,6 +507,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     setTour(null);
   };
   const startIntro = () => {
+    if (quick) return;
     introRef.current = 0;
     introClock.current = 0;
     clearTour();
@@ -430,7 +557,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     if (playing && pos.i + delta >= 0 && pos.i + delta < week.stages.length) startIntro();
     else endIntro();
     clearTour();
-    place({ i: Math.min(week.stages.length - 1, Math.max(0, pos.i + delta)), t: 0 });
+    place({
+      i: Math.min(week.stages.length - 1, Math.max(0, pos.i + delta)),
+      t: 0,
+    });
     setSelected(null);
   };
   /** "Hurrengo etapa" at the end of a stage: move on and keep playing, preview first. */
@@ -503,6 +633,78 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     router.push(`/astea/${w}?${q.toString()}`);
   };
 
+  /** Time machine: jump to the step where a structure forms and play it, remembering where we were. */
+  const replay = (w: number, stageId: string, at: number, id: string) => {
+    const here: Back = {
+      week: week.week,
+      stage: stage.id,
+      t: pos.t,
+      view: view.id,
+      selected,
+      title: stage.title,
+    };
+    if (w === week.week) {
+      const idx = week.stages.findIndex((s) => s.id === stageId);
+      if (idx < 0) return;
+      endIntro();
+      clearTour();
+      setBack(here);
+      place({ i: idx, t: at + 0.001 });
+      setSelected(id);
+      setPlaying(true);
+      return;
+    }
+    try {
+      window.sessionStorage.setItem(BACK_KEY, JSON.stringify({ ...here, to: `${w}/${stageId}` }));
+    } catch {
+      // Without storage the jump still works; only the way back is lost.
+    }
+    router.push(`/astea/${w}?${new URLSearchParams({ etapa: stageId, une: String(at + 0.001), egitura: id, jolastu: '1' }).toString()}`);
+  };
+  const goBack = () => {
+    if (!back) return;
+    setBack(null);
+    try {
+      window.sessionStorage.removeItem(BACK_KEY);
+    } catch {}
+    if (back.href) {
+      router.push(back.href);
+      return;
+    }
+    if (back.week === week.week) {
+      const idx = week.stages.findIndex((s) => s.id === back.stage);
+      endIntro();
+      clearTour();
+      setPlaying(false);
+      if (idx >= 0) place({ i: idx, t: back.t });
+      if (back.view) {
+        const bv = back.view;
+        setViewByStage((m) => ({ ...m, [back.stage]: bv }));
+        setManualView((m) => ({ ...m, [back.stage]: true }));
+      }
+      setSelected(back.selected);
+      return;
+    }
+    const q = new URLSearchParams({
+      etapa: back.stage,
+      une: String(Math.max(0.001, back.t)),
+    });
+    if (back.view) q.set('ikuspegia', back.view);
+    if (back.selected) q.set('egitura', back.selected);
+    router.push(`/astea/${back.week}?${q.toString()}`);
+  };
+
+  /** The explanation panel: a column on wide screens (remembered), a drawer on narrow ones. */
+  const narrow = () => window.matchMedia('(max-width: 1320px)').matches;
+  const openPanel = () => {
+    if (narrow()) setPanelOpen(true);
+    else if (!infoOpen) setPref('panel', true);
+  };
+  const togglePanel = () => {
+    if (narrow()) setPanelOpen((v) => !v);
+    else setPref('panel', !infoOpen);
+  };
+
   // ——— "Aurkitu" (find the structure) quiz ———
   const presentIds = () => {
     const svg = svgRef.current;
@@ -521,35 +723,76 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     return ids.length ? ids[Math.floor(Math.random() * ids.length)] : null;
   };
 
-  const startFind = () => {
+  const startFind = (want?: string) => {
     setPlaying(false);
     setSelected(null);
-    setFind({ target: nextTarget(null), ok: 0, tries: 0, message: null });
+    setFind({ target: want && presentIds().includes(want) ? want : nextTarget(null), ok: 0, tries: 0, message: null });
+  };
+
+  // A requested find target waits for its scene to be drawn (after a stage jump or a deep link).
+  const runPendingFind = useEffectEvent(() => {
+    if (!pendingFind) return;
+    startFind(pendingFind);
+    setPendingFind(null);
+  });
+  useEffect(() => {
+    if (!pendingFind || !mounted) return;
+    const raf = requestAnimationFrame(() => runPendingFind());
+    return () => cancelAnimationFrame(raf);
+  }, [pendingFind, mounted, pos.i]);
+
+  /** Re-test a concept as an image: go where it is drawn and ask for it in the find quiz. */
+  const findConcept = (id: string) => {
+    const f = firstSeenOf(id);
+    setQuestionsOpen(false);
+    if (!f) return;
+    if (f.week === week.week) {
+      const idx = week.stages.findIndex((s) => s.id === f.stage);
+      endIntro();
+      clearTour();
+      setPlaying(false);
+      place({ i: idx, t: 1 });
+      setPendingFind(id);
+      return;
+    }
+    router.push(`/astea/${f.week}?${new URLSearchParams({ etapa: f.stage, une: '1', aurkitu: id }).toString()}`);
   };
 
   const answerFind = (id: string) => {
     if (!find?.target) return;
     const ok = id === find.target;
+    recordAnswer(imageId(find.target), ok, nameOf(id));
     setFlash({ id, ok });
-    setFind((f) =>
-      f && {
-        ...f,
-        ok: f.ok + (ok ? 1 : 0),
-        tries: f.tries + 1,
-        message: ok ? `Bai! Hori da ${nameOf(id)}.` : `Ez: hori ${nameOf(id)} da.`,
-      },
+    setFind(
+      (f) =>
+        f && {
+          ...f,
+          ok: f.ok + (ok ? 1 : 0),
+          tries: f.tries + 1,
+          message: ok ? `Bai! Hori da ${nameOf(id)}.` : `Ez: hori ${nameOf(id)} da.`,
+        },
     );
-    window.setTimeout(() => {
-      setFlash(null);
-      if (ok) setFind((f) => f && { ...f, target: nextTarget(f.target), message: null });
-    }, ok ? 900 : 1100);
+    window.setTimeout(
+      () => {
+        setFlash(null);
+        if (ok) setFind((f) => f && { ...f, target: nextTarget(f.target), message: null });
+      },
+      ok ? 900 : 1100,
+    );
   };
 
   const revealFind = () => {
     if (!find?.target) return;
     const id = find.target;
     setFlash({ id, ok: true });
-    setFind((f) => f && { ...f, tries: f.tries + 1, message: `Hemen dago: ${nameOf(id)}.` });
+    setFind(
+      (f) =>
+        f && {
+          ...f,
+          tries: f.tries + 1,
+          message: `Hemen dago: ${nameOf(id)}.`,
+        },
+    );
     window.setTimeout(() => {
       setFlash(null);
       setFind((f) => f && { ...f, target: nextTarget(id), message: null });
@@ -563,6 +806,14 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     return () => cancelAnimationFrame(raf);
   }, [selected, stage.id, view.id, mounted]);
 
+  // Cognitive focus: shade the context only when the step's own structures are drawn in this view.
+  const [focusLit, setFocusLit] = useState(false);
+  const focusKey = `${stage.id}/${view.id}/${activeBeat}`;
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setFocusLit(!!beat?.focus?.some((id) => drawnIn(svgRef.current, id))));
+    return () => cancelAnimationFrame(raf);
+  }, [focusKey, beat, mounted]);
+
   const inScene = (id: string) => !!svgRef.current?.querySelector(`[data-part="${CSS.escape(id)}"]`);
   const pick = (id: string) => {
     setSelected(id);
@@ -575,7 +826,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       return;
     }
     pick(id);
-    setPanelOpen(true);
+    openPanel();
   };
 
   // Keyboard shortcuts. The listener is subscribed once; the effect event always sees fresh state.
@@ -594,15 +845,29 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       if (e.shiftKey) gotoStage(-1);
       else stepBeat(-1);
     } else if (e.key.toLowerCase() === 'l') setShowLabels((v) => !v);
+    else if (e.key.toLowerCase() === 'g' && !e.ctrlKey && !e.metaKey) setPlayMode(mode === 'gidatua' ? 'arrunta' : mode === 'arrunta' ? 'azkarra' : 'gidatua');
+    else if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey) setFocusMode((v) => !v);
+    else if (e.key === '[') setPref('outline', !outlineOpen);
+    else if (e.key === ']') togglePanel();
+    else if (e.key === '?') setHelpOpen(true);
     else if (e.key === 'Escape') {
+      if (helpOpen) {
+        setHelpOpen(false);
+        return;
+      }
+      if (focusMode && !selected && !find) {
+        setFocusMode(false);
+        return;
+      }
       setSelected(null);
       setFind(null);
       setGlossaryOpen(false);
       setQuestionsOpen(false);
       setPanelOpen(false);
+      setNowOpen(false);
     } else if (/^[1-9]$/.test(e.key)) {
       const v = stage.views[Number(e.key) - 1];
-      if (v) setViewByStage((m) => ({ ...m, [stage.id]: v.id }));
+      if (v) chooseView(v.id);
     }
   });
   useEffect(() => {
@@ -614,12 +879,14 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const ctx: SceneContextValue = {
     selected: find || !selectedLit ? null : selected,
     hovered: find ? hovered : hovered,
-    focus: find || intro !== null ? [] : beat?.focus ?? [],
+    focus: find || intro !== null ? [] : (beat?.focus ?? []),
+    dimContext: focusLit && !view.ownFocus && !find && intro === null,
     spotlight: !find && intro === null && tour ? tour.items[tour.idx] : null,
     showLabels: showLabels && intro === null,
     quiz: !!find,
     quizFlash: flash,
     nameOf,
+    isSpace,
     onSelect,
     onHover: setHovered,
   };
@@ -642,7 +909,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const pad = (n: number) => String(n).padStart(2, '0');
 
   return (
-    <div className="app">
+    <div className={`app${focusMode ? ' is-focus' : ''}`}>
       <header className="topbar">
         <Link href="/" className="tb-brand" title="Hasiera">
           <Wordmark size={20} />
@@ -657,9 +924,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               aria-current={w.week === week.week ? 'page' : undefined}
             >
               <span className="tb-week-n">{pad(w.week)}</span>
-              <span className="tb-week-d">
-                {spanOf(w).short}
-              </span>
+              <span className="tb-week-d">{spanOf(w).short}</span>
             </Link>
           ))}
         </nav>
@@ -668,23 +933,46 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           <button className={`tool${find ? ' is-on' : ''}`} onClick={() => (find ? setFind(null) : startFind())} title="Aurkitu egitura irudian">
             <IconTarget size={16} /> <span>Aurkitu</span>
           </button>
-          <button className="tool" onClick={() => setQuestionsOpen(true)} title="Azterketa-galderak">
+          <button
+            className="tool"
+            onClick={() => {
+              setQuestionsConcept(undefined);
+              setQuestionsOpen(true);
+            }}
+            title="Azterketa-galderak"
+          >
             <IconQuiz size={16} /> <span>Galderak</span>
           </button>
           <button className="tool" onClick={() => setGlossaryOpen(true)} title="Glosarioa">
             <IconBook size={16} /> <span>Glosarioa</span>
           </button>
+          <Link className="tool" href={`/kronologia?eguna=${Math.round(day)}`} title="Kronologia: zer dago egun honetan?">
+            <IconClock size={16} /> <span>Kronologia</span>
+          </Link>
           <Link className="tool" href="/leinuak" title="Ernetze orrien leinuak">
             <IconTree size={16} /> <span>Leinuak</span>
           </Link>
-          <button className={`tool tool-panel${panelOpen ? ' is-on' : ''}`} onClick={() => setPanelOpen((v) => !v)} title="Azalpen-panela" aria-expanded={panelOpen}>
+          <Link className="tool" href="/irudiak" title="Irudi-laborategia: irudiak azterketan bezala (etiketarik gabe)">
+            <IconImage size={16} /> <span>Irudiak</span>
+          </Link>
+          <button className={`tool tool-panel${panelOpen || infoOpen ? ' is-on' : ''}`} onClick={togglePanel} title="Azalpen-panela (])" aria-expanded={panelOpen || infoOpen}>
             <IconInfo size={16} /> <span>Azalpena</span>
+          </button>
+          <button className="tool tool-icon" onClick={() => setFocusMode(true)} title="Foku modua: eszena pantaila osoan (F)" aria-label="Foku modua">
+            <IconExpand size={16} />
+          </button>
+          <button className="tool tool-icon" onClick={() => setHelpOpen(true)} title="Laguntza eta lasterbideak (?)" aria-label="Laguntza">
+            <span className="tool-q" aria-hidden>
+              ?
+            </span>
           </button>
         </div>
       </header>
 
-      <div className={`workspace${panelOpen ? ' panel-open' : ''}`}>
+      <div className={`workspace${panelOpen ? ' panel-open' : ''}${outlineOpen ? '' : ' no-outline'}${infoOpen ? '' : ' no-info'}${selected ? ' has-sel' : ''}`}>
         <Outline
+          collapsed={!outlineOpen}
+          onToggle={() => setPref('outline', !outlineOpen)}
           week={week}
           current={pos.i}
           t={pos.t}
@@ -700,31 +988,50 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           onBeat={gotoBeat}
         />
 
-        <main className="stage">
+        <main className={`stage${find && print ? ' is-print' : ''}`}>
           <div className="stage-bar">
             <div className="stage-heading">
-              <p className="kicker">
-                {pad(pos.i + 1)} / {pad(week.stages.length)} · {stage.day}
-              </p>
-              <h2>{stage.title}</h2>
+              <button className="kicker ctx-bar" onClick={() => setNowOpen((v) => !v)} aria-expanded={nowOpen} title="Testuinguru tenporala: zer dago orain, zer den berria, zer desagertu den">
+                <span>{week.week}. gaia</span>
+                <span>
+                  {pad(pos.i + 1)}/{pad(week.stages.length)} etapa
+                </span>
+                <span className="ctx-day">{stage.day}</span>
+                <span>{weekOfDay(day)}. astea</span>
+                <span>
+                  {periodOf(day).name}
+                  <i className="ctx-more" aria-hidden>
+                    ▾
+                  </i>
+                </span>
+              </button>
+              {nowOpen && (
+                <NowCard
+                  day={day}
+                  stageDays={stage.day}
+                  onClose={() => setNowOpen(false)}
+                  onPick={(id) => {
+                    setNowOpen(false);
+                    pick(id);
+                    openPanel();
+                  }}
+                />
+              )}
+              <h2 title={stage.title}>{stage.title}</h2>
             </div>
-            {stage.views.length > 1 && (
-              <div className="seg" role="tablist" aria-label="Ikuspegiak">
-                {stage.views.map((v, k) => (
-                  <button
-                    key={v.id}
-                    role="tab"
-                    aria-selected={v.id === view.id}
-                    className={v.id === view.id ? 'is-on' : ''}
-                    onClick={() => setViewByStage((m) => ({ ...m, [stage.id]: v.id }))}
-                    title={`${v.description} (${k + 1})`}
-                  >
-                    <PlaneGlyph plane={v.plane} size={18} />
-                    <span>{v.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="stage-side">
+              <Locator plane={view.plane} day={day} level={view.locator?.level} note={view.locator?.note} viewKey={`${stage.id}/${view.id}`} hold={helpOpen || questionsOpen || glossaryOpen} />
+              {stage.views.length > 1 && (
+                <div className="seg" role="tablist" aria-label="Ikuspegiak">
+                  {stage.views.map((v, k) => (
+                    <button key={v.id} role="tab" aria-selected={v.id === view.id} className={v.id === view.id ? 'is-on' : ''} onClick={() => chooseView(v.id)} title={`${v.description} (${k + 1})`}>
+                      <PlaneGlyph plane={v.plane} size={18} />
+                      <span>{v.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <SceneContext.Provider value={ctx}>
@@ -751,7 +1058,24 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                           {categoryLabel[cat]}
                         </span>
                       ))}
+                      <span className="legend-space" title="Barrunbea espazio bat da (hutsunea, likidoa); ehuna, berriz, zelulez osatuta dago.">
+                        <i aria-hidden />
+                        <em>Etzana</em> = barrunbea (espazioa, ez ehuna)
+                      </span>
                     </div>
+                  )}
+                  {back && (
+                    <button className="back-chip" onClick={goBack} title={`Itzuli: ${back.title}`}>
+                      <span aria-hidden>←</span> Bueltatu <b>{back.title}</b>
+                    </button>
+                  )}
+                  {focusMode && (
+                    <button className="btn small ghost focus-exit" onClick={() => setFocusMode(false)} title="Irten foku modutik (F / Esc)">
+                      Irten fokutik <kbd>F</kbd>
+                    </button>
+                  )}
+                  {tour && intro === null && structures.get(tour.items[tour.idx]) && (
+                    <TourCard item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} onSkip={skipTour} onPick={onSelect} />
                   )}
                   {intro === null && (
                     <p key={`${stage.id}/${view.id}`} className="view-desc">
@@ -787,7 +1111,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       )}
                       <div className="pv-foot">
                         <span className="pv-bar">
-                          <i style={{ transform: `scaleX(${Math.min(1, intro)})` }} />
+                          <i
+                            style={{
+                              transform: `scaleX(${Math.min(1, intro)})`,
+                            }}
+                          />
                         </span>
                         <small>{intro < 1 ? 'Aurrebista: prozesu osoa' : guided ? 'Irakurri lasai; prest zaudenean, hasi' : 'Orain, urratsez urrats'}</small>
                         {intro >= 1 && (
@@ -824,6 +1152,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       <span className="find-score">
                         {find.ok}/{find.tries}
                       </span>
+                      <button className={`btn small ghost${print ? ' is-on' : ''}`} onClick={() => setPrint((v) => !v)} aria-pressed={print} title="Azterketako irudiak bezala: zuri-beltzean">
+                        Zuri-beltza
+                      </button>
                       <button className="btn small" onClick={revealFind} disabled={!find.target}>
                         Erakutsi
                       </button>
@@ -864,31 +1195,56 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             onSpeed={setSpeed}
             onAutoContinue={setAutoContinue}
             guided={guided}
+            mode={mode}
+            onMode={setPlayMode}
             voice={voice}
             waiting={waiting && playing && intro === null}
             fresh={guided && intro === null && !tour ? fresh : []}
-            tour={tour && intro === null && structures.get(tour.items[tour.idx]) ? { item: structures.get(tour.items[tour.idx])!, idx: tour.idx, n: tour.items.length } : null}
-            onSkipTour={skipTour}
-            onGuided={(v) => setPref('guided', v)}
             onVoice={(v) => setPref('voice', v)}
             onContinue={continueHold}
             onNextStage={continueNext}
             onPick={onSelect}
+            onRecall={(id) => {
+              const f = firstSeenOf(id);
+              if (f && f.beat >= 0) replay(f.week, f.stage, f.at, id);
+              else {
+                pick(id);
+                openPanel();
+              }
+            }}
+            ask={
+              askNow && beat.ask ? (
+                <AskCard
+                  key={askKey}
+                  id={`mikro:${week.week}/${askKey}`}
+                  ask={beat.ask}
+                  onDone={() => {
+                    setAsked((a) => [...a, askKey]);
+                    continueHold();
+                  }}
+                />
+              ) : undefined
+            }
           />
         </main>
 
         <aside className="info" aria-label="Azalpena">
           {selected ? (
-            <Inspector
-              id={selected}
-              week={week}
-              currentStageId={stage.id}
-              onClose={() => setSelected(null)}
-              onSelect={pick}
-              onGoto={(w, sid) => gotoWeekStage(w, sid, selected)}
+            <Inspector id={selected} week={week} currentStageId={stage.id} onClose={() => setSelected(null)} onSelect={pick} onGoto={(w, sid) => gotoWeekStage(w, sid, selected)} onReplay={replay}
+              onPractice={(id) => {
+                setQuestionsConcept(id);
+                setQuestionsOpen(true);
+              }}
+              onFind={findConcept}
             />
           ) : (
-            <StageInfo key={stage.id} stage={stage} onSelect={onSelect} onDismiss={() => setPanelOpen(false)} onHover={(id) => setHovered(id && inScene(id) ? id : null)} />
+            <StageInfo
+              key={stage.id}
+              stage={stage}
+              onSelect={onSelect}
+              onDismiss={() => (narrow() ? setPanelOpen(false) : setPref('panel', false))}
+              onHover={(id) => setHovered(id && inScene(id) ? id : null)}
+            />
           )}
         </aside>
         {panelOpen && <button className="info-scrim" aria-label="Itxi panela" onClick={() => setPanelOpen(false)} />}
@@ -904,7 +1260,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           }}
         />
       )}
-      {questionsOpen && <Questions week={week.week} onClose={() => setQuestionsOpen(false)} onGoto={(w, sid) => gotoWeekStage(w, sid)} />}
+      {helpOpen && <Help welcome={firstVisit} onClose={() => setHelpOpen(false)} />}
+      {questionsOpen && <Questions week={week.week} concept={questionsConcept} onClose={() => setQuestionsOpen(false)} onGoto={(w, sid) => gotoWeekStage(w, sid)} onFind={findConcept} />}
     </div>
   );
 }

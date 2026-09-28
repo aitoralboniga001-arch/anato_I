@@ -12,3 +12,6 @@ dist/
 *.tsbuildinfo
 *.log
 _source-review/
+
+# Course figures (copyrighted): kept only on this computer, read by /api/irudiak
+private-images/

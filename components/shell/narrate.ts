@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from 'react';
+
 /** Read-aloud narration for guided mode (Web Speech API). Prefers a Basque voice, then Spanish. */
 
 const synth = () => (typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null);
@@ -9,6 +11,10 @@ const pickVoice = () => {
 };
 
 export const canNarrate = () => !!synth();
+
+const noop = () => () => {};
+/** Speech support, false on the server and during hydration so both renders agree. */
+export const useCanNarrate = () => useSyncExternalStore(noop, canNarrate, () => false);
 
 /** Speak `text`, cancelling anything in progress; `onEnd` fires when it finishes (or at once if unsupported). */
 export function speak(text: string, onEnd: () => void) {

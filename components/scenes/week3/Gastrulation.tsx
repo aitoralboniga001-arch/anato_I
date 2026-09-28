@@ -3,19 +3,21 @@
 import { Arrow, C, Cell, Label, Note, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
 import { W3C, discOutlinePath, f1 } from './common';
 import { DiscDrawing, makeDisc } from './DiscSection';
+import { GB } from './GastrulationCells';
 
 /**
  * 15–16. egunak — gastrulation: the primitive line/groove and Hensen's node appear, epiblast
  * cells invaginate and split into the three germ layers.
- * Dorsal view t: 0–.34 lerro→ildo primitiboa elongates cranially · .28–.4 nodo primitiboa ·
- *    .36–.46 hobitxo primitiboa · .42–.9 cells stream into the groove (bottle cells).
+ * Both views follow the shared step windows GB (GastrulationCells.tsx), so every view of the stage
+ * shows what the current step says. Dorsal: lerro→ildo primitiboa elongates cranially, nodo primitiboa ·
+ *    and hobitxo primitiboa, then cells stream into the groove.
  * Transverse view: realistic cell section (DiscSection) — streak, groove, bottle cells, endoderm replacing
  *    the hypoblast from the midline outwards, mesoderm spreading laterally, epiblast → ectoderm.
  */
 const D = { cx: 500, cy: 320, rx: 190, ry: 145 };
 
 function dorsalGeometry(t: number) {
-  const growth = seg(t, 0, 0.34);
+  const growth = seg(t, GB.streak, GB.converge);
   const caudalY = D.cy + D.ry - 20;
   const nodeY = lerp(caudalY, D.cy - 55, growth);
   return { caudalY, nodeY, growth };
@@ -24,11 +26,11 @@ function dorsalGeometry(t: number) {
 function DorsalDrawing({ t, reduced }: SceneProps) {
   const outline = discOutlinePath(D.cx, D.cy, D.rx, D.rx, D.ry, D.ry);
   const { caudalY, nodeY, growth } = dorsalGeometry(t);
-  const node = seg(t, 0.2, 0.32);
-  const pit = seg(t, 0.34, 0.46);
-  const migrate = seg(t, 0.42, 0.9);
-  const lateral = seg(t, 0.7, 0.95);
-  const ecto = seg(t, 0.84, 0.98);
+  const node = seg(t, GB.node, GB.node + 0.05);
+  const pit = seg(t, GB.node + 0.04, GB.converge);
+  const migrate = seg(t, GB.converge, GB.ecto);
+  const lateral = seg(t, GB.meso, GB.tri);
+  const ecto = seg(t, GB.ecto, GB.tri);
 
   const streakW = lerp(3, 9, growth);
   const streakPath = `M${f1(D.cx - streakW)},${f1(caudalY + 6)} Q${f1(D.cx - streakW * 1.3)},${f1((caudalY + nodeY) / 2)} ${f1(D.cx - streakW * 0.4)},${f1(nodeY + 10)} L${f1(D.cx + streakW * 0.4)},${f1(nodeY + 10)} Q${f1(D.cx + streakW * 1.3)},${f1((caudalY + nodeY) / 2)} ${f1(D.cx + streakW)},${f1(caudalY + 6)} Z`;
@@ -105,19 +107,19 @@ function DorsalDrawing({ t, reduced }: SceneProps) {
 
 function dorsalLabels(t: number) {
   const { caudalY, nodeY, growth } = dorsalGeometry(t);
-  const node = seg(t, 0.2, 0.32);
-  const pit = seg(t, 0.34, 0.46);
-  const ecto = seg(t, 0.84, 0.98);
+  const node = seg(t, GB.node, GB.node + 0.05);
+  const pit = seg(t, GB.node + 0.04, GB.converge);
+  const ecto = seg(t, GB.ecto, GB.tri);
   const L = (id: string, x: number, y: number, p: Pt, show = 1) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} />;
   return (
     <>
-      {L('lerro-primitiboa', 190, 235, [D.cx, (caudalY + nodeY) / 2 + 14], node < 0.5 ? growth : 0)}
-      {L('ildo-primitiboa', 190, 270, [D.cx, (caudalY + nodeY) / 2 - 14], node >= 0.5 ? node : 0)}
+      {L('lerro-primitiboa', 190, 235, [D.cx, (caudalY + nodeY) / 2 + 14], t < GB.groove ? seg(t, GB.streak, GB.streak + 0.03) : 0)}
+      {L('ildo-primitiboa', 190, 270, [D.cx, (caudalY + nodeY) / 2 - 14], t >= GB.groove ? seg(t, GB.groove, GB.groove + 0.03) : 0)}
       {L('nodo-primitiboa', 190, 460, [D.cx + lerp(4, 15, node) * 0.6, nodeY], node)}
       {L('hobitxo-primitiboa', 810, 460, [D.cx + 4, nodeY], pit)}
       {L('epiblastoa', 810, 235, [D.cx + D.rx * 0.5, D.cy - 30], ecto < 0.5 ? 1 : 0)}
       {L('ektodermoa', 810, 390, [D.cx + D.rx * 0.5, D.cy - 55], ecto >= 0.5 ? 1 : 0)}
-      {L('hiru-orriko-diskoa', 810, 270, [D.cx + D.rx * Math.cos((200 * Math.PI) / 180), D.cy + D.ry * Math.sin((200 * Math.PI) / 180)], seg(t, 0.5, 0.6))}
+      {L('hiru-orriko-diskoa', 810, 270, [D.cx + D.rx * Math.cos((200 * Math.PI) / 180), D.cy + D.ry * Math.sin((200 * Math.PI) / 180)], seg(t, GB.tri, GB.tri + 0.04))}
     </>
   );
 }
@@ -136,16 +138,16 @@ export function GastrulationDorsal(props: SceneProps) {
  * inbaginatzen"). Fade-in windows end at each beat's `at` (0, .14, .26, .34, .42, .5, .62, .72, .84, .94).
  */
 function transverseGeometry(t: number) {
-  const streak = seg(t, 0.06, 0.14);
-  const groove = seg(t, 0.18, 0.26);
-  const nodeNote = seg(t, 0.28, 0.34) * (1 - seg(t, 0.44, 0.48));
-  const converge = seg(t, 0.36, 0.42) * (1 - seg(t, 0.56, 0.62));
-  const invag = seg(t, 0.44, 0.5);
-  const endo = seg(t, 0.52, 0.62);
-  const meso = seg(t, 0.62, 0.72);
-  const spreadArrows = seg(t, 0.62, 0.68) * (1 - seg(t, 0.86, 0.92));
-  const ecto = seg(t, 0.78, 0.84);
-  const tri = seg(t, 0.9, 0.94);
+  const streak = seg(t, GB.streak, GB.streak + 0.07);
+  const groove = seg(t, GB.groove, GB.groove + 0.06);
+  const nodeNote = seg(t, GB.node, GB.node + 0.05) * (1 - seg(t, GB.invag - 0.01, GB.invag + 0.03));
+  const converge = seg(t, GB.converge, GB.converge + 0.06) * (1 - seg(t, GB.endo, GB.endo + 0.06));
+  const invag = seg(t, GB.invag, GB.invag + 0.08);
+  const endo = seg(t, GB.endo, GB.endo + 0.12);
+  const meso = seg(t, GB.meso, GB.meso + 0.12);
+  const spreadArrows = seg(t, GB.meso, GB.meso + 0.06) * (1 - seg(t, GB.tri - 0.02, GB.tri + 0.02));
+  const ecto = seg(t, GB.ecto, GB.ecto + 0.06);
+  const tri = seg(t, GB.tri, GB.tri + 0.05);
   return { streak, groove, nodeNote, converge, invag, endo, meso, spreadArrows, ecto, tri };
 }
 

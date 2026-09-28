@@ -19,7 +19,7 @@ const introFlag = `try{if(sessionStorage.getItem('enbrioatlas:intro')||matchMedi
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="eu" className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html lang="eu" className={`${sans.variable} ${mono.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: introFlag }} />
       </head>

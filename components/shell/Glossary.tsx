@@ -54,7 +54,7 @@ export function Glossary({ onClose, onPick }: GlossaryProps) {
                     {first && (
                       <>
                         <br />
-                        {first.week.week}. astea · {first.stage.day}
+                        {first.week.week}. gaia · {first.stage.day}
                       </>
                     )}
                   </span>

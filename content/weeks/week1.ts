@@ -245,7 +245,7 @@ export const week1: WeekDef = {
         { at: 0.3, text: '2. fasea — mintz peluzidoa zeharkatzea: akrosoma apurtu eta entzima litikoak askatzen dira (akrosoma erreakzioa).', focus: ['akrosoma-erreakzioa', 'akrosoma', 'mintz-peluzidoa'] },
         { at: 0.46, text: 'Espermatozoide bakar batek zeharkatzen du: pikor batzuk askatzen dira (erreakzio kortikala) eta mintz peluzidoa iragazgaitza bihurtzen da gainontzekoentzat.', focus: ['erreakzio-kortikala', 'mintz-peluzidoa'] },
         { at: 0.58, text: '3. fasea — mintz plasmatikoen fusioa: espermatozoidearen edukia obozitoaren zitoplasmara sartzen da.', focus: ['espermatozoidea', 'obozito-sekundarioa'] },
-        { at: 0.7, text: 'Orduan amaitzen du obozito sekundarioak II. zatiketa meiotikoa: obulua (23 kromosoma, egitura bakunekin) eta bigarren gorpuskulu polarra.', focus: ['obulua', 'gorpuskulu-polarrak'] },
+        { at: 0.7, exam: 'Azterketan: obozitoak II. meiosia ernalkuntzan amaitzen du (espermatozoidea sartzean), ez obulazioan.', text: 'Orduan amaitzen du obozito sekundarioak II. zatiketa meiotikoa: obulua (23 kromosoma, egitura bakunekin) eta bigarren gorpuskulu polarra.', focus: ['obulua', 'gorpuskulu-polarrak'] },
         { at: 0.82, text: 'Emakumezkoaren eta gizonezkoaren pronukleoak aurkitzen dira; kromosomek DNA bikoizten dute zatiketa mitotikorako.', focus: ['pronukleoak'] },
         { at: 0.92, text: 'Zigotoa: gune peluzidoz inguratua. Garapenaren lehenengo astea hemen hasten da.', focus: ['zigotoa'] },
       ],
@@ -309,7 +309,7 @@ export const week1: WeekDef = {
       ],
       beats: [
         { at: 0, text: '4. eta 5. egunen artean morula umetoki-gorputzaren barrunbean sartzen da.', focus: ['morula', 'umetoki-barrunbea'] },
-        { at: 0.08, text: 'Mintz peluzidoa galtzen du, eta blastozistoaren eraketa hasten da.', focus: ['mintz-peluzidoa'] },
+        { at: 0.08, exam: 'Azterketan: 6. egunean blastozistoak jada EZ du mintz peluzidorik (habiratu ahal izateko galdu du).', text: 'Mintz peluzidoa galtzen du, eta blastozistoaren eraketa hasten da.', focus: ['mintz-peluzidoa'] },
         { at: 0.3, text: 'Likidoa morularen zelulen artean sartzen da; hasieran barrunbe txikiak eratzen dira eta poliki-poliki fusionatzen dira.', focus: ['blastozelea'] },
         { at: 0.6, text: 'Barrunbe handiago bat agertzen da: blastozelea. Egiturari blastozistoa deritzo.', focus: ['blastozelea', 'blastozistoa'] },
         { at: 0.72, text: 'Kanpoko masa zelularrak trofoblastoa osatzen du (berdea); barruko masa zelularrak, mutur batean bakarrik, enbrioblastoa (urdina).', focus: ['trofoblastoa', 'enbrioblastoa'] },

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { weeks } from '@/content/registry';
 import { Chronicle } from './Chronicle';
 import { HeroFold } from './HeroFold';
+import { StudyMap } from './StudyMap';
 import { INTRO_KEY, Intro } from './intro/Intro';
 import { LandFoot, LandNav, firstReady, isWip } from './LandNav';
 import { IconPlay } from './icons';
@@ -93,8 +94,8 @@ export function Home() {
             <Link className="btn btn-light lg" href={`/astea/${firstReady.week}`}>
               <IconPlay size={14} /> Hasi simulagailua
             </Link>
-            <Link className="link-arrow" href="#kronologia">
-              Ikusi kronologia <span aria-hidden>↓</span>
+            <Link className="link-arrow" href="#mapa">
+              Gai osoa 20 segundotan <span aria-hidden>↓</span>
             </Link>
           </div>
           <p className="hero-meta rv">
@@ -108,6 +109,8 @@ export function Home() {
           <HeroFold playing={!intro} />
         </div>
       </section>
+
+      <StudyMap />
 
       <Chronicle />
 

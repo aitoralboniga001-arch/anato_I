@@ -13,3 +13,4 @@ Lau apunteak simulazioaren ikasketa-esparrua dira. Irudiak eskematikoak dira: ge
 - Tolespen zefalokaudalean bihotz-eremua hasieran mintz bukofaringeoaren KRANEALEAN dago eta buruaren tolespenak ~180° biratzen du, aurreko hestearen bentralera (apunteen 12. irudia, Langman A–D). Bihotz hodia eta barrunbe perikardikoa irudi horretan agertzen direlako marraztu dira.
 
 Etapa bakoitzak apuntearen fitxategia eta atala edo orrialdea gordetzen ditu. Iturri horiek eta kanpoko erreferentziek ez dute ordezkatzen irakaslearen ebaluazio-irizpidea edo aditu baten azken berrikuspen zientifikoa.
+- Somitomeroak: 3.1 atalak dio alde zefalikoko somitomeroak (okzipitaletik gorantz) ez direla inoiz somita bihurtzen, eta kaudalekoak, aldiz, benetako somitatan antolatzen direla. Leinuan somitomeroak → somitak lotura mantentzen da (kaudalekoentzat zuzena), baina «zein EZ da eratorria?» galdera sortua ez da egiten, bi irakurketak zuzenak izan daitezkeelako.

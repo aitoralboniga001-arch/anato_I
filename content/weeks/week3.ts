@@ -1,8 +1,10 @@
 import type { QuizQuestion, StageDef, StructureDef, WeekDef } from '@/lib/sim/types';
 import { AllantoisDorsal, AllantoisSagittal } from '@/components/scenes/week3/Allantois';
 import { GastrulationDorsal, GastrulationTransverse } from '@/components/scenes/week3/Gastrulation';
+import { GastrulationCells } from '@/components/scenes/week3/GastrulationCells';
 import { MesodermDorsal, MesodermSagittal } from '@/components/scenes/week3/MesodermSpread';
 import { NotochordSagittal, NotochordTransverse } from '@/components/scenes/week3/Notochord';
+import { NB, NotochordCells } from '@/components/scenes/week3/NotochordCells';
 import { Stage1Disc, Stage1Sagittal } from '@/components/scenes/week3/Stage1';
 import { quizB, stagesB, structuresB } from './week3b';
 
@@ -307,9 +309,18 @@ const stagesA: StageDef[] = [
     dayRange: [15, 16],
     title: 'Hiru orriko ernetze diskoaren eraketa: gastrulazioa',
     subtitle: 'Lerro/ildo primitiboa, nodo primitiboa eta hiru geruzen sorrera',
-    duration: 26,
+    duration: 34,
     source: { file: FILE, section: '1. Hiru orriko ernetze diskoaren eraketa (15-16 egunak)' },
     views: [
+      {
+        id: 'zelulak',
+        label: 'Zelulen bidaia',
+        plane: 'zeharkakoa',
+        description: 'Lerro primitiboaren mailako zeharkako mozketa, zelulak banan-banan: nondik datozen, nondik sartzen diren, nora doazen eta zer bihurtzen diren.',
+        orientation: { top: 'Dortsala (amniosa)', bottom: 'Bentrala (bitelo zakua)' },
+        scene: GastrulationCells,
+        ownFocus: true,
+      },
       {
         id: 'dortsala',
         label: 'Ikuspegi dortsala',
@@ -322,22 +333,122 @@ const stagesA: StageDef[] = [
         id: 'zeharkakoa',
         label: 'Zeharkako mozketa',
         plane: 'zeharkakoa',
-        description: 'Ildo primitiboaren mailako zeharkako mozketa: zelula epiblastikoak inbaginatu eta hiru geruzak sortzen dituzte.',
+        description: 'Liburuetako irudien antzeko zeharkako mozketa: amniosa, bitelo zakua eta hiru geruzak, azterketako irudietan ezagutzeko.',
         orientation: { top: 'Dortsala (amniosa)', bottom: 'Bentrala (bitelo zakua)' },
         scene: GastrulationTransverse,
       },
     ],
     beats: [
-      { at: 0, text: 'Gastrulazioaren hasieran diskoa oraindik bi orrikoa da: epiblastoa eta hipoblastoa.', focus: ['epiblastoa', 'hipoblastoa'] },
-      { at: 0.14, text: 'Epiblasto zelula-geruzaren alde kaudalean, erdigunean, loditasun bat agertzen da: lerro primitiboa.', focus: ['lerro-primitiboa'] },
-      { at: 0.26, text: 'Marra hori poliki ildo bihurtzen da: ildo primitiboa.', focus: ['ildo-primitiboa'] },
-      { at: 0.34, text: 'Ildoaren alde zefalikoan goragune txiki bat agertzen da: nodo primitiboa (Hensen-en nodoa).', focus: ['nodo-primitiboa'] },
-      { at: 0.42, text: 'Nodoan hobitxo primitiboa agertzen da; hor epiblasto-zelulak ugaltzen dira eta ildo eta nodo primitibora migratzen dute.', focus: ['hobitxo-primitiboa'] },
-      { at: 0.5, text: 'Zelula epiblastikoak ildo primitiboan sartu eta une jakin batean geruzatik askatzen dira: inbaginazioa.', focus: ['ildo-primitiboa'] },
-      { at: 0.62, text: 'Zelula epiblastiko migratzaile batzuek hipoblastoko zelulak ordezkatzen dituzte, geruza berri bat sortuz: endodermoa.', focus: ['endodermoa'] },
-      { at: 0.72, text: 'Beste zelula batzuk epiblastoaren eta endodermoaren artean kokatzen dira: enbrioi barruko mesodermoa (zelula gorriak). Kontuz: ez nahastu enbrioi kanpoko mesodermoarekin.', focus: ['mesodermo-intraenbrionarioa'] },
-      { at: 0.84, text: 'Inbaginatzen ez diren epiblasto-zelulak geratzen dira goiko aldean: ektodermoa.', focus: ['ektodermoa'] },
-      { at: 0.94, text: 'Horrela hiru orriko ernetze diskoa osatzen da: ektodermoa, enbrioi barruko mesodermoa eta endodermoa, epiblastotik guztiak.', focus: ['hiru-orriko-diskoa', 'gastrulazioa'] },
+      {
+        at: 0,
+        recall: ['epiblastoa', 'hipoblastoa'],
+        idea: 'Abiapuntua: bi orriko diskoa, epiblastoa eta hipoblastoa.',
+        text: 'Goian epiblastoa (urdina, zelula luzeak); behean hipoblastoa (zelula kubiko txikiak). Epiblastoaren gainean amnios barrunbea dago, hipoblastoaren azpian bitelo zakua.',
+        key: 'Hiru geruza berriak epiblastotik sortuko dira, ez hipoblastotik.',
+        focus: ['epiblastoa', 'hipoblastoa'],
+      },
+      {
+        at: 0.08,
+        idea: 'Erdiko lerroan epiblastoa loditzen da: lerro primitiboa.',
+        text: 'Diskoaren alde kaudalean, erdigunean, epiblasto-zelulak ugaldu eta metatu egiten dira. Mozketan epiblastoa lodiago ikusten da erdian; goitik (goiko mapa txikia) marra bat da, kaudaletik kranealera luzatzen dena.',
+        focus: ['lerro-primitiboa'],
+      },
+      {
+        at: 0.16,
+        idea: 'Lerroaren erdia sakondu egiten da: ildo primitiboa.',
+        text: 'Lerro primitiboa poliki-poliki ildo bihurtzen da. Ildo hori da sarrera-atea: hortik sartuko dira zelulak hurrengo urratsetan.',
+        focus: ['ildo-primitiboa'],
+      },
+      {
+        at: 0.23,
+        idea: 'Lerroaren mutur kranealean: nodo primitiboa eta, haren erdian, hobitxo primitiboa.',
+        text: 'Ildoaren alde zefalikoan goragune txiki bat agertzen da, nodo primitiboa (Hensen-en nodoa), eta haren erdian zulotxo bat, hobitxo primitiboa. Mozketa honetan ez dira ikusten: goiko mapan daude, mozketa-planoaren gainetik.',
+        key: 'Nodoak eta hobitxoak ardatzak finkatzen dituzte: kraneala–kaudala eta dortsala–bentrala.',
+        focus: ['nodo-primitiboa', 'hobitxo-primitiboa'],
+      },
+      {
+        at: 0.31,
+        idea: 'Orain epiblastoko zelula hauek lerro primitiborantz mugitzen ari dira.',
+        text: 'Epiblastoa ugaltzen da eta zelulak alboetatik erdiko lerrorantz lerratzen dira. Ildora iristen direnek botila-itxura hartzen dute: goiko muturra estutu eta gorputza behera doa. Zuriz inguratutako sei zelulak amaierara arte jarraituko ditugu.',
+        focus: ['epiblastoa', 'ildo-primitiboa'],
+      },
+      {
+        at: 0.41,
+        idea: 'Zelula hauek ildoaren hondotik beherantz sartzen dira: inbaginazioa.',
+        text: 'Ildoaren hondoan, zelula bakoitza epiblastotik askatzen da (lotura hausten da) eta azpira jaisten da, bi geruzen arteko espaziora. Hau da inbaginazioa: zelula ez da desagertzen, lekuz aldatzen da.',
+        key: 'Sartzen den zelula oro epiblastokoa da.',
+        focus: ['ildo-primitiboa'],
+        ask: {
+          q: 'Nondik sartzen dira zelulak bi geruzen artera?',
+          options: ['Ildo primitibotik, erdiko lerroan', 'Diskoaren alboko ertzetatik', 'Hipoblastotik gora igota'],
+          answer: 0,
+          why: [
+            'Hori da: ildo primitiboa da sarrera-atea; hor zelulak botila-itxura hartu eta askatzen dira.',
+            'Ertzetan ez da inor sartzen: zelulak erdirantz mugitzen dira, ildoraino.',
+            'Hipoblastotik ez da ezer igotzen: hipoblastoa ordezkatua izango da.',
+          ],
+        },
+      },
+      {
+        at: 0.5,
+        idea: 'Inbaginatu diren lehen zelulek hipoblastoko zelulak ordezkatzen dituzte; horrela endodermo definitiboa eratzen da.',
+        text: 'Lehen taldea (horia) hipoblastoaren mailaraino jaisten da eta erdian txertatzen da. Zelula berri bakoitzak hipoblastoko zelulak alboetara bultzatzen ditu, eta endodermoa erditik kanpora hazten da.',
+        caution: 'Endodermoa EZ da hipoblastotik sortzen: hipoblastoa ordezkatu egiten da.',
+        more: 'Zergatik da garrantzitsua? Endodermoak digestio-aparatuaren barne-epitelioa eta haren guruinak emango ditu (4. astean, hesteen eraketan).',
+        focus: ['endodermoa', 'hipoblastoa'],
+        ask: {
+          q: 'Endodermo definitiboko zelulak nondik datoz?',
+          options: ['Hipoblastotik', 'Epiblastotik, ildo primitiboan barrena sartuta', 'Enbrioi kanpoko mesodermotik'],
+          answer: 1,
+          why: [
+            'Tranpa klasikoa: hipoblastoa ez da endodermo bihurtzen, alboetara baztertu eta ordezkatu egiten da.',
+            'Bai: lehenengo sartzen diren epiblasto-zelulek hipoblastoa ordezkatzen dute.',
+            'Enbrioi kanpoko mesodermoa 2. astekoa da eta diskotik kanpo dago.',
+          ],
+        },
+      },
+      {
+        at: 0.64,
+        idea: 'Hurrengo zelula-populazioa bi geruzen artean kokatzen da; horiek mesodermo intraenbrionarioa osatzen dute.',
+        text: 'Bigarren taldea (gorria) ere ildotik sartzen da, baina ez da behera iristen: epiblastoaren eta endodermoaren artean geratzen da eta alboetara zabaltzen da, zelula izartsu (mesenkima) gisa.',
+        caution: 'Ez nahastu enbrioi kanpoko mesodermoarekin (2. astekoa, diskotik kanpo).',
+        more: 'Mesodermoa alde kraneal eta lateraletara hedatuko da, eta ertzetan enbrioi kanpoko mesodermoarekin jarraitzen du. Mintz bukofaringeoan eta kloaka mintzan ez da sartzen (hurrengo etapa).',
+        focus: ['mesodermo-intraenbrionarioa'],
+        ask: {
+          q: 'Non kokatzen dira bigarren taldeko zelulak (gorriak)?',
+          options: ['Endodermoaren azpian, bitelo zakuan', 'Epiblastoaren (ektodermoaren) eta endodermoaren artean', 'Amniosaren gainean'],
+          answer: 1,
+          why: [
+            'Ez: bitelo zakua endodermoaren azpiko barrunbea da; zelula horiek ez dira hara iristen.',
+            'Hori da: bi geruzen artean geratu eta alboetara zabaltzen dira — mesodermo intraenbrionarioa.',
+            'Amniosa epiblastoaren gaineko mintza da; hara ez da inor igotzen.',
+          ],
+        },
+      },
+      {
+        at: 0.78,
+        idea: 'Azalean geratzen diren epiblastoko zelulek ektodermoa eratuko dute.',
+        text: 'Inbaginatzen ez diren zelulak goiko aldean geratzen dira. Haiek ere erdirantz mugitu dira (ikus arrastoa), baina ez dira sartu: geruza horri orain ektodermoa deritzo.',
+        more: 'Ektodermotik nerbio-sistema (plaka neurala → hodi neurala, gandor neurala) eta azaleko ektodermoa (epidermisa) sortuko dira 4. astean.',
+        focus: ['ektodermoa'],
+      },
+      {
+        at: 0.88,
+        idea: 'Hiru orriko diskoa: ektodermoa, mesodermo intraenbrionarioa eta endodermoa — hirurak epiblastotik.',
+        text: 'Goitik behera: ektodermoa (urdina), mesodermo intraenbrionarioa (gorria) eta endodermoa (horia). Hipoblastoa alboetara baztertu da. Diskoaren alde kaudalean gastrulazioak 4. astearen bukaerara arte jarraitzen du.',
+        key: 'Epiblastoa → lehenak endodermo, hurrengoak mesodermo, geratzen direnak ektodermo.',
+        focus: ['hiru-orriko-diskoa', 'gastrulazioa'],
+        ask: {
+          q: 'Hiru geruzetatik zein EZ dator epiblastotik?',
+          options: ['Hirurak datoz epiblastotik', 'Endodermoa (hipoblastotik dator)', 'Mesodermoa (enbrioi kanpokotik dator)'],
+          answer: 0,
+          why: [
+            'Hori da: ektodermoa, mesodermo intraenbrionarioa eta endodermoa, hirurak epiblastotik.',
+            'Endodermoak hipoblastoa ordezkatzen du, ez da hartatik sortzen.',
+            'Mesodermo intraenbrionarioa ildotik sartutako epiblasto-zeluletatik dator.',
+          ],
+        },
+      },
     ],
     structures: [
       'epiblastoa',
@@ -396,7 +507,7 @@ const stagesA: StageDef[] = [
     beats: [
       { at: 0, text: 'Amnios barrunbearen eta bitelo zakuaren inguruan enbrioi kanpoko mesodermoa dago jada.', focus: ['enbrioi-kanpoko-mesodermoa'] },
       { at: 0.16, text: 'Ildo primitibotik inbaginatutako enbrioi barruko mesodermoko zelulak diskoaren alde kraneal eta lateraletara desplazatzen dira.', focus: ['mesodermo-intraenbrionarioa'] },
-      { at: 0.42, text: 'Diskoaren alboko ertzetara ailegatzean, enbrioi barruko mesodermoa jarraia egiten da enbrioi kanpoko mesodermoarekin.', focus: ['mesodermo-intraenbrionarioa', 'enbrioi-kanpoko-mesodermoa'] },
+      { at: 0.42, exam: 'Azterketan: diskoaren ertzetan enbrioi barruko mesodermoa enbrioi kanpokoarekin jarraitzen du.', text: 'Diskoaren alboko ertzetara ailegatzean, enbrioi barruko mesodermoa jarraia egiten da enbrioi kanpoko mesodermoarekin.', focus: ['mesodermo-intraenbrionarioa', 'enbrioi-kanpoko-mesodermoa'] },
       { at: 0.6, text: 'Diskoaren alde zefalikoan, mintz bukofaringeoa (orofaringeoa) agertzen da: bertan ektodermoa eta endodermoa itsatsita daude, mesodermorik ez dagoelako.', focus: ['mintz-bukofaringeoa'] },
       { at: 0.68, text: 'Diskoaren alde kaudalean, kloaka mintza agertzen da, egitura bera baina kaudalean.', focus: ['kloaka-mintza'] },
       { at: 0.78, text: 'Bi eskualde hauetan, mesodermo faltagatik, ez dira odol-hodiak garatuko: geroago zelulak endekatu eta zuloak sortuko dira (digestio-aparatuaren sarrera eta irteera).', focus: ['mintz-bukofaringeoa', 'kloaka-mintza'] },
@@ -432,9 +543,18 @@ const stagesA: StageDef[] = [
     dayRange: [16, 18],
     title: 'Notokordaren eraketa',
     subtitle: 'Zelula prenotokordaletatik notokorda-plakara eta notokordara',
-    duration: 26,
+    duration: 36,
     source: { file: FILE, section: '2. Notokordaren eraketa' },
     views: [
+      {
+        id: 'zelulak',
+        label: 'Zelulen bidaia',
+        plane: 'sagitala',
+        description: 'Goian erdiko mozketa sagitala (kraneala ezkerrean); behean, marra etenaren mailako zeharkako mozketa. Bi irudiak batera mugitzen dira.',
+        orientation: { top: 'Dortsala', bottom: 'Bentrala' },
+        scene: NotochordCells,
+        ownFocus: true,
+      },
       {
         id: 'sagitala',
         label: 'Mozketa sagitala',
@@ -453,14 +573,98 @@ const stagesA: StageDef[] = [
       },
     ],
     beats: [
-      { at: 0, text: 'Nodo eta hobitxo primitiboa: hemendik inbaginatzen dira zelula epiblastiko gehiago, ildo primitibotik inbaginatzen diren zelulez gain.', focus: ['nodo-primitiboa', 'hobitxo-primitiboa'] },
-      { at: 0.16, text: 'Zelula prenotokordalak hobitxo primitibotik alde kranealera abiatzen dira, erdiko marra jarraituz, ektodermoaren eta endodermoaren artean.', focus: ['zelula-prenotokordalak'] },
-      { at: 0.34, text: 'Hobitxo primitiboan hodi neuroenterikoa eratzen da, aldi baterako: amnios barrunbea eta bitelo zakua komunikatzen ditu.', focus: ['hodi-neuroenterikoa'] },
-      { at: 0.44, text: 'Zelula prenotokordalak plaka prekordaleraino iristen dira (mintz bukofaringearen azpian).', focus: ['plaka-prekordala', 'zelula-prenotokordalak'] },
-      { at: 0.5, text: 'Zelulak hasieran endodermoko zelulen artean tartekatzen dira: notokorda-plaka.', focus: ['notokorda-plaka'] },
-      { at: 0.66, text: 'Zelulak ugaldu eta endodermoko geruzatik askatzen dira: notokorda (egitura solidoa) sortzen da.', focus: ['notokorda'] },
-      { at: 0.78, text: 'Notokorda-plaka endodermotik askatu ahala, endodermoa berriz jarraitu bihurtzen da notokordaren azpian.', focus: ['endodermoa', 'notokorda'] },
-      { at: 0.88, text: 'Notokorda hobitxo primitibotik alde zefalikora hedatzen da, plaka prekordalaren alde kaudaleraino; hobitxotik behera (diskoaren alde kaudalean) EZ dago inoiz notokordarik.', focus: ['notokorda', 'nodo-primitiboa'] },
+      {
+        at: 0,
+        recall: ['nodo-primitiboa'],
+        idea: 'Abiapuntua: nodo primitiboa eta haren erdiko hobitxo primitiboa.',
+        text: 'Ildo primitibotik ez ezik, hobitxo primitibotik ere inbaginatzen dira epiblasto-zelulak. Hortik sartutako lehen zelulek plaka prekordala osatu dute jada (arrosa, alde kranealean).',
+        focus: ['nodo-primitiboa', 'hobitxo-primitiboa', 'plaka-prekordala'],
+      },
+      {
+        at: NB.migrate,
+        idea: 'Zelula prenotokordal hauek nodo primitibotik alde kranealerantz migratzen dute.',
+        text: 'Hobitxotik banan-banan irteten dira eta erdiko marran aurrera egiten dute, ektodermoaren eta endodermoaren artean. Zutabea luzatzen doa: lehen zelulak aurrean, berriak nodoaren ondoan.',
+        key: 'Notokordaren jatorria: nodo/hobitxo primitiboa.',
+        focus: ['zelula-prenotokordalak'],
+      },
+      {
+        at: NB.reach,
+        idea: 'Zutabea plaka prekordaleraino luzatzen da.',
+        text: 'Zelula prenotokordalak plaka prekordalera iristean gelditzen dira (mintz bukofaringeoaren atzean). B mozketan, zutabearen muturra marra etena igarotzean agertu dira zelulak erdian.',
+        more: 'Liburu batzuek (Moore) zelula-zutabe honi «notokorda-prozesua» deitzen diote. Apunteek zuzenean zelula prenotokordalez hitz egiten dute; gauza bera da.',
+        focus: ['zelula-prenotokordalak', 'plaka-prekordala'],
+      },
+      {
+        at: NB.canal,
+        idea: 'Hobitxo primitiboan hodi neuroenterikoa irekitzen da, aldi baterako.',
+        text: 'Hodi horrek amnios barrunbea eta bitelo zakua komunikatzen ditu, nodoaren mailan. Notokorda osatzean itxi egingo da.',
+        focus: ['hodi-neuroenterikoa'],
+      },
+      {
+        at: NB.plate,
+        idea: 'Zelula prenotokordalak endodermoko zelulen artean tartekatzen dira: notokorda-plaka.',
+        text: 'B mozketan ikusten da: erdiko zelula moreak behera doaz eta endodermoa zabaldu egiten da haientzat. Denbora labur batez, erdiko lerroan endodermoaren parte dira.',
+        caution: 'Notokorda-plaka ez da oraindik notokorda: endodermoan tartekatuta dago.',
+        focus: ['notokorda-plaka'],
+        ask: {
+          q: 'Notokorda-plakaren fasean, non daude zelula prenotokordalak?',
+          options: ['Endodermoko zelulen artean tartekatuta', 'Ektodermoaren gainean', 'Bitelo zakuaren barrunbean, askatuta'],
+          answer: 0,
+          why: [
+            'Hori da: aldi batez endodermoaren parte dira; horregatik «plaka».',
+            'Ektodermoa goiko geruza da; notokorda beti haren azpian dago.',
+            'Ez dira barrunbera erortzen: endodermoaren geruzan txertatzen dira.',
+          ],
+        },
+      },
+      {
+        at: NB.rod,
+        idea: 'Plakako zelulak ugaldu, tolestu eta endodermotik askatzen dira: notokorda definitiboa.',
+        text: 'Zelula berriak agertzen dira eta plaka bera kiribiltzen da, zilindro trinko bat osatu arte. Zilindro hori endodermotik bereizi eta mesodermoaren mailara igotzen da.',
+        more: 'Apunteek «ugaldu eta askatu» diote. Plaka «tolesten» dela Moore-ren deskribapena da; irudian bi ideiak batera ikusten dira.',
+        focus: ['notokorda'],
+        ask: {
+          q: 'Zer ordena da zuzena?',
+          options: ['Zelula prenotokordalak → notokorda-plaka → notokorda', 'Notokorda → notokorda-plaka → zelula prenotokordalak', 'Notokorda-plaka → zelula prenotokordalak → notokorda'],
+          answer: 0,
+          why: [
+            'Hori da: migratu, endodermoan tartekatu (plaka), eta ugaldu eta askatu (notokorda).',
+            'Alderantziz: notokorda da azken egitura, ez lehena.',
+            'Plaka zelula prenotokordalek osatzen dute; ezin da haiek baino lehen egon.',
+          ],
+        },
+      },
+      {
+        at: NB.close,
+        idea: 'Notokordaren azpian endodermoa berriz jarraitu bihurtzen da.',
+        text: 'Plaka altxatzean utzitako hutsunea endodermoko zelulek ixten dute, alboetatik erdirantz. Hodi neuroenterikoa ere ixten da.',
+        focus: ['endodermoa', 'notokorda'],
+      },
+      {
+        at: NB.extent,
+        idea: 'Notokorda hobitxo primitibotik plaka prekordaleraino dago; hobitxotik behera EZ.',
+        text: 'A irudian: marra laranja da notokordaren luzera. Nodotik kaudalera ildo primitiboa dago oraindik, eta han ez da inoiz notokordarik egongo.',
+        caution: 'Azterketa-galdera klasikoa: nodotik beherako zeharkako mozketan ez dago notokordarik.',
+        focus: ['notokorda', 'nodo-primitiboa'],
+      },
+      {
+        at: NB.induce,
+        exam: 'Azterketan: notokordarik gabe ez da hodi neuralik sortzen (indukzioa).',
+        idea: 'Notokorda ektodermoaren azpian geratzen da eta neurulazioaren indukzioan funtsezkoa izango da.',
+        text: 'Notokordak (eta plaka prekordalak) gainean duen ektodermoari seinaleak bidaltzen dizkio: eremu hori plaka neurala bihurtuko da. Hauek gabe ez litzateke nerbio-sistemarik garatuko.',
+        key: 'Notokorda eta plaka prekordala = nerbio-sistemaren egitura induktoreak.',
+        focus: ['notokorda', 'plaka-prekordala', 'ektodermoa'],
+        ask: {
+          q: 'Zer eragiten du notokordak gainean duen ektodermoan?',
+          options: ['Plaka neurala eratzea (indukzioa)', 'Somitak eratzea', 'Endodermoa ordezkatzea'],
+          answer: 0,
+          why: [
+            'Hori da: notokorda eta plaka prekordala nerbio-sistemaren induktoreak dira.',
+            'Somitak mesodermo paraxialetik sortzen dira, ez ektodermotik.',
+            'Endodermoaren ordezkapena gastrulazioan gertatu zen, epiblasto-zelulek eginda.',
+          ],
+        },
+      },
     ],
     structures: [
       'nodo-primitiboa',

@@ -1,6 +1,6 @@
 'use client';
 
-import { Label, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
+import { Arrow, Label, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
 import { SectionDrawing, makeSection, type Section } from '@/components/scenes/section/Section';
 
 /**
@@ -13,16 +13,19 @@ import { SectionDrawing, makeSection, type Section } from '@/components/scenes/s
  * Drawn with the shared realistic section engine (cells, epithelia, mesenchyme).
  */
 
-// Fade-in windows end exactly at each beat's `at` (week4b.ts: 0, .14, .3, .34, .62, .74, .9).
+// Step windows (week4b.ts beats): each change happens INSIDE its own step, never before it.
+export const SB = { sclero: 0.12, migrate: 0.26, dermomyo: 0.4, dermato: 0.56, myo: 0.72, fate: 0.88 };
 function geometry(t: number) {
-  const uniform = 1 - seg(t, 0.06, 0.14);
-  const sclero = seg(t, 0.06, 0.14);
-  const migrate = seg(t, 0.14, 0.3);
-  const dermomyo = seg(t, 0.26, 0.34) * (1 - seg(t, 0.54, 0.62));
-  const dermato = seg(t, 0.54, 0.62);
-  const myo = seg(t, 0.66, 0.74);
-  const fate = seg(t, 0.82, 0.9);
-  return { uniform, sclero, migrate, dermomyo, dermato, myo, fate };
+  const uniform = 1 - seg(t, SB.sclero, SB.sclero + 0.08);
+  const sclero = seg(t, SB.sclero, SB.sclero + 0.08);
+  const migrate = seg(t, SB.migrate, SB.migrate + 0.12);
+  const dermomyo = seg(t, SB.dermomyo, SB.dermomyo + 0.08) * (1 - seg(t, SB.dermato, SB.dermato + 0.03));
+  const dermato = seg(t, SB.dermato + 0.04, SB.dermato + 0.08);
+  const myo = seg(t, SB.myo, SB.myo + 0.08);
+  /** Myotome cells travelling out into the somatic layer (limb / body-wall muscle). */
+  const myoOut = seg(t, SB.myo + 0.04, SB.fate);
+  const fate = seg(t, SB.fate, SB.fate + 0.06);
+  return { uniform, sclero, migrate, dermomyo, dermato, myo, myoOut, fate };
 }
 
 const FOLD = 0.3;
@@ -32,7 +35,8 @@ function somiteSection(t: number, k: number, focus: boolean) {
     fold: FOLD,
     neural: 1,
     meso: 1,
-    somite: 0.45 + 0.3 * seg(t, 0.06, 0.3) + 0.2 * seg(t, 0.54, 0.62),
+    // .75: sclerotome out, dorsal plate intact; the plate splits in the dermatome step (.85) and the myotome completes in its own step (.95).
+    somite: 0.45 + 0.3 * seg(t, SB.sclero, SB.sclero + 0.1) + 0.1 * seg(t, SB.dermato, SB.dermato + 0.08) + 0.1 * seg(t, SB.myo, SB.myo + 0.08),
     crest: 0,
     aorta: 1,
     k: 1,
@@ -54,8 +58,8 @@ type P2 = [number, number];
 const line = (pts: P2[]) => pts.map((q, i) => `${i ? 'L' : 'M'}${q[0].toFixed(1)},${q[1].toFixed(1)}`).join('');
 
 /** Sclerotome fates (vertebra around the notochord/tube, ribs into the body wall) and myotome cells entering the somatic layer. */
-function FateOverlay({ s, fate }: { s: Section; fate: number }) {
-  if (fate <= 0.02) return null;
+function FateOverlay({ s, fate, myoOut }: { s: Section; fate: number; myoOut: number }) {
+  if (fate <= 0.02 && myoOut <= 0.02) return null;
   const ng = s.neural;
   const [nx, ny] = s.at.notochord;
   const Rx = (ng.rho + 12) * ng.sx + 9;
@@ -91,12 +95,28 @@ function FateOverlay({ s, fate }: { s: Section; fate: number }) {
         ))}
       </Part>
       {/* Some myotome cells migrate into the somatic (parietal) layer: limb / body-wall muscle. */}
-      <g pointerEvents="none" opacity={fate}>
-        {[0.3, 0.55, 0.8].map((u) => (
-          <ellipse key={u} cx={lerp(myoFrom[0], myoTo[0], u)} cy={lerp(myoFrom[1], myoTo[1], u)} rx={3.6 * s.k} ry={2.4 * s.k} fill="#c2410c" stroke="#6b2413" strokeWidth={0.6} />
-        ))}
+      <g pointerEvents="none" opacity={Math.min(1, myoOut * 4)}>
+        {[0.3, 0.55, 0.8].map((u) => {
+          const k = u * myoOut;
+          return <ellipse key={u} cx={lerp(myoFrom[0], myoTo[0], k)} cy={lerp(myoFrom[1], myoTo[1], k)} rx={3.6 * s.k} ry={2.4 * s.k} fill="#c2410c" stroke="#6b2413" strokeWidth={0.6} />;
+        })}
       </g>
+      <Arrow from={myoFrom} to={myoTo} bend={-0.12} color="#fb923c" width={1.8} dashed show={myoOut * (1 - fate)} />
     </g>
+  );
+}
+
+/** Sclerotome cells heading medially to surround the notochord and neural tube. */
+function ScleroArrows({ s, t }: { s: Section; t: number }) {
+  const show = seg(t, SB.migrate, SB.migrate + 0.03) * (1 - seg(t, SB.dermomyo - 0.02, SB.dermomyo + 0.02));
+  if (show <= 0.02) return null;
+  const so = s.somite;
+  return (
+    <>
+      {[1, -1].map((sd) => (
+        <Arrow key={sd} from={s.map(sd * (so.cx - so.rx * 0.3), so.cd + so.rd * 0.5)} to={s.map(sd * 26, s.dNoto - 6)} bend={sd * 0.18} color="#fbbf24" width={2} show={show} progress={seg(t, SB.migrate, SB.migrate + 0.1)} />
+      ))}
+    </>
   );
 }
 
@@ -166,7 +186,8 @@ export function SomiteContext({ t }: SceneProps) {
   return (
     <g>
       <SectionDrawing s={s} show={{ crest: 0 }} />
-      <FateOverlay s={s} fate={geometry(t).fate} />
+      <FateOverlay s={s} fate={geometry(t).fate} myoOut={geometry(t).myoOut} />
+      <ScleroArrows s={s} t={t} />
       <Note x={500} y={610} tone="dim" size={11}>
         Odol-hodiak mesodermotik sortzen dira (hemangioblastoak), somiten inguruan barne
       </Note>
@@ -181,7 +202,8 @@ export function SomiteClose({ t }: SceneProps) {
   return (
     <g>
       <SectionDrawing s={s} show={{ crest: 0 }} />
-      <FateOverlay s={s} fate={geometry(t).fate} />
+      <FateOverlay s={s} fate={geometry(t).fate} myoOut={geometry(t).myoOut} />
+      <ScleroArrows s={s} t={t} />
       {labels(s, t, true)}
     </g>
   );

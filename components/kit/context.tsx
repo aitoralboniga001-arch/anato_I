@@ -9,6 +9,8 @@ export interface SceneContextValue {
   hovered: string | null;
   /** Structures highlighted by the active narrative beat. */
   focus: readonly string[];
+  /** Cognitive focus: shade everything the beat is not about (only when its focus is drawn here). */
+  dimContext?: boolean;
   /** Guided tour: the one structure lit right now; everything else is shaded. */
   spotlight?: string | null;
   showLabels: boolean;
@@ -16,6 +18,8 @@ export interface SceneContextValue {
   quiz: boolean;
   quizFlash: QuizFlash;
   nameOf: (id: string) => string;
+  /** Spaces (cavities) are labelled differently from tissues. */
+  isSpace?: (id: string) => boolean;
   onSelect: (id: string) => void;
   onHover: (id: string | null) => void;
 }
@@ -37,11 +41,11 @@ export const SceneContext = createContext<SceneContextValue>({
 export const useScene = () => useContext(SceneContext);
 
 /** Visual state of a structure id given the current interaction state. */
-export function partState(ctx: SceneContextValue, id: string): 'active' | 'dim' | 'focus' | 'idle' | 'spot' | 'shade' {
+export function partState(ctx: SceneContextValue, id: string): 'active' | 'dim' | 'focus' | 'idle' | 'spot' | 'shade' | 'ctx' {
   const pointed = ctx.hovered ?? ctx.selected;
   if (ctx.quizFlash?.id === id) return 'active';
   if (pointed) return pointed === id ? 'active' : 'dim';
   if (ctx.spotlight) return ctx.spotlight === id ? 'spot' : 'shade';
-  if (ctx.focus.length) return ctx.focus.includes(id) ? 'focus' : 'idle';
+  if (ctx.focus.length) return ctx.focus.includes(id) ? 'focus' : ctx.dimContext ? 'ctx' : 'idle';
   return 'idle';
 }

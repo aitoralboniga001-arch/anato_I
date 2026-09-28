@@ -1,7 +1,19 @@
 import { useSyncExternalStore } from 'react';
 
-/** Boolean viewer preferences (guided mode, narration), remembered per browser. */
-export type PrefKey = 'guided' | 'voice';
+/**
+ * Boolean viewer preferences (playback mode, narration, which side panels are open), remembered per
+ * browser. The playback mode is `quick` (quick replay) over `guided` (guided) over neither (normal).
+ */
+export type PrefKey = 'guided' | 'quick' | 'voice' | 'outline' | 'panel';
+
+const DEFAULTS: Record<PrefKey, boolean> = { guided: true, quick: false, voice: false, outline: true, panel: true };
+
+export type PlayMode = 'gidatua' | 'arrunta' | 'azkarra';
+
+export const setPlayMode = (m: PlayMode) => {
+  setPref('quick', m === 'azkarra');
+  setPref('guided', m === 'gidatua');
+};
 
 const KEY = (k: PrefKey) => `enbrioatlas:${k}`;
 const cache = new Map<PrefKey, boolean>();
@@ -19,9 +31,10 @@ const readPref = (k: PrefKey) => {
   if (v === undefined) {
     try {
       const saved = window.localStorage.getItem(KEY(k));
-      v = saved === null ? k === 'guided' : saved === '1';
+      // The stage list starts folded on narrower screens, so the scene gets the room; it opens with "[".
+      v = saved === null ? (k === 'outline' ? window.innerWidth >= 1500 : DEFAULTS[k]) : saved === '1';
     } catch {
-      v = k === 'guided';
+      v = DEFAULTS[k];
     }
     cache.set(k, v);
   }
@@ -38,10 +51,10 @@ export const setPref = (k: PrefKey, v: boolean) => {
   listeners.forEach((l) => l());
 };
 
-/** False on the server and during hydration. */
+/** The default on the server and during hydration (voice stays off until the client can speak). */
 export const usePref = (k: PrefKey) =>
   useSyncExternalStore(
     subscribe,
     () => readPref(k),
-    () => false,
+    () => DEFAULTS[k],
   );

@@ -1,7 +1,7 @@
 import type { QuizQuestion, StageDef, StructureDef } from '@/lib/sim/types';
 import { MesoSplitDorsal, MesoSplitSection } from '@/components/scenes/week4-meso/Stage1Meso';
 import { SomiteBud, SomiteDorsal } from '@/components/scenes/week4-meso/Stage2Somites';
-import { SomiteClose, SomiteContext } from '@/components/scenes/week4-meso/Stage3Somite';
+import { SB, SomiteClose, SomiteContext } from '@/components/scenes/week4-meso/Stage3Somite';
 import { IntermediateLongitudinal, IntermediateSection } from '@/components/scenes/week4-meso/Stage4Intermediate';
 import { GutSagittal, PharynxClose } from '@/components/scenes/week4-meso/Stage5Endoderm';
 
@@ -411,14 +411,77 @@ export const stagesB: StageDef[] = [
       },
     ],
     beats: [
-      { at: 0, text: 'Notokordaren alboetan enbrioi barruko mesodermoaren lamina fina dago, ektodermo eta endodermoaren artean.', focus: ['mesodermo-intraenbrionarioa', 'notokorda'] },
-      { at: 0.1, text: '17. egunean, notokordatik gertuko zelulak ugaltzen hasten dira: mesodermo paraxiala sortzen da.', focus: ['mesodermo-paraxiala'] },
-      { at: 0.24, text: 'Alboko mesodermoa lamina bakarra da oraindik, disko-ertzean enbrioi kanpoko mesodermoarekin jarraia.', focus: ['alboko-mesodermoa', 'enbrioi-kanpoko-mesodermoa'] },
-      { at: 0.38, text: 'Alboko mesodermoan barrunbe txikiak agertzen dira.', focus: ['alboko-mesodermoa'] },
-      { at: 0.5, text: 'Barrunbe txikiak batu eta enbrioi barruko zeloma sortzen da: alboko mesodermoa bi orritan banatzen du.', focus: ['enbrioi-barruko-zeloma'] },
-      { at: 0.62, text: 'Paretako orria: ektodermoarekin batera (somatopleura), amnios barrunbe inguruko enbrioi kanpoko paretako orriarekin jarraia.', focus: ['paretako-orria'] },
-      { at: 0.74, text: 'Errai orria: endodermoarekin batera (esplaknopleura), bitelo-zakuaren inguruko enbrioi kanpoko errai orriarekin jarraia.', focus: ['errai-orria'] },
-      { at: 0.86, text: 'Gerora, mesodermo paraxialaren eta alboko mesodermoaren artean 3. multzo bat agertzen da: bitarteko mesodermoa.', focus: ['bitarteko-mesodermoa'] },
+      {
+        at: 0,
+        recall: ['mesodermo-intraenbrionarioa'],
+        idea: 'Abiapuntua: notokordaren alboetan mesodermo intraenbrionarioaren xafla fin bat dago.',
+        text: 'Ektodermoaren eta endodermoaren artean dago, gastrulazioan sartutako zeluletatik. Oraingoz berdina da alde guztietan.',
+        focus: ['mesodermo-intraenbrionarioa', 'notokorda'],
+      },
+      {
+        at: 0.1,
+        idea: 'Notokordatik gertuko zelulak ugaltzen dira: mesodermo paraxiala.',
+        text: '17. egunaren inguruan, erdiko lerroaren bi aldeetan mesodermoa loditu egiten da (bloke ilunagoak). Hortik sortuko dira somitak.',
+        key: 'Paraxiala = notokordaren ondoan → somitak.',
+        focus: ['mesodermo-paraxiala'],
+      },
+      {
+        at: 0.24,
+        idea: 'Kanpoaldean, alboko mesodermoa xafla bakarra da oraindik.',
+        text: 'Diskoaren ertzean enbrioi kanpoko mesodermoarekin jarraitzen du (amniosa eta bitelo zakua estaltzen dituena).',
+        focus: ['alboko-mesodermoa', 'enbrioi-kanpoko-mesodermoa'],
+      },
+      {
+        at: 0.38,
+        idea: 'Alboko mesodermoan barrunbe txikiak agertzen dira.',
+        text: 'Xaflaren barruan espazio txiki ugari irekitzen dira (orban ilunak), mesodermo paraxialetik urrun.',
+        focus: ['alboko-mesodermoa'],
+      },
+      {
+        at: 0.5,
+        recall: ['korion-barrunbea'],
+        idea: 'Barrunbe txikiak batu eta enbrioi barruko zeloma sortzen da.',
+        text: 'Espazioak elkartu eta barrunbe bakarra osatzen dute. Horrela alboko mesodermoa bi orritan banatzen da: bat gainean, bestea azpian.',
+        caution: 'Banaketa goitik behera da (dortsala/bentrala), ez alboz albo.',
+        focus: ['enbrioi-barruko-zeloma'],
+        ask: {
+          q: 'Nola sortzen da enbrioi barruko zeloma?',
+          options: ['Alboko mesodermoko barrunbe txikiak batuz', 'Bitelo zakua barneratuz', 'Mesodermo paraxiala hustuz'],
+          answer: 0,
+          why: [
+            'Hori da: barrunbe txikiak agertu eta batu egiten dira, 2. asteko korion barrunbearen antzera.',
+            'Bitelo zakua endodermoaren azpian dago; zeloma mesodermoaren barruan sortzen da.',
+            'Paraxiala trinko geratzen da eta somitak emango ditu.',
+          ],
+        },
+      },
+      {
+        at: 0.62,
+        idea: 'Goiko orria paretako orria da, ektodermoari itsatsita (somatopleura).',
+        text: 'Diskoaren ertzean amnios inguruko enbrioi kanpoko paretako orriarekin jarraitzen du.',
+        key: 'Paretako orria + ektodermoa = somatopleura (gorputz-horma).',
+        focus: ['paretako-orria'],
+      },
+      {
+        at: 0.74,
+        idea: 'Beheko orria errai orria da, endodermoari itsatsita (esplaknopleura).',
+        text: 'Diskoaren ertzean bitelo zakuaren inguruko enbrioi kanpoko errai orriarekin jarraitzen du.',
+        key: 'Errai orria + endodermoa = esplaknopleura (hestearen horma).',
+        focus: ['errai-orria'],
+        ask: {
+          q: 'Zein orri dago endodermoarekin batera?',
+          options: ['Errai orria (esplaknopleura)', 'Paretako orria (somatopleura)', 'Mesodermo paraxiala'],
+          answer: 0,
+          why: ['Hori da: errai orria endodermoari itsatsita dago.', 'Paretako orria ektodermoari itsatsita dago, goian.', 'Paraxiala notokordaren ondoan dago, ez da orri bat.'],
+        },
+      },
+      {
+        at: 0.86,
+        idea: 'Gerora, paraxialaren eta alboko mesodermoaren artean hirugarren multzo bat agertzen da: bitarteko mesodermoa.',
+        text: 'Zerrenda estu bat da (laranja), bi eremuen artean. Hortik sistema urogenitala sortuko da.',
+        key: 'Erditik kanpora: paraxiala → bitartekoa → albokoa.',
+        focus: ['bitarteko-mesodermoa'],
+      },
     ],
     structures: ['mesodermo-paraxiala', 'bitarteko-mesodermoa', 'alboko-mesodermoa', 'paretako-orria', 'errai-orria', 'enbrioi-barruko-zeloma', 'notokorda', 'ektodermoa', 'endodermoa', 'mesodermo-intraenbrionarioa', 'enbrioi-kanpoko-mesodermoa'],
     keyPoints: [
@@ -457,11 +520,11 @@ export const stagesB: StageDef[] = [
       },
     ],
     beats: [
-      { at: 0, text: 'Alde zefalikoan, mesodermo paraxiala somitomerotan antolatzen da; hauek ez dira inoiz benetako somita bihurtzen.', focus: ['somitomeroak'] },
+      { at: 0, recall: ['mesodermo-paraxiala'], text: 'Alde zefalikoan, mesodermo paraxiala somitomerotan antolatzen da; hauek ez dira inoiz benetako somita bihurtzen.', focus: ['somitomeroak'] },
       { at: 0.12, text: 'Okzipitaletik behera, mesodermo paraxiala somitatan segmentatzen da. Lehen bikotea (okzipitala) 20. egunean agertzen da.', focus: ['somitak'] },
       { at: 0.3, text: 'Egunero ~3 somita bikote berri sortzen dira, kraneokaudalki, 5. astearen amaiera arte.', focus: ['somitak'] },
       { at: 0.55, text: 'Somitek egitura bilaterala dute: bikoteak dira, hodi neuralaren bi aldeetan.', focus: ['somitak', 'hodi-neurala'] },
-      { at: 0.7, text: 'Guztira 42-44 somita bikote: 4 okzipital, 8 zerbikal, 12 toraziko, 5 lunbar, 5 sakro, 8-10 kokzigeo.', focus: ['somitak'] },
+      { at: 0.7, exam: 'Azterketan: somita kopuruak — 4 okzipital, 8 zerbikal, 12 toraziko, 5 lunbar, 5 sakro, 8–10 kokzigeo.', text: 'Guztira 42-44 somita bikote: 4 okzipital, 8 zerbikal, 12 toraziko, 5 lunbar, 5 sakro, 8-10 kokzigeo.', focus: ['somitak'] },
       { at: 0.88, text: 'Lehen somita bikote okzipitala eta azken 5-7 kokzigeoak normalean desagertu egiten dira.', focus: ['somitak'] },
       { at: 0.95, text: 'Somita kopurua enbrioiaren adina kalkulatzeko erabiltzen da klinikan.', focus: ['somitak'] },
     ],
@@ -501,13 +564,62 @@ export const stagesB: StageDef[] = [
       },
     ],
     beats: [
-      { at: 0, text: 'Hasieran somitaren zelula guztiak berdinak dira: zelula mesodermiko paraxialak.', focus: ['somitak'] },
-      { at: 0.14, text: 'Somitaren erdi-beheko (ventromedial) aldeko zelulek itxura aldatzen dute: esklerotoma zelula-multzoa sortzen dute, notokorda eta hodi neuralaren ondoan.', focus: ['esklerotoma'] },
-      { at: 0.3, text: 'Esklerotoma zelulak erdikalderantz migratzen dute, notokorda eta hodi neurala inguratuz.', focus: ['esklerotoma', 'notokorda', 'hodi-neurala'] },
-      { at: 0.34, text: 'Somitaren plaka dortsalak (ektodermoaren azpian, somitaren zabalera osoan) beste multzo bat osatzen du: dermatomiotoma (dermatoma + miotoma, oraindik bereizi gabe).', focus: ['dermatomiotoma'] },
-      { at: 0.62, text: 'Dermatoma: plaka dortsalaren zati azaletsuena, larruazaleko dermisa/hipodermisa sortuko duena.', focus: ['dermatoma'] },
-      { at: 0.74, text: 'Miotoma: dermatomaren azpiko zelulak, bizkarreko muskulu ildaskatuak sortuko dituztenak; batzuk paretako orrirantz migratzen dira, gorputz-adar eta gorputz-pareta muskuluak sortzeko.', focus: ['miotoma'] },
-      { at: 0.9, text: 'Esklerotomatik ornoak eta saihetsak eratzen dira (lehenik kartilago gisa), notokorda eta hodi neuralaren inguruan.', focus: ['ornoak', 'saihetsak'] },
+      {
+        at: 0,
+        recall: ['somitak'],
+        idea: 'Hasieran somitaren zelula guztiak berdinak dira.',
+        text: 'Somita mesodermo paraxialeko zelulen bola bat da, hodi neuralaren eta notokordaren alboan. Oraindik ez dago eremurik.',
+        focus: ['somitak'],
+      },
+      {
+        at: SB.sclero,
+        idea: 'Erdi-beheko (bentromediala) aldeko zelulak askatzen dira: esklerotoma.',
+        text: 'Notokordatik eta hodi neuraletik gertuen dauden zelulek itxura aldatzen dute eta solte geratzen dira (zelula marroi txikiak).',
+        focus: ['esklerotoma'],
+      },
+      {
+        at: SB.migrate,
+        idea: 'Esklerotoma zelulak erdikalderantz migratzen dute.',
+        text: 'Notokorda eta hodi neurala inguratzen dituzte (geziak). Hor eratuko dira ornoak.',
+        focus: ['esklerotoma', 'notokorda', 'hodi-neurala'],
+      },
+      {
+        at: SB.dermomyo,
+        idea: 'Geratzen den plaka dortsala dermatomiotoma da.',
+        text: 'Ektodermoaren azpian, somitaren zabalera osoan dagoen plaka da. Oraindik dermatoma eta miotoma bereizi gabe daude.',
+        focus: ['dermatomiotoma'],
+      },
+      {
+        at: SB.dermato,
+        idea: 'Plakaren kanpoko geruza dermatoma da.',
+        text: 'Plaka bi geruzatan banatzen hasten da. Ektodermotik gertuen dagoena dermatoma da: larruazaleko dermisa eta hipodermisa emango ditu.',
+        focus: ['dermatoma'],
+      },
+      {
+        at: SB.myo,
+        idea: 'Dermatomaren azpiko geruza miotoma da.',
+        text: 'Bizkarreko muskulu ildaskatuak emango ditu. Zelula batzuk paretako orrirantz migratzen dute (gezia): gorputz-adarretako eta gorputz-paretako muskuluak.',
+        key: 'Dermatoma → dermisa; miotoma → muskulua.',
+        focus: ['miotoma'],
+        ask: {
+          q: 'Zer ematen du miotomak?',
+          options: ['Muskulu ildaskatuak', 'Larruazaleko dermisa', 'Ornoak eta saihetsak'],
+          answer: 0,
+          why: ['Hori da: bizkarrekoak, eta migratutakoek gorputz-adar eta paretakoak.', 'Hori dermatomak ematen du.', 'Horiek esklerotomatik datoz.'],
+        },
+      },
+      {
+        at: SB.fate,
+        idea: 'Esklerotomatik ornoak eta saihetsak eratzen dira.',
+        text: 'Lehenik kartilago gisa, notokordaren eta hodi neuralaren inguruan (orno-gorputza eta arkua) eta gorputz-hormara (saihetsak).',
+        focus: ['ornoak', 'saihetsak'],
+        ask: {
+          q: 'Somitaren zein eremutatik datoz ornoak?',
+          options: ['Esklerotomatik', 'Dermatomatik', 'Miotomatik'],
+          answer: 0,
+          why: ['Hori da: esklerotoma notokorda eta hodi neurala inguratzera migratzen da.', 'Dermatomak dermisa ematen du.', 'Miotomak muskulua ematen du.'],
+        },
+      },
     ],
     structures: ['somitak', 'esklerotoma', 'dermatoma', 'miotoma', 'dermatomiotoma', 'notokorda', 'hodi-neurala', 'ornoak', 'saihetsak', 'mesodermo-paraxiala', 'bitarteko-mesodermoa', 'alboko-mesodermoa', 'ektodermoa', 'endodermoa', 'aorta-dortsalak'],
     keyPoints: [
@@ -612,7 +724,7 @@ export const stagesB: StageDef[] = [
       },
     ],
     beats: [
-      { at: 0, text: 'Bi tolesturek (zeharkakoa eta zefalokaudala) endodermoa eta bitelo-zakua enbrioi gorputzera sartzen dituzte, C itxura hartuz. Muturretan bi mintz daude: mintz orofaringeoa (kraneala) eta kloaka mintza (kaudala).', focus: ['estomodeoa', 'mintz-bukofaringeoa'] },
+      { at: 0, recall: ['bitelo-zaku-sekundarioa'], text: 'Bi tolesturek (zeharkakoa eta zefalokaudala) endodermoa eta bitelo-zakua enbrioi gorputzera sartzen dituzte, C itxura hartuz. Muturretan bi mintz daude: mintz orofaringeoa (kraneala) eta kloaka mintza (kaudala).', focus: ['estomodeoa', 'mintz-bukofaringeoa'] },
       { at: 0.12, text: 'Mintz orofaringeotik kloaka mintzeraino, heste endodermikoa hiru zatitan bereizten da: aurreko, erdiko eta atzeko hestea.', focus: ['aurreko-hestea', 'erdiko-hestea', 'atzeko-hestea'] },
       { at: 0.24, text: 'Aurreko hestearen hasierako zatia faringe hestea da, mintz orofaringeotik arnas hastapenaren mailaraino.', focus: ['faringe-hestea'] },
       { at: 0.34, text: 'Faringe hestean faringe poltsa bikoteak sortzen dira: hortik erdiko belarria, amigdala, timoa eta paratiroideak eratzen dira.', focus: ['faringe-poltsak'] },

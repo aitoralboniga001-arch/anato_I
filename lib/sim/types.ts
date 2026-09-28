@@ -37,13 +37,50 @@ export interface ViewDef {
   description: string;
   orientation?: Orientation;
   scene: SceneComponent;
+  /** The scene dims its own context per step (tracked-cell scenes); the shell must not dim on top. */
+  ownFocus?: boolean;
+  /** "Non nago?": where the cut lies along the body (0 = cranial … 1 = caudal) and an optional note. */
+  locator?: { level?: number; note?: string };
 }
 
 /** A narrative caption active from `at` until the next beat. `focus` highlights structures while active. */
+/** A one-tap check the guided mode asks at the end of a step, before moving on. */
+/** What a question trains: timing, origin, formation, location, relations, fate, causality, image recognition. */
+export type Competence = 'noiz' | 'jatorria' | 'eraketa' | 'kokapena' | 'erlazioak' | 'patua' | 'kausa' | 'irudia';
+
+export interface MicroQuestion {
+  q: string;
+  options: string[];
+  answer: number;
+  /** One short reason per option (why it is right, or what that option actually is). */
+  why: string[];
+  /** Competence it trains (inferred from the wording when omitted). */
+  comp?: Competence;
+  /** The structure it is about (inferred when omitted). */
+  concept?: string;
+}
+
 export interface Beat {
   at: number;
+  /** AZALPEN LABURRA: what just happened on screen, in 2–4 short sentences. */
   text: string;
+  /** IDEIA NAGUSIA: the step in one sentence (the only line the quick replay shows). */
+  idea?: string;
+  /** ULERTZEKO GAKOA: the one idea that makes this step make sense. */
+  key?: string;
+  /** AZTERKETARAKO GAKOA: what the exams have asked about this step (checked against past papers). */
+  exam?: string;
+  /** GOGORATU: earlier structures this step builds on (re-activated before it, with a way to watch them again). */
+  recall?: string[];
+  /** KONTUZ: the trap this step invites. */
+  caution?: string;
+  /** SAKONDU: longer detail, folded away by default. */
+  more?: string;
+  /** Guided mode: a micro-question at the end of the step. */
+  ask?: MicroQuestion;
   focus?: string[];
+  /** The view where this step is best seen; playback switches to it unless the viewer picked a view. */
+  view?: string;
   /**
    * Guided tour: structures lit one at a time (in their own colour, the rest shaded) while the
    * animation holds at `tourAt`, so the viewer meets each part before the process starts.
@@ -114,6 +151,8 @@ export interface StructureDef {
   fate?: string;
   caution?: string;
   related?: string[];
+  /** A space (cavity, lacuna), not a tissue — drawn and labelled differently so the two are never confused. */
+  space?: boolean;
 }
 
 export interface QuizQuestion {
@@ -123,6 +162,10 @@ export interface QuizQuestion {
   answer: number;
   explanation: string;
   stageId?: string;
+  /** Competence it trains (inferred from the wording when omitted). */
+  comp?: Competence;
+  /** The structure it is about (inferred when omitted). */
+  concept?: string;
 }
 
 export interface WeekDef {

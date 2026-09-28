@@ -146,6 +146,11 @@ export const IconGuide = ({ size }: P) => (
     <path d="M12 6.5v12.6" />
   </svg>
 );
+export const IconBolt = ({ size }: P) => (
+  <svg {...base(size)}>
+    <path d="M13 3 5 13.5h6L10 21l8-10.5h-6z" />
+  </svg>
+);
 export const IconVoice = ({ size }: P) => (
   <svg {...base(size)}>
     <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
@@ -162,6 +167,27 @@ export const IconInfo = ({ size }: P) => (
   <svg {...base(size)}>
     <circle cx="12" cy="12" r="9" />
     <path d="M12 11v6M12 7.5v.2" />
+  </svg>
+);
+
+/** Focus mode: corners opening out. */
+export const IconExpand = ({ size }: P) => (
+  <svg {...base(size)}>
+    <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+  </svg>
+);
+/** Chronology: a clock face. */
+export const IconClock = ({ size }: P) => (
+  <svg {...base(size)}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3.5 2" />
+  </svg>
+);
+export const IconImage = ({ size }: P) => (
+  <svg {...base(size)}>
+    <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" />
+    <circle cx="9" cy="10" r="1.8" />
+    <path d="M20.5 16l-5-5-8 8.5" />
   </svg>
 );
 

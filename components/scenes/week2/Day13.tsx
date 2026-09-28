@@ -16,7 +16,7 @@ import { EndometriumBack, EndometriumFront } from './Day11_12';
  */
 export const W = {
   heal: [0, 0.1],
-  villi: [0.06, 0.3],
+  villi: [0.08, 0.22],
   cavityGrow: [0.14, 0.5],
   plaka: [0.34, 0.5],
   secondary: [0.48, 0.68],
@@ -35,6 +35,8 @@ const EDGE_H = (Math.asin(-HYPO_BOTTOM / INNER) * 180) / Math.PI;
 const AMNION_L = 180 + EDGE_H;
 const AMNION_R = 360 - EDGE_H;
 const CYST = '#f2c14e';
+/** Opaque dark fill for the chorionic cavity (a space: nothing of the stroma may show through). */
+const CAVITY = '#232a3d';
 
 function fingers(a: number) {
   return 1 + 0.22 * Math.sin((a * Math.PI) / 11) + 0.12 * Math.sin((a * Math.PI) / 5.3);
@@ -81,7 +83,8 @@ function ring(g: Geo, r0: number, r1: number, a0: number, a1: number) {
   const large = a1 - a0 > 180 ? 1 : 0;
   return `M${f1(p0[0])},${f1(p0[1])} A${r1} ${r1} 0 ${large} 1 ${f1(p1[0])},${f1(p1[1])} L${f1(p2[0])},${f1(p2[1])} A${r0} ${r0} 0 ${large} 0 ${f1(p3[0])},${f1(p3[1])}Z`;
 }
-const fullRing = (g: Geo, r0: number, r1: number) => ring(g, r0, r1, 0, 359.999);
+/** Edge angle where a circle of radius r (centred on the blastocyst) meets the hypoblast line. */
+const edgeAt = (r: number) => (Math.asin(Math.min(1, -HYPO_BOTTOM / r)) * 180) / Math.PI;
 
 const CYST_A = [24, 72, 168, 328, 352];
 
@@ -107,15 +110,28 @@ function Day13Drawing({ t }: SceneProps) {
   const wYSec = wY(rYSec);
   const yolkPath = (rY: number, w: number) => `M${f1(cx - w)},${f1(hypoBottom)} A${rY} ${rY} 0 1 0 ${f1(cx + w)},${f1(hypoBottom)} Z`;
 
+  // Splanchnopleure hugs the yolk sac as it shrinks; the chorionic cavity takes the freed space.
+  const rY = lerp(rYPrim, rYSec, secondary);
+  const eY = edgeAt(rY + 5);
+  const wUp = Math.sqrt(Math.max(1, INNER * INNER - HYPO_BOTTOM * HYPO_BOTTOM));
+  const cavOut = outerInner;
+
   return (
     <g>
-      <circle cx={cx} cy={cy} r={INNER} fill="#1b2437" pointerEvents="none" />
+      {/* Chorionic cavity: one space around amnion + yolk sac, interrupted only by the connecting stalk. */}
+      <Part id="korion-barrunbea">
+        <path d={ring(g, 0.5, cavOut, stalkA1, stalkA0 + 360)} fill={CAVITY} stroke="rgba(255,255,255,0.18)" strokeWidth={0.8} />
+      </Part>
+      {/* Above the disc: the amniotic side (cap of the old blastocyst interior). */}
+      <path d={`M${f1(cx - wUp)},${f1(hypoBottom)} A${INNER} ${INNER} 0 0 1 ${f1(cx + wUp)},${f1(hypoBottom)} Z`} fill="#1b2437" pointerEvents="none" />
 
       <Part id="hasierako-bitelo-zakua" show={1 - secondary}>
+        <path d={yolkPath(rYPrim, wYPrim)} fill={CAVITY} />
         <path d={yolkPath(rYPrim, wYPrim)} fill={C.yolkCavity} />
         <path d={yolkPath(rYPrim, wYPrim)} fill="url(#g-cavity)" />
       </Part>
       <Part id="bitelo-zaku-sekundarioa" show={secondary}>
+        <path d={yolkPath(rYSec, wYSec)} fill={CAVITY} />
         <path d={yolkPath(rYSec, wYSec)} fill={C.yolkCavity} />
         <path d={yolkPath(rYSec, wYSec)} fill="rgba(242,193,78,0.2)" />
         <path d={yolkPath(rYSec, wYSec)} fill="url(#g-cavity)" />
@@ -128,17 +144,14 @@ function Day13Drawing({ t }: SceneProps) {
         })}
       </Part>
 
-      <Part id="korion-barrunbea">
-        <path d={fullRing(g, innerOuter, outerInner)} fill={C.chorionCavity} stroke="rgba(255,255,255,0.18)" strokeWidth={0.8} />
-      </Part>
       <Part id="korion-plaka">
-        <path d={fullRing(g, outerInner, Rc - CYTO)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} opacity={lerp(0.55, 1, plaka)} />
+        <path d={ring(g, outerInner, Rc - CYTO, stalkA1, stalkA0 + 360)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} opacity={lerp(0.55, 1, plaka)} />
       </Part>
       <Part id="somatopleura-kanpokoa">
         <path d={ring(g, INNER, innerOuter, AMNION_L, AMNION_R)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
       </Part>
       <Part id="esplaknopleura-kanpokoa">
-        <path d={ring(g, INNER, innerOuter, AMNION_R, AMNION_L + 360)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
+        <path d={ring(g, rY, rY + 5, 360 - eY, 540 + eY)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
       </Part>
       <Part id="finkapen-pedikulua">
         <path d={ring(g, INNER, Rc - CYTO, stalkA0, stalkA1)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1.2} />
@@ -146,6 +159,16 @@ function Day13Drawing({ t }: SceneProps) {
 
       <Part id="sinzitiotrofoblastoa">
         <path d={syncytioPath(g)} fill="url(#p-syncytio)" fillRule="evenodd" stroke={C.syncytioDeep} strokeWidth={1.2} />
+      </Part>
+      {/* The lacunar network from days 11–12 keeps its maternal blood: villi grow out between its spaces. */}
+      <Part id="sare-lakunarra">
+        {VILLI_A.map((v, i) => {
+          const a = v + 10;
+          const th = synTh(norm(a), villi);
+          if (th < 16) return null;
+          const [x, y] = polar(g, a, Rc + th * 0.5);
+          return <ellipse key={i} cx={f1(x)} cy={f1(y)} rx={f1(Math.min(9, th * 0.16))} ry={f1(Math.min(15, th * 0.3))} transform={`rotate(${f1(a)} ${f1(x)} ${f1(y)})`} fill="#b3303f" stroke="#7d1d2b" strokeWidth={0.8} opacity={0.85} />;
+        })}
       </Part>
       <Part id="biloxka-primarioa" show={villi}>
         {/* Cytotrophoblast fingers growing out of the cyto ring into the syncytium (villus cores). */}

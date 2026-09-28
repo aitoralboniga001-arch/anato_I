@@ -10,7 +10,7 @@ import { CYTO, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, discGeometry, f1, l
  *   .00-.06 fibrina koagulu txikia oraindik han · .04-.20 lakuak elkarren artean komunikatzen: sare lakunarra
  *   .16-.28 sinzitiotrofoblastoak sinusoideen pareta urratzen du · .26-.40 amaren odola lakuetan zirkulatzen hasten da
  *   .42-.68 konzeptua hazi eta enbrioi kanpoko mesodermoa agertzen da (zito eta amnios/bitelo zakuaren artean)
- *   .54-.70 mesodermoan barrunbeak ireki eta fusionatzen dira -> korion barrunbea; finkapen pedikulua geratzen da
+ *   .54-.64 mesodermoan hutsune txikiak ireki, handitu eta fusionatzen dira -> korion barrunbea; finkapen pedikulua geratzen da
  *   .62-1.0 desidua erreakzioa: estroma edematoso, zelula poliedrikoak glukogenoz beteta
  */
 export const W = {
@@ -19,7 +19,7 @@ export const W = {
   erosion: [0.16, 0.28],
   circulation: [0.26, 0.4],
   mesoGrow: [0.42, 0.68],
-  cavitate: [0.54, 0.7],
+  cavitate: [0.54, 0.64],
   decidua: [0.62, 1.0],
 } as const;
 
@@ -93,6 +93,16 @@ function lacunaBlob(g: Geo, a: number, seed: number) {
 }
 
 /** Maternal vessels close enough to the implantation site to be eroded into the lacunar network. */
+/** Spaces in the extra-embryonic mesoderm: [angle°, opening delay, relative size]. None in the stalk (251–269°). */
+const SPACES: [number, number, number][] = [
+  [285, 0.0, 0.8], [312, 0.12, 0.6], [338, 0.05, 0.9], [4, 0.16, 0.7], [30, 0.02, 0.85], [56, 0.1, 0.6], [82, 0.06, 0.9],
+  [108, 0.14, 0.7], [134, 0.03, 0.8], [160, 0.11, 0.65], [186, 0.07, 0.85], [212, 0.15, 0.6], [236, 0.09, 0.75],
+];
+/** Fluid-filled space: dark like the other cavities, so it reads as a hole in the tissue, not as tissue. */
+const CAVITY = '#232a3d';
+/** Half-width (°) each space reaches when they merge: slightly more than half the spacing, so they overlap. */
+const SPACE_W = 15;
+
 const NEAR_VESSEL = VESSELS.map(([x, y]) => Math.hypot(x - W2.cx, y - CY0) < 235);
 
 function Day1112Drawing({ t, reduced }: SceneProps) {
@@ -119,10 +129,25 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
     const large = a1 - a0 > 180 ? 1 : 0;
     return `M${f1(p0[0])},${f1(p0[1])} A${r1} ${r1} 0 ${large} 1 ${f1(p1[0])},${f1(p1[1])} L${f1(p2[0])},${f1(p2[1])} A${r0} ${r0} 0 ${large} 0 ${f1(p3[0])},${f1(p3[1])}Z`;
   };
-  const fullRing = (r0: number, r1: number) => `${ring(r0, r1, 0, 359.999)}`;
-  const genericShow = thickness > 3 ? 1 - seg(cav, 0.15, 0.55) : 0;
-  const layerShow = seg(cav, 0.15, 0.55);
-  const cavityShow = seg(cav, 0.15, 0.6);
+  // Two half-arcs per circle: a single 360° arc has coincident end points and SVG drops it.
+  const fullRing = (r0: number, r1: number) =>
+    `M${f1(cx + r1)},${f1(cy)} A${r1} ${r1} 0 1 1 ${f1(cx - r1)},${f1(cy)} A${r1} ${r1} 0 1 1 ${f1(cx + r1)},${f1(cy)} M${f1(cx + r0)},${f1(cy)} A${r0} ${r0} 0 1 0 ${f1(cx - r0)},${f1(cy)} A${r0} ${r0} 0 1 0 ${f1(cx + r0)},${f1(cy)}`;
+  // The solid tissue stays between the spaces until they have merged; only then are the two layers left.
+  const genericShow = thickness > 3 ? 1 - seg(cav, 0.7, 0.9) : 0;
+  const layerShow = seg(cav, 0.7, 0.9);
+  const cavityShow = seg(cav, 0.72, 0.9);
+  // Small spaces open at scattered points of the mesoderm, grow and merge into one cavity; the
+  // connecting stalk never hollows. Staggered so the viewer sees them appear one by one.
+  const spaces = SPACES.map(([a, delay, rr], i) => {
+    const open = seg(cav, 0.04 + delay, 0.3 + delay);
+    const merge = seg(cav, 0.45, 0.85);
+    const mid = (INNER + Rc - CYTO) / 2;
+    const half = Math.max(0, (Rc - CYTO - INNER) / 2 - 7);
+    const r0 = lerp(mid - half * rr * open, innerOuter, merge);
+    const r1 = lerp(mid + half * rr * open, outerInner, merge);
+    const w = lerp(4 * open, SPACE_W, merge);
+    return { key: i, d: open > 0.01 ? ring(Math.min(r0, r1 - 0.5), r1, a - w, a + w) : null };
+  });
 
   return (
     <g>
@@ -150,13 +175,18 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
       {thickness > 3 && (
         <>
           <Part id="enbrioi-kanpoko-mesodermoa" show={genericShow}>
-            <path d={fullRing(INNER, Rc - CYTO)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
+            <path d={fullRing(INNER, Rc - CYTO)} fill="url(#p-meso-extra)" fillRule="evenodd" stroke="#c97a52" strokeWidth={1} />
           </Part>
           <Part id="korion-barrunbea" show={cavityShow}>
-            <path d={fullRing(innerOuter, outerInner)} fill={C.chorionCavity} stroke="rgba(255,255,255,0.18)" strokeWidth={0.8} />
+            <path d={ring(innerOuter, outerInner, stalkA1, stalkA0 + 360)} fill={CAVITY} stroke="rgba(255,255,255,0.18)" strokeWidth={0.8} />
           </Part>
+          {cav > 0.02 && cavityShow < 0.99 && (
+            <Part id="korion-barrunbea">
+              {spaces.map((sp) => sp.d && <path key={sp.key} d={sp.d} fill={CAVITY} stroke={CAVITY} strokeWidth={5} strokeLinejoin="round" />)}
+            </Part>
+          )}
           <Part id="somatopleura-kanpokoa" show={layerShow}>
-            <path d={fullRing(outerInner, Rc - CYTO)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
+            <path d={fullRing(outerInner, Rc - CYTO)} fill="url(#p-meso-extra)" fillRule="evenodd" stroke="#c97a52" strokeWidth={1} />
             <path d={ring(INNER, innerOuter, AMNION_L, AMNION_R)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
           </Part>
           <Part id="esplaknopleura-kanpokoa" show={layerShow}>
@@ -280,9 +310,9 @@ function anchors(t: number) {
     cav: g.cav,
     decidua: s(t, W.decidua),
     cells: seg(t, W.decidua[0] + 0.18, 1),
-    generic: g.thickness > 3 ? 1 - seg(g.cav, 0.15, 0.55) : 0,
-    layer: seg(g.cav, 0.15, 0.55),
-    cavity: seg(g.cav, 0.15, 0.6),
+    generic: g.thickness > 3 ? 1 - seg(g.cav, 0.7, 0.9) : 0,
+    layer: seg(g.cav, 0.7, 0.9),
+    cavity: seg(g.cav, 0.35, 0.6),
     syn: (a: number) => synAt(g, a, 0.5),
     lacuna: (a: number) => synAt(g, a, 0.5),
     cyto: (a: number) => polar(g, a, g.Rc - CYTO / 2),

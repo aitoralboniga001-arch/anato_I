@@ -1,13 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import { appearances, structures } from '@/content/registry';
+import { structures } from '@/content/registry';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import { spanOf } from '@/lib/sim/age';
 import type { StageDef, WeekDef } from '@/lib/sim/types';
 import { IconCheck, IconClose, IconWarn } from './icons';
 
 const pad = (n: number) => String(n).padStart(2, '0');
+
+/** Sidebar glyph: a panel with an arrow pointing the way it will move. */
+export function IconRail({ open, side = 'left' }: { open: boolean; side?: 'left' | 'right' }) {
+  const x = side === 'left' ? 6.5 : 13.5;
+  const dir = (side === 'left') === open ? -1 : 1;
+  const c = side === 'left' ? 12.5 : 7.5;
+  return (
+    <svg width={16} height={16} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x={2.5} y={3.5} width={15} height={13} rx={2.5} />
+      <path d={`M${x} 3.5v13`} />
+      <path d={`M${c - dir} 7.5L${c + dir} 10L${c - dir} 12.5`} />
+    </svg>
+  );
+}
 
 interface OutlineProps {
   week: WeekDef;
@@ -17,13 +31,40 @@ interface OutlineProps {
   visited: string[];
   onStage: (i: number) => void;
   onBeat: (k: number) => void;
+  /** Folded into a thin rail of stage numbers, to give the scene the room. */
+  collapsed: boolean;
+  onToggle: () => void;
 }
 
-/** Left column: the week as a table of contents; the current stage unfolds into its steps. */
-export function Outline({ week, current, t, activeBeat, visited, onStage, onBeat }: OutlineProps) {
+/** Left column: the topic as a table of contents; the current stage unfolds into its steps. */
+export function Outline({ week, current, t, activeBeat, visited, onStage, onBeat, collapsed, onToggle }: OutlineProps) {
   const seen = week.stages.filter((s) => visited.includes(s.id)).length;
+  if (collapsed)
+    return (
+      <aside className="outline is-rail" aria-label="Etapak">
+        <button className="icon-btn rail-toggle" onClick={onToggle} title="Zabaldu etapen zerrenda ([)" aria-label="Zabaldu etapen zerrenda" aria-expanded={false}>
+          <IconRail open={false} />
+        </button>
+        <ol className="rail">
+          {week.stages.map((s, i) => {
+            const cur = i === current;
+            const done = visited.includes(s.id) && !cur;
+            return (
+              <li key={s.id}>
+                <button className={`rail-n${cur ? ' is-cur' : ''}${done ? ' is-done' : ''}`} onClick={() => onStage(i)} title={`${s.title} · ${s.day}`} aria-current={cur ? 'step' : undefined}>
+                  {pad(i + 1)}
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      </aside>
+    );
   return (
     <aside className="outline" aria-label="Etapak">
+      <button className="icon-btn rail-toggle" onClick={onToggle} title="Tolestu etapen zerrenda ([)" aria-label="Tolestu etapen zerrenda" aria-expanded>
+        <IconRail open />
+      </button>
       <div className="outline-head">
         <p className="kicker">
           {week.week}. gaia · {spanOf(week).long}
@@ -147,114 +188,6 @@ export function StageInfo({ stage, onSelect, onHover, onDismiss }: InfoProps) {
           </ul>
         </div>
       )}
-    </div>
-  );
-}
-
-interface InspectorProps {
-  id: string;
-  week: WeekDef;
-  onClose: () => void;
-  onSelect: (id: string) => void;
-  onGoto: (week: number, stageId: string) => void;
-  currentStageId: string;
-}
-
-/** Structure card: what it is, where it comes from, what it becomes, and where to see it. */
-export function Inspector({ id, week, onClose, onSelect, onGoto, currentStageId }: InspectorProps) {
-  const s = structures.get(id);
-  if (!s) {
-    return (
-      <div className="info-body">
-        <p className="muted pad">«{id}» ez dago glosarioan.</p>
-      </div>
-    );
-  }
-  const color = s.color ?? categoryColor[s.category];
-  const seen = appearances.get(id) ?? [];
-  const rows: [string, string | undefined][] = [
-    ['Non dago', s.location],
-    ['Jatorria', s.origin],
-    ['Zer bihurtzen da', s.fate],
-  ];
-  return (
-    <div className="info-body inspector">
-      <div className="insp-top">
-        <button className="link-quiet" onClick={onClose} title="Itxi (Esc)">
-          ← Etaparen informazioa
-        </button>
-        <button className="icon-btn" onClick={onClose} aria-label="Itxi" title="Itxi (Esc)">
-          <IconClose size={16} />
-        </button>
-      </div>
-      <div className="info-scroll">
-        <div className="insp-head">
-          <span className="insp-swatch" style={{ background: color }} />
-          <div>
-            <p className="kicker">{categoryLabel[s.category]}</p>
-            <h2 className="insp-name">{s.name}</h2>
-            {s.aka?.length ? <p className="insp-alt">Beste izenak: {s.aka.join(' · ')}</p> : null}
-          </div>
-        </div>
-
-        <p className="insp-def">{s.definition}</p>
-
-        <dl className="insp-rows">
-          {rows
-            .filter(([, v]) => v)
-            .map(([k, v]) => (
-              <div key={k}>
-                <dt>{k}</dt>
-                <dd>{v}</dd>
-              </div>
-            ))}
-        </dl>
-
-        {s.caution && (
-          <aside className="caution">
-            <p className="caution-h">
-              <IconWarn size={14} /> Kontuz
-            </p>
-            <p>{s.caution}</p>
-          </aside>
-        )}
-
-        {s.related && s.related.length > 0 && (
-          <section className="insp-sec">
-            <h3>Lotutako egiturak</h3>
-            <div className="chips">
-              {s.related
-                .filter((r) => structures.has(r))
-                .map((r) => {
-                  const rs = structures.get(r)!;
-                  return (
-                    <button key={r} className="struct-chip" onClick={() => onSelect(r)}>
-                      <i style={{ background: rs.color ?? categoryColor[rs.category] }} />
-                      {rs.name}
-                    </button>
-                  );
-                })}
-            </div>
-          </section>
-        )}
-
-        {seen.length > 0 && (
-          <section className="insp-sec">
-            <h3>Non ikusi simulazioan</h3>
-            <ul className="seen">
-              {seen.map(({ week: w, stage }) => (
-                <li key={`${w.week}-${stage.id}`}>
-                  <button className={w.week === week.week && stage.id === currentStageId ? 'is-here' : ''} onClick={() => onGoto(w.week, stage.id)}>
-                    <span className="seen-week">{pad(w.week)}</span>
-                    <span className="seen-title">{stage.title}</span>
-                    <span className="seen-day">{stage.day}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-      </div>
     </div>
   );
 }

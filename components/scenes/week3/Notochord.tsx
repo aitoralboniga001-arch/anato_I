@@ -3,6 +3,7 @@
 import { Arrow, C, Label, Note, Part, clamp, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
 import { f1 } from './common';
 import { CellCluster, DiscDrawing, MembraneMark, NotochordPlate, NotochordRod, makeDisc } from './DiscSection';
+import { NB } from './NotochordCells';
 
 /**
  * Prenotochordal cells invaginate at Hensen's node and stream cranially in the midline to the
@@ -12,10 +13,10 @@ import { CellCluster, DiscDrawing, MembraneMark, NotochordPlate, NotochordRod, m
  * through the node while this happens.
  */
 /**
- * Realistic midsagittal section (cranial = left). Fade-in windows end at the beats:
- * .16 prenotochordal cells leave the pit cranially · .34 neurenteric canal · .44 they reach the
- * prechordal plate · .5 notochordal plate intercalated in the endoderm · .66 solid notochord detaches ·
- * .78 endoderm continuous again underneath (canal closes once the notochord is complete).
+ * Realistic midsagittal section (cranial = left). Each change happens inside the step that tells it
+ * (windows NB, shared with NotochordCells): cells leave the pit and reach the prechordal plate ·
+ * neurenteric canal · notochordal plate intercalated in the endoderm · solid notochord detaches ·
+ * endoderm continuous again underneath (canal closes once the notochord is complete).
  */
 const X_NODE = 62;
 const X_BUCCO = -238;
@@ -25,11 +26,11 @@ const X_HEAD = X_PRE + 20; // cranial end of the notochord (caudal edge of the p
 
 function sagGeometry(t: number) {
   return {
-    migrate: seg(t, 0.1, 0.44),
-    canal: seg(t, 0.28, 0.34) * (1 - seg(t, 0.8, 0.9)),
-    plate: seg(t, 0.44, 0.5),
-    rod: seg(t, 0.6, 0.66),
-    close: seg(t, 0.72, 0.78),
+    migrate: seg(t, NB.migrate, NB.canal),
+    canal: seg(t, NB.canal, NB.canal + 0.05) * (1 - seg(t, NB.close, NB.close + 0.06)),
+    plate: seg(t, NB.plate, NB.plate + 0.08),
+    rod: seg(t, NB.rod, NB.rod + 0.08),
+    close: seg(t, NB.close, NB.close + 0.07),
   };
 }
 
@@ -111,7 +112,7 @@ export function NotochordSagittal({ t }: SceneProps) {
           <path d={canal} fill="#2a3a5c" stroke="#9fb6e8" strokeWidth={1.2} />
         </Part>
       )}
-      <Note x={500} y={606} show={seg(t, 0.82, 0.88)} tone="accent" size={11}>
+      <Note x={500} y={606} show={seg(t, NB.extent, NB.extent + 0.04)} tone="accent" size={11}>
         Notokorda: hobitxo primitibotik alde zefalikora, plaka prekordaleraino; hobitxotik behera ez dago notokordarik
       </Note>
 
@@ -134,14 +135,14 @@ export function NotochordSagittal({ t }: SceneProps) {
  * Two realistic transverse sections (w3 fig. 2, lower row): cranial to the node (top — prenotochordal
  * cells → notochordal plate intercalated in the endoderm → solid notochord, endoderm closing under it)
  * vs caudal to the node (bottom — primitive groove still invaginating, no notochord ever).
- * Fade-in windows end at the beats (.16 cells, .5 plate, .66 notochord, .78 endoderm closed).
+ * Windows NB, as in the other views: cells arrive, plate, notochord, endoderm closed.
  */
 function notoGeometry(t: number) {
   return {
-    pre: seg(t, 0.08, 0.16),
-    plate: seg(t, 0.44, 0.5),
-    rod: seg(t, 0.6, 0.66),
-    close: seg(t, 0.72, 0.78),
+    pre: seg(t, NB.migrate + 0.08, NB.reach),
+    plate: seg(t, NB.plate, NB.plate + 0.08),
+    rod: seg(t, NB.rod, NB.rod + 0.08),
+    close: seg(t, NB.close, NB.close + 0.07),
   };
 }
 
@@ -166,7 +167,7 @@ export function NotochordTransverse({ t }: SceneProps) {
         Nodotik behera (kaudala): ildo primitiboa, notokordarik EZ
       </text>
 
-      <Note x={500} y={606} show={seg(t, 0.82, 0.88)} tone="accent" size={11}>
+      <Note x={500} y={606} show={seg(t, NB.extent, NB.extent + 0.04)} tone="accent" size={11}>
         Notokorda: hobitxo primitibotik alde zefalikora, plaka prekordaleraino; hobitxotik behera ez dago notokordarik
       </Note>
 

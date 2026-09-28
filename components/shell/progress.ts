@@ -45,6 +45,7 @@ export const markVisited = (week: number, stageId: string) => {
     // Storage unavailable (private mode): progress simply isn't remembered.
   }
   cache.set(week, list);
+  allCache = all;
   listeners.forEach((l) => l());
 };
 
@@ -54,4 +55,15 @@ export const useVisited = (week: number) =>
     subscribe,
     () => readVisited(week),
     () => NONE,
+  );
+
+let allCache: Store | null = null;
+const EMPTY: Store = {};
+
+/** Visited stages of every topic at once (the home page's study route). */
+export const useVisitedAll = () =>
+  useSyncExternalStore(
+    subscribe,
+    () => (allCache ??= read()),
+    () => EMPTY,
   );

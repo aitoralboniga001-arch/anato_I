@@ -437,8 +437,8 @@ export const week5: WeekDef = {
       beats: [
         { at: 0, text: 'Erditze-data jakitea garrantzitsua da haurdunaldia eta fetuaren garapena kontrolatzeko, batez ere arrisku handiko haurdunaldietan.', focus: ['erditze-data'] },
         { at: 0.2, text: 'Azken hilekoaren (ziklo obarikoaren) hasieratik: 40 aste edo 280 egun. Metodo askoz zehatzagoa.', focus: ['azken-hilekoa'] },
-        { at: 0.42, text: 'Ernalkuntzatik: 38 aste edo 266 egun. Zaila da ernalkuntza-data jakitea: obulazioa aldakorra da eta espermatozoideak 6 egunez mantentzen dira.', focus: ['ernalkuntza'] },
-        { at: 0.62, text: 'Enbrioi aroa (3.–8. asteak) eta fetu aroa (9. astetik jaio arte), ernalkuntzatik kontatuta.', focus: ['enbrioi-aroa', 'fetu-aroa'] },
+        { at: 0.42, exam: 'Azterketan: haurdunaldia 266 egun (ernalkuntzatik) edo 280 egun (azken hilekotik).', text: 'Ernalkuntzatik: 38 aste edo 266 egun. Zaila da ernalkuntza-data jakitea: obulazioa aldakorra da eta espermatozoideak 6 egunez mantentzen dira.', focus: ['ernalkuntza'] },
+        { at: 0.62, exam: 'Azterketan: enbrioi aroa 3. astean hasi eta 8. astearen amaieran bukatzen da.', text: 'Enbrioi aroa (3.–8. asteak) eta fetu aroa (9. astetik jaio arte), ernalkuntzatik kontatuta.', focus: ['enbrioi-aroa', 'fetu-aroa'] },
         { at: 0.8, text: 'Espero baino lehenago jaiotzen direnak goiztiarrak dira; beranduago jaiotzen direnak, berantiarrak.', focus: ['goiztiarra', 'berantiarra'] },
       ],
       structures: ['erditze-data', 'azken-hilekoa', 'ernalkuntza', 'enbrioi-aroa', 'fetu-aroa', 'goiztiarra', 'berantiarra', 'luzera-zefalokaudala', 'vertex-orpo-luzera'],
