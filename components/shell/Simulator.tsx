@@ -6,11 +6,12 @@ import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } fro
 import { SceneContext, type QuizFlash, type SceneContextValue } from '@/components/kit/context';
 import { getWeek, isSpace, nameOf, structures, weeks } from '@/content/registry';
 import { firstSeenOf, periodOf, weekOfDay } from '@/content/chronology';
-import { ageLabel, ageParts, spanOf } from '@/lib/sim/age';
+import { ageLabel, spanOf } from '@/lib/sim/age';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { StageDef, StructureCategory, StructureDef, WeekDef } from '@/lib/sim/types';
 import { Glossary } from './Glossary';
-import { IconBook, IconCalendar, IconClock, IconExpand, IconImage, IconInfo, IconLayers, IconPlay, IconQuiz, IconTag, IconTarget, IconTree, PlaneGlyph } from './icons';
+import { IconBook, IconCalendar, IconClock, IconExpand, IconImage, IconLayers, IconMore, IconPlay, IconQuiz, IconTag, IconTarget, IconTree, PlaneGlyph } from './icons';
+import { Popover } from './Popover';
 import { Wordmark, isWip } from './LandNav';
 import { AskCard, Player, TourCard, ideaOf } from './Player';
 import { Help, useHelpOnce } from './Help';
@@ -1023,13 +1024,12 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             </Link>
           ))}
         </nav>
-        <DayRuler day={day} index={weeks.indexOf(week)} />
         <div className="tb-tools">
-          <button className={`tool${find ? ' is-on' : ''}`} onClick={() => (find ? setFind(null) : startFind())} title="Aurkitu egitura irudian">
+          <button className={`tool tool-main${find ? ' is-on' : ''}`} onClick={() => (find ? setFind(null) : startFind())} title="Aurkitu egitura irudian">
             <IconTarget size={16} /> <span>Aurkitu</span>
           </button>
           <button
-            className="tool"
+            className="tool tool-main"
             onClick={() => {
               setQuestionsConcept(undefined);
               setQuestionsOpen(true);
@@ -1038,29 +1038,60 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           >
             <IconQuiz size={16} /> <span>Galderak</span>
           </button>
-          <span className="tool-sep" aria-hidden />
-          <button className="tool tool-2" onClick={() => setGlossaryOpen(true)} title="Glosarioa">
-            <IconBook size={16} /> <span>Glosarioa</span>
-          </button>
-          <Link className="tool tool-2" href={`/kronologia?eguna=${Math.round(day)}`} title="Kronologia: zer dago egun honetan?">
-            <IconClock size={16} /> <span>Kronologia</span>
-          </Link>
-          <Link className="tool tool-2" href="/leinuak" title="Ernetze orrien leinuak">
-            <IconTree size={16} /> <span>Leinuak</span>
-          </Link>
-          <Link className="tool tool-2" href="/irudiak" title="Irudi-laborategia: irudiak azterketan bezala (etiketarik gabe)">
-            <IconImage size={16} /> <span>Irudiak</span>
-          </Link>
-          <button className={`tool tool-panel${panelOpen || infoOpen ? ' is-on' : ''}`} onClick={togglePanel} title="Azalpen-panela (])" aria-expanded={panelOpen || infoOpen}>
-            <IconInfo size={16} /> <span>Azalpena</span>
-          </button>
-          <button className="tool tool-icon" onClick={() => setFocusMode(true)} title="Foku modua: eszena pantaila osoan (F)" aria-label="Foku modua">
-            <IconExpand size={16} />
-          </button>
-          <button className="tool tool-icon" onClick={() => setHelpOpen(true)} title="Laguntza eta lasterbideak (?)" aria-label="Laguntza">
-            <span className="tool-q" aria-hidden>
-              ?
-            </span>
+          <Popover
+            trigger={({ open, toggle }) => (
+              <button className={`tool tool-icon${open ? ' is-on' : ''}`} onClick={toggle} aria-expanded={open} title="Tresna gehiago" aria-label="Tresna gehiago">
+                <IconMore size={16} />
+              </button>
+            )}
+          >
+            {(close) => (
+              <div className="menu" role="menu">
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    close();
+                    setGlossaryOpen(true);
+                  }}
+                >
+                  <IconBook size={16} /> Glosarioa
+                </button>
+                <Link role="menuitem" href={`/kronologia?eguna=${Math.round(day)}`} onClick={close}>
+                  <IconClock size={16} /> Kronologia <small>zer dago egun honetan?</small>
+                </Link>
+                <Link role="menuitem" href="/leinuak" onClick={close}>
+                  <IconTree size={16} /> Leinuak <small>ernetze orrien zuhaitza</small>
+                </Link>
+                <Link role="menuitem" href="/irudiak" onClick={close}>
+                  <IconImage size={16} /> Irudiak <small>etiketarik gabe</small>
+                </Link>
+                <hr />
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    close();
+                    setFocusMode(true);
+                  }}
+                >
+                  <IconExpand size={16} /> Foku modua <kbd>F</kbd>
+                </button>
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    close();
+                    setHelpOpen(true);
+                  }}
+                >
+                  <span className="menu-q" aria-hidden>
+                    ?
+                  </span>{' '}
+                  Laguntza <kbd>?</kbd>
+                </button>
+              </div>
+            )}
+          </Popover>
+          <button className={`tool tool-icon${panelOpen || infoOpen ? ' is-on' : ''}`} onClick={togglePanel} title="Azalpen-panela (])" aria-label="Azalpen-panela" aria-expanded={panelOpen || infoOpen}>
+            <IconRail open={infoOpen || panelOpen} side="right" />
           </button>
         </div>
       </header>
@@ -1071,8 +1102,6 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           onToggle={() => setPref('outline', !outlineOpen)}
           week={week}
           current={pos.i}
-          t={pos.t}
-          activeBeat={activeBeat}
           visited={visited}
           onStage={(i) => {
             if (playing) startIntro();
@@ -1081,7 +1110,6 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             place({ i, t: 0 });
             setSelected(null);
           }}
-          onBeat={gotoBeat}
         />
 
         <main className={`stage${find && print ? ' is-print' : ''}`}>
@@ -1169,20 +1197,6 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                     <button className="btn small ghost focus-exit" onClick={() => setFocusMode(false)} title="Irten foku modutik (F / Esc)">
                       Irten fokutik <kbd>F</kbd>
                     </button>
-                  )}
-                  {intro === null && !find && !tour && !bridge && dates.length > 0 && (
-                    // HITO-DATA: the date the exams ask about, stamped on the scene while its step plays.
-                    <div className="xstamp" key={`xd-${stage.id}-${activeBeat}`} role="status" aria-label="Azterketarako data">
-                      {dates.map((d, i) => (
-                        <span key={i} className="xstamp-i" style={{ animationDelay: `${0.15 + i * 0.3}s, ${5 + i * 0.3}s` }}>
-                          <b>
-                            <IconCalendar size={14} />
-                            {d.when}
-                          </b>
-                          <small>{d.what}</small>
-                        </span>
-                      ))}
-                    </div>
                   )}
                   {bridge && intro === null && <ViewBridge key={bridge.to.key} from={bridge.from} to={bridge.to} onClose={() => setBridge(null)} />}
                   {tour && intro === null && structures.get(tour.items[tour.idx]) && (
@@ -1386,24 +1400,3 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 }
 
 const lerpDay = (r: [number, number], t: number) => r[0] + (r[1] - r[0]) * t;
-
-/** One equal segment per topic (they span very different numbers of days); the head sits inside the current one. */
-function DayRuler({ day, index }: { day: number; index: number }) {
-  const n = weeks.length;
-  const [a, b] = weeks[index].dayRange;
-  const head = (index + Math.min(1, Math.max(0, (day - a) / Math.max(1, b - a)))) / n;
-  return (
-    <div className="day-ruler" title={`Garapenaren ${ageLabel(day)}`}>
-      <div className="day-ruler-track">
-        {weeks.map((w, i) => (
-          <span key={w.week} className={`day-ruler-week${i < index ? ' is-past' : ''}`} style={{ left: `${(i / n) * 100}%`, width: `${100 / n}%` }} />
-        ))}
-        <span className="day-ruler-head" style={{ left: `${head * 100}%` }} />
-      </div>
-      <span className="day-ruler-label">
-        <b>{ageParts(day)[0]}</b>
-        {ageParts(day)[1]}
-      </span>
-    </div>
-  );
-}

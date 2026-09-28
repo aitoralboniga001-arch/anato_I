@@ -5,7 +5,6 @@ import { structures } from '@/content/registry';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import { spanOf } from '@/lib/sim/age';
 import { NOTES, sectionLabel, type NotesSection } from '@/content/notes';
-import { ideaOf } from './Player';
 import type { StageDef, WeekDef } from '@/lib/sim/types';
 import { IconCalendar, IconCheck, IconClose, IconWarn } from './icons';
 import { stageExamDates } from '@/content/examDates';
@@ -30,11 +29,8 @@ export function IconRail({ open, side = 'left' }: { open: boolean; side?: 'left'
 interface OutlineProps {
   week: WeekDef;
   current: number;
-  t: number;
-  activeBeat: number;
   visited: string[];
   onStage: (i: number) => void;
-  onBeat: (k: number) => void;
   /** Folded into a thin rail of the notes' sections, to give the scene the room. */
   collapsed: boolean;
   onToggle: () => void;
@@ -51,22 +47,10 @@ function groupsOf(week: WeekDef) {
   return groups;
 }
 
-/** The stage list grouped under the notes' headings; the current stage unfolds into its steps. */
-function NotesList({ week, current, t, activeBeat, visited, onStage, onBeat, beats = true }: Omit<OutlineProps, 'collapsed' | 'onToggle'> & { beats?: boolean }) {
+/** The stage list grouped under the notes' headings (the steps of a stage live in the scrubber and the caption). */
+function NotesList({ week, current, visited, onStage }: Omit<OutlineProps, 'collapsed' | 'onToggle'>) {
   const groups = groupsOf(week);
   const curSec = groups.find((g) => g.items.includes(current))?.sec;
-  const steps = (s: StageDef) => (
-    <ol className="ol-beats">
-      {s.beats.map((b, k) => (
-        <li key={k} className={k === activeBeat ? 'is-on' : k < activeBeat || t >= 1 ? 'is-past' : ''}>
-          <button onClick={() => onBeat(k)} title={b.text}>
-            <span className="ol-dot" />
-            <span className="ol-beat">{ideaOf(b)}</span>
-          </button>
-        </li>
-      ))}
-    </ol>
-  );
   return (
     <ol className="nt">
       {groups.map(({ sec, items }) => {
@@ -94,7 +78,6 @@ function NotesList({ week, current, t, activeBeat, visited, onStage, onBeat, bea
                     </span>
                   </span>
                 </button>
-                {on && beats && steps(s)}
               </div>
             </li>
           );
@@ -126,7 +109,6 @@ function NotesList({ week, current, t, activeBeat, visited, onStage, onBeat, bea
                           </span>
                         </span>
                       </button>
-                      {cur && beats && steps(s)}
                     </li>
                   );
                 })}
@@ -202,7 +184,6 @@ export function Outline(p: OutlineProps) {
             <p className="kicker nt-kicker">{week.week}. gaia · Apunteen aurkibidea</p>
             <NotesList
               {...p}
-              beats={false}
               onStage={(i) => {
                 setPeek(false);
                 onStage(i);

@@ -4,7 +4,8 @@ import { firstSentence } from '@/content/generate';
 import { useRef, useState, type ReactNode } from 'react';
 import type { Beat, MicroQuestion, StageDef, StructureDef } from '@/lib/sim/types';
 import { structures } from '@/content/registry';
-import { IconBolt, IconCalendar, IconGuide, IconLoop, IconNext, IconPause, IconPlay, IconPrev, IconSkipNext, IconSkipPrev, IconVoice } from './icons';
+import { IconBolt, IconCalendar, IconGuide, IconLoop, IconNext, IconPause, IconPlay, IconPrev, IconSkipNext, IconSkipPrev, IconSliders, IconVoice } from './icons';
+import { Popover } from './Popover';
 import { categoryColor } from '@/lib/sim/palette';
 import { useCanNarrate } from './narrate';
 import type { PlayMode } from './prefs';
@@ -57,23 +58,28 @@ const pad = (n: number) => String(n).padStart(2, '0');
 /** The step in one line: its IDEIA NAGUSIA, or the first sentence of its explanation ("15. eguna" is not a sentence end). */
 export const ideaOf = (b: Beat | undefined) => b?.idea ?? b?.text.match(/^.+?(?<!\d)[.!?](?=\s|$)/)?.[0] ?? b?.text ?? '';
 
-const MODES: { id: PlayMode; label: string; title: string }[] = [
+const MODES: { id: PlayMode; label: string; title: string; hint: string }[] = [
   {
     id: 'gidatua',
     label: 'Gidatua',
     title: 'Modu gidatua: mantso, urrats bakoitzean gelditu, egiturak aurkeztu eta galdera txikiak',
+    hint: 'Mantso; urrats bakoitzean gelditzen da, egiturak aurkezten ditu eta galdera txikiak egiten ditu',
   },
   {
     id: 'arrunta',
     label: 'Arrunta',
     title: 'Modu arrunta: jarraian, urrats bakoitza irakurtzeko denborarekin',
+    hint: 'Jarraian; urrats bakoitza irakurtzeko denborarekin',
   },
   {
     id: 'azkarra',
     label: 'Azkarra',
     title: 'Modu azkarra: prozesua 20–60 segundotan berriz ikusteko, ideia nagusiak soilik',
+    hint: 'Errepasoa: prozesu osoa 20–60 segundotan, ideia nagusiak soilik',
   },
 ];
+
+const ModeIcon = ({ mode, size = 15 }: { mode: PlayMode; size?: number }) => (mode === 'gidatua' ? <IconGuide size={size} /> : mode === 'azkarra' ? <IconBolt size={size} /> : <IconPlay size={size - 3} />);
 
 /** The date tag in front of the step's idea (exam dates, "HITO-DATAK"). */
 function DateTag({ dates }: { dates: ExamDate[] }) {
@@ -353,40 +359,60 @@ export function Player(p: PlayerProps) {
           {p.day}
         </span>
 
-        <div className="tp-opts">
-          <div className="tp-mode" role="radiogroup" aria-label="Erreprodukzio modua">
-            {MODES.map((m) => (
-              <button key={m.id} role="radio" aria-checked={p.mode === m.id} className={p.mode === m.id ? 'is-on' : ''} onClick={() => p.onMode(m.id)} title={m.title}>
-                {m.id === 'gidatua' && <IconGuide size={14} />}
-                {m.id === 'azkarra' && <IconBolt size={14} />}
-                <span>{m.label}</span>
-              </button>
-            ))}
-          </div>
-          {p.guided && narrate && (
-            <button
-              className={`icon-btn${p.voice ? ' is-on' : ''}`}
-              onClick={() => p.onVoice(!p.voice)}
-              title={p.voice ? 'Ahotsa: aktibatuta' : 'Ahotsa: azalpenak ozen irakurri'}
-              aria-pressed={p.voice}
-              aria-label="Azalpenak ozen irakurri"
-            >
-              <IconVoice size={16} />
+        <Popover
+          up
+          className="tp-set"
+          trigger={({ open, toggle }) => (
+            <button className={`tp-set-btn${open ? ' is-on' : ''}`} onClick={toggle} aria-expanded={open} title="Erreprodukzio-aukerak: modua, abiadura, ahotsa (G)">
+              <ModeIcon mode={p.mode} />
+              <span>{MODES.find((m) => m.id === p.mode)?.label}</span>
+              {p.speed !== 1 && <em>{p.speed}×</em>}
+              <IconSliders size={14} />
             </button>
           )}
-          <button className="tp-speed" onClick={() => p.onSpeed(SPEEDS[(SPEEDS.indexOf(p.speed) + 1) % SPEEDS.length])} title="Abiadura (klik aldatzeko)" aria-label={`Abiadura ${p.speed}×`}>
-            {p.speed}×
-          </button>
-          <button
-            className={`icon-btn${p.autoContinue ? ' is-on' : ''}`}
-            onClick={() => p.onAutoContinue(!p.autoContinue)}
-            title={p.autoContinue ? 'Jarraian: aktibatuta — etapa bukatzean hurrengora pasatzen da' : 'Jarraian: desaktibatuta — etapa bakoitzaren amaieran gelditzen da'}
-            aria-pressed={p.autoContinue}
-            aria-label="Etapak jarraian erreproduzitu"
-          >
-            <IconLoop size={16} />
-          </button>
-        </div>
+        >
+          {() => (
+            <div className="menu tp-menu">
+              <p className="menu-h">Erreprodukzio modua</p>
+              <div role="radiogroup" aria-label="Erreprodukzio modua" className="tp-modes">
+                {MODES.map((m) => (
+                  <button key={m.id} role="radio" aria-checked={p.mode === m.id} className={p.mode === m.id ? 'is-on' : ''} onClick={() => p.onMode(m.id)} title={m.title}>
+                    <ModeIcon mode={m.id} />
+                    <span>
+                      <b>{m.label}</b>
+                      <small>{m.hint}</small>
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <hr />
+              <div className="tp-row">
+                <span>Abiadura</span>
+                <span className="tp-speeds" role="radiogroup" aria-label="Abiadura">
+                  {SPEEDS.map((v) => (
+                    <button key={v} role="radio" aria-checked={p.speed === v} className={p.speed === v ? 'is-on' : ''} onClick={() => p.onSpeed(v)}>
+                      {v}×
+                    </button>
+                  ))}
+                </span>
+              </div>
+              {p.guided && narrate && (
+                <button className="tp-row tp-switch" role="switch" aria-checked={p.voice} onClick={() => p.onVoice(!p.voice)}>
+                  <span>
+                    <IconVoice size={15} /> Azalpenak ozen irakurri
+                  </span>
+                  <i aria-hidden />
+                </button>
+              )}
+              <button className="tp-row tp-switch" role="switch" aria-checked={p.autoContinue} onClick={() => p.onAutoContinue(!p.autoContinue)} title="Etapa bukatzean hurrengora pasatzen da">
+                <span>
+                  <IconLoop size={15} /> Etapak jarraian
+                </span>
+                <i aria-hidden />
+              </button>
+            </div>
+          )}
+        </Popover>
       </div>
     </div>
   );

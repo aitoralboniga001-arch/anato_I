@@ -279,3 +279,18 @@ export const BrandMark = ({ size = 28 }: P) => (
     <circle cx="22.3" cy="21.3" r="2" fill="var(--signal, #ff6a3d)" />
   </svg>
 );
+
+export const IconMore = ({ size }: P) => (
+  <svg {...base(size)}>
+    <circle cx="5.5" cy="12" r="1.3" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none" />
+    <circle cx="18.5" cy="12" r="1.3" fill="currentColor" stroke="none" />
+  </svg>
+);
+export const IconSliders = ({ size }: P) => (
+  <svg {...base(size)}>
+    <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+    <circle cx="15" cy="7" r="2" />
+    <circle cx="9" cy="17" r="2" />
+  </svg>
+);
