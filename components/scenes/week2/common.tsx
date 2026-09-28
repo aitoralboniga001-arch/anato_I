@@ -108,6 +108,46 @@ export const EPI_TOP = -72;
 export const DISC = -48;
 export const HYPO_BOTTOM = -38;
 
+/**
+ * Days 11–13: the trophoblast shell (radius `Rc`, centre `cyC`) grows much faster than the embryo
+ * complex (amnion + disc + yolk sac, radius INNER, centre `cy`). The complex stays hung from the
+ * connecting stalk at the embryonic pole, so the chorionic cavity opens as a wide crescent around it.
+ */
+export function conceptusAt(Rc: number, gap = 10) {
+  const cyC = W2.surfaceY - gap - Rc;
+  const D = Math.max(0, Rc - CYTO - INNER);
+  const stalk = Math.min(D, 4 + 0.28 * D);
+  return { cyC, cy: cyC + stalk - D, D, stalk };
+}
+
+const rad = (deg: number) => (deg * Math.PI) / 180;
+
+/** Distance from the embryo-complex centre (cy), along angle `a`, to the cytotrophoblast's inner surface. */
+export function toCyto(cy: number, cyC: number, Rc: number, a: number) {
+  const dy = cyC - cy;
+  const b = dy * Math.sin(rad(a));
+  const ro = Rc - CYTO;
+  return b + Math.sqrt(Math.max(0, b * b - dy * dy + ro * ro));
+}
+
+/** A band around the embryo-complex centre whose inner and outer radii may vary with the angle. */
+export function bandAround(cx: number, cy: number, r0: (a: number) => number, r1: (a: number) => number, a0: number, a1: number, step = 2) {
+  const n = Math.max(2, Math.ceil(Math.abs(a1 - a0) / step));
+  const at = (a: number, r: number) => `${f1(cx + r * Math.cos(rad(a)))},${f1(cy + r * Math.sin(rad(a)))}`;
+  const outer: string[] = [];
+  const inner: string[] = [];
+  for (let i = 0; i <= n; i++) {
+    const a = a0 + ((a1 - a0) * i) / n;
+    outer.push(at(a, r1(a)));
+    inner.push(at(a, r0(a)));
+  }
+  return `M${[...outer, ...inner.reverse()].join(' L')}Z`;
+}
+
+/** A full circle as two half-arcs (a single 360° arc has coincident end points and SVG drops it). */
+export const circlePath = (cx: number, cy: number, r: number, sweep = 1) =>
+  `M${f1(cx + r)},${f1(cy)} A${r} ${r} 0 1 ${sweep} ${f1(cx - r)},${f1(cy)} A${r} ${r} 0 1 ${sweep} ${f1(cx + r)},${f1(cy)}Z`;
+
 /** Half-width of the blastocyst's inner cavity at vertical offset `dy` from the centre. */
 export const chord = (dy: number) => Math.sqrt(Math.max(0, INNER * INNER - dy * dy));
 

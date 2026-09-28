@@ -131,8 +131,11 @@ const poresOn = (t: number) => seg(t, 0.6, 0.66);
 
 /** The folds meet at the future neck in the fusion step (.44) and zip both ways until the neuropores close. */
 type Zip = { cr: number; ca: number } | null;
-/** Cranial front runs a little faster: the cranial neuropore (≈25th day) closes before the caudal one (≈28th). */
-const zipOf = (t: number): Zip => (t < 0.44 ? null : { cr: lin(t, 0.44, 0.92) * 0.46, ca: Math.pow(lin(t, 0.44, 1), 1.4) * 0.56 });
+/**
+ * Cranial front runs a little faster: the cranial neuropore (≈25th day) closes before the caudal one
+ * (≈28th). Both pores stay open until the neuropore step (.9), so that step shows them closing in order.
+ */
+const zipOf = (t: number): Zip => (t < 0.44 ? null : { cr: lin(t, 0.44, 0.95) * 0.39, ca: Math.pow(lin(t, 0.44, 0.995), 1.4) * 0.51 });
 
 function localClosure(frac: number, spread: Zip) {
   if (!spread) return 0;
@@ -240,8 +243,8 @@ function DorsalDrawing({ t }: SceneProps) {
 }
 
 /** Day ruler for the zipper: fusion starts mid-embryo (≈22), cranial pore closes (≈25), caudal (≈28). */
-const T_CRANIAL = 0.847; // localClosure(0.05) reaches 1
-const T_CAUDAL = 0.964; // localClosure(0.95) reaches 1
+const T_CRANIAL = 0.95; // localClosure(0.05) reaches 1
+const T_CAUDAL = 0.995; // localClosure(0.95) reaches 1
 function DayRuler({ t }: { t: number }) {
   const show = seg(t, ZIP_START, ZIP_START + 0.03);
   if (show <= 0.02) return null;

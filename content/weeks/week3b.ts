@@ -211,7 +211,7 @@ export const stagesB: StageDef[] = [
       { at: 0.42, text: 'Biloxka sekundarioaren hiru geruzak: erdigunean enbrioi kanpoko mesodermoa, horren inguruan zitotrofoblastoa, kanpoaldean sinzitiotrofoblastoa.', focus: ['biloxka-sekundarioa', 'zitotrofoblastoa', 'sinzitiotrofoblastoa'] },
       { at: 0.55, text: 'Mesodermoko zeluletatik angioblasto-multzoak ("odol-uharteak") agertzen dira erdigunean.', focus: ['enbrioi-kanpoko-mesodermoa', 'biloxka-kapilarrak'] },
       { at: 0.67, text: '3. astearen amaieran, odol-hodi eta odol-zelula desberdinak garatuta daude: biloxka tertziarioa (behin-betiko karena-biloxka).', focus: ['biloxka-tertziarioa', 'biloxka-kapilarrak'] },
-      { at: 0.84, text: 'Hiru biloxka moten arteko ezberdintasun bakarra erdigunea da: zitotrofoblastoa bakarrik, mesodermoa, edo mesodermoa + odol-hodiak.', focus: ['biloxka-primarioa', 'biloxka-sekundarioa', 'biloxka-tertziarioa'] },
+      { at: 0.84, view: 'zeharkakoa', text: 'Hiru biloxka moten arteko ezberdintasun bakarra erdigunea da: zitotrofoblastoa bakarrik, mesodermoa, edo mesodermoa + odol-hodiak.', focus: ['biloxka-primarioa', 'biloxka-sekundarioa', 'biloxka-tertziarioa'] },
     ],
     structures: [
       'biloxka-primarioa',

@@ -576,6 +576,7 @@ export function PlacentaFaces({ t }: SceneProps) {
       <Note x={lx} y={cy - RY - 34} show={dims} tone="accent">500–600 g</Note>
 
       <Label id="karena-aterminoa" x={850} y={250} ax={lx + RX * 0.7} ay={cy + 10} show={vis(t, 0, 0.28)} align="start" />
+      <Label id="karena" x={850} y={250} ax={lx + RX * 0.7} ay={cy + 10} show={vis(t, 0.6, 0.68)} align="start" />
       <Label id="zilborrestea" x={240} y={80} ax={lx + 4} ay={cy - RY - 80} show={vis(t, 0.2)} align="end" />
       <Label id="fetuaren-aurpegia" x={240} y={160} ax={lx - RX * 0.55} ay={cy - RY * 0.5} show={vis(t, 0.2)} align="end" />
       <Label id="korion-plaka" x={240} y={230} ax={lx - RX * 0.35} ay={cy + RY * 0.1} show={vis(t, 0.2)} align="end" text="Orri korionikoa" />

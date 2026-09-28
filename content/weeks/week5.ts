@@ -11,9 +11,8 @@ import { structures5 } from './week5-structures';
 const FILE = '5. GAIA_Enbrioi eta fetuaren ezaugarri nagusiak (zuzenduta).pdf';
 const src = (section: string) => ({ file: FILE, section });
 
+/** Embryo and fetus are both seen from their left side, face to the left: one body, followed from day 28 to birth. */
 const LATERAL = { top: 'Kraneala', bottom: 'Kaudala', left: 'Bentrala', right: 'Dortsala' };
-/** The fetus figures face right, as in the course figures. */
-const LATERAL_R = { top: 'Kraneala', bottom: 'Kaudala', left: 'Dortsala', right: 'Bentrala' };
 
 export const week5: WeekDef = {
   week: 5,
@@ -228,8 +227,8 @@ export const week5: WeekDef = {
           id: 'fetua',
           label: 'Fetua',
           plane: 'kanpokoa',
-          description: 'Fetua 9. astetik 12. astera, eskuineko aldetik: aurpegia, gorputz-adarrak, hezurtzapena eta zilborrestea.',
-          orientation: LATERAL_R,
+          description: 'Fetua 9. astetik 12. astera, ezkerreko aldetik (aurpegia ezkerrean, enbrioian bezala): aurpegia, gorputz-adarrak, hezurtzapena eta zilborrestea.',
+          orientation: LATERAL,
           scene: Fetus3rdMonth,
         },
         {
@@ -245,9 +244,9 @@ export const week5: WeekDef = {
         { at: 0.16, text: '11. astea: aurpegiak giza itxura hartzen du. Begiak aurrekaldean, sudurra begien behealdean, belarriaren pabiloiak alboetan.', focus: ['begia', 'sudurra', 'belarriaren-pabiloia'] },
         { at: 0.32, text: 'Goiko eta beheko gorputz-adarrek beren tamaina erlatiboa lortzen dute (behekoak atzeratuago doaz).', focus: ['besoa', 'izterra'] },
         { at: 0.46, text: '12. asterako hezurtzapen zentro primarioak: izterrezurrean eta garezurreko hezur batzuetan.', focus: ['hezurtzapen-zentroak'] },
-        { at: 0.6, text: 'Zilborrestean goragunea: heste lakioak (6. astetik) zilborrestera irten dira. Ernia fisiologikoa da, ez patologikoa.', focus: ['zilbor-ernia-fisiologikoa', 'heste-lakioak'] },
+        { at: 0.6, view: 'ernia', text: 'Zilborrestean goragunea: heste lakioak (6. astetik) zilborrestera irten dira. Ernia fisiologikoa da, ez patologikoa.', focus: ['zilbor-ernia-fisiologikoa', 'heste-lakioak'] },
         { at: 0.74, text: '12. asterako lakioak barrunbe abdominalera itzultzen dira, barrunbea handiagoa egiten baita.', focus: ['barrunbe-abdominala', 'heste-lakioak'] },
-        { at: 0.86, text: '12. astea: kanpoko genitalak agerian (sexua jakin daiteke). Muskulu ildaskatuetan aktibitate txikia; ama ez da ohartzen.', focus: ['kanpoko-genitalak', 'aktibitate-muskularra'] },
+        { at: 0.86, view: 'fetua', text: '12. astea: kanpoko genitalak agerian (sexua jakin daiteke). Muskulu ildaskatuetan aktibitate txikia; ama ez da ohartzen.', focus: ['kanpoko-genitalak', 'aktibitate-muskularra'] },
       ],
       structures: [
         'fetu-aroa',
@@ -318,8 +317,8 @@ export const week5: WeekDef = {
           id: 'fetua',
           label: 'Fetua',
           plane: 'kanpokoa',
-          description: 'Fetua 13. astetik 20. astera, eskuineko aldetik: luzera handitzen da, lanugoa eta ilea agertzen dira.',
-          orientation: LATERAL_R,
+          description: 'Fetua 13. astetik 20. astera, ezkerreko aldetik (aurpegia ezkerrean, enbrioian bezala): luzera handitzen da, lanugoa eta ilea agertzen dira.',
+          orientation: LATERAL,
           scene: Fetus4to5,
         },
         {
@@ -358,8 +357,8 @@ export const week5: WeekDef = {
           id: 'fetua',
           label: 'Fetua',
           plane: 'kanpokoa',
-          description: 'Fetua 21. astetik jaiotzara, eskuineko aldetik: gantza metatu eta gorputza borobiltzen da; vernix caseosa.',
-          orientation: LATERAL_R,
+          description: 'Fetua 21. astetik jaiotzara, ezkerreko aldetik (aurpegia ezkerrean, enbrioian bezala): gantza metatu eta gorputza borobiltzen da; vernix caseosa.',
+          orientation: LATERAL,
           scene: Fetus6to9,
         },
         {

@@ -724,7 +724,7 @@ const stagesA: StageDef[] = [
       { at: 0.36, text: 'Gastrulazioa ez da aldi berean gertatzen alde guztietan: alde kranealean lehenago osatzen dira geruzak eta hasten da ezberdintzea.', focus: ['ildo-primitiboa'] },
       { at: 0.5, text: 'Diskoaren alde kaudalean, ordea, gastrulazioak jarraitzen du 4. astearen bukaeraraino: ildo primitiboa poliki-poliki laburtuz (erregreditzen) doa.', focus: ['ildo-primitiboa', 'nodo-primitiboa'] },
       { at: 0.62, text: 'Ondorioz, diskoa askoz gehiago hazten da alde kranealetik: forma biribiletik udare/zapata-formara pasatzen da.', focus: ['hiru-orriko-diskoa'] },
-      { at: 0.72, text: 'Garapenaren 16. egunean, kloaka mintza agertzen den unean, bitelo zakuaren atzeko paretatik alantoidea sortzen da, finkapen pedikuluaren mesodermora hedatuz.', focus: ['alantoidea', 'kloaka-mintza'] },
+      { at: 0.72, view: 'sagitala', text: 'Garapenaren 16. egunean, kloaka mintza agertzen den unean, bitelo zakuaren atzeko paretatik alantoidea sortzen da, finkapen pedikuluaren mesodermora hedatuz.', focus: ['alantoidea', 'kloaka-mintza'] },
       { at: 0.86, text: '19–20. egunetarako, korion barrunbea gero eta handiagoa da eta finkapen pedikulua gero eta meheagoa: geroago zilbor-hestea bihurtuko da.', focus: ['finkapen-pedikulua'] },
     ],
     structures: [

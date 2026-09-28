@@ -281,7 +281,7 @@ const LR = 80;
 function stageOf(t: number): { id: string; hud: [string, string] } {
   if (t < 0.12) return { id: 'obozito-sekundarioa', hud: ['14.', ' eguna'] };
   if (t < 0.24) return { id: 'obozito-sekundarioa', hud: ['14.', ' eguna'] };
-  if (t < 0.36) return { id: 'zigotoa', hud: ['12–24', ' ordu'] };
+  if (t < 0.41) return { id: 'zigotoa', hud: ['12–24', ' ordu'] };
   if (t < 0.5) return { id: 'blastomeroak', hud: ['30', ' ordu'] };
   if (t < 0.62) return { id: 'morula', hud: ['3.', ' eguna'] };
   if (t < 0.74) return { id: 'morula', hud: ['4.', ' eguna'] };
@@ -386,7 +386,11 @@ export function TractJourney({ t }: SceneProps) {
       })}
 
       {/* The conceptus in the tract */}
-      {t >= 0.14 && <Conceptus f={f} x={pos[0]} y={pos[1]} s={0.085} corona={corona} polar={t < 0.5 ? 1 : 0} mass={mass} rot={rot} id="w1t" tiny />}
+      {t >= 0.14 && (
+        <Part id={st.id}>
+          <Conceptus f={f} x={pos[0]} y={pos[1]} s={0.085} corona={corona} polar={t < 0.5 ? 1 : 0} mass={mass} rot={rot} id="w1t" tiny />
+        </Part>
+      )}
       {t >= 0.14 && <circle cx={pos[0]} cy={pos[1]} r={20} fill="none" stroke="#ffb86b" strokeWidth={1.4} opacity={0.8} />}
 
       {/* Loupe */}
@@ -400,7 +404,9 @@ export function TractJourney({ t }: SceneProps) {
                 <circle cx={LOUPE[0]} cy={LOUPE[1]} r={LR} fill="#f3e9c6" opacity={0.25} />
               </g>
             ) : null}
-            <Conceptus f={f} x={LOUPE[0]} y={LOUPE[1]} s={0.4} corona={corona} polar={t < 0.5 ? 1 : 0} mass={mass} rot={rot} id="w1t" />
+            <Part id={st.id}>
+              <Conceptus f={f} x={LOUPE[0]} y={LOUPE[1]} s={0.4} corona={corona} polar={t < 0.5 ? 1 : 0} mass={mass} rot={rot} id="w1t" />
+            </Part>
           </g>
           <circle cx={LOUPE[0]} cy={LOUPE[1]} r={LR} fill="none" stroke="#ffb86b" strokeWidth={1.6} />
         </g>

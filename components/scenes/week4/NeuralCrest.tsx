@@ -37,6 +37,7 @@ function sectionLabels(t: number) {
   const ng = s.neural;
   const tubeL = s.map(-(ng.rho + 12) * ng.sx, ng.cy - 10);
   const home = s.map(ng.closed > 0.5 ? 14 : ng.crest[0], ng.closed > 0.5 ? ng.topBasal - 4 : ng.crest[1] - 2);
+  const fold = s.map(ng.closed > 0.5 ? -14 : -ng.crest[0], ng.closed > 0.5 ? ng.topBasal - 4 : ng.crest[1] - 2);
   const ecto = s.map(-120, 4.5);
   const mel = s.map(240, 15);
   const som = s.map(-s.somite.cx - 24, s.somite.cd + 6);
@@ -44,6 +45,7 @@ function sectionLabels(t: number) {
   const aorta = s.map(48, s.dAorta);
   return (
     <>
+      <Label id="tolesdura-neuralak" x={190} y={60} ax={fold[0] - 6} ay={fold[1]} show={1 - seg(t, 0.16, 0.19)} small />
       <Label id="hodi-neurala" x={190} y={100} ax={tubeL[0]} ay={tubeL[1]} />
       <Label id="melanozitoak" x={810} y={140} ax={mel[0]} ay={mel[1]} show={dl} small />
       <Label id="somitak" x={810} y={470} ax={som[0] + 2 * (500 - som[0])} ay={som[1]} small />
@@ -93,23 +95,25 @@ const DESTS: Dest[] = [
   { id: 'buru-aurpegi-hezurrak', at: onEll(g.cran, 175, 0.72), x: L, y: 190, group: 0 },
   { id: 'nerbio-kranialen-gongoilak', at: mid(g.bars[1].top, sp(0.0, 30), 0.55), x: L, y: 100, group: 0 },
   { id: 'buru-lepo-dermisa', at: sp(0.02, 3), x: R, y: 80, group: 0 },
-  { id: 'odontoblastoak', at: mid(g.bars[0].top, g.bars[0].bot, 0.75), x: L, y: 235, group: 1 },
-  { id: 'aurpegi-hodi-muskulu-leuna', at: [g.face[0] - 10, g.face[1]], x: L, y: 280, group: 1 },
+  { id: 'odontoblastoak', at: mid(g.bars[0].top, g.bars[0].bot, 0.75), x: L, y: 235, group: 0 },
+  { id: 'aurpegi-hodi-muskulu-leuna', at: [g.face[0] - 10, g.face[1]], x: L, y: 280, group: 0 },
   { id: 'tiroide-c-zelulak', at: mid(g.bars[3].top, g.bars[3].bot, 0.8), x: R, y: 200, group: 1 },
   { id: 'bihotz-trenkada-tronkokonala', at: onEll(g.heart, -150, 0.55), x: L, y: 325, group: 1 },
   // Trunk: skin melanocytes, peripheral nerve glia, ganglia, adrenal medulla
-  { id: 'melanozitoak', at: sp(0.38, 2), x: R, y: 320, group: 2 },
+  { id: 'melanozitoak', at: sp(0.38, 2), x: R, y: 320, group: 3 },
   { id: 'glia-zelulak', at: sp(0.3, 12), x: R, y: 250, group: 2 },
   { id: 'schwann-zelulak', at: sp(0.62, 24), x: R, y: 545, group: 2 },
-  { id: 'gongoil-errakideoak', at: sp(0.42, 22), x: R, y: 390, group: 3 },
-  { id: 'gongoil-sinpatikoak', at: sp(0.46, 44), x: R, y: 440, group: 3 },
-  { id: 'giltzurrun-gaineko-muina', at: sp(0.55, 62), x: R, y: 490, group: 3 },
-  { id: 'gongoil-parasinpatikoak', at: sp(0.5, 78), x: L, y: 420, group: 3 },
+  { id: 'gongoil-errakideoak', at: sp(0.42, 22), x: R, y: 390, group: 2 },
+  { id: 'gongoil-sinpatikoak', at: sp(0.46, 44), x: R, y: 440, group: 2 },
+  { id: 'giltzurrun-gaineko-muina', at: sp(0.55, 62), x: R, y: 490, group: 2 },
+  { id: 'gongoil-parasinpatikoak', at: sp(0.5, 78), x: L, y: 420, group: 2 },
 ];
 
+/** Each group appears with the step that names it: head (0.5), non-neural (0.65), nerves and ganglia (0.78), melanocytes (0.9). */
+const GROUP_AT = [0.46, 0.61, 0.74, 0.86];
 function groupShow(t: number, group: number) {
-  const a = 0.06 + group * 0.22;
-  return seg(t, a, a + 0.2);
+  const a = GROUP_AT[group];
+  return seg(t, a, a + 0.06);
 }
 
 function MapDrawing({ t }: SceneProps) {

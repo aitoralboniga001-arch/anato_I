@@ -6059,3 +6059,218 @@ button.ctx-bar[aria-expanded="true"] {
   align-items: center;
   gap: 10px;
 }
+
+/* ---- View bridge: the simulation moved to another view --------------------------------------- */
+.bridge {
+  position: absolute;
+  z-index: 30;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  width: min(640px, calc(100% - 28px));
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: rgba(24, 24, 27, 0.94);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  animation: now-in 0.22s var(--ease);
+}
+
+.bridge-figs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bridge figure {
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+
+.bridge figcaption {
+  font-size: 10.5px;
+  color: var(--text-4);
+  font-family: var(--font-mono);
+  text-align: center;
+  max-width: 190px;
+}
+
+.bridge-svg {
+  display: block;
+  width: 190px;
+  height: 139px;
+}
+
+.bridge-old .bridge-svg {
+  width: 96px;
+  height: 70px;
+  opacity: 0.75;
+}
+
+.bridge-arrow {
+  color: var(--text-3);
+  font-size: 18px;
+}
+
+.bridge-svg .loc-cut {
+  animation: bridge-cut 1.4s var(--ease) both;
+}
+
+@keyframes bridge-cut {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.bridge-text h4 {
+  margin: 2px 0 6px;
+  font-size: 15px;
+}
+
+.bridge-text p {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.bridge-change span {
+  color: var(--text-2);
+}
+
+.bridge-change .is-now {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+.bridge-change small {
+  color: var(--text-4);
+}
+
+.bridge-dirs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.bridge-dirs b {
+  color: #fbbf24;
+}
+
+.bridge-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.bridge-timer {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(251, 191, 36, 0.5);
+  transform-origin: left;
+  animation: bridge-timer 9s linear both;
+}
+
+@keyframes bridge-timer {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bridge-svg .loc-cut,
+  .bridge-timer {
+    animation: none;
+  }
+}
+
+@media (max-width: 700px) {
+  /* The scene is too short on phones: the card floats over the lower screen instead. */
+  .bridge {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    transform: none;
+    width: auto;
+    max-height: calc(100dvh - 180px);
+    overflow-y: auto;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .bridge-figs {
+    justify-content: center;
+  }
+  .bridge-svg {
+    width: 132px;
+    height: 97px;
+  }
+  .bridge-old .bridge-svg {
+    width: 72px;
+    height: 53px;
+  }
+  .bridge-text .muted {
+    display: none;
+  }
+}
+
+/* ——— Marker for step structures drawn too small to notice ——— */
+.mark-ring {
+  fill: none;
+  stroke: var(--focus);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+  animation: mark-pulse 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+.mark-hit {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 10;
+  pointer-events: stroke;
+  cursor: zoom-in;
+}
+.mark-tag {
+  fill: var(--focus);
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: rgba(8, 12, 22, 0.85);
+  stroke-width: 3px;
+  pointer-events: none;
+}
+@keyframes mark-pulse {
+  0%,
+  100% {
+    stroke-opacity: 1;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-opacity: 0.45;
+    stroke-dashoffset: 9;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mark-ring {
+    animation: none;
+  }
+}

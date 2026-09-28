@@ -18,6 +18,7 @@ import { Questions } from './Questions';
 import { Inspector } from './Inspector';
 import { NowCard } from './NowCard';
 import { Locator } from './Locator';
+import { ViewBridge, needsBridge, type ViewSnap } from './ViewBridge';
 import { IconRail, Outline, StageInfo } from './SidePanel';
 import { Viewport } from './Viewport';
 import { hush, speak } from './narrate';
@@ -54,14 +55,53 @@ const beatIndexAt = (stage: StageDef, t: number) => {
   return k;
 };
 
-/** Structures a step brings into focus for the first time in its stage. */
-const freshAt = (stage: StageDef, k: number): StructureDef[] => {
+/** Was the structure first shown forming in an earlier stage (of this or an earlier week)? */
+const formedBefore = (id: string, week: number, stage: StageDef) => {
+  const f = firstSeenOf(id);
+  return !!f && (f.week !== week || f.stage !== stage.id);
+};
+
+/** Structures a step brings into focus for the first time in the whole course. */
+const freshAt = (stage: StageDef, k: number, week: number): StructureDef[] => {
   const seen = new Set<string>();
   stage.beats.slice(0, k).forEach((b) => b.focus?.forEach((id) => seen.add(id)));
   // What the step asks to remember ("Gogoratu") is old by definition, not new.
   stage.beats[k]?.recall?.forEach((id) => seen.add(id));
-  return (stage.beats[k]?.focus ?? []).filter((id) => !seen.has(id) && structures.has(id)).map((id) => structures.get(id)!);
+  return (stage.beats[k]?.focus ?? []).filter((id) => !seen.has(id) && structures.has(id) && !formedBefore(id, week, stage)).map((id) => structures.get(id)!);
 };
+
+/**
+ * The stage as the caption shows it: a step that focuses on something formed in an earlier WEEK
+ * says so ("Gogoratu"), with a button to watch it form, so the student never meets it as if new.
+ */
+const recallCache = new Map<string, StageDef>();
+const withRecall = (week: number, stage: StageDef): StageDef => {
+  const key = `${week}/${stage.id}`;
+  const hit = recallCache.get(key);
+  if (hit) return hit;
+  const beats = stage.beats.map((b) => {
+    const earlier = (b.focus ?? []).filter((id) => {
+      const f = firstSeenOf(id);
+      return !!f && f.beat >= 0 && f.week < week && !b.recall?.includes(id);
+    });
+    return earlier.length ? { ...b, recall: [...(b.recall ?? []), ...earlier] } : b;
+  });
+  const out = { ...stage, beats };
+  recallCache.set(key, out);
+  return out;
+};
+
+const LAST_VIEW_KEY = 'enbrioatlas:last-view';
+/** The view shown last in ANOTHER week (so the first view of this week can be bridged from it). */
+const readLastView = (week: number): ViewSnap | null => {
+  try {
+    const v = JSON.parse(window.sessionStorage.getItem(LAST_VIEW_KEY) ?? 'null') as (ViewSnap & { at: number }) | null;
+    return v && v.week !== week && Date.now() - v.at < 30 * 60 * 1000 ? v : null;
+  } catch {
+    return null;
+  }
+};
+
 
 /** Minimum caption dwell in normal playback, with extra time for longer explanations. */
 const captionDwellMs = (stage: StageDef, k: number) => Math.max(5500, (stage.beats[k]?.text.length ?? 0) * 80);
@@ -224,6 +264,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const introClock = useRef(0);
   // Guided tour of the current step: the loop owns `tourRef`; `tour` mirrors it for rendering.
   const tourRef = useRef<Tour | null>(null);
+  const bridgeHold = useRef(false);
   const toured = useRef('');
   const [tour, setTour] = useState<{ items: string[]; idx: number } | null>(null);
   // Scenes use floating-point geometry; render them only on the client to avoid hydration mismatches.
@@ -275,7 +316,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const Scene = view.scene;
   const activeBeat = beatIndexAt(stage, pos.t);
   const beat = stage.beats[activeBeat];
-  const fresh = freshAt(stage, activeBeat);
+  const fresh = freshAt(stage, activeBeat, week.week);
   const askKey = `${stage.id}:${activeBeat}`;
 
   // Each step opens in the view where it is best seen, unless the viewer chose a view for this stage.
@@ -285,7 +326,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     const want = beat?.view;
     if (want && !manualView[stage.id] && stage.views.some((v) => v.id === want) && view.id !== want) setViewByStage((m) => ({ ...m, [stage.id]: want }));
   }
+  const [pickedView, setPickedView] = useState('');
+  /** The view-change card (see ViewBridge), set when the simulation itself moves to another view. */
+  const [bridge, setBridge] = useState<{ from: ViewSnap; to: ViewSnap } | null>(null);
   const chooseView = (id: string) => {
+    setPickedView(`${week.week}/${stage.id}/${id}`);
     setManualView((m) => ({ ...m, [stage.id]: true }));
     setViewByStage((m) => ({ ...m, [stage.id]: id }));
   };
@@ -398,7 +443,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         return;
       }
 
-      // 2) Detailed playback, step by step.
+      // 2) Detailed playback, step by step (on hold while the view bridge is being read).
+      if (bridgeHold.current) return;
       const p = live.current;
       const st = week.stages[p.i];
       let t = p.t + (dt * speed * NORMAL_RATE * (guided ? GUIDED_RATE : quick ? QUICK_RATE : 1)) / st.duration;
@@ -416,7 +462,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       if (!tr && !quick && toured.current !== tkey && t >= tourAt) {
         toured.current = tkey;
         const b = st.beats[k];
-        const items = (b.tour ?? (guided ? freshAt(st, k).map((s) => s.id) : [])).filter((id) => drawnIn(svgRef.current, id));
+        const items = (b.tour ?? (guided ? freshAt(st, k, week.week).map((s) => s.id) : [])).filter((id) => drawnIn(svgRef.current, id));
         if (items.length >= (b.tour ? 1 : 2)) {
           tr = { key: tkey, items, idx: 0, start: 0, said: false };
           tourRef.current = tr;
@@ -544,6 +590,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       place({ ...pos, t: 0 });
     }
     if (!playing && intro === null && !find && (pos.t <= 0.001 || pos.t >= 1)) startIntro();
+    // Pressing play is the answer to the view-change card: it would otherwise sit behind the preview.
+    if (!playing) setBridge(null);
     setPlaying(!playing);
   };
   /** Advance from a reading hold; in guided mode this also lets the learner stop narration. */
@@ -891,6 +939,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     onHover: setHovered,
   };
 
+  // Rings for step structures drawn too small to notice: the tour's current one, else the selection, else the step's.
+  const spot = !find && intro === null && tour ? tour.items[tour.idx] : null;
+  const marks = find || intro !== null ? [] : spot ? [spot] : selected && selectedLit ? [selected] : (beat?.focus ?? []);
+
   // Legend: categories present in this stage.
   const legend = useMemo(() => {
     const seen = new Map<StructureCategory, string>();
@@ -902,6 +954,30 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   }, [stage]);
 
   const day = lerpDay(stage.dayRange, pos.t);
+
+  // View bridge: when the simulation (not the student) moves to another way of looking at the
+  // specimen — next step, next stage, next week — it says so on the same 3-D sketch.
+  const snap: ViewSnap = { key: sceneKey, week: week.week, stageTitle: stage.title, label: view.label, plane: view.plane, day, level: view.locator?.level, orientation: view.orientation };
+  const [seenView, setSeenView] = useState<ViewSnap | null>(null);
+  if (mounted && seenView?.key !== sceneKey) {
+    const from = seenView ?? readLastView(week.week);
+    setSeenView(snap);
+    if (from && pickedView !== sceneKey && needsBridge(from, snap)) setBridge({ from, to: snap });
+    else if (bridge) setBridge(null);
+  }
+  const saveView = useEffectEvent(() => {
+    try {
+      window.sessionStorage.setItem(LAST_VIEW_KEY, JSON.stringify({ ...snap, at: Date.now() }));
+    } catch {}
+  });
+  useEffect(() => {
+    if (mounted) saveView();
+  }, [sceneKey, mounted]);
+  // Guided playback waits while the bridge is up.
+  useEffect(() => {
+    bridgeHold.current = !!bridge && guided;
+  }, [bridge, guided]);
+
   const nextStage = week.stages[pos.i + 1];
   const prevWeek = weeks[weeks.indexOf(week) - 1];
   const prevStage = week.stages[pos.i - 1] ?? prevWeek?.stages[prevWeek.stages.length - 1];
@@ -1020,7 +1096,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               <h2 title={stage.title}>{stage.title}</h2>
             </div>
             <div className="stage-side">
-              <Locator plane={view.plane} day={day} level={view.locator?.level} note={view.locator?.note} viewKey={`${stage.id}/${view.id}`} hold={helpOpen || questionsOpen || glossaryOpen} />
+              <Locator plane={view.plane} week={week.week} day={day} level={view.locator?.level} orientation={view.orientation} note={view.locator?.note} viewKey={`${stage.id}/${view.id}`} hold={helpOpen || questionsOpen || glossaryOpen || !!bridge} />
               {stage.views.length > 1 && (
                 <div className="seg" role="tablist" aria-label="Ikuspegiak">
                   {stage.views.map((v, k) => (
@@ -1040,6 +1116,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               orientation={view.orientation}
               resetKey={`${stage.id}/${view.id}`}
               onBackgroundClick={() => !find && setSelected(null)}
+              marks={marks}
+              nameOf={nameOf}
               overlay={
                 <>
                   <div className="view-tools">
@@ -1074,6 +1152,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       Irten fokutik <kbd>F</kbd>
                     </button>
                   )}
+                  {bridge && intro === null && <ViewBridge key={bridge.to.key} from={bridge.from} to={bridge.to} onClose={() => setBridge(null)} />}
                   {tour && intro === null && structures.get(tour.items[tour.idx]) && (
                     <TourCard item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} onSkip={skipTour} onPick={onSelect} />
                   )}
@@ -1178,7 +1257,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           </SceneContext.Provider>
 
           <Player
-            stage={stage}
+            stage={withRecall(week.week, stage)}
             stageIndex={pos.i}
             stageCount={week.stages.length}
             nextTitle={nextStage?.title}

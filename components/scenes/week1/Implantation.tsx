@@ -99,9 +99,11 @@ export function Implantation({ t }: SceneProps) {
           </Part>
 
           {/* Blastocyst (zona pellucida already lost) */}
+          {/* The whole blastocyst: a thin outline (its cells and cavity are their own parts). */}
           <Part id="blastozistoa">
-            <Conceptus f={f} x={cx} y={cy} s={SB} rot={ROT} mass={1} id="w1i" />
+            <circle cx={cx} cy={cy} r={142 * SB} fill="none" stroke="rgba(232,238,252,0.28)" strokeWidth={7} />
           </Part>
+          <Conceptus f={f} x={cx} y={cy} s={SB} rot={ROT} mass={1} id="w1i" parts={{ cell: (c) => (c.kind === 'enbrioblasto' || c.fate === 'enbrioblasto' ? 'enbrioblastoa' : 'trofoblastoa') }} />
           {/* Trophoblast cells next to the embryoblast wedge between the epithelial cells. */}
           {wedge > 0.01 && (
             <Part id="trofoblastoa">

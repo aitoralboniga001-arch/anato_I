@@ -163,6 +163,9 @@ function CordFormationDrawing({ t }: SceneProps) {
       </Part>
       <Part id="amniosa">
         <ellipse cx={amCx} cy={amCy} rx={amRx} ry={amRy} fill="none" stroke="#9fc3e6" strokeWidth={1.6} strokeDasharray="2 4" opacity={0.85} />
+      </Part>
+      {/* The amnios sleeve is the cord itself: primitive, then definitive, then filled with Wharton's jelly. */}
+      <Part id={whartonK > 0.4 ? 'wharton-gelatina' : t < 0.74 ? 'hasierako-zilbor-hestea' : 'behin-betiko-zilbor-hestea'} show={trunkWrap > 0.01 ? 1 : 0}>
         <path d={partialBand(...TRUNK, Math.max(trunkWrap, upWrap > 0 ? 1 : 0), 21)} fill={sleeveFill} opacity={0.9} />
         {upWrap > 0.01 && <path d={partialBand(...UP, upWrap, 19)} fill={sleeveFill} opacity={0.9} />}
       </Part>
@@ -220,13 +223,6 @@ function CordFormationDrawing({ t }: SceneProps) {
         <circle cx={RING[0]} cy={RING[1]} r={15} fill="none" stroke="#f4d7da" strokeWidth={3} opacity={0.9} />
       </Part>
 
-      {/* Behin-betiko zilbor-hestea: the final cord identity, once fused */}
-      <Part id="behin-betiko-zilbor-hestea" show={seg(t, 0.74, 0.88)} quiet>
-        <path d={bezD(...TRUNK)} fill="none" stroke="none" />
-      </Part>
-      <Part id="wharton-gelatina" show={whartonK} quiet>
-        <path d={bezD(...TRUNK)} fill="none" stroke="none" />
-      </Part>
 
       {/* Labels — left gutter */}
       <Label id="amniosa" x={200} y={80} ax={amCx + amRx * 0.7} ay={amCy - amRy * 0.65} show={vis(t, 0)} />

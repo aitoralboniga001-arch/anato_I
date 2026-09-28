@@ -658,9 +658,9 @@ export const stagesB: StageDef[] = [
       },
     ],
     beats: [
-      { at: 0, text: 'Lepo eta goiko torax mailan, bitarteko mesodermoa segmentu bereizitan (nefrotomak) antolatzen da.', focus: ['nefrotomak'] },
+      { at: 0, view: 'luzetarakoa', text: 'Lepo eta goiko torax mailan, bitarteko mesodermoa segmentu bereizitan (nefrotomak) antolatzen da.', focus: ['nefrotomak'] },
       { at: 0.14, text: 'Hortik behera, bitarteko mesodermoa masa jarraia da: kordoi nefrogenoa.', focus: ['kordoi-nefrogenoa'] },
-      { at: 0.28, text: 'Alboko mesodermoa jada bitan banatuta dago (ikus aurreko etapa): paretako orria eta errai orria, enbrioi barruko zeloma tartean dutela.', focus: ['paretako-orria', 'errai-orria', 'enbrioi-barruko-zeloma'] },
+      { at: 0.28, view: 'zeharkakoa', text: 'Alboko mesodermoa jada bitan banatuta dago (ikus aurreko etapa): paretako orria eta errai orria, enbrioi barruko zeloma tartean dutela.', focus: ['paretako-orria', 'errai-orria', 'enbrioi-barruko-zeloma'] },
       { at: 0.42, text: 'Nefrotomek eta kordoi nefrogenoak nefroiak eta gonadak sortuko dituzte.', focus: ['giltzurruna', 'gonadak'] },
       { at: 0.54, text: 'Paretako orriak gorputz-paretaren dermisa, gorputz-adarretako hezurrak eta esternoia sortuko ditu.', focus: ['paretako-orria', 'esternoia'] },
       { at: 0.66, text: 'Zeharkako tolestura amaitzean, heste-hodia gorputz-paretatik bereizten da: zelomak heste-hodia inguratzen duen barrunbe itxia osatzen du.', focus: ['enbrioi-barruko-zeloma'] },

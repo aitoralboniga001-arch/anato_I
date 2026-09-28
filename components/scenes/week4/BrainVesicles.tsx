@@ -76,6 +76,8 @@ function dorsalLabels(t: number) {
       <Label id="mesentzefaloa" x={190} y={230} ax={VX - 24} ay={mesY} show={mesA} />
       <Label id="erronbentzefaloa" x={190} y={290} ax={VX - 30} ay={rhombY} show={rhombA} />
       <Label id="ornomuina" x={810} y={420} ax={VX + 14} ay={D_BOTTOM - 60} show={cordA} />
+      {/* Before the vesicles bulge, it is one continuous tube. */}
+      <Label id="hodi-neurala" x={810} y={360} ax={VX + 14} ay={(D_TOP + D_BOTTOM) / 2} show={1 - seg(t, 0.1, 0.14)} />
     </>
   );
 }

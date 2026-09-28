@@ -1,6 +1,7 @@
 'use client';
 
-import { C, mix } from '@/components/kit';
+import type { ReactNode } from 'react';
+import { C, Part, mix } from '@/components/kit';
 import type { Cell as CCell, Frame } from '@/components/shell/intro/cleavage';
 
 /**
@@ -94,7 +95,15 @@ export interface ConceptusProps {
   cut?: number;
   /** Rotation of the whole conceptus (degrees). */
   rot?: number;
+  /**
+   * Make its structures clickable/highlightable (zona, corona, polar bodies, blastocoel and each
+   * cell with the id `cell` gives it). Leave out when a parent already wraps it in a <Part>.
+   */
+  parts?: { cell: (c: CCell) => string };
 }
+
+/** Wraps in a <Part> only when the conceptus is interactive (parts must not nest). */
+const P = ({ on, id, children }: { on: boolean; id: string; children: ReactNode }) => (on ? <Part id={id}>{children}</Part> : <>{children}</>);
 
 /** Corona radiata: radially arranged follicular cells around the zona. */
 function Corona({ r, o }: { r: number; o: number }) {
@@ -115,7 +124,8 @@ function Corona({ r, o }: { r: number; o: number }) {
   return <g opacity={o}>{cells}</g>;
 }
 
-export function Conceptus({ f, x, y, s = 1, corona = 0, polar = 0, mass = 0, id = 'w1c', tiny, cut = 0, rot = 0 }: ConceptusProps) {
+export function Conceptus({ f, x, y, s = 1, corona = 0, polar = 0, mass = 0, id = 'w1c', tiny, cut = 0, rot = 0, parts }: ConceptusProps) {
+  const on = !!parts;
   const inPair = new Set(f.pairs.flat());
   const units: { z: number; cells: CCell[]; goo: boolean }[] = [
     ...f.pairs.map(([a, b]) => ({ z: (f.cells[a].z + f.cells[b].z) / 2, cells: [f.cells[a], f.cells[b]], goo: true })),
@@ -124,24 +134,35 @@ export function Conceptus({ f, x, y, s = 1, corona = 0, polar = 0, mass = 0, id 
   const zo = f.zonaO;
   return (
     <g transform={`translate(${x} ${y}) scale(${s}) rotate(${rot})`}>
-      <Corona r={f.zonaR} o={corona * zo} />
+      <P on={on && corona * zo > 0.02} id="koroa-erradiatua">
+        <Corona r={f.zonaR} o={corona * zo} />
+      </P>
       {zo > 0.01 && (
+        <P on={on} id="mintz-peluzidoa">
         <g opacity={zo}>
           <circle r={f.zonaR + 9} fill="none" stroke={C.zona} strokeOpacity={0.55} strokeWidth={18} />
           <circle r={f.zonaR + 18} fill="none" stroke="#b64f6b" strokeWidth={tiny ? 4 : 1.6} />
           <circle r={f.zonaR} fill="none" stroke="#b64f6b" strokeWidth={1} strokeOpacity={0.7} />
         </g>
+        </P>
       )}
       {polar > 0.01 && (
+        <P on={on} id="gorpuskulu-polarrak">
         <g opacity={polar * zo}>
           <circle cx={84} cy={-92} r={10} fill={C.blastomere} stroke="rgba(40,16,20,0.55)" strokeWidth={1.2} />
           <circle cx={100} cy={-72} r={7.5} fill={C.blastomere} stroke="rgba(40,16,20,0.55)" strokeWidth={1.2} />
         </g>
+        </P>
       )}
-      {f.cavO > 0.01 && <circle r={f.cavR} fill={`url(#${id}-cav)`} opacity={f.cavO} />}
+      {f.cavO > 0.01 && (
+        <P on={on && f.cavO > 0.3} id="blastozelea">
+          <circle r={f.cavR} fill={`url(#${id}-cav)`} opacity={f.cavO} />
+        </P>
+      )}
       {units.map((u, k) =>
         u.goo ? (
-          <g key={k}>
+          <P key={k} on={on} id={parts ? parts.cell(u.cells[0]) : ''}>
+          <g>
             <g filter={`url(#${id}-goo)`}>
               {u.cells.map((c, j) => (
                 <CellShape key={j} c={c} mass={mass} stroke={false} />
@@ -151,8 +172,10 @@ export function Conceptus({ f, x, y, s = 1, corona = 0, polar = 0, mass = 0, id 
               <Nucleus key={j} c={c} />
             ))}
           </g>
+          </P>
         ) : (
-          <g key={k} opacity={cut > 0 && u.cells[0].fate === 'trofoblasto' && u.cells[0].z > 0.45 ? 1 - 0.6 * cut : 1}>
+          <P key={k} on={on} id={parts ? parts.cell(u.cells[0]) : ''}>
+          <g opacity={cut > 0 && u.cells[0].fate === 'trofoblasto' && u.cells[0].z > 0.45 ? 1 - 0.6 * cut : 1}>
             <CellShape c={u.cells[0]} mass={mass} />
             <ellipse
               cx={u.cells[0].x}
@@ -164,6 +187,7 @@ export function Conceptus({ f, x, y, s = 1, corona = 0, polar = 0, mass = 0, id 
             />
             <Nucleus c={u.cells[0]} />
           </g>
+          </P>
         ),
       )}
       {f.pro.o > 0.01 && (

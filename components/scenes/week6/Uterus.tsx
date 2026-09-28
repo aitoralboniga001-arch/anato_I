@@ -239,6 +239,7 @@ export function UterusSagittal({ t }: SceneProps) {
       <Label id="paretako-dezidua" x={240} y={150} ax={dec[15][0] + 9} ay={dec[15][1]} show={vis(t, 0.4)} align="end" />
       <Label id="korion-barrunbea" x={240} y={210} ax={onE(sac, 200, -sac.rx * 0.1)[0]} ay={onE(sac, 200, -sac.rx * 0.1)[1]} show={vis(t, 0, 0.92)} align="end" />
       <Label id="dezidua-kapsularra" x={240} y={270} ax={wallA(125, caps * 0.6)[0]} ay={wallA(125, caps * 0.6)[1]} show={Math.min(capsShow, vis(t, 0.4))} align="end" />
+      <Label id="biloxka-sekundarioa" x={240} y={330} ax={wallA(165, villLen * 0.4)[0]} ay={wallA(165, villLen * 0.4)[1]} show={vis(t, 0, 0.12)} align="end" />
       <Label id="korion-leuna" x={240} y={330} ax={wallA(165, 0)[0]} ay={wallA(165, 0)[1]} show={vis(t, 0.26, 0.86)} align="end" />
       <Label id="mutur-anenbrionarioa" x={240} y={390} ax={wallA(wallMid + 180, caps + 2)[0]} ay={wallA(wallMid + 180, caps + 2)[1]} show={vis(t, 0.26, 0.4)} align="end" small />
       <Label id="amniosa" x={240} y={390} ax={onE(am, 175)[0]} ay={onE(am, 175)[1]} show={vis(t, 0.5, 0.86)} align="end" />

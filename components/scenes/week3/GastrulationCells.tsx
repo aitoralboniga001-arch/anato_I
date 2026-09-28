@@ -460,6 +460,7 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
       <Label id="hipoblastoa" x={170} y={HYP_Y + 2} ax={MID - HALF + 34} ay={HYP_Y} small show={1 - seg(t, GB.endo + 0.04, GB.endo + 0.06)} />
       <Label id="hipoblastoa" x={836} y={HYP_Y + 2} ax={MID + HALF - 34} ay={HYP_Y} small show={seg(t, GB.endo + 0.06, GB.endo + 0.09)} />
       <Label id="bitelo-zaku-sekundarioa" x={MID - 170} y={470} align="middle" small />
+      <Label id="hiru-orriko-diskoa" text="Hiru orriko diskoa" x={836} y={272} ax={MID + HALF - 30} ay={272} small show={triOn} />
     </g>
   );
 }

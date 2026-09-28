@@ -166,6 +166,16 @@ export function VilliLongSection(props: SceneProps) {
       <VillusDefs />
       <VilliDefs />
       <VilliLongSectionDrawing {...props} />
+      {/* Karena = fetal part (chorionic plate + villi + shell) + maternal part (endometrium / decidua). */}
+      <Part id="karenaren-ama-atala" show={karena}>
+        <Bracket x={910} y0={12} y1={114} color="#e8a0a8" />
+      </Part>
+      <Part id="karenaren-fetu-atala" show={karena}>
+        <Bracket x={910} y0={122} y1={PLATE.bottom} color="#7fd1a8" />
+      </Part>
+      <Part id="karena" show={karena}>
+        <Bracket x={926} y0={12} y1={PLATE.bottom} color="#f4c06a" />
+      </Part>
       <Label id="endometrioa" x={190} y={48} ax={280} ay={48} show={vis(t, 0)} />
       <Label id="amaren-odol-hodiak" x={190} y={92} ax={370} ay={94} show={vis(t, 0.16)} />
       <Label id="kanpoko-zorro-zitotrofoblastikoa" x={300} y={132} align="end" ax={228} ay={112} show={vis(t, 0)} />
@@ -177,14 +187,27 @@ export function VilliLongSection(props: SceneProps) {
 
       <Label id="biloxka-tertziarioa" x={740} y={150} ax={VL[1].x + VL[1].hw - 6} ay={230} show={vis(t, 0)} />
       <Label id="biloxka-arteko-espazioa" x={740} y={200} ax={772} ay={260} show={vis(t, 0.16)} />
-      <Label id="biloxka-kapilarrak" x={810} y={255} ax={VL[2].x + VL[2].half} ay={BASE.vessel - VL[2].loopLen * 0.55} show={Math.max(vis(t, 0.32), pathHighlight)} />
-      <Label id="endotelioa" x={810} y={305} ax={VL[2].x + VL[2].half + 6} ay={BASE.vessel - VL[2].loopLen * 0.5} show={Math.max(vis(t, 0.82), layerHighlight)} />
+      <Label id="biloxka-kapilarrak" x={770} y={255} ax={VL[2].x + VL[2].half} ay={BASE.vessel - VL[2].loopLen * 0.55} show={Math.max(vis(t, 0.32), pathHighlight)} />
+      <Label id="endotelioa" x={770} y={305} ax={VL[2].x + VL[2].half + 6} ay={BASE.vessel - VL[2].loopLen * 0.5} show={Math.max(vis(t, 0.82), layerHighlight)} />
       <Label id="finkapen-pedikulua" x={810} y={500} ax={508} ay={560} show={vis(t, 0.32)} />
       <Label id="zilbor-hodiak" x={810} y={550} ax={508} ay={PLATE.bottom + 30} show={vis(t, 0.32)} />
 
+      <Label id="karena" x={900} y={590} align="end" ax={926} ay={PLATE.bottom} show={karena} />
+      <Label id="karenaren-ama-atala" x={896} y={64} align="end" ax={910} ay={64} show={karena} small />
+      <Label id="karenaren-fetu-atala" x={896} y={420} align="end" ax={910} ay={420} show={karena} small />
       <Note x={500} y={608} show={karena} tone="accent">
         Karena: fetu-osagaia (trofoblastoa) + ama-osagaia (endometrioa)
       </Note>
+    </g>
+  );
+}
+
+/** Vertical bracket (with a wide invisible hit strip) marking what a composite structure spans. */
+function Bracket({ x, y0, y1, color }: { x: number; y0: number; y1: number; color: string }) {
+  return (
+    <g>
+      <rect x={x - 6} y={y0} width={14} height={y1 - y0} fill="transparent" />
+      <path d={`M${x - 8},${y0} H${x} V${y1} H${x - 8}`} fill="none" stroke={color} strokeWidth={3} strokeLinejoin="round" />
     </g>
   );
 }

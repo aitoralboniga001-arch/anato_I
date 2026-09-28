@@ -13,6 +13,8 @@ const vis = (t: number, a: number, b = 2) => Math.min(a <= 0 ? 1 : seg(t, a, a +
 const CX = 500;
 const CY = 350;
 const GAP = 34; // half-angle (deg) of the top gap where the stalk enters
+/** Angles (deg, 0 = right, clockwise) of the stem villi, clear of the top gap. */
+const STEMS = [-50, -15, 20, 55, 90, 125, 160, 195, 230];
 
 function SacDefs() {
   return (
@@ -70,6 +72,14 @@ function SacDrawing({ t, reduced }: SceneProps) {
       <Part id="biloxka-arteko-espazioa" quiet show={vis(t, 0.16)}>
         <path d={smoothPath(villiPts, true, 0.55)} fill="none" />
       </Part>
+      {/* Stem (anchoring) villi: plate → shell, the trunks the free villi branch from. */}
+      <Part id="biloxka-enborra" show={vis(t, 0)}>
+        {STEMS.map((deg) => {
+          const a = (deg * Math.PI) / 180;
+          const p = (r: number) => `${CX + Math.cos(a) * r},${CY + Math.sin(a) * r}`;
+          return <path key={deg} d={`M${p(R3 - 4)} L${p(R1 - 6)}`} stroke="#11573b" strokeWidth={9} strokeLinecap="round" />;
+        })}
+      </Part>
       <Part id="korion-plaka" show={vis(t, 0)}>
         <circle cx={CX} cy={CY} r={R3} fill="#3f8f5e" stroke="#2c6b41" strokeWidth={1.2} />
       </Part>
@@ -124,7 +134,9 @@ export function ChorionicSac({ t, reduced }: SceneProps) {
       <Label id="kanpoko-zorro-zitotrofoblastikoa" x={300} y={140} align="end" ax={CX - 236} ay={CY - 30} />
       <Label id="biloxka-askea" x={740} y={140} ax={CX + 214} ay={CY - 60} show={Math.max(0.4, branch)} />
       <Label id="biloxka-arteko-espazioa" x={740} y={190} ax={CX + 190} ay={CY + 20} show={vis(t, 0.16)} />
+      <Label id="biloxka-enborra" x={300} y={185} align="end" ax={CX - 195} ay={CY - 52} />
       <Label id="korion-plaka" x={190} y={230} ax={CX - 160} ay={CY + 40} />
+      <Label id="biloxka-tertziarioa" x={190} y={280} ax={CX - 190} ay={CY + 69} show={vis(t, 0, 0.2)} />
       <Label id="korion-barrunbea" x={810} y={280} ax={CX + 110} ay={CY + 60} />
       <Label id="finkapen-pedikulua" x={190} y={330} ax={CX - 6} ay={CY - 50} />
       <Label id="amnios-barrunbea" x={810} y={330} ax={CX + 16} ay={CY - 24} />
@@ -200,6 +212,10 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
         <ellipse cx={CX + 12} cy={CY - 8} rx={10} ry={12} fill="#f2c14e" opacity={0.85} />
       </Part>
       <ellipse cx={CX - 8} cy={CY - 28} rx={9} ry={13} fill="#7aa7f5" opacity={0.9} />
+      <Part id="zilbor-hodiak" show={vis(t, 0)}>
+        <path d={`M${CX - 2},${CY - 46} L${CX - 2},${CY - V_R + 96}`} stroke={C.artery} strokeWidth={2} />
+        <path d={`M${CX + 2},${CY - 46} L${CX + 2},${CY - V_R + 96}`} stroke={C.vein} strokeWidth={2} />
+      </Part>
 
       {!reduced && (
         <>
@@ -232,6 +248,7 @@ export function SacCirculation({ t, reduced }: SceneProps) {
       <Label id="korion-plaka" x={190} y={280} ax={CX - (V_R - 62)} ay={CY + 30} text="Korion-orria" />
       <Label id="korion-barrunbea" x={810} y={330} ax={CX + (V_R - 90) - 4} ay={CY + 30} />
       <Label id="sinzitiotrofoblastoa" x={190} y={380} ax={CX - V_R + 8} ay={CY + 70} text="Sinzitioa" />
+      <Label id="zilbor-hodiak" x={190} y={130} ax={CX - 3} ay={CY - 80} show={vis(t, 0.76)} />
 
       <Note x={500} y={600} show={sep} tone="warn">
         Amaren eta fetuaren odolak ez dute inoiz kontakturik

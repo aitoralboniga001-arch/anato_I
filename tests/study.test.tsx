@@ -6,6 +6,7 @@ import { structures, weeks } from '@/content/registry';
 import { COMPETENCES, POOL } from '@/content/pool';
 import { competenceLevel } from '@/components/shell/answers';
 import { dirAt } from '@/components/shell/ImageLab';
+import { needsBridge, type ViewSnap } from '@/components/shell/ViewBridge';
 
 describe('chronology', () => {
   it('only dates structures that exist', () => {
@@ -159,5 +160,21 @@ describe('definition and location questions', () => {
   });
   it('offer four different places', () => {
     for (const g of generated.filter((x) => x.skill === 'kokapena')) expect(new Set(g.options).size, g.id).toBe(4);
+  });
+});
+
+describe('view bridge', () => {
+  const snap = (week: number, day: number, plane: ViewSnap['plane']): ViewSnap => ({ key: `${week}/${plane}`, week, stageTitle: '', label: '', plane, day });
+  it('explains a change of cut or of object, not a zoom or a diagram', () => {
+    expect(needsBridge(snap(3, 16, 'sagitala'), snap(3, 16, 'zeharkakoa'))).toBe(true);
+    expect(needsBridge(snap(2, 13, 'sagitala'), snap(3, 15, 'sagitala'))).toBe(true);
+    expect(needsBridge(snap(3, 16, 'sagitala'), snap(3, 16, 'xehetasuna'))).toBe(false);
+    expect(needsBridge(snap(3, 16, 'sagitala'), snap(3, 16, 'sagitala'))).toBe(false);
+    expect(needsBridge(snap(4, 25, 'zeharkakoa'), snap(4, 25, 'eskema'))).toBe(false);
+  });
+
+  it('only switches a step to a view its stage has', () => {
+    const bad = weeks.flatMap((w) => w.stages.flatMap((s) => s.beats.filter((b) => b.view && !s.views.some((v) => v.id === b.view)).map((b) => `${w.week}/${s.id}@${b.at}`)));
+    expect(bad).toEqual([]);
   });
 });

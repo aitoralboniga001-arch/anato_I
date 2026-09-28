@@ -1,6 +1,6 @@
 'use client';
 
-import { Label, Note, lerp, seg, type SceneProps } from '@/components/kit';
+import { Label, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
 import { cleavageFrame } from '@/components/shell/intro/cleavage';
 import { Hud, MiniTract, vis } from './common';
 import { Conceptus, ConceptusDefs } from './conceptus';
@@ -48,7 +48,16 @@ export function Segmentation({ t }: SceneProps) {
       <ConceptusDefs />
       {/* Reference ring: the conceptus does not grow while it divides. */}
       <circle cx={CX} cy={CY} r={158 * S} fill="none" stroke="rgba(255,255,255,0.12)" strokeDasharray="3 7" opacity={vis(t, 0.26, 0.66)} />
-      <Conceptus f={f} x={CX} y={CY} s={S} polar={polar} mass={mass} cut={cut} />
+      <Conceptus
+        f={f}
+        x={CX}
+        y={CY}
+        s={S}
+        polar={polar}
+        mass={mass}
+        cut={cut}
+        parts={{ cell: (c) => (mass > 0.5 ? (c.fate === 'enbrioblasto' ? 'enbrioblastoa' : 'trofoblastoa') : count === 1 ? 'zigotoa' : t >= 0.66 ? 'morula' : 'blastomeroak') }}
+      />
 
       <Label id="zigotoa" x={250} y={150} ax={one[0] - 40} ay={one[1] - 30} show={vis(t, 0, 0.12)} />
       <Label id="mintz-peluzidoa" x={800} y={470} ax={zona[0]} ay={zona[1]} />
@@ -94,13 +103,32 @@ export function BlastocystFormation({ t }: SceneProps) {
   f.zonaO = Math.min(f.zonaO, 1 - zonaLoss);
   const day = lerp(4, 5, seg(t, 0, 0.72));
   const done = seg(t, 0.72, 0.78);
+  // Named as soon as the single cavity (blastocoel) exists, the step that introduces the word.
+  const named = seg(t, 0.6, 0.66);
   const ROT = 43; // embryonic pole up, as it will face the endometrium
   const RB = 138;
   const embC: [number, number] = [CX, CY - 72 * S];
   return (
     <g>
       <ConceptusDefs />
-      <Conceptus f={f} x={CX} y={CY} s={S} rot={ROT} mass={1} />
+      {/* The uterine cavity it has just entered (day 4–5). */}
+      <Part id="umetoki-barrunbea" quiet>
+        <ellipse cx={CX} cy={CY} rx={430} ry={280} fill="rgba(190,90,110,0.06)" stroke="rgba(214,120,140,0.35)" strokeWidth={2} strokeDasharray="6 6" />
+      </Part>
+      {named > 0.02 && (
+        <Part id="blastozistoa" show={named}>
+          <circle cx={CX} cy={CY} r={(RB + 6) * S} fill="none" stroke="rgba(232,238,252,0.28)" strokeWidth={7} />
+        </Part>
+      )}
+      <Conceptus
+        f={f}
+        x={CX}
+        y={CY}
+        s={S}
+        rot={ROT}
+        mass={1}
+        parts={{ cell: (c) => (cav < 0.3 ? 'morula' : c.kind === 'enbrioblasto' || c.fate === 'enbrioblasto' ? 'enbrioblastoa' : 'trofoblastoa') }}
+      />
       {/* Fluid entering between the cells: small spaces that grow and fuse. */}
       {cav > 0.01 && cav < 0.75 && (
         <g transform={`translate(${CX} ${CY}) scale(${S})`} pointerEvents="none">
@@ -118,7 +146,8 @@ export function BlastocystFormation({ t }: SceneProps) {
       <Label id="blastozelea" x={800} y={300} ax={CX + 30 * S} ay={CY + 30 * S} show={seg(t, 0.55, 0.62)} />
       <Label id="mutur-enbrionarioa" x={800} y={110} ax={CX + 8} ay={CY - RB * S - 4} show={seg(t, 0.84, 0.88)} />
       <Label id="mutur-anenbrionarioa" x={250} y={540} ax={CX} ay={CY + RB * S + 4} show={seg(t, 0.84, 0.88)} />
-      <Label id="blastozistoa" x={250} y={420} ax={CX - 120 * S} ay={CY + 40 * S} show={done} />
+      <Label id="blastozistoa" x={250} y={420} ax={CX - 120 * S} ay={CY + 40 * S} show={named} />
+      <Label id="umetoki-barrunbea" x={250} y={560} ax={CX - 300} ay={CY + 200} show={vis(t, 0, 0.26)} />
 
       <Note x={CX} y={606} tone="accent" show={vis(t, 0.08, 0.26)}>
         Umetokiaren barrunbean mintz peluzidoa galtzen da

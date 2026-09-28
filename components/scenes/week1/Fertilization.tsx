@@ -200,7 +200,9 @@ export function Fertilization({ t }: SceneProps) {
         </radialGradient>
       </defs>
 
-      <Corona o={coronaO * (1 - cortical * 0.15)} gapDeg={WINNER_DEG} gapOpen={seg(t, 0.12, 0.28)} />
+      <Part id="koroa-erradiatua" show={coronaO > 0.02 ? 1 : 0}>
+        <Corona o={coronaO * (1 - cortical * 0.15)} gapDeg={WINNER_DEG} gapOpen={seg(t, 0.12, 0.28)} />
+      </Part>
 
       {/* Zona pellucida: thickens/tints slightly once the cortical reaction seals it. */}
       <Part id="mintz-peluzidoa">
@@ -279,7 +281,7 @@ export function Fertilization({ t }: SceneProps) {
       <Label id="gorpuskulu-polarrak" x={790} y={210} align="start" ax={polar1[0]} ay={polar1[1]} show={vis(t, 0.02, 0.64)} />
 
       <Label id="kapazitazioa" x={210} y={290} ax={pt(CORONA_R1 + 6, WINNER_DEG - 14)[0]} ay={pt(CORONA_R1 + 6, WINNER_DEG - 14)[1]} show={vis(t, 0.1, 0.26)} />
-      <Label id="akrosoma" x={210} y={250} ax={winner.x} ay={winner.y} show={vis(t, 0.02, 0.3)} />
+      <Label id="akrosoma" x={210} y={250} ax={winner.x} ay={winner.y} show={vis(t, 0.02, 0.46)} />
       <Label id="akrosoma-erreakzioa" x={210} y={330} ax={winner.x} ay={winner.y} show={vis(t, 0.28, 0.44)} />
       <Label id="erreakzio-kortikala" x={790} y={470} align="start" ax={pt(OO_R - 2, -20)[0]} ay={pt(OO_R - 2, -20)[1]} show={vis(t, 0.42, 0.58)} />
       <Label id="espermatozoidea" x={210} y={200} ax={winner.x - 22} ay={winner.y - 4} show={vis(t, 0.02, 0.44)} />

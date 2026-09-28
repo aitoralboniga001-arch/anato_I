@@ -1,7 +1,7 @@
 'use client';
 
 import { C, Arrow, Cell, Flow, Label, Note, Part, lerp, mix, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
-import { CYTO, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, discGeometry, f1, lensPath } from './common';
+import { CYTO, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, bandAround, circlePath, conceptusAt, discGeometry, f1, lensPath, toCyto } from './common';
 
 /**
  * 11-12. eguna — sare lakunarra, hasierako zirkulazio uteroplazentarioa, enbrioi kanpoko
@@ -29,7 +29,8 @@ const norm = (a: number) => (a < 90 ? a + 360 : a);
 
 /** The abembryonic pole stays just under the surface (small residual gap); the centre deepens as the conceptus grows. */
 const GAP0 = 16;
-const RC_MAX = 150;
+/** Trophoblast radius at the end of day 12; day 13 continues from here. */
+export const RC_END = 175;
 const CY0 = W2.surfaceY - 10 - R;
 /** Angle where the hypoblast disc's edge meets the cytotrophoblast (amnion/disc side has no Heuser membrane). */
 const EDGE_H = (Math.asin(-HYPO_BOTTOM / INNER) * 180) / Math.PI;
@@ -46,18 +47,26 @@ function synTh(a: number) {
   return (7 + 63 * p) * (1 + (fingers(a) - 1) * p);
 }
 
+/**
+ * The trophoblast shell (centre cyC) grows much faster than the embryo complex (amnion + disc +
+ * yolk sac, centre cy), which stays hung from the future connecting stalk at the embryonic pole.
+ */
 function geometry(t: number) {
   const grow = seg(t, W.mesoGrow[0], W.cavitate[1]);
-  const Rc = lerp(R, RC_MAX, grow);
-  const cy = W2.surfaceY - 10 - Rc;
+  const Rc = lerp(R, RC_END, grow);
+  const { cyC, cy, D } = conceptusAt(Rc);
   const core = discGeometry(W2.cx, cy);
   const cav = s(t, W.cavitate);
-  const thickness = Math.max(0, Rc - CYTO - INNER);
-  return { ...core, Rc, cav, thickness, fib: lerp(1, 0.3, s(t, W.fibrin)) };
+  return { ...core, cyC, Rc, cav, thickness: D, fib: lerp(1, 0.3, s(t, W.fibrin)) };
 }
 type Geo = ReturnType<typeof geometry>;
 
-const polar = (g: Geo, a: number, r: number): Pt => [g.cx + r * Math.cos(rad(a)), g.cy + r * Math.sin(rad(a))];
+/** Around the trophoblast centre (syncytio, lacunae, cyto). */
+const polar = (g: Geo, a: number, r: number): Pt => [g.cx + r * Math.cos(rad(a)), g.cyC + r * Math.sin(rad(a))];
+/** Around the embryo-complex centre (mesoderm, cavity, stalk). */
+const polarE = (g: Geo, a: number, r: number): Pt => [g.cx + r * Math.cos(rad(a)), g.cy + r * Math.sin(rad(a))];
+/** From the embryo-complex centre to the cytotrophoblast's inner face, along angle a. */
+const outR = (g: Geo, a: number) => toCyto(g.cy, g.cyC, g.Rc, a);
 const synAt = (g: Geo, a: number, frac: number): Pt => polar(g, a, g.Rc + frac * synTh(norm(a)));
 
 function syncytioPath(g: Geo) {
@@ -66,7 +75,7 @@ function syncytioPath(g: Geo) {
     const a = 90 + i * 3;
     pts.push(polar(g, a, g.Rc + synTh(a)));
   }
-  return `${smoothPath(pts, true)}${`M${f1(g.cx + g.Rc)},${f1(g.cy)} A${g.Rc} ${g.Rc} 0 1 0 ${f1(g.cx - g.Rc)},${f1(g.cy)} A${g.Rc} ${g.Rc} 0 1 0 ${f1(g.cx + g.Rc)},${f1(g.cy)}Z`}`;
+  return `${smoothPath(pts, true)}${circlePath(g.cx, g.cyC, g.Rc, 0)}`;
 }
 
 /** Lacunae, already merged by the end of day 9: fixed angular slots that grow and, once networked, join by thin necks. */
@@ -98,8 +107,9 @@ const SPACES: [number, number, number][] = [
   [285, 0.0, 0.8], [312, 0.12, 0.6], [338, 0.05, 0.9], [4, 0.16, 0.7], [30, 0.02, 0.85], [56, 0.1, 0.6], [82, 0.06, 0.9],
   [108, 0.14, 0.7], [134, 0.03, 0.8], [160, 0.11, 0.65], [186, 0.07, 0.85], [212, 0.15, 0.6], [236, 0.09, 0.75],
 ];
-/** Fluid-filled space: dark like the other cavities, so it reads as a hole in the tissue, not as tissue. */
-const CAVITY = '#232a3d';
+/** Fluid-filled space: darker than the amnion (blue) and the yolk sac (yellow), as in week 3. */
+export const CAVITY = '#111a2e';
+const YOLK_WALL = '#f7d98a';
 /** Half-width (°) each space reaches when they merge: slightly more than half the spacing, so they overlap. */
 const SPACE_W = 15;
 
@@ -115,23 +125,16 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
   const cells = seg(t, W.decidua[0] + 0.18, 1);
   const lens = lensPath(g);
 
-  // Mesoderm ring geometry: solid until cavitation starts, then hollows into two thin layers + a fixed bridge.
-  const bandTh = Math.max(2.2, Math.min(thickness, lerp(thickness, 5, cav)));
-  const innerOuter = INNER + bandTh; // outer edge of the inner (splanchno/somato) band
-  const outerInner = Math.max(innerOuter, Rc - CYTO - bandTh); // inner edge of the outer (somatopleura) band
-  const stalkA0 = 251;
-  const stalkA1 = 269;
-  const ring = (r0: number, r1: number, a0: number, a1: number) => {
-    const p0 = polar(g, a0, r1);
-    const p1 = polar(g, a1, r1);
-    const p2 = polar(g, a1, r0);
-    const p3 = polar(g, a0, r0);
-    const large = a1 - a0 > 180 ? 1 : 0;
-    return `M${f1(p0[0])},${f1(p0[1])} A${r1} ${r1} 0 ${large} 1 ${f1(p1[0])},${f1(p1[1])} L${f1(p2[0])},${f1(p2[1])} A${r0} ${r0} 0 ${large} 0 ${f1(p3[0])},${f1(p3[1])}Z`;
-  };
-  // Two half-arcs per circle: a single 360° arc has coincident end points and SVG drops it.
-  const fullRing = (r0: number, r1: number) =>
-    `M${f1(cx + r1)},${f1(cy)} A${r1} ${r1} 0 1 1 ${f1(cx - r1)},${f1(cy)} A${r1} ${r1} 0 1 1 ${f1(cx + r1)},${f1(cy)} M${f1(cx + r0)},${f1(cy)} A${r0} ${r0} 0 1 0 ${f1(cx - r0)},${f1(cy)} A${r0} ${r0} 0 1 0 ${f1(cx + r0)},${f1(cy)}`;
+  // Mesoderm between the embryo complex and the cyto: solid first, then it hollows into two thin
+  // layers joined by the stalk. Widths vary with the angle (short at the stalk, widest abembryonically).
+  const width = (a: number) => Math.max(0, outR(g, a) - INNER);
+  const bandTh = (a: number) => Math.max(2.2, lerp(width(a) / 2, 5, cav));
+  const inner = () => INNER;
+  const innerB = (a: number) => INNER + bandTh(a);
+  const outer = (a: number) => outR(g, a);
+  const outerB = (a: number) => Math.max(innerB(a), outR(g, a) - bandTh(a));
+  const stalkA0 = 247;
+  const stalkA1 = 273;
   // The solid tissue stays between the spaces until they have merged; only then are the two layers left.
   const genericShow = thickness > 3 ? 1 - seg(cav, 0.7, 0.9) : 0;
   const layerShow = seg(cav, 0.7, 0.9);
@@ -141,12 +144,12 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
   const spaces = SPACES.map(([a, delay, rr], i) => {
     const open = seg(cav, 0.04 + delay, 0.3 + delay);
     const merge = seg(cav, 0.45, 0.85);
-    const mid = (INNER + Rc - CYTO) / 2;
-    const half = Math.max(0, (Rc - CYTO - INNER) / 2 - 7);
-    const r0 = lerp(mid - half * rr * open, innerOuter, merge);
-    const r1 = lerp(mid + half * rr * open, outerInner, merge);
+    const mid = (b: number) => (INNER + outR(g, b)) / 2;
+    const half = (b: number) => Math.max(0, width(b) / 2 - 7);
+    const r0 = (b: number) => lerp(mid(b) - half(b) * rr * open, innerB(b), merge);
+    const r1 = (b: number) => lerp(mid(b) + half(b) * rr * open, outerB(b), merge);
     const w = lerp(4 * open, SPACE_W, merge);
-    return { key: i, d: open > 0.01 ? ring(Math.min(r0, r1 - 0.5), r1, a - w, a + w) : null };
+    return { key: i, d: open > 0.01 ? bandAround(cx, cy, (b) => Math.min(r0(b), r1(b) - 0.5), r1, a - w, a + w) : null };
   });
 
   return (
@@ -163,8 +166,9 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
           const yolk = `M${f1(cx - wY)},${f1(hypoBottom)} A${rY} ${rY} 0 1 0 ${f1(cx + wY)},${f1(hypoBottom)} Z`;
           return (
             <>
+              <path d={bandAround(cx, cy, () => INNER - 4.5, () => INNER, AMNION_R, AMNION_L + 360)} fill={YOLK_WALL} opacity={0.75} />
               <path d={yolk} fill={C.yolkCavity} />
-              <path d={yolk} fill="rgba(242,193,78,0.12)" />
+              <path d={yolk} fill="rgba(242,193,78,0.34)" />
               <path d={yolk} fill="url(#g-cavity)" />
             </>
           );
@@ -175,10 +179,10 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
       {thickness > 3 && (
         <>
           <Part id="enbrioi-kanpoko-mesodermoa" show={genericShow}>
-            <path d={fullRing(INNER, Rc - CYTO)} fill="url(#p-meso-extra)" fillRule="evenodd" stroke="#c97a52" strokeWidth={1} />
+            <path d={`${circlePath(cx, g.cyC, Rc - CYTO)}${circlePath(cx, cy, INNER)}`} fill="url(#p-meso-extra)" fillRule="evenodd" stroke="#c97a52" strokeWidth={1} />
           </Part>
           <Part id="korion-barrunbea" show={cavityShow}>
-            <path d={ring(innerOuter, outerInner, stalkA1, stalkA0 + 360)} fill={CAVITY} stroke="rgba(255,255,255,0.18)" strokeWidth={0.8} />
+            <path d={bandAround(cx, cy, innerB, outerB, stalkA1, stalkA0 + 360)} fill={CAVITY} stroke="rgba(255,255,255,0.22)" strokeWidth={0.8} />
           </Part>
           {cav > 0.02 && cavityShow < 0.99 && (
             <Part id="korion-barrunbea">
@@ -186,14 +190,14 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
             </Part>
           )}
           <Part id="somatopleura-kanpokoa" show={layerShow}>
-            <path d={fullRing(outerInner, Rc - CYTO)} fill="url(#p-meso-extra)" fillRule="evenodd" stroke="#c97a52" strokeWidth={1} />
-            <path d={ring(INNER, innerOuter, AMNION_L, AMNION_R)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
+            <path d={bandAround(cx, cy, outerB, outer, 0, 360)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
+            <path d={bandAround(cx, cy, inner, innerB, AMNION_L, AMNION_R)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
           </Part>
           <Part id="esplaknopleura-kanpokoa" show={layerShow}>
-            <path d={ring(INNER, innerOuter, AMNION_R, AMNION_L + 360)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
+            <path d={bandAround(cx, cy, inner, innerB, AMNION_R, AMNION_L + 360)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
           </Part>
           <Part id="finkapen-pedikulua" show={1}>
-            <path d={ring(INNER, Rc - CYTO, stalkA0, stalkA1)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1.2} />
+            <path d={bandAround(cx, cy, inner, outer, stalkA0, stalkA1)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1.2} />
           </Part>
         </>
       )}
@@ -244,7 +248,7 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
 
       <Part id="zitotrofoblastoa">
         <path
-          d={`M${f1(cx + Rc)},${f1(cy)} A${Rc} ${Rc} 0 1 1 ${f1(cx - Rc)},${f1(cy)} A${Rc} ${Rc} 0 1 1 ${f1(cx + Rc)},${f1(cy)} M${f1(cx + Rc - CYTO)},${f1(cy)} A${Rc - CYTO} ${Rc - CYTO} 0 1 0 ${f1(cx - (Rc - CYTO))},${f1(cy)} A${Rc - CYTO} ${Rc - CYTO} 0 1 0 ${f1(cx + Rc - CYTO)},${f1(cy)}`}
+          d={`${circlePath(cx, g.cyC, Rc)}${circlePath(cx, g.cyC, Rc - CYTO, 0)}`}
           fill={C.cyto}
           fillRule="evenodd"
           stroke="#4a9d63"
@@ -255,6 +259,8 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
       <Part id="amnios-barrunbea">
         <path d={lens} fill="#6d9be6" opacity={0.42} />
         <path d={lens} fill="url(#g-cavity)" />
+        {/* Amnion roof (amnioblasts): once the mesoderm separates it from the cyto it is a wall of its own. */}
+        <path d={bandAround(cx, cy, () => INNER - 4, () => INNER, AMNION_L, AMNION_R)} fill={C.amnioblast} opacity={0.85} />
       </Part>
       <Part id="epiblastoa">
         <TrapBand cx={cx} yTop={epiTop} yBottom={discY} wTop={wEpiTop} wBottom={wDisc} n={15} color={C.epiblast} shape="columnar" />
@@ -316,11 +322,12 @@ function anchors(t: number) {
     syn: (a: number) => synAt(g, a, 0.5),
     lacuna: (a: number) => synAt(g, a, 0.5),
     cyto: (a: number) => polar(g, a, g.Rc - CYTO / 2),
-    meso: (a: number, r: number) => polar(g, a, r),
+    /** A point in the mesoderm: fraction f of the way from the embryo complex to the cyto (+ offset px). */
+    meso: (a: number, f: number, off = 0) => polarE(g, a, lerp(INNER, outR(g, a), f) + off),
     amnios: [cx - 22, (cy - INNER + epiTop) / 2 + 2] as Pt,
     epi: [cx + 38, (epiTop + discY) / 2] as Pt,
     yolk: [cx - 14, cy + 60] as Pt,
-    stalk: polar(g, 260, (INNER + g.Rc - CYTO) / 2),
+    stalk: polarE(g, 260, (INNER + outR(g, 260)) / 2),
   };
 }
 
@@ -344,8 +351,9 @@ export function Day1112Section(props: SceneProps) {
       {L('zitotrofoblastoa', 190, 515, k.cyto(140))}
       {L('endometrio-epitelioa', 190, 560, [300, W2.surfaceY - 8])}
       {L('mutur-enbrionarioa', 810, 250, k.cyto(276))}
-      {L('enbrioi-kanpoko-mesodermoa', 810, 380, k.meso(300, (INNER + k.g.Rc - CYTO) / 2), k.generic)}
-      {L('korion-barrunbea', 810, 430, k.meso(220, (INNER + k.g.Rc - CYTO) / 2), k.cavity)}
+      {/* Still named while it hollows out (step "Hasieran ehun betea da…"), then its two sheets take over. */}
+      {L('enbrioi-kanpoko-mesodermoa', 810, 380, k.meso(300, 0.5), Math.max(k.generic, seg(t, 0.42, 0.46) * (1 - seg(t, 0.62, 0.64))))}
+      {L('korion-barrunbea', 810, 430, k.meso(220, 0.5), k.cavity)}
       {L('finkapen-pedikulua', 810, 470, k.stalk, k.layer)}
       {L('amnios-barrunbea', 810, 515, k.amnios)}
       {L('epiblastoa', 810, 560, k.epi)}
@@ -410,7 +418,8 @@ export function Day1112Meso(props: SceneProps) {
   const { t } = props;
   const k = anchors(t);
   const { cx, cy } = k.g;
-  const z = zoom(cx, cy - 10, 1.85, 500, 320);
+  // Fixed frame (centred where the shell ends up), so the growth of the chorionic cavity is seen.
+  const z = zoom(cx, W2.surfaceY - 10 - RC_END, 1.25, 500, 320);
   const L = makeL(z.at);
   const arrowShow = k.layer;
   return (
@@ -420,12 +429,12 @@ export function Day1112Meso(props: SceneProps) {
         <EndometriumBack decidua={0} />
         <Day1112Drawing {...props} />
       </g>
-      <Arrow from={z.at(...k.meso(230, k.g.Rc - CYTO + 6))} to={z.at(...k.meso(230, INNER - 6))} bend={0} color={C.mesoExtra} show={arrowShow * 0.9} progress={1} />
+      <Arrow from={z.at(...k.meso(230, 1, 6))} to={z.at(...k.meso(230, 0, -6))} bend={0} color={C.mesoExtra} show={arrowShow * 0.9} progress={1} />
       {L('zitotrofoblastoa', 180, 90, k.cyto(200))}
-      {L('enbrioi-kanpoko-mesodermoa', 192, 150, k.meso(300, (INNER + k.g.Rc - CYTO) / 2), k.generic)}
-      {L('somatopleura-kanpokoa', 180, 210, k.meso(300, k.g.Rc - CYTO - 4), k.layer)}
-      {L('korion-barrunbea', 180, 400, k.meso(215, (INNER + k.g.Rc - CYTO) / 2), k.cavity)}
-      {L('esplaknopleura-kanpokoa', 180, 460, k.meso(160, INNER + 4), k.layer)}
+      {L('enbrioi-kanpoko-mesodermoa', 192, 150, k.meso(300, 0.5), Math.max(k.generic, seg(t, 0.42, 0.46) * (1 - seg(t, 0.62, 0.64))))}
+      {L('somatopleura-kanpokoa', 180, 210, k.meso(300, 1, -4), k.layer)}
+      {L('korion-barrunbea', 180, 400, k.meso(215, 0.5), k.cavity)}
+      {L('esplaknopleura-kanpokoa', 180, 460, k.meso(160, 0, 4), k.layer)}
       {L('hasierako-bitelo-zakua', 180, 520, k.yolk)}
       {L('finkapen-pedikulua', 800, 150, k.stalk, k.layer)}
       {L('amnios-barrunbea', 800, 210, k.amnios)}
@@ -442,7 +451,7 @@ export function Day1112Desidua(props: SceneProps) {
   const { t } = props;
   const k = anchors(t);
   const { cx, cy } = k.g;
-  const z = zoom(cx - 190, cy - 190, 2.1, 500, 320);
+  const z = zoom(cx - 190, k.g.cyC - 190, 2.1, 500, 320);
   const L = makeL(z.at);
   return (
     <g>
@@ -460,6 +469,7 @@ export function Day1112Desidua(props: SceneProps) {
       {L('sare-lakunarra', 800, 160, k.lacuna(212), k.network)}
       {L('zirkulazio-uteroplazentarioa', 790, 250, k.lacuna(236), k.circ)}
       {L('sinzitiotrofoblastoa', 800, 400, k.syn(240))}
+      {L('bi-orriko-diskoa', 800, 460, [cx + 12, cy], seg(t, 0.9, 0.93))}
       <Note x={500} y={588} tone="warn" show={seg(k.erosion, 0.5, 1)}>
         Sinzitiotrofoblastoak sinusoideen pareta urratu du: amaren odola laku sarean zirkulatzen hasten da
       </Note>

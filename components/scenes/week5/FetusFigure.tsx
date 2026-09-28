@@ -361,9 +361,11 @@ export function FetusFigure({ id, week, pose, s, hernia = 0, vernix = 0 }: Fetus
  * the horizontal centre of the body, `cy` the middle of the vertex–rump line (or the lowest
  * point when `base` is set).
  */
-export function placeFetus(cm: number, pxcm: number, cx: number, cy: number, base = false) {
+export function placeFetus(cm: number, pxcm: number, cx: number, cy: number, base = false, mirror = false) {
   const s = (cm * pxcm) / 100;
   const m: Pt = [-2, base ? 100 : 50];
-  const xf = (p: readonly number[]): Pt => [cx + (p[0] - m[0]) * s, cy + (p[1] - m[1]) * s];
-  return { s, xf, vertex: xf([1, 0]), rump: xf([-3, 100]), transform: `translate(${cx} ${cy}) scale(${s}) translate(${-m[0]} ${-m[1]})` };
+  // `mirror`: face to the left, as the embryo views of days 28–56 do, so the student follows one body.
+  const sx = mirror ? -1 : 1;
+  const xf = (p: readonly number[]): Pt => [cx + sx * (p[0] - m[0]) * s, cy + (p[1] - m[1]) * s];
+  return { s, xf, vertex: xf([1, 0]), rump: xf([-3, 100]), transform: `translate(${cx} ${cy}) scale(${sx * s} ${s}) translate(${-m[0]} ${-m[1]})` };
 }

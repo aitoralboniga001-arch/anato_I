@@ -6,8 +6,9 @@ import { LEN, WT, fmtWeight, interp } from './growth';
 import { FetusFigure, fetusGeom, placeFetus, type FetusPose } from './FetusFigure';
 
 /**
- * Fetal period (topic 5, §2), drawn like the course figures (fetuses of 9–38 weeks, side view
- * facing right, curled) and TO SCALE inside each stage: the ruler and the length/weight
+ * Fetal period (topic 5, §2), drawn like the course figures (fetuses of 9–38 weeks, side view,
+ * curled) but facing LEFT like the embryo of days 28–56 before it, so the student follows one
+ * body through the change of name (the course figures face right: the image lab trains both) and TO SCALE inside each stage: the ruler and the length/weight
  * read-outs come from the notes' table ("Enbrio aroko luzeera eta pisuen gehikuntza").
  * The fetus moves: kicks, hand-to-mouth (sucking) and breathing movements.
  */
@@ -20,7 +21,7 @@ const CY = 330;
 /** The figure placed so its vertex–rump length is the table's length at `pxcm` px per cm. */
 function place(day: number, pxcm: number) {
   const cm = interp(LEN, weekOf(day));
-  return { cm, ...placeFetus(cm, pxcm, CX, CY) };
+  return { cm, ...placeFetus(cm, pxcm, CX, CY, false, true) };
 }
 
 function Ruler({ pxcm, step, max }: { pxcm: number; step: number; max: number }) {
@@ -165,17 +166,17 @@ export function Fetus3rdMonth({ t }: SceneProps) {
       )}
       <Ruler pxcm={58} step={1} max={8} />
 
-      <Label id="begia" x={790} y={200} ax={x(g.eye)[0] + 4} ay={x(g.eye)[1]} show={vis(t, 0.16)} />
-      <Label id="sudurra" x={790} y={250} ax={x(g.nose)[0] + 2} ay={x(g.nose)[1]} show={vis(t, 0.16)} />
-      <Label id="belarriaren-pabiloia" x={230} y={230} ax={x(g.ear)[0] - 6} ay={x(g.ear)[1]} show={vis(t, 0.16)} />
-      <Label id="besoa" x={230} y={330} ax={arm[0]} ay={arm[1]} show={vis(t, 0.32, 0.46)} />
-      <Label id="izterra" x={230} y={420} ax={femur[0]} ay={femur[1]} show={vis(t, 0.32, 0.46)} />
-      <Label id="hezurtzapen-zentroak" x={230} y={420} ax={femur[0]} ay={femur[1]} show={oss} />
-      <Label id="hezurtzapen-zentroak" text="Garezurreko hezurrak" x={230} y={120} ax={skull[0]} ay={skull[1]} show={oss} />
-      <Label id="zilbor-ernia-fisiologikoa" x={790} y={390} ax={loops[0] + 8} ay={loops[1]} show={vis(t, 0.6, 0.86)} />
-      <Label id="heste-lakioak" x={790} y={440} ax={loops[0] + 4} ay={loops[1] + 6} show={vis(t, 0.6, 0.76)} />
-      <Label id="kanpoko-genitalak" x={790} y={500} ax={gen[0]} ay={gen[1]} show={vis(t, 0.86)} />
-      <Label id="aktibitate-muskularra" x={790} y={550} ax={x(g.foot)[0] + 8} ay={x(g.foot)[1]} show={vis(t, 0.86)} />
+      <Label id="begia" x={230} y={200} ax={x(g.eye)[0] + 4} ay={x(g.eye)[1]} show={vis(t, 0.16)} />
+      <Label id="sudurra" x={230} y={250} ax={x(g.nose)[0] + 2} ay={x(g.nose)[1]} show={vis(t, 0.16)} />
+      <Label id="belarriaren-pabiloia" x={790} y={230} ax={x(g.ear)[0] - 6} ay={x(g.ear)[1]} show={vis(t, 0.16)} />
+      <Label id="besoa" x={790} y={330} ax={arm[0]} ay={arm[1]} show={vis(t, 0.32, 0.46)} />
+      <Label id="izterra" x={790} y={420} ax={femur[0]} ay={femur[1]} show={vis(t, 0.32, 0.46)} />
+      <Label id="hezurtzapen-zentroak" x={790} y={420} ax={femur[0]} ay={femur[1]} show={oss} />
+      <Label id="hezurtzapen-zentroak" text="Garezurreko hezurrak" x={790} y={120} ax={skull[0]} ay={skull[1]} show={oss} />
+      <Label id="zilbor-ernia-fisiologikoa" x={230} y={390} ax={loops[0] + 8} ay={loops[1]} show={vis(t, 0.6, 0.86)} />
+      <Label id="heste-lakioak" x={230} y={440} ax={loops[0] + 4} ay={loops[1] + 6} show={vis(t, 0.6, 0.76)} />
+      <Label id="kanpoko-genitalak" x={230} y={500} ax={gen[0]} ay={gen[1]} show={vis(t, 0.86)} />
+      <Label id="aktibitate-muskularra" x={230} y={550} ax={x(g.foot)[0] + 8} ay={x(g.foot)[1]} show={vis(t, 0.86)} />
       <Note x={40} y={520} align="start" tone="accent" show={vis(t, 0.74, 0.86)}>
         12. astea: lakioak barrunbe abdominalean
       </Note>
@@ -199,11 +200,11 @@ export function Fetus4to5({ t }: SceneProps) {
       <Ruler pxcm={26} step={1} max={20} />
       <CrlLine a={Pl.vertex} b={Pl.rump} show={1} />
 
-      <Label id="luzera-zefalokaudala" x={230} y={470} ax={lerp(Pl.vertex[0], Pl.rump[0], 0.6)} ay={lerp(Pl.vertex[1], Pl.rump[1], 0.6)} />
-      <Label id="buruko-ilea" x={230} y={120} ax={scalp[0]} ay={scalp[1]} show={vis(t, 0.52)} />
-      <Label id="bekainak" x={790} y={200} ax={x(g.brow)[0] + 4} ay={x(g.brow)[1]} show={vis(t, 0.52)} />
-      <Label id="lanugoa" x={230} y={360} ax={back[0]} ay={back[1]} show={vis(t, 0.52)} />
-      <Label id="aktibitate-muskularra" x={790} y={500} ax={x(g.foot)[0] + 6} ay={x(g.foot)[1]} show={vis(t, 0.76)} />
+      <Label id="luzera-zefalokaudala" x={790} y={470} ax={lerp(Pl.vertex[0], Pl.rump[0], 0.6)} ay={lerp(Pl.vertex[1], Pl.rump[1], 0.6)} />
+      <Label id="buruko-ilea" x={790} y={120} ax={scalp[0]} ay={scalp[1]} show={vis(t, 0.52)} />
+      <Label id="bekainak" x={230} y={200} ax={x(g.brow)[0] + 4} ay={x(g.brow)[1]} show={vis(t, 0.52)} />
+      <Label id="lanugoa" x={790} y={360} ax={back[0]} ay={back[1]} show={vis(t, 0.52)} />
+      <Label id="aktibitate-muskularra" x={230} y={500} ax={x(g.foot)[0] + 6} ay={x(g.foot)[1]} show={vis(t, 0.76)} />
       <Note x={40} y={520} align="start" tone="accent" show={vis(t, 0.28, 0.52)}>
         5. hilabetearen bukaeran: ~15 cm · ~500 g
       </Note>
@@ -230,11 +231,11 @@ export function Fetus6to9({ t }: SceneProps) {
       <Ruler pxcm={14} step={1} max={36} />
       <CrlLine a={Pl.vertex} b={Pl.rump} show={vis(t, 0.86)} />
 
-      <Label id="gantz-metaketa" text="Larruazala ximurra eta gorrixka" x={230} y={440} ax={flank[0]} ay={flank[1]} show={vis(t, 0.16, 0.3)} />
-      <Label id="gantz-metaketa" x={230} y={470} ax={fatP[0]} ay={fatP[1]} show={vis(t, 0.58)} />
-      <Label id="vernix-caseosa" x={230} y={300} ax={vern[0]} ay={vern[1]} show={vis(t, 0.72)} />
-      <Label id="lanugoa" x={230} y={150} ax={hair[0]} ay={hair[1]} show={vis(t, 0, 0.16)} />
-      <Label id="luzera-zefalokaudala" x={790} y={540} ax={lerp(Pl.vertex[0], Pl.rump[0], 0.6)} ay={lerp(Pl.vertex[1], Pl.rump[1], 0.6)} show={vis(t, 0.86)} />
+      <Label id="gantz-metaketa" text="Larruazala ximurra eta gorrixka" x={770} y={440} ax={flank[0]} ay={flank[1]} show={vis(t, 0.16, 0.3)} />
+      <Label id="gantz-metaketa" x={790} y={470} ax={fatP[0]} ay={fatP[1]} show={Math.max(vis(t, 0, 0.16), vis(t, 0.58))} />
+      <Label id="vernix-caseosa" x={790} y={300} ax={vern[0]} ay={vern[1]} show={vis(t, 0.72)} />
+      <Label id="lanugoa" x={790} y={150} ax={hair[0]} ay={hair[1]} show={vis(t, 0, 0.16)} />
+      <Label id="luzera-zefalokaudala" x={230} y={540} ax={lerp(Pl.vertex[0], Pl.rump[0], 0.6)} ay={lerp(Pl.vertex[1], Pl.rump[1], 0.6)} show={vis(t, 0.86)} />
 
       <Note x={40} y={520} align="start" tone="warn" show={vis(t, 0.3, 0.44)}>
         6. hilabetea: bizirautea zaila
@@ -279,7 +280,7 @@ export function FetusLineup({ t }: SceneProps) {
           kick: Math.max(0, Math.sin(t * 26 + i * 2.3)) ** 8 * 0.55,
           nod: 3 * Math.sin(ph * 0.3),
         };
-        const Pl = placeFetus(cm, LINE_PX, f.x, BASE, true);
+        const Pl = placeFetus(cm, LINE_PX, f.x, BASE, true, true);
         return (
           <g key={f.tag} opacity={show}>
             <g transform={Pl.transform}>

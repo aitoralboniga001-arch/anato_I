@@ -787,6 +787,7 @@ export const week4: WeekDef = {
         },
         {
           at: 0.9,
+          view: 'dortsala',
           exam: 'Azterketan: neuroporo kraneala ≈25. egunean ixten da, kaudala ≈28. egunean.',
           idea: 'Muturretan, hodia amnios barrunbera irekita dago: neuroporoak.',
           text: 'Ikuspegi dortsalean: kraneala lehenago ixten da (≈25. eguna) eta kaudala geroago (≈28. eguna). Itxi arte, hodi neurala amnios barrunbearekin komunikatuta dago.',
@@ -891,7 +892,7 @@ export const week4: WeekDef = {
         { at: 0, recall: ['tolesdura-neuralak'], text: 'Tolesdura neuralen ertzetako zelula ektodermikoek trantsizio epitelio-mesenkimatikoa egiten dute eta hodi neuraletik askatzen dira: gandor neurala.', focus: ['gandor-neurala', 'tolesdura-neuralak'] },
         { at: 0.18, text: 'Migrazio dortsolaterala: zelula batzuk atzekaldera abiatzen dira eta azaleko ektodermopean sartzen dira.', focus: ['gandor-neurala', 'azaleko-ektodermoa'] },
         { at: 0.3, text: 'Migrazio bentrala: beste zelula batzuk aurrerantz migratzen dute, hodi neuralaren eta somiten artetik.', focus: ['gandor-neurala', 'somitak'] },
-        { at: 0.5, text: 'Gandor neural kranealetik: buru-hezur eta aurpegiko hezurrak, meningeak, odontoblastoak eta nerbio kranialen gongoilak sortzen dira.', focus: ['buru-aurpegi-hezurrak', 'meningeak-kraneal', 'odontoblastoak'] },
+        { at: 0.5, view: 'eratorriak', text: 'Gandor neural kranealetik: buru-hezur eta aurpegiko hezurrak, meningeak, odontoblastoak eta nerbio kranialen gongoilak sortzen dira.', focus: ['buru-aurpegi-hezurrak', 'meningeak-kraneal', 'odontoblastoak'] },
         { at: 0.65, text: 'Nerbio-sistemarekin zuzenean lotu gabeko beste eratorri batzuk: tiroideko C zelulak, bihotzeko trenkada tronkokonala, aurpegiko odol-hodietako muskulu leuna.', focus: ['tiroide-c-zelulak', 'bihotz-trenkada-tronkokonala'] },
         { at: 0.78, exam: 'Azterketan: gandor neuralaren eratorriak, adib. gongoil errakideoak (espinalak) eta giltzurrun-gaineko guruinaren muina.', text: 'Nerbio-sistema periferiko eta begetatiboko eratorriak: gongoil errakideoak, gongoil sinpatikoak, gongoil parasinpatikoak (enterikoak), Schwann zelulak eta glia.', focus: ['gongoil-errakideoak', 'gongoil-sinpatikoak', 'gongoil-parasinpatikoak', 'schwann-zelulak', 'glia-zelulak'] },
         { at: 0.9, text: 'KONTUZ: melanozitoak gandor neuralekoak dira, baina ile-folikuluak eta azazkalak azaleko ektodermotik datoz.', focus: ['melanozitoak'] },
