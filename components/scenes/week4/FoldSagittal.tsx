@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Label, Note, Part, clamp, lerp, rand, seg, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, Mark, Note, Part, clamp, lerp, rand, seg, type SceneProps } from '@/components/kit';
 import type { ReactNode } from 'react';
 import { Cells } from '@/components/scenes/section/Section';
 
@@ -594,6 +594,7 @@ export function FoldingSagittal({ t }: SceneProps) {
   const cause = seg(t, 0.08, 0.11) * (1 - seg(t, 0.42, 0.44));
   const tipH = X(map(g.sHT + 4, g.cen(g.sHT)));
   const tipT = X(map(g.sTT - 4, g.cen(g.sTT)));
+  const fold = seg(t, 0.08, 0.11) * (1 - seg(t, 0.86, 0.9));
   const tH = g.tangent(g.sHT);
   const tT = g.tangent(g.sTT);
 
@@ -619,6 +620,11 @@ export function FoldingSagittal({ t }: SceneProps) {
           </Note>
         </g>
       )}
+
+      {/* the cephalocaudal fold happens at both ends: ringed while the ends curl */}
+      <Mark id="tolestura-kraneokaudala" x={tipH[0]} y={tipH[1]} rx={30} show={fold} />
+      <Mark id="tolestura-kraneokaudala" x={tipT[0]} y={tipT[1]} rx={30} show={fold} />
+      <Label id="tolestura-kraneokaudala" x={190} y={62} ax={tipH[0]} ay={tipH[1]} show={fold} />
 
       <Track t={t} id="bihotz-hodia" k="heart" from={0.08} tag color="#f87171" show={headTr} />
       <Track t={t} id="mintz-bukofaringeoa" k="bm" from={0.08} color="#e8eefc" show={headTr} />

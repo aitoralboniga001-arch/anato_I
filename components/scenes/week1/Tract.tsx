@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Label, Note, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
+import { C, Label, Mark, Note, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
 import { cleavageFrame } from '@/components/shell/intro/cleavage';
 import { Hud, vis } from './common';
 import { Conceptus, ConceptusDefs } from './conceptus';
@@ -412,6 +412,11 @@ export function TractJourney({ t }: SceneProps) {
         </g>
       )}
 
+      {/* Marks: ovulation (the follicle and the fimbriae over it) and implantation */}
+      <Mark id="obulazioa" x={292} y={338} rx={78} ry={56} show={vis(t, 0.1, 0.26)} />
+      <Mark id="ernalkuntza" x={pos[0]} y={pos[1]} rx={34} color="#fbbf24" show={vis(t, 0.24, 0.4)} />
+      <Mark id="habiratzea" x={pos[0] + 6} y={pos[1]} rx={30} show={seg(t, 0.9, 0.94)} />
+
       {/* Anatomy (first beat) */}
       <Label id="umetoki-tronpa" x={250} y={40} ax={tp(0.42)[0]} ay={tp(0.42)[1] - 20} show={anat} />
       <Label id="anpulua" x={140} y={236} ax={amp[0] - 20} ay={amp[1]} show={anat} />
@@ -449,7 +454,7 @@ export function TractJourney({ t }: SceneProps) {
 // ---------------------------------------------------------------------------
 
 /** A blastocyst at an implantation site: green ring = usual place, dashed red = ectopic. */
-function Mark({ f, p, show, ok }: { f: ReturnType<typeof cleavageFrame>; p: Pt; show: number; ok?: boolean }) {
+function Blast({ f, p, show, ok }: { f: ReturnType<typeof cleavageFrame>; p: Pt; show: number; ok?: boolean }) {
   if (show <= 0.01) return null;
   return (
     <g opacity={show}>
@@ -492,11 +497,15 @@ export function EctopicSites({ t }: SceneProps) {
       {fall > 0.01 && fall < 0.99 && (
         <path d={`M${mouth[0]},${mouth[1] + 20} Q${mouth[0] + 30},${(mouth[1] + douglas[1]) / 2} ${douglas[0]},${douglas[1]}`} fill="none" stroke="#fb7185" strokeWidth={1.4} strokeDasharray="3 5" opacity={0.7} />
       )}
-      <Mark f={f} p={normal} show={seg(t, 0.14, 0.2)} ok />
-      <Mark f={f} p={amp} show={s1} />
-      <Mark f={f} p={ist} show={s2} />
-      <Mark f={f} p={ov} show={s3} />
-      <Mark f={f} p={fallPos} show={s4} />
+      <Blast f={f} p={normal} show={seg(t, 0.14, 0.2)} ok />
+      <Mark id="ezohiko-habiratzea" x={amp[0]} y={amp[1]} rx={30} color="#fb7185" show={s1} />
+      <Mark id="ezohiko-habiratzea" x={ist[0]} y={ist[1]} rx={30} color="#fb7185" show={s2} />
+      <Mark id="ezohiko-habiratzea" x={ov[0]} y={ov[1]} rx={30} color="#fb7185" show={s3} />
+      <Mark id="ezohiko-habiratzea" x={fallPos[0]} y={fallPos[1]} rx={30} color="#fb7185" show={s4} />
+      <Blast f={f} p={amp} show={s1} />
+      <Blast f={f} p={ist} show={s2} />
+      <Blast f={f} p={ov} show={s3} />
+      <Blast f={f} p={fallPos} show={s4} />
 
       <Label id="habiratzea" text="Ohiko lekua: endometrioa" x={796} y={440} ax={normal[0] + 22} ay={normal[1]} align="start" show={seg(t, 0.16, 0.2)} />
       <Label id="endometrioa" x={830} y={520} ax={surfaceAt(520).p[0] + 20} ay={520} align="start" show={vis(t, 0, 0.3)} />

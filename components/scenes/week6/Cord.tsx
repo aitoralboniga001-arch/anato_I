@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Label, Note, Part, lerp, mix, seg, type Pt, type SceneProps } from '@/components/kit';
+import { C, Label, Mark, Note, Part, lerp, mix, seg, type Pt, type SceneProps } from '@/components/kit';
 import { EarlyEmbryo, earlyGeom } from '@/components/scenes/week5/EarlyEmbryo';
 
 /**
@@ -228,6 +228,7 @@ function CordFormationDrawing({ t }: SceneProps) {
       <Label id="amniosa" x={200} y={80} ax={amCx + amRx * 0.7} ay={amCy - amRy * 0.65} show={vis(t, 0)} />
       <Label id="amnios-barrunbea" x={200} y={130} ax={amCx} ay={amCy - 60} show={vis(t, 0.48)} />
       <Label id="hasierako-zilbor-eraztuna" x={420} y={556} align="start" ax={RING[0]} ay={RING[1]} show={vis(t, 0, 0.66)} />
+      <Mark id="finkapen-pedikulua" x={upMid[0]} y={upMid[1]} rx={22} show={vis(t, 0.12, 0.76)} />
       <Label id="finkapen-pedikulua" x={200} y={230} ax={upMid[0]} ay={upMid[1]} show={vis(t, 0.12, 0.76)} />
       <Label id="alantoidea" x={200} y={280} ax={trunkMid[0]} ay={trunkMid[1] + 8} show={vis(t, 0.12, 0.9)} />
       <Label id="zilbor-hodiak" x={200} y={330} ax={bez(...UP, 0.75)[0]} ay={bez(...UP, 0.75)[1]} show={vis(t, 0.12)} />

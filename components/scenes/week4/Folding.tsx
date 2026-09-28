@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, Label, Note, lerp, seg, type SceneProps } from '@/components/kit';
+import { Arrow, Label, Mark, Note, lerp, seg, type SceneProps } from '@/components/kit';
 import { type Pt } from './common';
 import { SectionDrawing, makeSection } from '@/components/scenes/section/Section';
 
@@ -54,9 +54,13 @@ function transverseLabels(t: number) {
   // The coelom, parietal and visceral layers already exist (mesoderm stage): labelled from the start.
   const coelom = 1;
   const edge = s.map(-500, 8);
+  const edgeR = s.map(500, 8);
+  const lat = seg(t, 0.44, 0.48) * (1 - seg(t, 0.8, 0.83));
   const gut = s.map(0, s.dEndo(0) + 12);
   return (
     <>
+      <Mark id="tolestura-laterala" x={edge[0]} y={edge[1]} rx={30} show={lat} />
+      <Mark id="tolestura-laterala" x={edgeR[0]} y={edgeR[1]} rx={30} show={lat} />
       <Label id="amnios-barrunbea" x={190} y={80} ax={s.at.amnion[0]} ay={s.at.amnion[1]} />
       <Label id="ektodermoa" x={190} y={120} ax={s.map(-150, 4.5)[0]} ay={s.map(-150, 4.5)[1]} />
       <Label id="tolestura-laterala" x={190} y={160} ax={edge[0]} ay={edge[1]} show={seg(t, 0.44, 0.48)} />

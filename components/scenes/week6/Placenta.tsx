@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Flow, Label, Note, Part, clamp, lerp, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Flow, Label, Mark, Note, Part, clamp, lerp, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
 import { V, VilliDefs, f1, fingerD, place } from '@/components/scenes/week3-villi/common';
 
 /**
@@ -367,6 +367,7 @@ export function PlacentaCirculation({ t, reduced }: SceneProps) {
           ))}
         </g>
       </g>
+      <Mark id="karenaren-zirkulazioa" x={z.at(480, IVS + 120)[0]} y={z.at(480, IVS + 120)[1]} rx={72} ry={92} color="#ff8a8a" show={vis(t, 0.4)} />
       {/* Dim the neighbouring cotyledons so the central one reads as the subject */}
       <rect x={0} y={0} width={lx} height={640} fill="#0a0c12" opacity={0.55} />
       <rect x={rx} y={0} width={1000 - rx} height={640} fill="#0a0c12" opacity={0.55} />
@@ -552,6 +553,7 @@ export function PlacentaFaces({ t }: SceneProps) {
         <path d={`M${lx - RX - 60},${cy - RY + 20} Q${lx},${cy - RY - 70} ${lx + RX + 60},${cy - RY + 20} L${lx + RX + 60},${cy - RY - 20} Q${lx},${cy - RY - 110} ${lx - RX - 60},${cy - RY - 20} Z`} fill="url(#p-muscle)" opacity={0.9} />
       </g>
 
+      <Mark id="karena-aterminoa" x={lx} y={cy + TH / 2} rx={RX + 22} ry={RY + TH + 22} show={vis(t, 0, 0.28)} />
       <Part id="fetuaren-aurpegia">
         <g transform={`translate(0 ${bob})`}>
           <FetalFace cx={lx} cy={cy} t={t} />
@@ -650,53 +652,71 @@ export function PlacentaFunctions({ t, reduced }: SceneProps) {
       <Note x={(FET[0] + FET[1]) / 2} y={76} tone="accent">Fetuaren odola</Note>
 
       {/* 1) Gases */}
-      <g opacity={g}>
+      <Mark id="gasen-elkartrukea" show={g}>
+        <g>
+          <rect x={MOM[0] + 8} y={ROWS.gas - 26} width={FET[1] - MOM[0] - 16} height={60} rx={10} fill="#ff8a8a" fillOpacity={0.07} stroke="#ff8a8a" strokeOpacity={0.5} strokeDasharray="5 4" pointerEvents="stroke" />
         <Arrow from={[MOM[0] + 24, ROWS.gas - 10]} to={[FET[1] - 24, ROWS.gas - 10]} bend={0} color="#ff8a8a" width={2.2} progress={seg(t, 0.68, 0.72)} />
         <Arrow from={[FET[1] - 24, ROWS.gas + 12]} to={[MOM[0] + 24, ROWS.gas + 12]} bend={0} color="#93b4ff" width={2.2} progress={seg(t, 0.69, 0.73)} />
         <Mover y={ROWS.gas - 10} dir={1} t={tt} color="#ff8a8a" />
         <Mover y={ROWS.gas + 12} dir={-1} t={tt} color="#93b4ff" />
-      </g>
+        </g>
+      </Mark>
       <Note x={FET[0] + 20} y={ROWS.gas - 26} align="start" show={g} tone="accent">O₂ fetura</Note>
       <Note x={MOM[1] - 20} y={ROWS.gas + 32} align="end" show={g}>CO₂ eta CO amarengana</Note>
       <Label id="gasen-elkartrukea" x={300} y={ROWS.gas} show={g} align="end" />
 
       {/* 2) Nutrients and electrolytes */}
-      <g opacity={food}>
+      <Mark id="elikagaien-elkartrukea" show={food}>
+        <g>
+          <rect x={MOM[0] + 8} y={ROWS.food - 26} width={FET[1] - MOM[0] - 16} height={60} rx={10} fill="#fbbf24" fillOpacity={0.07} stroke="#fbbf24" strokeOpacity={0.5} strokeDasharray="5 4" pointerEvents="stroke" />
         <Arrow from={[MOM[0] + 24, ROWS.food]} to={[FET[1] - 24, ROWS.food]} bend={0} color="#fbbf24" width={2.2} progress={seg(t, 0.71, 0.75)} />
         <Mover y={ROWS.food} dir={1} t={tt} color="#fbbf24" n={4} speed={6} />
-      </g>
+        </g>
+      </Mark>
       <Note x={(MOM[0] + FET[1]) / 2} y={ROWS.food + 22} show={food} size={11.5}>aminoazidoak · karbohidratoak · gantz-azido askeak · bitaminak</Note>
       <Label id="elikagaien-elkartrukea" x={300} y={ROWS.food} show={food} align="end" small />
 
       {/* 3) Hormones made by the placenta */}
-      <g opacity={horm}>
+      <Mark id="karenaren-hormonak" show={horm}>
+        <g>
+          <rect x={MOM[0] + 8} y={ROWS.horm - 26} width={FET[1] - MOM[0] - 16} height={60} rx={10} fill="#c084fc" fillOpacity={0.07} stroke="#c084fc" strokeOpacity={0.5} strokeDasharray="5 4" pointerEvents="stroke" />
         <circle cx={BAR[0] + 9} cy={ROWS.horm} r={10 + 3 * Math.sin(t * 60)} fill="#c084fc" opacity={0.35} />
         <Arrow from={[BAR[0] + 4, ROWS.horm]} to={[MOM[0] + 24, ROWS.horm]} bend={0} color="#c084fc" width={2.2} progress={seg(t, 0.78, 0.82)} />
         <Mover y={ROWS.horm} dir={-1} t={tt} color="#c084fc" x0={MOM[0] + 20} x1={BAR[0]} speed={5} />
-      </g>
+        </g>
+      </Mark>
       <Note x={(MOM[0] + FET[1]) / 2} y={ROWS.horm + 22} show={horm} size={11.5}>estrogenoa · progesterona · gonadotropina · hazkuntza hormonaren antzekoa · somatomamotropina</Note>
       <Label id="karenaren-hormonak" x={300} y={ROWS.horm} show={horm} align="end" />
 
       {/* 4) IgG antibodies from mother to fetus */}
-      <g opacity={igg}>
+      <Mark id="igg-antigorputzak" show={igg}>
+        <g>
+          <rect x={MOM[0] + 8} y={ROWS.igg - 26} width={FET[1] - MOM[0] - 16} height={60} rx={10} fill="#7ed492" fillOpacity={0.07} stroke="#7ed492" strokeOpacity={0.5} strokeDasharray="5 4" pointerEvents="stroke" />
         <Arrow from={[MOM[0] + 24, ROWS.igg]} to={[FET[1] - 24, ROWS.igg]} bend={0} color="#7ed492" width={2.2} progress={seg(t, 0.81, 0.85)} />
         <Mover y={ROWS.igg - 2} dir={1} t={tt} color="#7ed492" glyph="y" speed={5} />
-      </g>
+        </g>
+      </Mark>
       <Note x={FET[0] + 20} y={ROWS.igg + 22} align="start" show={igg} size={11.5}>amarengandik fetura</Note>
       <Label id="igg-antigorputzak" x={300} y={ROWS.igg} show={igg} align="end" />
 
       {/* Not always beneficial */}
-      <g opacity={rh}>
+      <Mark id="eritroblastosi-fetala" show={rh}>
+        <g>
+          <rect x={MOM[0] + 8} y={ROWS.rh - 26} width={FET[1] - MOM[0] - 16} height={60} rx={10} fill="#ff7b72" fillOpacity={0.07} stroke="#ff7b72" strokeOpacity={0.5} strokeDasharray="5 4" pointerEvents="stroke" />
         <Arrow from={[MOM[0] + 24, ROWS.rh]} to={[FET[1] - 24, ROWS.rh]} bend={0} color="#ff7b72" width={2.2} progress={seg(t, 0.88, 0.92)} />
         <Mover y={ROWS.rh - 2} dir={1} t={tt} color="#ff7b72" glyph="y" speed={5} />
-      </g>
+        </g>
+      </Mark>
       <Note x={(MOM[0] + FET[1]) / 2} y={ROWS.rh + 22} show={rh} tone="warn" size={11.5}>Rh antigorputzak: 2. haurdunaldian fetuaren globulu gorriak suntsitu</Note>
       <Label id="eritroblastosi-fetala" x={300} y={ROWS.rh} show={rh} align="end" />
 
-      <g opacity={bad}>
+      <Mark id="karena-zeharkatzen-duten-kalteak" show={bad}>
+        <g>
+          <rect x={MOM[0] + 8} y={ROWS.bad - 26} width={FET[1] - MOM[0] - 16} height={60} rx={10} fill="#ff7b72" fillOpacity={0.07} stroke="#ff7b72" strokeOpacity={0.5} strokeDasharray="5 4" pointerEvents="stroke" />
         <Arrow from={[MOM[0] + 24, ROWS.bad]} to={[FET[1] - 24, ROWS.bad]} bend={0} color="#ff7b72" width={2.2} progress={seg(t, 0.91, 0.95)} />
         <Mover y={ROWS.bad} dir={1} t={tt} color="#ff7b72" glyph="x" speed={6} n={4} />
-      </g>
+        </g>
+      </Mark>
       <Note x={(MOM[0] + FET[1]) / 2} y={ROWS.bad + 22} show={bad} tone="warn" size={11.5}>biruela · barizela · poliomielitisa · errubeola · drogak · alkohola</Note>
       <Label id="karena-zeharkatzen-duten-kalteak" x={300} y={ROWS.bad} show={bad} align="end" small />
 

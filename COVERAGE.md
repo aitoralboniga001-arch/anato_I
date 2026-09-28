@@ -23,9 +23,8 @@ Auditoría hecha el 2026-09-28. La pregunta de fondo es si un estudiante que sol
 - **Texto.** Solo 24 líneas de apuntes quedaron por debajo del 75 % de coincidencia. Se revisaron todas a mano y en su mayoría eran palabras de relleno («momentu», «kontuan»…). El contenido de apariencia nueva ya estaba cubierto:
   - diagnóstico prenatal: ecografía, α-fetoproteína, amniocentesis y biopsia de vellosidades coriónicas;
   - viabilidad y actividad fetal.
-- **Sin dibujar (4):**
-  - umetokiaren gorputza y umetokiaren lepoa, que solo aparecen en texto dentro del esquema del útero;
-  - karenaren fetu-atala y karenaren ama-atala, que se ven como korion hostotsua y dezidua basala.
+- **Marcas para lo que no tiene forma (2026-09-28):** procesos, términos de dirección y conceptos clínicos ya no son solo etiqueta: llevan una marca discontinua (`Mark`, anillo que late) en el lugar donde ocurren, clicable y con el mismo resaltado que cualquier estructura. Cubre ovulación, capacitación, reacción acrosómica/cortical, implantación (y ectópica), gastrulación (3 vistas), pliegues, kraneala/kaudala/bentrala/dortsala, polos del blastocisto, hitos fetales (osificación, genitales, lanugo, cejas, pelo, vernix, actividad muscular), joven/tardío, articulaciones, y en la placenta la circulación, cada intercambio (gases, nutrientes, hormonas, IgG, Rh, daños) y la circulación extraembrionaria. Los anillos grandes solo responden al contorno para no tapar lo que hay debajo.
+  - Aún solo etiqueta con pin: fetu-aroa (es un periodo, ya es barra en la línea de tiempo), vertex-orpo-luzera en la vista de hitos finales, y algunas apariciones secundarias de blastozistoa, bi-orriko-diskoa, karena y finkapen-pedikulua en escenas donde ya existe otra vista con forma.
 - **Sin pregunta textual (16):**
   - partes finas del útero y la trompa: fundusa, istmoa, perimetrioa, Douglas…;
   - ejes y términos de orientación;

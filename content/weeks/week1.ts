@@ -4,6 +4,7 @@ import { Fertilization } from '@/components/scenes/week1/Fertilization';
 import { Implantation } from '@/components/scenes/week1/Implantation';
 import { PlanesAxes } from '@/components/scenes/week1/Planes';
 import { EctopicSites, TractJourney } from '@/components/scenes/week1/Tract';
+import { UterusParts } from '@/components/scenes/week1/Uterus';
 
 const FILE = '1. ENBRIOLOGIA_GARAPENAREN LEHENGO ASTEA (zuzenduta).docx';
 const src = (section: string) => ({ file: FILE, section });
@@ -232,6 +233,15 @@ export const week1: WeekDef = {
           description: 'Emakumearen ugal aparatuaren atzeko zatia, plano koronaleko mozketa bertikalean (umetokia barrutik eta atzetik): ernetze-zelularen ibilbidea egunez egun.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: TractJourney,
+        },
+        {
+          id: 'umetokia',
+          label: 'Umetokiaren atalak',
+          plane: 'koronala',
+          description: 'Umetokia osorik, mozketa koronalean: fundusa, gorputza eta lepoa (baginaren jarraian), pareta-geruzak eta tronpak obulutegiekin.',
+          orientation: { top: 'Kraneala', bottom: 'Kaudala' },
+          ownFocus: true,
+          scene: UterusParts,
         },
       ],
       beats: [

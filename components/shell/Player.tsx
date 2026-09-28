@@ -259,7 +259,10 @@ export function Player(p: PlayerProps) {
           )}
         </div>
         <div className="cap-nav">
-          <button className="icon-btn" onClick={() => p.onBeat(-1)} aria-label="Aurreko urratsa" title="Aurreko urratsa (←)">
+          <span className="cap-nav-l" aria-hidden>
+            Urratsa
+          </span>
+          <button className="icon-btn" onClick={() => p.onBeat(-1)} aria-label="Aurreko urratsa" data-tip="Aurreko urratsa · ←" data-tip-pos="top">
             <IconPrev />
           </button>
           {p.waiting && !p.ask && (
@@ -281,7 +284,7 @@ export function Player(p: PlayerProps) {
               Hurrengo etapa <span aria-hidden>→</span>
             </button>
           ) : (
-            <button className="icon-btn" onClick={() => p.onBeat(1)} aria-label="Hurrengo urratsa" title="Hurrengo urratsa (→)">
+            <button className="icon-btn" onClick={() => p.onBeat(1)} aria-label="Hurrengo urratsa" data-tip="Hurrengo urratsa · →" data-tip-pos="top">
               <IconNext />
             </button>
           )}
@@ -290,14 +293,16 @@ export function Player(p: PlayerProps) {
 
       <div className="transport">
         <div className="tp-buttons">
-          <button className="icon-btn" onClick={() => p.onStage(-1)} disabled={p.stageIndex === 0} title="Aurreko etapa (Shift + ←)" aria-label="Aurreko etapa">
-            <IconSkipPrev size={16} />
+          <button className="tp-stage" onClick={() => p.onStage(-1)} disabled={p.stageIndex === 0} data-tip="Aurreko etapa · Shift + ←" data-tip-pos="top" aria-label="Aurreko etapa">
+            <IconSkipPrev size={15} />
+            <span>Etapa</span>
           </button>
-          <button className={`play${p.playing ? ' is-playing' : ''}`} onClick={p.onTogglePlay} title="Erreproduzitu / pausatu (Zuriunea)" aria-label={p.playing ? 'Pausatu' : 'Erreproduzitu'}>
+          <button className={`play${p.playing ? ' is-playing' : ''}`} onClick={p.onTogglePlay} data-tip={p.playing ? 'Pausatu · Zuriunea' : 'Erreproduzitu · Zuriunea'} data-tip-pos="top" aria-label={p.playing ? 'Pausatu' : 'Erreproduzitu'}>
             {p.playing ? <IconPause size={16} /> : <IconPlay size={16} />}
           </button>
-          <button className="icon-btn" onClick={() => p.onStage(1)} disabled={p.stageIndex === p.stageCount - 1} title="Hurrengo etapa (Shift + →)" aria-label="Hurrengo etapa">
-            <IconSkipNext size={16} />
+          <button className="tp-stage" onClick={() => p.onStage(1)} disabled={p.stageIndex === p.stageCount - 1} data-tip="Hurrengo etapa · Shift + →" data-tip-pos="top" aria-label="Hurrengo etapa">
+            <span>Etapa</span>
+            <IconSkipNext size={15} />
           </button>
         </div>
 
@@ -363,7 +368,7 @@ export function Player(p: PlayerProps) {
           up
           className="tp-set"
           trigger={({ open, toggle }) => (
-            <button className={`tp-set-btn${open ? ' is-on' : ''}`} onClick={toggle} aria-expanded={open} title="Erreprodukzio-aukerak: modua, abiadura, ahotsa (G)">
+            <button className={`tp-set-btn${open ? ' is-on' : ''}`} onClick={toggle} aria-expanded={open} aria-haspopup="dialog" data-tip="Erreprodukzio modua, abiadura eta ahotsa · G" data-tip-pos="top-end">
               <ModeIcon mode={p.mode} />
               <span>{MODES.find((m) => m.id === p.mode)?.label}</span>
               {p.speed !== 1 && <em>{p.speed}×</em>}

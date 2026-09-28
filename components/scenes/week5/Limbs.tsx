@@ -134,6 +134,16 @@ export function LimbDevelopment({ t }: SceneProps) {
       <Span id="izterra" a={L.prox} b={L.mid} side={1} show={segs3} />
       <Span id="berna" a={L.mid} b={L.dist} side={1} show={segs3} />
       <Span id="oina" a={L.dist} b={L.tip} side={1} show={segs3} />
+      <Part id="atzamarrak" show={two(t, 0.9)}>
+          {arm.rays.map(([, b], i) => (
+            <circle key={i} cx={b[0]} cy={b[1]} r={7} fill="rgba(255,184,107,0.14)" stroke="#ffb86b" strokeWidth={1.4} strokeDasharray="3 3" />
+          ))}
+      </Part>
+      <Part id="behatzak" show={two(t, 0.9)}>
+          {leg.rays.map(([, b], i) => (
+            <circle key={i} cx={b[0]} cy={b[1]} r={7} fill="rgba(255,184,107,0.14)" stroke="#ffb86b" strokeWidth={1.4} strokeDasharray="3 3" />
+          ))}
+      </Part>
       <Joint id="ukondoa" p={A.mid} show={two(t, 0.84) * ertz2} />
       <Joint id="eskumuturra" p={A.dist} show={two(t, 0.84)} />
       <Joint id="belauna" p={L.mid} show={two(t, 0.84) * ertz2} />

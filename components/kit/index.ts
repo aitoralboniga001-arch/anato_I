@@ -1,5 +1,6 @@
 export { Part } from './Part';
 export { Label, Note } from './Label';
+export { Mark } from './Mark';
 export { CellBand, Cell, Arrow, Flow, scatterInEllipse } from './tissue';
 export { useScene } from './context';
 export { C } from '@/lib/sim/palette';

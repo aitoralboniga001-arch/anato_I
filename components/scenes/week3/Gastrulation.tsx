@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Cell, Label, Note, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Cell, Label, Mark, Note, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
 import { W3C, discOutlinePath, f1 } from './common';
 import { DiscDrawing, makeDisc } from './DiscSection';
 import { GB } from './GastrulationCells';
@@ -128,6 +128,8 @@ export function GastrulationDorsal(props: SceneProps) {
   return (
     <g>
       <DorsalDrawing {...props} />
+      <Mark id="gastrulazioa" x={D.cx} y={D.cy} rx={D.rx + 16} ry={D.ry + 16} show={seg(props.t, GB.streak, GB.streak + 0.05)} />
+      <Label id="gastrulazioa" x={810} y={90} ax={D.cx + D.rx * 0.75} ay={D.cy - D.ry * 0.7} show={seg(props.t, GB.streak, GB.streak + 0.05)} />
       {dorsalLabels(props.t)}
     </g>
   );
@@ -178,6 +180,8 @@ export function GastrulationTransverse({ t }: SceneProps) {
         </g>
       ))}
 
+      <Mark id="gastrulazioa" x={s.at.streak[0]} y={s.at.streak[1] + 30} rx={150} ry={95} show={g.streak} />
+
       <Part id="hiru-orriko-diskoa" show={g.tri}>
         <path d={outline} fill="none" stroke="#e8eefc" strokeWidth={1.4} strokeDasharray="5 4" opacity={0.85} />
       </Part>
@@ -186,6 +190,7 @@ export function GastrulationTransverse({ t }: SceneProps) {
         Nodo eta hobitxo primitiboa mozketa honetatik kranealago daude (ikus ikuspegi dortsala)
       </Note>
 
+      {L('gastrulazioa', 810, 100, s.at.streak, g.streak)}
       {L('lerro-primitiboa', 190, 170, s.at.streak, g.groove < 0.5 ? g.streak : 0)}
       {L('ildo-primitiboa', 190, 170, s.at.groove, g.groove >= 0.5 ? g.groove : 0)}
       {L('epiblastoa', 190, 215, s.at.epiblast, g.ecto < 0.5 ? 1 : 0)}

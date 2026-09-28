@@ -1,6 +1,6 @@
 'use client';
 
-import { Label, Note, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Label, Mark, Note, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
 import { EmbryoFigure, embryoGeom } from '@/components/scenes/week5/Embryo';
 import { Standing } from '@/components/scenes/week5/Proportions';
 import { spineAt } from '@/components/scenes/week5/skin';
@@ -32,7 +32,7 @@ function Plane({ id, d, color, on, dim }: { id: string; d: string; color: string
   if (o <= 0.01) return null;
   return (
     <Part id={id}>
-      <path d={d} fill={color} fillOpacity={0.08 + 0.2 * on} stroke={color} strokeOpacity={0.35 + 0.65 * on} strokeWidth={1.6} opacity={o} />
+      <path d={d} fill={color} fillOpacity={0.1 + 0.26 * on} stroke={color} strokeOpacity={0.35 + 0.65 * on} strokeWidth={1.6} opacity={o} />
     </Part>
   );
 }
@@ -63,7 +63,7 @@ const E_S = 0.78;
 
 export function PlanesAxes({ t }: SceneProps) {
   // Part A
-  const partA = 1 - seg(t, 0.58, 0.64);
+  const partA = 1 - seg(t, 0.635, 0.665);
   const sOn = vis(t, 0, 0.16);
   const cOn = vis(t, 0.16, 0.32);
   const tOn = vis(t, 0.32, 0.48);
@@ -76,7 +76,7 @@ export function PlanesAxes({ t }: SceneProps) {
   const dv: [Pt, Pt] = [add([CX, WAIST], -1.1), add([CX, WAIST], 1.1)];
 
   // Part B: embryo, then upside down.
-  const partB = seg(t, 0.6, 0.66);
+  const partB = seg(t, 0.64, 0.68);
   const flip = seg(t, 0.8, 0.9);
   const rot = 180 * flip * flip * (3 - 2 * flip);
   const ang = (rot * Math.PI) / 180;
@@ -96,7 +96,7 @@ export function PlanesAxes({ t }: SceneProps) {
   const tail = R(spineAt(S, 0.985, 2).p);
   const back = R(spineAt(S, 0.42, -2).p);
   const belly = R([b.heart[0] - b.heart[2] * 0.82, b.heart[1]]);
-  const terms = seg(t, 0.66, 0.7) * (1 - seg(t, 0.79, 0.81)) + seg(t, 0.9, 0.93);
+  const terms = seg(t, 0.67, 0.71) * (1 - seg(t, 0.79, 0.81)) + seg(t, 0.9, 0.93);
   const L1 = RL([230, 70]);
   const L2 = RL([230, 560]);
   const L3 = RL([230, 360]);
@@ -121,9 +121,12 @@ export function PlanesAxes({ t }: SceneProps) {
               stroke={COL.sag}
               strokeDasharray="4 5"
               strokeWidth={1.2}
-              opacity={0.55 * vis(t, 0.06, 0.16)}
+              opacity={0.8 * vis(t, 0.06, 0.16)}
             />
           ))}
+          <text x={CX - 70 - D[0] * 0.5 - 6} y={TOP + 62} textAnchor="end" fill={COL.sag} fontSize={12} fontWeight={600} opacity={vis(t, 0.06, 0.16)}>
+            plano parasagitalak (paraleloak)
+          </text>
           <Plane id="zeharkako-planoa" d={tra} color={COL.tra} on={tOn} dim={seenT} />
 
           {/* Axes */}
@@ -164,11 +167,15 @@ export function PlanesAxes({ t }: SceneProps) {
           <g transform={`translate(500 320) rotate(${rot}) scale(${E_S}) translate(${-E_C[0]} ${-E_C[1]})`} pointerEvents="none">
             <EmbryoFigure day={DAY} />
           </g>
+          <Mark id="kraneala" x={head[0]} y={head[1]} rx={22} show={terms} />
+          <Mark id="kaudala" x={tail[0]} y={tail[1]} rx={22} show={terms} />
+          <Mark id="bentrala" x={belly[0]} y={belly[1]} rx={22} show={terms} />
+          <Mark id="dortsala" x={back[0]} y={back[1]} rx={22} show={terms} />
           <Label id="kraneala" x={L1[0]} y={L1[1]} ax={head[0]} ay={head[1]} show={terms} />
           <Label id="kaudala" x={L2[0]} y={L2[1]} ax={tail[0]} ay={tail[1]} show={terms} />
           <Label id="bentrala" x={L3[0]} y={L3[1]} ax={belly[0]} ay={belly[1]} show={terms} />
           <Label id="dortsala" x={L4[0]} y={L4[1]} ax={back[0]} ay={back[1]} show={terms} />
-          <Note x={500} y={612} show={vis(t, 0.66, 0.8)}>Kokapen terminoak gorputzari lotuta daude</Note>
+          <Note x={500} y={612} show={vis(t, 0.67, 0.82)}>Kokapen terminoak gorputzari lotuta daude</Note>
           <Note x={500} y={612} tone="warn" show={vis(t, 0.82)}>KONTUZ buruz behera dagoenean: kraneala burezurretik gertu dago, ez goian</Note>
         </g>
       )}

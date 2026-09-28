@@ -66,7 +66,7 @@ const KEYS: [string, string][] = [
   ['1–9', 'Ikuspegia aldatu (mozketak)'],
   ['G', 'Modua aldatu: gidatua → arrunta → azkarra'],
   ['L', 'Etiketak erakutsi / ezkutatu'],
-  ['F', 'Foku modua: eszena pantaila osoan'],
+  ['F', 'Foku modua: eszena handia, azalpena beti beheko txartelean'],
   ['[  ]', 'Etapen zerrenda / azalpen-panela tolestu'],
   ['Esc', 'Itxi fitxa edo leihoa'],
 ];

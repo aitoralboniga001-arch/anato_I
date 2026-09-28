@@ -1,6 +1,6 @@
 'use client';
 
-import { Label, Note, Part, lerp, lerpPt, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Label, Mark, Note, Part, lerp, lerpPt, seg, type Pt, type SceneProps } from '@/components/kit';
 import { AgeHud, ramp } from './skin';
 import { LEN, WT, fmtWeight, interp } from './growth';
 import { FetusFigure, fetusGeom, placeFetus, type FetusPose } from './FetusFigure';
@@ -140,8 +140,10 @@ export function Fetus3rdMonth({ t }: SceneProps) {
     <g>
       <Fetus id="w5f3" day={day} pose={pose} Pl={Pl} hernia={hernia} />
       {/* Ossification centres: skull bones and long bones start to ossify */}
-      {oss > 0.01 && (
-        <g opacity={oss} pointerEvents="none">
+      <Mark id="hezurtzapen-zentroak" show={oss}>
+        <g>
+          <circle cx={skull[0]} cy={skull[1]} r={26} fill="#ffb86b" fillOpacity={0.1} stroke="#ffb86b" strokeWidth={1.8} strokeDasharray="5 4" className="mark-ring" />
+          <circle cx={femur[0]} cy={femur[1]} r={20} fill="#ffb86b" fillOpacity={0.1} stroke="#ffb86b" strokeWidth={1.8} strokeDasharray="5 4" className="mark-ring" />
           <g transform={Pl.transform}>
             {[
               [-0.35, -0.55, 0.32],
@@ -163,7 +165,14 @@ export function Fetus3rdMonth({ t }: SceneProps) {
             })}
           </g>
         </g>
-      )}
+      </Mark>
+      <Mark id="kanpoko-genitalak" x={gen[0]} y={gen[1]} rx={18} show={vis(t, 0.86)} />
+      <Mark id="aktibitate-muskularra" x={x(g.foot)[0] + 4} y={x(g.foot)[1]} rx={18} color="#6ee7d3" show={vis(t, 0.86)} />
+      <Mark id="begia" x={x(g.eye)[0]} y={x(g.eye)[1]} rx={11} color="#8fb4f7" show={vis(t, 0.16)} />
+      <Mark id="sudurra" x={x(g.nose)[0]} y={x(g.nose)[1]} rx={10} color="#8fb4f7" show={vis(t, 0.16)} />
+      <Mark id="belarriaren-pabiloia" x={x(g.ear)[0]} y={x(g.ear)[1]} rx={12} color="#8fb4f7" show={vis(t, 0.16)} />
+      <Mark id="besoa" x={arm[0]} y={arm[1]} rx={14} color="#7ad9a3" show={vis(t, 0.32, 0.46)} />
+      <Mark id="izterra" x={femur[0]} y={femur[1]} rx={16} color="#7ad9a3" show={vis(t, 0.32, 0.46)} />
       <Ruler pxcm={58} step={1} max={8} />
 
       <Label id="begia" x={230} y={200} ax={x(g.eye)[0] + 4} ay={x(g.eye)[1]} show={vis(t, 0.16)} />
@@ -199,6 +208,10 @@ export function Fetus4to5({ t }: SceneProps) {
       <Fetus id="w5f45" day={day} pose={pose} Pl={Pl} />
       <Ruler pxcm={26} step={1} max={20} />
       <CrlLine a={Pl.vertex} b={Pl.rump} show={1} />
+      <Mark id="buruko-ilea" x={scalp[0]} y={scalp[1]} rx={22} show={vis(t, 0.52)} />
+      <Mark id="bekainak" x={x(g.brow)[0] + 3} y={x(g.brow)[1]} rx={9} color="#8fb4f7" show={vis(t, 0.52)} />
+      <Mark id="lanugoa" x={back[0]} y={back[1]} rx={20} ry={34} color="#c4b5fd" show={vis(t, 0.52)} />
+      <Mark id="aktibitate-muskularra" x={x(g.foot)[0] + 4} y={x(g.foot)[1]} rx={16} color="#6ee7d3" show={vis(t, 0.76)} />
 
       <Label id="luzera-zefalokaudala" x={790} y={470} ax={lerp(Pl.vertex[0], Pl.rump[0], 0.6)} ay={lerp(Pl.vertex[1], Pl.rump[1], 0.6)} />
       <Label id="buruko-ilea" x={790} y={120} ax={scalp[0]} ay={scalp[1]} show={vis(t, 0.52)} />
@@ -230,6 +243,8 @@ export function Fetus6to9({ t }: SceneProps) {
       <Fetus id="w5f69" day={day} pose={pose} Pl={Pl} vernix={ramp(day, 224, 250)} />
       <Ruler pxcm={14} step={1} max={36} />
       <CrlLine a={Pl.vertex} b={Pl.rump} show={vis(t, 0.86)} />
+      <Mark id="vernix-caseosa" x={vern[0]} y={vern[1]} rx={18} ry={28} color="#e8eefc" show={vis(t, 0.72)} />
+      <Mark id="lanugoa" x={hair[0]} y={hair[1]} rx={20} color="#c4b5fd" show={vis(t, 0, 0.16)} />
 
       <Label id="gantz-metaketa" text="Larruazala ximurra eta gorrixka" x={770} y={440} ax={flank[0]} ay={flank[1]} show={vis(t, 0.16, 0.3)} />
       <Label id="gantz-metaketa" x={790} y={470} ax={fatP[0]} ay={fatP[1]} show={Math.max(vis(t, 0, 0.16), vis(t, 0.58))} />

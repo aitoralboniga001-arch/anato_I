@@ -150,7 +150,7 @@ export function Outline(p: OutlineProps) {
         onPointerEnter={(e) => e.pointerType === 'mouse' && later(true, 260)}
         onPointerLeave={() => later(false, 180)}
       >
-        <button className="icon-btn rail-toggle" onClick={onToggle} title="Zabaldu aurkibidea ([)" aria-label="Zabaldu aurkibidea" aria-expanded={false}>
+        <button className="icon-btn rail-toggle" onClick={onToggle} data-tip="Aurkibidea zabaldu · [" data-tip-pos="right" aria-label="Zabaldu aurkibidea" aria-expanded={false}>
           <IconRail open={false} />
         </button>
         <ol className="rail">
@@ -196,7 +196,7 @@ export function Outline(p: OutlineProps) {
   }
   return (
     <aside className="outline" aria-label="Apunteen aurkibidea">
-      <button className="icon-btn rail-toggle" onClick={onToggle} title="Tolestu aurkibidea ([)" aria-label="Tolestu aurkibidea" aria-expanded>
+      <button className="icon-btn rail-toggle" onClick={onToggle} data-tip="Aurkibidea tolestu · [" data-tip-pos="bottom-end" aria-label="Tolestu aurkibidea" aria-expanded>
         <IconRail open />
       </button>
       <div className="outline-head">
@@ -254,7 +254,7 @@ export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, 
             Leinuak
           </button>
         )}
-        <button className="icon-btn info-close" onClick={onDismiss} aria-label="Itxi panela">
+        <button className="icon-btn info-close" onClick={onDismiss} aria-label="Itxi panela" data-tip="Panela itxi · ]" data-tip-pos="bottom-end">
           <IconClose size={16} />
         </button>
       </div>

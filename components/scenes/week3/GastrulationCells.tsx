@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Label, Note, Part, clamp, easeInOut, lerp, lin, mix, rand, seg, useScene, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, Mark, Note, Part, clamp, easeInOut, lerp, lin, mix, rand, seg, useScene, type Pt, type SceneProps } from '@/components/kit';
 import { f1 } from './common';
 
 /**
@@ -437,6 +437,9 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
       <Callout x={MID} y={HYP_Y + 64} text="hurrengoak: tartean geratzen dira → mesodermo intraenbrionarioa" show={mesoOn} color="#ff8a8a" to={[MID - 180, LANE_Y]} />
       <Callout x={MID - 150} y={132} text="sartzen ez direnak: azalean → ektodermoa" show={ectoOn} color="#a9c3ff" to={[MID - 100, EPI_TOP + 4]} />
       <Callout x={MID} y={HYP_Y + 64} text="ektodermoa · mesodermoa · endodermoa — hirurak epiblastotik" show={triOn} />
+
+      <Mark id="gastrulazioa" x={MID} y={(EPI_TOP + LANE_Y) / 2} rx={190} ry={120} show={seg(t, GB.converge, GB.converge + 0.03)} />
+      <Label id="gastrulazioa" x={170} y={150} ax={MID - 150} ay={EPI_TOP + 20} show={seg(t, GB.converge, GB.converge + 0.03)} />
 
       <Inset t={t} />
 

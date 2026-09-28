@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Label, Part, lerp, lerpPt, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { C, Label, Mark, Part, lerp, lerpPt, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { earlyGeom } from '@/components/scenes/week5/EarlyEmbryo';
 import { spineAt } from '@/components/scenes/week5/skin';
 
@@ -72,6 +72,7 @@ function dorsalLabels(t: number) {
   const rhombY = mesY + lerp(17, 40, mesA) * 0.6 + lerp(17, 46, rhombA) * 0.8;
   return (
     <>
+      <Mark id="hodi-neurala" x={VX} y={(D_TOP + D_BOTTOM) / 2} rx={26} ry={(D_BOTTOM - D_TOP) / 2 + 12} color="#7ad9a3" show={1 - seg(t, 0.1, 0.14)} />
       <Label id="prosentzefaloa" x={190} y={170} ax={VX - 40} ay={prosY} show={prosA} />
       <Label id="mesentzefaloa" x={190} y={230} ax={VX - 24} ay={mesY} show={mesA} />
       <Label id="erronbentzefaloa" x={190} y={290} ax={VX - 30} ay={rhombY} show={rhombA} />

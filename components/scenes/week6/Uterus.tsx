@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Label, Note, Part, seg, lerp, lerpPt, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { C, Label, Mark, Note, Part, seg, lerp, lerpPt, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { FetusFigure, fetusGeom, placeFetus } from '@/components/scenes/week5/FetusFigure';
 
 /**
@@ -224,6 +224,12 @@ export function UterusSagittal({ t }: SceneProps) {
           <path d={band(sac, -4, 2, w1 + 4, w0 + 356)} fill="#cfe3ff" opacity={0.55} />
         </Part>
       </g>
+
+      {/* Poles and the villi's fate, ringed where the notes point */}
+      <Mark id="mutur-enbrionarioa" x={wallA(wallMid, villLen + basal)[0]} y={wallA(wallMid, villLen + basal)[1]} rx={22} color="#8fb4f7" show={vis(t, 0.12, 0.4)} />
+      <Mark id="mutur-anenbrionarioa" x={wallA(wallMid + 180, caps + 2)[0]} y={wallA(wallMid + 180, caps + 2)[1]} rx={22} color="#7ad9a3" show={vis(t, 0.26, 0.4)} />
+      <Mark id="biloxka-sekundarioa" x={wallA(165, villLen * 0.4)[0]} y={wallA(165, villLen * 0.4)[1]} rx={18} show={vis(t, 0, 0.12)} />
+      <Mark id="karena" x={wallA(wallMid + 78, villLen * 0.7)[0]} y={wallA(wallMid + 78, villLen * 0.7)[1]} rx={24} color="#ff8a8a" show={vis(t, 0.56)} />
 
       {/* Labels — right gutter (as in figure A) */}
       <Label id="mutur-enbrionarioa" x={770} y={110} ax={wallA(wallMid, villLen + basal)[0]} ay={wallA(wallMid, villLen + basal)[1]} show={vis(t, 0.12, 0.4)} small />

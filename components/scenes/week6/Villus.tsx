@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Flow, Label, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
+import { C, Flow, Label, Mark, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
 import { V, VilliDefs, fingerD, loopD, place } from '@/components/scenes/week3-villi/common';
 
 /**
@@ -192,6 +192,7 @@ export function VilliLongSection(props: SceneProps) {
       <Label id="finkapen-pedikulua" x={810} y={500} ax={508} ay={560} show={vis(t, 0.32)} />
       <Label id="zilbor-hodiak" x={810} y={550} ax={508} ay={PLATE.bottom + 30} show={vis(t, 0.32)} />
 
+      <Mark id="karena" x={926} y={PLATE.bottom} rx={26} color="#ff8a8a" show={karena} />
       <Label id="karena" x={900} y={590} align="end" ax={926} ay={PLATE.bottom} show={karena} />
       <Label id="karenaren-ama-atala" x={896} y={64} align="end" ax={910} ay={64} show={karena} small />
       <Label id="karenaren-fetu-atala" x={896} y={420} align="end" ax={910} ay={420} show={karena} small />
@@ -282,6 +283,7 @@ export function VillusCross({ t, reduced }: SceneProps) {
       <Label id="ehun-konektiboa" x={190} y={265} ax={CX - R_MESO + 10} ay={CY + 10} text="3. Ehun konektiboa" show={numberShow(1)} />
       <Label id="endotelioa" x={190} y={315} ax={CX - 32 + 16} ay={CY - 22} text="4. Endotelioa" show={numberShow(0)} />
       <Label id="biloxka-kapilarrak" x={810} y={400} ax={CX + 28 + 16} ay={CY + 30} show={vis(t, 0)} />
+      <Mark id="karena-muga" x={CX - R_OUT - 8} y={CY} rx={16} color="#fbbf24" show={vis(t, 0.82)} />
       <Label id="karena-muga" x={190} y={365} ax={CX - R_OUT - 8} ay={CY} show={vis(t, 0.82)} />
       <Note x={500} y={520} show={vis(t, 0.82)} tone="accent">
         Karena muga (barrutik kanpora): endotelioa → ehun konektiboa → zitotrofoblastoa → sinzitiotrofoblastoa
@@ -353,6 +355,7 @@ export function VillusThinning({ t, reduced }: SceneProps) {
       <Label id="zitotrofoblastoa" x={190} y={210} ax={CX - cytoR + 6} ay={CY - 20} show={1 - thin} />
       <Label id="ehun-konektiboa" x={190} y={260} ax={CX - mesoR * 0.4} ay={CY + 30} show={1} />
       <Label id="endotelioa" x={190} y={310} ax={cap[0] - capRadius} ay={cap[1]} show={1} />
+      <Mark id="karena-muga" x={CX + R_OUT - 10} y={CY - 50} rx={16} color="#fbbf24" />
       <Label id="karena-muga" x={810} y={200} ax={CX + R_OUT - 10} ay={CY - 50} show={1} />
       <Label id="karena-mugaren-meheketa" x={810} y={250} ax={CX + capR * 0.4} ay={CY - capR * 0.3} show={seg(t, 0.34, 0.42)} />
 

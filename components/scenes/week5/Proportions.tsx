@@ -1,6 +1,6 @@
 'use client';
 
-import { Label, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Label, Mark, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { SkinDefs } from './skin';
 
 /**
@@ -144,6 +144,12 @@ export function HeadProportions({ t }: SceneProps) {
       })}
 
       <Label id="buruaren-tamaina" x={430} y={34} ax={FIGS[0].cx + H * 0.175 + 14} ay={Y0 + 30} />
+      <Mark id="vertex-orpo-luzera" show={seg(t, 0.26, 0.3) * (1 - seg(t, 0.49, 0.52))}>
+        <g>
+          <path d={`M${FIGS[0].cx - 92},${Y0} h-10 V${Y0 + H} h10`} fill="none" stroke="#fbbf24" strokeWidth={2} strokeDasharray="5 4" />
+          <rect x={FIGS[0].cx - 108} y={Y0} width={16} height={H} fill="transparent" />
+        </g>
+      </Mark>
       <Label id="vertex-orpo-luzera" x={40} y={590} ax={FIGS[0].cx - 100} ay={Y0 + H - 6} align="start" show={seg(t, 0.26, 0.3) * (1 - seg(t, 0.49, 0.52))} />
       <Note x={40} y={34} align="start" tone="accent">
         Altuera berdinera eskalatuta

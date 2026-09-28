@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Arrow, Cell, Flow, Label, Note, Part, lerp, mix, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
+import { C, Arrow, Cell, Flow, Label, Mark, Note, Part, lerp, mix, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
 import { CYTO, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, bandAround, circlePath, conceptusAt, discGeometry, f1, lensPath, toCyto } from './common';
 
 /**
@@ -305,6 +305,14 @@ function makeL(at: At) {
   };
 }
 
+/** A dashed ring at a point of the drawing, for what a step names but has no outline (the decidual reaction, the flow). */
+function makeM(at: At) {
+  return function mark(id: string, p: Pt, rx: number, show = 1, color?: string) {
+    const [x, y] = at(p[0], p[1]);
+    return <Mark key={`m-${id}`} id={id} x={x} y={y} rx={rx} show={show} color={color} />;
+  };
+}
+
 function anchors(t: number) {
   const g = geometry(t);
   const { cx, cy, epiTop, discY } = g;
@@ -335,11 +343,14 @@ export function Day1112Section(props: SceneProps) {
   const { t } = props;
   const k = anchors(t);
   const L = makeL((x, y) => [x, y]);
+  const M = makeM((x, y) => [x, y]);
   return (
     <g>
       <EndometriumBack decidua={k.decidua} />
       <Day1112Drawing {...props} />
       <EndometriumFront gap={GAP0 * k.g.fib} />
+      {M('desidua-erreakzioa', [340, 130], 56, k.decidua)}
+      {M('zirkulazio-uteroplazentarioa', k.lacuna(259), 42, k.circ, '#ff8a8a')}
       {L('endometrio-estroma', 190, 50, [300, 60])}
       {L('amaren-odol-hodiak', 190, 100, [VESSELS[3][0], VESSELS[3][1]])}
       {L('umetoki-guruina', 190, 150, [266, 250])}
@@ -453,6 +464,7 @@ export function Day1112Desidua(props: SceneProps) {
   const { cx, cy } = k.g;
   const z = zoom(cx - 190, k.g.cyC - 190, 2.1, 500, 320);
   const L = makeL(z.at);
+  const M = makeM(z.at);
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#101828" />
@@ -460,6 +472,8 @@ export function Day1112Desidua(props: SceneProps) {
         <EndometriumBack decidua={k.decidua} />
         <Day1112Drawing {...props} />
       </g>
+      {M('desidua-erreakzioa', [340, 140], 90, k.decidua)}
+      {M('zirkulazio-uteroplazentarioa', k.lacuna(236), 70, k.circ, '#ff8a8a')}
       {L('endometrio-estroma', 180, 60, [280, 120])}
       {L('desidua-erreakzioa', 180, 110, [340, 150], k.decidua)}
       {L('desidua-zelulak', 180, 160, [340, 140], k.cells)}

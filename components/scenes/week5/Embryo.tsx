@@ -1,6 +1,6 @@
 'use client';
 
-import { Label, Note, Part, ellipsePts, lerp, lerpPt, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Label, Mark, Note, Part, ellipsePts, lerp, lerpPt, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { EarlyEmbryo, earlyGeom } from './EarlyEmbryo';
 import { AgeHud, SKIN, SkinDefs, atDay, limbGeom, polar, ramp, sampleSpine, spineAt, trunkPath, win, type LimbPose, type Num } from './skin';
 
@@ -750,6 +750,10 @@ export function Embryo28to32({ t }: SceneProps) {
         </Part>
       )}
 
+      <Part id="ezkerreko-bentrikulua" show={vis(t, 0.48, 0.74)}>
+        <ellipse cx={heart[0]} cy={heart[1] + heart[3] * 0.4} rx={heart[2] * 0.5} ry={heart[3] * 0.38} fill="rgba(255,184,107,0.12)" stroke="#ffb86b" strokeWidth={1.4} strokeDasharray="4 4" />
+      </Part>
+
       {/* Left gutter */}
       <Label id="mesentzefaloa" x={290} y={100} ax={mesen[0]} ay={mesen[1]} show={vis(t, 0.37)} />
       <Label id="kristalinoaren-plaka" x={290} y={165} ax={g.eye[0] - 8} ay={g.eye[1]} show={vis(t, 0.37, 0.7)} />
@@ -834,6 +838,21 @@ export function Embryo42to56({ t }: SceneProps) {
       <Label id="ukondoa" x={770} y={410} ax={arm.joints.mid[0]} ay={arm.joints.mid[1]} show={d56} />
       <Label id="belauna" x={770} y={540} ax={leg.joints.mid[0]} ay={leg.joints.mid[1]} show={d56} />
 
+      {/* Parts to point at on the figure: dashed marks over the shoulder, the sole and the toes */}
+      <Part id="sorbalda" show={d56}>
+        <circle cx={arm.joints.prox[0]} cy={arm.joints.prox[1]} r={18} fill="rgba(255,184,107,0.12)" stroke="#ffb86b" strokeWidth={1.4} strokeDasharray="4 4" />
+      </Part>
+      <Part id="oinzola" show={d56}>
+        <ellipse cx={foot[0]} cy={foot[1] + 4} rx={20} ry={13} fill="rgba(255,184,107,0.12)" stroke="#ffb86b" strokeWidth={1.4} strokeDasharray="4 4" />
+      </Part>
+      <Part id="behatzak" show={d56}>
+          {leg.rays.map(([, b], i) => (
+            <circle key={i} cx={b[0]} cy={b[1]} r={7} fill="rgba(255,184,107,0.14)" stroke="#ffb86b" strokeWidth={1.4} strokeDasharray="3 3" />
+          ))}
+      </Part>
+      <Mark id="eskumuturra" x={arm.joints.dist[0]} y={arm.joints.dist[1]} rx={10} show={d56} />
+      <Mark id="ukondoa" x={arm.joints.mid[0]} y={arm.joints.mid[1]} rx={10} show={d56} />
+      <Mark id="belauna" x={leg.joints.mid[0]} y={leg.joints.mid[1]} rx={10} show={d56} />
       <AgeHud value={Math.round(day)} unit=". eguna" caption="Enbrioiaren adina" />
     </g>
   );

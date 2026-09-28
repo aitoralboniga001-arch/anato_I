@@ -112,6 +112,9 @@ const captionDwellMs = (stage: StageDef, k: number) => Math.max(5500, (stage.bea
 /** Quick replay dwell: just long enough to read the step's main idea. */
 const quickDwellMs = (stage: StageDef, k: number) => Math.max(1600, ideaOf(stage.beats[k]).length * 38);
 
+/** Stage time before a step boundary where a reading hold rests (scenes cross-fade steps over ~0.03). */
+const HOLD_LEAD = 0.035;
+
 /** The preview card stays up until it has had time to be read (ms at 1×). */
 const previewMs = (stage: StageDef) => 2500 + ((stage.intro ?? '').length + stage.keyPoints.slice(0, 3).join('').length) * 40;
 
@@ -232,6 +235,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const router = useRouter();
   const reduced = usePrefersReducedMotion();
   const svgRef = useRef<SVGSVGElement>(null);
+  const appRef = useRef<HTMLDivElement>(null);
 
   const [pos, setPos] = useState<Pos>({ i: 0, t: 0 });
   const [playing, setPlaying] = useState(false);
@@ -538,7 +542,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           });
         }
       }
-      const boundary = k + 1 < st.beats.length ? st.beats[k + 1].at : 1;
+      const end = k + 1 < st.beats.length ? st.beats[k + 1].at : 1;
+      // Rest just before the next step's cross-fade begins, so the frame being read shows this step complete.
+      const boundary = k + 1 < st.beats.length ? end - Math.min(HOLD_LEAD, (end - st.beats[k].at) * 0.25) : 1;
       const elapsed = now - clock.current.start;
       const dwell = quick ? quickDwellMs(st, k) : captionDwellMs(st, k);
       const hold = t >= boundary - 1e-4 && (guided ? !skipHold.current : elapsed < dwell && !skipHold.current);
@@ -770,7 +776,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   };
 
   /** The explanation panel: a column on wide screens (remembered), a drawer on narrow ones. */
-  const narrow = () => window.matchMedia('(max-width: 1320px)').matches;
+  const narrow = () => focusMode || window.matchMedia('(max-width: 1320px)').matches;
   const openPanel = () => {
     if (narrow()) setPanelOpen(true);
     else if (!infoOpen) setPref('panel', true);
@@ -904,6 +910,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     openPanel();
   };
 
+  // Focus mode and full screen go together: leaving one (the F key, the button) leaves the other.
+  useEffect(() => {
+    if (!focusMode && document.fullscreenElement && document.fullscreenElement === appRef.current) void document.exitFullscreen?.().catch(() => {});
+  }, [focusMode]);
+
   // Keyboard shortcuts. The listener is subscribed once; the effect event always sees fresh state.
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     const tag = (e.target as HTMLElement)?.tagName;
@@ -1005,11 +1016,14 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const pad = (n: number) => String(n).padStart(2, '0');
 
   return (
-    <div className={`app${focusMode ? ' is-focus' : ''}`}>
+    <div ref={appRef} className={`app${focusMode ? ' is-focus' : ''}`}>
       <header className="topbar">
         <Link href="/" className="tb-brand" title="Hasiera">
           <Wordmark size={20} />
         </Link>
+        <span className="tb-weeks-l" aria-hidden>
+          Gaia
+        </span>
         <nav className="tb-weeks" aria-label="Gaiak">
           {weeks.map((w) => (
             <Link
@@ -1025,7 +1039,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           ))}
         </nav>
         <div className="tb-tools">
-          <button className={`tool tool-main${find ? ' is-on' : ''}`} onClick={() => (find ? setFind(null) : startFind())} title="Aurkitu egitura irudian">
+          <button className={`tool tool-main${find ? ' is-on' : ''}`} onClick={() => (find ? setFind(null) : startFind())} data-tip="Irudian galdetzen zaizun egitura klikatu" data-tip-pos="bottom">
             <IconTarget size={16} /> <span>Aurkitu</span>
           </button>
           <button
@@ -1034,14 +1048,15 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               setQuestionsConcept(undefined);
               setQuestionsOpen(true);
             }}
-            title="Azterketa-galderak"
+            data-tip="Azterketa-motako galderak, azalpenarekin"
+            data-tip-pos="bottom"
           >
             <IconQuiz size={16} /> <span>Galderak</span>
           </button>
           <Popover
             trigger={({ open, toggle }) => (
-              <button className={`tool tool-icon${open ? ' is-on' : ''}`} onClick={toggle} aria-expanded={open} title="Tresna gehiago" aria-label="Tresna gehiago">
-                <IconMore size={16} />
+              <button className={`tool${open ? ' is-on' : ''}`} onClick={toggle} aria-expanded={open} aria-haspopup="menu" data-tip="Glosarioa, kronologia, leinuak, irudiak…" data-tip-pos="bottom">
+                <IconMore size={16} /> <span>Tresnak</span>
               </button>
             )}
           >
@@ -1090,8 +1105,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               </div>
             )}
           </Popover>
-          <button className={`tool tool-icon${panelOpen || infoOpen ? ' is-on' : ''}`} onClick={togglePanel} title="Azalpen-panela (])" aria-label="Azalpen-panela" aria-expanded={panelOpen || infoOpen}>
-            <IconRail open={infoOpen || panelOpen} side="right" />
+          <button className={`tool${panelOpen || infoOpen ? ' is-on' : ''}`} onClick={togglePanel} data-tip="Laburpena, datak eta egiturak erakutsi / ezkutatu · ]" data-tip-pos="bottom" aria-expanded={panelOpen || infoOpen}>
+            <IconRail open={infoOpen || panelOpen} side="right" /> <span>Laburpena</span>
           </button>
         </div>
       </header>
@@ -1164,13 +1179,15 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               onBackgroundClick={() => !find && setSelected(null)}
               marks={marks}
               nameOf={nameOf}
+              fullscreenRef={appRef}
+              onFullscreenChange={setFocusMode}
               overlay={
                 <>
                   <div className="view-tools">
-                    <button className={`icon-btn${showLabels ? ' is-on' : ''}`} onClick={() => setShowLabels((v) => !v)} title="Etiketak (L)" aria-label="Etiketak" aria-pressed={showLabels}>
+                    <button className={`icon-btn${showLabels ? ' is-on' : ''}`} onClick={() => setShowLabels((v) => !v)} data-tip={showLabels ? 'Etiketak ezkutatu · L' : 'Etiketak erakutsi · L'} data-tip-pos="left" aria-label="Etiketak" aria-pressed={showLabels}>
                       <IconTag size={16} />
                     </button>
-                    <button className={`icon-btn${legendOpen ? ' is-on' : ''}`} onClick={() => setLegendOpen((v) => !v)} title="Kolore-kodea" aria-label="Kolore-kodea" aria-pressed={legendOpen}>
+                    <button className={`icon-btn${legendOpen ? ' is-on' : ''}`} onClick={() => setLegendOpen((v) => !v)} data-tip="Koloreen esanahia" data-tip-pos="left" aria-label="Kolore-kodea" aria-pressed={legendOpen}>
                       <IconLayers size={16} />
                     </button>
                   </div>
@@ -1194,9 +1211,22 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                     </button>
                   )}
                   {focusMode && (
-                    <button className="btn small ghost focus-exit" onClick={() => setFocusMode(false)} title="Irten foku modutik (F / Esc)">
-                      Irten fokutik <kbd>F</kbd>
-                    </button>
+                    <p className="focus-title">
+                      <span>
+                        {week.week}. gaia{notesAt ? ` › ${sectionLabel(notesAt.section)}` : ''}
+                      </span>
+                      <b>{stage.title}</b>
+                    </p>
+                  )}
+                  {focusMode && (
+                    <div className="focus-exit">
+                      <button className={`btn small ghost${panelOpen ? ' is-on' : ''}`} onClick={togglePanel} data-tip="Laburpena eta datak erakutsi · ]" data-tip-pos="bottom">
+                        Laburpena <kbd>]</kbd>
+                      </button>
+                      <button className="btn small ghost" onClick={() => setFocusMode(false)} data-tip="Aurkibidea eta tresnak berriro erakutsi" data-tip-pos="bottom">
+                        Irten <kbd>F</kbd>
+                      </button>
+                    </div>
                   )}
                   {bridge && intro === null && <ViewBridge key={bridge.to.key} from={bridge.from} to={bridge.to} onClose={() => setBridge(null)} />}
                   {tour && intro === null && structures.get(tour.items[tour.idx]) && (

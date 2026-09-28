@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { forwardRef, useCallback, useEffect, useEffectEvent, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { Defs } from '@/components/kit/Defs';
 import type { Orientation } from '@/lib/sim/types';
 import { IconFit, IconZoomIn, IconZoomOut } from './icons';
@@ -19,6 +19,13 @@ interface ViewportProps {
   marks?: readonly string[];
   /** Names for the ring tags. */
   nameOf?: (id: string) => string;
+  /**
+   * What goes full screen. The whole study screen, not just the scene, so the explanation stays
+   * beside the picture; the scene alone is the fallback.
+   */
+  fullscreenRef?: RefObject<HTMLElement | null>;
+  /** Told when full screen starts or ends (the screen hides its chrome while it lasts). */
+  onFullscreenChange?: (on: boolean) => void;
 }
 
 interface Mark {
@@ -101,7 +108,7 @@ const sameMarks = (a: Mark[], b: Mark[]) =>
 
 /** SVG stage with wheel/drag zoom-pan, orientation edges and a feathered specimen backdrop. */
 export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewport(
-  { orientation, children, resetKey, onBackgroundClick, overlay, marks, nameOf },
+  { orientation, children, resetKey, onBackgroundClick, overlay, marks, nameOf, fullscreenRef, onFullscreenChange },
   svgRef,
 ) {
   const [z, setZ] = useState({ k: 1, x: 0, y: 0 });
@@ -125,18 +132,26 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
 
   useEffect(() => setZ({ k: 1, x: 0, y: 0 }), [resetKey]);
 
+  const changed = useEffectEvent((on: boolean) => onFullscreenChange?.(on));
+
   useEffect(() => {
+    let was = false;
     const syncFullscreen = () => {
-      setIsFullscreen(document.fullscreenElement === wrap.current);
+      const on = !!document.fullscreenElement && document.fullscreenElement === (fullscreenRef?.current ?? wrap.current);
+      setIsFullscreen(on);
       setFullscreenError('');
+      if (on !== was) {
+        was = on;
+        changed(on);
+      }
     };
     document.addEventListener('fullscreenchange', syncFullscreen);
     syncFullscreen();
     return () => document.removeEventListener('fullscreenchange', syncFullscreen);
-  }, []);
+  }, [fullscreenRef]);
 
   const toggleFullscreen = useCallback(async () => {
-    const el = wrap.current;
+    const el = fullscreenRef?.current ?? wrap.current;
     if (!el) return;
     setFullscreenError('');
     try {
@@ -158,7 +173,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
         ? 'Ezin izan da pantaila osotik irten.'
         : 'Ezin izan da pantaila osoa aktibatu.');
     }
-  }, []);
+  }, [fullscreenRef]);
 
   const toSvg = useCallback((clientX: number, clientY: number) => {
     const el = wrap.current;
@@ -283,10 +298,10 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
       )}
 
       <div className="zoom-controls">
-        <button className="icon-btn" onClick={() => zoomAt(1.35)} aria-label="Handitu" title="Handitu (Ctrl + gurpila)">
+        <button className="icon-btn" onClick={() => zoomAt(1.35)} aria-label="Handitu" data-tip="Handitu · Ctrl + gurpila" data-tip-pos="left">
           <IconZoomIn />
         </button>
-        <button className="icon-btn" onClick={() => zoomAt(1 / 1.35)} aria-label="Txikitu" title="Txikitu">
+        <button className="icon-btn" onClick={() => zoomAt(1 / 1.35)} aria-label="Txikitu" data-tip="Txikitu" data-tip-pos="left">
           <IconZoomOut />
         </button>
         <button
@@ -294,7 +309,8 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
           onClick={toggleFullscreen}
           aria-label={isFullscreen ? 'Irten pantaila osotik' : 'Pantaila osoa'}
           aria-pressed={isFullscreen}
-          title={isFullscreen ? 'Irten pantaila osotik' : 'Pantaila osoa'}
+          data-tip={isFullscreen ? 'Irten pantaila osotik · Esc' : 'Pantaila osoa (azalpenarekin)'}
+          data-tip-pos="left"
         >
           <IconFit />
         </button>

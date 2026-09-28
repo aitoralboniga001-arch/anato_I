@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Label, Note, Part, lerp, mix, seg, type SceneProps } from '@/components/kit';
+import { C, Label, Mark, Note, Part, lerp, mix, seg, type SceneProps } from '@/components/kit';
 import { Hud, MiniTract, vis } from './common';
 
 /**
@@ -271,6 +271,14 @@ export function Fertilization({ t }: SceneProps) {
         ))}
         <Sperm s={winner} t={t} seedPhase={5.1} />
       </Part>
+
+      {/* Marks for what the steps name but that has no outline: the acrosome, gaitze, the acrosome reaction, the cortical reaction */}
+      <Mark id="akrosoma" x={winner.x} y={winner.y} rx={13} show={vis(t, 0.02, 0.46) * winner.headOpacity} />
+      <Mark id="kapazitazioa" x={winner.x} y={winner.y} rx={27} color="#7dd3fc" show={vis(t, 0.1, 0.26)} />
+      <Mark id="akrosoma-erreakzioa" x={winner.x + Math.cos(((WINNER_DEG + 180) * Math.PI) / 180) * 16} y={winner.y + Math.sin(((WINNER_DEG + 180) * Math.PI) / 180) * 16} rx={17} show={vis(t, 0.28, 0.44)} />
+      <Mark id="erreakzio-kortikala" show={vis(t, 0.42, 0.58)}>
+        <circle className="mark-ring" cx={CX} cy={CY} r={OO_R - 6} fill="none" stroke="#fde68a" strokeWidth={3} strokeDasharray="5 4" />
+      </Mark>
 
       {/* Labels — side gutters only. */}
       <Label id="koroa-erradiatua" x={210} y={150} ax={pt(CORONA_R1 - 4, 235)[0]} ay={pt(CORONA_R1 - 4, 235)[1]} show={coronaO * vis(t, 0, 1)} />

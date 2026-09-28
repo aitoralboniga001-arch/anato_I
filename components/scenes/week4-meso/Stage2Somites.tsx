@@ -115,33 +115,38 @@ export function SomiteDorsal({ t }: SceneProps) {
   const count = countFor(day);
   const disappear = seg(t, 0.8, 0.88);
   const regressed = disappear > 0.15 ? Math.round(7 * disappear) : 0;
+  // The body is a tall strip: magnify it so it fills the frame (labels keep their own size).
+  const z = zoom(500, 325, 1.2, 500, 325);
+  const at = (x: number, y: number) => z.at(x, y);
   return (
     <g>
-      <BodyOutline t={t} />
-      <NeuralAxis t={t} />
-      <Somitomeres t={t} />
-      <SomitePairs t={t} />
-      <Note x={500} y={Y_TOP - 26} tone="dim">Kraneala</Note>
-      <Note x={500} y={Y_BOT + 30} tone="dim">Kaudala</Note>
+      <g transform={z.transform}>
+        <BodyOutline t={t} />
+        <NeuralAxis t={t} />
+        <Somitomeres t={t} />
+        <SomitePairs t={t} />
+      </g>
+      <Note x={500} y={at(500, Y_TOP - 26)[1] + 4} tone="dim">Kraneala</Note>
+      <Note x={500} y={at(500, Y_BOT + 30)[1]} tone="dim">Kaudala</Note>
       <g fontSize={15} fontWeight={700} fill="#e8eefc">
-        <text x={500} y={72} textAnchor="middle">
+        <text x={700} y={78}>
           {Math.round(day)}. eguna · {count} / {TOTAL_SOMITES} bikote
         </text>
         {regressed > 0 && (
-          <text x={500} y={94} textAnchor="middle" fontSize={12} fontWeight={400} fill="#ffb3b3">
+          <text x={700} y={100} fontSize={12} fontWeight={400} fill="#ffb3b3">
             {TOTAL_SOMITES - regressed}-{TOTAL_SOMITES} eratuak · {regressed} desagertzen
           </text>
         )}
       </g>
-      <Label id="somitomeroak" x={190} y={150} ax={478} ay={Y_TOP + 22} show={1} />
-      <Label id="somitak" x={190} y={280} ax={478} ay={SOM_Y_TOP + 10} show={fade(t, appearT(0), Infinity, 0.05)} />
-      <Label id="hodi-neurala" x={810} y={200} ax={500} ay={Y_TOP + 90} small />
+      <Label id="somitomeroak" x={190} y={150} ax={at(478, Y_TOP + 22)[0]} ay={at(478, Y_TOP + 22)[1]} show={1} />
+      <Label id="somitak" x={190} y={280} ax={at(478, SOM_Y_TOP + 10)[0]} ay={at(478, SOM_Y_TOP + 10)[1]} show={fade(t, appearT(0), Infinity, 0.05)} />
+      <Label id="hodi-neurala" x={810} y={200} ax={500} ay={at(500, Y_TOP + 90)[1]} small />
       {REGION_STARTS.map((r) => {
         const show = fade(t, appearT(r.start), Infinity, 0.05);
         const y0 = SOMITES[r.start]?.y ?? SOM_Y_TOP;
         const y1 = SOMITES[Math.min(r.start + r.n - 1, TOTAL_SOMITES - 1)]?.y ?? Y_BOT;
         return (
-          <Note key={r.id} x={640} y={(y0 + y1) / 2} tone="dim" size={12} show={show}>
+          <Note key={r.id} x={at(640, 0)[0]} y={at(0, (y0 + y1) / 2)[1]} tone="dim" size={13} show={show}>
             {`${r.n} ${r.id}`}
           </Note>
         );

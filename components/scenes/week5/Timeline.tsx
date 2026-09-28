@@ -1,6 +1,6 @@
 'use client';
 
-import { Label, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
+import { Label, Mark, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
 
 /**
  * Stage `iraupena`: the two ways of counting a pregnancy on ONE true time axis. Counted from
@@ -84,6 +84,9 @@ export function PregnancyTimeline({ t }: SceneProps) {
         <circle cx={DUE} cy={116} r={5} fill="#ff8a7a" />
       </Part>
       <Label id="erditze-data" x={DUE - 14} y={116} align="end" />
+      <Note x={(TX0 + DUE) / 2} y={312} tone="accent" show={1 - seg(t, 0.18, 0.2)}>
+        Erditze-data jakin → haurdunaldia eta fetuaren garapena kontrolatu · batez ere arrisku handiko haurdunaldietan
+      </Note>
 
       {/* Row A: from the last menstrual period. */}
       <line x1={X(0)} x2={X(DMAX)} y1={RA} y2={RA} stroke="rgba(255,255,255,0.1)" strokeWidth={12} strokeLinecap="round" />
@@ -140,12 +143,20 @@ export function PregnancyTimeline({ t }: SceneProps) {
       </Note>
 
       {/* Born earlier / later than expected. */}
-      <g opacity={early} pointerEvents="none">
-        <path d={`M${DUE - 8},${540} H${DUE - 70}`} stroke="#ff8a7a" strokeWidth={1.8} />
-        <path d={`M${DUE - 70},${540} l8,-5 v10z`} fill="#ff8a7a" />
-        <path d={`M${DUE + 8},${540} H${DUE + 40}`} stroke="#ff8a7a" strokeWidth={1.8} />
-        <path d={`M${DUE + 40},${540} l-8,-5 v10z`} fill="#ff8a7a" />
-      </g>
+      <Mark id="goiztiarra" show={early}>
+        <g>
+          <rect x={DUE - 104} y={526} width={100} height={28} rx={8} fill="#ff8a7a" fillOpacity={0.1} />
+          <path d={`M${DUE - 8},${540} H${DUE - 70}`} stroke="#ff8a7a" strokeWidth={1.8} />
+          <path d={`M${DUE - 70},${540} l8,-5 v10z`} fill="#ff8a7a" />
+        </g>
+      </Mark>
+      <Mark id="berantiarra" show={early}>
+        <g>
+          <rect x={DUE + 4} y={526} width={48} height={28} rx={8} fill="#ff8a7a" fillOpacity={0.1} />
+          <path d={`M${DUE + 8},${540} H${DUE + 40}`} stroke="#ff8a7a" strokeWidth={1.8} />
+          <path d={`M${DUE + 40},${540} l-8,-5 v10z`} fill="#ff8a7a" />
+        </g>
+      </Mark>
       <Label id="goiztiarra" text="Goiztiarra: lehenago" x={DUE - 80} y={540} align="end" show={early} />
       <Label id="berantiarra" x={DUE + 46} y={540} align="start" show={early} />
 

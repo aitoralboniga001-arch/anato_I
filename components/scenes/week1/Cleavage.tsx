@@ -1,6 +1,6 @@
 'use client';
 
-import { Label, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
+import { Label, Mark, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
 import { cleavageFrame } from '@/components/shell/intro/cleavage';
 import { Hud, MiniTract, vis } from './common';
 import { Conceptus, ConceptusDefs } from './conceptus';
@@ -108,6 +108,12 @@ export function BlastocystFormation({ t }: SceneProps) {
   const ROT = 43; // embryonic pole up, as it will face the endometrium
   const RB = 138;
   const embC: [number, number] = [CX, CY - 72 * S];
+  const poleOn = seg(t, 0.84, 0.88);
+  const poleArc = (mid: number) => {
+    const r = RB * S + 10;
+    const pt = (a: number) => `${(CX + r * Math.cos((a * Math.PI) / 180)).toFixed(1)},${(CY + r * Math.sin((a * Math.PI) / 180)).toFixed(1)}`;
+    return `M${pt(mid - 32)} A${r},${r} 0 0 1 ${pt(mid + 32)}`;
+  };
   return (
     <g>
       <ConceptusDefs />
@@ -140,12 +146,25 @@ export function BlastocystFormation({ t }: SceneProps) {
         </g>
       )}
 
+      {/* The two poles: an arc on each end of the axis through the inner cell mass */}
+      {poleOn > 0.02 && (
+        <>
+          <Part id="mutur-enbrionarioa" show={poleOn}>
+            <path d={poleArc(-90)} fill="none" stroke="#8fb4f7" strokeWidth={9} strokeLinecap="round" opacity={0.85} />
+          </Part>
+          <Part id="mutur-anenbrionarioa" show={poleOn}>
+            <path d={poleArc(90)} fill="none" stroke="#7ad9a3" strokeWidth={9} strokeLinecap="round" opacity={0.85} />
+          </Part>
+        </>
+      )}
+
       <Label id="mintz-peluzidoa" x={800} y={470} ax={CX + 110 * S} ay={CY + 100 * S} show={vis(t, 0, 0.26)} />
       <Label id="trofoblastoa" x={800} y={420} ax={CX + 88 * S} ay={CY + 88 * S} show={done} />
       <Label id="enbrioblastoa" x={250} y={170} ax={embC[0] - 20} ay={embC[1]} show={done} />
       <Label id="blastozelea" x={800} y={300} ax={CX + 30 * S} ay={CY + 30 * S} show={seg(t, 0.55, 0.62)} />
       <Label id="mutur-enbrionarioa" x={800} y={110} ax={CX + 8} ay={CY - RB * S - 4} show={seg(t, 0.84, 0.88)} />
       <Label id="mutur-anenbrionarioa" x={250} y={540} ax={CX} ay={CY + RB * S + 4} show={seg(t, 0.84, 0.88)} />
+      <Mark id="blastozistoa" x={CX} y={CY} rx={RB * S + 22} color="#8fb4f7" show={named} />
       <Label id="blastozistoa" x={250} y={420} ax={CX - 120 * S} ay={CY + 40 * S} show={named} />
       <Label id="umetoki-barrunbea" x={250} y={560} ax={CX - 300} ay={CY + 200} show={vis(t, 0, 0.26)} />
 

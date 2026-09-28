@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Flow, Label, Note, Part, lerp, rand, seg, smoothPath, type SceneProps } from '@/components/kit';
+import { C, Flow, Label, Mark, Note, Part, lerp, rand, seg, smoothPath, type SceneProps } from '@/components/kit';
 
 /**
  * Topic 6 — the chorionic sac as a whole (stage `biloxka-askeak`): a ring of villi around the
@@ -240,6 +240,8 @@ export function SacCirculation({ t, reduced }: SceneProps) {
     <g>
       <SacDefs />
       <CirculationDrawing t={t} reduced={reduced} />
+      <Mark id="enbrioi-kanpoko-zirkulazioa" x={CX} y={CY} rx={V_R + 52} color="#93b4ff" />
+      <Label id="enbrioi-kanpoko-zirkulazioa" x={270} y={480} ax={CX - (V_R + 52) * 0.72} ay={CY + (V_R + 52) * 0.69} />
       <Label id="finkapen-pedikulua" x={190} y={80} ax={CX - 4} ay={CY - V_R + 100} />
       <Label id="amnios-barrunbea" x={810} y={80} ax={CX + 14} ay={CY - 22} />
       <Label id="bitelo-zaku-sekundarioa" x={740} y={130} ax={CX + 18} ay={CY - 8} />
