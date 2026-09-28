@@ -21,7 +21,7 @@ export function NowCard({ day, stageDays, onPick, onClose }: { day: number; stag
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const away = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node) && !(e.target as HTMLElement).closest?.('.ctx-bar')) onClose();
+      if (ref.current && !ref.current.contains(e.target as Node) && !(e.target as HTMLElement).closest?.('.day-chip')) onClose();
     };
     window.addEventListener('pointerdown', away);
     return () => window.removeEventListener('pointerdown', away);

@@ -4,11 +4,12 @@ import { firstSentence } from '@/content/generate';
 import { useRef, useState, type ReactNode } from 'react';
 import type { Beat, MicroQuestion, StageDef, StructureDef } from '@/lib/sim/types';
 import { structures } from '@/content/registry';
-import { IconBolt, IconGuide, IconLoop, IconNext, IconPause, IconPlay, IconPrev, IconSkipNext, IconSkipPrev, IconVoice } from './icons';
+import { IconBolt, IconCalendar, IconGuide, IconLoop, IconNext, IconPause, IconPlay, IconPrev, IconSkipNext, IconSkipPrev, IconVoice } from './icons';
 import { categoryColor } from '@/lib/sim/palette';
 import { useCanNarrate } from './narrate';
 import type { PlayMode } from './prefs';
 import { recordAnswer } from './answers';
+import type { ExamDate } from '@/content/examDates';
 
 interface PlayerProps {
   stage: StageDef;
@@ -46,6 +47,8 @@ interface PlayerProps {
   ask?: ReactNode;
   /** GOGORATU: watch again how an earlier structure formed (time machine, with a way back). */
   onRecall?: (id: string) => void;
+  /** Exam dates the current step shows. */
+  dates?: ExamDate[];
 }
 
 const SPEEDS = [0.5, 1, 1.5, 2];
@@ -72,84 +75,109 @@ const MODES: { id: PlayMode; label: string; title: string }[] = [
   },
 ];
 
-/** The step's caption: main idea, short explanation, key and trap, and optional detail folded away. */
+/** The date tag in front of the step's idea (exam dates, "HITO-DATAK"). */
+function DateTag({ dates }: { dates: ExamDate[] }) {
+  if (!dates.length) return null;
+  return (
+    <span className="cap-date" title={dates.map((d) => `${d.when}: ${d.what}`).join(' · ')}>
+      <IconCalendar size={12} />
+      {dates.map((d) => d.when).join(' · ')}
+    </span>
+  );
+}
 
-function Caption({ beat, quick, stageId, k, extra, onRecall }: { beat: Beat | undefined; quick: boolean; stageId: string; k: number; extra?: ReactNode; onRecall?: (id: string) => void }) {
+/**
+ * The step's caption. What to read comes first, in one column (date, main idea, explanation); the
+ * study notes (key, exam, trap, earlier structures, new structures) sit in the margin beside it.
+ */
+function Caption({
+  beat,
+  quick,
+  stageId,
+  k,
+  dates,
+  extra,
+  onRecall,
+}: {
+  beat: Beat | undefined;
+  quick: boolean;
+  stageId: string;
+  k: number;
+  dates: ExamDate[];
+  extra?: ReactNode;
+  onRecall?: (id: string) => void;
+}) {
   const [openKey, setOpenKey] = useState('');
   if (!beat) return null;
   const key = `${stageId}-${k}`;
   if (quick)
     return (
       <p key={key} className="cap-idea is-quick">
+        <DateTag dates={dates} />
         {ideaOf(beat)}
       </p>
     );
   const open = openKey === key;
+  const recall = (beat.recall ?? []).map((id) => structures.get(id)).filter((r): r is StructureDef => !!r);
+  const side = recall.length > 0 || !!(beat.key || beat.exam || beat.caution || beat.more) || !!extra;
   return (
-    <div className={`cap-text${beat.idea ? ' has-idea' : ''}`} key={key}>
-      {(beat.recall?.length ?? 0) > 1 && (
-        // Several earlier structures: one line of names (definition on hover), each can be replayed.
-        <p className="cap-recall is-many">
-          <b>Gogoratu</b>
-          <span>
-            {beat.recall!.map((id, i) => {
-              const r = structures.get(id);
-              if (!r) return null;
-              return (
-                <span key={id} className="cap-recall-item">
-                  {i > 0 && <span aria-hidden> · </span>}
-                  {onRecall ? (
-                    <button className="link-quiet" onClick={() => onRecall(id)} title={`${firstSentence(r.definition)} — Ikusi nola sortu zen (gero, bueltatu hona)`}>
-                      <strong>{r.name}</strong> <span aria-hidden>↺</span>
-                    </button>
-                  ) : (
-                    <strong title={r.definition}>{r.name}</strong>
-                  )}
-                </span>
-              );
-            })}
-          </span>
-        </p>
-      )}
-      {beat.recall?.length === 1 && beat.recall.map((id) => {
-        const r = structures.get(id);
-        return r ? (
-          <p className="cap-recall" key={id} title={r.definition}>
-            <b>Gogoratu</b>
-            <span>
-              <strong>{r.name}</strong> — {firstSentence(r.definition)}
-            </span>
-            {onRecall && (
-              <button className="link-quiet" onClick={() => onRecall(id)} title="Ikusi nola sortu zen (gero, bueltatu hona)">
-                Ikusi berriro <span aria-hidden>↺</span>
-              </button>
-            )}
+    <div className={`cap-text cap-v2${side ? ' has-side' : ''}`} key={key}>
+      <div className="cap-main">
+        {beat.idea ? (
+          <p className="cap-idea">
+            <DateTag dates={dates} />
+            {beat.idea}
           </p>
-        ) : null;
-      })}
-      {beat.idea && <p className="cap-idea">{beat.idea}</p>}
-      <p>{beat.text}</p>
-      {extra && <div className="cap-extra">{extra}</div>}
-      {(beat.key || beat.exam || beat.caution || beat.more) && (
-        <div className="cap-notes">
+        ) : (
+          dates.length > 0 && (
+            <p className="cap-idea is-date">
+              <DateTag dates={dates} />
+            </p>
+          )
+        )}
+        <p>{beat.text}</p>
+        {open && beat.more && <p className="cap-more">{beat.more}</p>}
+      </div>
+      {side && (
+        <div className="cap-side">
           {beat.key && (
-            <span className="cap-note is-key">
+            <p className="cap-note is-key">
               <b>Ulertzeko gakoa</b>
               {beat.key}
-            </span>
+            </p>
           )}
           {beat.exam && (
-            <span className="cap-note is-exam">
-              <b>Azterketarako gakoa</b>
-              {beat.exam}
-            </span>
+            <p className="cap-note is-exam">
+              <b>Azterketan</b>
+              {beat.exam.replace(/^Azterketan:\s*(.)/, (_, c: string) => c.toUpperCase())}
+            </p>
           )}
           {beat.caution && (
-            <span className="cap-note is-warn">
+            <p className="cap-note is-warn">
               <b>Kontuz</b>
               {beat.caution}
-            </span>
+            </p>
           )}
+          {recall.length > 0 && (
+            <p className="cap-note is-recall">
+              <b>Gogoratu</b>
+              <span>
+                {recall.map((r, i) => (
+                  <span key={r.id} className="cap-recall-item">
+                    {i > 0 && <span aria-hidden> · </span>}
+                    {onRecall ? (
+                      <button className="link-quiet" onClick={() => onRecall(r.id)} title={`${firstSentence(r.definition)} — Ikusi nola sortu zen (gero, bueltatu hona)`}>
+                        {r.name} <span aria-hidden>↺</span>
+                      </button>
+                    ) : (
+                      <span title={r.definition}>{r.name}</span>
+                    )}
+                  </span>
+                ))}
+              </span>
+            </p>
+          )}
+          {extra && <div className="cap-extra">{extra}</div>}
           {beat.more && (
             <button className="cap-more-btn" aria-expanded={open} onClick={() => setOpenKey(open ? '' : key)}>
               {open ? 'Laburtu' : 'Sakondu'} <span aria-hidden>{open ? '−' : '+'}</span>
@@ -157,7 +185,6 @@ function Caption({ beat, quick, stageId, k, extra, onRecall }: { beat: Beat | un
           )}
         </div>
       )}
-      {open && beat.more && <p className="cap-more">{beat.more}</p>}
     </div>
   );
 }
@@ -201,6 +228,7 @@ export function Player(p: PlayerProps) {
               quick={p.mode === 'azkarra'}
               stageId={p.stage.id}
               k={p.activeBeat}
+              dates={p.dates ?? []}
               onRecall={p.onRecall}
               extra={
                 p.fresh.length > 0 && (

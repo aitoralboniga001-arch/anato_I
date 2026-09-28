@@ -183,6 +183,13 @@ export const IconClock = ({ size }: P) => (
     <path d="M12 7v5l3.5 2" />
   </svg>
 );
+/** Exam date: a calendar page. */
+export const IconCalendar = ({ size }: P) => (
+  <svg {...base(size)}>
+    <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+    <path d="M3.5 10h17M8 3v4M16 3v4" />
+  </svg>
+);
 export const IconImage = ({ size }: P) => (
   <svg {...base(size)}>
     <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" />

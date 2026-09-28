@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useEffectEvent, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react';
 import { SceneContext, type QuizFlash, type SceneContextValue } from '@/components/kit/context';
 import { getWeek, isSpace, nameOf, structures, weeks } from '@/content/registry';
 import { firstSeenOf, periodOf, weekOfDay } from '@/content/chronology';
@@ -10,7 +10,7 @@ import { ageLabel, ageParts, spanOf } from '@/lib/sim/age';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { StageDef, StructureCategory, StructureDef, WeekDef } from '@/lib/sim/types';
 import { Glossary } from './Glossary';
-import { IconBook, IconClock, IconExpand, IconImage, IconInfo, IconLayers, IconPlay, IconQuiz, IconTag, IconTarget, IconTree, PlaneGlyph } from './icons';
+import { IconBook, IconCalendar, IconClock, IconExpand, IconImage, IconInfo, IconLayers, IconPlay, IconQuiz, IconTag, IconTarget, IconTree, PlaneGlyph } from './icons';
 import { Wordmark, isWip } from './LandNav';
 import { AskCard, Player, TourCard, ideaOf } from './Player';
 import { Help, useHelpOnce } from './Help';
@@ -26,6 +26,8 @@ import { setPlayMode, setPref, usePref, type PlayMode } from './prefs';
 import { markVisited, useVisited } from './progress';
 import { recordAnswer } from './answers';
 import { imageId } from '@/content/pool';
+import { sectionLabel, sectionOf } from '@/content/notes';
+import { examDatesAt } from '@/content/examDates';
 
 interface Pos {
   i: number;
@@ -214,6 +216,16 @@ const readBack = (week: number, stage: string): Back | null => {
   }
 };
 
+/** The tissue categories drawn in a stage, with their colours (the legend). */
+function legendOf(ids: readonly string[]) {
+  const seen = new Map<StructureCategory, string>();
+  for (const id of ids) {
+    const s = structures.get(id);
+    if (s && !seen.has(s.category)) seen.set(s.category, categoryColor[s.category]);
+  }
+  return [...seen.entries()];
+}
+
 export function Simulator({ weekNumber }: { weekNumber: number }) {
   const week = getWeek(weekNumber) ?? weeks[0];
   const router = useRouter();
@@ -318,6 +330,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const Scene = view.scene;
   const activeBeat = beatIndexAt(stage, pos.t);
   const beat = stage.beats[activeBeat];
+  /** Where the stage sits in the notes, and the exam dates the current step shows. */
+  const notesAt = sectionOf(week.week, stage.id);
+  const dates = examDatesAt(week.week, stage.id, beat?.at);
   const fresh = freshAt(stage, activeBeat, week.week);
   const askKey = `${stage.id}:${activeBeat}`;
 
@@ -955,14 +970,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const marks = find || intro !== null ? [] : spot ? [spot] : selected && selectedLit ? [selected] : (beat?.focus ?? []);
 
   // Legend: categories present in this stage.
-  const legend = useMemo(() => {
-    const seen = new Map<StructureCategory, string>();
-    for (const id of stage.structures) {
-      const s = structures.get(id);
-      if (s && !seen.has(s.category)) seen.set(s.category, categoryColor[s.category]);
-    }
-    return [...seen.entries()];
-  }, [stage]);
+  const legend = legendOf(stage.structures);
 
   const day = lerpDay(stage.dayRange, pos.t);
 
@@ -1030,16 +1038,17 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           >
             <IconQuiz size={16} /> <span>Galderak</span>
           </button>
-          <button className="tool" onClick={() => setGlossaryOpen(true)} title="Glosarioa">
+          <span className="tool-sep" aria-hidden />
+          <button className="tool tool-2" onClick={() => setGlossaryOpen(true)} title="Glosarioa">
             <IconBook size={16} /> <span>Glosarioa</span>
           </button>
-          <Link className="tool" href={`/kronologia?eguna=${Math.round(day)}`} title="Kronologia: zer dago egun honetan?">
+          <Link className="tool tool-2" href={`/kronologia?eguna=${Math.round(day)}`} title="Kronologia: zer dago egun honetan?">
             <IconClock size={16} /> <span>Kronologia</span>
           </Link>
-          <Link className="tool" href="/leinuak" title="Ernetze orrien leinuak">
+          <Link className="tool tool-2" href="/leinuak" title="Ernetze orrien leinuak">
             <IconTree size={16} /> <span>Leinuak</span>
           </Link>
-          <Link className="tool" href="/irudiak" title="Irudi-laborategia: irudiak azterketan bezala (etiketarik gabe)">
+          <Link className="tool tool-2" href="/irudiak" title="Irudi-laborategia: irudiak azterketan bezala (etiketarik gabe)">
             <IconImage size={16} /> <span>Irudiak</span>
           </Link>
           <button className={`tool tool-panel${panelOpen || infoOpen ? ' is-on' : ''}`} onClick={togglePanel} title="Azalpen-panela (])" aria-expanded={panelOpen || infoOpen}>
@@ -1078,20 +1087,19 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         <main className={`stage${find && print ? ' is-print' : ''}`}>
           <div className="stage-bar">
             <div className="stage-heading">
-              <button className="kicker ctx-bar" onClick={() => setNowOpen((v) => !v)} aria-expanded={nowOpen} title="Testuinguru tenporala: zer dago orain, zer den berria, zer desagertu den">
+              {/* Where this stage sits in the notes: topic › heading, numbered as the notes number it. */}
+              <p className="kicker crumbs" title={[notesAt?.parent && sectionLabel(notesAt.parent), notesAt?.section.covers].filter(Boolean).join(' · ') || undefined}>
                 <span>{week.week}. gaia</span>
-                <span>
-                  {pad(pos.i + 1)}/{pad(week.stages.length)} etapa
-                </span>
-                <span className="ctx-day">{stage.day}</span>
-                <span>{weekOfDay(day)}. astea</span>
-                <span>
-                  {periodOf(day).name}
-                  <i className="ctx-more" aria-hidden>
-                    ▾
-                  </i>
-                </span>
-              </button>
+                {notesAt && <span className="crumb-sec">{sectionLabel(notesAt.section)}</span>}
+              </p>
+              <div className="stage-title">
+                <h2 title={stage.title}>{stage.title}</h2>
+                <button className="day-chip" onClick={() => setNowOpen((v) => !v)} aria-expanded={nowOpen} title={`${weekOfDay(day)}. astea · ${periodOf(day).name} — zer dago orain, zer den berria, zer desagertu den`}>
+                  <IconCalendar size={13} />
+                  {stage.day}
+                  <i aria-hidden>▾</i>
+                </button>
+              </div>
               {nowOpen && (
                 <NowCard
                   day={day}
@@ -1104,7 +1112,6 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                   }}
                 />
               )}
-              <h2 title={stage.title}>{stage.title}</h2>
             </div>
             <div className="stage-side">
               <Locator plane={view.plane} week={week.week} day={day} level={view.locator?.level} orientation={view.orientation} note={view.locator?.note} viewKey={`${stage.id}/${view.id}`} hold={helpOpen || questionsOpen || glossaryOpen || !!bridge} />
@@ -1163,6 +1170,20 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       Irten fokutik <kbd>F</kbd>
                     </button>
                   )}
+                  {intro === null && !find && !tour && !bridge && dates.length > 0 && (
+                    // HITO-DATA: the date the exams ask about, stamped on the scene while its step plays.
+                    <div className="xstamp" key={`xd-${stage.id}-${activeBeat}`} role="status" aria-label="Azterketarako data">
+                      {dates.map((d, i) => (
+                        <span key={i} className="xstamp-i" style={{ animationDelay: `${0.15 + i * 0.3}s, ${5 + i * 0.3}s` }}>
+                          <b>
+                            <IconCalendar size={14} />
+                            {d.when}
+                          </b>
+                          <small>{d.what}</small>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   {bridge && intro === null && <ViewBridge key={bridge.to.key} from={bridge.from} to={bridge.to} onClose={() => setBridge(null)} />}
                   {tour && intro === null && structures.get(tour.items[tour.idx]) && (
                     <TourCard item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} onSkip={skipTour} onPick={onSelect} />
@@ -1175,18 +1196,21 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                   {intro !== null && (
                     <div className="pv-card" key={`intro-${stage.id}`}>
                       <div className="pv-top">
-                        <span className="pv-kicker">
-                          Aurrebista · {pad(pos.i + 1)}/{pad(week.stages.length)} · {stage.day}
-                        </span>
+                        <span className="pv-kicker">Aurrebista · {stage.day}</span>
                         {intro < 1 && (
                           <button className="btn small ghost" onClick={endIntro}>
                             Saltatu <span aria-hidden>→</span>
                           </button>
                         )}
                       </div>
-                      {prevStage && (
+                      {notesAt && (
+                        <p className="pv-prev pv-notes">
+                          <span>Apunteetan</span> {week.week}. gaia › {sectionLabel(notesAt.section)}
+                        </p>
+                      )}
+                      {prevStage && pos.i === 0 && (
                         <p className="pv-prev">
-                          <span>Aurreko etapa</span> {prevStage.title}
+                          <span>Aurreko gaia</span> {prevStage.title}
                         </p>
                       )}
                       <h3>{stage.title}</h3>
@@ -1295,6 +1319,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             onContinue={continueHold}
             onNextStage={continueNext}
             onPick={onSelect}
+            dates={intro === null && !find ? dates : []}
             onRecall={(id) => {
               const f = firstSeenOf(id);
               if (f && f.beat >= 0) replay(f.week, f.stage, f.at, id);
@@ -1331,7 +1356,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           ) : (
             <StageInfo
               key={stage.id}
+              week={week.week}
               stage={stage}
+              activeBeat={activeBeat}
+              onSeek={(t) => seek(pos.i, t)}
               onSelect={onSelect}
               onDismiss={() => (narrow() ? setPanelOpen(false) : setPref('panel', false))}
               onHover={(id) => setHovered(id && inScene(id) ? id : null)}
