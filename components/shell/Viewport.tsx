@@ -109,6 +109,8 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   const wrap = useRef<HTMLDivElement>(null);
   const scene = useRef<SVGGElement>(null);
   const [rings, setRings] = useState<Mark[]>([]);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fullscreenError, setFullscreenError] = useState('');
   const markKey = (marks ?? []).join('|');
 
   // Re-measured after every render (the scene moves while it plays); state changes only when a ring moves.
@@ -122,6 +124,41 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   });
 
   useEffect(() => setZ({ k: 1, x: 0, y: 0 }), [resetKey]);
+
+  useEffect(() => {
+    const syncFullscreen = () => {
+      setIsFullscreen(document.fullscreenElement === wrap.current);
+      setFullscreenError('');
+    };
+    document.addEventListener('fullscreenchange', syncFullscreen);
+    syncFullscreen();
+    return () => document.removeEventListener('fullscreenchange', syncFullscreen);
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    const el = wrap.current;
+    if (!el) return;
+    setFullscreenError('');
+    try {
+      if (document.fullscreenElement === el) {
+        if (!document.exitFullscreen) {
+          setFullscreenError('Ezin izan da pantaila osotik irten.');
+          return;
+        }
+        await document.exitFullscreen();
+      } else {
+        if (!el.requestFullscreen) {
+          setFullscreenError('Pantaila osoa ez dago erabilgarri nabigatzaile honetan.');
+          return;
+        }
+        await el.requestFullscreen();
+      }
+    } catch {
+      setFullscreenError(document.fullscreenElement === el
+        ? 'Ezin izan da pantaila osotik irten.'
+        : 'Ezin izan da pantaila osoa aktibatu.');
+    }
+  }, []);
 
   const toSvg = useCallback((clientX: number, clientY: number) => {
     const el = wrap.current;
@@ -252,10 +289,17 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
         <button className="icon-btn" onClick={() => zoomAt(1 / 1.35)} aria-label="Txikitu" title="Txikitu">
           <IconZoomOut />
         </button>
-        <button className="icon-btn" onClick={() => setZ({ k: 1, x: 0, y: 0 })} aria-label="Doitu" title="Doitu (klik bikoitza)">
+        <button
+          className="icon-btn"
+          onClick={toggleFullscreen}
+          aria-label={isFullscreen ? 'Irten pantaila osotik' : 'Pantaila osoa'}
+          aria-pressed={isFullscreen}
+          title={isFullscreen ? 'Irten pantaila osotik' : 'Pantaila osoa'}
+        >
           <IconFit />
         </button>
       </div>
+      {fullscreenError && <div className="viewport-fullscreen-error" role="status" aria-live="polite">{fullscreenError}</div>}
       {overlay}
     </div>
   );

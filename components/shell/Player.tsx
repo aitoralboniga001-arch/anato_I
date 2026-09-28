@@ -32,6 +32,8 @@ interface PlayerProps {
   voice: boolean;
   /** The step's animation has finished and it is waiting for the reading time. */
   waiting: boolean;
+  /** Seconds remaining before a timed mode advances this step. */
+  waitSeconds: number | null;
   /** Structures introduced by the current step (only filled in guided mode). */
   fresh: StructureDef[];
   mode: PlayMode;
@@ -227,10 +229,18 @@ export function Player(p: PlayerProps) {
             <IconPrev />
           </button>
           {p.waiting && !p.ask && (
-            <button className="btn small ghost cap-wait" onClick={p.onContinue} title="Irakurtzeko denbora: klik jarraitzeko">
-              <span className="cap-wait-dot" aria-hidden />
-              Jarraitu
-            </button>
+            p.guided ? (
+              <button className="btn cap-wait cap-wait-guided" onClick={p.onContinue} title="Sakatu hurrengo urratsa ikusteko">
+                <span className="cap-wait-dot" aria-hidden />
+                <span><b>Jarraitu</b><small>Sakatu hurrengo urratsa ikusteko</small></span>
+                <span aria-hidden>→</span>
+              </button>
+            ) : (
+              <div className="cap-wait-timed">
+                <span>Hurrengo pausoa {p.waitSeconds ?? 1} s barru</span>
+                <button className="btn small ghost" onClick={p.onContinue} title="Hurrengo pausora berehala aurreratu">Aurreratu orain <span aria-hidden>→</span></button>
+              </div>
+            )
           )}
           {atEnd && p.nextTitle ? (
             <button className="btn btn-light" onClick={p.onNextStage} title={p.nextTitle}>

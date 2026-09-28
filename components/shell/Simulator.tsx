@@ -255,6 +255,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const [intro, setIntro] = useState<number | null>(null);
   // Guided mode: the step's animation is done but its text is still being read.
   const [waiting, setWaiting] = useState(false);
+  const [waitSeconds, setWaitSeconds] = useState<number | null>(null);
+  const waitSecondsRef = useRef<number | null>(null);
   // The playback loop owns these between frames; `live` mirrors the committed position.
   const live = useRef<Pos>({ i: 0, t: 0 });
   const introRef = useRef<number | null>(null);
@@ -498,6 +500,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           }
         }
         setWaiting(false);
+        if (waitSecondsRef.current !== null) {
+          waitSecondsRef.current = null;
+          setWaitSeconds(null);
+        }
         const held = { i: p.i, t };
         live.current = held;
         setPos(held);
@@ -520,6 +526,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       const elapsed = now - clock.current.start;
       const dwell = quick ? quickDwellMs(st, k) : captionDwellMs(st, k);
       const hold = t >= boundary - 1e-4 && (guided ? !skipHold.current : elapsed < dwell && !skipHold.current);
+      const remainingSeconds = hold && !guided ? Math.max(1, Math.ceil((dwell - elapsed) / 1000)) : null;
+      if (waitSecondsRef.current !== remainingSeconds) {
+        waitSecondsRef.current = remainingSeconds;
+        setWaitSeconds(remainingSeconds);
+      }
       if (hold) t = Math.max(p.t, boundary - 1e-4);
       setWaiting(hold);
       let next: Pos = { i: p.i, t: Math.min(t, 1) };
@@ -1278,6 +1289,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             onMode={setPlayMode}
             voice={voice}
             waiting={waiting && playing && intro === null}
+            waitSeconds={waiting && playing && intro === null ? waitSeconds : null}
             fresh={guided && intro === null && !tour ? fresh : []}
             onVoice={(v) => setPref('voice', v)}
             onContinue={continueHold}

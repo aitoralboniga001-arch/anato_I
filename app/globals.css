@@ -742,6 +742,27 @@ kbd {
   user-select: none;
 }
 
+.viewport:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  border: 0;
+  border-radius: 0;
+}
+
+.viewport-fullscreen-error {
+  position: absolute;
+  z-index: 4;
+  left: 12px;
+  bottom: 12px;
+  max-width: min(360px, calc(100% - 24px));
+  padding: 8px 12px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: rgba(19, 19, 21, 0.94);
+  color: var(--text);
+  font-size: 12px;
+}
+
 .viewport::after {
   content: "";
   position: absolute;
@@ -3537,6 +3558,53 @@ a.ln-chip:hover {
 
 .cap-wait {
   gap: 8px;
+}
+
+.cap-wait-guided {
+  min-height: 46px;
+  padding: 7px 12px;
+  color: var(--bg);
+  background: var(--signal);
+  border-color: var(--signal);
+  text-align: left;
+}
+
+.btn.cap-wait-guided:hover:not(:disabled) {
+  color: var(--bg);
+  background: #ff805b;
+  border-color: #ff805b;
+}
+
+.cap-wait-guided > span:nth-child(2) {
+  display: grid;
+  gap: 1px;
+}
+
+.cap-wait-guided small {
+  font-size: 10px;
+  line-height: 1.25;
+  opacity: 0.82;
+}
+
+.cap-wait-timed {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  color: var(--text-2);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .cap-wait-guided small {
+    max-width: 132px;
+    white-space: normal;
+  }
+
+  .cap-wait-timed {
+    white-space: normal;
+    text-align: right;
+  }
 }
 
 .cap-wait-dot {
