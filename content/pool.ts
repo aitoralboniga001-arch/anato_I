@@ -96,7 +96,7 @@ const TAGS: Record<string, { comp?: Competence; concept?: string }> = {
   'w3b-q-zirkulazio-funtzionala': { concept: 'zirkulazio-uteroplazentarioa' },
   'w4-q-fusio-hasiera': { comp: 'kokapena', concept: 'tolesdura-neuralak' },
   'w4-q-neuroporoak-egunak': { comp: 'noiz', concept: 'neuroporo-kraneala' },
-  'w4-q-ile-azazkalak': { concept: 'azaleko-ektodermoa' },
+  'w4-q-ile-azazkalak': { comp: 'jatorria', concept: 'melanozitoak' },
   'w4-q-giltzurrun-gaineko': { comp: 'jatorria', concept: 'giltzurrun-gaineko-muina' },
   'w5-q-sudur-plaka': { concept: 'sudur-plaka' },
   'w5-q-iraupena': { comp: 'noiz' },

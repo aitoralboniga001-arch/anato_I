@@ -1,83 +1,42 @@
 'use client';
 
-import { C, Label, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { C, Cell, Label, Note, Part, lerp, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
 import { spineAt } from '@/components/scenes/week5/skin';
 import { Embryo28Outline, G28, onEll } from './BrainVesicles';
-import { SectionDrawing, makeSection } from '@/components/scenes/section/Section';
+import { CrestGlyph } from './CrestGlyph';
+export { CrestSection as NeuralCrestSection } from './CrestSection';
 
-/**
- * Stage `gandor-neurala` — crest cells detach from the neural fold edges (epithelial→mesenchymal),
- * migrate dorsolaterally (under the ectoderm → epidermal melanocytes, per SOURCE_ISSUES: NOT hair
- * follicles or nails) and ventrally (between the neural tube and the somites → ganglia and more),
- * per the notes' derivative list (figure 4).
- */
+const TEAL = C.neuralCrest;
+const ORANGE = '#ffba72';
+const dist = (a: Pt, b: Pt) => Math.hypot(b[0] - a[0], b[1] - a[1]);
 
-// ---------------------------------------------------------------------------
-// View A: transverse section — the two migration streams.
-// ---------------------------------------------------------------------------
-
-const lin = (k: number) => k;
-
-function crestSection(t: number) {
-  return makeSection({
-    fold: 0.22,
-    neural: lerp(0.8, 1, seg(t, 0, 0.14)),
-    meso: 0.62,
-    somite: 0.45,
-    crest: seg(t, 0.15, 0.85, lin),
-    aorta: 1,
-    k: 1.6,
-    oy: 40,
-  });
+/** Point at fraction u (by length) along a polyline, with its direction. */
+function along(pts: Pt[], u: number): { p: Pt; ang: number } {
+  const lens: number[] = [];
+  let tot = 0;
+  for (let i = 1; i < pts.length; i++) {
+    const l = dist(pts[i - 1], pts[i]);
+    lens.push(l);
+    tot += l;
+  }
+  let want = Math.min(1, Math.max(0, u)) * tot;
+  for (let i = 0; i < lens.length; i++) {
+    if (want <= lens[i] || i === lens.length - 1) {
+      const k = lens[i] > 0 ? Math.min(1, want / lens[i]) : 0;
+      const a = pts[i];
+      const b = pts[i + 1];
+      return { p: [lerp(a[0], b[0], k), lerp(a[1], b[1], k)], ang: (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI };
+    }
+    want -= lens[i];
+  }
+  return { p: pts[pts.length - 1], ang: 0 };
 }
-
-function sectionLabels(t: number) {
-  const s = crestSection(t);
-  const dl = seg(t, 0.3, 0.6);
-  const ng = s.neural;
-  const tubeL = s.map(-(ng.rho + 12) * ng.sx, ng.cy - 10);
-  const home = s.map(ng.closed > 0.5 ? 14 : ng.crest[0], ng.closed > 0.5 ? ng.topBasal - 4 : ng.crest[1] - 2);
-  const fold = s.map(ng.closed > 0.5 ? -14 : -ng.crest[0], ng.closed > 0.5 ? ng.topBasal - 4 : ng.crest[1] - 2);
-  const ecto = s.map(-120, 4.5);
-  const mel = s.map(240, 15);
-  const som = s.map(-s.somite.cx - 24, s.somite.cd + 6);
-  const drg = s.map(-((ng.rho + 12) * ng.sx + 16), ng.cy + 14);
-  const aorta = s.map(48, s.dAorta);
-  return (
-    <>
-      <Label id="tolesdura-neuralak" x={190} y={60} ax={fold[0] - 6} ay={fold[1]} show={1 - seg(t, 0.16, 0.19)} small />
-      <Label id="hodi-neurala" x={190} y={100} ax={tubeL[0]} ay={tubeL[1]} />
-      <Label id="melanozitoak" x={810} y={140} ax={mel[0]} ay={mel[1]} show={dl} small />
-      <Label id="somitak" x={810} y={470} ax={som[0] + 2 * (500 - som[0])} ay={som[1]} small />
-      <Label id="gongoil-errakideoak" x={190} y={470} ax={drg[0] - 8} ay={drg[1]} show={seg(t, 0.55, 0.75)} small />
-      <Label id="gongoil-sinpatikoak" x={190} y={510} ax={s.at.sympathetic[0] - 6} ay={s.at.sympathetic[1]} show={seg(t, 0.7, 0.85)} small />
-      <Label id="notokorda" x={190} y={550} ax={s.at.notochord[0] - 16} ay={s.at.notochord[1]} small />
-      <Label id="gandor-neurala" x={810} y={100} ax={home[0] + 6} ay={home[1]} />
-      <Label id="azaleko-ektodermoa" x={190} y={140} ax={ecto[0]} ay={ecto[1]} />
-      <Label id="aorta-dortsalak" x={810} y={510} ax={aorta[0] + 14} ay={aorta[1]} small />
-    </>
-  );
-}
-
-export function NeuralCrestSection({ t }: SceneProps) {
-  return (
-    <g>
-      <SectionDrawing s={crestSection(t)} />
-      <Note x={500} y={600} show={seg(t, 0.78, 0.98)}>
-        Ile-folikuluak eta azazkalak gainazaleko ektodermotik dira, EZ gandor neuraletik
-      </Note>
-      {sectionLabels(t)}
-    </g>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// View B: derivative map, over the folded day-28 embryo silhouette (fate destinations).
-// ---------------------------------------------------------------------------
 
 interface Dest {
   id: string;
   at: Pt;
+  /** where along the neural tube the cells leave (0 = cranial end … 1 = tail) */
+  u: number;
   x: number;
   y: number;
   group: number;
@@ -91,64 +50,152 @@ const R = 740;
 
 const DESTS: Dest[] = [
   // Head: skull/face bones, meninges, cranial ganglia, dermis, odontoblasts, facial vessel muscle
-  { id: 'meningeak-kraneal', at: onEll(g.cran, -150, 0.78), x: L, y: 145, group: 0 },
-  { id: 'buru-aurpegi-hezurrak', at: onEll(g.cran, 175, 0.72), x: L, y: 190, group: 0 },
-  { id: 'nerbio-kranialen-gongoilak', at: mid(g.bars[1].top, sp(0.0, 30), 0.55), x: L, y: 100, group: 0 },
-  { id: 'buru-lepo-dermisa', at: sp(0.02, 3), x: R, y: 80, group: 0 },
-  { id: 'odontoblastoak', at: mid(g.bars[0].top, g.bars[0].bot, 0.75), x: L, y: 235, group: 0 },
-  { id: 'aurpegi-hodi-muskulu-leuna', at: [g.face[0] - 10, g.face[1]], x: L, y: 280, group: 0 },
-  { id: 'tiroide-c-zelulak', at: mid(g.bars[3].top, g.bars[3].bot, 0.8), x: R, y: 200, group: 1 },
-  { id: 'bihotz-trenkada-tronkokonala', at: onEll(g.heart, -150, 0.55), x: L, y: 325, group: 1 },
+  { id: 'meningeak-kraneal', at: onEll(g.cran, -150, 0.78), u: 0.03, x: L, y: 145, group: 0 },
+  { id: 'buru-aurpegi-hezurrak', at: onEll(g.cran, 175, 0.72), u: 0.05, x: L, y: 190, group: 0 },
+  { id: 'nerbio-kranialen-gongoilak', at: mid(g.bars[1].top, sp(0.0, 30), 0.55), u: 0.04, x: L, y: 100, group: 0 },
+  { id: 'buru-lepo-dermisa', at: sp(0.02, 3), u: 0.09, x: R, y: 80, group: 0 },
+  { id: 'odontoblastoak', at: mid(g.bars[0].top, g.bars[0].bot, 0.75), u: 0.06, x: L, y: 235, group: 0 },
+  { id: 'aurpegi-hodi-muskulu-leuna', at: [g.face[0] - 10, g.face[1]], u: 0.07, x: L, y: 280, group: 1 },
+  { id: 'tiroide-c-zelulak', at: mid(g.bars[3].top, g.bars[3].bot, 0.8), u: 0.08, x: R, y: 200, group: 1 },
+  { id: 'bihotz-trenkada-tronkokonala', at: onEll(g.heart, -150, 0.55), u: 0.05, x: L, y: 325, group: 1 },
   // Trunk: skin melanocytes, peripheral nerve glia, ganglia, adrenal medulla
-  { id: 'melanozitoak', at: sp(0.38, 2), x: R, y: 320, group: 3 },
-  { id: 'glia-zelulak', at: sp(0.3, 12), x: R, y: 250, group: 2 },
-  { id: 'schwann-zelulak', at: sp(0.62, 24), x: R, y: 545, group: 2 },
-  { id: 'gongoil-errakideoak', at: sp(0.42, 22), x: R, y: 390, group: 2 },
-  { id: 'gongoil-sinpatikoak', at: sp(0.46, 44), x: R, y: 440, group: 2 },
-  { id: 'giltzurrun-gaineko-muina', at: sp(0.55, 62), x: R, y: 490, group: 2 },
-  { id: 'gongoil-parasinpatikoak', at: sp(0.5, 78), x: L, y: 420, group: 2 },
+  { id: 'melanozitoak', at: sp(0.36, 2), u: 0.36, x: R, y: 300, group: 3 },
+  { id: 'ile-folikuluak', at: sp(0.47, 2), u: 0.47, x: R, y: 350, group: 3 },
+  { id: 'azazkalak', at: sp(0.58, 2), u: 0.58, x: R, y: 400, group: 3 },
+  { id: 'glia-zelulak', at: sp(0.3, 12), u: 0.3, x: R, y: 250, group: 2 },
+  { id: 'schwann-zelulak', at: sp(0.62, 24), u: 0.62, x: R, y: 545, group: 2 },
+  { id: 'gongoil-errakideoak', at: sp(0.42, 22), u: 0.42, x: R, y: 390, group: 2 },
+  { id: 'gongoil-sinpatikoak', at: sp(0.46, 44), u: 0.46, x: R, y: 440, group: 2 },
+  { id: 'giltzurrun-gaineko-muina', at: sp(0.55, 62), u: 0.55, x: R, y: 490, group: 2 },
+  { id: 'gongoil-parasinpatikoak', at: sp(0.5, 78), u: 0.12, x: L, y: 420, group: 2 },
 ];
 
-/** Each group appears with the step that names it: head (0.5), non-neural (0.65), nerves and ganglia (0.78), melanocytes (0.9). */
-const GROUP_AT = [0.46, 0.61, 0.74, 0.86];
-function groupShow(t: number, group: number) {
-  const a = GROUP_AT[group];
-  return seg(t, a, a + 0.06);
+/** Each group is explained by its own step: head (.50), non-neural (.65), nerves and ganglia (.78), melanocytes (.90). */
+const GROUP_AT = [0.5, 0.65, 0.78, 0.9];
+const GROUP_COLOR = ['#2dd4bf', '#c4b5fd', '#7dd3fc', ORANGE];
+const GROUP_TITLE = [
+  'Gandor kraneala: burua eta aurpegia',
+  'Nerbio-sistemarekin lotu gabeko eratorriak',
+  'Nerbio sistema periferikoa eta begetatiboa',
+  'Epidermisera: melanozitoak, ile-folikuluak, azazkalak',
+];
+
+function groupIndex(d: Dest) {
+  return DESTS.filter((q) => q.group === d.group).indexOf(d);
+}
+/** Travel window of one destination. */
+function travel(d: Dest) {
+  const a = GROUP_AT[d.group] + 0.004 * groupIndex(d);
+  return { a, b: a + 0.046 };
+}
+
+const originOf = (d: Dest): Pt => sp(d.u, 8);
+function routeOf(d: Dest): Pt[] {
+  const o = originOf(d);
+  const e = d.at;
+  const dx = e[0] - o[0];
+  const dy = e[1] - o[1];
+  const bend = d.group === 3 ? 0.06 : 0.16;
+  const c: Pt = [o[0] + dx / 2 - dy * bend, o[1] + dy / 2 + dx * bend];
+  return Array.from({ length: 21 }, (_, i): Pt => {
+    const k = i / 20;
+    return [(1 - k) * (1 - k) * o[0] + 2 * (1 - k) * k * c[0] + k * k * e[0], (1 - k) * (1 - k) * o[1] + 2 * (1 - k) * k * c[1] + k * k * e[1]];
+  });
+}
+
+// Group changes happen at beat boundaries; every trip + differentiation finishes BEFORE the hold.
+const activeGroup = (t: number) => t < 0.5 ? -1 : t < 0.65 ? 0 : t < 0.78 ? 1 : t < 0.9 ? 2 : 3;
+/** Whole embryo first; then the head for the cranial and non-neural groups, then the trunk for nerves and skin. */
+const ZOOMS: [number, number, number, number, number][] = [
+  [520, 325, 1.08, 505, 317],
+  [490, 195, 1.8, 555, 320],
+  [630, 390, 1.5, 545, 330],
+];
+function mapZoomAt(t: number) {
+  const k = seg(t, 0.488, 0.512) * 0.5 + seg(t, 0.768, 0.792) * 0.5;
+  const [A, B] = k < 0.5 ? [ZOOMS[0], ZOOMS[1]] : [ZOOMS[1], ZOOMS[2]];
+  const u = k < 0.5 ? k * 2 : (k - 0.5) * 2;
+  const m = (i: number) => lerp(A[i], B[i], u);
+  return zoom(m(0), m(1), m(2), m(3), m(4));
 }
 
 function MapDrawing({ t }: SceneProps) {
-  return (
-    <g>
-      <Embryo28Outline />
-      {/* Origin: the crest along the dorsal neural tube */}
-      <path d={smoothPath(Array.from({ length: 30 }, (_, i) => sp(0.02 + (0.93 * i) / 29, 8)), false)} fill="none" stroke={C.neuralCrest} strokeWidth={3} strokeDasharray="2 5" strokeLinecap="round" opacity={0.6} />
-      {DESTS.map((d) => {
-        const show = groupShow(t, d.group);
-        return (
-          <Part id={d.id} key={d.id} show={show}>
-            <circle cx={d.at[0]} cy={d.at[1]} r={7} fill={C.neuralCrest} stroke="#0f766e" strokeWidth={1.4} />
-          </Part>
-        );
+  const active = activeGroup(t);
+  const mapZoom = mapZoomAt(t);
+  const crestLine = Array.from({ length: 30 }, (_, i) => sp(0.02 + (0.93 * i) / 29, 8));
+  return <g transform={mapZoom.transform}>
+    <g opacity={0.55}><Embryo28Outline /></g>
+    <Part id="hodi-neurala" show={0.4}>
+      <path d={smoothPath(crestLine.map(([x, y]): Pt => [x - 7, y]), false)} fill="none" stroke={C.neural} strokeWidth={12} strokeLinecap="round" />
+    </Part>
+    <Part id="gandor-neurala">
+      <path d={smoothPath(crestLine, false)} fill="none" stroke="transparent" strokeWidth={18} />
+      {Array.from({ length: 21 }, (_, i) => {
+        const p = sp(0.03 + (0.92 * i) / 20, 8);
+        return <Cell key={i} x={p[0]} y={p[1]} r={4} rx={3.5} ry={5} color={TEAL} nucleus="#155e59" opacity={active < 0 ? 1 : 0.42} />;
       })}
-    </g>
-  );
+    </Part>
+    {DESTS.map(d => {
+      const { a, b } = travel(d);
+      const col = GROUP_COLOR[d.group];
+      const route = routeOf(d);
+      const u = seg(t, a, b);
+      const arrive = seg(t, b - 0.002, b + 0.014);
+      const current = active === d.group;
+      const opacity = current ? 1 : 0.16;
+      if (t < GROUP_AT[d.group]) return null;
+      return <g key={d.id} opacity={opacity}>
+        <path d={smoothPath(route, false, 0.5)} fill="none" stroke={col} strokeWidth={2.5} pathLength={1} strokeDasharray="1 2" strokeDashoffset={1 - u} opacity={0.6} pointerEvents="none" />
+        <Part id="gandor-neurala" show={1 - arrive}>
+          {[0, 1, 2].map(i => {
+            const { p, ang } = along(route, Math.max(0, u - i * 0.12));
+            return <Cell key={i} x={p[0]} y={p[1]} r={5.5} rx={7 - i} ry={5 - i * 0.5} color={col} nucleus="#153e44" rotate={ang} />;
+          })}
+        </Part>
+        {/* A faint destination outline is already clickable as the step begins. */}
+        <Part id={d.id} show={0.25 + 0.75 * arrive}>
+          <g transform={`translate(${d.at[0]} ${d.at[1]}) scale(${lerp(0.5, 0.85, arrive)}) translate(${-d.at[0]} ${-d.at[1]})`}>
+            <CrestGlyph id={d.id} at={d.at} color={col} />
+          </g>
+        </Part>
+      </g>;
+    })}
+  </g>;
+}
+
+function TrapBox({ t }: { t: number }) {
+  if (t < 0.9) return null;
+  return <g>
+    <rect x={35} y={330} width={370} height={132} rx={13} fill="#251f1b" stroke={ORANGE} strokeOpacity={0.6} />
+    <Note x={53} y={358} align="start" tone="accent" size={16}>Epidermisera iristen direnak (apunteak):</Note>
+    <Note x={53} y={387} align="start" size={15}>Melanozitoak, ile-folikuluak, azazkalak</Note>
+    <Note x={53} y={418} align="start" tone="dim" size={14}>Oharra: liburuetan, ile-folikuluak eta</Note>
+    <Note x={53} y={440} align="start" tone="dim" size={14}>azazkalak azaleko ektodermotik datoz.</Note>
+  </g>;
 }
 
 function mapLabels(t: number) {
-  return (
-    <>
-      {DESTS.map((d) => (
-        <Label key={d.id} id={d.id} x={d.x} y={d.y} ax={d.at[0]} ay={d.at[1]} show={groupShow(t, d.group)} small />
-      ))}
-    </>
-  );
+  const mapZoom = mapZoomAt(t);
+  const first = DESTS.find((q) => q.group === activeGroup(t));
+  const [ox, oy] = mapZoom.at(...(first ? originOf(first) : sp(0.14, 8)));
+  return <>
+    <Label id="gandor-neurala" x={740} y={140} ax={ox} ay={oy} small />
+    {DESTS.map(d => {
+      if (activeGroup(t) !== d.group) return null;
+      const [ax, ay] = mapZoom.at(...d.at);
+      return <Label key={d.id} id={d.id} x={d.x} y={d.y} ax={ax} ay={ay} small />;
+    })}
+  </>;
 }
 
 export function NeuralCrestDerivatives(props: SceneProps) {
-  return (
-    <g>
-      <MapDrawing {...props} />
-      {mapLabels(props.t)}
-    </g>
-  );
+  const gi = activeGroup(props.t);
+  return <g>
+    <Note x={500} y={43} tone="accent" size={16}>{gi < 0 ? 'Gandor neurala: hodi neuralaren luzeran' : GROUP_TITLE[gi]}</Note>
+    <MapDrawing {...props} />
+    {mapLabels(props.t)}
+    <TrapBox t={props.t} />
+    <Note x={500} y={598} size={14}>Eratorrien helmugak, eskematikoki: ez dira denak 28. egunean helduak.</Note>
+    {gi === 2 && <Note x={500} y={622} size={13}>Gongoil enterikoak: gandor bagal eta sakraletik; muina: zelula endokrinoak.</Note>}
+  </g>;
 }

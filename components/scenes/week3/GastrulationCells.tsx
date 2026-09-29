@@ -1,7 +1,8 @@
 'use client';
 
-import { Arrow, C, Label, Mark, Note, Part, clamp, easeInOut, lerp, lin, mix, rand, seg, useScene, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, Mark, Note, Part, clamp, easeInOut, lerp, lin, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
 import { f1 } from './common';
+import { Callout, frameAt, type Key } from './gastroKit';
 
 /**
  * 15–16. egunak — gastrulation, cell by cell. A close-up transverse section through the primitive
@@ -10,8 +11,7 @@ import { f1 } from './common';
  * (yellow) inserts into the hypoblast row at the midline and pushes the hypoblast aside, so the
  * endoderm grows from the middle outwards; the next group (red) stops between the layers and spreads
  * sideways as mesenchyme; the cells that never reach the groove stay on top as ectoderm. Six cells
- * are followed with a trail from start to end. An inset shows the disc from above (streak, node,
- * pit) and where the section is cut.
+ * are followed with a trail from start to end. The companion dorsal view shows the streak, node and pit.
  */
 
 /** Step windows of the 'gastrulazioa' stage; the dorsal and the realistic transverse views use them too. */
@@ -25,16 +25,16 @@ const EPI_BOT = 250;
 const LANE_Y = 292;
 const HYP_Y = 346;
 const HYP_H = 30;
-const WH = 32;
-const HALF = 318;
+const WH = 24;
+const HALF = 210;
 
 /** Departure times (per side) of the cells that go in: 7 → endoderm, then 5 → mesoderm. */
-const A_LEAVE = [0.415, 0.445, 0.5, 0.518, 0.536, 0.554, 0.572];
-const B_LEAVE = [0.64, 0.654, 0.668, 0.682, 0.696];
+const A_LEAVE = [0.413, 0.427, 0.5, 0.512, 0.524, 0.536, 0.548];
+const B_LEAVE = [0.64, 0.648, 0.656, 0.664, 0.672];
 const NA = A_LEAVE.length;
 const K = NA + B_LEAVE.length;
-const DIVE = 0.04;
-const INS = 0.025;
+const DIVE = 0.028;
+const INS = 0.018;
 const RANKS = 32;
 
 const HYP_COLOR = mix(C.hypoblast, '#6b7280', 0.5);
@@ -50,9 +50,9 @@ function shiftOf(t: number, s: number) {
 }
 
 /** Cells crowd into the streak: offsets are squeezed near the midline. */
-const squeeze = (o: number, t: number) => o * (1 - 0.55 * seg(t, GB.streak, GB.groove) * Math.exp(-((o / (2.2 * W)) ** 2)));
-const dipAt = (o: number, t: number) => 20 * seg(t, GB.groove, GB.node) * Math.exp(-((o / 28) ** 2));
-const thickAt = (o: number, t: number) => 17 * seg(t, GB.streak, GB.groove) * Math.exp(-((o / 62) ** 2));
+const squeeze = (o: number, t: number) => o * (1 - 0.55 * seg(t, GB.streak, GB.streak + 0.04) * Math.exp(-((o / (2.2 * W)) ** 2)));
+const dipAt = (o: number, t: number) => 20 * seg(t, GB.groove, GB.groove + 0.025) * Math.exp(-((o / 28) ** 2));
+const thickAt = (o: number, t: number) => 17 * seg(t, GB.streak, GB.streak + 0.04) * Math.exp(-((o / 62) ** 2));
 
 /** Insertion progress (0..1) of endoderm cell k on side s, and when it starts. */
 function insertion(k: number, s: number, t: number) {
@@ -107,8 +107,8 @@ function mover(k: number, s: number, t: number): Mover {
   const j = k - NA;
   const lane: Pt = [MID + s * 16, LANE_Y + (j % 2 ? 9 : -9)];
   const q = bez(g, [MID + s * 4, EPI_BOT + 10], lane, dive);
-  const spread = easeInOut(lin(t, t0 + DIVE * 0.8, t0 + DIVE * 0.8 + 0.045));
-  const target = 60 + (B_LEAVE.length - 1 - j) * 62;
+  const spread = easeInOut(lin(t, t0 + DIVE * 0.8, t0 + DIVE * 0.8 + 0.036));
+  const target = 48 + (B_LEAVE.length - 1 - j) * 25;
   const drift = 1 + 0.12 * seg(t, GB.ecto, 1);
   return { x: lerp(q[0], MID + s * target * drift, spread), y: q[1], dive, settle: spread, color: mix(C.epiblast, C.mesoIntra, dive) };
 }
@@ -158,23 +158,23 @@ function Stellate({ x, y, r, color, arms, seed, opacity = 1 }: { x: number; y: n
   );
 }
 
-/** Short on-scene call-out on a dark chip, optionally pointing at something. */
-function Callout({ x, y, text, show, color = '#e8eefc', to, align = 'middle' }: { x: number; y: number; text: string; show: number; color?: string; to?: Pt; align?: 'start' | 'middle' | 'end' }) {
-  const ctx = useScene();
-  if (show <= 0.02 || !ctx.showLabels || ctx.quiz) return null;
-  const w = text.length * 6.9 + 18;
-  const x0 = align === 'middle' ? x - w / 2 : align === 'end' ? x - w : x;
-  return (
-    <g opacity={show} pointerEvents="none">
-      {to && <path d={`M${f1(x)},${f1(y)} L${f1(to[0])},${f1(to[1])}`} stroke={color} strokeWidth={1.2} strokeDasharray="3 3" opacity={0.8} />}
-      {to && <circle cx={to[0]} cy={to[1]} r={3} fill={color} />}
-      <rect x={f1(x0)} y={y - 12} width={f1(w)} height={24} rx={12} fill="rgba(12,12,16,0.88)" stroke={color} strokeOpacity={0.55} />
-      <text x={f1(x0 + w / 2)} y={y} dy="0.35em" textAnchor="middle" fontSize={12.5} fontWeight={600} fill={color}>
-        {text}
-      </text>
-    </g>
-  );
-}
+/** Auto-zoom: wide at the start, then close on the groove while the cells go in. */
+const CELL_KEYS: Key[] = [
+  [0, 500, 280, 2.05],
+  [0.31, 500, 280, 2.05],
+  [0.34, 500, 260, 2.3],
+  [0.41, 500, 260, 2.3],
+  [0.44, 500, 270, 2.3],
+  [0.5, 500, 270, 2.3],
+  [0.53, 500, 281, 2.1],
+  [0.64, 500, 281, 2.1],
+  [0.67, 500, 280, 2.2],
+  [0.78, 500, 280, 2.2],
+  [0.81, 500, 255, 2.15],
+  [0.88, 500, 255, 2.15],
+  [0.91, 500, 280, 2.05],
+  [1, 500, 280, 2.05],
+];
 
 /** Emphasis of each population per step: the step's subject stays bright, the rest steps back. */
 function emphasis(t: number) {
@@ -204,48 +204,6 @@ const STEPS: [number, string, string][] = [
   [GB.ecto, 'Ektodermoa', C.ectoderm],
   [GB.tri, 'Hiru orriko diskoa', '#e8eefc'],
 ];
-
-/** Top-right inset: the disc from above, with the streak, node, pit and the plane of this section. */
-function Inset({ t }: { t: number }) {
-  const cx = 846;
-  const cy = 104;
-  const growth = seg(t, GB.streak, GB.node + 0.05);
-  const caudal = cy + 40;
-  const nodeY = lerp(caudal, cy - 8, growth);
-  const node = seg(t, GB.node, GB.node + 0.04);
-  const pit = seg(t, GB.node + 0.035, GB.converge);
-  const cutY = cy + 22;
-  const flow = seg(t, GB.converge, GB.converge + 0.03) * (1 - seg(t, GB.ecto, GB.ecto + 0.03));
-  const w = lerp(1.5, 4, growth);
-  return (
-    <g>
-      <rect x={764} y={20} width={164} height={160} rx={12} fill="rgba(12,12,16,0.82)" stroke="rgba(232,238,252,0.14)" />
-      <Note x={846} y={36} size={10.5}>
-        Goitik ikusita · kraneala ▲
-      </Note>
-      <ellipse cx={cx} cy={cy} rx={64} ry={52} fill="rgba(91,141,239,0.2)" stroke="rgba(232,238,252,0.35)" strokeWidth={1.2} />
-      <Part id={t < GB.groove ? 'lerro-primitiboa' : 'ildo-primitiboa'} show={seg(t, GB.streak, GB.streak + 0.03)}>
-        <path d={`M${f1(cx - w)},${f1(caudal)} L${f1(cx - w * 0.6)},${f1(nodeY + 4)} L${f1(cx + w * 0.6)},${f1(nodeY + 4)} L${f1(cx + w)},${f1(caudal)} Z`} fill={t < GB.groove ? '#dbe4ff' : '#93a7d9'} />
-      </Part>
-      <Part id="nodo-primitiboa" show={node}>
-        <circle cx={cx} cy={f1(nodeY)} r={6.5} fill="#dbe4ff" />
-      </Part>
-      <Part id="hobitxo-primitiboa" show={pit}>
-        <circle cx={cx} cy={f1(nodeY)} r={2.6} fill="#0c1730" />
-      </Part>
-      {flow > 0.02 && (
-        <g opacity={flow}>
-          <Arrow from={[cx - 52, cutY - 10]} to={[cx - 10, cutY - 4]} bend={0.1} color={C.epiblast} width={1.8} head={6} />
-          <Arrow from={[cx + 52, cutY - 10]} to={[cx + 10, cutY - 4]} bend={-0.1} color={C.epiblast} width={1.8} head={6} />
-        </g>
-      )}
-      <line x1={cx - 72} y1={cutY} x2={cx + 72} y2={cutY} stroke="#ffb86b" strokeWidth={1.4} strokeDasharray="4 3" />
-      <Note x={846} y={168} size={10.5} tone="accent">
-        - - mozketa hau
-      </Note>
-    </g>
-  );
-}
 
 export function GastrulationCells({ t, reduced }: SceneProps) {
   const em = emphasis(t);
@@ -277,7 +235,6 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
     for (let k = 0; k < K; k++) if (t >= leaveAt(k, s)) movers.push({ key: `${s}:${k}`, k, s, m: mover(k, s, t) });
   const aCells = movers.filter((c) => c.k < NA);
   const bCells = movers.filter((c) => c.k >= NA);
-  const isTracked = (k: number, s: number) => TRACKED.some((q) => q.s === s && q.k === k);
 
   const neck = (c: { k: number; s: number; m: Mover }) =>
     c.m.dive < 0.45 ? <path d={`M${f1(MID + c.s * 2)},${f1(EPI_TOP + 22)} L${f1(c.m.x)},${f1(c.m.y)}`} stroke={c.m.color} strokeWidth={f1(5 * (1 - c.m.dive / 0.45) + 0.6)} strokeLinecap="round" /> : null;
@@ -292,6 +249,9 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
   const ectoOn = seg(t, GB.ecto + 0.01, GB.ecto + 0.04) * (1 - seg(t, GB.tri - 0.01, GB.tri + 0.02));
   const triOn = seg(t, GB.tri, GB.tri + 0.03);
   const trailOn = trackOn * (1 - triOn * 0.5);
+
+  const z = frameAt(t, CELL_KEYS);
+  const A = (x: number, y: number) => z.at(x, y);
 
   return (
     <g>
@@ -308,6 +268,7 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
       </defs>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
 
+      <g transform={z.transform}>
       <g mask="url(#gc-fade)">
         <Part id="amnios-barrunbea" quiet>
           <rect x={MID - HALF} y={82} width={HALF * 2} height={EPI_TOP - 82} fill="rgba(143,180,247,0.07)" />
@@ -379,7 +340,7 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
           </g>
         </Part>
         <Part id={t < GB.groove ? 'lerro-primitiboa' : 'ildo-primitiboa'} show={seg(t, GB.streak, GB.streak + 0.04)} quiet>
-          <ellipse cx={MID} cy={(EPI_TOP + EPI_BOT) / 2 + 6} rx={46} ry={40} fill="none" stroke="#dbe4ff" strokeWidth={1.4} strokeDasharray="5 4" opacity={0.7 * (1 - seg(t, GB.converge, GB.invag))} />
+          <ellipse cx={MID} cy={(EPI_TOP + EPI_BOT) / 2 + 6} rx={21} ry={31} fill="none" stroke="#dbe4ff" strokeWidth={1.4} strokeDasharray="5 4" opacity={0.7} />
         </Part>
       </g>
 
@@ -411,37 +372,39 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
       <g pointerEvents="none">
         {conv > 0.02 && (
           <g opacity={conv}>
-            <Arrow from={[MID - 300, 160]} to={[MID - 40, 170]} bend={0.08} color={C.epiblast} width={2.4} flow={!reduced} />
-            <Arrow from={[MID + 300, 160]} to={[MID + 40, 170]} bend={-0.08} color={C.epiblast} width={2.4} flow={!reduced} />
+            <Arrow from={[MID - 185, 160]} to={[MID - 40, 170]} bend={0.08} color={C.epiblast} width={2.4} flow={!reduced} />
+            <Arrow from={[MID + 185, 160]} to={[MID + 40, 170]} bend={-0.08} color={C.epiblast} width={2.4} flow={!reduced} />
           </g>
         )}
         {invagOn > 0.02 && <Arrow from={[MID + 30, 150]} to={[MID + 30, 300]} bend={-0.25} color="#e8eefc" width={2.4} flow={!reduced} show={invagOn} />}
         {endoOn > 0.02 && (
           <g opacity={endoOn}>
-            <Arrow from={[MID - 150, HYP_Y + 34]} to={[MID - 300, HYP_Y + 34]} bend={0} color={HYP_COLOR} width={2.2} flow={!reduced} />
-            <Arrow from={[MID + 150, HYP_Y + 34]} to={[MID + 300, HYP_Y + 34]} bend={0} color={HYP_COLOR} width={2.2} flow={!reduced} />
+            <Arrow from={[MID - 150, HYP_Y + 34]} to={[MID - 185, HYP_Y + 34]} bend={0} color={HYP_COLOR} width={2.2} flow={!reduced} />
+            <Arrow from={[MID + 150, HYP_Y + 34]} to={[MID + 185, HYP_Y + 34]} bend={0} color={HYP_COLOR} width={2.2} flow={!reduced} />
           </g>
         )}
         {mesoOn > 0.02 && (
           <g opacity={mesoOn}>
-            <Arrow from={[MID - 40, LANE_Y]} to={[MID - 250, LANE_Y]} bend={0} color={C.mesoIntra} width={2.2} flow={!reduced} />
-            <Arrow from={[MID + 40, LANE_Y]} to={[MID + 250, LANE_Y]} bend={0} color={C.mesoIntra} width={2.2} flow={!reduced} />
+            <Arrow from={[MID - 40, LANE_Y]} to={[MID - 170, LANE_Y]} bend={0} color={C.mesoIntra} width={2.2} flow={!reduced} />
+            <Arrow from={[MID + 40, LANE_Y]} to={[MID + 170, LANE_Y]} bend={0} color={C.mesoIntra} width={2.2} flow={!reduced} />
           </g>
         )}
       </g>
 
-      {/* Call-outs: what the cells are doing right now. */}
-      <Callout x={MID - 170} y={132} text="epiblastoko zelulak → ildorantz" show={conv} color="#a9c3ff" />
-      <Callout x={MID + 145} y={132} text="sartu eta askatu: inbaginazioa" show={invagOn} />
-      <Callout x={MID} y={HYP_Y + 64} text="lehenak: hipoblastoa ordezkatzen dute → endodermoa" show={endoOn} color={C.endoderm} />
-      <Callout x={MID} y={HYP_Y + 64} text="hurrengoak: tartean geratzen dira → mesodermo intraenbrionarioa" show={mesoOn} color="#ff8a8a" to={[MID - 180, LANE_Y]} />
-      <Callout x={MID - 150} y={132} text="sartzen ez direnak: azalean → ektodermoa" show={ectoOn} color="#a9c3ff" to={[MID - 100, EPI_TOP + 4]} />
-      <Callout x={MID} y={HYP_Y + 64} text="ektodermoa · mesodermoa · endodermoa — hirurak epiblastotik" show={triOn} />
+      <Mark id="gastrulazioa" x={MID} y={276} rx={40} ry={82} show={seg(t, GB.converge, GB.converge + 0.03)} />
+      </g>
 
-      <Mark id="gastrulazioa" x={MID} y={(EPI_TOP + LANE_Y) / 2} rx={190} ry={120} show={seg(t, GB.converge, GB.converge + 0.03)} />
-      <Label id="gastrulazioa" x={170} y={150} ax={MID - 150} ay={EPI_TOP + 20} show={seg(t, GB.converge, GB.converge + 0.03)} />
+      <Callout x={500} y={565} text="Epiblastoko zelulak → ildo primitibora" show={t >= GB.converge && t < GB.invag ? conv : 0} color={C.epiblast} />
+      <Callout x={500} y={565} text="Inbaginazioa: zelula geruzatik askatzen da" show={t >= GB.invag && t < GB.endo ? invagOn : 0} />
+      <Callout x={500} y={565} text="Endodermoa txertatu → hipoblastoa alboetara baztertu" show={t >= GB.endo && t < GB.meso ? endoOn : 0} color={C.endoderm} />
+      <Callout x={500} y={565} text="Mesodermoa: goiko eta beheko geruzen ARTEAN" show={t >= GB.meso && t < GB.ecto ? mesoOn : 0} color={C.mesoIntra} />
+      <Callout x={500} y={565} text="Ektodermoa: SARTU GABE, azalean geratu" show={t >= GB.ecto && t < GB.tri ? ectoOn : 0} color={C.ectoderm} />
+      <Callout x={500} y={565} text="Hiru geruzak epiblastotik; hipoblastoa ordezkatua" show={triOn} />
 
-      <Inset t={t} />
+      {/* A bracket is a real, clickable representation of the three-layer disc. */}
+      <Mark id="hiru-orriko-diskoa" show={triOn}>
+        <path d={`M${A(MID - 156, EPI_TOP - 4).join(',')}h-12V${A(0, HYP_Y + 19)[1]}h12M${A(MID + 156, EPI_TOP - 4).join(',')}h12V${A(0, HYP_Y + 19)[1]}h-12`} fill="none" stroke="#e8eefc" strokeWidth={2} strokeDasharray="5 4" />
+      </Mark>
 
       {/* Step chip. */}
       <g pointerEvents="none">
@@ -454,46 +417,41 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
 
       <Legend t={t} />
 
-      <Label id="amnios-barrunbea" x={MID + 190} y={104} align="middle" small />
-      <Label id={ectoName ? 'ektodermoa' : 'epiblastoa'} x={170} y={218} ax={MID - HALF + 34} ay={218} small />
-      <Label id="lerro-primitiboa" x={MID - 130} y={112} ax={MID - 20} ay={EPI_TOP + 8} show={seg(t, GB.streak, GB.streak + 0.03) * (1 - seg(t, GB.groove - 0.01, GB.groove + 0.01))} />
-      <Label id="ildo-primitiboa" x={MID - 130} y={112} ax={MID - 6} ay={EPI_TOP + 14} show={seg(t, GB.groove, GB.groove + 0.03) * (1 - conv) * (1 - invagOn) * (1 - ectoOn)} />
-      <Label id="mesodermo-intraenbrionarioa" x={192} y={LANE_Y + 2} ax={MID - 240} ay={LANE_Y} small show={seg(t, GB.meso + 0.08, GB.meso + 0.11)} />
-      <Label id="endodermoa" x={170} y={HYP_Y + 2} ax={MID - 170} ay={HYP_Y} small show={seg(t, GB.endo + 0.06, GB.endo + 0.09)} />
-      <Label id="hipoblastoa" x={170} y={HYP_Y + 2} ax={MID - HALF + 34} ay={HYP_Y} small show={1 - seg(t, GB.endo + 0.04, GB.endo + 0.06)} />
-      <Label id="hipoblastoa" x={836} y={HYP_Y + 2} ax={MID + HALF - 34} ay={HYP_Y} small show={seg(t, GB.endo + 0.06, GB.endo + 0.09)} />
-      <Label id="bitelo-zaku-sekundarioa" x={MID - 170} y={470} align="middle" small />
-      <Label id="hiru-orriko-diskoa" text="Hiru orriko diskoa" x={836} y={272} ax={MID + HALF - 30} ay={272} small show={triOn} />
+      {(() => {
+        const label = (id: string, x: number, y: number, p: Pt, show = 1, text?: string) => {
+          const [ax, ay] = A(...p);
+          return <Label key={id} id={id} x={x} y={y} ax={ax} ay={ay} align={x < 500 ? 'end' : 'start'} show={show * (ay > 35 && ay < 580 ? 1 : 0)} text={text} small />;
+        };
+        const currentMeso = bCells.at(-1)?.m;
+        const hypoX = MID + (0.5 + hypPush[1]) * WH;
+        return <>
+          {label('gastrulazioa', 192, 81, [MID - 38, 270], trackOn)}
+          {label(t < GB.groove ? 'lerro-primitiboa' : 'ildo-primitiboa', 790, 92, [MID + 3, EPI_TOP + 23], seg(t, GB.streak, GB.streak + 0.025))}
+          {label(ectoName ? 'ektodermoa' : 'epiblastoa', 192, 170, [MID - 100, 218])}
+          {label('mesodermo-intraenbrionarioa', 192, 368, currentMeso ? [currentMeso.x, currentMeso.y] : [MID, LANE_Y], currentMeso ? 1 : 0)}
+          {label('endodermoa', 192, 469, [MID - WH / 2, HYP_Y], seg(t, GB.endo + 0.015, GB.endo + 0.035))}
+          {label('hipoblastoa', 790, 506, [hypoX, HYP_Y], 1 - seg(t, GB.meso, GB.meso + 0.02))}
+          {label('amnios-barrunbea', 790, 241, [MID + 85, EPI_TOP - 24])}
+          {label('bitelo-zaku-sekundarioa', 790, 566, [MID + 85, HYP_Y + 35])}
+          {label('hiru-orriko-diskoa', 790, 401, [MID + 156, 290], triOn, 'Hiru orriko diskoa')}
+        </>;
+      })()}
     </g>
   );
 }
 
-/** Colour key of the populations; the row of the step's subject is lit. */
+/** A compact destination key; its highlight follows the active step. */
 function Legend({ t }: { t: number }) {
-  const rows: { color: string; text: string; on: number; lit: number; ring?: boolean }[] = [
-    { color: C.epiblast, text: 'Epiblastoa → azalean: ektodermoa', on: 1, lit: seg(t, GB.ecto, GB.ecto + 0.02) * (1 - seg(t, GB.tri, GB.tri + 0.02)) },
-    { color: C.endoderm, text: '1. taldea: sartu → endodermoa', on: seg(t, GB.invag, GB.invag + 0.03), lit: seg(t, GB.endo, GB.endo + 0.02) * (1 - seg(t, GB.meso, GB.meso + 0.02)) },
-    { color: C.mesoIntra, text: '2. taldea: sartu → mesodermoa', on: seg(t, GB.meso - 0.03, GB.meso), lit: seg(t, GB.meso, GB.meso + 0.02) * (1 - seg(t, GB.ecto, GB.ecto + 0.02)) },
-    { color: HYP_COLOR, text: 'Hipoblastoa: alboetara baztertua', on: 1, lit: seg(t, GB.endo, GB.endo + 0.02) * (1 - seg(t, GB.meso, GB.meso + 0.02)) },
-    { color: '#fff', text: 'Jarraitutako zelula (arrastoa)', on: seg(t, GB.converge, GB.converge + 0.03), lit: 0, ring: true },
+  const rows = [
+    { color: C.endoderm, text: 'Ordezkatu → endodermoa', active: t >= GB.endo && t < GB.meso },
+    { color: C.mesoIntra, text: 'Tartean → mesodermoa', active: t >= GB.meso && t < GB.ecto },
+    { color: C.ectoderm, text: 'Gelditu → ektodermoa', active: t >= GB.ecto },
   ];
-  const x = 742;
-  const y = 492;
-  return (
-    <g pointerEvents="none">
-      <rect x={x - 14} y={y - 26} width={258} height={146} rx={12} fill="rgba(12,12,16,0.82)" stroke="rgba(232,238,252,0.14)" />
-      <text x={x} y={y - 10} fontSize={10.5} fontWeight={600} letterSpacing="0.08em" fill="rgba(232,238,252,0.55)">
-        NORK ZER EGITEN DU?
-      </text>
-      {rows.map((r, i) => (
-        <g key={r.text} opacity={lerp(0.28, 1, r.on) * lerp(0.8, 1, r.lit)} transform={`translate(${x} ${y + 12 + i * 23})`}>
-          {r.lit > 0.02 && <rect x={-8} y={-10} width={242} height={20} rx={6} fill="rgba(255,255,255,0.07)" opacity={r.lit} />}
-          {r.ring ? <circle cx={6} cy={0} r={5.5} fill="none" stroke="#fff" strokeWidth={1.6} /> : <rect x={0} y={-6} width={12} height={12} rx={3} fill={r.color} />}
-          <text x={22} y={0} dy="0.35em" fontSize={12} fontWeight={r.lit > 0.5 ? 650 : 500} fill="#e8eefc">
-            {r.text}
-          </text>
-        </g>
-      ))}
-    </g>
-  );
+  return <g pointerEvents="none">
+    {rows.map((r, i) => <g key={r.text} opacity={r.active ? 1 : 0.38}>
+      <circle cx={245 + i * 205} cy={589} r={4} fill={r.color} />
+      <Note x={255 + i * 205} y={589} align="start" tone="accent" size={11}>{r.text}</Note>
+    </g>)}
+    <Note x={500} y={76} size={10}>Zelulen bidaia: geruzen arteko tartea handituta, ibilbidea ikusteko.</Note>
+  </g>;
 }
