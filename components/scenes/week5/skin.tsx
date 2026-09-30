@@ -303,7 +303,6 @@ export function limbGeom(L: LimbPose): LimbGeom {
     pts.push(polar(palm, a2 + th, r));
   }
   const hand = dev < 1.2 ? '' : smoothPath(pts, true, 0.5);
-  const rays: [Pt, Pt][] = RAYS.map((r) => [polar(palm, a2 + r * 1.6, plateR * 0.3), polar(palm, a2 + r, plateR + ext * 0.85)]);
   const grooves: [Pt, Pt][] = RAYS.slice(0, -1).map((r, i) => {
     const m = (r + RAYS[i + 1]) / 2;
     return [polar(palm, a2 + m, plateR * 0.7), polar(palm, a2 + m, plateR * 0.98 + ext * 0.2 * (1 - notch))];
@@ -315,10 +314,18 @@ export function limbGeom(L: LimbPose): LimbGeom {
     const k = 0.35 + 0.65 * notch;
     return [a, [lerp(a[0], b[0], k), lerp(a[1], b[1], k)]];
   });
+  // Each ray stays inside its limb: within the plate's rim while it still covers the ray, then within its
+  // digit (the toes, 1–2 days behind, are shorter than the rays would otherwise reach).
+  const digitW = plateR * (L.toes ? 0.42 : 0.36);
+  const rays: [Pt, Pt][] = RAYS.map((r, i) => {
+    const tip = digits[i][1];
+    const inDigit = Math.hypot(tip[0] - palm[0], tip[1] - palm[1]) - digitW * 0.25;
+    return [polar(palm, a2 + r * 1.6, plateR * 0.3), polar(palm, a2 + r, Math.min(plateR + ext * 0.85, Math.max(plateR + ext * 0.85 * (1 - notch), inDigit)))];
+  });
   return {
     w: L.w,
     digits,
-    digitW: plateR * (L.toes ? 0.42 : 0.36),
+    digitW,
     digitA: notch,
     body,
     hand,

@@ -1,7 +1,7 @@
 'use client';
 
 import { C, Label, Note, Part, lerp, seg, zoom, type Pt, type SceneProps } from '@/components/kit';
-import { CYTO, HYPO_BOTTOM, INNER, TrapBand, W2, bandAround, circlePath, conceptusAt, discGeometry, f1, lensPath, toCyto } from './common';
+import { CYTO, HYPO_BOTTOM, INNER, TrapBand, W2, arcAround, bandAround, circlePath, stalkBridge, conceptusAt, discGeometry, f1, lensPath, toCyto } from './common';
 import { CAVITY, EndometriumBack, EndometriumFront, RC_END } from './Day11_12';
 
 /**
@@ -107,8 +107,8 @@ function Day13Drawing({ t }: SceneProps) {
   const innerOuter = INNER + bandTh;
   const outer = (a: number) => outR(g, a);
   const outerB = (a: number) => outR(g, a) - bandTh;
-  const stalkA0 = 247;
-  const stalkA1 = 273;
+  const STALK_A = 260;
+  const stalk = stalkBridge(cx, cy, STALK_A, INNER + bandTh / 2, innerOuter, outerB(STALK_A), outer(STALK_A) - bandTh / 2, 8, 12);
 
   const rYPrim = INNER - 4.5;
   const rYSec = lerp(rYPrim, 60, secondary);
@@ -126,7 +126,7 @@ function Day13Drawing({ t }: SceneProps) {
     <g>
       {/* Chorionic cavity: one space around amnion + yolk sac, interrupted only by the connecting stalk. */}
       <Part id="korion-barrunbea">
-        <path d={bandAround(cx, cy, () => 0.5, outerB, stalkA1, stalkA0 + 360)} fill={CAVITY} stroke="rgba(255,255,255,0.22)" strokeWidth={0.8} />
+        <path d={bandAround(cx, cy, () => 0.5, outerB, STALK_A, STALK_A + 360)} fill={CAVITY} stroke="rgba(255,255,255,0.22)" strokeWidth={0.8} />
       </Part>
       {/* Above the disc: the amniotic side (cap of the old blastocyst interior). */}
       <path d={`M${f1(cx - wUp)},${f1(hypoBottom)} A${INNER} ${INNER} 0 0 1 ${f1(cx + wUp)},${f1(hypoBottom)} Z`} fill="#1b2437" pointerEvents="none" />
@@ -152,7 +152,13 @@ function Day13Drawing({ t }: SceneProps) {
       </Part>
 
       <Part id="korion-plaka">
-        <path d={bandAround(cx, cy, outerB, outer, stalkA1, stalkA0 + 360)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} opacity={lerp(0.55, 1, plaka)} />
+        <g opacity={lerp(0.55, 1, plaka)}>
+          <path d={bandAround(cx, cy, outerB, outer, STALK_A, STALK_A + 360)} fill="url(#p-meso-extra)" />
+          <g fill="none" stroke="#c97a52" strokeWidth={1}>
+            <path d={arcAround(cx, cy, outerB, STALK_A, STALK_A + 360)} />
+            <path d={arcAround(cx, cy, outer, STALK_A, STALK_A + 360)} />
+          </g>
+        </g>
       </Part>
       <Part id="somatopleura-kanpokoa">
         <path d={ring(g, INNER, innerOuter, AMNION_L, AMNION_R)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
@@ -161,7 +167,11 @@ function Day13Drawing({ t }: SceneProps) {
         <path d={ring(g, rY, rY + 5, 360 - eY, 540 + eY)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
       </Part>
       <Part id="finkapen-pedikulua">
-        <path d={bandAround(cx, cy, () => INNER, outer, stalkA0, stalkA1)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1.2} />
+        <path d={stalk.d} fill="url(#p-meso-extra)" />
+        <g fill="none" stroke="#c97a52" strokeWidth={1}>
+          <path d={stalk.left} />
+          <path d={stalk.right} />
+        </g>
       </Part>
 
       <Part id="sinzitiotrofoblastoa">

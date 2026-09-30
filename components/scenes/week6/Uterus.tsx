@@ -2,6 +2,7 @@
 
 import { C, Label, Mark, Note, Part, seg, lerp, lerpPt, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { FetusFigure, fetusGeom, placeFetus } from '@/components/scenes/week5/FetusFigure';
+import { CordRope } from './CordRope';
 
 /**
  * 6:korion-hostotsua:sagitala — apunteetako irudia A → B (img_p05_0): umetokiaren mozketa sagitala.
@@ -115,7 +116,8 @@ export function UterusSagittal({ t }: SceneProps) {
   const place = placeFetus(crl, 1, am.cx - am.rx * 0.08, am.cy + am.ry * 0.02);
   const g = fetusGeom(week);
   const cordRoot = place.xf(g.cordBase);
-  const cordTop = onE(sac, wallMid + 42, -1);
+  // Ends on the chorionic plate, where the amnion line (drawn over it) hides the cut of its flared end.
+  const cordTop = onE(sac, wallMid + 42, -3);
   const cordMid: Pt = [Math.max(cordRoot[0], cordTop[0]) + am.rx * 0.12, (cordRoot[1] + cordTop[1]) / 2 + am.ry * 0.12];
 
   const yolkShow = 1 - seg(t, 0.7, 0.8);
@@ -201,19 +203,18 @@ export function UterusSagittal({ t }: SceneProps) {
           <path d={ellPath(am)} fill="#1d2f4d" />
           <path d={ellPath(am)} fill={C.amnionCavity} />
         </Part>
-        <Part id="zilborrestea">
-          <path
-            d={`M${f1(cordRoot[0])},${f1(cordRoot[1])} Q${f1(cordMid[0])},${f1(cordMid[1])} ${f1(cordTop[0])},${f1(cordTop[1])}`}
-            fill="none" stroke="#e7b9c9" strokeWidth={lerp(3, 8, k)} strokeLinecap="round"
-          />
-          <path
-            d={`M${f1(cordRoot[0])},${f1(cordRoot[1])} Q${f1(cordMid[0])},${f1(cordMid[1])} ${f1(cordTop[0])},${f1(cordTop[1])}`}
-            fill="none" stroke="#c0415f" strokeWidth={lerp(0.8, 1.6, k)} strokeDasharray="5 6" opacity={0.7}
-          />
-        </Part>
         <g transform={`${place.transform}`}>
           <g transform={`translate(-2 50) scale(${f1(1 + breathe)}) translate(2 -50)`}>
-            <FetusFigure id="w6ut" week={week} s={place.s} />
+            <FetusFigure
+              id="w6ut"
+              week={week}
+              s={place.s}
+              cord={
+                <Part id="zilborrestea">
+                  <CordRope pts={[cordRoot, [cordRoot[0] + am.rx * 0.22, cordRoot[1] + am.ry * 0.04], [cordTop[0] - am.rx * 0.1, cordTop[1] + am.ry * 0.3], cordTop].map(place.inv)} w={lerp(3.5, 8, k) / place.s} turns={6} />
+                </Part>
+              }
+            />
           </g>
         </g>
         <Part id="amniosa" quiet>

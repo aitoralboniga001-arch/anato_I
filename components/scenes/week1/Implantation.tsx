@@ -46,6 +46,9 @@ export function Implantation({ t }: SceneProps) {
   const cx = lerp(560, 500, seg(t, 0, 0.45));
   const f = cleavageFrame(7, 0, 5);
   f.zonaO = 0;
+  // Keep the embryoblast inside the trophoblast ring (the polar trophoblast lies between it and the
+  // epithelium, and is what invades first).
+  f.cells = f.cells.map((c) => (c.kind === 'enbrioblasto' ? { ...c, x: c.x * 0.84, y: c.y * 0.84 } : c));
   const gap = lerp(0, 20, seg(t, 0.62, 0.8));
   const wedge = seg(t, 0.64, 0.8);
 
@@ -102,7 +105,7 @@ export function Implantation({ t }: SceneProps) {
           {/* Blastocyst (zona pellucida already lost) */}
           {/* The whole blastocyst: a thin outline (its cells and cavity are their own parts). */}
           <Part id="blastozistoa">
-            <circle cx={cx} cy={cy} r={142 * SB} fill="none" stroke="rgba(232,238,252,0.28)" strokeWidth={7} />
+            <circle cx={cx} cy={cy} r={138 * SB} fill="none" stroke="rgba(232,238,252,0.14)" strokeWidth={1.5} />
           </Part>
           <Conceptus f={f} x={cx} y={cy} s={SB} rot={ROT} mass={1} id="w1i" parts={{ cell: (c) => (c.kind === 'enbrioblasto' || c.fate === 'enbrioblasto' ? 'enbrioblastoa' : 'trofoblastoa') }} />
           {/* Trophoblast cells next to the embryoblast wedge between the epithelial cells. */}

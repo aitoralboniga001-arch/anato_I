@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Label, Note, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, Note, Part, bezier, lerp, rand, seg, tube, type Pt, type SceneProps } from '@/components/kit';
 import { Cells } from '@/components/scenes/section/Section';
 import { f1 } from './common';
 import { DiscDrawing, makeDisc } from './DiscSection';
@@ -42,28 +42,34 @@ function embryo(k: number, cx: number, y: number, amnionH: number, yolkH: number
 }
 const IDS = { amnionWall: 'amnioblastoak' };
 
+/** Stalk centreline: from the amnion's mesoderm coat (caudal side) out to the chorionic lining at −28°. */
+function stalkCurve(s: ReturnType<typeof embryo>) {
+  const a = 0.42;
+  const rX = s.rx + 8 * s.k;
+  const rY = s.p.amnionH * s.k + 8 * s.k;
+  const p0: P2 = [s.p.cx + rX * Math.cos(a), s.cyA - rY * Math.sin(a)];
+  const nx = Math.cos(a) / rX;
+  const ny = -Math.sin(a) / rY;
+  const nl = Math.hypot(nx, ny);
+  const p3 = onRing(R_CYTO - 1, -28);
+  const p2 = onRing(R_MESO - 60, -28);
+  return bezier(p0, [p0[0] + (nx / nl) * 55, p0[1] + (ny / nl) * 55], p2, p3);
+}
+/** Half-width: slim in the middle, flaring where it merges into the amnion coat (u=0) and the chorion (u=1). */
+const stalkW = (u: number) => 12 + 6 * Math.max(0, 1 - u / 0.22) ** 2 + 11 * Math.max(0, (u - 0.76) / 0.24) ** 2;
+/** Mesenchymal nuclei scattered through the stalk (fixed positions, revealed as it grows). */
+const STALK_NUCLEI = Array.from({ length: 30 }, (_, i) => ({ u: Math.min(0.95, (i + 0.2 + rand(i * 7.3) * 0.6) / 30), v: (rand(i * 3.7 + 1) - 0.5) * 1.3 }));
+
+
 function Stage1Drawing({ t }: SceneProps) {
   const s = embryo(0.6, 485, 336, 150, 160);
   // Primary villi: cytotrophoblast cores push into the syncytium.
   const V = villi(lerp(0.15, 1, seg(t, 0, 0.1)));
-  const stalkN = Math.round(lerp(1, 20, seg(t, 0.32, 0.4)));
   const embryoO = lerp(0.22, 1, seg(t, 0.42, 0.48));
   const sheath = Math.min(seg(t, 0.72, 0.76), 1 - seg(t, 0.86, 0.9));
-  const base: P2 = [s.p.cx + s.rx + 6, s.cyA - 4];
-  const end = onRing(R_MESO - 2, -28);
-  const stalk = Array.from({ length: 21 }, (_, i): P2 => {
-    const u = i / 20;
-    const c: P2 = [base[0] + 50, base[1] - 10];
-    return [(1 - u) * (1 - u) * base[0] + 2 * (1 - u) * u * c[0] + u * u * end[0], (1 - u) * (1 - u) * base[1] + 2 * (1 - u) * u * c[1] + u * u * end[1]];
-  });
-  const side = (d: number) =>
-    stalk.map((q, i): P2 => {
-      const a = stalk[Math.max(0, i - 1)];
-      const b = stalk[Math.min(stalk.length - 1, i + 1)];
-      const L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
-      const w = d * lerp(1, 1.5, i / 20);
-      return [q[0] - ((b[1] - a[1]) / L) * w, q[1] + ((b[0] - a[0]) / L) * w];
-    });
+  const stalkG = seg(t, 0.32, 0.4);
+  const stalk = stalkCurve(s);
+  const ST = tube(stalk, stalkW, 1 - stalkG, 1, 40, stalkG < 0.999);
   const pol = seg(t, 0.88, 1);
   return (
     <g>
@@ -87,15 +93,22 @@ function Stage1Drawing({ t }: SceneProps) {
         ))}
         <Cells outer={ring(R_SYN)} inner={ring(R_CYTO)} n={96} fill="#e3c58f" nucleus="rgba(90,60,20,0.6)" seed={81} />
       </Part>
+      {/* Connecting stalk: extra-embryonic mesoderm continuous with the chorionic lining and with the coat of the
+          amnion — drawn beneath both so its flared ends merge into them; it grows out from the chorion. */}
+      <Part id="finkapen-pedikulua" show={stalkG > 0.001 ? 1 : 0}>
+        <path d={ST.d} fill={C.mesoExtra} />
+        {STALK_NUCLEI.filter((q) => q.u > 1 - stalkG + 0.03).map((q, i) => {
+          const c = stalk(q.u);
+          const w = stalkW(q.u) * q.v;
+          return <ellipse key={i} cx={c.x + c.nx * w} cy={c.y + c.ny * w} rx={2.3} ry={1.7} transform={`rotate(${c.angle} ${c.x + c.nx * w} ${c.y + c.ny * w})`} fill="rgba(150,70,50,0.6)" />;
+        })}
+        <path d={ST.left} fill="none" stroke="#c96b45" strokeWidth={1.1} strokeLinecap="round" />
+        <path d={ST.right} fill="none" stroke="#c96b45" strokeWidth={1.1} strokeLinecap="round" />
+      </Part>
       <Part id="enbrioi-kanpoko-mesodermoa">
         <Cells outer={ring(R_CYTO)} inner={ring(R_MESO)} n={90} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={82} />
       </Part>
-      <Part id="finkapen-pedikulua">
-        <path d={pathD([...side(-11).slice(0, stalkN + 1), ...side(11).slice(0, stalkN + 1).reverse()]) + 'Z'} fill={C.mesoExtra} stroke="#c96b45" strokeWidth={1.1} />
-        {stalk.slice(2, Math.max(2, stalkN)).map((q, i) => (
-          <ellipse key={i} cx={q[0] + ((i * 37) % 9) - 4} cy={q[1] + ((i * 53) % 9) - 4} rx={2.2} ry={1.7} fill="rgba(150,70,50,0.7)" />
-        ))}
-      </Part>
+
 
       <g opacity={embryoO}>
         <DiscDrawing s={s} ids={IDS} />
@@ -124,7 +137,7 @@ export function Stage1Sagittal(props: SceneProps) {
       {L('enbrioi-kanpoko-mesodermoa', 190, 440, onRing(R_MESO + 5, 150), from(t, 0.22))}
       {L('epiblastoa', 190, 480, s.at.epiblast, from(t, 0.52))}
       {L('bi-orriko-diskoa', 190, 520, s.map(-150, 20), from(t, 0.52))}
-      {L('finkapen-pedikulua', 810, 235, onRing(R_MESO - 20, -28), from(t, 0.34))}
+      {L('finkapen-pedikulua', 810, 235, ((c) => [c.x, c.y] as Pt)(stalkCurve(s)(0.62)), from(t, 0.34))}
       {L('amnios-barrunbea', 810, 270, s.at.amnion, from(t, 0.42))}
       {L('amnioblastoak', 810, 380, s.at.amnionWall.map((v, i) => (i ? v : 2 * s.p.cx - v)) as Pt, from(t, 0.42))}
       {L('hipoblastoa', 810, 420, s.map(120, s.dEnd(120) + 4), from(t, 0.52))}

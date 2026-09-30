@@ -1,6 +1,7 @@
 'use client';
 
-import { C, Label, Mark, Note, Part, lerp, mix, seg, type Pt, type SceneProps } from '@/components/kit';
+import { C, Label, Mark, Note, Part, bezier, lerp, mix, seg, smoothPath, tube, type Curve, type Pt, type SceneProps } from '@/components/kit';
+import { useId } from 'react';
 import { EarlyEmbryo, earlyGeom } from '@/components/scenes/week5/EarlyEmbryo';
 
 /**
@@ -43,42 +44,6 @@ function offsetCurve(p0: Pt, c1: Pt, c2: Pt, p3: Pt, off: number): [Pt, Pt, Pt, 
   return [o(p0), o(c1), o(c2), o(p3)];
 }
 
-/** Filled band around a cubic bezier, drawn only up to `uMax` (0..1) — lets a sleeve "grow" along a path. */
-function partialBand(p0: Pt, c1: Pt, c2: Pt, p3: Pt, uMax: number, half: number, n = 22): string {
-  if (uMax <= 0.004) return '';
-  const outer: Pt[] = [];
-  const inner: Pt[] = [];
-  for (let i = 0; i <= n; i++) {
-    const u = (i / n) * uMax;
-    const p = bez(p0, c1, c2, p3, u);
-    const a = bez(p0, c1, c2, p3, Math.max(0, u - 0.004));
-    const b = bez(p0, c1, c2, p3, Math.min(1, u + 0.004));
-    const dx = b[0] - a[0];
-    const dy = b[1] - a[1];
-    const len = Math.hypot(dx, dy) || 1;
-    const nx = -dy / len;
-    const ny = dx / len;
-    outer.push([p[0] + nx * half, p[1] + ny * half]);
-    inner.push([p[0] - nx * half, p[1] - ny * half]);
-  }
-  const cap = (a: Pt, b: Pt) => `Q${f1((a[0] + b[0]) / 2 + (b[1] - a[1]) * 0.3)},${f1((a[1] + b[1]) / 2 - (b[0] - a[0]) * 0.3)} ${f1(b[0])},${f1(b[1])}`;
-  return (
-    `M${f1(outer[0][0])},${f1(outer[0][1])}` +
-    outer
-      .slice(1)
-      .map((p) => `L${f1(p[0])},${f1(p[1])}`)
-      .join('') +
-    cap(outer[outer.length - 1], inner[inner.length - 1]) +
-    inner
-      .slice()
-      .reverse()
-      .slice(1)
-      .map((p) => `L${f1(p[0])},${f1(p[1])}`)
-      .join('') +
-    'Z'
-  );
-}
-
 /* ---------------------------------------------------------------------------------------------- */
 /* CordFormation                                                                                     */
 /* ---------------------------------------------------------------------------------------------- */
@@ -90,13 +55,36 @@ const EMB_S = 0.56;
 const EMB = earlyGeom(EMB_DAY);
 const RING: Pt = [374, 316];
 const FORK: Pt = [560, 300];
-const TRUNK: [Pt, Pt, Pt, Pt] = [RING, [460, 282], [512, 290], FORK];
-const UP: [Pt, Pt, Pt, Pt] = [FORK, [650, 216], [750, 178], [880, 176]];
+// Trunk and upper branch share one tangent at the fork, so the cord reads as one smooth tube.
+const TRUNK: [Pt, Pt, Pt, Pt] = [RING, [450, 290], [512, 317], FORK];
+const UP: [Pt, Pt, Pt, Pt] = [FORK, [650, 268], [790, 184], [972, 177]];
+/** The whole cord (ring → chorionic plate) as one curve: u 0–.4 = trunk (starting inside the body wall), .4–1 = upper branch. */
+const TRUNK_C = bezier(...TRUNK);
+const UP_C = bezier(...UP);
+const cordC: Curve = (u) => (u < 0.4 ? TRUNK_C(lerp(-0.05, 1, u / 0.4)) : UP_C((u - 0.4) / 0.6));
+/** Reversed (plate → ring), with the normal flipped to stay the left-hand normal, so `tube` can round the growing front. */
+const cordRev: Curve = (u) => {
+  const q = cordC(1 - u);
+  return { ...q, nx: -q.nx, ny: -q.ny };
+};
+/** Half-width: a little slimmer distally, flaring where it inserts into the chorionic plate. */
+const cordW = (u: number) => lerp(21, 19, seg(u, 0.3, 0.5)) + 9 * Math.max(0, (u - 0.84) / 0.16) ** 2;
+const cordLine = (off: number, u0 = 0, u1 = 1, n = 60) =>
+  smoothPath(
+    Array.from({ length: n + 1 }, (_, i) => {
+      const q = cordC(lerp(u0, u1, i / n));
+      return [q.x + q.nx * off, q.y + q.ny * off] as Pt;
+    }),
+    false,
+  );
 const DOWN: [Pt, Pt, Pt, Pt] = [FORK, [650, 362], [742, 408], [800, 422]];
 const YOLK: Pt = [800, 422];
 const CHORION_WALL_X = 955;
 
 function CordFormationDrawing({ t }: SceneProps) {
+  // Everything that runs into the chorionic plate is clipped by the plate's curve, so it meets it exactly.
+  const clipId = `${useId().replace(/:/g, '')}-plate`;
+  const plateClip = `url(#${clipId})`;
   // Amnios barrunbea slowly widening around the embryo.
   const amGrow = seg(t, 0.48, 0.56);
   const amRx = lerp(172, 190, amGrow);
@@ -123,6 +111,12 @@ function CordFormationDrawing({ t }: SceneProps) {
   // The primitive ring is absorbed into the cord once it's wrapped.
   const ringA = 1 - seg(t, 0.6, 0.68);
 
+  // The sleeve grows from the ring along the trunk, then along the upper branch; its front is rounded.
+  const sleeveU = 0.4 * Math.max(trunkWrap, upWrap > 0 ? 1 : 0) + 0.6 * upWrap;
+  const sleeve = sleeveU > 0.004 ? tube(cordRev, (v) => cordW(1 - v), 1 - sleeveU, 1, 64, sleeveU < 0.999) : null;
+  // Before it is sleeved, the connecting stalk is a slim mesoderm cord carrying the vessels.
+  const stalk = tube(cordC, (u) => 11 + 7 * Math.max(0, (u - 0.86) / 0.14) ** 2, 0, 1, 64);
+
   const upMid = bez(...UP, 0.5);
   const downMid = bez(...DOWN, 0.5);
   const trunkMid = bez(...TRUNK, 0.55);
@@ -133,9 +127,6 @@ function CordFormationDrawing({ t }: SceneProps) {
       <Part id="korion-barrunbea" show={chorionCav} quiet>
         <rect x={600} y={106} width={360} height={392} rx={26} fill={C.chorionCavity} />
         <rect x={600} y={106} width={360} height={392} rx={26} fill="none" stroke="rgba(160,180,220,0.25)" strokeWidth={1.4} />
-      </Part>
-      <Part id="korion-plaka">
-        <path d={`M${CHORION_WALL_X},118 Q${CHORION_WALL_X + 22},300 ${CHORION_WALL_X},484`} fill="none" stroke="#b9c6e6" strokeWidth={3} opacity={0.85} />
       </Part>
 
       {/* Distal branch: hodi onfalomesenterikoa + bitelo-zaku-sekundarioa */}
@@ -157,6 +148,13 @@ function CordFormationDrawing({ t }: SceneProps) {
         <ellipse cx={YOLK[0] - 6} cy={YOLK[1] - 4} rx={11} ry={8} fill="#3b5bdb" opacity={0.6} />
       </Part>
 
+      <clipPath id={clipId}>
+        <path d={`M0,0 L${CHORION_WALL_X},0 L${CHORION_WALL_X},118 Q${CHORION_WALL_X + 22},300 ${CHORION_WALL_X},484 L${CHORION_WALL_X},640 L0,640Z`} />
+      </clipPath>
+      <Part id="finkapen-pedikulua" show={1 - upWrap}>
+        <path d={stalk.d} fill={C.mesoExtra} opacity={0.3} clipPath={plateClip} />
+      </Part>
+
       {/* Amnios: sac around the embryo + sleeve wrapping the cord */}
       <Part id="amnios-barrunbea" quiet>
         <ellipse cx={amCx} cy={amCy} rx={amRx} ry={amRy} fill={C.amnionCavity} />
@@ -166,38 +164,26 @@ function CordFormationDrawing({ t }: SceneProps) {
       </Part>
       {/* The amnios sleeve is the cord itself: primitive, then definitive, then filled with Wharton's jelly. */}
       <Part id={whartonK > 0.4 ? 'wharton-gelatina' : t < 0.74 ? 'hasierako-zilbor-hestea' : 'behin-betiko-zilbor-hestea'} show={trunkWrap > 0.01 ? 1 : 0}>
-        <path d={partialBand(...TRUNK, Math.max(trunkWrap, upWrap > 0 ? 1 : 0), 21)} fill={sleeveFill} opacity={0.9} />
-        {upWrap > 0.01 && <path d={partialBand(...UP, upWrap, 19)} fill={sleeveFill} opacity={0.9} />}
+        {sleeve && <path d={sleeve.d} fill={sleeveFill} opacity={0.9} clipPath={plateClip} />}
       </Part>
 
-      {/* Zilbor-hodiak: 2 arteries + 1 vein running the length of the (future) cord */}
+      {/* Zilbor-hodiak: 2 arteries + 1 vein running the whole (future) cord, into the chorionic plate */}
       <Part id="zilbor-hodiak">
-        {[7, -7].map((off, i) => {
-          const [tp0, tc1, tc2, tp3] = offsetCurve(...TRUNK, off);
-          const [up0, uc1, uc2, up3] = offsetCurve(...UP, off);
-          return (
-            <g key={i}>
-              <path d={bezD(tp0, tc1, tc2, tp3)} fill="none" stroke={C.artery} strokeWidth={3.4} strokeLinecap="round" />
-              <path d={bezD(up0, uc1, uc2, up3)} fill="none" stroke={C.artery} strokeWidth={3.4} strokeLinecap="round" />
-            </g>
-          );
-        })}
-        {(() => {
-          const [tp0, tc1, tc2, tp3] = offsetCurve(...TRUNK, 0);
-          const [up0, uc1, uc2, up3] = offsetCurve(...UP, 0);
-          return (
-            <>
-              <path d={bezD(tp0, tc1, tc2, tp3)} fill="none" stroke={C.vein} strokeWidth={4} strokeLinecap="round" />
-              <path d={bezD(up0, uc1, uc2, up3)} fill="none" stroke={C.vein} strokeWidth={4} strokeLinecap="round" />
-            </>
-          );
-        })()}
+        <g clipPath={plateClip}>
+          {[7, -7].map((off) => (
+            <path key={off} d={cordLine(off)} fill="none" stroke={C.artery} strokeWidth={3.4} strokeLinecap="round" />
+          ))}
+          <path d={cordLine(0)} fill="none" stroke={C.vein} strokeWidth={4} strokeLinecap="round" />
+        </g>
       </Part>
 
       {/* Alantoidea: thin duct inside the proximal part, closing late */}
       <Part id="alantoidea" show={allantois}>
-        <path d={bezD(...TRUNK)} fill="none" stroke="#ffe28a" strokeWidth={1.6} strokeDasharray="4 3" opacity={0.85} />
-        <path d={bezD(bez(...UP, 0), bez(...UP, 0.2), bez(...UP, 0.35), bez(...UP, 0.42))} fill="none" stroke="#ffe28a" strokeWidth={1.6} strokeDasharray="4 3" opacity={0.85} />
+        <path d={cordLine(0, 0.04, 0.65, 30)} fill="none" stroke="#ffe28a" strokeWidth={1.6} strokeDasharray="4 3" opacity={0.85} />
+      </Part>
+
+      <Part id="korion-plaka">
+        <path d={`M${CHORION_WALL_X},118 Q${CHORION_WALL_X + 22},300 ${CHORION_WALL_X},484`} fill="none" stroke="#b9c6e6" strokeWidth={3} opacity={0.85} />
       </Part>
 
       {/* Heste lakioak: physiological hernia at the base of the cord */}
@@ -293,11 +279,22 @@ export function CordSections({ t }: SceneProps) {
 
   return (
     <g>
-      <Part id="amniosa">
-        <circle cx={SEC_C[0]} cy={SEC_C[1]} r={SEC_R} fill="none" stroke="#9fc3e6" strokeWidth={3} strokeDasharray="2 5" />
-      </Part>
       <Part id="wharton-gelatina">
-        <circle cx={SEC_C[0]} cy={SEC_C[1]} r={SEC_R - 10} fill={mix('#e9a48f', '#f1c7b5', definitiv)} />
+        <circle cx={SEC_C[0]} cy={SEC_C[1]} r={SEC_R - 6} fill={mix('#e9a48f', '#f1c7b5', definitiv)} />
+        <circle cx={SEC_C[0]} cy={SEC_C[1]} r={SEC_R - 6} fill="url(#p-meso-extra)" opacity={0.35} />
+        <circle cx={SEC_C[0]} cy={SEC_C[1]} r={SEC_R - 6} fill="url(#g-shade)" opacity={0.25} />
+      </Part>
+      {/* The amnion covering the cord: a thin epithelium lying on the jelly (cell boundaries as ticks). */}
+      <Part id="amniosa">
+        <circle cx={SEC_C[0]} cy={SEC_C[1]} r={SEC_R - 3} fill="none" stroke="#9fc3e6" strokeWidth={6} />
+        <g stroke="#5f86b8" strokeWidth={0.9}>
+          {Array.from({ length: 96 }, (_, i) => {
+            const a = (i / 96) * Math.PI * 2;
+            const [c, sn] = [Math.cos(a), Math.sin(a)];
+            return <line key={i} x1={f1(SEC_C[0] + c * (SEC_R - 6))} y1={f1(SEC_C[1] + sn * (SEC_R - 6))} x2={f1(SEC_C[0] + c * SEC_R)} y2={f1(SEC_C[1] + sn * SEC_R)} />;
+          })}
+        </g>
+        <circle cx={SEC_C[0]} cy={SEC_C[1]} r={SEC_R} fill="none" stroke="#5f86b8" strokeWidth={0.9} />
       </Part>
 
       <Part id="enbrioi-barruko-zeloma" show={zeloma} quiet>
@@ -319,11 +316,17 @@ export function CordSections({ t }: SceneProps) {
         <circle cx={SEC_C[0] - 10} cy={SEC_C[1] - 4} r={4} fill="#ffe28a" stroke="#c9a13a" strokeWidth={0.8} />
       </Part>
 
+      {/* Two arteries (thick muscular wall, narrow lumen) and one vein (thinner wall, wide lumen). */}
       <Part id="zilbor-hodiak">
         {[0, 1].map((i) => (
-          <circle key={i} cx={vpos(i)[0]} cy={vpos(i)[1]} r={13} fill={C.artery} stroke="#7a1f1f" strokeWidth={1.2} />
+          <g key={i}>
+            <circle cx={vpos(i)[0]} cy={vpos(i)[1]} r={14} fill="#c46a6a" stroke="#7a1f1f" strokeWidth={1.1} />
+            <circle cx={vpos(i)[0]} cy={vpos(i)[1]} r={10.5} fill="none" stroke="#a84a4f" strokeWidth={0.8} strokeDasharray="1.5 2.5" />
+            <circle cx={vpos(i)[0]} cy={vpos(i)[1]} r={6.5} fill={C.artery} stroke="#7a1f1f" strokeWidth={0.9} />
+          </g>
         ))}
-        <circle cx={vpos(2)[0]} cy={vpos(2)[1]} r={15} fill={C.vein} stroke="#1f3a7a" strokeWidth={1.2} />
+        <circle cx={vpos(2)[0]} cy={vpos(2)[1]} r={16} fill="#8aa0d6" stroke="#1f3a7a" strokeWidth={1.1} />
+        <circle cx={vpos(2)[0]} cy={vpos(2)[1]} r={12.5} fill={C.vein} stroke="#1f3a7a" strokeWidth={0.9} />
       </Part>
 
       <Label id="amniosa" x={200} y={80} ax={SEC_C[0] - SEC_R * 0.7} ay={SEC_C[1] - SEC_R * 0.7} />

@@ -5,7 +5,7 @@ export { CellBand, Cell, Arrow, Flow, scatterInEllipse } from './tissue';
 export { useScene } from './context';
 export { C } from '@/lib/sim/palette';
 export { seg, lin, fade, lerp, lerpPt, lerpPts, mix, clamp, rand, easeOut, easeIn, easeInOut } from '@/lib/sim/anim';
-export { ellipseArc, line, bezier, polyline, curvePath, bandPath, smoothPath, ellipsePts, ellipseD, curveLength } from '@/lib/sim/geometry';
+export { ellipseArc, line, bezier, polyline, curvePath, bandPath, smoothPath, ellipsePts, ellipseD, curveLength, tube } from '@/lib/sim/geometry';
 export type { Pt, Curve, Sample } from '@/lib/sim/geometry';
 
 /**

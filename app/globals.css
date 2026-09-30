@@ -929,6 +929,92 @@ kbd {
   color: #55524d;
 }
 
+/* Offer of full screen when an explanation starts: a compact card in the free bottom-right corner (the
+   preview card holds the left), above everything in the scene; it steps aside on its own. */
+.fs-offer {
+  position: absolute;
+  z-index: 6;
+  right: 14px;
+  bottom: 34px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 9px 10px;
+  width: min(330px, calc(100% - 28px));
+  padding: 11px 12px 10px;
+  border-radius: 14px;
+  background: rgba(19, 19, 21, 0.94);
+  border: 1px solid var(--line-2);
+  box-shadow: 0 18px 44px -14px rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  animation: fs-offer-in 0.45s var(--ease) both;
+}
+
+@keyframes fs-offer-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.fs-offer-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(255, 184, 107, 0.14);
+  color: #ffb86b;
+}
+
+.fs-offer-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.fs-offer-text b {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.fs-offer-text small {
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+
+.fs-offer-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fs-offer-never {
+  margin-left: auto;
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  color: var(--text-3);
+  font: inherit;
+  font-size: 11.5px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.fs-offer-never:hover {
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fs-offer {
+    animation: none;
+  }
+}
+
 @keyframes start-in {
   from {
     opacity: 0;
@@ -7642,6 +7728,11 @@ button.tp-switch:hover {
 .app.is-focus .focus-exit {
   display: flex;
   z-index: 6;
+}
+
+/* The exit buttons take the bottom-right corner in focus mode: the ventral/bottom compass label sits above them. */
+.app.is-focus .orient-bottom {
+  bottom: 52px;
 }
 
 .app.is-focus .workspace.panel-open .info {

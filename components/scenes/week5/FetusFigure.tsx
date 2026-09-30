@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { clamp, lerp, lerpPt, mix, smoothPath, type Pt } from '@/components/kit';
 import { interp } from './growth';
 import { ramp } from './skin';
@@ -233,9 +234,11 @@ export interface FetusFigureProps {
   /** Physiological umbilical hernia (up to the 12th week). */
   hernia?: number;
   vernix?: number;
+  /** Replaces the short cut cord stub (figure-local coordinates), drawn between the far and near limbs. */
+  cord?: ReactNode;
 }
 
-export function FetusFigure({ id, week, pose, s, hernia = 0, vernix = 0 }: FetusFigureProps) {
+export function FetusFigure({ id, week, pose, s, hernia = 0, vernix = 0, cord }: FetusFigureProps) {
   const g = fetusGeom(week, pose);
   const { R, Hc, arm, leg, farArm, farLeg, turn } = g;
   const red = Math.min(ramp(week, 16, 20), 1 - ramp(week, 28, 34));
@@ -268,7 +271,7 @@ export function FetusFigure({ id, week, pose, s, hernia = 0, vernix = 0 }: Fetus
           <path d={`M${g.cordBase[0] + 0.5},${g.cordBase[1]} q2,-2.6 4,0 t4,0 M${g.cordBase[0] + 1},${g.cordBase[1] + 2.4} q2,-2.2 4,0`} fill="none" />
         </g>
       )}
-      <Cord g={g} />
+      {cord ?? <Cord g={g} />}
       <g filter={`url(#${id}-sculpt)`} fill={skin}>
         {/* Head over the trunk */}
         <path d={smoothPath(g.head, true, 0.5)} />
@@ -367,5 +370,7 @@ export function placeFetus(cm: number, pxcm: number, cx: number, cy: number, bas
   // `mirror`: face to the left, as the embryo views of days 28–56 do, so the student follows one body.
   const sx = mirror ? -1 : 1;
   const xf = (p: readonly number[]): Pt => [cx + sx * (p[0] - m[0]) * s, cy + (p[1] - m[1]) * s];
-  return { s, xf, vertex: xf([1, 0]), rump: xf([-3, 100]), transform: `translate(${cx} ${cy}) scale(${sx * s} ${s}) translate(${-m[0]} ${-m[1]})` };
+  /** Scene → figure-local coordinates (the inverse of `xf`), e.g. to route a full cord from the belly. */
+  const inv = (p: readonly number[]): Pt => [(p[0] - cx) / (sx * s) + m[0], (p[1] - cy) / s + m[1]];
+  return { s, xf, inv, vertex: xf([1, 0]), rump: xf([-3, 100]), transform: `translate(${cx} ${cy}) scale(${sx * s} ${s}) translate(${-m[0]} ${-m[1]})` };
 }

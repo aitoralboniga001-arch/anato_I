@@ -2,6 +2,8 @@
 
 import { C, Flow, Label, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { fetusGeom, FetusFigure, placeFetus } from '@/components/scenes/week5/FetusFigure';
+import { useId } from 'react';
+import { CordRope } from './CordRope';
 
 const vis = (t: number, a: number, b = 2) => Math.min(a <= 0 ? 1 : seg(t, a, a + 0.03), 1 - seg(t, b - 0.03, b));
 
@@ -61,7 +63,16 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
   const gaugeH = 100;
   const gaugeFill = Math.min(1, ml / 1000) * gaugeH;
 
-  const cordD = smoothPath([cordBase, [(cordBase[0] + PLACENTA_C[0]) / 2, (cordBase[1] + PLACENTA_C[1]) / 2 - 30], PLACENTA_C], false, 0.5);
+  // The cord leaves the belly, loops round in front of the knees and rises to the placenta's fetal
+  // surface, which lies on the cavity wall right under the placenta.
+  const ins = Math.atan2((PLACENTA_C[1] - cavC[1]) / cavRy, (PLACENTA_C[0] - cavC[0]) / cavRx);
+  const insertion: Pt = [cavC[0] + (cavRx + 10) * Math.cos(ins), cavC[1] + (cavRy + 10) * Math.sin(ins)];
+  const wallTan = (Math.atan2(cavRy * Math.cos(ins), -cavRx * Math.sin(ins)) * 180) / Math.PI;
+  const plC: Pt = [cavC[0] + (cavRx + 6) * Math.cos(ins), cavC[1] + (cavRy + 6) * Math.sin(ins)];
+  const cordPts: Pt[] = [cordBase, [cordBase[0] + 34, cordBase[1] + 22], [cordBase[0] + 92, cordBase[1] - 6], [cordBase[0] + 104, cordBase[1] - 96], [insertion[0] + 22, insertion[1] + 110], [insertion[0] + 2, insertion[1] + 36], insertion];
+  const cordD = smoothPath(cordPts, false, 0.5);
+  const cordMid = cordPts[3];
+  const clipId = `${useId().replace(/:/g, '')}-wall`;
 
   return (
     <g>
@@ -69,10 +80,6 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
       <path d={smoothPath(UTERUS, true, 0.55)} fill="#7a2c34" stroke="#4a1a20" strokeWidth={2} opacity={0.92} />
       <path d={smoothPath(UTERUS, true, 0.55)} fill="none" stroke="#c88a90" strokeWidth={1} opacity={0.35} />
 
-      {/* Placenta patch on the wall */}
-      <Part id="karena" quiet>
-        <ellipse cx={PLACENTA_C[0]} cy={PLACENTA_C[1]} rx={78} ry={48} fill="#c2415f" stroke="#7c1f36" strokeWidth={2} />
-      </Part>
 
       {/* Amnios barrunbea: the fluid-filled cavity, its size a proxy for the growing volume */}
       <Part id="amnios-barrunbea">
@@ -86,16 +93,35 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
         <ellipse cx={cavC[0]} cy={cavC[1]} rx={cavRx + 5} ry={cavRy + 5} fill="none" stroke="#bfe0f2" strokeWidth={1.4} strokeDasharray="2 5" opacity={0.6} />
       </Part>
 
-      {/* Cord to the placenta */}
-      <Part id="zilborrestea">
-        <path d={cordD} fill="none" stroke="#d9a6b8" strokeWidth={7} strokeLinecap="round" />
-        <path d={cordD} fill="none" stroke="#9c4a6d" strokeWidth={2} strokeDasharray="6 5" opacity={0.7} />
-        <path d={cordD} fill="none" stroke="#6f78b8" strokeWidth={1.6} strokeDasharray="5 6" strokeDashoffset={4} opacity={0.65} />
-      </Part>
-
       <Part id="fetu-aroa" quiet>
         <g transform={place.transform}>
-          <FetusFigure id="w6af" week={week5} pose={pose} s={place.s} vernix={0.4} />
+          <FetusFigure
+            id="w6af"
+            week={week5}
+            pose={pose}
+            s={place.s}
+            vernix={0.4}
+            cord={
+              <Part id="zilborrestea">
+                <CordRope pts={cordPts.map(place.inv)} w={11 / place.s} turns={9} />
+              </Part>
+            }
+          />
+        </g>
+      </Part>
+
+      {/* Placenta: a lens in the uterine wall whose fetal surface is the cavity wall itself (drawn over the cord's insertion) */}
+      <clipPath id={clipId}>
+        <path d={`M0,0H1000V640H0Z M${cavC[0] - cavRx},${cavC[1]} a${cavRx},${cavRy} 0 1,0 ${cavRx * 2},0 a${cavRx},${cavRy} 0 1,0 ${-cavRx * 2},0Z`} clipRule="evenodd" />
+      </clipPath>
+      <clipPath id={`${clipId}-u`}>
+        <path d={smoothPath(UTERUS, true, 0.55)} />
+      </clipPath>
+      <Part id="karena" quiet>
+        <g clipPath={`url(#${clipId})`}>
+          <g clipPath={`url(#${clipId}-u)`}>
+            <ellipse cx={plC[0]} cy={plC[1]} rx={104} ry={44} transform={`rotate(${wallTan} ${plC[0]} ${plC[1]})`} fill="#c2415f" stroke="#7c1f36" strokeWidth={2} />
+          </g>
         </g>
       </Part>
 
@@ -121,7 +147,7 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
       {!reduced && swallowA > 0.02 && (
         <g opacity={swallowA}>
           <Flow d={`M${mouth[0]},${mouth[1]} Q${cordBase[0] - 20},${cordBase[1] + 10} ${cordBase[0]},${cordBase[1]}`} n={3} dur={3.2} r={2.2} color="#8ecae6" />
-          <Flow d={`M${cordBase[0]},${cordBase[1]} Q${(cordBase[0] + PLACENTA_C[0]) / 2},${(cordBase[1] + PLACENTA_C[1]) / 2 - 20} ${PLACENTA_C[0]},${PLACENTA_C[1]}`} n={3} dur={3.6} r={2.2} color="#8ecae6" />
+          <Flow d={cordD} n={3} dur={3.6} r={2.2} color="#8ecae6" />
           <Flow d={`M${PLACENTA_C[0] - 20},${PLACENTA_C[1] + 20} Q${cavC[0] - 100},${cavC[1] - 120} ${mouth[0] - 40},${mouth[1] - 60}`} n={2} dur={5} r={2} color="#5fa8cc" />
         </g>
       )}
@@ -163,8 +189,8 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
       <Label id="degluzioa" x={200} y={300} ax={mouth[0]} ay={mouth[1]} show={swallowA} />
 
       {/* Labels — right gutter */}
-      <Label id="karena" x={800} y={150} ax={PLACENTA_C[0] + 60} ay={PLACENTA_C[1]} />
-      <Label id="zilborrestea" x={800} y={200} ax={(cordBase[0] + PLACENTA_C[0]) / 2} ay={(cordBase[1] + PLACENTA_C[1]) / 2 - 10} />
+      <Label id="karena" x={800} y={150} ax={plC[0] + 30} ay={plC[1] - 18} />
+      <Label id="zilborrestea" x={800} y={200} ax={cordMid[0]} ay={cordMid[1]} />
 
       <Note x={500} y={612} tone="dim" show={sourcesA > 0.02 ? 1 : 0}>
         Jatorria: amniosa, fetuaren gernua, dezidua, biloxka-odola, arnas/digestio aparatua
@@ -188,8 +214,17 @@ const U2: Pt[] = [
   [370, 528], [274, 466], [240, 360], [270, 250], [360, 168],
 ];
 const PLAC2: Pt = [352, 230];
-const NEEDLE_A: Pt = [560, 118];
-const NEEDLE_B: Pt = [560, 340];
+const CAV2: Pt = [500, 352];
+const CAV2_R: Pt = [190, 170];
+/** Where a placenta centred towards `toward` sits on the cavity wall: its centre, the wall's tangent (°) and the cord insertion (just inside the wall). */
+function wallSpot(c: Pt, r: Pt, toward: Pt) {
+  const a = Math.atan2((toward[1] - c[1]) / r[1], (toward[0] - c[0]) / r[0]);
+  const at = (d: number): Pt => [c[0] + (r[0] + d) * Math.cos(a), c[1] + (r[1] + d) * Math.sin(a)];
+  return { c: at(6), ins: at(10), tan: (Math.atan2(r[1] * Math.cos(a), -r[0] * Math.sin(a)) * 180) / Math.PI };
+}
+// Ultrasound-guided into a free pocket of fluid, well clear of the fetus and the placenta.
+const NEEDLE_A: Pt = [468, 118];
+const NEEDLE_B: Pt = [468, 318];
 const VAGINA_A: Pt = [500, 546];
 const VAGINA_B: Pt = [500, 604];
 
@@ -200,8 +235,16 @@ export function PrenatalTests({ t }: SceneProps) {
   const cvsA = seg(t, 0.9, 0.98);
 
   const needleTip: Pt = [lerp(NEEDLE_A[0], NEEDLE_B[0], needleA), lerp(NEEDLE_A[1], NEEDLE_B[1], needleA)];
-  const catheterD = smoothPath([VAGINA_B, VAGINA_A, [430, 460], [PLAC2[0] + 30, PLAC2[1] + 40]], false, 0.5);
+  // Through the cervix and up between the uterine wall and the membranes (never through the amniotic cavity) to the villi.
+  const inWall = (deg: number, d: number): Pt => [CAV2[0] + (CAV2_R[0] + d) * Math.cos((deg * Math.PI) / 180), CAV2[1] + (CAV2_R[1] + d) * Math.sin((deg * Math.PI) / 180)];
+  const cvsEnd = inWall(212, 12);
+  const catheterD = smoothPath([VAGINA_B, VAGINA_A, inWall(100, 9), inWall(140, 10), inWall(180, 10), cvsEnd], false, 0.5);
   const catheterLen = 1 - cvsA;
+  const place = placeFetus(13, 6.5, 560, 380);
+  const cordBase = place.xf(fetusGeom(22).cordBase);
+  const pl = wallSpot(CAV2, CAV2_R, PLAC2);
+  const cordPts: Pt[] = [cordBase, [cordBase[0] + 6, cordBase[1] + 30], [cordBase[0] - 60, cordBase[1] + 52], [412, 372], [pl.ins[0] + 16, pl.ins[1] + 60], pl.ins];
+  const clipId = `${useId().replace(/:/g, '')}-wall2`;
 
   return (
     <g>
@@ -210,15 +253,35 @@ export function PrenatalTests({ t }: SceneProps) {
 
       {/* Uterus */}
       <path d={smoothPath(U2, true, 0.55)} fill="#7a2c34" stroke="#4a1a20" strokeWidth={2} opacity={0.92} />
-      <ellipse cx={500} cy={352} rx={190} ry={170} fill={C.amnionCavity} />
+      <ellipse cx={CAV2[0]} cy={CAV2[1]} rx={CAV2_R[0]} ry={CAV2_R[1]} fill={C.amnionCavity} />
 
-      <Part id="karena" quiet>
-        <ellipse cx={PLAC2[0]} cy={PLAC2[1]} rx={64} ry={40} fill="#c2415f" stroke="#7c1f36" strokeWidth={2} />
-      </Part>
-
-      <g transform={placeFetus(13, 6.5, 560, 380).transform}>
-        <FetusFigure id="w6pt" week={22} s={placeFetus(13, 6.5, 560, 380).s} />
+      <g transform={place.transform}>
+        <FetusFigure
+          id="w6pt"
+          week={22}
+          s={place.s}
+          cord={
+            <Part id="zilborrestea" quiet>
+              <CordRope pts={cordPts.map(place.inv)} w={7 / place.s} turns={8} />
+            </Part>
+          }
+        />
       </g>
+
+      {/* Placenta as a lens in the wall; its fetal surface is the cavity wall (over the cord's insertion) */}
+      <clipPath id={clipId}>
+        <path d={`M0,0H1000V640H0Z M${CAV2[0] - CAV2_R[0]},${CAV2[1]} a${CAV2_R[0]},${CAV2_R[1]} 0 1,0 ${CAV2_R[0] * 2},0 a${CAV2_R[0]},${CAV2_R[1]} 0 1,0 ${-CAV2_R[0] * 2},0Z`} clipRule="evenodd" />
+      </clipPath>
+      <clipPath id={`${clipId}-u`}>
+        <path d={smoothPath(U2, true, 0.55)} />
+      </clipPath>
+      <Part id="karena" quiet>
+        <g clipPath={`url(#${clipId})`}>
+          <g clipPath={`url(#${clipId}-u)`}>
+            <ellipse cx={pl.c[0]} cy={pl.c[1]} rx={84} ry={36} transform={`rotate(${pl.tan} ${pl.c[0]} ${pl.c[1]})`} fill="#c2415f" stroke="#7c1f36" strokeWidth={2} />
+          </g>
+        </g>
+      </Part>
 
       {/* Cervix / vaginal canal */}
       <path d={`M${VAGINA_A[0] - 26},${VAGINA_A[1]} L${VAGINA_B[0] - 14},${VAGINA_B[1]} L${VAGINA_B[0] + 14},${VAGINA_B[1]} L${VAGINA_A[0] + 26},${VAGINA_A[1]}Z`} fill="#7a2c34" stroke="#4a1a20" strokeWidth={2} opacity={0.9} />
@@ -262,8 +325,8 @@ export function PrenatalTests({ t }: SceneProps) {
       <Label id="ekografia" x={200} y={100} ax={560} ay={102} show={probeA} />
       <Label id="alfa-fetoproteina" x={800} y={300} ax={858} ay={300} show={bloodA} />
       <Label id="amniozentesia" x={200} y={400} ax={needleTip[0]} ay={needleTip[1]} show={needleA} />
-      <Label id="biloxka-korionikoen-biopsia" x={200} y={460} ax={PLAC2[0] + 20} ay={PLAC2[1] + 40} show={cvsA} />
-      <Label id="karena" x={200} y={200} ax={PLAC2[0]} ay={PLAC2[1]} />
+      <Label id="biloxka-korionikoen-biopsia" x={200} y={460} ax={cvsEnd[0]} ay={cvsEnd[1]} show={cvsA} />
+      <Label id="karena" x={200} y={200} ax={pl.c[0] - 14} ay={pl.c[1] - 10} />
 
       <Note x={500} y={612} tone="warn" show={needleA}>
         Amniozentesia: ez lehen 14 asteetan

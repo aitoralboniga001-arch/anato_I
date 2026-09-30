@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Label, Note, Part, lerp, type Pt, type SceneProps } from '@/components/kit';
+import { C, Label, Note, Part, bezier, lerp, polyline, tube, type Pt, type SceneProps } from '@/components/kit';
 
 /**
  * 4.1 Emakumearen ugal aparatua, the whole organ: the uterus in a frontal cut with its three
@@ -37,12 +37,29 @@ const CANAL = `M${CX - 6},388 L${CX + 6},388 L${CX + 5},${Y_END} L${CX - 5},${Y_
 /** One side: tube from the uterine corner over the ovary, the ovary and the fimbriae. `s` = +1 right, −1 left. */
 function Side({ s }: { s: 1 | -1 }) {
   const x = (v: number) => CX + s * (v - CX);
-  const tube = `M${x(594)},188 C${x(652)},178 ${x(690)},150 ${x(742)},132 C${x(806)},110 ${x(866)},160 ${x(852)},228`;
-  const fim = [
-    [x(846), 238, x(826), 262],
-    [x(854), 240, x(848), 270],
-    [x(862), 236, x(872), 264],
-  ];
+  const P = (px: number, py: number): Pt => [x(px), py];
+  // Centreline from the uterine corner (under the uterus) to the abdominal opening.
+  const a = bezier(P(590, 189), P(652, 178), P(690, 150), P(742, 132));
+  const b = bezier(P(742, 132), P(806, 110), P(866, 160), P(852, 226));
+  const c = polyline([...Array.from({ length: 24 }, (_, i) => a(i / 24)), ...Array.from({ length: 25 }, (_, i) => b(i / 24))].map((q): Pt => [q.x, q.y]));
+  // Narrow isthmus → wider ampulla → trumpet-shaped infundibulum.
+  const hw = (u: number) => lerp(7.5, 11, Math.min(1, u / 0.55)) + 7 * Math.max(0, (u - 0.86) / 0.14) ** 2;
+  const wall = tube(c, hw, 0, 1, 64);
+  const lumen = tube(c, (u) => hw(u) * 0.42 + 2.5 * Math.max(0, (u - 0.86) / 0.14) ** 2, 0, 1, 64);
+  // Fimbriae: tapered fingers fanning out from the rim of the infundibulum, towards the ovary.
+  const e = c(1);
+  const [tx, ty] = [-e.ny, e.nx];
+  const fim = [-1, -0.6, -0.2, 0.2, 0.6, 1].map((k, i) => {
+    const r = hw(1) - 5.5;
+    const base: Pt = [e.x + e.nx * r * k - tx * 5, e.y + e.ny * r * k - ty * 5];
+    const ang = Math.atan2(ty, tx) - k * 0.75;
+    const L = 24 + ((i * 5) % 3) * 5;
+    const tip: Pt = [base[0] + Math.cos(ang) * L, base[1] + Math.sin(ang) * L];
+    const bend = (i % 2 ? 1 : -1) * 4;
+    const mid: Pt = [(base[0] + tip[0]) / 2 - Math.sin(ang) * bend, (base[1] + tip[1]) / 2 + Math.cos(ang) * bend];
+    // From the tip (rounded cap) back to the rim, widening.
+    return tube(bezier(tip, mid, mid, base), (u) => lerp(2.6, 4.6, u), 0, 1, 12, true);
+  });
   return (
     <g>
       <Part id="obulutegia">
@@ -51,15 +68,20 @@ function Side({ s }: { s: 1 | -1 }) {
           <circle key={i} cx={x(790) + s * dx} cy={286 + dy} r={r} fill="#fbe6d0" stroke="rgba(90,50,30,0.5)" strokeWidth={1} />
         ))}
       </Part>
-      <Part id="umetoki-tronpa">
-        <path d={tube} fill="none" stroke={C.tube} strokeWidth={22} strokeLinecap="round" />
-        <path d={tube} fill="none" stroke="#3a1b2e" strokeWidth={8} strokeLinecap="round" opacity={0.8} />
-      </Part>
       <Part id="finbriak">
-        <g fill="none" stroke={C.tube} strokeWidth={7} strokeLinecap="round">
-          {fim.map(([a, b, c, d], i) => (
-            <path key={i} d={`M${a},${b} L${c},${d}`} />
-          ))}
+        {fim.map((f, i) => (
+          <g key={i}>
+            <path d={f.d} fill={C.tube} />
+            <path d={f.d} fill="none" stroke="rgba(60,10,30,0.4)" strokeWidth={0.9} />
+          </g>
+        ))}
+      </Part>
+      <Part id="umetoki-tronpa">
+        <path d={wall.d} fill={C.tube} />
+        <path d={lumen.d} fill="#3a1b2e" opacity={0.8} />
+        <g fill="none" stroke="rgba(60,10,30,0.45)" strokeWidth={1}>
+          <path d={wall.left} />
+          <path d={wall.right} />
         </g>
       </Part>
     </g>

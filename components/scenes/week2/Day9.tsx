@@ -185,19 +185,29 @@ function sinusoidPath(q: Sinusoid, k: number) {
 }
 
 /** Fibrin plug in the epithelial defect: two halves growing from the cut epithelial edges until they meet. */
-function fibrinHalf(side: -1 | 1, k: number) {
+/**
+ * Fibrin plug sealing the epithelial gap: two lumpy masses creep in from the cut epithelial edges with
+ * rounded fronts and fuse into one plug (no seam) that bulges a little into the uterine lumen.
+ */
+function fibrinPlug(k: number): string[] {
   const { cx, surfaceY, epiThickness } = W2;
   const top = surfaceY - epiThickness - 2;
-  const bottom = (x: number) => surfaceY + 3 + 7 * (1 - ((x - cx) / GAP) ** 2);
-  const x0 = cx + side * GAP;
-  const x1 = cx + side * GAP * (1 - k);
-  const pts: string[] = [];
-  const n = 16;
-  for (let i = 0; i <= n; i++) {
-    const x = lerp(x0, x1, i / n);
-    pts.push(`${f1(x)},${f1(bottom(x))}`);
-  }
-  return `M${f1(x0)},${f1(top)} L${pts.join(' L')} L${f1(x1)},${f1(top)}Z`;
+  const bottom = (x: number) => surfaceY + 2 + 7 * (1 - ((x - cx) / GAP) ** 2) + 1.3 * Math.sin(x * 0.31) * Math.cos(x * 0.13);
+  const piece = (xs: number, xf: number, free: boolean) => {
+    const dir = Math.sign(xf - xs) || 1;
+    const n = Math.max(3, Math.round(Math.abs(xf - xs) / 7));
+    const pts: Pt[] = [[xs, top], [xs, bottom(xs) - 2]];
+    for (let i = 1; i <= n; i++) {
+      const x = lerp(xs, xf, i / n);
+      pts.push([x, bottom(x)]);
+    }
+    if (free) pts.push([xf + dir * (bottom(xf) - top) * 0.4, (top + bottom(xf)) / 2 + 1]);
+    pts.push([xf, top]);
+    return smoothPath(pts, true, 0.45);
+  };
+  if (k <= 0.004) return [];
+  if (k >= 0.995) return [piece(cx - GAP, cx + GAP, false)];
+  return [piece(cx - GAP, cx - GAP * (1 - k), true), piece(cx + GAP, cx + GAP * (1 - k), true)];
 }
 
 function Day9Drawing({ t, reduced }: SceneProps) {
@@ -269,8 +279,9 @@ function Day9Drawing({ t, reduced }: SceneProps) {
 
       {/* Fibrin plug where the epithelium should be (drawn under the blastocyst it abuts). */}
       <Part id="fibrina-koagulua" show={seg(fib, 0, 0.15)}>
-        <path d={fibrinHalf(-1, fib)} fill="url(#p-fibrin)" stroke="#b9ae95" strokeWidth={1} />
-        <path d={fibrinHalf(1, fib)} fill="url(#p-fibrin)" stroke="#b9ae95" strokeWidth={1} />
+        {fibrinPlug(fib).map((d, i) => (
+          <path key={i} d={d} fill="url(#p-fibrin)" stroke="#b9ae95" strokeWidth={1} />
+        ))}
       </Part>
 
       {/* Cavity background (not interactive), then the cavity that is renamed when Heuser's membrane closes. */}

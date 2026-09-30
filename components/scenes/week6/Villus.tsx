@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Flow, Label, Mark, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
+import { C, Flow, Label, Mark, Note, Part, lerp, line, seg, tube, type SceneProps } from '@/components/kit';
 import { V, VilliDefs, fingerD, loopD, place } from '@/components/scenes/week3-villi/common';
 
 /**
@@ -35,8 +35,12 @@ function VillusDefs() {
 
 const ROOF = { synTop: 96, synBottom: 128 };
 const BASE = { syn: 466, cyto: 480, meso: 495, vessel: 522 };
-const PLATE = { syn: 466, cyto: 480, meso: 495, bottom: 528 };
-const STALK_Y = 588;
+const PLATE = { syn: 466, cyto: 480, meso: 495, bottom: 556 };
+/** Plate vessels (chorionic arteries/veins) collecting the villous loops, and the stalk hanging into the chorionic cavity. */
+const PLATE_ART_Y = 534;
+const PLATE_VEIN_Y = 545;
+const STALK_X = 420;
+const STALK = tube(line([STALK_X, PLATE.bottom - 3], [STALK_X + 8, 660]), (u) => 17 + 16 * Math.max(0, 1 - u / 0.35) ** 2, 0, 1, 24);
 
 const VILLI = [
   { x: 350, len: 296, hw: 40, ts: 11, tc: 10 },
@@ -89,6 +93,27 @@ function VilliLongSectionDrawing({ t, reduced }: SceneProps) {
           'M232,160 C248,280 224,370 240,455',
         ].map((d, i) => <Flow key={i} d={d} n={4} dur={7 + i} r={2.3} color="#ff6b81" reduced={reduced} />)}
 
+      {/* Chorionic plate: trophoblast facing the intervillous space, extra-embryonic mesoderm below it.
+          Drawn under the villi so each villus' layers run straight into the plate's (no cut at the base). */}
+      <Part id="korion-plaka" show={vis(t, 0)}>
+        <rect x={0} y={PLATE.syn} width={1000} height={PLATE.cyto - PLATE.syn} fill="url(#p-syncytio)" />
+        <rect x={0} y={PLATE.cyto} width={1000} height={PLATE.meso - PLATE.cyto} fill="url(#w3v-cyto)" />
+        <rect x={0} y={PLATE.meso} width={1000} height={PLATE.bottom - PLATE.meso} fill={C.mesoExtra} />
+        <rect x={0} y={PLATE.meso} width={1000} height={PLATE.bottom - PLATE.meso} fill="url(#p-meso-extra)" />
+        <path d={`M0,${PLATE.bottom} H1000`} stroke="#d9785a" strokeWidth={1} />
+      </Part>
+      <Part id="korion-barrunbea" quiet show={vis(t, 0)}>
+        <rect x={0} y={PLATE.bottom} width={1000} height={640 - PLATE.bottom} fill="#131a2b" />
+      </Part>
+      <Part id="finkapen-pedikulua" show={vis(t, 0.32)}>
+        <path d={STALK.d} fill={C.mesoExtra} />
+        <path d={STALK.d} fill="url(#p-meso-extra)" />
+        <g fill="none" stroke="#d9785a" strokeWidth={lerp(1, 2.2, pathHighlight)}>
+          <path d={STALK.left} />
+          <path d={STALK.right} />
+        </g>
+      </Part>
+
       <Part id="biloxka-tertziarioa" show={vis(t, 0)}>
         <path transform={place(VL[1].x, BASE.syn)} d={fingerD(VL[1].len, VL[1].hw + 3, 9)} fill="none" stroke="#e8eefc" strokeWidth={1.2} strokeDasharray="4 4" opacity={0.7} />
       </Part>
@@ -108,10 +133,27 @@ function VilliLongSectionDrawing({ t, reduced }: SceneProps) {
           <g key={i} transform={place(v.x, BASE.meso)}>
             <path d={fingerD(v.mesoLen, v.mesoHw, 5)} fill={C.mesoExtra} />
             <path d={fingerD(v.mesoLen, v.mesoHw, 5)} fill="url(#p-meso-extra)" stroke="#d9785a" strokeWidth={0.8} />
+            {/* the core opens into the plate's mesoderm: no line across its base */}
+            <rect x={-v.mesoHw - 5} y={-1.2} width={(v.mesoHw + 5) * 2} height={3} fill={C.mesoExtra} />
           </g>
         ))}
       </Part>
 
+      {/* Chorionic-plate vessels gather the loops and run into the stalk: umbilical vessels */}
+      <Part id="zilbor-hodiak" show={vis(t, 0.32)}>
+        <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <path
+            d={`${VL.map((v) => `M${v.x - v.half * 0.58},${BASE.vessel} V${PLATE_ART_Y} M${v.x + v.half * 0.58},${BASE.vessel} V${PLATE_ART_Y}`).join(' ')} M${VL[0].x - VL[0].half * 0.58},${PLATE_ART_Y} H${VL[2].x + VL[2].half * 0.58} M${STALK_X - 5},${PLATE_ART_Y} V640`}
+            stroke={C.artery}
+            strokeWidth={4}
+          />
+          <path
+            d={`${VL.map((v) => `M${v.x - v.half * 1.3},${BASE.vessel} V${PLATE_VEIN_Y} M${v.x + v.half * 1.3},${BASE.vessel} V${PLATE_VEIN_Y}`).join(' ')} M${VL[0].x - VL[0].half * 1.3},${PLATE_VEIN_Y} H${VL[2].x + VL[2].half * 1.3} M${STALK_X + 6},${PLATE_VEIN_Y} V640`}
+            stroke={C.vein}
+            strokeWidth={4}
+          />
+        </g>
+      </Part>
       <Part id="biloxka-kapilarrak" show={vis(t, 0.32)}>
         {VL.map((v, i) => (
           <g key={i} transform={place(v.x, BASE.vessel)}>
@@ -127,24 +169,9 @@ function VilliLongSectionDrawing({ t, reduced }: SceneProps) {
         ))}
       </Part>
 
-      <Part id="korion-plaka" show={vis(t, 0)}>
-        <rect x={190} y={PLATE.syn} width={620} height={PLATE.bottom - PLATE.syn} fill="url(#p-syncytio)" />
-        <rect x={190} y={PLATE.syn} width={620} height={(PLATE.bottom - PLATE.syn) * 0.55} fill="url(#w3v-cyto)" opacity={0.9} />
-      </Part>
-      <Part id="finkapen-pedikulua" show={vis(t, 0.32)}>
-        <path d={`M494,${PLATE.bottom} L494,${STALK_Y}`} fill="none" stroke={V.endothelium} strokeWidth={lerp(11, 15, pathHighlight)} strokeLinecap="round" opacity={0.9} />
-      </Part>
-      <Part id="zilbor-hodiak" show={vis(t, 0.32)}>
-        <path d={`M490,${PLATE.bottom} L490,${STALK_Y}`} stroke={C.artery} strokeWidth={5} fill="none" strokeLinecap="round" />
-        <path d={`M500,${PLATE.bottom} L500,${STALK_Y}`} stroke={C.vein} strokeWidth={5} fill="none" strokeLinecap="round" />
-      </Part>
-      <Part id="korion-barrunbea" quiet show={vis(t, 0)}>
-        <rect x={0} y={STALK_Y} width={1000} height={640 - STALK_Y} fill="#131a2b" />
-      </Part>
-
       {!reduced && (
         <>
-          <Flow d={`M495,${STALK_Y} L495,${PLATE.bottom}`} n={3} dur={3} r={2} color={C.vein} reduced={reduced} />
+          <Flow d={`M${STALK_X + 6},640 L${STALK_X + 6},${PLATE_VEIN_Y}`} n={3} dur={3} r={2} color={C.vein} reduced={reduced} />
           {VL.map((v, i) => (
             <g key={i} transform={place(v.x, BASE.vessel)}>
               <Flow d={loopD(v.loopLen * 0.92, v.half * 1.3)} n={2} dur={4 + i} r={1.8} color={C.artery} reduced={reduced} />
@@ -182,21 +209,21 @@ export function VilliLongSection(props: SceneProps) {
       <Label id="sinzitiotrofoblastoa" x={190} y={185} ax={VL[0].x - VL[0].hw + 6} ay={220} show={vis(t, 0)} />
       <Label id="zitotrofoblastoa" x={190} y={235} ax={VL[0].x - VL[0].hw + VL[0].ts + 4} ay={280} show={vis(t, 0.66)} />
       <Label id="ehun-konektiboa" x={190} y={285} ax={VL[0].x - VL[0].mesoHw * 0.6} ay={BASE.meso - VL[0].mesoLen * 0.4} show={vis(t, 0.66)} />
-      <Label id="korion-plaka" x={190} y={470} ax={260} ay={480} show={vis(t, 0)} />
+      <Label id="korion-plaka" x={190} y={470} ax={250} ay={520} show={vis(t, 0)} />
       <Label id="korion-barrunbea" x={190} y={610} ax={260} ay={610} show={vis(t, 0)} />
 
       <Label id="biloxka-tertziarioa" x={740} y={150} ax={VL[1].x + VL[1].hw - 6} ay={230} show={vis(t, 0)} />
       <Label id="biloxka-arteko-espazioa" x={740} y={200} ax={772} ay={260} show={vis(t, 0.16)} />
       <Label id="biloxka-kapilarrak" x={770} y={255} ax={VL[2].x + VL[2].half} ay={BASE.vessel - VL[2].loopLen * 0.55} show={Math.max(vis(t, 0.32), pathHighlight)} />
       <Label id="endotelioa" x={770} y={305} ax={VL[2].x + VL[2].half + 6} ay={BASE.vessel - VL[2].loopLen * 0.5} show={Math.max(vis(t, 0.82), layerHighlight)} />
-      <Label id="finkapen-pedikulua" x={810} y={500} ax={508} ay={560} show={vis(t, 0.32)} />
-      <Label id="zilbor-hodiak" x={810} y={550} ax={508} ay={PLATE.bottom + 30} show={vis(t, 0.32)} />
+      <Label id="finkapen-pedikulua" x={190} y={560} ax={STALK_X - 12} ay={596} show={vis(t, 0.32)} />
+      <Label id="zilbor-hodiak" x={810} y={530} ax={640} ay={PLATE_VEIN_Y} show={vis(t, 0.32)} />
 
       <Mark id="karena" x={926} y={PLATE.bottom} rx={26} color="#ff8a8a" show={karena} />
       <Label id="karena" x={900} y={590} align="end" ax={926} ay={PLATE.bottom} show={karena} />
       <Label id="karenaren-ama-atala" x={896} y={64} align="end" ax={910} ay={64} show={karena} small />
       <Label id="karenaren-fetu-atala" x={896} y={420} align="end" ax={910} ay={420} show={karena} small />
-      <Note x={500} y={608} show={karena} tone="accent">
+      <Note x={658} y={612} show={karena} tone="accent">
         Karena: fetu-osagaia (trofoblastoa) + ama-osagaia (endometrioa)
       </Note>
     </g>

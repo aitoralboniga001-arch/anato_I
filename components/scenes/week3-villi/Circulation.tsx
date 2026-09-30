@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Flow, Label, Note, Part, seg, type SceneProps } from '@/components/kit';
+import { Arrow, C, Flow, Label, Note, Part, line, seg, tube, type SceneProps } from '@/components/kit';
 import { V, VilliDefs, f1 } from './common';
 
 /**
@@ -62,6 +62,17 @@ function segmentPaths() {
   return { stalkDeoxy, stalkOxy, plate, capillary };
 }
 
+/** Villus layer outline: base half-width `b` (at the plate), tip radius `r`, tip inset `inset` below the shell. */
+const villusD = (b: number, r: number, inset: number) => {
+  const mid = (Y.plateSyn + VILLUS_TIP) / 2;
+  const base = Y.plateMeso + 8;
+  const tip = VILLUS_TIP + inset;
+  return `M${VX - b},${base} L${VX - b},${Y.plateSyn} Q${VX - b + 2},${mid} ${VX - r},${tip} A${r} ${r} 0 0 1 ${VX + r},${tip} Q${VX + b - 2},${mid} ${VX + b},${Y.plateSyn} L${VX + b},${base}Z`;
+};
+
+/** Connecting stalk: a soft cord flaring into the chorionic plate, its lower end tucked under the embryo. */
+const STALK = tube(line([VX, Y.stalkTop - 4], [VX, EMBRYO.y - EMBRYO.ry + 5]), (u) => 17 + 18 * Math.max(0, 1 - u / 0.28) ** 2 + 6 * Math.max(0, (u - 0.85) / 0.15) ** 2, 0, 1, 40);
+
 const dash = (p: number) => ({ pathLength: 1, strokeDasharray: '1 1', strokeDashoffset: f1(1 - Math.max(0, Math.min(1, p))) });
 
 function CirculationDrawing({ t, reduced }: SceneProps) {
@@ -92,18 +103,24 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
       {!reduced && <Flow d={`M330,${Y.roofBottom + 6} C300,220 320,290 330,${Y.plateSyn - 10}`} n={4} dur={8} r={2} color="#ff6b81" reduced={reduced} />}
       {!reduced && <Flow d={`M670,${Y.roofBottom + 6} C700,220 680,290 670,${Y.plateSyn - 10}`} n={4} dur={9} r={2} color="#ff6b81" reduced={reduced} />}
 
-      {/* A single tertiary villus, tip merged into the shell, projecting down to the chorionic plate. */}
+      {/* A single tertiary villus, tip merged into the shell, rising from the chorionic plate: each layer's
+          outline first (double width), then the plate band, then the fill — so the villus and the plate
+          read as one tissue, with no seam where they meet. */}
       <Part id="sinzitiotrofoblastoa" quiet>
-        <path d={`M${VX - 46},${Y.plateSyn} Q${VX - 44},${(Y.plateSyn + VILLUS_TIP) / 2} ${VX - 30},${VILLUS_TIP} A30 30 0 0 1 ${VX + 30},${VILLUS_TIP} Q${VX + 44},${(Y.plateSyn + VILLUS_TIP) / 2} ${VX + 46},${Y.plateSyn}Z`} fill="url(#p-syncytio)" stroke={C.syncytioDeep} strokeWidth={1} />
+        <path d={villusD(46, 30, 0)} fill="none" stroke={C.syncytioDeep} strokeWidth={2} />
+        <rect x={0} y={Y.plateSyn} width={1000} height={Y.plateCyto - Y.plateSyn + 1} fill="url(#p-syncytio)" />
+        <path d={villusD(46, 30, 0)} fill="url(#p-syncytio)" />
       </Part>
       <Part id="zitotrofoblastoa" quiet>
+        <path d={villusD(36, 22, 10)} fill="none" stroke="rgba(22,80,45,0.6)" strokeWidth={1.8} />
         <rect x={0} y={Y.plateCyto} width={1000} height={Y.plateMeso - Y.plateCyto + 1} fill="url(#w3v-cyto)" />
-        <path d={`M${VX - 36},${Y.plateSyn} Q${VX - 34},${(Y.plateSyn + VILLUS_TIP) / 2} ${VX - 22},${VILLUS_TIP + 10} A22 22 0 0 1 ${VX + 22},${VILLUS_TIP + 10} Q${VX + 34},${(Y.plateSyn + VILLUS_TIP) / 2} ${VX + 36},${Y.plateSyn}Z`} fill="url(#w3v-cyto)" stroke="rgba(22,80,45,0.6)" strokeWidth={0.9} />
+        <path d={villusD(36, 22, 10)} fill="url(#w3v-cyto)" />
       </Part>
       <Part id="enbrioi-kanpoko-mesodermoa" quiet>
+        <path d={villusD(24, 14, 18)} fill="none" stroke="#d9785a" strokeWidth={1.4} />
         <rect x={0} y={Y.plateMeso} width={1000} height={Y.plateBottom - Y.plateMeso} fill={C.mesoExtra} />
+        <path d={villusD(24, 14, 18)} fill={C.mesoExtra} />
         <rect x={0} y={Y.plateMeso} width={1000} height={Y.plateBottom - Y.plateMeso} fill="url(#p-meso-extra)" />
-        <path d={`M${VX - 24},${Y.plateSyn} Q${VX - 22},${(Y.plateSyn + VILLUS_TIP) / 2} ${VX - 14},${VILLUS_TIP + 18} A14 14 0 0 1 ${VX + 14},${VILLUS_TIP + 18} Q${VX + 22},${(Y.plateSyn + VILLUS_TIP) / 2} ${VX + 24},${Y.plateSyn}Z`} fill={C.mesoExtra} stroke="#d9785a" strokeWidth={0.7} />
       </Part>
       <Part id="korion-plaka">
         <path d={`M232,${Y.plateSyn} h-8 v${Y.plateBottom - Y.plateSyn} h8`} fill="none" stroke="#e8eefc" strokeWidth={2} opacity={0.85} />
@@ -115,13 +132,12 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
 
       {/* Connecting stalk: tapered cord from the chorionic plate down to the embryo. */}
       <Part id="finkapen-pedikulua">
-        <path
-          d={`M${VX - 26},${Y.stalkTop} C${VX - 30},460 ${VX - 18},520 ${VX - 9},${Y.stalkBottom} L${VX + 9},${Y.stalkBottom} C${VX + 18},520 ${VX + 30},460 ${VX + 26},${Y.stalkTop} Z`}
-          fill="#c9a7d8"
-          opacity={0.32}
-          stroke="#9f7ac2"
-          strokeWidth={1.2}
-        />
+        <path d={STALK.d} fill={C.mesoExtra} />
+        <path d={STALK.d} fill="url(#p-meso-extra)" opacity={0.6} />
+        <g fill="none" stroke="#d9785a" strokeWidth={1}>
+          <path d={STALK.left} />
+          <path d={STALK.right} />
+        </g>
       </Part>
 
       {/* Embryo schematic (decorative — internal embryo structures belong to week 3A). */}
@@ -204,7 +220,7 @@ export function CirculationOverview(props: SceneProps) {
       <VilliDefs />
       <CirculationDrawing {...props} />
       {labels(t)}
-      <Note x={630} y={500} show={s(t, W.heartbeat)}>
+      <Note x={770} y={600} show={s(t, W.heartbeat)}>
         Bihotzak taupada egiten hasten da (4. astea)
       </Note>
     </g>

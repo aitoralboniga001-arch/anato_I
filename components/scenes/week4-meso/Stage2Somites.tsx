@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Label, Note, Part, fade, lerp, lin, seg, zoom, type SceneProps } from '@/components/kit';
+import { C, Label, Note, Part, fade, lerp, lin, seg, smoothPath, zoom, type SceneProps } from '@/components/kit';
 import { SOMITE_REGIONS, TOTAL_SOMITES, buildSomites } from './common';
 
 /**
@@ -50,25 +50,25 @@ const REGION_STARTS = (() => {
   });
 })();
 
+/** Closed outline symmetric about x = 500 from a half-width profile over [y0, y1] (round at both tips). */
+function profileD(y0: number, y1: number, hw: (y: number) => number, n = 72) {
+  const ys = Array.from({ length: n + 1 }, (_, i) => lerp(y0, y1, (1 - Math.cos((Math.PI * i) / n)) / 2));
+  return smoothPath([...ys.map((y): [number, number] => [500 - hw(y), y]), ...[...ys].reverse().slice(1, -1).map((y): [number, number] => [500 + hw(y), y])], true, 0.5);
+}
+const capR = (d: number, r: number) => (d >= r ? 1 : Math.sqrt(Math.max(0, 1 - ((r - d) / r) ** 2)));
+
+/** Dorsal silhouette of the embryo: broad cranial end, tapering towards the tail, round at both ends. */
 function BodyOutline({ t }: { t: number }) {
   const grow = seg(t, 0, 0.1);
   const halfW = lerp(48, 74, grow);
-  const cap = 34;
-  const top = Y_TOP + cap;
-  const bot = Y_BOT - cap;
-  return (
-    <path
-      d={`M${500 - halfW},${top}
-          C${500 - halfW},${Y_TOP} ${500 + halfW},${Y_TOP} ${500 + halfW},${top}
-          L${500 + halfW},${bot}
-          C${500 + halfW},${Y_BOT} ${500 - halfW},${Y_BOT} ${500 - halfW},${bot}
-          Z`}
-      fill="#182238"
-      stroke="#3a3a40"
-      strokeWidth={1.4}
-      opacity={0.9}
-    />
-  );
+  const y0 = Y_TOP - 16;
+  const y1 = Y_BOT + 12;
+  const hw = (y: number) => {
+    const v = Math.max(0, (y - Y_TOP) / (Y_BOT - Y_TOP));
+    const w = lerp(halfW, Math.max(halfW * 0.6, 40), v ** 1.6);
+    return w * capR(y - y0, halfW * 0.9) * capR(y1 - y, 34);
+  };
+  return <path d={profileD(y0, y1, hw)} fill="#182238" stroke="#3a3a40" strokeWidth={1.4} opacity={0.9} />;
 }
 
 /** Cranial (permanent) somitomeres: sit ABOVE (cranial to) the first true somite, never overlapping it. */
@@ -160,7 +160,18 @@ function NeuralAxis({ t }: { t: number }) {
   const grow = seg(t, 0, 0.1);
   return (
     <Part id="hodi-neurala" quiet>
-      <rect x={493} y={Y_TOP} width={14} height={lerp(30, Y_BOT - Y_TOP, grow)} rx={7} fill={C.neural} opacity={0.55} />
+      {(() => {
+        const y0 = Y_TOP - 4;
+        const y1 = y0 + lerp(30, Y_BOT - Y_TOP, grow);
+        // Tapering tube (the brain end a little broader), rounded at both ends.
+        const hw = (y: number) => lerp(9, 6, Math.max(0, (y - Y_TOP) / (Y_BOT - Y_TOP))) * capR(y - y0, 8) * capR(y1 - y, 6);
+        return (
+          <>
+            <path d={profileD(y0, y1, hw, 60)} fill={C.neural} opacity={0.7} />
+            <path d={profileD(y0 + 4, y1 - 3, (y) => hw(y) * 0.28, 60)} fill="#1b2f7a" opacity={0.5} />
+          </>
+        );
+      })()}
     </Part>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { C, Arrow, Cell, Flow, Label, Mark, Note, Part, lerp, mix, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
-import { CYTO, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, bandAround, circlePath, conceptusAt, discGeometry, f1, lensPath, toCyto } from './common';
+import { CYTO, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, bandAround, circlePath, stalkBridge, conceptusAt, discGeometry, f1, lensPath, toCyto } from './common';
 
 /**
  * 11-12. eguna — sare lakunarra, hasierako zirkulazio uteroplazentarioa, enbrioi kanpoko
@@ -116,6 +116,21 @@ const SPACE_W = 15;
 
 const NEAR_VESSEL = VESSELS.map(([x, y]) => Math.hypot(x - W2.cx, y - CY0) < 235);
 
+/**
+ * Vessel `i` as the conceptus grows: the stroma is pushed aside, so a vessel the syncytium would
+ * swallow moves out along its radius. Sinusoids stay just embedded in the syncytium's edge (eroded
+ * into the lacunae); other vessels keep clear of it.
+ */
+function vesselAt(g: Geo, i: number, rx: number): Pt {
+  const [x, y] = VESSELS[i];
+  const dx = x - g.cx;
+  const dy = y - g.cyC;
+  const d = Math.hypot(dx, dy) || 1;
+  const a = (Math.atan2(dy, dx) * 180) / Math.PI;
+  const need = g.Rc + synTh(a) + (NEAR_VESSEL[i] ? rx * 0.2 : rx + 6);
+  return d >= need ? [x, y] : [g.cx + (dx / d) * need, g.cyC + (dy / d) * need];
+}
+
 function Day1112Drawing({ t, reduced }: SceneProps) {
   const g = geometry(t);
   const { cx, cy, epiTop, discY, hypoBottom, wEpiTop, wDisc, wHypo, Rc, cav, thickness } = g;
@@ -134,8 +149,9 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
   const innerB = (a: number) => INNER + bandTh(a);
   const outer = (a: number) => outR(g, a);
   const outerB = (a: number) => Math.max(innerB(a), outR(g, a) - bandTh(a));
-  const stalkA0 = 247;
-  const stalkA1 = 273;
+  // Connecting stalk: a short neck at the embryonic pole whose sides fillet into both layers.
+  const STALK_A = 260;
+  const stalk = stalkBridge(cx, cy, STALK_A, INNER + bandTh(STALK_A) / 2, innerB(STALK_A), outerB(STALK_A), outer(STALK_A) - bandTh(STALK_A) / 2, 8, 12);
   // The solid tissue stays between the spaces until they have merged; only then are the two layers left.
   const genericShow = thickness > 3 ? 1 - seg(cav, 0.7, 0.9) : 0;
   const layerShow = seg(cav, 0.7, 0.9);
@@ -183,7 +199,7 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
             <path d={`${circlePath(cx, g.cyC, Rc - CYTO)}${circlePath(cx, cy, INNER)}`} fill="url(#p-meso-extra)" fillRule="evenodd" stroke="#c97a52" strokeWidth={1} />
           </Part>
           <Part id="korion-barrunbea" show={cavityShow}>
-            <path d={bandAround(cx, cy, innerB, outerB, stalkA1, stalkA0 + 360)} fill={CAVITY} stroke="rgba(255,255,255,0.22)" strokeWidth={0.8} />
+            <path d={bandAround(cx, cy, innerB, outerB, STALK_A, STALK_A + 360)} fill={CAVITY} stroke="rgba(255,255,255,0.22)" strokeWidth={0.8} />
           </Part>
           {cav > 0.02 && cavityShow < 0.99 && (
             <Part id="korion-barrunbea">
@@ -198,7 +214,11 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
             <path d={bandAround(cx, cy, inner, innerB, AMNION_R, AMNION_L + 360)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1} />
           </Part>
           <Part id="finkapen-pedikulua" show={1}>
-            <path d={bandAround(cx, cy, inner, outer, stalkA0, stalkA1)} fill="url(#p-meso-extra)" stroke="#c97a52" strokeWidth={1.2} />
+            <path d={stalk.d} fill="url(#p-meso-extra)" />
+            <g fill="none" stroke="#c97a52" strokeWidth={1} opacity={layerShow}>
+              <path d={stalk.left} />
+              <path d={stalk.right} />
+            </g>
           </Part>
         </>
       )}
@@ -228,22 +248,25 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
         !reduced &&
         NEAR_VESSEL.flatMap((near, vi) => {
           if (!near) return [];
-          const [vx, vy] = VESSELS[vi];
+          const [vx, vy] = vesselAt(g, vi, 13 * VESSELS[vi][2] * lerp(1, 2, erosion));
           const a = LACUNAE_A[vi % LACUNAE_A.length];
           const p = synAt(g, a, 0.5);
           return [<Flow key={vi} d={`M${f1(vx)},${f1(vy)} L${f1(p[0])},${f1(p[1])}`} n={2} dur={2.6} r={1.8} reduced={reduced} />];
         })}
 
       <Part id="amaren-odol-hodiak" quiet>
-        {VESSELS.map(([x, y, sc], i) =>
-          NEAR_VESSEL[i] ? null : <ellipse key={i} cx={x} cy={y} rx={13 * sc} ry={8 * sc} fill="url(#p-blood)" stroke="#8d1024" strokeWidth={1.4} />,
-        )}
+        {VESSELS.map(([, , sc], i) => {
+          if (NEAR_VESSEL[i]) return null;
+          const [x, y] = vesselAt(g, i, 13 * sc);
+          return <ellipse key={i} cx={f1(x)} cy={f1(y)} rx={13 * sc} ry={8 * sc} fill="url(#p-blood)" stroke="#8d1024" strokeWidth={1.4} />;
+        })}
       </Part>
       <Part id="sinusoideak">
-        {VESSELS.map(([x, y, sc], i) => {
+        {VESSELS.map(([, , sc], i) => {
           if (!NEAR_VESSEL[i]) return null;
           const dil = lerp(1, 2, erosion);
-          return <ellipse key={i} cx={x} cy={y} rx={13 * sc * dil} ry={8 * sc * dil} fill="url(#p-blood)" stroke={mix('#8d1024', '#f3b3c0', erosion)} strokeWidth={1.6} />;
+          const [x, y] = vesselAt(g, i, 13 * sc * dil);
+          return <ellipse key={i} cx={f1(x)} cy={f1(y)} rx={13 * sc * dil} ry={8 * sc * dil} fill="url(#p-blood)" stroke={mix('#8d1024', '#f3b3c0', erosion)} strokeWidth={1.6} />;
         })}
       </Part>
 
@@ -353,7 +376,7 @@ export function Day1112Section(props: SceneProps) {
       {M('desidua-erreakzioa', [340, 130], 56, k.decidua)}
       {M('zirkulazio-uteroplazentarioa', k.lacuna(259), 42, k.circ, '#ff8a8a')}
       {L('endometrio-estroma', 190, 50, [300, 60])}
-      {L('amaren-odol-hodiak', 190, 100, [VESSELS[3][0], VESSELS[3][1]])}
+      {L('amaren-odol-hodiak', 190, 100, vesselAt(k.g, 3, 13 * VESSELS[3][2]))}
       {L('umetoki-guruina', 190, 150, [266, 250])}
       {L('desidua-erreakzioa', 190, 200, [340, 130], k.decidua)}
       {L('sare-lakunarra', 190, 250, k.lacuna(200), k.network)}
@@ -480,8 +503,8 @@ export function Day1112Desidua(props: SceneProps) {
       {L('desidua-erreakzioa', 180, 110, [340, 150], k.decidua)}
       {L('desidua-zelulak', 180, 160, [340, 140], k.cells)}
       {L('umetoki-guruina', 180, 210, [266, 250])}
-      {L('amaren-odol-hodiak', 800, 60, [VESSELS[3][0], VESSELS[3][1]])}
-      {L('sinusoideak', 800, 110, [VESSELS[4][0], VESSELS[4][1]])}
+      {L('amaren-odol-hodiak', 800, 60, vesselAt(k.g, 3, 13 * VESSELS[3][2]))}
+      {L('sinusoideak', 800, 110, vesselAt(k.g, 4, 13 * VESSELS[4][2] * lerp(1, 2, k.erosion)))}
       {L('sare-lakunarra', 800, 160, k.lacuna(212), k.network)}
       {L('zirkulazio-uteroplazentarioa', 790, 250, k.lacuna(236), k.circ)}
       {L('sinzitiotrofoblastoa', 800, 400, k.syn(240))}

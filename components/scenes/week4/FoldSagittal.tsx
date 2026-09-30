@@ -1,7 +1,7 @@
 'use client';
 
-import { Arrow, C, Label, Mark, Note, Part, clamp, lerp, rand, seg, type SceneProps } from '@/components/kit';
-import type { ReactNode } from 'react';
+import { Arrow, C, Label, Mark, Note, Part, clamp, lerp, polyline, rand, seg, tube, type SceneProps } from '@/components/kit';
+import { useId, type ReactNode } from 'react';
 import { Cells } from '@/components/scenes/section/Section';
 
 /**
@@ -318,6 +318,11 @@ export function computeFold(t: number, spMax = 5) {
   const loop = dedupe(pieces.flat());
   const loopIn = offset(loop, ENDO * K);
   const pieceIn = (p: P2[]) => offset(p, ENDO * K);
+  // Continuous underlays for the yolk-sac neck: the per-piece cell bands end square where the duct turns
+  // into the sac or the gut, leaving dark notches; these fill them with the right tissue.
+  const neck = dedupe([...pieces[2].slice(-6), ...pieces[3], ...pieces[4], ...pieces[5], ...pieces[0].slice(0, 6)]);
+  const neckEndo = [...neck, ...offset(neck, ENDO * K).reverse()];
+  const neckMeso = [...offset(neck, -5 * K), ...neck.slice().reverse()];
   const bodyGut = dedupe(S([...g.fore, ...g.mid, ...g.hind]));
   const meso = [...ecto, ...bodyGut.slice().reverse()];
 
@@ -370,7 +375,10 @@ export function computeFold(t: number, spMax = 5) {
     (1 - u) * (1 - u) * B[1] + 2 * (1 - u) * u * c1[1] + u * u * stalkEnd[1],
   ]);
   const stalkS = S(stalkC);
-  const stalkPoly = [...offset(stalkS, -17 * K), ...offset(stalkS, 17 * K).reverse()];
+  // Organic tube: flares where it leaves the ventral body wall; its far end (towards the chorion,
+  // outside this view) fades out instead of ending in a square cut.
+  const stalkW = (u: number) => (17 + 13 * Math.max(0, 1 - u / 0.3) ** 2 - 2 * u) * K;
+  const stalkTube = tube(polyline(stalkS), stalkW, 0, 1, 48);
   const allC = dedupe(S([fT(8, H0T - 2), fT(18, H0T + ENDO + 10), ...range(26, LFT, 4).map((v) => fT(v, H0T + ENDO + 11)), ...stalkC.slice(1, 14)]));
   const allO1 = offset(allC, -6 * K);
   const allI1 = offset(allC, -2.6 * K);
@@ -398,13 +406,14 @@ export function computeFold(t: number, spMax = 5) {
     { id: 'proktodeoa', c: X(add(fT(0, g.WT(0) + 6), g.tangent(S_CM), 8)) },
   ];
 
-  return { g, X, S, map, fH, fT, LF, LFT, pit, ecto, ectoIn, pieces, loopIn, pieceIn, meso, ntTop, ntBot, lumTop, lumBot, noTop, noBot, splO, splI, somO, somI, cavPoly, vSplit, heartC, heartO, heartI, stalkS, stalkPoly, allC, allO1, allI1, allO2, allI2, amn, amnIn, amnOut, dots, bmMid, cmMid, kloakaC, kloakaRing, pits };
+  return { g, X, S, map, fH, fT, LF, LFT, pit, ecto, ectoIn, pieces, loopIn, pieceIn, meso, ntTop, ntBot, lumTop, lumBot, noTop, noBot, splO, splI, somO, somI, cavPoly, vSplit, heartC, heartO, heartI, stalkS, stalkTube, neckEndo, neckMeso, allC, allO1, allI1, allO2, allI2, amn, amnIn, amnOut, dots, bmMid, cmMid, kloakaC, kloakaRing, pits };
 }
 export type Fold = ReturnType<typeof computeFold>;
 
 /** The cellular folded-embryo section (no labels). `children` are drawn over the gut, under the surface ectoderm. */
 export function FoldBody({ f, kloakaShow, children, bare = false }: { f: Fold; kloakaShow: number; children?: ReactNode; bare?: boolean }) {
-  const { g, LF, pit, ecto, ectoIn, pieces, loopIn, pieceIn, meso, ntTop, ntBot, lumTop, lumBot, noTop, noBot, splO, splI, somO, somI, cavPoly, vSplit, heartO, heartI, stalkS, stalkPoly, allC, allO1, allI1, allO2, allI2, amn, amnIn, amnOut, dots, bmMid, cmMid, kloakaRing, pits } = f;
+  const uid = useId().replace(/:/g, '');
+  const { g, LF, pit, ecto, ectoIn, pieces, loopIn, pieceIn, meso, ntTop, ntBot, lumTop, lumBot, noTop, noBot, splO, splI, somO, somI, cavPoly, vSplit, heartO, heartI, stalkS, stalkTube, neckEndo, neckMeso, allC, allO1, allI1, allO2, allI2, amn, amnIn, amnOut, dots, bmMid, cmMid, kloakaRing, pits } = f;
   return (
     <g>
       {!bare && <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />}
@@ -414,14 +423,31 @@ export function FoldBody({ f, kloakaShow, children, bare = false }: { f: Fold; k
       </Part>
 
       <Part id="finkapen-pedikulua">
-        <path d={pathD(stalkPoly, true)} fill={C.mesoExtra} stroke="#c96b45" strokeWidth={1.1} />
-        {stalkS.slice(3, -1).map((q, i) => (
-          <ellipse key={i} cx={q[0] + (rand(i * 3.1) - 0.5) * 16} cy={q[1] + (rand(i * 5.7) - 0.5) * 16} rx={2.2} ry={1.6} fill="rgba(150,70,50,0.7)" />
-        ))}
+        <defs>
+          <linearGradient id={`${uid}-sg`} gradientUnits="userSpaceOnUse" x1={stalkS[16][0]} y1={stalkS[16][1]} x2={stalkS[24][0]} y2={stalkS[24][1]}>
+            <stop offset={0} stopColor="#fff" />
+            <stop offset={1} stopColor="#fff" stopOpacity={0} />
+          </linearGradient>
+          <mask id={`${uid}-sm`} maskUnits="userSpaceOnUse" x={0} y={0} width={1000} height={640}>
+            <rect x={0} y={0} width={1000} height={640} fill={`url(#${uid}-sg)`} />
+          </mask>
+        </defs>
+        <g mask={`url(#${uid}-sm)`}>
+          <path d={stalkTube.d} fill={C.mesoExtra} />
+          {stalkS.slice(3, -1).map((q, i) => (
+            <ellipse key={i} cx={q[0] + (rand(i * 3.1) - 0.5) * 16} cy={q[1] + (rand(i * 5.7) - 0.5) * 16} rx={2.2} ry={1.6} fill="rgba(150,70,50,0.7)" />
+          ))}
+          <g fill="none" stroke="#c96b45" strokeWidth={1.1}>
+            <path d={stalkTube.left} />
+            <path d={stalkTube.right} />
+          </g>
+        </g>
       </Part>
 
       {/* gut + yolk-sac lumen */}
       <path d={pathD(loopIn, true)} fill="#2a2413" />
+      <path d={pathD(neckMeso, true)} fill={C.mesoExtra} />
+      <path d={pathD(neckEndo, true)} fill={C.endoderm} />
       {/* extra-embryonic splanchnic mesoderm around the yolk sac and vitelline duct */}
       <Part id="bitelo-zaku-sekundarioa" show={1}>
         <Cells outer={offset(pieces[4], -5 * K)} inner={pieces[4]} n={cellsFor(pieces[4], pieces[4], 9)} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={401} />
@@ -496,6 +522,8 @@ export function FoldBody({ f, kloakaShow, children, bare = false }: { f: Fold; k
       )}
 
       <Part id="alantoidea">
+        {/* Blind, rounded tip: the endoderm wraps round the end of the lumen. */}
+        <circle cx={allC[allC.length - 1][0]} cy={allC[allC.length - 1][1]} r={6 * K} fill={C.endoderm} stroke="rgba(8,12,26,0.55)" strokeWidth={1} />
         <path d={pathD(allC)} stroke="#2a2413" strokeWidth={5 * K} fill="none" strokeLinecap="round" />
         <Cells outer={allO1} inner={allI1} n={cellsFor(allO1, allI1, 6)} fill={C.endoderm} nucleus="rgba(90,60,10,0.7)" seed={430} />
         <Cells outer={allO2} inner={allI2} n={cellsFor(allO2, allI2, 6)} fill={C.endoderm} nucleus="rgba(90,60,10,0.7)" seed={431} />

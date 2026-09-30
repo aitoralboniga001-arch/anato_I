@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Label, Note, Part, clamp, lerp, lin, seg, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, Note, Part, clamp, lerp, lin, seg, smoothPath, type SceneProps } from '@/components/kit';
 import { SectionDrawing, makeSection } from '@/components/scenes/section/Section';
 import { f1, type Pt } from './common';
 
@@ -136,15 +136,42 @@ function localClosure(frac: number, spread: Zip) {
   return clamp(1 - d / 0.1);
 }
 
-function ridgePath(side: -1 | 1, spread: Zip, approach = 0, n = 40) {
+/** Distance of a neural fold's crest from the midline. */
+const ridgeX = (frac: number, spread: Zip, approach: number) => plateHalfWidth(frac) * (1 - approach * 0.3) * (1 - localClosure(frac, spread) * 0.94);
+
+/** A fold's crest, optionally only over [a, b] (arc fractions). */
+function ridgePath(side: -1 | 1, spread: Zip, approach = 0, n = 40, a = 0.03, b = 0.97) {
   const pts: Pt[] = [];
   for (let i = 0; i <= n; i++) {
-    const frac = 0.03 + (0.94 * i) / n;
-    const closureHere = localClosure(frac, spread);
-    const x = 500 + side * plateHalfWidth(frac) * (1 - approach * 0.3) * (1 - closureHere * 0.94);
-    pts.push([x, yAt(frac)]);
+    const frac = a + ((b - a) * i) / n;
+    pts.push([500 + side * ridgeX(frac, spread, approach), yAt(frac)]);
   }
   return pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${f1(p[0])},${f1(p[1])}`).join('');
+}
+
+/** Where the folds have effectively met (a tube), from the zipper's two fronts. */
+const FUSED = 0.75;
+function fusedRange(spread: Zip): [number, number] | null {
+  if (!spread) return null;
+  const k = (1 - FUSED) * 0.1; // localClosure falls to FUSED this far beyond each front
+  return [Math.max(0.03, ZIP_START - spread.cr - k), Math.min(0.97, ZIP_START + spread.ca + k)];
+}
+
+/** Neural tube half-width: broader where the brain will be, narrowing caudally. */
+const tubeHW = (frac: number) => 10 + 6 * (1 - frac) ** 2;
+
+/** Filled tube between two arc fractions, with rounded ends. */
+function tubeD(a: number, b: number, f: (frac: number) => number) {
+  const n = 48;
+  const fr = Array.from({ length: n + 1 }, (_, i) => lerp(a, b, (1 - Math.cos((Math.PI * i) / n)) / 2));
+  const L = yAt(b) - yAt(a);
+  const w = (frac: number) => {
+    const y = yAt(frac) - yAt(a);
+    const r = Math.min(f(frac), L / 2);
+    const cap = (d: number) => (d >= r ? 1 : Math.sqrt(Math.max(0, 1 - ((r - d) / r) ** 2)));
+    return Math.min(f(frac), L / 2 + 0.5) * cap(y) * cap(L - y);
+  };
+  return smoothPath([...fr.map((q): Pt => [500 - w(q), yAt(q)]), ...[...fr].reverse().slice(1, -1).map((q): Pt => [500 + w(q), yAt(q)])], true, 0.5);
 }
 
 function DorsalDrawing({ t }: SceneProps) {
@@ -155,66 +182,69 @@ function DorsalDrawing({ t }: SceneProps) {
   // Folds rise and draw towards each other before they touch at the future neck.
   const approach = seg(t, 0.3, 0.4);
 
-  const outline: Pt[] = [];
-  for (let i = 0; i <= 48; i++) {
-    const frac = i / 48;
-    outline.push([500 - bodyHalfWidth(frac), yAt(frac)]);
-  }
-  for (let i = 48; i >= 0; i--) {
-    const frac = i / 48;
-    outline.push([500 + bodyHalfWidth(frac), yAt(frac)]);
-  }
-  const outlineD = outline.map((p, i) => `${i === 0 ? 'M' : 'L'}${f1(p[0])},${f1(p[1])}`).join('') + 'Z';
+  // Body outline with rounded head and tail ends (a little beyond the plate).
+  const bodyW = (frac: number) => {
+    const u = (frac + 0.07) / 1.13;
+    return 112 * Math.pow(Math.sin(Math.PI * clamp(u, 0, 1)), 0.55) * (1.04 - 0.08 * u);
+  };
+  const bf = Array.from({ length: 81 }, (_, i) => lerp(-0.07, 1.06, (1 - Math.cos((Math.PI * i) / 80)) / 2));
+  // (the return side skips the two tips the sides share, so they stay round instead of a corner)
+  const outlineD = smoothPath([...bf.map((q): Pt => [500 - bodyW(q), yAt(q)]), ...[...bf].reverse().slice(1, -1).map((q): Pt => [500 + bodyW(q), yAt(q)])], true, 0.5);
 
-  // Only the stretch the zipper has already closed is tube; the rest is still open plate.
-  const fusedFrom = Math.max(0.03, ZIP_START - (spread?.cr ?? 0));
-  const fusedTo = Math.min(0.97, ZIP_START + (spread?.ca ?? 0));
-  const fusedBand = () => `M500,${f1(yAt(fusedFrom))} L500,${f1(yAt(fusedTo))}`;
+  // Only the stretch the zipper has already closed is tube; the rest is still open plate / folds.
+  const fused = fusedRange(spread);
+  const ridges = (side: -1 | 1) =>
+    !fused
+      ? [ridgePath(side, spread, approach)]
+      : ([
+          [0.03, fused[0] + 0.01],
+          [fused[1] - 0.01, 0.97],
+        ] as [number, number][])
+          .filter(([a, b]) => b - a > 0.012)
+          .map(([a, b]) => ridgePath(side, spread, approach, 16, a, b));
+  // The plate between the folds, rounded at both ends.
   const openPlate = () => {
-    const l = ridgePath(-1, spread, approach);
-    const r = ridgePath(1, spread, approach)
-      .split(/(?=[ML])/)
-      .reverse()
-      .map((c) => 'L' + c.slice(1))
-      .join('');
-    return `${l}${r}Z`;
+    const fr = Array.from({ length: 41 }, (_, i) => 0.03 + (0.94 * i) / 40);
+    const side = (sd: number) => fr.map((q): Pt => [500 + sd * ridgeX(q, spread, approach), yAt(q)]);
+    return smoothPath([[500, yAt(0.03) - 6], ...side(-1), [500, yAt(0.97) + 6], ...side(1).reverse()], true, 0.5);
   };
 
   return (
     <g>
       <path d={outlineD} fill="#101828" stroke="rgba(232,238,252,0.25)" strokeWidth={1.2} />
 
+      {/* Somites: pairs appearing cranio-caudally beside the folds, drawn in with them as the tube closes. */}
       {somiteShow > 0 &&
-        Array.from({ length: 6 }, (_, i) => {
-          const frac = 0.3 + i * 0.09;
+        Array.from({ length: 7 }, (_, i) => {
+          const frac = 0.3 + i * 0.062;
           const y = yAt(frac);
-          const w = plateHalfWidth(frac) + 16;
+          const x = Math.max(ridgeX(frac, spread, approach) + 8, tubeHW(frac) + 5);
+          const o = seg(somiteShow, i * 0.1, i * 0.1 + 0.4);
           return (
-            <g key={i} opacity={somiteShow}>
-              <rect x={500 - w - 14} y={y - 8} width={12} height={16} rx={3} fill={C.mesoParaxial} opacity={0.6} />
-              <rect x={500 + w + 2} y={y - 8} width={12} height={16} rx={3} fill={C.mesoParaxial} opacity={0.6} />
+            <g key={i} opacity={o} fill={C.mesoParaxial} stroke="rgba(90,20,30,0.55)" strokeWidth={0.9}>
+              <rect x={500 - x - 17} y={y - 10} width={17} height={20} rx={6} />
+              <rect x={500 + x} y={y - 10} width={17} height={20} rx={6} />
             </g>
           );
         })}
 
       {/* Open neural plate / groove between the folds. */}
       <Part id={t < 0.12 ? 'plaka-neurala' : 'ildo-neurala'}>
-        <path d={openPlate()} fill={C.neural} opacity={0.28} />
+        <path d={openPlate()} fill={C.neural} opacity={0.28 * (1 - seg(Math.min(localClosure(0.03, spread), localClosure(0.97, spread)), 0.6, 0.8))} />
         {t >= 0.12 && <path d={`M500,${f1(yAt(0.04))} L500,${f1(yAt(0.96))}`} stroke="#0c1730" strokeWidth={3} strokeDasharray="6 5" opacity={seg(t, 0.12, 0.16)} />}
       </Part>
 
       {/* Fused neural tube: only where the folds have met. */}
-      {spread && (
+      {/* Open neural folds where fusion has not yet reached (under the tube, so they run into its ends). */}
+      <Part id="tolesdura-neuralak">
+        {([-1, 1] as const).flatMap((sd) => ridges(sd).map((d, i) => <path key={`${sd}${i}`} d={d} stroke={C.neural} strokeWidth={10} fill="none" strokeLinecap="round" />))}
+      </Part>
+      {fused && (
         <Part id="hodi-neurala" show={seg(t, 0.44, 0.47)}>
-          <path d={fusedBand()} stroke={C.neural} strokeWidth={26} fill="none" strokeLinecap="round" />
+          <path d={tubeD(fused[0], fused[1], tubeHW)} fill={C.neural} stroke="#1e3a8a" strokeWidth={1.2} />
+          <path d={tubeD(fused[0], fused[1], (q) => tubeHW(q) * 0.22)} fill="#1b2f7a" opacity={0.6} />
         </Part>
       )}
-
-      {/* Open neural folds where fusion has not yet reached. */}
-      <Part id="tolesdura-neuralak">
-        <path d={ridgePath(-1, spread, approach)} stroke={C.neural} strokeWidth={10} fill="none" strokeLinecap="round" />
-        <path d={ridgePath(1, spread, approach)} stroke={C.neural} strokeWidth={10} fill="none" strokeLinecap="round" />
-      </Part>
 
       {/* Neuropores. */}
       <Part id="neuroporo-kraneala" show={cranialOpen * poresOn(t)}>
@@ -224,7 +254,7 @@ function DorsalDrawing({ t }: SceneProps) {
         <ellipse cx={500} cy={yAt(0.95)} rx={16 * caudalOpen + 4} ry={20 * caudalOpen + 3} fill="#0c0c0e" stroke={C.neural} strokeWidth={2} />
       </Part>
 
-      <Note x={500} y={100} tone="warn" show={seg(t, 0.9, 0.93)}>
+      <Note x={500} y={74} tone="warn" show={seg(t, 0.9, 0.93)}>
         Neuroporoen itxiera-egunak gutxi gorabeherakoak dira (inguruan)
       </Note>
       <DayRuler t={t} />

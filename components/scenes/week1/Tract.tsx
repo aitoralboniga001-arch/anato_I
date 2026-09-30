@@ -1,6 +1,7 @@
 'use client';
 
 import { C, Label, Mark, Note, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
+import { useId } from 'react';
 import { cleavageFrame } from '@/components/shell/intro/cleavage';
 import { Hud, vis } from './common';
 import { Conceptus, ConceptusDefs } from './conceptus';
@@ -77,6 +78,12 @@ const N_IN = normals(INNER); // points into the wall
 const N_OUT = normals(OUTER); // points away from the wall
 const ENDO = 46;
 
+/** x of a wall border (sampled top → bottom, y increasing) at height y. */
+function xAtY(s: Pt[], y: number): number {
+  for (let i = 1; i < s.length; i++) if (s[i][1] >= y) return lerp(s[i - 1][0], s[i][0], (y - s[i - 1][1]) / (s[i][1] - s[i - 1][1] || 1));
+  return s[s.length - 1][0];
+}
+
 /** Point on the endometrial surface closest to height y. */
 export function surfaceAt(y: number): { p: Pt; n: Pt } {
   let best = 0;
@@ -95,7 +102,7 @@ function tubePoints(reach: number): Pt[] {
 
 /** Outer diameter along the tube: wide infundibulum and ampulla, narrow isthmus and interstitial part. */
 const tubeWidth = (u: number) =>
-  u < 0.08 ? lerp(66, 52, u / 0.08) : u < 0.52 ? lerp(52, 46, (u - 0.08) / 0.44) : u < 0.66 ? lerp(46, 32, (u - 0.52) / 0.14) : u < 0.84 ? 32 : 26;
+  u < 0.08 ? lerp(66, 52, u / 0.08) : u < 0.52 ? lerp(52, 46, (u - 0.08) / 0.44) : u < 0.66 ? lerp(46, 32, (u - 0.52) / 0.14) : lerp(32, 26, seg(u, 0.8, 0.9));
 
 export const U = { ampulla: 0.2, isthmus: 0.74, interstitial: 0.92 };
 
@@ -118,6 +125,7 @@ export interface TractProps {
 }
 
 export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: TractProps) {
+  const uid = useId().replace(/:/g, '');
   const T = tubePoints(reach);
   const TN = normals(T);
   const w = (i: number) => tubeWidth(i / (T.length - 1)) / 2;
@@ -134,11 +142,31 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
     const wi = (i: number) => w(i + a);
     const li = (i: number) => lum(i + a);
     return {
-      outer: poly([...offset(s, sn, wi), ...offset(s, sn, (i) => -wi(i)).reverse()]),
+      walls: [poly([...offset(s, sn, wi), ...offset(s, sn, li).reverse()]), poly([...offset(s, sn, (i) => -li(i)), ...offset(s, sn, (i) => -wi(i)).reverse()])],
       lumen: poly([...offset(s, sn, li), ...offset(s, sn, (i) => -li(i)).reverse()]),
+      sides: [line(offset(s, sn, wi)), line(offset(s, sn, (i) => -wi(i)))],
     };
   };
-  const pieces = TUBE_PARTS.map(([id, u0, u1]) => ({ id, ...tubePiece(u0, u1) }));
+  // Pieces are drawn as wall bands + lumen over the whole tube (same colours), so their joins leave no seam.
+  const pieces = TUBE_PARTS.filter(([id]) => id !== 'atal-interstiziala').map(([id, u0, u1]) => ({ id, ...tubePiece(u0, u1) }));
+  const tubeSides = [line(offset(T, TN, w)), line(offset(T, TN, (i) => -w(i)))];
+  // Interstitial part: a canal through the uterine wall (the tube runs under the wall up to its outer
+  // surface), its mucosa continuous with the endometrium and its lumen widening into the uterine ostium.
+  const iIn = Math.max(0, T.findIndex((p) => p[0] > xAtY(OUTER, p[1])) - 1);
+  const iEnd = T.length - 1;
+  // Carried a little past the tube's end so the wall clip cuts the ostium along the cavity surface.
+  const [ex, ey] = [TN[iEnd][1], -TN[iEnd][0]];
+  const CS = [...T.slice(iIn), ...[8, 16, 24].map((d): Pt => [T[iEnd][0] + ex * d, T[iEnd][1] + ey * d])];
+  const CN = [...TN.slice(iIn), TN[iEnd], TN[iEnd], TN[iEnd]];
+  const k = (i: number) => Math.min(1, i / (iEnd - iIn)); // 0 at the outer surface → 1 at the cavity
+  const flare = (i: number) => Math.max(0, (k(i) - 0.62) / 0.38) ** 2;
+  const canLum = (i: number) => lum(Math.min(i + iIn, iEnd)) + 9 * flare(i);
+  const canMuc = (i: number) => canLum(i) + 4 + 6 * flare(i);
+  const canal = {
+    muc: poly([...offset(CS, CN, canMuc), ...offset(CS, CN, (i) => -canMuc(i)).reverse()]),
+    lum: poly([...offset(CS, CN, canLum), ...offset(CS, CN, (i) => -canLum(i)).reverse()]),
+    sides: [line(offset(CS, CN, canLum)), line(offset(CS, CN, (i) => -canLum(i)))],
+  };
   // Fimbriae: finger-like fringes around the mouth, spreading over the ovary at ovulation.
   const m = T[0];
   const d = [T[0][0] - T[3][0], T[0][1] - T[3][1]];
@@ -213,6 +241,43 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
         </g>
       </Part>
 
+      {/* Tube: the whole tube, then each of its parts on top (same look, lit one by one in the tour). It runs
+          under the uterine wall; its interstitial part is drawn as a canal through the wall further down. */}
+      <Part id="umetoki-tronpa">
+        <path d={poly(tubeOuter)} fill={C.tube} />
+        <path d={poly(tubeLumen)} fill="#3a1b2e" />
+        <g fill="none" stroke="rgba(60,10,30,0.6)" strokeWidth={1.3}>
+          {tubeSides.map((d, i) => (
+            <path key={i} d={d} />
+          ))}
+        </g>
+      </Part>
+      {pieces.map((q) => (
+        <Part key={q.id} id={q.id}>
+          {q.walls.map((d, i) => (
+            <path key={i} d={d} fill={C.tube} />
+          ))}
+          <path d={q.lumen} fill="#3a1b2e" />
+          <g fill="none" stroke="rgba(60,10,30,0.45)" strokeWidth={1}>
+            {q.sides.map((d, i) => (
+              <path key={i} d={d} />
+            ))}
+          </g>
+        </Part>
+      ))}
+      <Part id="finbriak">
+        <g fill="none" stroke={C.tube} strokeWidth={8} strokeLinecap="round">
+          {fingers.map((f, i) => (
+            <path key={i} d={f} />
+          ))}
+        </g>
+        <g fill="none" stroke="rgba(60,10,30,0.45)" strokeWidth={1} strokeLinecap="round">
+          {fingers.map((f, i) => (
+            <path key={i} d={f} />
+          ))}
+        </g>
+      </Part>
+
       {/* Uterine wall */}
       <Part id="miometrioa">
         <path d={wall} fill={C.myometrium} />
@@ -235,27 +300,19 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
         </g>
         <path d={line(INNER)} fill="none" stroke={C.epithelium} strokeWidth={3} />
       </Part>
-      {/* Tube: the whole tube, then each of its parts on top (same look, lit one by one in the tour) */}
-      <Part id="umetoki-tronpa">
-        <path d={poly(tubeOuter)} fill={C.tube} stroke="rgba(60,10,30,0.6)" strokeWidth={1.3} />
-        <path d={poly(tubeLumen)} fill="#3a1b2e" />
-      </Part>
-      {pieces.map((q) => (
-        <Part key={q.id} id={q.id}>
-          <path d={q.outer} fill={C.tube} stroke="rgba(60,10,30,0.45)" strokeWidth={1} />
-          <path d={q.lumen} fill="#3a1b2e" />
-        </Part>
-      ))}
-      <Part id="finbriak">
-        <g fill="none" stroke={C.tube} strokeWidth={8} strokeLinecap="round">
-          {fingers.map((f, i) => (
-            <path key={i} d={f} />
+      <clipPath id={`${uid}-wall`}>
+        {/* 2 px past the outer surface, so the canal overlaps the tube there (no hairline at the join) */}
+        <path d={poly([...offset(OUTER, N_OUT, 2), ...[...INNER].reverse()])} />
+      </clipPath>
+      <Part id="atal-interstiziala">
+        <g clipPath={`url(#${uid}-wall)`}>
+        <path d={canal.muc} fill={C.tube} opacity={0.92} />
+        <path d={canal.lum} fill="#3a1b2e" />
+        <g fill="none" stroke="rgba(60,10,30,0.4)" strokeWidth={1}>
+          {canal.sides.map((d, i) => (
+            <path key={i} d={d} />
           ))}
         </g>
-        <g fill="none" stroke="rgba(60,10,30,0.45)" strokeWidth={1} strokeLinecap="round">
-          {fingers.map((f, i) => (
-            <path key={i} d={f} />
-          ))}
         </g>
       </Part>
     </g>

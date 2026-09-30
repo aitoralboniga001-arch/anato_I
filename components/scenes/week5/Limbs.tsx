@@ -84,10 +84,18 @@ function Joint({ id, p, show }: { id: string; p: Pt; show: number }) {
   );
 }
 
+const SPAN_MIN = 172;
+const SPAN_MAX = 846;
+const spanX = (a: Pt, b: Pt, side: number) => {
+  const x0 = Math.min(a[0], b[0]) * (side < 0 ? 1 : 0) + Math.max(a[0], b[0]) * (side > 0 ? 1 : 0) + side * 70;
+  return side < 0 ? Math.max(x0, SPAN_MIN) : Math.min(x0, SPAN_MAX);
+};
+
 /** Bracket beside a segment (proximal / distal, arm / forearm / hand…). */
 function Span({ id, a, b, side, show }: { id: string; a: Pt; b: Pt; side: number; show: number }) {
   if (show < 0.02) return null;
-  const x = Math.min(a[0], b[0]) * (side < 0 ? 1 : 0) + Math.max(a[0], b[0]) * (side > 0 ? 1 : 0) + side * 70;
+  // Beside the segment, but never out into the label column (the spread hand/foot would push it there).
+  const x = spanX(a, b, side);
   return (
     <Part id={id} show={show}>
       <path d={`M${x - side * 6},${a[1]} L${x},${a[1]} L${x},${b[1]} L${x - side * 6},${b[1]}`} fill="none" stroke="#b4afa6" strokeWidth={1.4} />
@@ -153,19 +161,19 @@ export function LimbDevelopment({ t }: SceneProps) {
       {/* Labels: upper limb on the left, lower limb on the right. */}
       <Label id="goiko-gorputz-adarraren-hasikina" x={300} y={300} align="middle" ax={A.tip[0]} ay={A.tip[1] - 6} show={two(t, 0, 0.18)} />
       <Label id="beheko-gorputz-adarraren-hasikina" x={700} y={330} align="middle" ax={L.tip[0]} ay={L.tip[1] - 6} show={two(t, 0, 0.18)} />
-      <Label id="segmentu-proximala" x={150} y={mid(A.prox, A.dist)[1]} ax={Math.min(A.prox[0], A.dist[0]) - 70} ay={mid(A.prox, A.dist)[1]} show={segs2} />
-      <Label id="segmentu-distala" x={150} y={mid(A.dist, A.tip)[1]} ax={Math.min(A.dist[0], A.tip[0]) - 70} ay={mid(A.dist, A.tip)[1]} show={segs2} />
+      <Label id="segmentu-proximala" x={150} y={mid(A.prox, A.dist)[1]} ax={spanX(A.prox, A.dist, -1)} ay={mid(A.prox, A.dist)[1]} show={segs2} />
+      <Label id="segmentu-distala" x={150} y={mid(A.dist, A.tip)[1]} ax={spanX(A.dist, A.tip, -1)} ay={mid(A.dist, A.tip)[1]} show={segs2} />
       <Label id="ertzadura" x={850} y={L.dist[1]} ax={L.dist[0] + 10} ay={L.dist[1]} show={segs2} />
       <Label id="esku-plaka" x={150} y={A.tip[1] + 26} ax={A.palm[0] - 20} ay={A.palm[1] + 16} show={two(t, 0.34, 0.66)} />
       <Label id="oin-plaka" x={850} y={L.palm[1] + 50} ax={L.palm[0] + 20} ay={L.palm[1] + 20} show={two(t, 0.34, 0.66)} />
       <Label id="hatzetako-izpiak" x={440} y={590} ax={arm.rays[2][1][0]} ay={arm.rays[2][1][1]} show={two(t, 0.5, 0.84)} />
       <Label id="izpiarteko-ildoak" x={560} y={590} align="start" ax={leg.grooves[1][1][0]} ay={leg.grooves[1][1][1]} show={two(t, 0.5, 0.84)} />
-      <Label id="besoa" x={150} y={mid(A.prox, A.mid)[1]} ax={Math.min(A.prox[0], A.mid[0]) - 70} ay={mid(A.prox, A.mid)[1]} show={segs3} />
-      <Label id="besaurrea" x={150} y={mid(A.mid, A.dist)[1]} ax={Math.min(A.mid[0], A.dist[0]) - 70} ay={mid(A.mid, A.dist)[1]} show={segs3} />
-      <Label id="eskua" x={150} y={mid(A.dist, A.tip)[1]} ax={Math.min(A.dist[0], A.tip[0]) - 70} ay={mid(A.dist, A.tip)[1]} show={segs3} />
-      <Label id="izterra" x={880} y={mid(L.prox, L.mid)[1]} ax={Math.max(L.prox[0], L.mid[0]) + 70} ay={mid(L.prox, L.mid)[1]} show={segs3} />
-      <Label id="berna" x={880} y={mid(L.mid, L.dist)[1]} ax={Math.max(L.mid[0], L.dist[0]) + 70} ay={mid(L.mid, L.dist)[1]} show={segs3} />
-      <Label id="oina" x={880} y={mid(L.dist, L.tip)[1]} ax={Math.max(L.dist[0], L.tip[0]) + 70} ay={mid(L.dist, L.tip)[1]} show={segs3} />
+      <Label id="besoa" x={150} y={mid(A.prox, A.mid)[1]} ax={spanX(A.prox, A.mid, -1)} ay={mid(A.prox, A.mid)[1]} show={segs3} />
+      <Label id="besaurrea" x={150} y={mid(A.mid, A.dist)[1]} ax={spanX(A.mid, A.dist, -1)} ay={mid(A.mid, A.dist)[1]} show={segs3} />
+      <Label id="eskua" x={150} y={mid(A.dist, A.tip)[1]} ax={spanX(A.dist, A.tip, -1)} ay={mid(A.dist, A.tip)[1]} show={segs3} />
+      <Label id="izterra" x={880} y={mid(L.prox, L.mid)[1]} ax={spanX(L.prox, L.mid, 1)} ay={mid(L.prox, L.mid)[1]} show={segs3} />
+      <Label id="berna" x={880} y={mid(L.mid, L.dist)[1]} ax={spanX(L.mid, L.dist, 1)} ay={mid(L.mid, L.dist)[1]} show={segs3} />
+      <Label id="oina" x={880} y={mid(L.dist, L.tip)[1]} ax={spanX(L.dist, L.tip, 1)} ay={mid(L.dist, L.tip)[1]} show={segs3} />
       <Label id="ukondoa" x={A.mid[0] + 70} y={A.mid[1] - 20} align="start" ax={A.mid[0] + 10} ay={A.mid[1]} show={two(t, 0.84)} />
       <Label id="eskumuturra" x={A.dist[0] + 70} y={A.dist[1] + 4} align="start" ax={A.dist[0] + 10} ay={A.dist[1]} show={two(t, 0.84)} />
       <Label id="belauna" x={L.mid[0] - 70} y={L.mid[1] - 20} align="end" ax={L.mid[0] - 10} ay={L.mid[1]} show={two(t, 0.84)} />
@@ -173,7 +181,7 @@ export function LimbDevelopment({ t }: SceneProps) {
       <Label id="atzamarrak" x={440} y={620} ax={arm.rays[3][1][0]} ay={arm.rays[3][1][1]} show={two(t, 0.9)} />
       <Label id="behatzak" x={560} y={620} align="start" ax={leg.rays[1][1][0]} ay={leg.rays[1][1][1]} show={two(t, 0.9)} />
 
-      <Note x={500} y={60} tone="warn" size={12} show={two(t, 0.84)}>
+      <Note x={500} y={548} tone="warn" size={12} show={two(t, 0.84)}>
         Behekoa 1–2 egun atzeratuta
       </Note>
       <AgeHud value={Math.round(day)} unit=". eguna" caption="Adina" />

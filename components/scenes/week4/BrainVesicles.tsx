@@ -1,5 +1,6 @@
 'use client';
 
+import { useId } from 'react';
 import { C, Label, Mark, Part, lerp, lerpPt, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { earlyGeom } from '@/components/scenes/week5/EarlyEmbryo';
 import { spineAt } from '@/components/scenes/week5/skin';
@@ -31,7 +32,11 @@ function vesicles(t: number) {
   };
 }
 
+/** Smooth maximum (soft union of two profiles, so the vesicles blend through real necks). */
+const smax = (a: number, b: number, k = 0.22) => Math.max(a, b) + Math.log1p(Math.exp(-Math.abs(a - b) * k)) / k;
+
 function DorsalDrawing({ t }: SceneProps) {
+  const uid = useId().replace(/:/g, '');
   const { prosA, mesA, rhombA } = vesicles(t);
   const cordA = 0.35 + 0.65 * seg(t, 0.1, 0.5);
 
@@ -42,37 +47,75 @@ function DorsalDrawing({ t }: SceneProps) {
   const mesY = prosY + prosR * 0.6 + mesR * 0.75;
   const rhombY = mesY + mesR * 0.6 + rhombR * 0.8;
 
-  const cordPts: Pt[] = [];
-  const n = 30;
-  for (let i = 0; i <= n; i++) {
-    const k = i / n;
-    const y = lerp(rhombY + rhombR * 0.7, D_BOTTOM, k);
-    const w = lerp(rhombR * 0.62, 10, Math.pow(k, 0.6)) * cordA;
-    cordPts.push([VX - w, y]);
-  }
-  for (let i = n; i >= 0; i--) {
-    const k = i / n;
-    const y = lerp(rhombY + rhombR * 0.7, D_BOTTOM, k);
-    const w = lerp(rhombR * 0.62, 10, Math.pow(k, 0.6)) * cordA;
-    cordPts.push([VX + w, y]);
-  }
+  // Half-width of the tube along its length: three rounded swellings, then the tapering spinal cord.
+  const bump = (y: number, c: number, rx: number, ry: number) => rx * Math.sqrt(Math.max(0, 1 - ((y - c) / ry) ** 2));
+  const cord = (y: number) => {
+    if (y < rhombY) return 0;
+    const k = Math.min(1, (y - rhombY) / (D_BOTTOM - rhombY));
+    return lerp(Math.max(12, rhombR * 0.5), 9, Math.pow(k, 0.6)) * cordA;
+  };
+  const yTop = prosY - prosR * 0.85;
+  const hw = (y: number) => {
+    let w = bump(y, prosY, prosR * 1.1, prosR * 0.85);
+    w = smax(w, bump(y, mesY, mesR, mesR * 0.92));
+    w = smax(w, bump(y, rhombY, rhombR * 1.05, rhombR));
+    w = smax(w, cord(y));
+    // Round both ends (the soft union never reaches 0 on its own).
+    const cap = (d: number, r: number) => (d >= r ? 1 : Math.sqrt(Math.max(0, 1 - ((r - d) / r) ** 2)));
+    return w * cap(y - yTop, 10) * cap(D_BOTTOM + 8 - y, 9);
+  };
+  const N = 140;
+  // Denser towards both ends, so the rounded tips stay round.
+  const ys = Array.from({ length: N + 1 }, (_, i) => lerp(yTop, D_BOTTOM + 8, (1 - Math.cos((Math.PI * i) / N)) / 2));
+  const outline = (f: (y: number) => number) => smoothPath([...ys.map((y): Pt => [VX - f(y), y]), ...[...ys].reverse().slice(1, -1).map((y): Pt => [VX + f(y), y])], true, 0.5);
+  const tube = outline(hw);
+  // Ventricles and central canal: the lumen follows the swellings.
+  const lumen = outline((y) => Math.max(0, hw(y) * 0.4 - 3));
+  // Region boundaries at the necks (narrowest point between two centres).
+  const neck = (a: number, b: number) => {
+    let best = a;
+    for (let y = a; y <= b; y += 0.5) if (hw(y) < hw(best)) best = y;
+    return best;
+  };
+  const n1 = neck(prosY, mesY);
+  const n2 = neck(mesY, rhombY);
+  const n3 = rhombY + rhombR * 0.9;
+  const regions: [string, number, number, number][] = [
+    ['prosentzefaloa', yTop - 20, n1, prosA],
+    ['mesentzefaloa', n1, n2, mesA],
+    ['erronbentzefaloa', n2, n3, rhombA],
+    ['ornomuina', n3, D_BOTTOM + 20, cordA],
+  ];
 
   return (
     <g>
-      <Part id="ornomuina" show={0.45 + 0.55 * cordA}>
-        <path d={smoothPath(cordPts, true, 0.35)} fill={C.neural} opacity={0.85} />
-      </Part>
-      <Part id="erronbentzefaloa" show={0.45 + 0.55 * rhombA}>
-        <ellipse cx={VX} cy={rhombY} rx={rhombR * 1.05} ry={rhombR} fill={C.neural} stroke="#1e3a8a" strokeWidth={1.4} />
-      </Part>
-      <Part id="mesentzefaloa" show={0.45 + 0.55 * mesA}>
-        <ellipse cx={VX} cy={mesY} rx={mesR} ry={mesR * 0.92} fill={C.neural} stroke="#1e3a8a" strokeWidth={1.4} />
-      </Part>
-      <Part id="prosentzefaloa" show={0.45 + 0.55 * prosA}>
-        <ellipse cx={VX - 4} cy={prosY} rx={prosR * 1.1} ry={prosR * 0.85} fill={C.neural} stroke="#1e3a8a" strokeWidth={1.4} />
-        <ellipse cx={VX - prosR * 0.55} cy={prosY - prosR * 0.15} rx={prosR * 0.52} ry={prosR * 0.42} fill="#7a9cf2" opacity={0.55 * prosA} />
-        <ellipse cx={VX + prosR * 0.55} cy={prosY - prosR * 0.15} rx={prosR * 0.52} ry={prosR * 0.42} fill="#7a9cf2" opacity={0.55 * prosA} />
-      </Part>
+      <defs>
+        <linearGradient id={`${uid}-g`} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stopColor="#2a44b0" />
+          <stop offset="0.38" stopColor={C.neural} />
+          <stop offset="0.62" stopColor={C.neural} />
+          <stop offset="1" stopColor="#2a44b0" />
+        </linearGradient>
+        {regions.map(([id, y0, y1]) => (
+          <clipPath key={id} id={`${uid}-${id}`}>
+            <rect x={VX - 200} y={y0} width={400} height={y1 - y0} />
+          </clipPath>
+        ))}
+      </defs>
+      {/* One unclipped copy underneath hides the hairlines where the regions' clips meet. */}
+      <g opacity={0.45 + 0.55 * Math.min(prosA, mesA, rhombA, cordA)} pointerEvents="none">
+        <path d={tube} fill={`url(#${uid}-g)`} />
+        <path d={lumen} fill="#1b2f7a" opacity={0.45} />
+      </g>
+      {regions.map(([id, , , a]) => (
+        <Part key={id} id={id} show={0.45 + 0.55 * a}>
+          <g clipPath={`url(#${uid}-${id})`}>
+            <path d={tube} fill={`url(#${uid}-g)`} />
+            <path d={lumen} fill="#1b2f7a" opacity={0.45} />
+          </g>
+        </Part>
+      ))}
+      <path d={tube} fill="none" stroke="#1e3a8a" strokeWidth={1.4} pointerEvents="none" />
     </g>
   );
 }

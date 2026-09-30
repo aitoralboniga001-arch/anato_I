@@ -144,6 +144,46 @@ export function bandAround(cx: number, cy: number, r0: (a: number) => number, r1
   return `M${[...outer, ...inner.reverse()].join(' L')}Z`;
 }
 
+/** Open arc around the embryo-complex centre (radius may vary with the angle), for stroking a band's edges without its ends. */
+export function arcAround(cx: number, cy: number, r: (a: number) => number, a0: number, a1: number, step = 2) {
+  const n = Math.max(2, Math.ceil(Math.abs(a1 - a0) / step));
+  return `M${Array.from({ length: n + 1 }, (_, i) => {
+    const a = a0 + ((a1 - a0) * i) / n;
+    return `${f1(cx + r(a) * Math.cos(rad(a)))},${f1(cy + r(a) * Math.sin(rad(a)))}`;
+  }).join(' L')}`;
+}
+
+/**
+ * The connecting stalk as a living bridge between two concentric mesoderm layers: a short neck of
+ * half-width `half` (px) centred on angle `a`, whose sides curve out in fillets of radius `fillet`
+ * and run tangentially into the layer surfaces `rInEdge` / `rOutEdge`. The ends close along the
+ * middle of each layer (`rIn` / `rOut`), so they vanish into the tissue instead of ending in a cut.
+ * Returns the fill outline plus the two sides (to stroke without drawing the ends).
+ */
+export function stalkBridge(cx: number, cy: number, a: number, rIn: number, rInEdge: number, rOutEdge: number, rOut: number, half: number, fillet: number) {
+  const gap = Math.max(0.1, rOutEdge - rInEdge);
+  const rho = Math.min(fillet, gap / 2);
+  const f = (d: number) => (d < rho ? rho - Math.sqrt(Math.max(0, rho * rho - (rho - d) * (rho - d))) : 0);
+  const off = (r: number) => half + f(r - rInEdge) + f(rOutEdge - r);
+  const at = (ang: number, r: number) => `${f1(cx + r * Math.cos(ang))},${f1(cy + r * Math.sin(ang))}`;
+  const a0 = rad(a);
+  const N = 36;
+  const side = (sgn: number) =>
+    Array.from({ length: N + 1 }, (_, i) => {
+      // Denser sampling near the fillets, where the side turns fastest.
+      const u = 0.5 - 0.5 * Math.cos((Math.PI * i) / N);
+      const r = rInEdge + gap * u;
+      return at(a0 + (sgn * off(r)) / r, r);
+    });
+  const arc = (r: number, from: number, to: number) => Array.from({ length: 9 }, (_, i) => at(from + ((to - from) * i) / 8, r));
+  const L = side(-1);
+  const Rt = side(1);
+  const oIn = off(rInEdge) / rInEdge;
+  const oOut = off(rOutEdge) / rOutEdge;
+  const d = `M${[...arc(rIn, a0 + oIn, a0 - oIn), ...L, ...arc(rOut, a0 - oOut, a0 + oOut), ...[...Rt].reverse()].join(' L')}Z`;
+  return { d, left: `M${L.join(' L')}`, right: `M${Rt.join(' L')}` };
+}
+
 /** A full circle as two half-arcs (a single 360° arc has coincident end points and SVG drops it). */
 export const circlePath = (cx: number, cy: number, r: number, sweep = 1) =>
   `M${f1(cx + r)},${f1(cy)} A${r} ${r} 0 1 ${sweep} ${f1(cx - r)},${f1(cy)} A${r} ${r} 0 1 ${sweep} ${f1(cx + r)},${f1(cy)}Z`;

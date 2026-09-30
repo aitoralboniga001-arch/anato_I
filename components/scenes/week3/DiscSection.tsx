@@ -190,6 +190,14 @@ export function DiscDrawing({ s, ids = {} }: { s: Disc; ids?: DiscIds }) {
   const yolkIn = arc(cyY, rx, Y, false);
   const yolkMid = arc(cyY, rx + 7 * k, Y + 7 * k, false);
   const yolkOut = arc(cyY, rx + 13 * k, Y + 13 * k, false);
+  // The sacs' walls run on round the disc's edge to meet at its mid-height, so the amnion and yolk-sac
+  // cell sheets close the margin instead of stopping flat on a bare block of mesoderm.
+  const midY = (cyA + cyY) / 2;
+  const toMid = (pts: Pt[]): Pt[] => {
+    const a = pts[0];
+    const b = pts[pts.length - 1];
+    return [[a[0], midY], [a[0], lerp(midY, a[1], 0.5)], ...pts, [b[0], lerp(midY, b[1], 0.5)], [b[0], midY]];
+  };
   const xs = range(-W, W, 80);
   const amnionCavity = poly([...amnionIn, ...xs.map((x) => map(x, top(x) - 0.5))]);
   const yolkCavity = poly([...xs.map((x) => map(x, lower(x) - 0.5)), ...yolkIn.slice().reverse()]);
@@ -270,14 +278,14 @@ export function DiscDrawing({ s, ids = {} }: { s: Disc; ids?: DiscIds }) {
       <Part id={id.extraMeso}>
         <path d={margin(1)} fill={C.mesoExtra} opacity={0.85} />
         <path d={margin(-1)} fill={C.mesoExtra} opacity={0.85} />
-        <Cells outer={amnionOut} inner={amnionMid} n={cellN(Math.PI * (rx / k + A / k) * 0.5, 30)} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={21} />
-        <Cells outer={yolkOut} inner={yolkMid} n={cellN(Math.PI * (rx / k + Y / k) * 0.5, 30)} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={22} />
+        <Cells outer={toMid(amnionOut)} inner={toMid(amnionMid)} n={cellN(Math.PI * (rx / k + A / k) * 0.5, 30)} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={21} />
+        <Cells outer={toMid(yolkOut)} inner={toMid(yolkMid)} n={cellN(Math.PI * (rx / k + Y / k) * 0.5, 30)} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={22} />
       </Part>
       <Part id={ids.amnionWall ?? id.amnion}>
-        <Cells outer={amnionMid} inner={amnionIn} n={cellN(Math.PI * (rx / k + A / k) * 0.5, 22)} fill={C.amnioblast} nk={0.5} seed={23} />
+        <Cells outer={toMid(amnionMid)} inner={toMid(amnionIn)} n={cellN(Math.PI * (rx / k + A / k) * 0.5, 22)} fill={C.amnioblast} nk={0.5} seed={23} />
       </Part>
       <Part id={id.yolk}>
-        <Cells outer={yolkMid} inner={yolkIn} n={cellN(Math.PI * (rx / k + Y / k) * 0.5, 16)} fill={HYPO} nucleus="rgba(90,70,20,0.6)" seed={24} />
+        <Cells outer={toMid(yolkMid)} inner={toMid(yolkIn)} n={cellN(Math.PI * (rx / k + Y / k) * 0.5, 16)} fill={HYPO} nucleus="rgba(90,70,20,0.6)" seed={24} />
       </Part>
 
       {/* Cell-free matrix between the epithelia wherever they are apart. */}

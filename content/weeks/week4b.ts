@@ -152,7 +152,7 @@ export const structuresB: StructureDef[] = [
     definition: 'Somitaren atzeko paretako aurre-alboko eta atze-erdiko zelulek osatzen duten multzoa, dermatomaren azpian kokatua.',
     location: 'Dermatomaren azpian, somitaren atzeko paretatik eratorria.',
     origin: 'Somita (dermatomiotoma).',
-    fate: 'Bizkarreko muskulu ildaskatu guztiak; zati batek gorputz-adarretako eta gorputz-paretako muskulu batzuk ere sortzen ditu.',
+    fate: 'Bizkarreko muskulu ildaskatu guztiak (bizkarreko muskulu autoktonoak); zati batek gorputz-adarretako eta gorputz-paretako muskulu batzuk ere sortzen ditu.',
     related: ['somitak', 'dermatomiotoma', 'dermatoma'],
   },
   {
@@ -628,7 +628,7 @@ export const stagesB: StageDef[] = [
       'Erdi-beheko (ventromedial) aldea → esklerotoma (migratu eta notokorda/hodi neurala inguratu → ornoak + saihetsak, lehenik kartilago gisa).',
       'Plaka dortsala → dermatomiotoma → dermatoma (dermisa) + miotoma (muskulu ildaskatuak; zenbait miotoma-zelula paretako orrirantz migratzen dira).',
       'Epidermisa ektodermotik dator, ez dermatomatik: nahaste ohikoa saihestu.',
-      'Odol-hodiak hemangioblastoei esker sortzen dira mesodermo mota guztietatik (enbrioi barrukotik eta kanpokotik). Enbrioi barruko hodiak finkapen pedikuluko zilbor-hesteko hodiekin lotzen dira, hauek korion plakakoekin, eta azken hauek biloxka tertziarioetakoekin.',
+      'Odol-hodiak hemangioblastoei esker sortzen dira mesodermo mota guztietatik (enbrioi barrukotik eta kanpokotik): multzoaren kanpoaldeko hemangioblastoetatik hodi-paretako zelula endotelialak, erdialdekoetatik odol-zelulak (baskulogenesia). Enbrioi barruko hodiak finkapen pedikuluko zilbor-hesteko hodiekin lotzen dira, hauek korion plakakoekin, eta azken hauek biloxka tertziarioetakoekin.',
     ],
     cautions: ['Larruazalaren dermisa dermatomatik dator, baina epidermisa ektodermotik: ez nahastu geruza bakoitzaren jatorria.'],
   },

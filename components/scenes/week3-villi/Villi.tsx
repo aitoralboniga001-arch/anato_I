@@ -1,7 +1,7 @@
 'use client';
 
 import { C, Flow, Label, Note, Part, clamp, lerp, seg, zoom, type SceneProps } from '@/components/kit';
-import { V, VilliDefs, f1, fingerD, loopD, place } from './common';
+import { V, VilliDefs, f1, filletD, fingerD, loopD, place } from './common';
 
 /**
  * Stage `biloxkak` — primary → secondary → tertiary villus (day 13 → end of week 3).
@@ -92,31 +92,62 @@ function VilliDrawing({ t, reduced }: SceneProps) {
         <Flow key={i} d={d} n={5} dur={7 + i} r={2.4} color="#ff6b81" reduced={reduced} />
       ))}
 
+      {/* Central villus outline: one clickable id per villus type, cross-fading with the core change. A rim
+          drawn under the villus, so only its outer edge shows. */}
+      {(
+        [
+          ['biloxka-primarioa', primary],
+          ['biloxka-sekundarioa', secondary],
+          ['biloxka-tertziarioa', tertiary],
+        ] as const
+      ).map(([id, s]) => (
+        <Part key={id} id={id} show={s}>
+          <path transform={place(c.x, BASE.syn)} d={fingerD(c.len, c.hw)} fill="none" stroke="#e8eefc" strokeWidth={4.5} opacity={0.6} />
+        </Part>
+      ))}
+
+      {/* Each layer: the villi's outlines (double width), then the plate band and fillets, then the villi's
+          fills — villi and plate read as one tissue, with no seams or feet where they meet. */}
       <Part id="sinzitiotrofoblastoa">
         <rect x={0} y={ROOF.synTop} width={1000} height={ROOF.synBottom - ROOF.synTop} fill="url(#p-syncytio)" />
+        {villi.map((v, i) => (
+          <path key={i} transform={place(v.x, BASE.syn)} d={fingerD(v.len, v.hw)} fill="none" stroke={C.syncytioDeep} strokeWidth={2.4} />
+        ))}
         <rect x={0} y={PLATE.syn} width={1000} height={PLATE.cyto - PLATE.syn + 1} fill="url(#p-syncytio)" />
         {villi.map((v, i) => (
-          <path key={i} transform={place(v.x, BASE.syn)} d={fingerD(v.len, v.hw)} fill="url(#p-syncytio)" stroke={C.syncytioDeep} strokeWidth={1.2} />
+          <g key={i}>
+            <path d={filletD(v.x, v.hw, PLATE.syn, 12)} fill="url(#p-syncytio)" />
+            <path transform={place(v.x, BASE.syn)} d={fingerD(v.len, v.hw)} fill="url(#p-syncytio)" />
+          </g>
         ))}
       </Part>
 
       <Part id="zitotrofoblastoa">
+        {villi.map((v, i) => (
+          <path key={i} transform={place(v.x, BASE.cyto)} d={fingerD(v.cytoLen, v.hw - v.ts, 6)} fill="none" stroke="rgba(22,80,45,0.6)" strokeWidth={2} />
+        ))}
         <rect x={0} y={PLATE.cyto} width={1000} height={PLATE.meso - PLATE.cyto + 1} fill="url(#w3v-cyto)" />
         {villi.map((v, i) => (
-          <path key={i} transform={place(v.x, BASE.cyto)} d={fingerD(v.cytoLen, v.hw - v.ts, 6)} fill="url(#w3v-cyto)" stroke="rgba(22,80,45,0.6)" strokeWidth={1} />
+          <g key={i}>
+            <path d={filletD(v.x, v.hw - v.ts, PLATE.cyto, 8)} fill="url(#w3v-cyto)" />
+            <path transform={place(v.x, BASE.cyto)} d={fingerD(v.cytoLen, v.hw - v.ts, 6)} fill="url(#w3v-cyto)" />
+          </g>
         ))}
       </Part>
 
       <Part id="enbrioi-kanpoko-mesodermoa">
+        {meso > 0.01 &&
+          villi.map((v, i) => <path key={i} transform={place(v.x, BASE.meso)} d={fingerD(v.mesoLen, v.mesoHw, 5)} fill="none" stroke="#d9785a" strokeWidth={1.6} />)}
         <rect x={0} y={PLATE.meso} width={1000} height={PLATE.bottom - PLATE.meso} fill={C.mesoExtra} />
-        <rect x={0} y={PLATE.meso} width={1000} height={PLATE.bottom - PLATE.meso} fill="url(#p-meso-extra)" />
         {meso > 0.01 &&
           villi.map((v, i) => (
-            <g key={i} transform={place(v.x, BASE.meso)}>
-              <path d={fingerD(v.mesoLen, v.mesoHw, 5)} fill={C.mesoExtra} />
-              <path d={fingerD(v.mesoLen, v.mesoHw, 5)} fill="url(#p-meso-extra)" stroke="#d9785a" strokeWidth={0.8} />
+            <g key={i}>
+              <path d={filletD(v.x, v.mesoHw, PLATE.meso, Math.min(6, Math.max(0, v.mesoLen - (BASE.meso - PLATE.meso))))} fill={C.mesoExtra} />
+              <path transform={place(v.x, BASE.meso)} d={fingerD(v.mesoLen, v.mesoHw, 5)} fill={C.mesoExtra} />
             </g>
           ))}
+        <rect x={0} y={PLATE.meso} width={1000} height={PLATE.bottom - PLATE.meso} fill="url(#p-meso-extra)" />
+        {meso > 0.01 && villi.map((v, i) => <path key={i} transform={place(v.x, BASE.meso)} d={fingerD(v.mesoLen, v.mesoHw, 5)} fill="url(#p-meso-extra)" />)}
       </Part>
 
       <Part id="korion-barrunbea" quiet>
@@ -148,19 +179,6 @@ function VilliDrawing({ t, reduced }: SceneProps) {
             )),
           )}
       </Part>
-
-      {/* Central villus outline: one clickable id per villus type, cross-fading with the core change. */}
-      {(
-        [
-          ['biloxka-primarioa', primary],
-          ['biloxka-sekundarioa', secondary],
-          ['biloxka-tertziarioa', tertiary],
-        ] as const
-      ).map(([id, s]) => (
-        <Part key={id} id={id} show={s}>
-          <path transform={place(c.x, BASE.syn)} d={fingerD(c.len, c.hw + 3, 9)} fill="none" stroke="#e8eefc" strokeWidth={1.2} strokeDasharray="4 4" opacity={0.8} />
-        </Part>
-      ))}
 
       {/* Chorionic plate bracket (the plate = extra-embryonic mesoderm + cyto + syncytio). */}
       <Part id="korion-plaka">

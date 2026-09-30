@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Flow, Label, Mark, Note, Part, lerp, rand, seg, smoothPath, type SceneProps } from '@/components/kit';
+import { C, Flow, Label, Mark, Note, Part, bezier, lerp, line, rand, seg, smoothPath, tube, type Pt, type SceneProps } from '@/components/kit';
 
 /**
  * Topic 6 — the chorionic sac as a whole (stage `biloxka-askeak`): a ring of villi around the
@@ -47,6 +47,33 @@ function ringPts(r: number, branch: number, n: number, seed: number) {
   return pts;
 }
 
+/**
+ * A stem (anchoring) villus as a living trunk: it flares where it leaves the chorionic plate and
+ * again where it anchors in the cytotrophoblastic shell, bends slightly, and gives off a few short
+ * free-villus twigs with rounded tips.
+ */
+function stemVillus(deg: number, r0: number, r1: number, twig: number) {
+  const a = (deg * Math.PI) / 180;
+  const at = (r: number, side = 0): Pt => [CX + Math.cos(a) * r - Math.sin(a) * side, CY + Math.sin(a) * r + Math.cos(a) * side];
+  const bend = (rand(deg * 0.37 + 2) - 0.5) * 16;
+  const c = bezier(at(r0), at(lerp(r0, r1, 0.35), bend), at(lerp(r0, r1, 0.7), -bend * 0.6), at(r1));
+  const trunk = tube(c, (u) => 4.2 + 4 * Math.max(0, 1 - u / 0.28) ** 2 + 3.4 * Math.max(0, (u - 0.8) / 0.2) ** 2, 0, 1, 30);
+  const twigs = [0.42, 0.66].flatMap((u, i) => {
+    if (twig <= 0.02) return [];
+    const q = c(u);
+    const side = (i + Math.round(rand(deg) * 2)) % 2 ? 1 : -1;
+    const tx = -q.ny;
+    const ty = q.nx; // unit tangent
+    const len = (14 + 8 * rand(deg + i * 5.1)) * twig;
+    const ang = 0.75; // ~45° off the trunk, towards the shell
+    const dx = tx * Math.cos(ang) + q.nx * side * Math.sin(ang);
+    const dy = ty * Math.cos(ang) + q.ny * side * Math.sin(ang);
+    const tip: Pt = [q.x + dx * len, q.y + dy * len];
+    return [tube(line(tip, [q.x, q.y]), (v) => lerp(2, 3.4, v), 0, 1, 10, true).d];
+  });
+  return { trunk, twigs };
+}
+
 function SacDrawing({ t, reduced }: SceneProps) {
   const branch = seg(t, 0, 0.16);
   const thin = seg(t, 0.34, 0.5);
@@ -75,9 +102,19 @@ function SacDrawing({ t, reduced }: SceneProps) {
       {/* Stem (anchoring) villi: plate → shell, the trunks the free villi branch from. */}
       <Part id="biloxka-enborra" show={vis(t, 0)}>
         {STEMS.map((deg) => {
-          const a = (deg * Math.PI) / 180;
-          const p = (r: number) => `${CX + Math.cos(a) * r},${CY + Math.sin(a) * r}`;
-          return <path key={deg} d={`M${p(R3 - 4)} L${p(R1 - 6)}`} stroke="#11573b" strokeWidth={9} strokeLinecap="round" />;
+          const v = stemVillus(deg, R3 - 6, R1 - 8, branch);
+          return (
+            <g key={deg}>
+              {v.twigs.map((d, i) => (
+                <path key={i} d={d} fill="#3f8f5e" stroke="#2c6b41" strokeWidth={1} />
+              ))}
+              <path d={v.trunk.d} fill="#3f8f5e" />
+              <g fill="none" stroke="#2c6b41" strokeWidth={1.1}>
+                <path d={v.trunk.left} />
+                <path d={v.trunk.right} />
+              </g>
+            </g>
+          );
         })}
       </Part>
       <Part id="korion-plaka" show={vis(t, 0)}>
@@ -109,8 +146,20 @@ function SacDrawing({ t, reduced }: SceneProps) {
       )}
 
       {/* embryo hanging from the stalk, inside the chorionic cavity */}
+      {/* The stalk is chorionic-plate mesoderm: same tissue, flaring out of the plate's cavity face; its lower end tucks under the amnion. */}
       <Part id="finkapen-pedikulua" show={vis(t, 0)}>
-        <path d={`M${CX},${CY - R3 + 4} L${CX},${CY - 44}`} fill="none" stroke="#d9a6b8" strokeWidth={5} />
+        {(() => {
+          const st = tube(bezier([CX, CY - R4 - 1], [CX, CY - R4 + 30], [CX - 6, CY - 70], [CX - 4, CY - 40]), (u) => 5 + 10 * Math.max(0, 1 - u / 0.3) ** 2, 0, 1, 30);
+          return (
+            <>
+              <path d={st.d} fill="#3f8f5e" />
+              <g fill="none" stroke="#2c6b41" strokeWidth={1.1}>
+                <path d={st.left} />
+                <path d={st.right} />
+              </g>
+            </>
+          );
+        })()}
       </Part>
       <Part id="amnios-barrunbea" show={vis(t, 0)}>
         <ellipse cx={CX - 4} cy={CY - 24} rx={20} ry={26} fill="#101828" stroke="#9fc3e6" strokeWidth={2} />
@@ -143,7 +192,7 @@ export function ChorionicSac({ t, reduced }: SceneProps) {
       <Label id="bitelo-zaku-sekundarioa" x={810} y={380} ax={CX + 20} ay={CY - 8} />
       <Label id="dezidua-kapsularra" x={500} y={600} ax={500} ay={585} align="middle" />
 
-      <Note x={500} y={44} show={seg(t, 0, 0.1)} tone="dim">
+      <Note x={500} y={44} show={1 - seg(t, 0.12, 0.16)} tone="dim">
         Biloxka enborrak adarkatzen dira
       </Note>
       <Note x={500} y={44} show={vis(t, 0.16, 0.66)} tone="accent">
@@ -190,16 +239,34 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
       <Part id="biloxka-arteko-espazioa" show={vis(t, 0)}>
         <circle cx={CX} cy={CY} r={V_R + 34} fill="url(#p-blood)" opacity={0.85} />
       </Part>
-      {units.map((u, i) => (
-        <Part key={i} id="biloxka-tertziarioa" show={vis(t, 0)}>
-          <path
-            d={`M${u.base[0] - 8 * Math.sin(u.a)},${u.base[1] + 8 * Math.cos(u.a)} Q${u.ctrl[0]},${u.ctrl[1]} ${u.tip[0]},${u.tip[1]} Q${u.ctrl[0]},${u.ctrl[1]} ${u.base[0] + 8 * Math.sin(u.a)},${u.base[1] - 8 * Math.cos(u.a)} Z`}
-            fill="#1b7f55"
-            stroke="#11573b"
-            strokeWidth={1.2}
-          />
-        </Part>
-      ))}
+      {/* Tertiary villi as fingers with rounded tips, each carrying a fetal capillary loop (artery out, vein back). */}
+      {units.map((u, i) => {
+        const tipIn: Pt = [u.tip[0] - Math.cos(u.a) * 7, u.tip[1] - Math.sin(u.a) * 7];
+        const baseIn: Pt = [CX + Math.cos(u.a) * (V_R - 66), CY + Math.sin(u.a) * (V_R - 66)];
+        const c = bezier(tipIn, [lerp(tipIn[0], u.ctrl[0], 0.8), lerp(tipIn[1], u.ctrl[1], 0.8)], [lerp(baseIn[0], u.ctrl[0], 0.5), lerp(baseIn[1], u.ctrl[1], 0.5)], baseIn);
+        const f = tube(c, (v) => 6.5 + 5 * Math.max(0, (v - 0.7) / 0.3) ** 2, 0, 1, 24, true);
+        const loop = (side: number) =>
+          smoothPath(
+            Array.from({ length: 13 }, (_, k) => {
+              const q = c(0.06 + (0.94 * k) / 12);
+              return [q.x + q.nx * 2.6 * side, q.y + q.ny * 2.6 * side] as Pt;
+            }),
+            false,
+          );
+        const q0 = c(0.06);
+        return (
+          <Part key={i} id="biloxka-tertziarioa" show={vis(t, 0)}>
+            <path d={f.d} fill="#1b7f55" />
+            <path d={loop(1)} fill="none" stroke={C.artery} strokeWidth={1.5} opacity={0.9} />
+            <path d={loop(-1)} fill="none" stroke={C.vein} strokeWidth={1.5} opacity={0.9} />
+            <path d={`M${q0.x + q0.nx * 2.6},${q0.y + q0.ny * 2.6} A2.6 2.6 0 0 0 ${q0.x - q0.nx * 2.6},${q0.y - q0.ny * 2.6}`} fill="none" stroke="#a78bfa" strokeWidth={1.5} opacity={0.9} />
+            <g fill="none" stroke="#11573b" strokeWidth={1.2}>
+              <path d={f.left} />
+              <path d={f.right} />
+            </g>
+          </Part>
+        );
+      })}
       <Part id="korion-plaka" show={vis(t, 0)}>
         <circle cx={CX} cy={CY} r={V_R - 62} fill="#3f8f5e" stroke="#2c6b41" strokeWidth={1.4} />
       </Part>
@@ -208,7 +275,18 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
       </Part>
 
       <Part id="finkapen-pedikulua" show={vis(t, 0)}>
-        <path d={`M${CX},${CY - V_R + 96} L${CX},${CY - 46}`} fill="none" stroke="#d9a6b8" strokeWidth={5} />
+        {(() => {
+          const st = tube(line([CX, CY - (V_R - 91)], [CX, CY - 40]), (u) => 6 + 9 * Math.max(0, 1 - u / 0.3) ** 2, 0, 1, 24);
+          return (
+            <>
+              <path d={st.d} fill="#3f8f5e" />
+              <g fill="none" stroke="#2c6b41" strokeWidth={1.1}>
+                <path d={st.left} />
+                <path d={st.right} />
+              </g>
+            </>
+          );
+        })()}
       </Part>
       <Part id="amnios-barrunbea" show={vis(t, 0)}>
         <ellipse cx={CX - 4} cy={CY - 22} rx={18} ry={24} fill="#101828" stroke="#9fc3e6" strokeWidth={2} />
@@ -218,8 +296,8 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
       </Part>
       <ellipse cx={CX - 8} cy={CY - 28} rx={9} ry={13} fill="#7aa7f5" opacity={0.9} />
       <Part id="zilbor-hodiak" show={vis(t, 0)}>
-        <path d={`M${CX - 2},${CY - 46} L${CX - 2},${CY - V_R + 96}`} stroke={C.artery} strokeWidth={2} />
-        <path d={`M${CX + 2},${CY - 46} L${CX + 2},${CY - V_R + 96}`} stroke={C.vein} strokeWidth={2} />
+        <path d={`M${CX - 2},${CY - 46} L${CX - 2},${CY - V_R + 82}`} stroke={C.artery} strokeWidth={2} />
+        <path d={`M${CX + 2},${CY - 46} L${CX + 2},${CY - V_R + 82}`} stroke={C.vein} strokeWidth={2} />
       </Part>
 
       {!reduced && (
@@ -257,7 +335,7 @@ export function SacCirculation({ t, reduced }: SceneProps) {
       <Label id="sinzitiotrofoblastoa" x={190} y={380} ax={CX - V_R + 8} ay={CY + 70} text="Sinzitioa" />
       <Label id="zilbor-hodiak" x={190} y={130} ax={CX - 3} ay={CY - 80} show={vis(t, 0.8)} />
 
-      <Note x={500} y={600} show={sep} tone="warn">
+      <Note x={500} y={630} show={sep} tone="warn">
         Amaren eta fetuaren odolak ez dute inoiz kontakturik
       </Note>
     </g>

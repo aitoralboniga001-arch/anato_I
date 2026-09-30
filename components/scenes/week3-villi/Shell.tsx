@@ -1,7 +1,8 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { C, Flow, Label, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
-import { V, VilliDefs, alongFinger, f1, fingerD, place } from './common';
+import { V, VilliDefs, alongFinger, f1, filletD, fingerD, place } from './common';
 
 /**
  * Stage `zorro-zitotrofoblastikoa` — cytotrophoblast of the tertiary (stem) villi penetrates the
@@ -77,45 +78,112 @@ function shellSeg(i: number, shellGrow: number) {
   return { x, show: seg(shellGrow, delay, delay + 0.42) };
 }
 
-/**
- * One tertiary villus. Its three tissue layers each belong to the same structure id as the flat plate
- * bands elsewhere in this scene (sinzitiotrofoblastoa / zitotrofoblastoa / enbrioi-kanpoko-mesodermoa),
- * so a click or a label leader anywhere on the villus wall hits the correct layer — not a separate,
- * competing id. `biloxka-tertziarioa` gets its own thin outline (as biloxka-enborra/biloxka-askea already
- * do), and the capillary loop is `biloxka-kapilarrak`.
- */
-function Villus({ v }: { v: VGeo }) {
-  const capLen = v.len * 0.46;
+/** Trunks are drawn running on down into the chorionic plate, so their cores join its mesoderm. */
+const ROOT = Y.plateMeso + 18 - Y.plateSyn;
+
+interface Drawn {
+  tf: string;
+  len: number;
+  hw: number;
+  ts: number;
+  tc: number;
+  /** Capillary loop: from its open legs (local y = cap0) to the start of the tip's arc. */
+  cap0: number;
+  /** Trunks: the legs turn aside into the chorionic plate (its vessels) instead of ending. */
+  turn: boolean;
+  capTop: number;
+  capHalf: number;
+}
+
+function drawn(v: VGeo): Drawn {
+  const ext = v.kind === 'enbor' ? ROOT : 0;
+  const [x, y] = alongFinger(v.x, v.y, v.angle, -ext);
+  const len = v.len + ext;
   const capHalf = Math.max(3, (v.hw - v.ts - v.tc) * 0.42);
+  return { tf: place(x, y, v.angle), len, hw: v.hw, ts: v.ts, tc: v.tc, cap0: 0, capTop: -(len - v.len * 0.4), capHalf, turn: ext > 0 };
+}
+
+const synD = (d: Drawn) => fingerD(d.len, d.hw);
+const cytoD = (d: Drawn) => fingerD(d.len - d.ts * 0.9, d.hw - d.ts, 6);
+const mesoD = (d: Drawn) => fingerD(d.len - (d.ts + d.tc) * 0.9, d.hw - d.ts - d.tc, 5);
+const loop = (d: Drawn, h: number) => {
+  const up = `L${f1(-h)},${f1(d.capTop)} A${f1(h)} ${f1(h)} 0 0 1 ${f1(h)},${f1(d.capTop)}`;
+  if (!d.turn) return `M${f1(-h)},${f1(d.cap0)} ${up} L${f1(h)},${f1(d.cap0)}`;
+  const y = d.cap0 + 8;
+  return `M${f1(-h - 40)},${f1(y)} Q${f1(-h)},${f1(y)} ${f1(-h)},${f1(y - 12)} ${up} L${f1(h)},${f1(y - 12)} Q${f1(h)},${f1(y)} ${f1(h + 40)},${f1(y)}`;
+};
+
+/**
+ * One tissue layer of the whole villous tree (trunks + branches) together with its band in the chorionic
+ * plate: every outline first (at double width), then every fill on top, so only the outline of the union
+ * shows — branches grow out of their trunk and trunks out of the plate, with no seams where they join.
+ */
+function Layer({ ds, d, fill, stroke, sw, plate }: { ds: Drawn[]; d: (x: Drawn) => string; fill: string; stroke: string; sw: number; plate: ReactNode }) {
   return (
-    <g transform={place(v.x, v.y, v.angle)}>
+    <>
+      {ds.map((x, i) => (
+        <path key={`s${i}`} transform={x.tf} d={d(x)} fill="none" stroke={stroke} strokeWidth={sw * 2} />
+      ))}
+      {plate}
+      {ds.map((x, i) => (
+        <path key={`f${i}`} transform={x.tf} d={d(x)} fill={fill} />
+      ))}
+    </>
+  );
+}
+
+/**
+ * The tertiary villi and the chorionic plate they rise from. Each tissue layer belongs to the same
+ * structure id as its plate band (sinzitiotrofoblastoa / zitotrofoblastoa / enbrioi-kanpoko-mesodermoa),
+ * so a click or a label leader anywhere on a villus wall hits the correct layer. `biloxka-tertziarioa`,
+ * `biloxka-enborra` and `biloxka-askea` are rims drawn under the tree (only their outer edge shows).
+ */
+function VillousTree({ g, anchor, free }: { g: Geo; anchor: number; free: number }) {
+  const ds = g.all.map(drawn);
+  // Concave fillets where each trunk layer meets its plate band (half-width w at the band's top y).
+  const fillets = (w: number, y: number, r: number, fill: string) =>
+g.trunks.map((v) => <path key={`${v.x}-${y}`} d={filletD(v.x, w, y, r)} fill={fill} />);
+  const trunks = ds.slice(0, g.trunks.length);
+  const branches = ds.slice(g.trunks.length);
+  return (
+    <>
+      <Part id="biloxka-tertziarioa">
+        {ds.map((x, i) => (
+          <path key={i} transform={x.tf} d={synD(x)} fill="none" stroke={C.syncytioDeep} strokeWidth={2} />
+        ))}
+      </Part>
+      <Part id="biloxka-enborra" show={Math.max(0.001, anchor)}>
+        {trunks.map((x, i) => (
+          <path key={i} transform={x.tf} d={synD(x)} fill="none" stroke="#e8eefc" strokeWidth={5} opacity={0.9} />
+        ))}
+      </Part>
+      <Part id="biloxka-askea" show={Math.max(0.001, free)}>
+        {branches.map((x, i) => (
+          <path key={i} transform={x.tf} d={synD(x)} fill="none" stroke="#e8eefc" strokeWidth={5} opacity={0.9} />
+        ))}
+      </Part>
       <Part id="sinzitiotrofoblastoa" quiet>
-        <path d={fingerD(v.len, v.hw)} fill="url(#p-syncytio)" stroke={C.syncytioDeep} strokeWidth={1} />
+        <Layer ds={ds} d={synD} fill="url(#p-syncytio)" stroke={C.syncytioDeep} sw={1} plate={<rect x={0} y={Y.plateSyn} width={1000} height={Y.plateCyto - Y.plateSyn + 1} fill="url(#p-syncytio)" />} />
+        {fillets(TRUNKS[0].hw, Y.plateSyn, 14, 'url(#p-syncytio)')}
       </Part>
       <Part id="zitotrofoblastoa" quiet>
-        <path d={fingerD(v.len - v.ts * 0.9, v.hw - v.ts, 6)} fill="url(#w3v-cyto)" stroke="rgba(22,80,45,0.6)" strokeWidth={0.9} />
+        <Layer ds={ds} d={cytoD} fill="url(#w3v-cyto)" stroke="rgba(22,80,45,0.6)" sw={0.9} plate={<rect x={0} y={Y.plateCyto} width={1000} height={Y.plateMeso - Y.plateCyto + 1} fill="url(#w3v-cyto)" />} />
+        {fillets(TRUNKS[0].hw - TRUNKS[0].ts, Y.plateCyto, 10, 'url(#w3v-cyto)')}
       </Part>
       <Part id="enbrioi-kanpoko-mesodermoa" quiet>
-        <path d={fingerD(v.len - (v.ts + v.tc) * 0.9, v.hw - v.ts - v.tc, 5)} fill={C.mesoExtra} stroke="#d9785a" strokeWidth={0.7} />
+        <Layer ds={ds} d={mesoD} fill={C.mesoExtra} stroke="#d9785a" sw={0.7} plate={<rect x={0} y={Y.plateMeso} width={1000} height={Y.plateBottom - Y.plateMeso} fill={C.mesoExtra} />} />
+        {fillets(TRUNKS[0].hw - TRUNKS[0].ts - TRUNKS[0].tc, Y.plateMeso, 7, C.mesoExtra)}
+        <rect x={0} y={Y.plateMeso} width={1000} height={Y.plateBottom - Y.plateMeso} fill="url(#p-meso-extra)" />
       </Part>
       <Part id="biloxka-kapilarrak">
-        <path
-          d={`M${f1(-capHalf)},${f1(-v.len * 0.14)} L${f1(-capHalf)},${f1(-v.len * 0.14 - capLen)} A${f1(capHalf)} ${f1(capHalf)} 0 0 1 ${f1(capHalf)},${f1(-v.len * 0.14 - capLen)} L${f1(capHalf)},${f1(-v.len * 0.14)}`}
-          fill="none"
-          stroke={V.endothelium}
-          strokeWidth={3.4}
-        />
-        <path
-          d={`M${f1(-capHalf * 0.55)},${f1(-v.len * 0.14)} L${f1(-capHalf * 0.55)},${f1(-v.len * 0.14 - capLen)} A${f1(capHalf * 0.55)} ${f1(capHalf * 0.55)} 0 0 1 ${f1(capHalf * 0.55)},${f1(-v.len * 0.14 - capLen)} L${f1(capHalf * 0.55)},${f1(-v.len * 0.14)}`}
-          fill="none"
-          stroke={V.fetal}
-          strokeWidth={1.8}
-        />
+        {ds.map((x, i) => (
+          <g key={i} transform={x.tf} fill="none">
+            <path d={loop(x, x.capHalf)} stroke={V.endothelium} strokeWidth={3.4} />
+            <path d={loop(x, x.capHalf * 0.55)} stroke={V.fetal} strokeWidth={1.8} />
+          </g>
+        ))}
       </Part>
-      <Part id="biloxka-tertziarioa">
-        <path d={fingerD(v.len, v.hw + 2, 9)} fill="none" stroke="#e8eefc" strokeWidth={1} strokeDasharray="2 3" opacity={0.55} />
-      </Part>
-    </g>
+    </>
   );
 }
 
@@ -193,34 +261,11 @@ function ShellDrawing({ t, reduced }: SceneProps) {
         <rect x={0} y={Y.plateBottom} width={1000} height={640 - Y.plateBottom} fill="url(#g-shade)" opacity={0.35} />
       </Part>
 
-      <Part id="sinzitiotrofoblastoa" quiet>
-        <rect x={0} y={Y.plateSyn} width={1000} height={Y.plateCyto - Y.plateSyn + 1} fill="url(#p-syncytio)" />
-      </Part>
-      <Part id="zitotrofoblastoa" quiet>
-        <rect x={0} y={Y.plateCyto} width={1000} height={Y.plateMeso - Y.plateCyto + 1} fill="url(#w3v-cyto)" />
-      </Part>
-      <Part id="enbrioi-kanpoko-mesodermoa" quiet>
-        <rect x={0} y={Y.plateMeso} width={1000} height={Y.plateBottom - Y.plateMeso} fill={C.mesoExtra} />
-        <rect x={0} y={Y.plateMeso} width={1000} height={Y.plateBottom - Y.plateMeso} fill="url(#p-meso-extra)" />
-      </Part>
+      <VillousTree g={g} anchor={anchor} free={free} />
       <Part id="korion-plaka">
         <path d={`M232,${Y.plateSyn} h-8 v${Y.plateBottom - Y.plateSyn} h8`} fill="none" stroke="#e8eefc" strokeWidth={2} opacity={0.85} />
       </Part>
 
-      {g.all.map((v, i) => (
-        <Villus key={i} v={v} />
-      ))}
-
-      <Part id="biloxka-enborra" show={Math.max(0.001, anchor)}>
-        {g.trunks.map((v, i) => (
-          <path key={i} transform={place(v.x, v.y, v.angle)} d={fingerD(v.len, v.hw + 4, 10)} fill="none" stroke="#e8eefc" strokeWidth={1.3} strokeDasharray="4 4" opacity={0.85} />
-        ))}
-      </Part>
-      <Part id="biloxka-askea" show={Math.max(0.001, free)}>
-        {g.branches.map((v, i) => (
-          <path key={i} transform={place(v.x, v.y, v.angle)} d={fingerD(v.len, v.hw + 3, 8)} fill="none" stroke="#e8eefc" strokeWidth={1.1} strokeDasharray="3 3" opacity={0.85} />
-        ))}
-      </Part>
     </g>
   );
 }

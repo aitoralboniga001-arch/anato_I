@@ -91,28 +91,28 @@ export function IntermediateSection({ t }: SceneProps) {
 
       {/* The three coelom-derived cavities are at different craniocaudal levels: shown as a caption, not spots here. */}
       <g opacity={g.fateCoelom}>
-        <rect x={700} y={128} width={216} height={112} rx={10} fill="#141416" stroke="#3a3a40" strokeWidth={1} />
-        <text x={710} y={114} fontSize={11} fill="#8a97b3">
+        <rect x={770} y={36} width={216} height={88} rx={10} fill="#141416" stroke="#3a3a40" strokeWidth={1} />
+        <text x={780} y={26} fontSize={11} fill="#8a97b3">
           Maila kraneokaudal desberdinetan:
         </text>
         {[
-          { id: 'pleura-barrunbea', y: 152 },
-          { id: 'perikardio-barrunbea', y: 176 },
-          { id: 'peritoneo-barrunbea', y: 200 },
+          { id: 'pleura-barrunbea', y: 60 },
+          { id: 'perikardio-barrunbea', y: 84 },
+          { id: 'peritoneo-barrunbea', y: 108 },
         ].map((it) => (
           <Part key={it.id} id={it.id} show={g.fateCoelom}>
-            <circle cx={718} cy={it.y} r={6} fill={C.coelom} stroke="#ff9d9d" strokeWidth={1} />
+            <circle cx={788} cy={it.y} r={6} fill={C.coelom} stroke="#ff9d9d" strokeWidth={1} />
           </Part>
         ))}
-        <Label id="pleura-barrunbea" x={732} y={152} ax={718} ay={152} align="start" show={g.fateCoelom} small />
-        <Label id="perikardio-barrunbea" x={732} y={176} ax={718} ay={176} align="start" show={g.fateCoelom} small />
-        <Label id="peritoneo-barrunbea" x={732} y={200} ax={718} ay={200} align="start" show={g.fateCoelom} small />
+        <Label id="pleura-barrunbea" x={802} y={60} ax={788} ay={60} align="start" show={g.fateCoelom} small />
+        <Label id="perikardio-barrunbea" x={802} y={84} ax={788} ay={84} align="start" show={g.fateCoelom} small />
+        <Label id="peritoneo-barrunbea" x={802} y={108} ax={788} ay={108} align="start" show={g.fateCoelom} small />
       </g>
 
-      <Note x={500} y={610} tone="dim" show={1 - g.folded}>
+      <Note x={500} y={24} tone="dim" show={1 - g.folded}>
         Tolestura zeharkakoa gertatzen ari da
       </Note>
-      <Note x={500} y={610} tone="accent" show={g.folded}>
+      <Note x={500} y={24} tone="accent" show={g.folded}>
         Tolestura zeharkakoa amaituta: heste-hodia zintzilik, zeloma inguruan
       </Note>
 

@@ -4,9 +4,10 @@ import { useSyncExternalStore } from 'react';
  * Boolean viewer preferences (playback mode, narration, which side panels are open), remembered per
  * browser. The playback mode is `quick` (quick replay) over `guided` (guided) over neither (normal).
  */
-export type PrefKey = 'guided' | 'quick' | 'voice' | 'outline' | 'panel';
+/** `fsAsk`: offer full screen when a stage starts playing ("Ez galdetu berriro" turns it off). */
+export type PrefKey = 'guided' | 'quick' | 'voice' | 'outline' | 'panel' | 'fsAsk';
 
-const DEFAULTS: Record<PrefKey, boolean> = { guided: true, quick: false, voice: false, outline: true, panel: true };
+const DEFAULTS: Record<PrefKey, boolean> = { guided: true, quick: false, voice: false, outline: true, panel: true, fsAsk: true };
 
 export type PlayMode = 'gidatua' | 'arrunta' | 'azkarra';
 
@@ -40,6 +41,9 @@ const readPref = (k: PrefKey) => {
   }
   return v;
 };
+
+/** Read a preference outside render (event handlers). */
+export const getPref = (k: PrefKey) => readPref(k);
 
 export const setPref = (k: PrefKey, v: boolean) => {
   cache.set(k, v);

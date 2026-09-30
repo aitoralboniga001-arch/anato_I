@@ -25,7 +25,7 @@ import { Viewport } from './Viewport';
 import { KimuFace } from '@/components/kimu/KimuFace';
 import { registerKimuHost, setKimuHere, toggleKimu, useKimuOpen } from '@/components/kimu/store';
 import { hush, speak } from './narrate';
-import { setPlayMode, setPref, usePref, type PlayMode } from './prefs';
+import { getPref, setPlayMode, setPref, usePref, type PlayMode } from './prefs';
 import { markVisited, useVisited } from './progress';
 import { recordAnswer } from './answers';
 import { imageId } from '@/content/pool';
@@ -243,6 +243,16 @@ function legendOf(ids: readonly string[]) {
   return [...seen.entries()];
 }
 
+/** Full screen was accepted earlier in this tab: later playbacks enter it without asking. */
+const FS_ACCEPTED = 'enbrioatlas:fs-accepted';
+const fsAccepted = () => {
+  try {
+    return window.sessionStorage.getItem(FS_ACCEPTED) === '1';
+  } catch {
+    return false;
+  }
+};
+
 export function Simulator({ weekNumber }: { weekNumber: number }) {
   const week = getWeek(weekNumber) ?? weeks[0];
   const router = useRouter();
@@ -267,6 +277,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const [flash, setFlash] = useState<QuizFlash>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
+  // Offer of full screen when an explanation starts; `autoFs` = we entered it for this playback, so we leave it at the end.
+  const [fsOffer, setFsOffer] = useState(false);
+  const autoFs = useRef(false);
   // Exam-style image: the find quiz in black and white, like the printed exam figures.
   const [print, setPrint] = useState(false);
   const [back, setBack] = useState<Back | null>(null);
@@ -672,8 +685,29 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     hush();
     speaking.current = false;
   };
+  /** Focus mode + browser full screen (inside the click/key gesture, as browsers require). */
+  const enterFull = () => {
+    try {
+      window.sessionStorage.setItem(FS_ACCEPTED, '1');
+    } catch {
+      // Storage unavailable: it will simply be offered again next time.
+    }
+    autoFs.current = true;
+    setFsOffer(false);
+    setFocusMode(true);
+    const el = appRef.current;
+    if (el?.requestFullscreen && !document.fullscreenElement) void el.requestFullscreen().catch(() => {});
+  };
+  /** An explanation is starting: go full screen if accepted before, else offer it (unless turned off). */
+  const offerFull = () => {
+    if (focusMode) return;
+    if (fsAccepted()) enterFull();
+    else if (getPref('fsAsk')) setFsOffer(true);
+  };
   const togglePlay = () => {
     stopGlide();
+    if (playing) setFsOffer(false);
+    else if (intro === null && (pos.t <= 0.001 || pos.t >= 1)) offerFull();
     // The preview has finished and is waiting to be read: start the step-by-step playback.
     if (playing && intro !== null && intro >= 1) {
       endIntro();
@@ -711,6 +745,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     gotoStage(1);
     startIntro();
     setPlaying(true);
+    offerFull();
   };
   const gotoBeat = (k: number) => {
     endIntro();
@@ -1007,8 +1042,24 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 
   // Focus mode and full screen go together: leaving one (the F key, the button) leaves the other.
   useEffect(() => {
-    if (!focusMode && document.fullscreenElement && document.fullscreenElement === appRef.current) void document.exitFullscreen?.().catch(() => {});
+    if (focusMode) return;
+    autoFs.current = false;
+    if (document.fullscreenElement && document.fullscreenElement === appRef.current) void document.exitFullscreen?.().catch(() => {});
   }, [focusMode]);
+
+  // The full-screen offer steps aside on its own after a while.
+  useEffect(() => {
+    if (!fsOffer) return;
+    const id = window.setTimeout(() => setFsOffer(false), 10000);
+    return () => window.clearTimeout(id);
+  }, [fsOffer]);
+
+  // The explanation has ended (playback stopped at the end): leave the full screen we entered for it.
+  useEffect(() => {
+    if (playing || !focusMode || pos.t < 1 || !autoFs.current) return;
+    const id = window.setTimeout(() => setFocusMode(false), 1800);
+    return () => window.clearTimeout(id);
+  }, [playing, focusMode, pos.t]);
 
   // Keyboard shortcuts. The listener is subscribed once; the effect event always sees fresh state.
   const onKey = useEffectEvent((e: KeyboardEvent) => {
@@ -1391,6 +1442,34 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       Erreproduzitu etapa
                       <kbd>Zuriunea</kbd>
                     </button>
+                  )}
+                  {fsOffer && playing && !focusMode && (
+                    <div className="fs-offer" role="group" aria-label="Pantaila osoa">
+                      <span className="fs-offer-icon" aria-hidden>
+                        <IconExpand size={15} />
+                      </span>
+                      <span className="fs-offer-text">
+                        <b>Pantaila osoan hobeto ikusten da</b>
+                        <small>Azalpena amaitzean, berez irtengo da</small>
+                      </span>
+                      <span className="fs-offer-actions">
+                        <button className="btn small btn-light" onClick={enterFull}>
+                          Pantaila osoa
+                        </button>
+                        <button className="btn small ghost" onClick={() => setFsOffer(false)}>
+                          Orain ez
+                        </button>
+                        <button
+                          className="fs-offer-never"
+                          onClick={() => {
+                            setPref('fsAsk', false);
+                            setFsOffer(false);
+                          }}
+                        >
+                          Ez galdetu berriro
+                        </button>
+                      </span>
+                    </div>
                   )}
                   {find && (
                     <div className="find-bar">

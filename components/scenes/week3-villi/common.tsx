@@ -66,6 +66,10 @@ export function fingerD(len: number, hw: number, flare = 8) {
 }
 
 /** Transform placing a finger's base at (x, y) and turning it by `deg` (0 = pointing up, + = clockwise). */
+/** Concave fillets (both sides) where an upright finger of half-width `w` at x meets a band whose top is y. */
+export const filletD = (x: number, w: number, y: number, r: number) =>
+  `M${f1(x - w - r)},${f1(y + 0.5)} Q${f1(x - w)},${f1(y)} ${f1(x - w)},${f1(y - r)} L${f1(x + w)},${f1(y - r)} Q${f1(x + w)},${f1(y)} ${f1(x + w + r)},${f1(y + 0.5)}Z`;
+
 export const place = (x: number, y: number, deg = 0) => `translate(${f1(x)} ${f1(y)}) rotate(${f1(deg)})`;
 
 /** A point `d` along a finger placed at (x, y) with angle `deg`, offset `o` sideways (+ = to its right). */

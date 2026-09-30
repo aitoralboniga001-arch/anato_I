@@ -133,6 +133,39 @@ export const smoothPath = (pts: readonly (readonly [number, number])[], closed =
   return closed ? d + 'Z' : d;
 };
 
+/**
+ * Organic tube along a curve (stalks, cords, ducts): the half-width may vary along u so the ends can flare
+ * into the tissue they join. Samples u ∈ [from, to]; `cap` rounds the `from` end (a growing tip).
+ * Returns the fill outline plus the two side lines, so the sides can be stroked without drawing a hard edge
+ * across the ends (which should be tucked under / merged into neighbouring tissue).
+ */
+export const tube = (c: Curve, hw: (u: number) => number, from = 0, to = 1, n = 40, cap = false) => {
+  const L: Pt[] = [];
+  const R: Pt[] = [];
+  for (let i = 0; i <= n; i++) {
+    const s = c(from + ((to - from) * i) / n);
+    const w = hw(from + ((to - from) * i) / n);
+    L.push([s.x + s.nx * w, s.y + s.ny * w]);
+    R.push([s.x - s.nx * w, s.y - s.ny * w]);
+  }
+  const tip: Pt[] = [];
+  if (cap) {
+    const s = c(from);
+    const w = hw(from);
+    const tx = -s.ny;
+    const ty = s.nx; // unit tangent (n is the tangent's left-hand normal); the cap bulges backwards, towards −u
+    for (let i = 1; i < 8; i++) {
+      const a = (i / 8) * Math.PI;
+      tip.push([s.x - s.nx * w * Math.cos(a) - tx * w * Math.sin(a), s.y - s.ny * w * Math.cos(a) - ty * w * Math.sin(a)]);
+    }
+  }
+  return {
+    d: smoothPath([...L, ...[...R].reverse(), ...tip], true, 0.5),
+    left: smoothPath(L, false, 0.5),
+    right: smoothPath(R, false, 0.5),
+  };
+};
+
 /** Points on an ellipse, optionally with a deterministic wobble (for organic blobs). */
 export const ellipsePts = (cx: number, cy: number, rx: number, ry: number, n = 24, wobble = 0, seed = 1): Pt[] =>
   Array.from({ length: n }, (_, i) => {
