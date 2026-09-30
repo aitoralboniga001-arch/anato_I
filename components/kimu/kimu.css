@@ -685,12 +685,78 @@
   color: var(--text-4);
 }
 
-/* Topbar button in the simulator */
+/* Topbar button in the simulator: Kimu's own warm colour, so it reads as the assistant and not as
+   one more tool — but it stays in the bar, never over the scene. */
 .kimu-tool .kimu-face {
   margin: -3px 0 -4px -2px;
 }
 .tool-main.kimu-tool {
   padding-left: 8px;
+  border-color: rgba(255, 168, 119, 0.5);
+  background: linear-gradient(180deg, rgba(255, 122, 72, 0.2), rgba(255, 122, 72, 0.07)), var(--surface);
+  color: #ffe2d2;
+  font-weight: 600;
+  animation: kimu-ring-tool 2.8s ease-out 3s 2;
+}
+.tool-main.kimu-tool:hover,
+.tool-main.kimu-tool.is-on {
+  border-color: rgba(255, 168, 119, 0.85);
+  background: linear-gradient(180deg, rgba(255, 122, 72, 0.3), rgba(255, 122, 72, 0.12)), var(--surface-3);
+}
+@keyframes kimu-ring-tool {
+  from {
+    box-shadow: 0 0 0 0 rgba(255, 106, 61, 0.45);
+  }
+  to {
+    box-shadow: 0 0 0 12px rgba(255, 106, 61, 0);
+  }
+}
+/* Other tools drop their text on narrower screens; Kimu keeps its name down to phone width. */
+@media (max-width: 1180px) {
+  .tool-main.kimu-tool span {
+    display: inline;
+  }
+  .tool-main.kimu-tool {
+    padding: 0 12px 0 8px;
+  }
+}
+@media (max-width: 640px) {
+  .tool-main.kimu-tool span {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tool-main.kimu-tool {
+    animation: none;
+  }
+}
+
+/* First-time nudge inside the simulator: a small bubble hanging from the top-bar button. */
+.kimu-nudge.is-sim {
+  position: fixed;
+  z-index: 46;
+  transform: translateX(-50%);
+  border-radius: 14px;
+  border-color: rgba(255, 168, 119, 0.5);
+  animation: kimu-drop-in 0.45s var(--ease) both;
+}
+.kimu-nudge.is-sim::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: var(--surface-2);
+  border-left: 1px solid rgba(255, 168, 119, 0.5);
+  border-top: 1px solid rgba(255, 168, 119, 0.5);
+  transform: translateX(-50%) rotate(45deg);
+}
+@keyframes kimu-drop-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -6px);
+  }
 }
 
 @media (max-width: 640px) {

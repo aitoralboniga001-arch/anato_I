@@ -99,6 +99,8 @@ export function Kimu() {
   const [reveal, setReveal] = useState<{ id: string; n: number; len: number } | null>(null);
   const [peek, setPeek] = useState<string | null>(null);
   const [nudge, setNudge] = useState(false);
+  // In the simulator the nudge hangs under Kimu's top-bar button instead of the floating launcher.
+  const [nudgeAt, setNudgeAt] = useState<{ x: number; y: number } | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const reduced = useRef(false);
@@ -132,6 +134,18 @@ export function Kimu() {
       window.clearTimeout(timer);
     };
   }, []);
+
+  // Keep the in-simulator nudge under the top-bar button (and on screen) while it shows.
+  useEffect(() => {
+    if (!nudge || !inSim) return;
+    const place = () => {
+      const r = document.querySelector('.kimu-tool')?.getBoundingClientRect();
+      setNudgeAt(r ? { x: Math.min(window.innerWidth - 120, Math.max(120, r.left + r.width / 2)), y: r.bottom + 10 } : null);
+    };
+    place();
+    window.addEventListener('resize', place);
+    return () => window.removeEventListener('resize', place);
+  }, [nudge, inSim]);
 
   // Opening Kimu dismisses the nudge and the toast, however it was opened.
   useEffect(
@@ -270,6 +284,12 @@ export function Kimu() {
             <KimuFace size={54} mood="happy" />
           </button>
         </div>
+      )}
+
+      {!open && inSim && nudge && nudgeAt && (
+        <button type="button" className="kimu-nudge is-sim" style={{ left: nudgeAt.x, top: nudgeAt.y }} onClick={openKimu}>
+          Zalantzarik? Galdetu niri 🌱
+        </button>
       )}
 
       {!open && peek && (

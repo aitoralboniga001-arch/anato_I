@@ -1135,7 +1135,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         </nav>
         <div className="tb-tools">
           <button className={`tool tool-main kimu-tool${kimuOpen ? ' is-on' : ''}`} onClick={toggleKimu} aria-expanded={kimuOpen} data-tip="Galdetu Kimuri: lekura eramango zaitu · K" data-tip-pos="bottom">
-            <KimuFace size={26} mood="happy" still /> <span>Kimu</span>
+            <KimuFace size={26} mood="happy" still /> <span>Galdetu Kimuri</span>
           </button>
           <button className={`tool tool-main${find ? ' is-on' : ''}`} onClick={() => (find ? setFind(null) : startFind())} data-tip="Irudian galdetzen zaizun egitura klikatu" data-tip-pos="bottom">
             <IconTarget size={16} /> <span>Aurkitu</span>
