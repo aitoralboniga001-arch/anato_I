@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { C, Part, clamp, lerp, rand, type Pt } from '@/components/kit';
+import { C, Part, clamp, lerp, mix, rand, type Pt } from '@/components/kit';
 import { Cells } from '@/components/scenes/section/Section';
 
 /**
@@ -93,10 +93,11 @@ export function makeDisc(params: DiscParams) {
   const midGap = (base(0) + dEnd(0)) / 2;
   const rx = W * p.k;
   const cyA = map(W, tEpi(W) / 2)[1];
-  const cyY = map(W, dEnd(W) + (p.endo >= 0.999 ? TEN : THY) / 2)[1];
+  // The yolk sac's rim follows the lining thickness smoothly (hypoblast → endoderm) instead of snapping at the end.
+  const cyY = map(W, dEnd(W) + lerp(THY, TEN, ss((p.endo - 0.8) / 0.2)) / 2)[1];
   const arc = (cy: number, rX: number, rY: number, up: boolean, n = 64) =>
     range(0, Math.PI, n).map((a): Pt => [p.cx + rX * Math.cos(a), cy + (up ? -1 : 1) * rY * Math.sin(a)]);
-  const eW = p.endo >= 0.999 ? W + 1 : p.endo * W;
+  const eW = clamp(p.endo) * (W + 1);
   const at = {
     epiblast: map(-W * 0.55, tEpi(W * 0.55) / 2),
     groove: map(streakMid, top(streakMid) + 2),
@@ -206,7 +207,7 @@ export function DiscDrawing({ s, ids = {} }: { s: Disc; ids?: DiscIds }) {
     return { outer: r.map((x) => map(x, d0(x))), inner: r.map((x) => map(x, d1(x))) };
   };
   const epi = band(-W, W, top, base, 120);
-  const epiColor = p.ecto >= 0.5 ? C.ectoderm : C.epiblast;
+  const epiColor = mix(C.epiblast, C.ectoderm, ss((p.ecto - 0.25) / 0.5));
   const plateOn = p.plate > 0.01 && p.rod < 0.99;
   const pw = plateOn ? 18 : 18 * (1 - ss(p.close)) * (p.rod > 0.01 ? 1 : 0);
   const bulge = (x: number) => 9 * p.plate * (1 - p.rod) * Math.exp(-((x / 12) ** 2));

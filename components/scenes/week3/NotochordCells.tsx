@@ -30,9 +30,9 @@ const X_NODE = 736;
 const X_CUT = 470;
 const N_CORD = 16;
 
-const front = (t: number) => lerp(X_NODE - 16, X_HEAD, seg(t, NB.migrate, NB.canal));
+const front = (t: number) => lerp(X_NODE - 16, X_HEAD, seg(t, NB.migrate, NB.canal - 0.04));
 /** Cells emitted from the pit so far (continuous). */
-const emitted = (t: number) => N_CORD * lin(t, NB.migrate, NB.canal);
+const emitted = (t: number) => N_CORD * lin(t, NB.migrate, NB.canal - 0.04);
 
 /** x of cord cell i (0 = first out, always at the front) along the growing cord. */
 function cordX(i: number, t: number) {

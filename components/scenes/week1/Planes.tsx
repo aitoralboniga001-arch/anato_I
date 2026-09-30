@@ -63,22 +63,25 @@ const E_S = 0.78;
 
 export function PlanesAxes({ t }: SceneProps) {
   // Part A
-  const partA = 1 - seg(t, 0.635, 0.665);
+  const partA = 1 - seg(t, 0.66, 0.69);
   const sOn = vis(t, 0, 0.16);
   const cOn = vis(t, 0.16, 0.32);
   const tOn = vis(t, 0.32, 0.48);
   const axes = seg(t, 0.48, 0.52);
-  const seenC = t >= 0.16 ? 0.35 : 0;
-  const seenT = t >= 0.32 ? 0.35 : 0;
+  // A plane already studied settles to a dim 35 % as its highlight fades (no step at the beat).
+  const seenS = 0.35 * seg(t, 0.13, 0.16);
+  const seenC = 0.35 * seg(t, 0.29, 0.32);
+  const seenT = 0.35 * seg(t, 0.45, 0.48);
   const sag = quad([add([CX, TOP], -0.5), add([CX, TOP], 0.5), add([CX, BOT], 0.5), add([CX, BOT], -0.5)]);
   const cor = quad([[CX - HALF, TOP + 20], [CX + HALF, TOP + 20], [CX + HALF, BOT], [CX - HALF, BOT]]);
   const tra = quad([add([CX - HALF, WAIST], -0.5), add([CX + HALF, WAIST], -0.5), add([CX + HALF, WAIST], 0.5), add([CX - HALF, WAIST], 0.5)]);
   const dv: [Pt, Pt] = [add([CX, WAIST], -1.1), add([CX, WAIST], 1.1)];
 
   // Part B: embryo, then upside down.
-  const partB = seg(t, 0.64, 0.68);
-  const flip = seg(t, 0.8, 0.9);
-  const rot = 180 * flip * flip * (3 - 2 * flip);
+  // Both start at their own beat; seg is already eased, so the turn is not eased twice (that snapped it through the middle).
+  const partB = seg(t, 0.66, 0.7);
+  const flip = seg(t, 0.82, 0.93);
+  const rot = 180 * flip;
   const ang = (rot * Math.PI) / 180;
   const R = (p: Pt): Pt => {
     const x = (p[0] - E_C[0]) * E_S;
@@ -96,7 +99,7 @@ export function PlanesAxes({ t }: SceneProps) {
   const tail = R(spineAt(S, 0.985, 2).p);
   const back = R(spineAt(S, 0.42, -2).p);
   const belly = R([b.heart[0] - b.heart[2] * 0.82, b.heart[1]]);
-  const terms = seg(t, 0.67, 0.71) * (1 - seg(t, 0.79, 0.81)) + seg(t, 0.9, 0.93);
+  const terms = seg(t, 0.68, 0.72) * (1 - seg(t, 0.82, 0.84)) + seg(t, 0.93, 0.96);
   const L1 = RL([230, 70]);
   const L2 = RL([230, 560]);
   const L3 = RL([230, 360]);
@@ -111,7 +114,7 @@ export function PlanesAxes({ t }: SceneProps) {
           <g opacity={0.95}>
             <Standing id="w1p" cx={CX} h={0.25} />
           </g>
-          <Plane id="plano-sagitala" d={sag} color={COL.sag} on={sOn} dim={t >= 0.16 ? 0.35 : 0} />
+          <Plane id="plano-sagitala" d={sag} color={COL.sag} on={sOn} dim={seenS} />
           {/* Parasagittal planes */}
           {[-1, 1].map((sgn) => (
             <path

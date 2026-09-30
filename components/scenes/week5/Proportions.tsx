@@ -105,15 +105,20 @@ function Scale({ x, h, on, grow }: { x: number; h: number; on: number; grow: num
 }
 
 export function HeadProportions({ t }: SceneProps) {
-  const final = seg(t, 0.93, 0.98);
+  const final = seg(t, 0.9, 0.97);
   return (
     <g>
       {/* Head-height guides shared by the three figures. */}
       {FIGS.map((f, i) => {
-        const focus = Math.min(seg(t, f.at - 0.03, f.at + 0.02), 1 - seg(t, (FIGS[i + 1]?.at ?? 0.93) - 0.03, FIGS[i + 1]?.at ?? 0.93));
-        const on = Math.max(focus, final, t < 0.21 ? 1 : 0);
+        // All three start lit; entering the first figure's step the other two dim while it stays lit.
+        // Every hand-over starts at its beat and cross-fades over ~2 s (no pops, no rushed swaps).
+        const rise = i === 0 ? 1 : seg(t, f.at, f.at + 0.05);
+        const next = FIGS[i + 1]?.at;
+        const focus = Math.min(rise, next === undefined ? 1 : 1 - seg(t, next, next + 0.05));
+        const intro = i === 0 ? 0 : 1 - seg(t, FIGS[0].at, FIGS[0].at + 0.05);
+        const on = Math.max(focus, final, intro);
         const grow = Math.max(seg(t, f.at, f.at + 0.12), final);
-        const seen = t >= f.at - 0.03 ? 1 : 0;
+        const seen = seg(t, f.at, f.at + 0.04);
         const k = (0.5 - f.h) / 0.25;
         const hh = H * f.h;
         const bx = f.cx - lerp(100, 138, k);
@@ -144,13 +149,13 @@ export function HeadProportions({ t }: SceneProps) {
       })}
 
       <Label id="buruaren-tamaina" x={430} y={34} ax={FIGS[0].cx + H * 0.175 + 14} ay={Y0 + 30} />
-      <Mark id="vertex-orpo-luzera" show={seg(t, 0.26, 0.3) * (1 - seg(t, 0.49, 0.52))}>
+      <Mark id="vertex-orpo-luzera" show={seg(t, 0.24, 0.28) * (1 - seg(t, 0.52, 0.55))}>
         <g>
           <path d={`M${FIGS[0].cx - 92},${Y0} h-10 V${Y0 + H} h10`} fill="none" stroke="#fbbf24" strokeWidth={2} strokeDasharray="5 4" />
           <rect x={FIGS[0].cx - 108} y={Y0} width={16} height={H} fill="transparent" />
         </g>
       </Mark>
-      <Label id="vertex-orpo-luzera" x={40} y={590} ax={FIGS[0].cx - 100} ay={Y0 + H - 6} align="start" show={seg(t, 0.26, 0.3) * (1 - seg(t, 0.49, 0.52))} />
+      <Label id="vertex-orpo-luzera" x={40} y={590} ax={FIGS[0].cx - 100} ay={Y0 + H - 6} align="start" show={seg(t, 0.24, 0.28) * (1 - seg(t, 0.52, 0.55))} />
       <Note x={40} y={34} align="start" tone="accent">
         Altuera berdinera eskalatuta
       </Note>

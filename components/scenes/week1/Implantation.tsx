@@ -36,8 +36,9 @@ const VESSELS: [number, number, number][] = [
 ];
 
 export function Implantation({ t }: SceneProps) {
-  const k = seg(t, 0.22, 0.42);
-  const e = k * k * (3 - 2 * k);
+  // The camera closes in while the blastocyst approaches (seg is already eased: no second easing,
+  // which made the move snap through its middle).
+  const e = seg(t, 0.2, 0.38);
   const z = zoom(500, lerp(300, 540, e), lerp(0.62, 1.75, e), 500, lerp(320, 300, e));
 
   // Blastocyst: approaches the surface, touches it with the embryonic pole, then settles.
@@ -58,7 +59,7 @@ export function Implantation({ t }: SceneProps) {
   const gland = P(640, 440);
   const layer = (y: number): Pt => P(1000, y);
   const over = vis(t, 0, 0.26);
-  const close = seg(t, 0.4, 0.46);
+  const close = seg(t, 0.35, 0.4);
 
   return (
     <g>
@@ -134,8 +135,8 @@ export function Implantation({ t }: SceneProps) {
       <Label id="miometrioa" x={812} y={layer(40)[1]} ax={layer(40)[0] - 60} ay={layer(40)[1]} align="start" show={over} />
       <Label id="endometrioa" x={812} y={layer(360)[1]} ax={layer(360)[0] - 60} ay={layer(360)[1]} align="start" show={over} />
       <Label id="umetoki-barrunbea" x={812} y={Math.min(600, layer(SURF + 60)[1])} ax={layer(SURF + 60)[0] - 60} ay={layer(SURF + 60)[1]} align="start" show={over} />
-      <Mark id="blastozistoa" x={P(cx, cy)[0]} y={P(cx, cy)[1]} rx={RB + 18} color="#8fb4f7" show={vis(t, 0.1, 0.4)} />
-      <Label id="blastozistoa" x={190} y={470} ax={P(cx - RB, cy)[0]} ay={P(cx - RB, cy)[1]} show={vis(t, 0.1, 0.4)} />
+      <Mark id="blastozistoa" x={P(cx, cy)[0]} y={P(cx, cy)[1]} rx={RB + 18} color="#8fb4f7" show={vis(t, 0.1, 0.46)} />
+      <Label id="blastozistoa" x={190} y={470} ax={P(cx - RB, cy)[0]} ay={P(cx - RB, cy)[1]} show={vis(t, 0.1, 0.46)} />
 
       {/* Marks: the embryonic pole leading, and the implantation itself where the trophoblast meets the epithelium */}
       <Mark id="mutur-enbrionarioa" x={pole[0]} y={pole[1]} rx={34} color="#8fb4f7" show={vis(t, 0.45, 0.66)} />

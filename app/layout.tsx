@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import { Kimu } from '@/components/kimu/Kimu';
 
 const sans = Geist({ subsets: ['latin'], variable: '--font-geist', display: 'swap' });
 const mono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono', display: 'swap' });
@@ -23,7 +24,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <script dangerouslySetInnerHTML={{ __html: introFlag }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Kimu />
+      </body>
     </html>
   );
 }

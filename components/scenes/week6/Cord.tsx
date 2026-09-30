@@ -98,30 +98,30 @@ const CHORION_WALL_X = 955;
 
 function CordFormationDrawing({ t }: SceneProps) {
   // Amnios barrunbea slowly widening around the embryo.
-  const amGrow = seg(t, 0, 0.48);
+  const amGrow = seg(t, 0.48, 0.56);
   const amRx = lerp(172, 190, amGrow);
   const amRy = lerp(182, 202, amGrow);
   const amCx = 338;
   const amCy = 306;
 
   // The amnios wall sweeps out and sleeves the trunk, then the upper branch, into a tube.
-  const trunkWrap = seg(t, 0.36, 0.6);
-  const upWrap = seg(t, 0.74, 0.92);
-  const whartonK = seg(t, 0.82, 1);
+  const trunkWrap = seg(t, 0.48, 0.56);
+  const upWrap = seg(t, 0.74, 0.82);
+  const whartonK = seg(t, 0.86, 0.96);
   const sleeveFill = mix('rgba(110,170,255,0.20)'.replace('rgba(110,170,255,0.20)', '#4a7fd1'), '#e8e3c8', whartonK);
 
   // Distal remnants fade away: bitelo-zakua + hodi onfalomesenterikoa.
-  const distal = 1 - seg(t, 0.74, 0.92);
+  const distal = 1 - seg(t, 0.86, 0.91);
   // Chorionic cavity disappears as the amnios fuses with the chorionic plate.
-  const chorionCav = 1 - seg(t, 0.74, 0.88);
+  const chorionCav = 1 - seg(t, 0.74, 0.82);
   // Physiological gut loop: appears in the proximal part, then returns to the abdomen.
-  const gut = seg(t, 0.48, 0.6) * (1 - seg(t, 0.84, 0.97));
+  const gut = seg(t, 0.6, 0.66) * (1 - seg(t, 0.89, 0.94));
   // Allantois (distal part) closes.
-  const allantois = 1 - seg(t, 0.84, 0.96);
+  const allantois = 1 - seg(t, 0.92, 0.96);
   // The coelomic communication (embryo ↔ chorion) closes.
-  const coelom = 1 - seg(t, 0.84, 0.96);
+  const coelom = 1 - seg(t, 0.94, 0.98);
   // The primitive ring is absorbed into the cord once it's wrapped.
-  const ringA = 1 - seg(t, 0.6, 0.78);
+  const ringA = 1 - seg(t, 0.6, 0.68);
 
   const upMid = bez(...UP, 0.5);
   const downMid = bez(...DOWN, 0.5);
@@ -227,12 +227,12 @@ function CordFormationDrawing({ t }: SceneProps) {
       {/* Labels — left gutter */}
       <Label id="amniosa" x={200} y={80} ax={amCx + amRx * 0.7} ay={amCy - amRy * 0.65} show={vis(t, 0)} />
       <Label id="amnios-barrunbea" x={200} y={130} ax={amCx} ay={amCy - 60} show={vis(t, 0.48)} />
-      <Label id="hasierako-zilbor-eraztuna" x={420} y={556} align="start" ax={RING[0]} ay={RING[1]} show={vis(t, 0, 0.66)} />
+      <Label id="hasierako-zilbor-eraztuna" x={420} y={556} align="start" ax={RING[0]} ay={RING[1]} show={vis(t, 0, 0.68)} />
       <Mark id="finkapen-pedikulua" x={upMid[0]} y={upMid[1]} rx={22} show={vis(t, 0.12, 0.76)} />
       <Label id="finkapen-pedikulua" x={200} y={230} ax={upMid[0]} ay={upMid[1]} show={vis(t, 0.12, 0.76)} />
-      <Label id="alantoidea" x={200} y={280} ax={trunkMid[0]} ay={trunkMid[1] + 8} show={vis(t, 0.12, 0.9)} />
+      <Label id="alantoidea" x={200} y={280} ax={trunkMid[0]} ay={trunkMid[1] + 8} show={vis(t, 0.12, 0.96)} />
       <Label id="zilbor-hodiak" x={200} y={330} ax={bez(...UP, 0.75)[0]} ay={bez(...UP, 0.75)[1]} show={vis(t, 0.12)} />
-      <Label id="enbrioi-barruko-zeloma" x={200} y={380} ax={RING[0] + 10} ay={RING[1] + 10} show={vis(t, 0.36, 0.9)} />
+      <Label id="enbrioi-barruko-zeloma" x={200} y={380} ax={RING[0] + 10} ay={RING[1] + 10} show={vis(t, 0.36, 0.98)} />
       <Label id="hasierako-zilbor-hestea" x={200} y={430} ax={trunkMid[0]} ay={trunkMid[1] - 14} show={vis(t, 0.48, 0.78)} />
       <Label id="heste-lakioak" x={200} y={480} ax={FORK[0] - 10} ay={FORK[1] + 12} show={gut} />
       <Label id="behin-betiko-zilbor-hestea" x={200} y={530} ax={upMid[0] - 30} ay={upMid[1] + 10} show={vis(t, 0.74)} />
@@ -240,15 +240,18 @@ function CordFormationDrawing({ t }: SceneProps) {
 
       {/* Labels — right gutter */}
       <Label id="korion-barrunbea" x={760} y={260} ax={700} ay={300} show={vis(t, 0.36, 0.82)} />
-      <Label id="hodi-onfalomesenterikoa" x={760} y={310} ax={downMid[0]} ay={downMid[1]} show={vis(t, 0.24, 0.8)} />
-      <Label id="bitelo-zaku-sekundarioa" x={760} y={360} ax={YOLK[0]} ay={YOLK[1]} show={vis(t, 0.24, 0.8)} />
+      <Label id="hodi-onfalomesenterikoa" x={760} y={310} ax={downMid[0]} ay={downMid[1]} show={vis(t, 0.24, 0.91)} />
+      <Label id="bitelo-zaku-sekundarioa" x={760} y={360} ax={YOLK[0]} ay={YOLK[1]} show={vis(t, 0.24, 0.91)} />
       <Label id="korion-plaka" x={760} y={410} ax={CHORION_WALL_X} ay={300} show={vis(t, 0.36)} />
 
-      <Note x={500} y={612} tone="dim" show={vis(t, 0.36, 0.72)}>
+      <Note x={500} y={612} tone="dim" show={vis(t, 0.48, 0.74)}>
         Amnios barrunbea zabaldu ahala, paretak eraztuneko egiturak inguratzen ditu
       </Note>
-      <Note x={500} y={612} tone="dim" show={vis(t, 0.74, 1)}>
-        Korion barrunbea desagertu; bitelo-zakua eta hodi onfalomesenterikoa galtzen dira
+      <Note x={500} y={612} tone="dim" show={vis(t, 0.74, 0.86)}>
+        Amniosa korion plakarekin fusionatu: korion barrunbea desagertu
+      </Note>
+      <Note x={500} y={612} tone="dim" show={vis(t, 0.86)}>
+        Bitelo-zakua eta hodi onfalomesenterikoa galdu; heste lakioak abdomenera; alantoidea itxi
       </Note>
     </g>
   );
@@ -266,15 +269,16 @@ const SEC_C: Pt = [500, 320];
 const SEC_R = 168;
 
 export function CordSections({ t }: SceneProps) {
-  const ductOut = seg(t, 0.34, 0.5); // hodi onfalomesenterikoa → heste lakioa
-  const gutVisible = ductOut * (1 - seg(t, 0.6, 0.76)); // heste lakioa itself, then returns to abdomen
-  const alantoidea = 1 - seg(t, 0.75, 0.85);
-  const zeloma = 1 - seg(t, 0.85, 0.96);
+  // The four losses all belong to the last step, in the order the notes list them.
+  const duct = 1 - seg(t, 0.86, 0.89);
+  const gutVisible = seg(t, 0.6, 0.66) * (1 - seg(t, 0.89, 0.92)); // proximal part: gut loops, then back to the abdomen
+  const alantoidea = 1 - seg(t, 0.92, 0.95);
+  const zeloma = 1 - seg(t, 0.95, 0.98);
   const definitiv = seg(t, 0.86, 1);
   const vesselShift = seg(t, 0.86, 1);
 
   const zelomaC: Pt = [SEC_C[0] - 66, SEC_C[1] - 58];
-  const ductC: Pt = zelomaC;
+  const ductC: Pt = [zelomaC[0] - 16, zelomaC[1] - 16];
   const vesselBase: Pt[] = [
     [SEC_C[0] + 54, SEC_C[1] + 58],
     [SEC_C[0] + 30, SEC_C[1] + 76],
@@ -300,12 +304,12 @@ export function CordSections({ t }: SceneProps) {
         <circle cx={zelomaC[0]} cy={zelomaC[1]} r={40} fill="#fbe7de" stroke="#b85b4a" strokeWidth={1.4} />
       </Part>
 
-      <Part id="hodi-onfalomesenterikoa" show={Math.max(1 - ductOut, 0.001) > 0.02 ? 1 - ductOut : 0}>
-        <circle cx={ductC[0]} cy={ductC[1]} r={16} fill="#f0b34e" stroke="#c98a2c" strokeWidth={1.4} />
-        <circle cx={ductC[0] - 4} cy={ductC[1] - 3} r={5} fill="#3b5bdb" opacity={0.6} />
+      <Part id="hodi-onfalomesenterikoa" show={duct}>
+        <circle cx={ductC[0]} cy={ductC[1]} r={12} fill="#f0b34e" stroke="#c98a2c" strokeWidth={1.4} />
+        <circle cx={ductC[0] - 3} cy={ductC[1] - 2} r={4} fill="#3b5bdb" opacity={0.6} />
       </Part>
       <Part id="heste-lakioak" show={gutVisible}>
-        <g transform={`translate(${ductC[0] - 16} ${ductC[1] - 8})`}>
+        <g transform={`translate(${zelomaC[0] - 4} ${zelomaC[1] - 2})`}>
           <circle cx={10} cy={8} r={11} fill="none" stroke="#c9665e" strokeWidth={5} />
           <circle cx={26} cy={12} r={9} fill="none" stroke="#c9665e" strokeWidth={4.5} />
         </g>
@@ -323,25 +327,25 @@ export function CordSections({ t }: SceneProps) {
       </Part>
 
       <Label id="amniosa" x={200} y={80} ax={SEC_C[0] - SEC_R * 0.7} ay={SEC_C[1] - SEC_R * 0.7} />
-      <Label id="hodi-onfalomesenterikoa" x={200} y={130} ax={ductC[0]} ay={ductC[1]} show={1 - ductOut} />
-      <Label id="heste-lakioak" x={200} y={180} ax={ductC[0] + 10} ay={ductC[1]} show={gutVisible} />
+      <Label id="hodi-onfalomesenterikoa" x={200} y={130} ax={ductC[0]} ay={ductC[1]} show={duct} />
+      <Label id="heste-lakioak" x={200} y={180} ax={zelomaC[0] + 8} ay={zelomaC[1] + 4} show={gutVisible} />
       <Label id="alantoidea" x={200} y={230} ax={SEC_C[0] - 10} ay={SEC_C[1] - 4} show={alantoidea} />
       <Label id="enbrioi-barruko-zeloma" x={200} y={280} ax={zelomaC[0]} ay={zelomaC[1]} show={zeloma} />
 
       <Label id="zilbor-hodiak" x={800} y={200} ax={vpos(2)[0]} ay={vpos(2)[1]} />
-      <Label id="wharton-gelatina" x={800} y={250} ax={SEC_C[0] + SEC_R * 0.55} ay={SEC_C[1]} show={vis(t, 0.1)} />
-      <Label id="behin-betiko-zilbor-hestea" x={800} y={300} ax={SEC_C[0]} ay={SEC_C[1] + SEC_R - 20} show={definitiv} />
+      <Label id="wharton-gelatina" x={800} y={250} ax={SEC_C[0] + SEC_R * 0.55} ay={SEC_C[1]} show={vis(t, 0.86)} />
+      <Label id="behin-betiko-zilbor-hestea" x={800} y={300} ax={SEC_C[0]} ay={SEC_C[1] + SEC_R - 20} show={vis(t, 0.74)} />
 
-      <Note x={40} y={470} align="start" tone="accent" show={seg(t, 0.5, 0.56)}>
+      <Note x={40} y={470} align="start" tone="accent" show={seg(t, 0.86, 0.89)}>
         1) Bitelo-zakua eta hodi onfalomesenterikoa desagertu
       </Note>
-      <Note x={40} y={505} align="start" tone="accent" show={seg(t, 0.6, 0.7)}>
+      <Note x={40} y={505} align="start" tone="accent" show={seg(t, 0.89, 0.92)}>
         2) Heste lakioak abdomenera itzuli (12. astetik)
       </Note>
-      <Note x={40} y={540} align="start" tone="accent" show={seg(t, 0.75, 0.82)}>
+      <Note x={40} y={540} align="start" tone="accent" show={seg(t, 0.92, 0.95)}>
         3) Alantoidea itxi
       </Note>
-      <Note x={40} y={575} align="start" tone="accent" show={seg(t, 0.85, 0.92)}>
+      <Note x={40} y={575} align="start" tone="accent" show={seg(t, 0.95, 0.98)}>
         4) Zelomen arteko komunikazioa itxi
       </Note>
     </g>

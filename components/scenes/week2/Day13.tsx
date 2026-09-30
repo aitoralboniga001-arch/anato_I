@@ -8,21 +8,23 @@ import { CAVITY, EndometriumBack, EndometriumFront, RC_END } from './Day11_12';
  * 13. eguna — gainazaleko epitelioa sendatuta, biloxka primarioak, korion plaka, bitelo zaku
  * sekundarioa, kiste exozelomikoak eta finkapen pedikulua.
  * Windows (shared by every view and the stage beats in content/weeks/week2.ts):
- *   .00-.10 epitelioa erabat itxita (fibrina desagertuta) · .06-.30 biloxka primarioak agertzen dira
- *   .14-.50 korion barrunbea handitzen jarraitzen du → korion plaka nabarmentzen da (.34-.50)
- *   .48-.68 hipoblastoak Heuser-en mintzaren barrualdea estaltzen du → bitelo zaku sekundarioa
- *   .60-.76 hasierako bitelo zakuaren zatiak kiste exozelomiko gisa geratzen dira
- *   .72-.84 finkapen pedikulua nabarmentzen da · .84-.98 korioia (zito+sinzitio+mesodermo somatikoa)
+ *   .00-.07 epitelioa erabat itxita (fibrina desagertuta) · .08-.18 biloxka primarioak agertzen dira
+ *   .14-.46 korion barrunbea handitzen jarraitzen du → korion plaka nabarmentzen da (.32-.46)
+ *   .50-.58 hipoblastoak Heuser-en mintzaren barrualdea estaltzen du → bitelo zaku sekundarioa
+ *   .56-.70 hasierako bitelo zakuaren zatiak kiste exozelomiko gisa geratzen dira
+ *   .74-.82 finkapen pedikulua nabarmentzen da · .86-.90 korioia (zito+sinzitio+mesodermo somatikoa)
+ * Every window ends before its step's complete frame (next beat − 0.035), so the paused frame
+ * shows the finished state the caption describes.
  */
 export const W = {
-  heal: [0, 0.1],
-  villi: [0.08, 0.22],
-  cavityGrow: [0.14, 0.5],
-  plaka: [0.34, 0.5],
-  secondary: [0.48, 0.68],
-  cysts: [0.6, 0.76],
-  stalk: [0.72, 0.84],
-  chorion: [0.84, 0.98],
+  heal: [0, 0.07],
+  villi: [0.08, 0.18],
+  cavityGrow: [0.14, 0.46],
+  plaka: [0.32, 0.46],
+  secondary: [0.5, 0.58],
+  cysts: [0.56, 0.7],
+  stalk: [0.74, 0.82],
+  chorion: [0.86, 0.9],
 } as const;
 
 const s = (t: number, w: readonly [number, number]) => seg(t, w[0], w[1]);
@@ -85,6 +87,12 @@ const ring = (g: Geo, r0: number, r1: number, a0: number, a1: number) => bandAro
 const edgeAt = (r: number) => (Math.asin(Math.min(1, -HYPO_BOTTOM / r)) * 180) / Math.PI;
 
 const CYST_A = [24, 72, 168, 328, 352];
+/** Cyst i, left between the old (primary) and the new (secondary) yolk-sac wall. */
+function cystAt(g: Geo, i: number, secondary: number): Pt {
+  const rYPrim = INNER - 4.5;
+  const rYSec = lerp(rYPrim, 60, secondary);
+  return polarE(g, CYST_A[i], lerp(rYSec, rYPrim, 0.5 + 0.15 * Math.sin(i * 2.1)));
+}
 
 function Day13Drawing({ t }: SceneProps) {
   const g = geometry(t);
@@ -138,8 +146,7 @@ function Day13Drawing({ t }: SceneProps) {
       </Part>
       <Part id="kiste-exozelomikoak" show={cysts}>
         {CYST_A.map((a, i) => {
-          const r = lerp(rYSec, rYPrim, 0.5 + 0.15 * Math.sin(i * 2.1));
-          const [x, y] = polarE(g, a, r);
+          const [x, y] = cystAt(g, i, secondary);
           return <ellipse key={i} cx={f1(x)} cy={f1(y)} rx={7} ry={5.4} fill={CYST} opacity={0.55} stroke="#c99a2e" strokeWidth={0.8} />;
         })}
       </Part>
@@ -165,9 +172,11 @@ function Day13Drawing({ t }: SceneProps) {
         {VILLI_A.map((v, i) => {
           const a = v + 10;
           const th = synTh(norm(a), villi);
-          if (th < 16) return null;
+          // Fade in as the syncytium gets thick enough to hold a lacuna (a hard threshold popped them in).
+          const o = Math.min(1, Math.max(0, (th - 12) / 8));
+          if (o < 0.01) return null;
           const [x, y] = polar(g, a, Rc + th * 0.5);
-          return <ellipse key={i} cx={f1(x)} cy={f1(y)} rx={f1(Math.min(9, th * 0.16))} ry={f1(Math.min(15, th * 0.3))} transform={`rotate(${f1(a)} ${f1(x)} ${f1(y)})`} fill="#b3303f" stroke="#7d1d2b" strokeWidth={0.8} opacity={0.85} />;
+          return <ellipse key={i} cx={f1(x)} cy={f1(y)} rx={f1(Math.min(9, th * 0.16))} ry={f1(Math.min(15, th * 0.3))} transform={`rotate(${f1(a)} ${f1(x)} ${f1(y)})`} fill="#b3303f" stroke="#7d1d2b" strokeWidth={0.8} opacity={0.85 * o} />;
         })}
       </Part>
       <Part id="biloxka-primarioa" show={villi}>
@@ -291,8 +300,8 @@ export function Day13Section(props: SceneProps) {
       {L('amnios-barrunbea', 810, 430, k.amnios)}
       {L('epiblastoa', 810, 475, k.epi)}
       {L('bitelo-zaku-sekundarioa', 810, 520, k.yolk, k.secondary)}
-      {L('kiste-exozelomikoak', 810, 565, k.near(72, 86), k.cysts)}
-      {L('korioia', 810, 598, polar(k.g, 340, k.g.Rc + 6), k.chorion)}
+      {L('kiste-exozelomikoak', 810, 565, cystAt(k.g, 1, k.secondary), k.cysts)}
+      {L('korioia', 810, 315, polar(k.g, 340, k.g.Rc + 6), k.chorion)}
       <Note x={500} y={585} tone="dim" show={1}>
         Blastozistoa guztiz sartuta dago; umetokiaren paretan goragunea antzematen da
       </Note>
@@ -338,7 +347,7 @@ export function Day13Yolk(props: SceneProps) {
       </g>
       {L('hasierako-bitelo-zakua', 180, 150, [cx - 20, k.g.hypoBottom + 30], 1 - k.secondary)}
       {L('bitelo-zaku-sekundarioa', 180, 200, k.yolk, k.secondary)}
-      {L('kiste-exozelomikoak', 180, 260, k.near(72, 86), k.cysts)}
+      {L('kiste-exozelomikoak', 180, 260, cystAt(k.g, 2, k.secondary), k.cysts)}
       {L('hipoblastoa', 180, 400, [cx + 40, k.g.hypoBottom - 10])}
       {L('finkapen-pedikulua', 800, 150, k.stalk)}
       {L('korion-barrunbea', 800, 200, k.meso(310, 0.5))}

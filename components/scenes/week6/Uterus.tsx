@@ -13,7 +13,6 @@ import { FetusFigure, fetusGeom, placeFetus } from '@/components/scenes/week5/Fe
 
 const vis = (t: number, a: number, b = 2) => Math.min(a <= 0 ? 1 : seg(t, a, a + 0.03), 1 - seg(t, b - 0.03, b));
 const f1 = (v: number) => v.toFixed(1);
-const ease = (x: number) => x * x * (3 - 2 * x);
 
 // Uterine wall (serosa outline), A and B share point count so they can be morphed.
 const OUTER_A: Pt[] = [
@@ -82,7 +81,8 @@ const VILLUS = '#7d1838';
 const PLATE = '#5a1026';
 
 export function UterusSagittal({ t }: SceneProps) {
-  const k = ease(seg(t, 0.42, 0.92)); // A → B growth
+  // A → B growth happens in its own step (chorionic cavity enlarging); the amnion fills it in the next one.
+  const k = seg(t, 0.7, 0.82);
   const outer = OUTER_A.map((p, i) => lerpPt(p, OUTER_B[i], k));
   const dec = DEC_A.map((p, i) => lerpPt(p, DEC_B[i], k));
   const outerD = smoothPath(outer, true, 0.5);
@@ -94,15 +94,15 @@ export function UterusSagittal({ t }: SceneProps) {
   const w0 = wallMid - lerp(92, 100, k);
   const w1 = wallMid + lerp(92, 88, k);
 
-  const villLen = lerp(15, 34, k) + 4 * seg(t, 0.56, 0.7);
+  const villLen = lerp(lerp(11, 15, seg(t, 0.12, 0.22)), 34, k) + 4 * seg(t, 0.56, 0.66);
   const basal = lerp(12, 26, k);
-  const leunaVilli = 1 - seg(t, 0.14, 0.4); // abembryonic villi degenerate
-  const caps = lerp(11, 2, seg(t, 0.62, 0.84));
-  const capsShow = 1 - seg(t, 0.72, 0.86);
-  const cavityShow = 1 - seg(t, 0.66, 0.84);
+  const leunaVilli = 1 - 0.3 * seg(t, 0.12, 0.22) - 0.7 * seg(t, 0.26, 0.36); // abembryonic villi degenerate
+  const caps = lerp(11, 2, seg(t, 0.7, 0.8));
+  const capsShow = 1 - seg(t, 0.72, 0.82);
+  const cavityShow = 1 - seg(t, 0.72, 0.82);
 
   // Amnion + embryo/fetus
-  const amFill = ease(seg(t, 0.5, 0.96));
+  const amFill = seg(t, 0.86, 0.97);
   const am: Ell = {
     cx: lerp(sac.cx - sac.rx * 0.08, sac.cx, amFill),
     cy: lerp(sac.cy + sac.ry * 0.04, sac.cy, amFill),
@@ -118,9 +118,9 @@ export function UterusSagittal({ t }: SceneProps) {
   const cordTop = onE(sac, wallMid + 42, -1);
   const cordMid: Pt = [Math.max(cordRoot[0], cordTop[0]) + am.rx * 0.12, (cordRoot[1] + cordTop[1]) / 2 + am.ry * 0.12];
 
-  const yolkShow = 1 - seg(t, 0.56, 0.74);
+  const yolkShow = 1 - seg(t, 0.7, 0.8);
   const yolk = onE(sac, 118, -sac.rx * 0.2);
-  const yolkR = lerp(8, 4, seg(t, 0.3, 0.7));
+  const yolkR = lerp(8, 4, seg(t, 0.3, 0.8));
   const membraneShow = vis(t, 0.86, 2);
 
   // villi: dense on the embryonic pole, sparse/regressing elsewhere
@@ -243,7 +243,7 @@ export function UterusSagittal({ t }: SceneProps) {
 
       {/* Labels — left gutter */}
       <Label id="paretako-dezidua" x={240} y={150} ax={dec[15][0] + 9} ay={dec[15][1]} show={vis(t, 0.4)} align="end" />
-      <Label id="korion-barrunbea" x={240} y={210} ax={onE(sac, 200, -sac.rx * 0.1)[0]} ay={onE(sac, 200, -sac.rx * 0.1)[1]} show={vis(t, 0, 0.92)} align="end" />
+      <Label id="korion-barrunbea" x={240} y={210} ax={onE(sac, 200, -sac.rx * 0.1)[0]} ay={onE(sac, 200, -sac.rx * 0.1)[1]} show={vis(t, 0, 0.95)} align="end" />
       <Label id="dezidua-kapsularra" x={240} y={270} ax={wallA(125, caps * 0.6)[0]} ay={wallA(125, caps * 0.6)[1]} show={Math.min(capsShow, vis(t, 0.4))} align="end" />
       <Label id="biloxka-sekundarioa" x={240} y={330} ax={wallA(165, villLen * 0.4)[0]} ay={wallA(165, villLen * 0.4)[1]} show={vis(t, 0, 0.12)} align="end" />
       <Label id="korion-leuna" x={240} y={330} ax={wallA(165, 0)[0]} ay={wallA(165, 0)[1]} show={vis(t, 0.26, 0.86)} align="end" />

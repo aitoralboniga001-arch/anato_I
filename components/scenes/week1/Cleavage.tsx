@@ -23,8 +23,9 @@ const CY = 326;
 const S = 1.42;
 
 // Stage time → engine progress (gens = 5) and development day.
-const P_SEG: [number, number][] = [[0, 0.5], [0.1, 1], [0.26, 2], [0.4, 3], [0.52, 4], [0.66, 5], [0.74, 5], [0.86, 5.999], [1, 5.999]];
-const D_SEG: [number, number][] = [[0, 0.5], [0.1, 1], [0.26, 1.25], [0.4, 2], [0.52, 2.5], [0.66, 3], [0.74, 3], [0.86, 4], [1, 4]];
+// Each count holds while its step is read: 16 cells for the whole 3rd day (notes: 12–16), ~32 on the 4th.
+const P_SEG: [number, number][] = [[0, 0.5], [0.1, 1], [0.26, 2], [0.4, 3], [0.52, 4], [0.66, 5], [0.86, 5], [0.93, 5.999], [1, 5.999]];
+const D_SEG: [number, number][] = [[0, 0.5], [0.1, 1], [0.26, 1.25], [0.4, 2], [0.52, 2.5], [0.66, 3], [0.86, 3], [0.89, 4], [1, 4]];
 
 const dayText = (d: number) => (d < 1 ? '12–24 ordu' : d < 1.5 ? '30 ordu' : `${Math.floor(d + 0.001)}. eguna`);
 
@@ -33,8 +34,8 @@ export function Segmentation({ t }: SceneProps) {
   const day = piece(D_SEG, t);
   const f = cleavageFrame(p, 0, 5);
   const count = p < 1 ? 1 : 2 ** Math.min(5, Math.floor(p) - 1 + (p % 1 > 0.6 ? 1 : 0));
-  const mass = seg(t, 0.86, 0.94);
-  const cut = seg(t, 0.9, 0.96);
+  const mass = seg(t, 0.9, 0.97);
+  const cut = seg(t, 0.93, 0.98);
   const polar = 1 - seg(t, 0.62, 0.7);
   // Anchors (engine units → screen).
   const at = (x: number, y: number): [number, number] => [CX + x * S, CY + y * S];
@@ -96,8 +97,11 @@ const DROPS = [
   [20, -40, 0.34],
 ] as const;
 
+// Cavitation by step: small spaces appear and start to fuse (step .30), the single blastocoel opens (step .60).
+const CAV_SEG: [number, number][] = [[0.28, 0], [0.57, 0.42], [0.6, 0.45], [0.7, 1]];
+
 export function BlastocystFormation({ t }: SceneProps) {
-  const cav = seg(t, 0.26, 0.72);
+  const cav = piece(CAV_SEG, t);
   const f = cleavageFrame(6 + cav, 0, 5);
   const zonaLoss = seg(t, 0.08, 0.24);
   f.zonaO = Math.min(f.zonaO, 1 - zonaLoss);
@@ -161,7 +165,7 @@ export function BlastocystFormation({ t }: SceneProps) {
       <Label id="mintz-peluzidoa" x={800} y={470} ax={CX + 110 * S} ay={CY + 100 * S} show={vis(t, 0, 0.26)} />
       <Label id="trofoblastoa" x={800} y={420} ax={CX + 88 * S} ay={CY + 88 * S} show={done} />
       <Label id="enbrioblastoa" x={250} y={170} ax={embC[0] - 20} ay={embC[1]} show={done} />
-      <Label id="blastozelea" x={800} y={300} ax={CX + 30 * S} ay={CY + 30 * S} show={seg(t, 0.55, 0.62)} />
+      <Label id="blastozelea" x={800} y={300} ax={CX + 30 * S} ay={CY + 30 * S} show={seg(t, 0.6, 0.65)} />
       <Label id="mutur-enbrionarioa" x={800} y={110} ax={CX + 8} ay={CY - RB * S - 4} show={seg(t, 0.84, 0.88)} />
       <Label id="mutur-anenbrionarioa" x={250} y={540} ax={CX} ay={CY + RB * S + 4} show={seg(t, 0.84, 0.88)} />
       <Mark id="blastozistoa" x={CX} y={CY} rx={RB * S + 22} color="#8fb4f7" show={named} />

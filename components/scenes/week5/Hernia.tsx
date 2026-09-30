@@ -2,6 +2,7 @@
 
 import { Label, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { AgeHud, SkinDefs } from './skin';
+import { D3, dayOf } from './Fetus';
 
 /**
  * Stage `hirugarren-hilabetea`, view `ernia`: the abdomen cut open from the left side.
@@ -13,14 +14,8 @@ import { AgeHud, SkinDefs } from './skin';
 const C: Pt = [610, 290];
 const E: Pt = [72, 468]; // cut end of the cord
 
-/** Week shown for each moment of the stage (the other view runs weeks 9–12 in parallel). */
-function weekAt(t: number) {
-  if (t < 0.12) return 6;
-  if (t < 0.3) return lerp(6, 7, seg(t, 0.12, 0.3));
-  if (t < 0.62) return lerp(7, 10, seg(t, 0.3, 0.62));
-  if (t < 0.84) return lerp(10, 12, seg(t, 0.62, 0.84));
-  return 12;
-}
+/** Week shown: the same clock as the fetus view (weeks 9–12), read the same way (whole weeks, rounded up). */
+const weekAt = (t: number) => Math.ceil(dayOf(D3, t) / 7);
 
 const bez = (a: Pt, b: Pt, c: Pt, d: Pt, u: number): Pt => {
   const v = 1 - u;
@@ -29,8 +24,9 @@ const bez = (a: Pt, b: Pt, c: Pt, d: Pt, u: number): Pt => {
 
 export function UmbilicalHernia({ t }: SceneProps) {
   const week = weekAt(t);
-  const out = seg(t, 0.12, 0.3) * (1 - seg(t, 0.62, 0.84)); // loops in the cord
-  const grow = seg(t, 0.56, 0.84); // the abdominal cavity enlarges
+  // Weeks 9–11: the loops (out since week 6) sit in the cord; they return in the step that says so (.74).
+  const out = 1 - seg(t, 0.74, 0.83); // loops in the cord
+  const grow = seg(t, 0.72, 0.83); // the abdominal cavity enlarges
   const rx = lerp(168, 222, grow);
   const ry = lerp(150, 188, grow);
   const wall = 30;
@@ -160,13 +156,13 @@ export function UmbilicalHernia({ t }: SceneProps) {
       <Label id="barrunbe-abdominala" x={846} y={262} ax={C[0] + rx * 0.62} ay={C[1] - ry * 0.3} />
       <Label id="erdiko-hestea" x={846} y={440} ax={S1[0] + rx * 0.2} ay={S1[1] + 9} />
 
-      <Note x={610} y={36} tone="accent" show={seg(t, 0.32, 0.36) * (1 - seg(t, 0.6, 0.64))}>
-        Ernia FISIOLOGIKOA: normala, ez patologikoa
+      <Note x={610} y={36} tone="accent" show={seg(t, 0.6, 0.64) * (1 - seg(t, 0.74, 0.77))}>
+        Ernia FISIOLOGIKOA: normala, ez patologikoa (6. astetik)
       </Note>
-      <Note x={610} y={36} tone="accent" show={seg(t, 0.86, 0.9)}>
+      <Note x={610} y={36} tone="accent" show={seg(t, 0.78, 0.82)}>
         12. astea: barrunbea handiagoa, goragunea desagertu da
       </Note>
-      <AgeHud value={Math.floor(week)} unit=". astea" caption="Adina" />
+      <AgeHud value={week} unit=". astea" caption="Adina" />
     </g>
   );
 }

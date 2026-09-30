@@ -25,6 +25,14 @@ npm run dev
 
 Ondoren ireki `http://localhost:3000`.
 
+## Kimu, laguntzaile txikia
+
+Kimu (euskaraz «kimu» = ernamuina) txat bat da, simulagailuaren azpian dagoen edukian oinarritua: «noiz sortzen da notokorda?» galdetuta, azalpena hasten den urratsera eramaten zaitu eta bertan erreproduzitzen du (eta «Bueltatu» botoiarekin lehengo lekura itzul zaitezke). Euskaraz, gaztelaniaz eta ingelesez ulertzen du. Ireki `K` teklarekin edo goiko barrako Kimu botoiarekin.
+
+- Bilaketa arakatzailean egiten da (`lib/kimu/search.ts`): Kimuk existitzen diren lekuetara bakarrik eraman dezake. Modeloak (Groq, `qwen/qwen3.8-27b`) hitzak jartzen ditu, ez datuak.
+- `GROQ_API_KEY` ezarri Vercel-en (Project Settings → Environment Variables) eta berriro deploy egin. Aukerakoa: `KIMU_MODEL`. Gakorik gabe edo muga gainditzean Kimuk apunteen bilaketarekin erantzuten du.
+- Groq-en doako mailak muga estuak ditu (~8K token/minutu, ~200K token/egun), beraz eskaera bakoitza txikia da (~1,5K token), erantzun errepikatuak cachean gordetzen dira eta IP bakoitzak muga du.
+
 ## Gemini tutorea (desaktibatuta lehenespenez)
 
 Une honetan AI tutorea desgaituta dago nahita. Aktibatzeko etorkizuneko release batean, ezarri `AI_TUTOR_ENABLED=true` eta `NEXT_PUBLIC_AI_TUTOR_ENABLED=true`, eta bete `GOOGLE_GENERATIVE_AI_API_KEY`. Bi banderak true ez badaude, ez da modelorik deitzen eta UI-ak `AI · desaktibatuta` egoera erakusten du.

@@ -10,14 +10,15 @@ import { Cells } from '@/components/scenes/section/Section';
  * faster cranially (pear/slipper shape) while the streak regresses caudally — gastrulation
  * continues caudally until the end of week 4. Around day 16 the allantois buds from the posterior
  * yolk-sac wall into the connecting stalk, which itself thins by days 19–20.
- * Dorsal t: 0–1 disc grows cranially, streak shortens and shifts caudally · polarity already fixed
- *    (shown throughout) · .68–.84 cloacal membrane appears at the caudal tip.
+ * Dorsal t (each change right after its beat): .36–.68 disc grows cranially (pear shape) ·
+ *    .50–.58 streak shortens caudally · .72–.80 cloacal membrane appears at the caudal tip ·
+ *    polarity already fixed (shown throughout).
  * Sagittal: see AllantoisSagittal.
  */
 const D = { cx: 500, cy: 330 };
 
 function discShape(t: number) {
-  const g = seg(t, 0, 1);
+  const g = seg(t, 0.36, 0.68);
   return {
     rxTop: lerp(150, 215, g),
     rxBot: lerp(150, 158, g),
@@ -29,11 +30,11 @@ function discShape(t: number) {
 function DorsalDrawing({ t }: SceneProps) {
   const { rxTop, rxBot, ryTop, ryBot } = discShape(t);
   const outline = discOutlinePath(D.cx, D.cy, rxTop, rxBot, ryTop, ryBot);
-  const regress = seg(t, 0.1, 0.9);
+  const regress = seg(t, 0.5, 0.58);
   const streakLen = lerp(120, 34, regress);
   const streakY0 = D.cy + ryBot - 16;
   const streakY1 = streakY0 - streakLen;
-  const cloaca = seg(t, 0.68, 0.84);
+  const cloaca = seg(t, 0.72, 0.8);
 
   return (
     <g>
@@ -94,10 +95,10 @@ function DorsalDrawing({ t }: SceneProps) {
 
 function dorsalLabels(t: number) {
   const { ryBot } = discShape(t);
-  const regress = seg(t, 0.1, 0.9);
+  const regress = seg(t, 0.5, 0.58);
   const streakY0 = D.cy + ryBot - 16;
   const streakLen = lerp(120, 34, regress);
-  const cloaca = seg(t, 0.68, 0.84);
+  const cloaca = seg(t, 0.72, 0.8);
   const L = (id: string, x: number, y: number, p: Pt, show = 1) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} />;
   return (
     <>
@@ -118,8 +119,8 @@ export function AllantoisDorsal(props: SceneProps) {
 }
 
 /**
- * Realistic sagittal section (cranial = left) inside the chorionic cavity. Fade-in windows end at
- * the beats: .5 streak regressed caudally · .62 disc grown cranially · .72 cloacal membrane +
+ * Realistic sagittal section (cranial = left) inside the chorionic cavity. Each change plays right
+ * after its beat: .5 streak regresses caudally · .62 disc grows cranially · .72 cloacal membrane +
  * allantois budding from the caudal yolk-sac wall into the connecting stalk · .86 stalk thinner,
  * chorionic cavity larger.
  */
@@ -128,12 +129,12 @@ const K = 0.92;
 
 function sagGeometry(t: number) {
   return {
-    polarity: seg(t, 0.12, 0.18) * (1 - seg(t, 0.32, 0.36)),
-    regress: seg(t, 0.4, 0.5),
-    grow: seg(t, 0.54, 0.62),
-    bud: seg(t, 0.64, 0.72),
-    cloaca: seg(t, 0.64, 0.72),
-    thin: seg(t, 0.78, 0.86),
+    polarity: seg(t, 0.18, 0.24) * (1 - seg(t, 0.34, 0.37)),
+    regress: seg(t, 0.5, 0.58),
+    grow: seg(t, 0.62, 0.68),
+    bud: seg(t, 0.72, 0.8),
+    cloaca: seg(t, 0.72, 0.8),
+    thin: seg(t, 0.86, 0.94),
   };
 }
 
@@ -231,7 +232,7 @@ export function AllantoisSagittal({ t }: SceneProps) {
       <Part id="hiru-orriko-diskoa" show={0.9}>
         <path d={outline} fill="none" stroke="#e8eefc" strokeWidth={1.1} strokeDasharray="5 4" opacity={0.55} />
       </Part>
-      <Arrow from={mid(-W * 0.2)} to={mid(-W * 0.2 - 110)} bend={0} color="#fde68a" width={1.8} head={7} show={g.grow * (1 - seg(t, 0.66, 0.7))} />
+      <Arrow from={mid(-W * 0.2)} to={mid(-W * 0.2 - 110)} bend={0} color="#fde68a" width={1.8} head={7} show={g.grow * (1 - seg(t, 0.69, 0.72))} />
 
       <Note x={500} y={606} show={g.polarity} tone="accent" size={11}>
         Polaritatea finkatuta: kraneo-kaudala, dortso-bentrala eta ezker-eskuina

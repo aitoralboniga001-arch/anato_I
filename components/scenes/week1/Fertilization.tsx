@@ -133,7 +133,7 @@ function winnerState(t: number, seedPhase: number): { s: SpermState; enterR: num
   else if (t < 0.58) r = rOolemma;
   else r = lerp(rOolemma, rInside, seg(t, 0.58, 0.66));
   const [x, y] = pt(r, WINNER_DEG);
-  const headOpacity = 1 - seg(t, 0.66, 0.74);
+  const headOpacity = 1 - seg(t, 0.74, 0.8);
   const tailOpacity = (1 - seg(t, 0.56, 0.64)) * (1 - vis(t, -1, 0) * 0);
   const acrosome = 1 - seg(t, 0.28, 0.32);
   const cloud = seg(t, 0.29, 0.34) * (1 - seg(t, 0.4, 0.5));
@@ -167,29 +167,29 @@ export function Fertilization({ t }: SceneProps) {
 
   // MII spindle (metaphase-arrested) near the upper edge, resolving into anaphase and the
   // second polar body as meiosis II completes.
-  const spindleFade = 1 - seg(t, 0.64, 0.7);
-  const spindleSplit = seg(t, 0.6, 0.68);
+  const spindleFade = 1 - seg(t, 0.75, 0.8);
+  const spindleSplit = seg(t, 0.7, 0.77);
   const spindlePos = pt(OO_R * 0.62, -80);
 
-  // Polar bodies in the perivitelline space (first one present from t=0; second pinches off at .70).
+  // Polar bodies in the perivitelline space (first one present from t=0; second pinches off after .70, with meiosis II).
   const polar1 = pt(ZONA_OUT - 9, -60);
-  const polar2At = seg(t, 0.66, 0.74);
+  const polar2At = seg(t, 0.73, 0.8);
   const polar2 = [lerp(spindlePos[0], pt(ZONA_OUT - 9, -46)[0], polar2At), lerp(spindlePos[1], pt(ZONA_OUT - 9, -46)[1], polar2At)] as const;
-  const polar2O = seg(t, 0.64, 0.7);
+  const polar2O = seg(t, 0.72, 0.77);
 
-  // Pronuclei: the male one starts where the sperm head entered, the female one near the
-  // (now resolved) spindle; both migrate to the centre and touch by .82.
-  const pronO = seg(t, 0.66, 0.74);
-  const meet = seg(t, 0.7, 0.82);
+  // Pronuclei form once meiosis II is complete (step .70): the male one where the sperm head entered,
+  // the female one by the resolved spindle. They meet in the centre in the next step (.82).
+  const pronO = seg(t, 0.74, 0.8);
+  const meet = seg(t, 0.82, 0.89);
   const mStart = pt(enterR, WINNER_DEG);
   const fStart = pt(OO_R * 0.5, -80);
   const mPos = [lerp(mStart[0], CX - 12, meet), lerp(mStart[1], CY, meet)] as const;
   const fPos = [lerp(fStart[0], CX + 12, meet), lerp(fStart[1], CY, meet)] as const;
-  const touch = seg(t, 0.8, 0.86);
+  const touch = seg(t, 0.87, 0.91);
   const proSep = 1 - touch * 0.75;
 
   // Zygote: pronuclear membranes fade into a single nucleus once DNA has replicated.
-  const zygoteFade = seg(t, 0.88, 0.96);
+  const zygoteFade = seg(t, 0.92, 0.98);
 
   return (
     <g>
@@ -283,18 +283,18 @@ export function Fertilization({ t }: SceneProps) {
       {/* Labels — side gutters only. */}
       <Label id="koroa-erradiatua" x={210} y={150} ax={pt(CORONA_R1 - 4, 235)[0]} ay={pt(CORONA_R1 - 4, 235)[1]} show={coronaO * vis(t, 0, 1)} />
       <Label id="mintz-peluzidoa" x={210} y={470} ax={pt(OO_R + 9, 162)[0]} ay={pt(OO_R + 9, 162)[1]} />
-      <Label id="obozito-sekundarioa" x={790} y={150} align="start" ax={CX + OO_R * 0.5} ay={CY - OO_R * 0.5} show={vis(t, 0, 0.62)} />
-      <Label id="obulua" x={790} y={150} align="start" ax={CX + OO_R * 0.5} ay={CY - OO_R * 0.5} show={vis(t, 0.66, 0.9)} />
-      <Label id="zigotoa" x={790} y={150} align="start" ax={CX + OO_R * 0.5} ay={CY - OO_R * 0.5} show={vis(t, 0.92)} />
-      <Label id="gorpuskulu-polarrak" x={790} y={210} align="start" ax={polar1[0]} ay={polar1[1]} show={vis(t, 0.02, 0.64)} />
+      <Label id="obozito-sekundarioa" x={790} y={150} align="start" ax={CX + OO_R * 0.5} ay={CY - OO_R * 0.5} show={vis(t, 0, 0.705)} />
+      <Label id="obulua" x={790} y={150} align="start" ax={CX + OO_R * 0.5} ay={CY - OO_R * 0.5} show={vis(t, 0.705, 0.915)} />
+      <Label id="zigotoa" x={790} y={150} align="start" ax={CX + OO_R * 0.5} ay={CY - OO_R * 0.5} show={vis(t, 0.915)} />
+      <Label id="gorpuskulu-polarrak" x={790} y={210} align="start" ax={polar1[0]} ay={polar1[1]} show={vis(t, 0.02, 0.93)} />
 
       <Label id="kapazitazioa" x={210} y={290} ax={pt(CORONA_R1 + 6, WINNER_DEG - 14)[0]} ay={pt(CORONA_R1 + 6, WINNER_DEG - 14)[1]} show={vis(t, 0.1, 0.26)} />
       <Label id="akrosoma" x={210} y={250} ax={winner.x} ay={winner.y} show={vis(t, 0.02, 0.46)} />
       <Label id="akrosoma-erreakzioa" x={210} y={330} ax={winner.x} ay={winner.y} show={vis(t, 0.28, 0.44)} />
       <Label id="erreakzio-kortikala" x={790} y={470} align="start" ax={pt(OO_R - 2, -20)[0]} ay={pt(OO_R - 2, -20)[1]} show={vis(t, 0.42, 0.58)} />
       <Label id="espermatozoidea" x={210} y={200} ax={winner.x - 22} ay={winner.y - 4} show={vis(t, 0.02, 0.44)} />
-      <Label id="pronukleoak" x={790} y={280} align="start" ax={CX + 10} ay={CY} show={vis(t, 0.68, 0.9)} />
-      <Label id="ernalkuntza" x={790} y={90} align="start" ax={CX} ay={CY - OO_R - 10} show={vis(t, 0.56, 0.62)} />
+      <Label id="pronukleoak" x={790} y={280} align="start" ax={lerp(fPos[0], CX + 8, touch)} ay={lerp(fPos[1], CY, touch)} show={vis(t, 0.76, 0.93)} />
+      <Label id="ernalkuntza" x={790} y={90} align="start" ax={CX} ay={CY - OO_R - 10} show={vis(t, 0.58, 0.7)} />
 
       <Note x={560} y={600} tone="accent" show={vis(t, 0, 0.14)}>
         Obozito sekundarioa: haploidea, II. zatiketa meiotikoaren metafasean etenda

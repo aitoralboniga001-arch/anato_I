@@ -11,7 +11,7 @@ import { CYTO, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, bandAround, circleP
  *   .16-.28 sinzitiotrofoblastoak sinusoideen pareta urratzen du · .26-.40 amaren odola lakuetan zirkulatzen hasten da
  *   .42-.68 konzeptua hazi eta enbrioi kanpoko mesodermoa agertzen da (zito eta amnios/bitelo zakuaren artean)
  *   .54-.64 mesodermoan hutsune txikiak ireki, handitu eta fusionatzen dira -> korion barrunbea; finkapen pedikulua geratzen da
- *   .62-1.0 desidua erreakzioa: estroma edematoso, zelula poliedrikoak glukogenoz beteta
+ *   .78-.89 desidua erreakzioa: estroma edematoso · .84-.96 zelula poliedrikoak glukogenoz beteta (habiratze-gunetik hedatuz)
  */
 export const W = {
   fibrin: [0, 0.06],
@@ -20,7 +20,8 @@ export const W = {
   circulation: [0.26, 0.4],
   mesoGrow: [0.42, 0.68],
   cavitate: [0.54, 0.64],
-  decidua: [0.62, 1.0],
+  decidua: [0.78, 0.89],
+  cells: [0.84, 0.96],
 } as const;
 
 const s = (t: number, w: readonly [number, number]) => seg(t, w[0], w[1]);
@@ -122,7 +123,7 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
   const erosion = s(t, W.erosion);
   const circ = s(t, W.circulation);
   const decidua = s(t, W.decidua);
-  const cells = seg(t, W.decidua[0] + 0.18, 1);
+  const cells = s(t, W.cells);
   const lens = lensPath(g);
 
   // Mesoderm between the embryo complex and the cyto: solid first, then it hollows into two thin
@@ -323,7 +324,7 @@ function anchors(t: number) {
     circ: s(t, W.circulation),
     cav: g.cav,
     decidua: s(t, W.decidua),
-    cells: seg(t, W.decidua[0] + 0.18, 1),
+    cells: s(t, W.cells),
     generic: g.thickness > 3 ? 1 - seg(g.cav, 0.7, 0.9) : 0,
     layer: seg(g.cav, 0.7, 0.9),
     cavity: seg(g.cav, 0.35, 0.6),
@@ -462,7 +463,8 @@ export function Day1112Desidua(props: SceneProps) {
   const { t } = props;
   const k = anchors(t);
   const { cx, cy } = k.g;
-  const z = zoom(cx - 190, k.g.cyC - 190, 2.1, 500, 320);
+  // Framed so the slab's feathered left edge (x≈205) falls under the label column, not mid-picture.
+  const z = zoom(cx - 147, k.g.cyC - 170, 2.1, 500, 320);
   const L = makeL(z.at);
   const M = makeM(z.at);
   return (
@@ -483,7 +485,7 @@ export function Day1112Desidua(props: SceneProps) {
       {L('sare-lakunarra', 800, 160, k.lacuna(212), k.network)}
       {L('zirkulazio-uteroplazentarioa', 790, 250, k.lacuna(236), k.circ)}
       {L('sinzitiotrofoblastoa', 800, 400, k.syn(240))}
-      {L('bi-orriko-diskoa', 800, 460, [cx + 12, cy], seg(t, 0.9, 0.93))}
+      {L('bi-orriko-diskoa', 800, 460, [cx + 12, k.g.discY], seg(t, 0.9, 0.93))}
       <Note x={500} y={588} tone="warn" show={seg(k.erosion, 0.5, 1)}>
         Sinzitiotrofoblastoak sinusoideen pareta urratu du: amaren odola laku sarean zirkulatzen hasten da
       </Note>

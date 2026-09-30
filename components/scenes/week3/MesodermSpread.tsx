@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Label, Note, Part, lerp, line, CellBand, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, Mark, Note, Part, lerp, line, CellBand, seg, type Pt, type SceneProps } from '@/components/kit';
 import { W3C, amnionArc, discOutlinePath, discX, f1, SAG, yolkArc } from './common';
 import { CellCluster, DiscDrawing, MembraneMark, makeDisc } from './DiscSection';
 
@@ -10,24 +10,33 @@ import { CellCluster, DiscDrawing, MembraneMark, makeDisc } from './DiscSection'
  * (bucco-pharyngeal cranially, cloacal caudally) where ectoderm and endoderm stay fused because no
  * mesoderm ever reaches there. The prechordal plate appears cranial to the (future) notochord,
  * caudal to the bucco-pharyngeal membrane.
- * t (both views): 0–.2 extra-embryonic mesoderm ring · .1–.75 mesoderm spreads from the streak ·
- *    .55–.7 the two membranes stand out as mesoderm-free gaps · .7–.85 prechordal plate.
+ * Both views follow the beats (.16 spread · .42 continuity at the edges · .6 bucco-pharyngeal membrane ·
+ *    .68 cloacal membrane · .78 no vessels there · .86 prechordal plate); each window ends before its
+ *    step's complete frame. The dorsal disc is longer than wide, as in the gastrulation stage.
  */
-const D = { cx: 500, cy: 320, rx: 190, ry: 145 };
+const D = { cx: 500, cy: 318, rx: 152, ry: 188 };
 const STREAK: [Pt, Pt] = [[D.cx, D.cy + 10], [D.cx, D.cy + D.ry - 42]];
 const CRANIAL: Pt = [D.cx, D.cy - D.ry + 14];
 const CAUDAL: Pt = [D.cx, D.cy + D.ry - 14];
 const MEMBR_R = 17;
 
+function dorsalWindows(t: number) {
+  return {
+    exMeso: seg(t, 0, 0.12),
+    growth: seg(t, 0.16, 0.52),
+    bucco: seg(t, 0.6, 0.64),
+    cloaca: seg(t, 0.68, 0.72),
+    noVessels: seg(t, 0.78, 0.82) * (1 - seg(t, 0.84, 0.86)),
+    prechordal: seg(t, 0.86, 0.92),
+    push: seg(t, 0.16, 0.44) * (1 - seg(t, 0.5, 0.56)),
+  };
+}
+
 function DorsalDrawing({ t }: SceneProps) {
   const outline = discOutlinePath(D.cx, D.cy, D.rx, D.rx, D.ry, D.ry);
-  const exMeso = seg(t, 0, 0.2);
-  const growth = seg(t, 0.1, 0.75);
-  const membranes = seg(t, 0.55, 0.7);
-  const prechordal = seg(t, 0.7, 0.85);
+  const { exMeso, growth, bucco, cloaca, noVessels, prechordal, push } = dorsalWindows(t);
   // The mesoderm leaves the streak (caudal half) and spreads cranially and laterally.
   const rev = { cx: D.cx, cy: lerp(STREAK[0][1] + 40, D.cy - 20, growth), rx: lerp(16, 420, growth), ry: lerp(58, 420, growth) };
-  const push = seg(t, 0.1, 0.6) * (1 - seg(t, 0.62, 0.7));
 
   return (
     <g>
@@ -54,8 +63,8 @@ function DorsalDrawing({ t }: SceneProps) {
         <g clipPath="url(#w3-disc-clip)">
           <Part id="mesodermo-intraenbrionarioa">
             <rect x={D.cx - D.rx - 10} y={D.cy - D.ry - 10} width={2 * D.rx + 20} height={2 * D.ry + 20} fill="url(#w3-meso-intra-dorsal)" />
-            <circle cx={CRANIAL[0]} cy={CRANIAL[1]} r={MEMBR_R} fill="#0f0f11" opacity={membranes} />
-            <circle cx={CAUDAL[0]} cy={CAUDAL[1]} r={MEMBR_R} fill="#0f0f11" opacity={membranes} />
+            <circle cx={CRANIAL[0]} cy={CRANIAL[1]} r={MEMBR_R} fill="#0f0f11" opacity={bucco} />
+            <circle cx={CAUDAL[0]} cy={CAUDAL[1]} r={MEMBR_R} fill="#0f0f11" opacity={cloaca} />
           </Part>
         </g>
       </g>
@@ -75,10 +84,10 @@ function DorsalDrawing({ t }: SceneProps) {
         <Arrow key={i} from={[x0, y0]} to={[x1, y1]} bend={i === 0 ? 0 : i === 1 ? 0.12 : -0.12} color="#fde68a" width={2} head={8} show={push} progress={Math.min(1, push * 1.4)} />
       ))}
 
-      <Part id="mintz-bukofaringeoa" show={membranes}>
+      <Part id="mintz-bukofaringeoa" show={bucco}>
         <circle cx={CRANIAL[0]} cy={CRANIAL[1]} r={MEMBR_R - 3} fill="#dfe6f7" opacity={0.85} />
       </Part>
-      <Part id="kloaka-mintza" show={membranes}>
+      <Part id="kloaka-mintza" show={cloaca}>
         <circle cx={CAUDAL[0]} cy={CAUDAL[1]} r={MEMBR_R - 3} fill="#dfe6f7" opacity={0.85} />
       </Part>
 
@@ -87,15 +96,16 @@ function DorsalDrawing({ t }: SceneProps) {
       </Part>
 
       <path d={outline} fill="none" stroke="rgba(232,238,252,0.3)" strokeWidth={1.4} />
+
+      {/* No mesoderm → no vessels: both membranes will later break down (mouth and cloaca openings). */}
+      <Mark id="mintz-bukofaringeoa" x={CRANIAL[0]} y={CRANIAL[1]} rx={MEMBR_R + 12} show={noVessels} />
+      <Mark id="kloaka-mintza" x={CAUDAL[0]} y={CAUDAL[1]} rx={MEMBR_R + 12} show={noVessels} />
     </g>
   );
 }
 
 function dorsalLabels(t: number) {
-  const exMeso = seg(t, 0, 0.2);
-  const growth = seg(t, 0.1, 0.75);
-  const membranes = seg(t, 0.55, 0.7);
-  const prechordal = seg(t, 0.7, 0.85);
+  const { exMeso, growth, bucco, cloaca, prechordal } = dorsalWindows(t);
   const L = (id: string, x: number, y: number, p: Pt, show = 1) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} />;
   return (
     <>
@@ -103,9 +113,9 @@ function dorsalLabels(t: number) {
       {L('mesodermo-intraenbrionarioa', 190, 220, [D.cx - D.rx * 0.55, D.cy], growth)}
       {L('ildo-primitiboa', 810, 400, [STREAK[0][0] + 3, (STREAK[0][1] + STREAK[1][1]) / 2])}
       {L('nodo-primitiboa', 810, 350, [STREAK[0][0] + 8, STREAK[0][1] - 4])}
-      {L('mintz-bukofaringeoa', 810, 245, CRANIAL, membranes)}
-      {L('plaka-prekordala', 810, 280, [CRANIAL[0] + 16, CRANIAL[1] + MEMBR_R + 14], prechordal)}
-      {L('kloaka-mintza', 810, 470, CAUDAL, membranes)}
+      {L('mintz-bukofaringeoa', 810, 245, CRANIAL, bucco)}
+      {L('plaka-prekordala', 810, 295, [CRANIAL[0] + 16, CRANIAL[1] + MEMBR_R + 14], prechordal)}
+      {L('kloaka-mintza', 810, 490, CAUDAL, cloaca)}
     </>
   );
 }
@@ -131,7 +141,7 @@ export function MesodermDorsal(props: SceneProps) {
  * Realistic sagittal section (cranial = left): the mesoderm front sweeps cranially from the streak
  * between ectoderm and endoderm, never reaching the two membranes (ectoderm + endoderm fused);
  * the prechordal plate lies just caudal to the bucco-pharyngeal membrane.
- * Fade-in windows end at the beats (.42 front at the cranial end, .6 / .68 membranes, .86 prechordal plate).
+ * Each change plays right after its beat (.16 spread, .6 / .68 membranes, .78 no vessels, .86 prechordal plate).
  */
 const X_BUCCO = -238;
 const X_CLOACA = 246;
@@ -139,11 +149,11 @@ const X_PRE = -196;
 
 function sagittalGeometry(t: number) {
   return {
-    growth: seg(t, 0.1, 0.42),
-    bucco: seg(t, 0.54, 0.6),
-    cloaca: seg(t, 0.62, 0.68),
-    noVessels: seg(t, 0.72, 0.78) * (1 - seg(t, 0.82, 0.86)),
-    prechordal: seg(t, 0.8, 0.86),
+    growth: seg(t, 0.16, 0.4),
+    bucco: seg(t, 0.6, 0.64),
+    cloaca: seg(t, 0.68, 0.72),
+    noVessels: seg(t, 0.78, 0.82) * (1 - seg(t, 0.84, 0.86)),
+    prechordal: seg(t, 0.86, 0.92),
   };
 }
 

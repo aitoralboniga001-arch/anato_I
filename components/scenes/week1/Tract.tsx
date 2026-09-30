@@ -272,8 +272,9 @@ const piece = (tab: [number, number][], t: number) => {
 
 // Stage time → position along the tube (u), then into the cavity.
 const U_T: [number, number][] = [[0.14, 0], [0.22, U.ampulla], [0.36, U.ampulla + 0.04], [0.42, 0.34], [0.5, 0.66], [0.58, 0.86], [0.64, 1]];
-// Stage time → cleavage progress (gens 5): zygote, 2 cells at 30 h, 16 on the 3rd day, ~32 on the 4th, blastocyst.
-const P_T: [number, number][] = [[0.24, 0], [0.34, 0.99], [0.42, 2], [0.5, 5], [0.62, 5.999], [0.72, 6.4], [0.84, 7]];
+// Stage time → cleavage progress (gens 5), held on each step's number while its caption is read: zygote,
+// 2 cells at 30 h (the whole step), 16 on the 3rd day (notes: 12–16), ~32 on the 4th, then the blastocyst.
+const P_T: [number, number][] = [[0.24, 0], [0.34, 0.99], [0.42, 2], [0.5, 2], [0.585, 5], [0.62, 5], [0.7, 6], [0.76, 6.15], [0.84, 7]];
 
 const LOUPE: Pt = [520, 472];
 const LR = 80;
@@ -283,6 +284,7 @@ function stageOf(t: number): { id: string; hud: [string, string] } {
   if (t < 0.24) return { id: 'obozito-sekundarioa', hud: ['14.', ' eguna'] };
   if (t < 0.41) return { id: 'zigotoa', hud: ['12–24', ' ordu'] };
   if (t < 0.5) return { id: 'blastomeroak', hud: ['30', ' ordu'] };
+  if (t < 0.56) return { id: 'blastomeroak', hud: ['3.', ' eguna'] };
   if (t < 0.62) return { id: 'morula', hud: ['3.', ' eguna'] };
   if (t < 0.74) return { id: 'morula', hud: ['4.', ' eguna'] };
   if (t < 0.86) return { id: 'blastozistoa', hud: ['4,5–5.', ' egunak'] };
@@ -469,7 +471,10 @@ function Blast({ f, p, show, ok }: { f: ReturnType<typeof cleavageFrame>; p: Pt;
  * outside the uterus — in the tube, the ovary or the peritoneal cavity (e.g. falling through
  * the abdominal opening of the tube into the pouch of Douglas).
  */
-export function EctopicSites({ t }: SceneProps) {
+export function EctopicSites({ t: stageT }: SceneProps) {
+  // The stage's first steps are about the usual site (shown here too); the ectopic sites are
+  // revealed in the step that names them (from .84), so this view never runs ahead of the caption.
+  const t = stageT < 0.84 ? (stageT / 0.84) * 0.26 : 0.26 + ((stageT - 0.84) / 0.16) * 0.74;
   const f = cleavageFrame(7, 0, 5);
   f.zonaO = 0;
   const site = surfaceAt(430);

@@ -24,25 +24,26 @@ import { CYTO, Endometrium, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, discGe
 /**
  * 9. eguna — blastocyst almost completely embedded; lacunar period; Heuser's membrane.
  * Windows (shared by every view and by the stage beats in content/weeks/week2.ts):
- *   .00–.18 the blastocyst sinks deeper · .02–.22 the syncytium spreads round (almost) the whole blastocyst
- *   .14–.28 fibrin plug closes the epithelial gap
- *   .28–.42 vacuoles appear in the syncytium and enlarge · .42–.56 they fuse into lacunae (embryonic pole)
- *   .50–.58 "garai lakunarra" · .56–.64 hypoblast cells proliferate at the disc edges
- *   .60–.80 the new cells spread along the inner face of the cytotrophoblast → Heuser's membrane
- *   .78–.86 the membrane closes: blastocele → primitive yolk sac · .86–.98 vessels enlarge → sinusoids
+ *   .00–.12 the blastocyst sinks deeper · .02–.12 the syncytium spreads round (almost) the whole blastocyst
+ *   .14–.24 fibrin plug closes the epithelial gap
+ *   .28–.38 vacuoles appear in the syncytium and enlarge · .42–.48 they fuse into lacunae (embryonic pole)
+ *   .50–.54 "garai lakunarra" · .56–.64 hypoblast cells proliferate at the disc edges
+ *   .60–.74 the new cells spread along the inner face of the cytotrophoblast → Heuser's membrane
+ *   .78–.82 the membrane closes: blastocele → primitive yolk sac · .86–.96 vessels enlarge → sinusoids
+ * Each window ends before its step's complete frame (next beat − 0.035).
  * Lacunae stay clear (no maternal blood): sinusoid erosion only happens on days 11–12.
  */
 export const W = {
-  sink: [0, 0.18],
-  cover: [0.02, 0.22],
-  fibrin: [0.14, 0.28],
-  vacuoles: [0.28, 0.42],
-  lacunae: [0.42, 0.56],
-  period: [0.5, 0.58],
+  sink: [0, 0.12],
+  cover: [0.02, 0.12],
+  fibrin: [0.14, 0.24],
+  vacuoles: [0.28, 0.38],
+  lacunae: [0.42, 0.48],
+  period: [0.5, 0.54],
   prolif: [0.56, 0.64],
-  heuser: [0.6, 0.8],
-  rename: [0.78, 0.86],
-  sinus: [0.86, 0.98],
+  heuser: [0.6, 0.74],
+  rename: [0.78, 0.82],
+  sinus: [0.86, 0.96],
 } as const;
 
 const s = (t: number, w: readonly [number, number]) => seg(t, w[0], w[1]);
@@ -464,7 +465,7 @@ export function Day9Lacunae(props: SceneProps) {
   const { t } = props;
   const k = anchors(t);
   const { cx, cy } = k.g;
-  const z = zoom(cx, cy - 150, 2, 500, 330);
+  const z = zoom(cx, cy - 150, 2, 500, 290);
   const L = makeL(z.at);
   const sL = SINUSOIDS[2];
   const sR = SINUSOIDS[3];

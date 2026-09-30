@@ -16,15 +16,27 @@ const UTERUS: Pt[] = [
 
 const PLACENTA_C: Pt = [652, 138];
 
-/** Amniotic-fluid volume (ml) across the stage: 10 w. 30 ml → 30 w. 200–500 ml → 37–38 w. 800–1000 ml. */
+/**
+ * Amniotic-fluid volume (ml): 10 w. 30 ml → 30 w. 200–500 ml → 37–38 w. 800–1000 ml. The gauge
+ * holds at 10 weeks until the volume step (.3), sweeps through the three reference points during it,
+ * and stays at term afterwards.
+ */
+const VOL_MARKS = [
+  { lo: 30, hi: 30, text: '10. a: 30 ml', at: 0.3 },
+  { lo: 200, hi: 500, text: '30. a: 200–500 ml', at: 0.33 },
+  { lo: 800, hi: 1000, text: '37.–38. a: 800–1000 ml', at: 0.39 },
+];
 function volumeAt(t: number) {
-  if (t < 0.3) return { ml: Math.round(lerp(30, 350, seg(t, 0, 0.3))), week: t < 0.06 ? '10. astea' : '~10.–30. asteak' };
-  return { ml: Math.round(lerp(350, 900, seg(t, 0.3, 1))), week: t > 0.9 ? '37.–38. asteak' : '~30.–37. asteak' };
+  const a = seg(t, 0.3, 0.35);
+  const b = seg(t, 0.355, 0.405);
+  const ml = t < 0.355 ? lerp(30, 350, a) : lerp(350, 900, b);
+  const wk = t < 0.355 ? lerp(10, 30, a) : lerp(30, 37.5, b);
+  return { ml: Math.round(ml), week: b > 0.98 ? '37.–38. asteak' : `${Math.round(wk)}. astea` };
 }
 
 export function AmnioticFluid({ t, reduced }: SceneProps) {
   const { ml, week } = volumeAt(t);
-  const fill = seg(t, 0, 1); // amnios barrunbea slowly filling out
+  const fill = (ml - 30) / 870; // amnios barrunbea filling out with the volume
   const cavRx = lerp(232, 258, fill);
   const cavRy = lerp(196, 220, fill);
   const cavC: Pt = [500, 330];
@@ -42,7 +54,7 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
   const cordBase = place.xf(g.cordBase);
   const hip = place.xf(g.hip);
 
-  const sourcesA = seg(t, 0.14, 0.24) * (1 - seg(t, 0.42, 0.5));
+  const sourcesA = seg(t, 0.14, 0.2) * (1 - seg(t, 0.3, 0.34));
   const functionsA = vis(t, 0.46, 0.58);
   const swallowA = vis(t, 0.58, 1);
 
@@ -127,6 +139,20 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
         <text x={57} y={514} textAnchor="middle" fontSize={10} fill="#8fa3c4">
           {week}
         </text>
+        {/* Reference volumes from the notes, ticked off as the gauge passes them */}
+        {VOL_MARKS.map((m) => {
+          const o = vis(t, m.at);
+          const y0 = 480 - (m.hi / 1000) * gaugeH;
+          const y1 = 480 - (m.lo / 1000) * gaugeH;
+          return (
+            <g key={m.text} opacity={o}>
+              <path d={`M72,${y0} h6 V${Math.max(y1, y0 + 1)} h-6`} fill="none" stroke="#fbbf24" strokeWidth={1.2} />
+              <text x={82} y={(y0 + y1) / 2 + 3.5} fontSize={10} fill="#fde68a">
+                {m.text}
+              </text>
+            </g>
+          );
+        })}
       </g>
 
       {/* Labels — left gutter */}

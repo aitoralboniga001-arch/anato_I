@@ -105,6 +105,9 @@ function routeOf(d: Dest): Pt[] {
 
 // Group changes happen at beat boundaries; every trip + differentiation finishes BEFORE the hold.
 const activeGroup = (t: number) => t < 0.5 ? -1 : t < 0.65 ? 0 : t < 0.78 ? 1 : t < 0.9 ? 2 : 3;
+/** 0..1 weight of group g: fades in right after its beat and out right after the next one (no pops). */
+const FADE = 0.025;
+const groupW = (t: number, g: number) => seg(t, GROUP_AT[g], GROUP_AT[g] + FADE) * (g + 1 < GROUP_AT.length ? 1 - seg(t, GROUP_AT[g + 1], GROUP_AT[g + 1] + FADE) : 1);
 /** Whole embryo first; then the head for the cranial and non-neural groups, then the trunk for nerves and skin. */
 const ZOOMS: [number, number, number, number, number][] = [
   [520, 325, 1.08, 505, 317],
@@ -112,7 +115,7 @@ const ZOOMS: [number, number, number, number, number][] = [
   [630, 390, 1.5, 545, 330],
 ];
 function mapZoomAt(t: number) {
-  const k = seg(t, 0.488, 0.512) * 0.5 + seg(t, 0.768, 0.792) * 0.5;
+  const k = seg(t, 0.5, 0.545) * 0.5 + seg(t, 0.78, 0.825) * 0.5;
   const [A, B] = k < 0.5 ? [ZOOMS[0], ZOOMS[1]] : [ZOOMS[1], ZOOMS[2]];
   const u = k < 0.5 ? k * 2 : (k - 0.5) * 2;
   const m = (i: number) => lerp(A[i], B[i], u);
@@ -120,7 +123,6 @@ function mapZoomAt(t: number) {
 }
 
 function MapDrawing({ t }: SceneProps) {
-  const active = activeGroup(t);
   const mapZoom = mapZoomAt(t);
   const crestLine = Array.from({ length: 30 }, (_, i) => sp(0.02 + (0.93 * i) / 29, 8));
   return <g transform={mapZoom.transform}>
@@ -132,7 +134,7 @@ function MapDrawing({ t }: SceneProps) {
       <path d={smoothPath(crestLine, false)} fill="none" stroke="transparent" strokeWidth={18} />
       {Array.from({ length: 21 }, (_, i) => {
         const p = sp(0.03 + (0.92 * i) / 20, 8);
-        return <Cell key={i} x={p[0]} y={p[1]} r={4} rx={3.5} ry={5} color={TEAL} nucleus="#155e59" opacity={active < 0 ? 1 : 0.42} />;
+        return <Cell key={i} x={p[0]} y={p[1]} r={4} rx={3.5} ry={5} color={TEAL} nucleus="#155e59" opacity={lerp(1, 0.42, seg(t, GROUP_AT[0], GROUP_AT[0] + FADE))} />;
       })}
     </Part>
     {DESTS.map(d => {
@@ -141,8 +143,7 @@ function MapDrawing({ t }: SceneProps) {
       const route = routeOf(d);
       const u = seg(t, a, b);
       const arrive = seg(t, b - 0.002, b + 0.014);
-      const current = active === d.group;
-      const opacity = current ? 1 : 0.16;
+      const opacity = 0.16 + 0.84 * groupW(t, d.group);
       if (t < GROUP_AT[d.group]) return null;
       return <g key={d.id} opacity={opacity}>
         <path d={smoothPath(route, false, 0.5)} fill="none" stroke={col} strokeWidth={2.5} pathLength={1} strokeDasharray="1 2" strokeDashoffset={1 - u} opacity={0.6} pointerEvents="none" />
@@ -164,8 +165,9 @@ function MapDrawing({ t }: SceneProps) {
 }
 
 function TrapBox({ t }: { t: number }) {
-  if (t < 0.9) return null;
-  return <g>
+  const show = seg(t, GROUP_AT[3], GROUP_AT[3] + FADE);
+  if (show <= 0.01) return null;
+  return <g opacity={show}>
     <rect x={35} y={330} width={370} height={132} rx={13} fill="#251f1b" stroke={ORANGE} strokeOpacity={0.6} />
     <Note x={53} y={358} align="start" tone="accent" size={16}>Epidermisera iristen direnak (apunteak):</Note>
     <Note x={53} y={387} align="start" size={15}>Melanozitoak, ile-folikuluak, azazkalak</Note>
@@ -181,21 +183,25 @@ function mapLabels(t: number) {
   return <>
     <Label id="gandor-neurala" x={740} y={140} ax={ox} ay={oy} small />
     {DESTS.map(d => {
-      if (activeGroup(t) !== d.group) return null;
+      const w = groupW(t, d.group);
+      if (w <= 0.01) return null;
       const [ax, ay] = mapZoom.at(...d.at);
-      return <Label key={d.id} id={d.id} x={d.x} y={d.y} ax={ax} ay={ay} small />;
+      return <Label key={d.id} id={d.id} x={d.x} y={d.y} ax={ax} ay={ay} small show={w} />;
     })}
   </>;
 }
 
 export function NeuralCrestDerivatives(props: SceneProps) {
-  const gi = activeGroup(props.t);
+  const { t } = props;
   return <g>
-    <Note x={500} y={43} tone="accent" size={16}>{gi < 0 ? 'Gandor neurala: hodi neuralaren luzeran' : GROUP_TITLE[gi]}</Note>
+    <Note x={500} y={43} tone="accent" size={16} show={1 - seg(t, GROUP_AT[0], GROUP_AT[0] + FADE)}>Gandor neurala: hodi neuralaren luzeran</Note>
+    {GROUP_TITLE.map((title, g) => (
+      <Note key={title} x={500} y={43} tone="accent" size={16} show={groupW(t, g)}>{title}</Note>
+    ))}
     <MapDrawing {...props} />
     {mapLabels(props.t)}
     <TrapBox t={props.t} />
     <Note x={500} y={598} size={14}>Eratorrien helmugak, eskematikoki: ez dira denak 28. egunean helduak.</Note>
-    {gi === 2 && <Note x={500} y={622} size={13}>Gongoil enterikoak: gandor bagal eta sakraletik; muina: zelula endokrinoak.</Note>}
+    <Note x={500} y={622} size={13} show={groupW(t, 2)}>Gongoil enterikoak: gandor bagal eta sakraletik; muina: zelula endokrinoak.</Note>
   </g>;
 }

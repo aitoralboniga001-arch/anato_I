@@ -8,22 +8,23 @@ import { V, VilliDefs, f1 } from './common';
  * chorionic plate ↔ tertiary-villus capillaries) and the placental barrier that keeps maternal and
  * fetal blood forever separate. Windows shared by both views and content/weeks/week3b.ts. The three
  * anatomical vessel segments reveal strictly in sequence, matching these windows one-to-one:
- *   .00–.15 embryonic vessels meet the connecting-stalk vessels (zilbor-hodiak) — fully revealed by .15
- *   .15–.32 stalk vessels continue as the chorionic-plate vessels (enbrioi-kanpoko-hodiak) — .15 → .32
- *   .32–.50 plate vessels continue into the tertiary villus capillary (biloxka-kapilarrak) — .32 → .50
- *   .50–.62 a single continuous circuit now links embryo → placenta → embryo
- *   .62–.72 week 4: the heart begins to beat → blood starts moving through the whole circuit
- *   .72–.85 O2 / nutrients cross from maternal to fetal blood at the barrier
- *   .85–1   CO2 / waste cross back; the two bloods never mix (karena-muga)
+ *   .00–.11 embryonic vessels meet the connecting-stalk vessels (zilbor-hodiak)
+ *   .15–.28 stalk vessels continue as the chorionic-plate vessels (enbrioi-kanpoko-hodiak)
+ *   .32–.46 plate vessels continue into the tertiary villus capillary (biloxka-kapilarrak)
+ *   .50–.60 a single continuous circuit now links embryo → placenta → embryo
+ *   .65–.72 week 4: the heart begins to beat → blood starts moving through the whole circuit
+ *   .76–.84 O2 / nutrients cross from maternal to fetal blood at the barrier
+ *   .88–.97 CO2 / waste cross back; the two bloods never mix (karena-muga)
+ * Each window starts at its beat and ends before the step's complete frame (next beat − 0.035).
  */
 export const W = {
-  embryoStalk: [0.0, 0.15],
-  stalkPlate: [0.15, 0.32],
-  platevillus: [0.32, 0.5],
-  circuit: [0.5, 0.62],
-  heartbeat: [0.62, 0.72],
-  o2: [0.72, 0.85],
-  co2: [0.85, 1],
+  embryoStalk: [0.0, 0.11],
+  stalkPlate: [0.15, 0.28],
+  platevillus: [0.32, 0.46],
+  circuit: [0.5, 0.6],
+  heartbeat: [0.65, 0.72],
+  o2: [0.76, 0.84],
+  co2: [0.88, 0.97],
 } as const;
 
 const s = (t: number, w: readonly [number, number]) => seg(t, w[0], w[1]);

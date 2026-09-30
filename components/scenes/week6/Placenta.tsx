@@ -529,11 +529,13 @@ function MaternalFace({ cx, cy }: { cx: number; cy: number }) {
 
 export function PlacentaFaces({ t }: SceneProps) {
   const detach = seg(t, 0.02, 0.09);
-  const split = seg(t, 0.2, 0.3);
+  // Step .2 slides the fetal face left; step .3 lifts a copy out from under it (same spot, so nothing
+  // pops), slides it right and turns it over to show the maternal face — both done by the complete frames.
+  const split = seg(t, 0.2, 0.26);
   const lx = lerp(500, 300, split);
-  const flip = seg(t, 0.28, 0.4);
-  const rxPos = lerp(500, 700, seg(t, 0.28, 0.36));
-  const showRight = t > 0.28;
+  const flip = seg(t, 0.3, 0.36);
+  const rxPos = lerp(lx, 700, seg(t, 0.3, 0.35));
+  const showRight = t > 0.3;
   const sq = flip < 0.5 ? 1 - flip * 2 : flip * 2 - 1;
   const dims = vis(t, 0.1, 0.24);
   const cy = 330;
@@ -575,20 +577,20 @@ export function PlacentaFaces({ t }: SceneProps) {
       </g>
       <Note x={lx} y={cy + RY + TH + 44} show={dims} tone="accent">15–20 cm diametroa</Note>
       <Note x={lx + RX + 26} y={cy + TH / 2} align="start" show={dims} tone="accent">3–4 cm lodiera</Note>
-      <Note x={lx} y={cy - RY - 34} show={dims} tone="accent">500–600 g</Note>
+      <Note x={lx - RX - 24} y={cy + TH / 2} align="end" show={dims} tone="accent">500–600 g</Note>
 
       <Label id="karena-aterminoa" x={850} y={250} ax={lx + RX * 0.7} ay={cy + 10} show={vis(t, 0, 0.28)} align="start" />
-      <Label id="karena" x={850} y={250} ax={lx + RX * 0.7} ay={cy + 10} show={vis(t, 0.6, 0.68)} align="start" />
+      <Label id="karena" x={240} y={330} ax={lx - RX + 6} ay={cy + TH / 2} show={vis(t, 0.6, 0.68)} align="end" />
       <Label id="zilborrestea" x={240} y={80} ax={lx + 4} ay={cy - RY - 80} show={vis(t, 0.2)} align="end" />
       <Label id="fetuaren-aurpegia" x={240} y={160} ax={lx - RX * 0.55} ay={cy - RY * 0.5} show={vis(t, 0.2)} align="end" />
       <Label id="korion-plaka" x={240} y={230} ax={lx - RX * 0.35} ay={cy + RY * 0.1} show={vis(t, 0.2)} align="end" text="Orri korionikoa" />
       <Label id="korioneko-odol-hodiak" x={240} y={420} ax={lx - RX * 0.5} ay={cy + RY * 0.4} show={vis(t, 0.2)} align="end" />
       <Label id="amniosa" x={240} y={480} ax={lx - RX * 0.9} ay={cy + RY * 0.62} show={vis(t, 0.2)} align="end" />
 
-      <Label id="amaren-aurpegia" x={850} y={250} ax={rxPos + RX * 0.6} ay={cy - RY * 0.5} show={vis(t, 0.36)} align="start" />
-      <Label id="kotiledoiak" x={850} y={380} ax={rxPos + RX * 0.5} ay={cy + RY * 0.35} show={vis(t, 0.36)} align="start" />
-      <Label id="dezidua-basala" x={850} y={440} ax={rxPos + RX * 0.9} ay={cy + TH + 4} show={vis(t, 0.36)} align="start" />
-      <Note x={rxPos} y={cy + RY + TH + 30} show={vis(t, 0.36)}>Dezidua basala erauzia (zati bat)</Note>
+      <Label id="amaren-aurpegia" x={850} y={250} ax={rxPos + RX * 0.6} ay={cy - RY * 0.5} show={vis(t, 0.33)} align="start" />
+      <Label id="kotiledoiak" x={850} y={380} ax={rxPos + RX * 0.5} ay={cy + RY * 0.35} show={vis(t, 0.33)} align="start" />
+      <Label id="dezidua-basala" x={850} y={440} ax={rxPos + RX * 0.9} ay={cy + TH + 4} show={vis(t, 0.33)} align="start" />
+      <Note x={rxPos} y={cy + RY + TH + 30} show={vis(t, 0.33)}>Dezidua basala erauzia (zati bat)</Note>
 
       <TermNotes t={t} />
     </g>

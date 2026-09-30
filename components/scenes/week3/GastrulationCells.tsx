@@ -162,23 +162,23 @@ function Stellate({ x, y, r, color, arms, seed, opacity = 1 }: { x: number; y: n
 const CELL_KEYS: Key[] = [
   [0, 500, 280, 2.05],
   [0.31, 500, 280, 2.05],
-  [0.34, 500, 260, 2.3],
+  [0.36, 500, 260, 2.3],
   [0.41, 500, 260, 2.3],
-  [0.44, 500, 270, 2.3],
+  [0.46, 500, 270, 2.3],
   [0.5, 500, 270, 2.3],
-  [0.53, 500, 281, 2.1],
+  [0.55, 500, 281, 2.1],
   [0.64, 500, 281, 2.1],
-  [0.67, 500, 280, 2.2],
+  [0.69, 500, 280, 2.2],
   [0.78, 500, 280, 2.2],
-  [0.81, 500, 255, 2.15],
+  [0.83, 500, 255, 2.15],
   [0.88, 500, 255, 2.15],
-  [0.91, 500, 280, 2.05],
+  [0.93, 500, 280, 2.05],
   [1, 500, 280, 2.05],
 ];
 
 /** Emphasis of each population per step: the step's subject stays bright, the rest steps back. */
 function emphasis(t: number) {
-  const k = (a: number, b: number) => seg(t, a, a + 0.02) * (1 - seg(t, b - 0.01, b + 0.01));
+  const k = (a: number, b: number) => seg(t, a, a + 0.03) * (1 - seg(t, b, b + 0.03));
   const inv = k(GB.invag, GB.endo);
   const endo = k(GB.endo, GB.meso);
   const meso = k(GB.meso, GB.ecto);
@@ -442,13 +442,14 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
 
 /** A compact destination key; its highlight follows the active step. */
 function Legend({ t }: { t: number }) {
+  const on = (a: number, b: number) => seg(t, a, a + 0.03) * (1 - seg(t, b, b + 0.03));
   const rows = [
-    { color: C.endoderm, text: 'Ordezkatu → endodermoa', active: t >= GB.endo && t < GB.meso },
-    { color: C.mesoIntra, text: 'Tartean → mesodermoa', active: t >= GB.meso && t < GB.ecto },
-    { color: C.ectoderm, text: 'Gelditu → ektodermoa', active: t >= GB.ecto },
+    { color: C.endoderm, text: 'Ordezkatu → endodermoa', active: on(GB.endo, GB.meso) },
+    { color: C.mesoIntra, text: 'Tartean → mesodermoa', active: on(GB.meso, GB.ecto) },
+    { color: C.ectoderm, text: 'Gelditu → ektodermoa', active: on(GB.ecto, 2) },
   ];
   return <g pointerEvents="none">
-    {rows.map((r, i) => <g key={r.text} opacity={r.active ? 1 : 0.38}>
+    {rows.map((r, i) => <g key={r.text} opacity={0.38 + 0.62 * r.active}>
       <circle cx={245 + i * 205} cy={589} r={4} fill={r.color} />
       <Note x={255 + i * 205} y={589} align="start" tone="accent" size={11}>{r.text}</Note>
     </g>)}

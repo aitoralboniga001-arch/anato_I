@@ -1,7 +1,7 @@
 'use client';
 
 import { Label, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
-import { LEN, ROWS, WT, fmtWeight, interp } from './growth';
+import { LEN, ROWS, TEXT_W20, WT, fmtWeight, interp } from './growth';
 
 /**
  * The notes' length/weight table as two stacked charts on one week axis: crown–rump length on
@@ -205,11 +205,17 @@ export function GrowthChartLength({ t }: SceneProps) {
       <Label id="luzera-zefalokaudala" x={150} y={150} ax={xw(12)} ay={yOf(P_LEN, 8)} align="start" />
       <Label id="fetuaren-pisua" x={150} y={410} ax={xw(15)} ay={yOf(P_WT, 150)} align="start" />
       <Note x={xw(29)} y={yOf(P_LEN, 36) - 2} tone="accent" show={callout}>
-        ~15 cm: jaioberriaren luzeraren ia erdia
+        Testua: ~15 cm, jaioberriaren luzeraren ia erdia
       </Note>
       <Note x={xw(29)} y={yOf(P_WT, 3000) - 2} tone="accent" show={callout}>
-        Pisua, ordea: ~500 g baino ez
+        Testua: pisua, ordea, ~500 g baino ez
       </Note>
+      {/* The written values (what counts) marked on top of the table's band. */}
+      <g opacity={callout} pointerEvents="none">
+        {[yOf(P_LEN, TEXT_W20.len), yOf(P_WT, TEXT_W20.wt)].map((y) => (
+          <path key={y} d={`M${xw(20)},${y - 8} l8,8 l-8,8 l-8,-8Z`} fill="#fbbf24" stroke="#0c1220" strokeWidth={1.5} />
+        ))}
+      </g>
       <WeekTag w={w} />
     </g>
   );

@@ -26,28 +26,28 @@ const HYP = '#c4a86e';
 const DORSAL_KEYS: Key[] = [
   [0, 500, 320, 1.16],
   [0.08, 500, 320, 1.16],
-  [0.11, 500, 396, 1.55],
+  [0.125, 500, 396, 1.55],
   [0.16, 500, 396, 1.55],
-  [0.185, 500, 385, 1.8],
+  [0.19, 500, 385, 1.8],
   [0.23, 500, 385, 1.8],
-  [0.255, 500, 286, 2.55],
+  [0.27, 500, 286, 2.55],
   [0.31, 500, 286, 2.55],
-  [0.34, 500, 320, 1.16],
+  [0.36, 500, 320, 1.16],
   [1, 500, 320, 1.16],
 ];
 
 const TRANS_KEYS: Key[] = [
   [0, 500, 293, 1.12],
   [0.08, 500, 293, 1.12],
-  [0.11, 500, 290, 1.42],
+  [0.125, 500, 290, 1.42],
   [0.31, 500, 290, 1.42],
-  [0.34, 500, 285, 1.7],
+  [0.36, 500, 285, 1.7],
   [0.5, 500, 285, 1.7],
-  [0.53, 500, 305, 1.5],
+  [0.55, 500, 305, 1.5],
   [0.64, 500, 305, 1.5],
-  [0.67, 500, 310, 1.45],
+  [0.69, 500, 310, 1.45],
   [0.88, 500, 310, 1.45],
-  [0.91, 500, 308, 1.3],
+  [0.93, 500, 308, 1.3],
   [1, 500, 308, 1.3],
 ];
 
@@ -408,12 +408,12 @@ export function GastrulationTransverse({ t, reduced }: SceneProps) {
       </Note>
 
       <Label id="gastrulazioa" x={810} y={130} ax={gastAt[0]} ay={gastAt[1]} show={g.streak * ok(gastAt)} />
-      <Label id="lerro-primitiboa" x={190} y={leftY[0]} ax={anchors.lerro[0]} ay={anchors.lerro[1]} show={(g.groove < 0.5 ? g.streak : 0) * ok(anchors.lerro)} />
-      <Label id="ildo-primitiboa" x={190} y={leftY[0]} ax={anchors.ildo[0]} ay={anchors.ildo[1]} show={(g.groove >= 0.5 ? g.groove : 0) * ok(anchors.ildo)} />
-      <Label id="epiblastoa" x={190} y={leftY[1]} ax={anchors.epi[0]} ay={anchors.epi[1]} show={(g.ecto < 0.5 ? 1 : 0) * ok(anchors.epi)} />
-      <Label id="ektodermoa" x={190} y={leftY[1]} ax={anchors.epi[0]} ay={anchors.epi[1]} show={(g.ecto >= 0.5 ? g.ecto : 0) * ok(anchors.epi)} />
+      <Label id="lerro-primitiboa" x={190} y={leftY[0]} ax={anchors.lerro[0]} ay={anchors.lerro[1]} show={g.streak * (1 - clamp(g.groove * 2)) * ok(anchors.lerro)} />
+      <Label id="ildo-primitiboa" x={190} y={leftY[0]} ax={anchors.ildo[0]} ay={anchors.ildo[1]} show={clamp(g.groove * 2 - 1) * ok(anchors.ildo)} />
+      <Label id="epiblastoa" x={190} y={leftY[1]} ax={anchors.epi[0]} ay={anchors.epi[1]} show={(1 - clamp(g.ecto * 2)) * ok(anchors.epi)} />
+      <Label id="ektodermoa" x={190} y={leftY[1]} ax={anchors.epi[0]} ay={anchors.epi[1]} show={clamp(g.ecto * 2 - 1) * ok(anchors.epi)} />
       <Label id="mesodermo-intraenbrionarioa" x={190} y={leftY[2]} ax={anchors.meso[0]} ay={anchors.meso[1]} show={g.meso * ok(anchors.meso)} />
-      <Label id="hipoblastoa" x={190} y={leftY[3]} ax={anchors.hypo[0]} ay={anchors.hypo[1]} show={(g.endo < 0.97 ? 1 : 0) * ok(anchors.hypo)} />
+      <Label id="hipoblastoa" x={190} y={leftY[3]} ax={anchors.hypo[0]} ay={anchors.hypo[1]} show={(1 - clamp((g.endo - 0.8) / 0.17)) * ok(anchors.hypo)} />
       <Label id="endodermoa" x={190} y={leftY[4]} ax={anchors.endo[0]} ay={anchors.endo[1]} show={g.endo * ok(anchors.endo)} />
       <Label id="amnios-barrunbea" x={810} y={rightY[0]} ax={anchors.amnion[0]} ay={anchors.amnion[1]} show={ok(anchors.amnion)} />
       <Label id="enbrioi-kanpoko-mesodermoa" x={810} y={rightY[1]} ax={anchors.extra[0]} ay={anchors.extra[1]} show={ok(anchors.extra)} small />

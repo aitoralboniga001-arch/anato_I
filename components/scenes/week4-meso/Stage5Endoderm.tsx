@@ -15,16 +15,17 @@ import { D_ROOF, ENDO, FoldBody, H0, S_BM, computeFold, type Fold, type P2 } fro
 const SPLANCH = 13;
 const POUCH_V = [9, 21, 33, 45];
 
+/** Each window starts at its beat (week4b.ts: 0, .12, .24, .34, .44, .52, .62, .76, .9) and is done before that step's done frame. */
 function timing(t: number) {
   return {
-    fore: seg(t, 0.04, 0.12),
-    phar: seg(t, 0.16, 0.24),
-    pouches: seg(t, 0.26, 0.34),
-    resp: seg(t, 0.36, 0.44),
-    thyro: seg(t, 0.44, 0.52),
-    mid: seg(t, 0.54, 0.62),
-    hind: seg(t, 0.68, 0.76),
-    ends: seg(t, 0.82, 0.9),
+    parts: seg(t, 0.12, 0.19), // foregut, midgut and hindgut are named together (step 2)
+    phar: seg(t, 0.24, 0.3),
+    pouches: seg(t, 0.34, 0.4),
+    resp: seg(t, 0.44, 0.49),
+    thyro: seg(t, 0.52, 0.58),
+    vit: seg(t, 0.62, 0.7),
+    hind: seg(t, 0.76, 0.84),
+    ends: seg(t, 0.9, 0.96),
   };
 }
 
@@ -102,19 +103,19 @@ export function GutSagittal({ t }: SceneProps) {
       {L('hodi-neurala', 190, 110, X(map(-0.6 * 250, g.cen(-0.6 * 250))))}
       {L('faringe-poltsak', 190, 150, e.pouch[1], tm.pouches)}
       {L('faringe-hestea', 190, 190, e.phar[4], tm.phar)}
-      {L('aurreko-hestea', 190, 235, X(fH(LF * 0.62, 0)), tm.fore)}
+      {L('aurreko-hestea', 190, 235, X(fH(LF * 0.62, 0)), tm.parts)}
       {L('arnas-hastapena', 190, 280, e.resp[3], tm.resp)}
       {L('hodi-tiroglosoa', 190, 355, e.thyro[3], tm.thyro)}
       {L('mintz-bukofaringeoa', 190, 395, bmMid)}
       {L('estomodeoa', 190, 435, pits[0].c)}
       {L('errai-orria', 190, 475, X(fH(LF * 0.3, H0 + ENDO + SPLANCH * 0.5)), 1, true)}
-      {L('hodi-onfalomesenterikoa', 190, 530, pieces[5][Math.floor(pieces[5].length * 0.45)], tm.mid)}
-      {L('bitelo-zaku-sekundarioa', 190, 580, pieces[4][Math.floor(pieces[4].length * 0.62)], tm.mid)}
+      {L('hodi-onfalomesenterikoa', 190, 530, pieces[5][Math.floor(pieces[5].length * 0.45)], tm.vit)}
+      {L('bitelo-zaku-sekundarioa', 190, 580, pieces[4][Math.floor(pieces[4].length * 0.62)], Math.max(1 - tm.parts, tm.vit))}
 
       {L('amnios-barrunbea', 810, 110, X(map(0.1 * 250, -80)), 1, true)}
       {L('notokorda', 810, 150, X(map(0.3 * 250, 17 + 5)))}
-      {L('erdiko-hestea', 810, 190, X(map(0, D_ROOF + 9)), tm.mid)}
-      {L('atzeko-hestea', 810, 235, X(fT(LFT * 0.45, 0)), tm.hind)}
+      {L('erdiko-hestea', 810, 190, X(map(0, D_ROOF + 9)), tm.parts)}
+      {L('atzeko-hestea', 810, 235, X(fT(LFT * 0.45, 0)), tm.parts)}
       {L('kloaka-mintza', 810, 275, cmMid)}
       {L('kloaka', 810, 318, kloakaC, tm.hind)}
       {L('proktodeoa', 810, 360, pits[1].c, tm.ends)}

@@ -26,7 +26,27 @@ interface ViewportProps {
   fullscreenRef?: RefObject<HTMLElement | null>;
   /** Told when full screen starts or ends (the screen hides its chrome while it lasts). */
   onFullscreenChange?: (on: boolean) => void;
+  /** A card sits over the left of the scene (the stage preview): the specimen glides aside to stay in view. */
+  makeRoom?: boolean;
 }
+
+interface Zoom {
+  k: number;
+  x: number;
+  y: number;
+}
+
+const HOME: Zoom = { k: 1, x: 0, y: 0 };
+
+/** Zoom by `factor` about the scene point (px, py), clamped to 1..6. */
+function zoomedAt(p: Zoom, factor: number, px: number, py: number): Zoom {
+  const k = Math.min(6, Math.max(1, p.k * factor));
+  if (k === 1) return HOME;
+  const f = k / p.k;
+  return { k, x: px - (px - p.x) * f, y: py - (py - p.y) * f };
+}
+
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 interface Mark {
   id: string;
@@ -108,10 +128,49 @@ const sameMarks = (a: Mark[], b: Mark[]) =>
 
 /** SVG stage with wheel/drag zoom-pan, orientation edges and a feathered specimen backdrop. */
 export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewport(
-  { orientation, children, resetKey, onBackgroundClick, overlay, marks, nameOf, fullscreenRef, onFullscreenChange },
+  { orientation, children, resetKey, onBackgroundClick, overlay, marks, nameOf, fullscreenRef, onFullscreenChange, makeRoom },
   svgRef,
 ) {
-  const [z, setZ] = useState({ k: 1, x: 0, y: 0 });
+  const [z, setZ] = useState<Zoom>(HOME);
+  // Zoom glides (buttons, rings, reset); the wheel and dragging stay direct.
+  const zNow = useRef<Zoom>(HOME);
+  const zGoal = useRef<Zoom | null>(null);
+  const zRaf = useRef(0);
+  useEffect(() => {
+    zNow.current = z;
+  }, [z]);
+  const stopZoom = () => {
+    cancelAnimationFrame(zRaf.current);
+    zGoal.current = null;
+  };
+  const glideZoom = useCallback((to: Zoom) => {
+    cancelAnimationFrame(zRaf.current);
+    const from = zNow.current;
+    if (reducedMotion()) {
+      zGoal.current = null;
+      setZ(to);
+      return;
+    }
+    zGoal.current = to;
+    // The point at the centre of the frame moves in a straight line while the scale changes geometrically.
+    const c0 = { x: (W / 2 - from.x) / from.k, y: (H / 2 - from.y) / from.k };
+    const c1 = { x: (W / 2 - to.x) / to.k, y: (H / 2 - to.y) / to.k };
+    const t0 = performance.now();
+    const ms = 420;
+    const frame = (now: number) => {
+      const u = Math.min(1, (now - t0) / ms);
+      const e = 1 - (1 - u) ** 3;
+      const k = from.k * (to.k / from.k) ** e;
+      const cx = c0.x + (c1.x - c0.x) * e;
+      const cy = c0.y + (c1.y - c0.y) * e;
+      setZ(u < 1 ? { k, x: W / 2 - cx * k, y: H / 2 - cy * k } : to);
+      if (u < 1) zRaf.current = requestAnimationFrame(frame);
+      else zGoal.current = null;
+    };
+    zRaf.current = requestAnimationFrame(frame);
+  }, []);
+  useEffect(() => () => cancelAnimationFrame(zRaf.current), []);
+  const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   const drag = useRef<{ x: number; y: number; zx: number; zy: number; moved: boolean } | null>(null);
   const wrap = useRef<HTMLDivElement>(null);
   const scene = useRef<SVGGElement>(null);
@@ -130,7 +189,32 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
     return () => cancelAnimationFrame(raf);
   });
 
-  useEffect(() => setZ({ k: 1, x: 0, y: 0 }), [resetKey]);
+  useEffect(() => {
+    cancelAnimationFrame(zRaf.current);
+    zGoal.current = null;
+    setZ(HOME);
+  }, [resetKey]);
+
+  useEffect(() => {
+    const el = wrap.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setSize({ w: e.contentRect.width, h: e.contentRect.height }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Room for the preview card (min(400px, 44%) wide, 14px in): the specimen (≈78% of the frame wide)
+  // shrinks just enough and centres itself in what is left, then glides back when the card goes.
+  let room: Zoom = HOME;
+  if (makeRoom && size && size.w >= 820) {
+    const s = Math.min(size.w / W, size.h / H);
+    const ox = (size.w - W * s) / 2;
+    const left = (Math.min(400, size.w * 0.44) + 14 + 18 - ox) / s;
+    if (left > 30) {
+      const k = Math.min(1, Math.max(0.6, (W - left) / (W * 0.78)));
+      room = { k, x: left + (W - left) / 2 - (W / 2) * k, y: (H / 2) * (1 - k) };
+    }
+  }
 
   const changed = useEffectEvent((on: boolean) => onFullscreenChange?.(on));
 
@@ -185,19 +269,8 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
     return { x: (clientX - r.left - ox) / s, y: (clientY - r.top - oy) / s, s };
   }, []);
 
-  const zoomAt = useCallback((factor: number, px = W / 2, py = H / 2) => {
-    setZ((p) => {
-      const k = Math.min(6, Math.max(1, p.k * factor));
-      const f = k / p.k;
-      let x = px - (px - p.x) * f;
-      let y = py - (py - p.y) * f;
-      if (k === 1) {
-        x = 0;
-        y = 0;
-      }
-      return { k, x, y };
-    });
-  }, []);
+  /** Buttons: glide, building on a zoom still under way so quick clicks add up. */
+  const zoomAt = useCallback((factor: number, px = W / 2, py = H / 2) => glideZoom(zoomedAt(zGoal.current ?? zNow.current, factor, px, py)), [glideZoom]);
 
   useEffect(() => {
     const el = wrap.current;
@@ -206,11 +279,13 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
       if (!e.ctrlKey && !e.metaKey && Math.abs(e.deltaY) < 4) return;
       e.preventDefault();
       const p = toSvg(e.clientX, e.clientY);
-      zoomAt(Math.exp(-e.deltaY * 0.0022), p.x, p.y);
+      cancelAnimationFrame(zRaf.current);
+      zGoal.current = null;
+      setZ((z) => zoomedAt(z, Math.exp(-e.deltaY * 0.0022), p.x, p.y));
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
-  }, [toSvg, zoomAt]);
+  }, [toSvg]);
 
   return (
     <div
@@ -218,6 +293,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
       className={`viewport${z.k > 1 ? ' is-zoomed' : ''}`}
       onPointerDown={(e) => {
         if (e.button !== 0) return;
+        if (z.k > 1) stopZoom();
         drag.current = { x: e.clientX, y: e.clientY, zx: z.x, zy: z.y, moved: false };
       }}
       onPointerMove={(e) => {
@@ -239,7 +315,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
           e.preventDefault();
         }
       }}
-      onDoubleClick={() => setZ({ k: 1, x: 0, y: 0 })}
+      onDoubleClick={() => glideZoom(HOME)}
     >
       <svg
         ref={svgRef}
@@ -251,6 +327,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
       >
         <Defs />
         <g transform={`translate(${z.x} ${z.y}) scale(${z.k})`}>
+          <g className="scene-room" style={{ transform: `translate(${room.x}px, ${room.y}px) scale(${room.k})` }}>
           <g ref={scene}>{children}</g>
           {rings.map((m, i) => {
             const pad = 10 / z.k;
@@ -272,7 +349,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
                   onClick={(e) => {
                     e.stopPropagation();
                     const k = Math.min(6, Math.max(z.k * 1.5, Math.min(W / (m.w * 6 + 60), H / (m.h * 6 + 60))));
-                    setZ({ k, x: W / 2 - cx * k, y: H / 2 - cy * k });
+                    glideZoom({ k, x: W / 2 - cx * k, y: H / 2 - cy * k });
                   }}
                 >
                   <title>{name ? `${name}: handitu` : 'Handitu'}</title>
@@ -285,6 +362,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
               </g>
             );
           })}
+          </g>
         </g>
       </svg>
 
@@ -304,6 +382,11 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
         <button className="icon-btn" onClick={() => zoomAt(1 / 1.35)} aria-label="Txikitu" data-tip="Txikitu" data-tip-pos="left">
           <IconZoomOut />
         </button>
+        {z.k > 1.01 && (
+          <button className="icon-btn zoom-level" onClick={() => glideZoom(HOME)} aria-label="Zooma berrezarri" data-tip="Irudi osoa ikusi · klik bikoitza" data-tip-pos="left">
+            {Math.round(z.k * 100)}%
+          </button>
+        )}
         <button
           className="icon-btn"
           onClick={toggleFullscreen}

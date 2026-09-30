@@ -2,14 +2,15 @@
 
 import { Label, Mark, Note, Part, lerp, lerpPt, seg, type Pt, type SceneProps } from '@/components/kit';
 import { AgeHud, ramp } from './skin';
-import { LEN, WT, fmtWeight, interp } from './growth';
+import { LEN_TEXT as LEN, WT_TEXT as WT, fmtWeight, interp } from './growth';
 import { FetusFigure, fetusGeom, placeFetus, type FetusPose } from './FetusFigure';
 
 /**
  * Fetal period (topic 5, §2), drawn like the course figures (fetuses of 9–38 weeks, side view,
  * curled) but facing LEFT like the embryo of days 28–56 before it, so the student follows one
  * body through the change of name (the course figures face right: the image lab trains both) and TO SCALE inside each stage: the ruler and the length/weight
- * read-outs come from the notes' table ("Enbrio aroko luzeera eta pisuen gehikuntza").
+ * read-outs come from the notes' table ("Enbrio aroko luzeera eta pisuen gehikuntza"), corrected
+ * to the written text where they disagree (end of the 5th month: ~15 cm, ~500 g — see growth.ts).
  * The fetus moves: kicks, hand-to-mouth (sucking) and breathing movements.
  */
 
@@ -117,8 +118,11 @@ function Fetus({ id, day, pose, Pl, hernia, vernix }: { id: string; day: number;
 
 // ---------------------------------------------------------------------------
 
-const D3: [number, number][] = [[0, 63], [0.16, 77], [0.6, 80], [0.74, 84], [1, 84]];
-const dayOf = (tab: [number, number][], t: number) => {
+// Day of the 3rd-month stage, moving only inside the step that names it (week5.ts beats): 9th week
+// at the start, 11th with the face step (.16), 12th with the ossification step (.46); the hernia
+// returns in its own step (.74) — the read-out never runs ahead of the caption.
+export const D3: [number, number][] = [[0, 63], [0.16, 63], [0.26, 77], [0.46, 77], [0.56, 80], [1, 84]];
+export const dayOf = (tab: [number, number][], t: number) => {
   for (let i = 0; i < tab.length - 1; i++) if (t <= tab[i + 1][0]) return lerp(tab[i][1], tab[i + 1][1], seg(t, tab[i][0], tab[i + 1][0]));
   return tab[tab.length - 1][1];
 };
@@ -129,7 +133,7 @@ export function Fetus3rdMonth({ t }: SceneProps) {
   const Pl = place(day, 58);
   const g = fetusGeom(weekOf(day), pose);
   const x = Pl.xf;
-  const hernia = 1 - ramp(day, 79, 84);
+  const hernia = 1 - seg(t, 0.74, 0.83);
   const gen = x([g.hip[0] + 8, g.hip[1] + g.wL * 1.6]);
   const skull = x(g.turn([g.Hc[0] - g.R * 0.25, g.Hc[1] - g.R * 0.5]));
   const femur = x(g.femur);
@@ -195,8 +199,11 @@ export function Fetus3rdMonth({ t }: SceneProps) {
   );
 }
 
+/** Months 4–5: growth through the first beat, the end of the 5th month (~15 cm, ~500 g) reached in its own beat. */
+const D45: [number, number][] = [[0, 85], [0.24, 126], [0.28, 126], [0.46, 140], [1, 140]];
+
 export function Fetus4to5({ t }: SceneProps) {
-  const day = lerp(85, 140, seg(t, 0, 0.9, (k) => k));
+  const day = dayOf(D45, t);
   const pose = motion(t, { kick: kicks(t, 0.76, 1.02, 34), breathing: seg(t, 0.1, 0.2), sucking: 0.4 * seg(t, 0.3, 0.4), rest: 0.55 });
   const Pl = place(day, 26);
   const g = fetusGeom(weekOf(day), pose);

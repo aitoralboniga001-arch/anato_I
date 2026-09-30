@@ -788,8 +788,14 @@ export function Embryo28to32({ t }: SceneProps) {
 export function Embryo42to56({ t }: SceneProps) {
   const day = day42to56(t);
   const { b, arm, leg, cordEnd } = embryoGeom(day);
-  const d42 = vis(t, 0.13, 0.45);
-  const d48 = vis(t, 0.5, 0.73);
+  // Each group of names arrives with the step that talks about it (week5.ts beats .13 face, .23 ear
+  // swellings, .32 hand/foot plates, .5 second constriction, .6 auricle/neck/liver, .78 day 56) and
+  // stays until the step that replaces it — so a step's own labels are on screen at its done frame.
+  const face42 = vis(t, 0.13, 0.5);
+  const ear42 = vis(t, 0.23, 0.6);
+  const limb42 = vis(t, 0.32, 0.5);
+  const limb48 = vis(t, 0.5, 0.78);
+  const ear48 = vis(t, 0.6, 0.78);
   const d56 = vis(t, 0.78);
   const eye = b.eye;
   const ear = b.ear;
@@ -802,28 +808,28 @@ export function Embryo42to56({ t }: SceneProps) {
       <EmbryoFigure day={day} />
 
       {/* 42. eguna */}
-      <Label id="betazala" x={250} y={185} ax={eye[0]} ay={eye[1] - 12} show={Math.max(d42, d48, d56)} />
-      <Label id="begia" text="Begi pigmentatua" x={250} y={228} ax={eye[0] - 10} ay={eye[1]} show={d42} />
-      <Label id="ildo-nasolakrimala" x={250} y={272} ax={(eye[0] + b.nose[0]) / 2 - 4} ay={(eye[1] + b.nose[1]) / 2 + 6} show={d42} />
-      <Label id="sudur-hobia" x={250} y={345} ax={b.nose[0] - 4} ay={b.nose[1] + 2} show={d42} />
-      <Label id="bihotz-goragunea" x={250} y={400} ax={b.heart[0] - b.heart[2] * 0.6} ay={b.heart[1]} show={d42} />
-      <Label id="oin-plaka" x={250} y={530} ax={foot[0]} ay={foot[1]} show={d42} />
-      <Label id="belarriaren-goraguneak" x={770} y={170} ax={ear[0] + 14} ay={ear[1] - 6} show={d42} />
-      <Label id="kanpoko-entzumenbidea" text="Kanpoko belarri meatoa" x={770} y={215} ax={ear[0] + 3} ay={ear[1] + 2} show={d42} />
-      <Label id="esku-plaka" x={770} y={372} ax={hand[0] + 10} ay={hand[1] - 10} show={d42} />
-      <Label id="hatzetako-izpiak" x={770} y={420} ax={arm.rays[4][1][0]} ay={arm.rays[4][1][1]} show={d42} />
+      <Label id="betazala" x={250} y={185} ax={eye[0]} ay={eye[1] - 12} show={vis(t, 0.13)} />
+      <Label id="begia" text="Begi pigmentatua" x={250} y={228} ax={eye[0] - 10} ay={eye[1]} show={face42} />
+      <Label id="ildo-nasolakrimala" x={250} y={272} ax={(eye[0] + b.nose[0]) / 2 - 4} ay={(eye[1] + b.nose[1]) / 2 + 6} show={face42} />
+      <Label id="sudur-hobia" x={250} y={345} ax={b.nose[0] - 4} ay={b.nose[1] + 2} show={face42} />
+      <Label id="bihotz-goragunea" x={250} y={400} ax={b.heart[0] - b.heart[2] * 0.6} ay={b.heart[1]} show={face42} />
+      <Label id="oin-plaka" x={250} y={530} ax={foot[0]} ay={foot[1]} show={limb42} />
+      <Label id="belarriaren-goraguneak" x={770} y={170} ax={ear[0] + 14} ay={ear[1] - 6} show={ear42} />
+      <Label id="kanpoko-entzumenbidea" text="Kanpoko belarri meatoa" x={770} y={215} ax={ear[0] + 3} ay={ear[1] + 2} show={ear42} />
+      <Label id="esku-plaka" x={770} y={372} ax={hand[0] + 10} ay={hand[1] - 10} show={limb42} />
+      <Label id="hatzetako-izpiak" x={770} y={420} ax={arm.rays[4][1][0]} ay={arm.rays[4][1][1]} show={limb42} />
 
       {/* 48. eguna */}
-      <Label id="begia" x={250} y={228} ax={eye[0] - 10} ay={eye[1]} show={Math.max(d48, d56)} />
-      <Label id="hatzetako-izpiak" x={250} y={360} ax={arm.rays[1][1][0]} ay={arm.rays[1][1][1]} show={d48} />
-      <Label id="izpiarteko-ildoak" x={250} y={392} ax={arm.grooves[1][1][0]} ay={arm.grooves[1][1][1]} show={d48} />
-      <Label id="gibelaren-goragunea" x={250} y={424} ax={b.liver[0] - b.liver[2] * 0.4} ay={b.liver[1] + 6} show={d48} />
-      <Label id="hatzetako-izpiak" text="Behatzetako izpiak" x={770} y={560} ax={leg.rays[2][1][0]} ay={leg.rays[2][1][1]} show={d48} />
-      <Label id="lepoko-tolestura" x={770} y={130} ax={b.spine[0][0] + 50} ay={b.spine[0][1] + 20} show={d48} />
-      <Label id="kanpoko-entzumenbidea" x={770} y={180} ax={ear[0] + 3} ay={ear[1] + 2} show={d48} />
-      <Label id="belarriaren-pabiloia" x={770} y={235} ax={ear[0] + 20} ay={ear[1]} show={Math.max(d48, d56)} />
-      <Label id="eskumuturra" x={770} y={400} ax={arm.joints.dist[0]} ay={arm.joints.dist[1]} show={d48} />
-      <Label id="zilborrestea" x={250} y={462} ax={cordEnd[0] - 6} ay={cordEnd[1]} show={Math.max(d42, d48, d56)} />
+      <Label id="begia" x={250} y={228} ax={eye[0] - 10} ay={eye[1]} show={vis(t, 0.5)} />
+      <Label id="hatzetako-izpiak" x={250} y={360} ax={arm.rays[1][1][0]} ay={arm.rays[1][1][1]} show={limb48} />
+      <Label id="izpiarteko-ildoak" x={250} y={392} ax={arm.grooves[1][1][0]} ay={arm.grooves[1][1][1]} show={limb48} />
+      <Label id="gibelaren-goragunea" x={250} y={424} ax={b.liver[0] - b.liver[2] * 0.4} ay={b.liver[1] + 6} show={ear48} />
+      <Label id="hatzetako-izpiak" text="Behatzetako izpiak" x={770} y={560} ax={leg.rays[2][1][0]} ay={leg.rays[2][1][1]} show={limb48} />
+      <Label id="lepoko-tolestura" x={770} y={130} ax={b.spine[0][0] + 50} ay={b.spine[0][1] + 20} show={ear48} />
+      <Label id="kanpoko-entzumenbidea" x={770} y={180} ax={ear[0] + 3} ay={ear[1] + 2} show={ear48} />
+      <Label id="belarriaren-pabiloia" x={770} y={235} ax={ear[0] + 20} ay={ear[1]} show={vis(t, 0.6)} />
+      <Label id="eskumuturra" x={770} y={400} ax={arm.joints.dist[0]} ay={arm.joints.dist[1]} show={limb48} />
+      <Label id="zilborrestea" x={250} y={462} ax={cordEnd[0] - 6} ay={cordEnd[1]} show={vis(t, 0.13)} />
 
       {/* 56. eguna */}
       <Label id="sare-baskularra" x={250} y={80} ax={plex[0]} ay={plex[1]} show={d56} />

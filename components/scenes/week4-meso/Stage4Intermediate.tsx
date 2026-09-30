@@ -20,16 +20,17 @@ import { SectionDrawing, makeSection } from '@/components/scenes/section/Section
  * from the dorsal wall by the dorsal mesentery, and the coelom filling the space around it — NOT
  * a set of concentric rings sharing the endoderm across the whole circumference.
  */
-// Fade-in windows end exactly at each beat's `at` (week4b.ts: 0, .14, .28, .42, .54, .66, .78, .9).
+// Each window starts at its beat and is complete before that step's done frame
+// (week4b.ts: 0, .14, .28, .42, .54, .66, .78, .9), so nothing shows up a step early.
 function geometry(t: number) {
-  const fold = lerp(0.25, 0.93, seg(t, 0.04, 0.7));
+  const fold = lerp(0.25, 0.93, seg(t, 0.04, 0.72));
   const nephro = seg(t, 0, 0.03);
-  const split = seg(t, 0.2, 0.28); // already split from stage 1 — just fades the labels in
-  const fateUro = seg(t, 0.34, 0.42);
-  const fateWall = seg(t, 0.46, 0.54);
-  const folded = seg(t, 0.62, 0.7);
-  const fateCoelom = seg(t, 0.7, 0.78);
-  const mesentery = seg(t, 0.82, 0.9);
+  const split = seg(t, 0.28, 0.36); // already split from stage 1 — just fades the labels in
+  const fateUro = seg(t, 0.42, 0.5);
+  const fateWall = seg(t, 0.54, 0.62);
+  const folded = seg(t, 0.66, 0.74);
+  const fateCoelom = seg(t, 0.78, 0.86);
+  const mesentery = seg(t, 0.9, 0.97);
   return { fold, nephro, split, fateUro, fateWall, folded, fateCoelom, mesentery };
 }
 
@@ -108,8 +109,11 @@ export function IntermediateSection({ t }: SceneProps) {
         <Label id="peritoneo-barrunbea" x={732} y={200} ax={718} ay={200} align="start" show={g.fateCoelom} small />
       </g>
 
-      <Note x={500} y={610} tone={g.folded > 0.5 ? 'accent' : 'dim'}>
-        {g.folded > 0.5 ? 'Tolestura zeharkakoa amaituta: heste-hodia zintzilik, zeloma inguruan' : 'Tolestura zeharkakoa gertatzen ari da'}
+      <Note x={500} y={610} tone="dim" show={1 - g.folded}>
+        Tolestura zeharkakoa gertatzen ari da
+      </Note>
+      <Note x={500} y={610} tone="accent" show={g.folded}>
+        Tolestura zeharkakoa amaituta: heste-hodia zintzilik, zeloma inguruan
       </Note>
 
       <Label id="bitarteko-mesodermoa" x={190} y={110} ax={inter[0]} ay={inter[1]} show={g.nephro} />
@@ -126,11 +130,11 @@ export function IntermediateSection({ t }: SceneProps) {
 
 /** Craniocaudal schematic: nephrotomes (segmented) cervically vs the nephrogenic cord (unsegmented) caudally. */
 export function IntermediateLongitudinal({ t }: SceneProps) {
-  // Fade-in windows end exactly at each beat's `at` (week4b.ts: 0, .14, .28, .42, ...). Beat 0's
-  // focus (nefrotomak) has no room to fade in before t=0, so it is always fully shown instead.
+  // Windows start at their beat (week4b.ts: 0, .14, .28, .42, ...). Beat 0's focus (nefrotomak)
+  // is the starting picture, so it is always fully shown.
   const nephro = 1;
-  const cord = seg(t, 0.04, 0.14);
-  const kidneyGonad = seg(t, 0.34, 0.42);
+  const cord = seg(t, 0.14, 0.22);
+  const kidneyGonad = seg(t, 0.42, 0.5);
   const yTop = 150;
   const yBot = 500;
   const cordTop = yTop + 9 * 18 + 6;
@@ -151,7 +155,8 @@ export function IntermediateLongitudinal({ t }: SceneProps) {
         ))}
       </Part>
 
-      <Part id="kordoi-nefrogenoa" show={cord}>
+      {/* The caudal cord is there from the start (faint); step 2 brings it forward. */}
+      <Part id="kordoi-nefrogenoa" show={lerp(0.3, 1, cord)}>
         <rect x={462} y={cordTop} width={26} height={yBot - cordTop} rx={13} fill={C.mesoIntermediate} opacity={0.85} />
         <rect x={512} y={cordTop} width={26} height={yBot - cordTop} rx={13} fill={C.mesoIntermediate} opacity={0.85} />
       </Part>

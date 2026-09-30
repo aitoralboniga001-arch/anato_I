@@ -19,7 +19,8 @@ const devAt = (tab: [number, number][], day: number) => {
 };
 
 // Stage time → day (beats: 0 bud, .18 1st constriction, .34 plates, .5 rays, .66 2nd constriction, .84 joints).
-const DAYS: [number, number][] = [[0, 29], [0.16, 38], [0.3, 42], [0.46, 45], [0.64, 48], [0.82, 52], [1, 56]];
+// The ruler reads 42 at the first-constriction step and ~48-49 when the second constriction is shown, as in the notes.
+const DAYS: [number, number][] = [[0, 29], [0.16, 38], [0.3, 42], [0.46, 44], [0.62, 46.5], [0.8, 48.6], [1, 56]];
 const dayAt = (t: number) => {
   for (let i = 0; i < DAYS.length - 1; i++) if (t <= DAYS[i + 1][0]) return lerp(DAYS[i][1], DAYS[i + 1][1], seg(t, DAYS[i][0], DAYS[i + 1][0], (k) => k));
   return 56;

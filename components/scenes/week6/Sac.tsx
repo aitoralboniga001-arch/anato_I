@@ -146,8 +146,13 @@ export function ChorionicSac({ t, reduced }: SceneProps) {
       <Note x={500} y={44} show={seg(t, 0, 0.1)} tone="dim">
         Biloxka enborrak adarkatzen dira
       </Note>
-      <Note x={500} y={44} show={seg(t, 0.16, 0.24)} tone="accent">
+      <Note x={500} y={44} show={vis(t, 0.16, 0.66)} tone="accent">
         Biloxka askeek biloxka arteko espazioa betetzen dute
+      </Note>
+      {/* Stem villi never thin: they take no part in the exchange. */}
+      <Mark id="biloxka-enborra" x={CX - 195} y={CY - 52} rx={26} color="#fbbf24" show={vis(t, 0.66)} />
+      <Note x={500} y={44} show={vis(t, 0.66)} tone="warn">
+        Enborrezko biloxkak ez dira mehetzen: ez dute trukerik egiten
       </Note>
     </g>
   );
@@ -177,7 +182,7 @@ function villusUnit(i: number, t: number) {
 }
 
 function CirculationDrawing({ t, reduced }: SceneProps) {
-  const sep = seg(t, 0.76, 0.84);
+  const sep = seg(t, 0.8, 0.86);
   const units = Array.from({ length: N_VILLI }, (_, i) => villusUnit(i, t));
   return (
     <g>
@@ -235,7 +240,7 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
 }
 
 export function SacCirculation({ t, reduced }: SceneProps) {
-  const sep = seg(t, 0.76, 0.84);
+  const sep = seg(t, 0.8, 0.86);
   return (
     <g>
       <SacDefs />
@@ -250,7 +255,7 @@ export function SacCirculation({ t, reduced }: SceneProps) {
       <Label id="korion-plaka" x={190} y={280} ax={CX - (V_R - 62)} ay={CY + 30} text="Korion-orria" />
       <Label id="korion-barrunbea" x={810} y={330} ax={CX + (V_R - 90) - 4} ay={CY + 30} />
       <Label id="sinzitiotrofoblastoa" x={190} y={380} ax={CX - V_R + 8} ay={CY + 70} text="Sinzitioa" />
-      <Label id="zilbor-hodiak" x={190} y={130} ax={CX - 3} ay={CY - 80} show={vis(t, 0.76)} />
+      <Label id="zilbor-hodiak" x={190} y={130} ax={CX - 3} ay={CY - 80} show={vis(t, 0.8)} />
 
       <Note x={500} y={600} show={sep} tone="warn">
         Amaren eta fetuaren odolak ez dute inoiz kontakturik

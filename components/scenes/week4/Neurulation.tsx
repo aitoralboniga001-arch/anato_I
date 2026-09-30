@@ -17,23 +17,11 @@ import { f1, type Pt } from './common';
 /**
  * Step windows (the stage beats): .00 induction → plate · .12 groove · .30 folds rise and approach ·
  * .44 fusion (zipping) · .62 crest cells leave the fold edges · .68 tube closed under the surface
- * ectoderm · .80 crest cells migrate · .90 neuropores. Each change happens inside its own step.
+ * ectoderm · .80 crest cells migrate · .90 neuropores. Each change starts at its beat and is finished
+ * by the step's complete frame (next beat − 0.035), eased in and out (no speed jumps between steps).
  */
-const NEURAL_KEYS: [number, number][] = [
-  [0, 0],
-  [0.12, 0.15],
-  [0.3, 0.42],
-  [0.44, 0.72],
-  [0.62, 0.9],
-  [0.72, 1],
-];
 function neuralAt(t: number) {
-  for (let i = 1; i < NEURAL_KEYS.length; i++) {
-    const [t0, v0] = NEURAL_KEYS[i - 1];
-    const [t1, v1] = NEURAL_KEYS[i];
-    if (t <= t1) return lerp(v0, v1, clamp((t - t0) / (t1 - t0)));
-  }
-  return 1;
+  return 0.15 * seg(t, 0.12, 0.26) + 0.27 * seg(t, 0.3, 0.405) + 0.48 * seg(t, 0.44, 0.58) + 0.1 * seg(t, 0.68, 0.76);
 }
 
 function transverseSection(t: number) {
@@ -42,8 +30,8 @@ function transverseSection(t: number) {
     neural: neuralAt(t),
     meso: lerp(0.3, 0.55, seg(t, 0.2, 1)),
     somite: lerp(0.15, 0.45, seg(t, 0.1, 0.6)),
-    crest: 0.58 * seg(t, 0.8, 0.9),
-    crestAppear: seg(t, 0.62, 0.66),
+    crest: 0.58 * seg(t, 0.8, 0.87),
+    crestAppear: seg(t, 0.62, 0.655),
     aorta: seg(t, 0.3, 0.6),
     k: 1.5,
     oy: 60,
@@ -53,10 +41,10 @@ function transverseSection(t: number) {
 function transverseLabels(t: number) {
   const s = transverseSection(t);
   const n = neuralAt(t);
-  const groove = seg(t, 0.12, 0.16) * (1 - seg(t, 0.52, 0.62));
-  const folds = seg(t, 0.3, 0.34) * (1 - seg(t, 0.56, 0.64));
-  const tube = seg(t, 0.56, 0.66);
-  const crest = seg(t, 0.62, 0.66);
+  const groove = seg(t, 0.12, 0.16) * (1 - seg(t, 0.5, 0.56));
+  const folds = seg(t, 0.3, 0.34) * (1 - seg(t, 0.52, 0.58));
+  const tube = seg(t, 0.52, 0.58);
+  const crest = seg(t, 0.62, 0.655);
   const ecto = s.map(-150, 4.5);
   const fold = s.at.folds;
   const tubeL = s.map(-s.neural.pt(Math.PI / 2, s.neural.rho)[0], s.neural.pt(Math.PI / 2, s.neural.rho)[1]);
@@ -127,15 +115,17 @@ function plateHalfWidth(frac: number) {
   return bodyHalfWidth(frac) * 0.52;
 }
 /** Neuropores exist once fusion has left just two open ends. */
-const poresOn = (t: number) => seg(t, 0.6, 0.66);
+const poresOn = (t: number) => seg(t, 0.52, 0.58);
 
 /** The folds meet at the future neck in the fusion step (.44) and zip both ways until the neuropores close. */
 type Zip = { cr: number; ca: number } | null;
 /**
- * Cranial front runs a little faster: the cranial neuropore (≈25th day) closes before the caudal one
- * (≈28th). Both pores stay open until the neuropore step (.9), so that step shows them closing in order.
+ * The fusion step zips the folds from the neck until only the two ends are open (the neuropores);
+ * they stay open until the neuropore step (.9), which closes the cranial one (≈25th day) and then
+ * the caudal one (≈28th).
  */
-const zipOf = (t: number): Zip => (t < 0.44 ? null : { cr: lin(t, 0.44, 0.95) * 0.39, ca: Math.pow(lin(t, 0.44, 0.995), 1.4) * 0.51 });
+const zipOf = (t: number): Zip =>
+  t < 0.44 ? null : { cr: 0.3 * seg(t, 0.44, 0.58) + 0.09 * seg(t, 0.9, 0.95), ca: 0.4 * seg(t, 0.44, 0.58) + 0.11 * seg(t, 0.95, 0.995) };
 
 function localClosure(frac: number, spread: Zip) {
   if (!spread) return 0;
@@ -163,7 +153,7 @@ function DorsalDrawing({ t }: SceneProps) {
   const caudalOpen = 1 - localClosure(0.95, spread);
   const somiteShow = seg(t, 0.15, 0.4);
   // Folds rise and draw towards each other before they touch at the future neck.
-  const approach = seg(t, 0.3, 0.44);
+  const approach = seg(t, 0.3, 0.4);
 
   const outline: Pt[] = [];
   for (let i = 0; i <= 48; i++) {
@@ -234,7 +224,7 @@ function DorsalDrawing({ t }: SceneProps) {
         <ellipse cx={500} cy={yAt(0.95)} rx={16 * caudalOpen + 4} ry={20 * caudalOpen + 3} fill="#0c0c0e" stroke={C.neural} strokeWidth={2} />
       </Part>
 
-      <Note x={500} y={100} tone="warn" show={seg(t, 0.75, 0.95) * (1 - seg(t, 0.97, 1))}>
+      <Note x={500} y={100} tone="warn" show={seg(t, 0.9, 0.93)}>
         Neuroporoen itxiera-egunak gutxi gorabeherakoak dira (inguruan)
       </Note>
       <DayRuler t={t} />
@@ -243,13 +233,14 @@ function DorsalDrawing({ t }: SceneProps) {
 }
 
 /** Day ruler for the zipper: fusion starts mid-embryo (≈22), cranial pore closes (≈25), caudal (≈28). */
+const T_OPEN = 0.9; // the pores start closing
 const T_CRANIAL = 0.95; // localClosure(0.05) reaches 1
 const T_CAUDAL = 0.995; // localClosure(0.95) reaches 1
 function DayRuler({ t }: { t: number }) {
   const show = seg(t, ZIP_START, ZIP_START + 0.03);
   if (show <= 0.02) return null;
   const x = (d: number) => lerp(70, 330, (d - 21) / 8);
-  const day = t < T_CRANIAL ? lerp(22, 25, lin(t, ZIP_START, T_CRANIAL)) : lerp(25, 28, lin(t, T_CRANIAL, T_CAUDAL));
+  const day = t < T_OPEN ? lerp(22, 24.5, lin(t, ZIP_START, T_OPEN)) : t < T_CRANIAL ? lerp(24.5, 25, lin(t, T_OPEN, T_CRANIAL)) : lerp(25, 28, lin(t, T_CRANIAL, T_CAUDAL));
   const ticks: [number, string][] = [
     [22, 'fusioa hasi'],
     [25, 'kraneala itxi'],
@@ -282,7 +273,7 @@ function dorsalLabels(t: number) {
     <>
       <Label id="hodi-neurala" x={190} y={360} ax={500 - 14} ay={yAt(0.5)} show={spread ? seg(t, 0.44, 0.47) : 0} />
       <Label id={t < 0.12 ? 'plaka-neurala' : 'ildo-neurala'} x={810} y={400} ax={500 + 6} ay={yAt(0.7)} show={1 - localClosure(0.7, spread)} />
-      <Label id="tolesdura-neuralak" x={190} y={200} ax={500 - plateHalfWidth(0.2) * 0.5} ay={yAt(0.2)} show={1 - localClosure(0.2, spread)} />
+      <Label id="tolesdura-neuralak" x={190} y={200} ax={500 - plateHalfWidth(0.2) * 0.5} ay={yAt(0.2)} show={seg(t, 0.3, 0.34) * (1 - localClosure(0.2, spread))} />
       <Label id="neuroporo-kraneala" x={790} y={150} ax={500 + 18} ay={yAt(0.05)} show={cranialOpen * poresOn(t)} />
       <Label id="neuroporo-kaudala" x={810} y={480} ax={500 + 14} ay={yAt(0.95)} show={caudalOpen * poresOn(t)} />
       <Label id="somitak" x={810} y={260} ax={500 + plateHalfWidth(0.4) + 20} ay={yAt(0.4)} small show={seg(t, 0.2, 0.3)} />

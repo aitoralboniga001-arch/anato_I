@@ -26,7 +26,8 @@ const X_HEAD = X_PRE + 20; // cranial end of the notochord (caudal edge of the p
 
 function sagGeometry(t: number) {
   return {
-    migrate: seg(t, NB.migrate, NB.canal),
+    // The cord reaches the prechordal plate by the 'reach' step's complete frame (canal − 0.035).
+    migrate: seg(t, NB.migrate, NB.canal - 0.04),
     canal: seg(t, NB.canal, NB.canal + 0.05) * (1 - seg(t, NB.close, NB.close + 0.06)),
     plate: seg(t, NB.plate, NB.plate + 0.08),
     rod: seg(t, NB.rod, NB.rod + 0.08),
@@ -119,7 +120,7 @@ export function NotochordSagittal({ t }: SceneProps) {
       {L('ektodermoa', 190, 110, s.map(-120, 8))}
       {L('mintz-bukofaringeoa', 190, 160, s.map(X_BUCCO, s.top(X_BUCCO) + 6))}
       {L('plaka-prekordala', 190, 205, mid(X_PRE))}
-      {L(notoSlot, 190, 250, g.plate >= 0.5 ? s.map(-80, s.dEnd(-80) + 3) : mid((front + X_NODE) / 2), notoSlot === 'notokorda-plaka' ? 1 - g.rod : g.migrate)}
+      {L(notoSlot, 190, 250, g.plate >= 0.5 ? s.map(-80, s.dEnd(-80) + 3) : mid((front + X_NODE) / 2), notoSlot === 'notokorda-plaka' ? 1 - g.rod : seg(t, NB.migrate, NB.migrate + 0.05))}
       {L('notokorda', 190, 430, mid(-80), g.rod)}
       {L('endodermoa', 190, 470, s.map(-150, s.dEnd(-150) + 6))}
       {L('nodo-primitiboa', 810, 150, [nodeTop[0] + 14 * s.k, nodeTop[1] + 6 * s.k])}

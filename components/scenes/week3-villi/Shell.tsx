@@ -8,17 +8,18 @@ import { V, VilliDefs, alongFinger, f1, fingerD, place } from './common';
  * syncytium and reaches the decidua basalis, forming the outer cytotrophoblastic shell that anchors
  * the whole chorionic sac. Distinguishes stem/anchoring villi (plate → shell) from free villi
  * (branches floating in the intervillous space). Windows (shared by views and content/weeks/week3b.ts):
- *   .08–.30 cyto cells at the trunk tips push through the syncytial roof, spreading sideways
- *   .28–.55 the cells join between villi → continuous kanpoko zorro zitotrofoblastikoa
- *   .50–.58 anchoring (stem) villi highlighted (trunk: plate → shell)
- *   .70–.82 free villi highlighted (branches, floating, do not reach the shell)
+ *   .10–.26 cyto cells at the trunk tips push through the syncytial roof, spreading sideways
+ *   .30–.46 the cells join between villi → continuous kanpoko zorro zitotrofoblastikoa
+ *   .58–.64 anchoring (stem) villi highlighted (trunk: plate → shell), until .70–.74
+ *   .70–.78 free villi highlighted (branches, floating, do not reach the shell)
+ *   (each window starts at its beat and ends before the step's complete frame)
  */
 export const W = {
-  penetrate: [0.08, 0.3],
-  shell: [0.28, 0.55],
-  anchor: [0.5, 0.58],
-  anchorFade: [0.66, 0.72],
-  free: [0.62, 0.72],
+  penetrate: [0.1, 0.26],
+  shell: [0.3, 0.46],
+  anchor: [0.58, 0.64],
+  anchorFade: [0.7, 0.74],
+  free: [0.7, 0.78],
 } as const;
 
 /**
@@ -294,7 +295,7 @@ export function ShellClose({ t, reduced }: SceneProps) {
       <Label id="zitotrofoblastoa" x={180} y={310} ax={at(cx - 17, Y.shellSplit + 40)[0]} ay={at(cx - 17, Y.shellSplit + 40)[1]} />
       <Label id="sinzitiotrofoblastoa" x={180} y={420} ax={at(cx - trunk.hw + 4, Y.shellSplit + 4)[0]} ay={at(cx - trunk.hw + 4, Y.shellSplit + 4)[1]} />
       <Label id="biloxka-enborra" x={180} y={520} ax={at(cx, Y.shellSplit + 140)[0]} ay={at(cx, Y.shellSplit + 140)[1]} text="Enborrezko biloxka" />
-      <Note x={500} y={612} tone="accent" show={seg(t, W.penetrate[0], W.penetrate[0] + 0.06) * (1 - seg(t, 0.28, 0.34))}>
+      <Note x={500} y={612} tone="accent" show={seg(t, W.penetrate[0], W.penetrate[0] + 0.06) * (1 - seg(t, 0.3, 0.34))}>
         Zitotrofoblasto-zelulak sinzitioa zeharkatu eta dezidua basalera iristen dira
       </Note>
     </g>

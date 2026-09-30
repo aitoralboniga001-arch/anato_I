@@ -19,6 +19,15 @@ export const ROWS: { w: [number, number]; len: [number, number]; wt: [number, nu
 export const LEN: [number, number][] = ROWS.flatMap((r) => [[r.w[0], r.len[0]], [r.w[1], r.len[1]]] as [number, number][]);
 export const WT: [number, number][] = ROWS.flatMap((r) => [[r.w[0], r.wt[0]], [r.w[1], r.wt[1]]] as [number, number][]);
 
+/**
+ * Where the notes' prose and table disagree, the prose wins: at the end of the 5th month (week 20)
+ * the fetus is ~15 cm and ~500 g (the table's 17–20 week row says 15–19 cm and 250–450 g). The
+ * fetus drawings and their live read-outs follow these curves; the growth charts still plot the table.
+ */
+export const TEXT_W20 = { len: 15, wt: 500 };
+export const LEN_TEXT: [number, number][] = [...LEN.filter(([w]) => w <= 12), [20, TEXT_W20.len], ...LEN.filter(([w]) => w >= 28)];
+export const WT_TEXT: [number, number][] = [...WT.filter(([w]) => w <= 16), [20, TEXT_W20.wt], ...WT.filter(([w]) => w >= 24)];
+
 export const interp = (tab: [number, number][], x: number) => {
   if (x <= tab[0][0]) return tab[0][1];
   for (let i = 0; i < tab.length - 1; i++) if (x <= tab[i + 1][0]) return lerp(tab[i][1], tab[i + 1][1], (x - tab[i][0]) / (tab[i + 1][0] - tab[i][0]));

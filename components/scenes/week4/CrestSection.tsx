@@ -9,7 +9,7 @@ const TEAL = '#5eead4';
 function geometry(t: number) {
   const close = seg(t, 0, 0.095);
   const gap = lerp(18, 0, close);
-  const z = zoom(0, 61, lerp(3.15, 2.65, seg(t, 0.15, 0.175)), 500, 320);
+  const z = zoom(0, 61, lerp(3.15, 2.65, seg(t, 0.18, 0.22)), 500, 320);
   return { gap, close, z };
 }
 function Melanocyte({ x, y }: { x: number; y: number }) {
@@ -24,9 +24,12 @@ export function CrestSection({ t, reduced }: SceneProps) {
   const emt = seg(t, 0.025, 0.13);
   const dorsal = seg(t, 0.182, 0.247);
   const ventral = seg(t, 0.31, 0.455);
-  const mode = t < 0.18 ? 0 : t < 0.3 ? 1 : 2;
-  const dimD = mode === 2 ? 0.28 : 1;
-  const dimV = mode === 1 ? 0.22 : 1;
+  // Weights of the three phases (EMT · dorsolateral · ventral), cross-faded right after each beat.
+  const m1in = seg(t, 0.18, 0.195);
+  const m2 = seg(t, 0.3, 0.315);
+  const m = [1 - m1in, m1in * (1 - m2), m2];
+  const dimD = lerp(1, 0.28, m[2]);
+  const dimV = 1 - 0.78 * m[1];
   const label = (id: string, x: number, y: number, p: Pt, show = 1) => {
     const [ax, ay] = z.at(...p);
     return <Label key={id} id={id} x={x} y={y} ax={ax} ay={ay} show={show} small />;
@@ -40,7 +43,7 @@ export function CrestSection({ t, reduced }: SceneProps) {
     <g clipPath="url(#w4-crest-section-crop)">
       <g transform={z.transform}>
         {/* A paired somite leaves a conspicuous corridor on each side of the tube. */}
-        <Part id="somitak" show={mode === 2 ? 0.85 : 0.35}>
+        <Part id="somitak" show={0.35 + 0.5 * m[2]}>
           {[-1, 1].map(sd => <g key={sd}>
             <ellipse cx={sd * 84} cy={64} rx={27} ry={35} fill={C.mesoIntra} fillOpacity={0.5} stroke="#f3a9a1" strokeWidth={0.8} />
             {Array.from({ length: 16 }, (_, i) => {
@@ -50,7 +53,7 @@ export function CrestSection({ t, reduced }: SceneProps) {
             <ellipse cx={sd * 84} cy={64} rx={9} ry={15} fill="#342634" />
           </g>)}
         </Part>
-        <Part id="azaleko-ektodermoa" show={mode === 1 ? 1 : 0.48}>
+        <Part id="azaleko-ektodermoa" show={0.48 + 0.52 * m[1]}>
           {[-1, 1].map(sd => <g key={sd} transform={`scale(${sd} 1)`}>
             <path d={`M${gap},-10H116V-2H${gap}Z`} fill={C.surfaceEcto} stroke="#a5c7f9" strokeWidth={0.7} />
             <path d={`M${gap},-2Q${gap - 5},2 ${gap},14`} fill="none" stroke={C.surfaceEcto} strokeWidth={6} opacity={1 - close} />
@@ -70,7 +73,7 @@ export function CrestSection({ t, reduced }: SceneProps) {
           {[-1, 1].map(sd => <ellipse key={sd} cx={sd * 30} cy={142} rx={9} ry={6} fill="#3f2033" stroke="#ec8290" strokeWidth={2} />)}
         </Part>
         {[-1, 1].map(sd => <g key={sd}>
-          <Mark id="tolesdura-neuralak" x={sd * (gap + 3)} y={17} rx={12} ry={13} show={mode === 0 ? 0.85 : 0} color="#fbd68c" />
+          <Mark id="tolesdura-neuralak" x={sd * (gap + 3)} y={17} rx={12} ry={13} show={0.85 * m[0]} color="#fbd68c" />
           {/* Cells start IN the fold rim, lose their tall shape and separate into a dorsal pool. */}
           <Part id="gandor-neurala">
             {[0, 1, 2].map(i => <Cell key={i} x={sd * lerp(gap + 3 + i * 4, 13 + i * 9, emt)} y={lerp(17, 6 + i * 2, emt)} r={4} rx={lerp(2, 4.5, emt)} ry={lerp(7, 3.7, emt)} color={TEAL} nucleus="#155e59" />)}
@@ -80,7 +83,7 @@ export function CrestSection({ t, reduced }: SceneProps) {
             <Part id="gandor-neurala">
               {[0, 1, 2].map(i => {
                 const u = seg(t, 0.182 + i * 0.003, 0.235 + i * 0.005);
-                return <g key={i} opacity={(1 - seg(t, 0.247, 0.258)) * (mode === 0 ? 0 : 1)}>
+                return <g key={i} opacity={(1 - seg(t, 0.247, 0.258)) * (1 - m[0])}>
                   <Cell x={sd * lerp(26, 65 + i * 17, u)} y={8} r={4} rx={5} ry={3.7} color={GOLD} nucleus="#874820" />
                 </g>;
               })}
@@ -110,7 +113,7 @@ export function CrestSection({ t, reduced }: SceneProps) {
         </g>)}
       </g>
     </g>
-    {label('tolesdura-neuralak', 204, 108, [-gap - 5, 19], mode === 0 ? 1 : 0)}
+    {label('tolesdura-neuralak', 204, 108, [-gap - 5, 19], m[0])}
     {label('azaleko-ektodermoa', 204, 166, [-90, -6])}
     {label('hodi-neurala', 204, 273, [-29, 63])}
     {label('notokorda', 204, 507, [0, 119])}
@@ -119,15 +122,17 @@ export function CrestSection({ t, reduced }: SceneProps) {
     {label('melanozitoak', 790, 232, [82, -1], seg(t, 0.247, 0.258) * dimD)}
     {label('gongoil-errakideoak', 790, 387, [45, 69], seg(t, 0.419, 0.442))}
     {label('gongoil-sinpatikoak', 790, 455, [45, 124], seg(t, 0.444, 0.463))}
-    {label('aorta-dortsalak', 790, 528, [30, 142], mode === 2 ? 0.7 : 0)}
-    <Note x={500} y={57} tone="accent" size={16}>
-      {mode === 0 ? '01 · Ertzetik askatu' : mode === 1 ? '02 · Azaleko ektodermopean' : '03 · Hodi neuralaren eta somiten artetik'}
-    </Note>
-    <Note x={500} y={574} tone="accent" size={16}>
-      {mode === 0 ? 'Trantsizio epitelio-mesenkimatikoa: zelulak bereizi eta migratzeko prest' : mode === 1 ? 'Bide dortsolaterala → epidermiseko melanozitoak' : 'Bide bentrala → gongoil errakideoak eta gongoil sinpatikoak'}
-    </Note>
-    <Note x={500} y={602} tone="dim" size={15}>
-      {mode === 0 ? 'Tolesdura neuralak → gandor neurala → migrazioa' : mode === 1 ? 'Epidermisean: melanozitoak, ile-folikuluak eta azazkalak' : 'Enborreko ebaki eskematikoa; gainerako eratorriak hurrengo ikuspegian'}
-    </Note>
+    {label('aorta-dortsalak', 790, 528, [30, 142], 0.7 * m[2])}
+    {[
+      ['01 · Ertzetik askatu', 'Trantsizio epitelio-mesenkimatikoa: zelulak bereizi eta migratzeko prest', 'Tolesdura neuralak → gandor neurala → migrazioa'],
+      ['02 · Azaleko ektodermopean', 'Bide dortsolaterala → epidermiseko melanozitoak', 'Epidermisean: melanozitoak, ile-folikuluak eta azazkalak'],
+      ['03 · Hodi neuralaren eta somiten artetik', 'Bide bentrala → gongoil errakideoak eta gongoil sinpatikoak', 'Enborreko ebaki eskematikoa; gainerako eratorriak hurrengo ikuspegian'],
+    ].map(([title, main, sub], i) => (
+      <g key={title}>
+        <Note x={500} y={57} tone="accent" size={16} show={m[i]}>{title}</Note>
+        <Note x={500} y={574} tone="accent" size={16} show={m[i]}>{main}</Note>
+        <Note x={500} y={602} tone="dim" size={15} show={m[i]}>{sub}</Note>
+      </g>
+    ))}
   </g>;
 }

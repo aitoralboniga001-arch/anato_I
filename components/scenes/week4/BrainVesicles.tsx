@@ -14,10 +14,25 @@ const D_TOP = 130;
 const D_JUNCTION = 300;
 const D_BOTTOM = 560;
 
+/**
+ * Vesicle growth: a first hint of all three swellings in step 1 ("agertzen hasten dira"), then each
+ * one grows in its own step (week4.ts beats .08 / .24 / .4), complete before that step's done frame.
+ */
+function vesicles(t: number) {
+  const hint = 0.15 * seg(t, 0, 0.06);
+  return {
+    prosA: hint + 0.85 * seg(t, 0.08, 0.2),
+    mesA: hint + 0.85 * seg(t, 0.24, 0.36),
+    rhombA: hint + 0.85 * seg(t, 0.4, 0.53),
+    // Names arrive with their own step only (not with the first hint).
+    prosL: seg(t, 0.08, 0.2),
+    mesL: seg(t, 0.24, 0.36),
+    rhombL: seg(t, 0.4, 0.53),
+  };
+}
+
 function DorsalDrawing({ t }: SceneProps) {
-  const prosA = seg(t, 0.05, 0.42);
-  const mesA = seg(t, 0.2, 0.56);
-  const rhombA = seg(t, 0.35, 0.72);
+  const { prosA, mesA, rhombA } = vesicles(t);
   const cordA = 0.35 + 0.65 * seg(t, 0.1, 0.5);
 
   const prosR = lerp(20, 54, prosA);
@@ -63,20 +78,17 @@ function DorsalDrawing({ t }: SceneProps) {
 }
 
 function dorsalLabels(t: number) {
-  const prosA = seg(t, 0.05, 0.42);
-  const mesA = seg(t, 0.2, 0.56);
-  const rhombA = seg(t, 0.35, 0.72);
-  const cordA = seg(t, 0.1, 0.5);
+  const { prosA, mesA, rhombA, prosL, mesL, rhombL } = vesicles(t);
   const prosY = D_TOP + 40;
   const mesY = prosY + lerp(20, 54, prosA) * 0.6 + lerp(17, 40, mesA) * 0.75;
   const rhombY = mesY + lerp(17, 40, mesA) * 0.6 + lerp(17, 46, rhombA) * 0.8;
   return (
     <>
       <Mark id="hodi-neurala" x={VX} y={(D_TOP + D_BOTTOM) / 2} rx={26} ry={(D_BOTTOM - D_TOP) / 2 + 12} color="#7ad9a3" show={1 - seg(t, 0.1, 0.14)} />
-      <Label id="prosentzefaloa" x={190} y={170} ax={VX - 40} ay={prosY} show={prosA} />
-      <Label id="mesentzefaloa" x={190} y={230} ax={VX - 24} ay={mesY} show={mesA} />
-      <Label id="erronbentzefaloa" x={190} y={290} ax={VX - 30} ay={rhombY} show={rhombA} />
-      <Label id="ornomuina" x={810} y={420} ax={VX + 14} ay={D_BOTTOM - 60} show={cordA} />
+      <Label id="prosentzefaloa" x={190} y={170} ax={VX - 40} ay={prosY} show={prosL} />
+      <Label id="mesentzefaloa" x={190} y={230} ax={VX - 24} ay={mesY} show={mesL} />
+      <Label id="erronbentzefaloa" x={190} y={290} ax={VX - 30} ay={rhombY} show={rhombL} />
+      <Label id="ornomuina" x={810} y={420} ax={VX + 14} ay={D_BOTTOM - 60} show={seg(t, 0.4, 0.46)} />
       {/* Before the vesicles bulge, it is one continuous tube. */}
       <Label id="hodi-neurala" x={810} y={360} ax={VX + 14} ay={(D_TOP + D_BOTTOM) / 2} show={1 - seg(t, 0.1, 0.14)} />
     </>
@@ -120,9 +132,7 @@ function catmull(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number): Pt {
 }
 
 function tubeNodes(t: number): Node[] {
-  const prosA = seg(t, 0.05, 0.42);
-  const mesA = seg(t, 0.2, 0.56);
-  const rhombA = seg(t, 0.35, 0.72);
+  const { prosA, mesA, rhombA } = vesicles(t);
   const neck = 13;
   const ctrl: Node[] = [
     { p: lerpPt(P_PROS, G28.face.slice(0, 2) as unknown as Pt, 0.35), r: lerp(neck, 30, prosA), part: 'prosentzefaloa' },
@@ -199,16 +209,14 @@ function LateralDrawing({ t }: SceneProps) {
 }
 
 function lateralLabels(t: number) {
-  const prosA = seg(t, 0.05, 0.42);
-  const mesA = seg(t, 0.2, 0.56);
-  const rhombA = seg(t, 0.35, 0.72);
+  const { prosA, mesA, rhombA, prosL, mesL, rhombL } = vesicles(t);
   const b0 = G28.bars[0];
   const cord = spineAt(G28.S, 0.5, 10).p;
   return (
     <>
-      <Label id="prosentzefaloa" x={190} y={250} ax={P_PROS[0]} ay={P_PROS[1]} show={prosA} />
-      <Label id="mesentzefaloa" x={190} y={110} ax={P_MES[0]} ay={P_MES[1]} show={mesA} />
-      <Label id="erronbentzefaloa" x={810} y={110} ax={P_RHOMB[0]} ay={P_RHOMB[1]} show={rhombA} />
+      <Label id="prosentzefaloa" x={190} y={250} ax={P_PROS[0]} ay={P_PROS[1]} show={prosL} />
+      <Label id="mesentzefaloa" x={190} y={110} ax={P_MES[0]} ay={P_MES[1]} show={mesL} />
+      <Label id="erronbentzefaloa" x={810} y={110} ax={P_RHOMB[0]} ay={P_RHOMB[1]} show={rhombL} />
       <Label id="ornomuina" x={810} y={400} ax={cord[0]} ay={cord[1]} />
       <Label id="mintz-bukofaringeoa" x={190} y={380} ax={b0.bot[0] - b0.w * 0.55} ay={b0.bot[1] - b0.w * 0.3} small />
     </>

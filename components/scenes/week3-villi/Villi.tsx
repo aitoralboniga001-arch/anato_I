@@ -1,22 +1,23 @@
 'use client';
 
-import { C, Flow, Label, Note, Part, lerp, seg, zoom, type SceneProps } from '@/components/kit';
+import { C, Flow, Label, Note, Part, clamp, lerp, seg, zoom, type SceneProps } from '@/components/kit';
 import { V, VilliDefs, f1, fingerD, loopD, place } from './common';
 
 /**
  * Stage `biloxkak` — primary → secondary → tertiary villus (day 13 → end of week 3).
  * Windows (shared by every view and by the beats in content/weeks/week3b.ts):
- *   .00–.28 primary villus: cytotrophoblast core covered by syncytium, it lengthens (.05–.30)
+ *   .00–.30 primary villus: cytotrophoblast core covered by syncytium, it lengthens (.08–.26)
  *   .30–.48 extra-embryonic mesoderm of the chorionic plate grows into the core → secondary villus
- *   .54–.64 blood islands (angioblast clusters) differentiate in the mesoderm core
- *   .62–.76 they join into capillaries, continuous with the chorionic-plate vessels → tertiary villus
+ *   .55–.63 blood islands (angioblast clusters) differentiate in the mesoderm core
+ *   .67–.78 they join into capillaries, continuous with the chorionic-plate vessels → tertiary villus
+ *   (each window starts at its beat and ends before the step's complete frame)
  *   .82–1   comparison: only the core changes
  */
 export const W = {
-  grow: [0.05, 0.3],
-  meso: [0.3, 0.48],
-  islands: [0.54, 0.64],
-  vessels: [0.62, 0.76],
+  grow: [0.08, 0.26],
+  meso: [0.3, 0.46],
+  islands: [0.55, 0.63],
+  vessels: [0.67, 0.78],
 } as const;
 
 const PLATE = { syn: 470, cyto: 484, meso: 498, bottom: 560 };
@@ -64,9 +65,9 @@ function VilliDrawing({ t, reduced }: SceneProps) {
   const g = geometry(t);
   const { villi, meso, islands, vessels } = g;
   const islandShow = islands * (1 - seg(t, 0.72, 0.8));
-  const primary = 1 - seg(t, 0.28, 0.38);
-  const secondary = seg(t, 0.28, 0.38) * (1 - seg(t, 0.58, 0.68));
-  const tertiary = seg(t, 0.58, 0.68);
+  const primary = 1 - seg(t, 0.3, 0.38);
+  const secondary = seg(t, 0.3, 0.38) * (1 - seg(t, 0.67, 0.75));
+  const tertiary = seg(t, 0.67, 0.75);
   const ivsShow = seg(t, 0.68, 0.78);
   const lakunaShow = 1 - ivsShow;
   const c = villi[0];
@@ -172,10 +173,10 @@ function VilliDrawing({ t, reduced }: SceneProps) {
 function labels(t: number, at: (x: number, y: number) => [number, number], closeUp: boolean) {
   const g = geometry(t);
   const [c, l, r] = g.villi;
-  const primary = 1 - seg(t, 0.28, 0.38);
-  const secondary = seg(t, 0.28, 0.38) * (1 - seg(t, 0.58, 0.68));
-  const tertiary = seg(t, 0.58, 0.68);
-  const vessels = g.vessels > 0.05 ? 1 : 0;
+  const primary = 1 - seg(t, 0.3, 0.38);
+  const secondary = seg(t, 0.3, 0.38) * (1 - seg(t, 0.67, 0.75));
+  const tertiary = seg(t, 0.67, 0.75);
+  const vessels = clamp((g.vessels - 0.02) / 0.08);
   const ivsShow = seg(t, 0.68, 0.78);
   const lakunaShow = 1 - ivsShow;
   const L = (id: string, x: number, y: number, p: [number, number], show = 1, text?: string) => {
@@ -194,7 +195,7 @@ function labels(t: number, at: (x: number, y: number) => [number, number], close
         {L('biloxka-primarioa', 180, 470, [v.x - v.hw - 3, 420], primary)}
         {L('biloxka-sekundarioa', 180, 500, [v.x - v.hw - 3, 420], secondary)}
         {L('biloxka-tertziarioa', 180, 530, [v.x - v.hw - 3, 420], tertiary)}
-        {L('enbrioi-kanpoko-mesodermoa', 820, 300, [v.x + v.mesoHw * 0.7, Math.max(v.mesoTip + 16, 330)], g.meso > 0.05 ? Math.min(1, Math.max(0, (420 - v.mesoTip) / 40)) : 0, 'Kanpoko mesodermoa')}
+        {L('enbrioi-kanpoko-mesodermoa', 820, 300, [v.x + v.mesoHw * 0.7, Math.max(v.mesoTip + 16, 330)], clamp(g.meso / 0.05) * clamp((420 - v.mesoTip) / 40), 'Kanpoko mesodermoa')}
         {L('biloxka-kapilarrak', 820, 400, [v.x + v.half, BASE.vessel - v.loopLen * 0.55], Math.max(vessels, g.islands * (1 - seg(t, 0.72, 0.8))), 'Biloxka kapilarrak')}
       </>
     );
@@ -212,7 +213,7 @@ function labels(t: number, at: (x: number, y: number) => [number, number], close
       {L('korion-barrunbea', 190, 590, [262, 590])}
       {L('lakuak', 810, 260, [772, 260], lakunaShow)}
       {L('biloxka-arteko-espazioa', 810, 260, [772, 260], ivsShow)}
-      {L('enbrioi-kanpoko-mesodermoa', 810, 330, [r.x, mesoMid(r)], g.meso > 0.25 ? 1 : 0, 'Kanpoko mesodermoa')}
+      {L('enbrioi-kanpoko-mesodermoa', 810, 330, [r.x, mesoMid(r)], clamp((g.meso - 0.2) / 0.12), 'Kanpoko mesodermoa')}
       {L('biloxka-kapilarrak', 810, 400, [r.x + r.half, BASE.vessel - r.loopLen * 0.55], Math.max(vessels, g.islands * (1 - seg(t, 0.72, 0.8))), 'Biloxka kapilarrak')}
       {L('enbrioi-kanpoko-hodiak', 810, 528, [Math.max(250, Math.min(752, 200 + 600 * g.vessels - 6)), BASE.vessel], vessels, 'Enbrioi kanpoko hodiak')}
     </>
@@ -304,11 +305,13 @@ function Section({ cx, kind, t }: { cx: number; kind: 0 | 1 | 2; t: number }) {
 
 export function VilliTransverse({ t, reduced }: SceneProps) {
   const g = geometry(t);
-  const show = [1, seg(t, W.meso[0], W.meso[0] + 0.08), seg(t, W.vessels[0], W.vessels[0] + 0.08)];
+  // The third section appears with the blood islands (a secondary villus turning tertiary); its name waits for the vessels.
+  const show = [1, seg(t, W.meso[0], W.meso[0] + 0.08), seg(t, W.islands[0], W.islands[0] + 0.06)];
+  const named = [1, show[1], seg(t, W.vessels[0], W.vessels[0] + 0.08)];
   const xs = [300, 500, 700];
   const ids = ['biloxka-primarioa', 'biloxka-sekundarioa', 'biloxka-tertziarioa'];
   const days = ['13. eguna', '3. astearen hasiera–erdia', '3. astearen amaiera'];
-  const vessel = g.vessels > 0.05 ? 1 : 0;
+  const vessel = clamp((g.vessels - 0.02) / 0.08);
   const ivsShow = seg(t, 0.68, 0.78);
   const lakunaShow = 1 - ivsShow;
   return (
@@ -327,21 +330,21 @@ export function VilliTransverse({ t, reduced }: SceneProps) {
         </g>
       ))}
       {ids.map((id, i) => (
-        <Part key={id} id={id} show={show[i]}>
+        <Part key={id} id={id} show={named[i]}>
           <circle cx={xs[i]} cy={SEC_Y} r={SEC_R + 8} fill="none" stroke="#e8eefc" strokeWidth={1} strokeDasharray="3 5" opacity={0.6} />
         </Part>
       ))}
       {ids.map((id, i) => (
-        <Label key={id} id={id} x={xs[i]} y={SEC_Y + SEC_R + 36} align="middle" show={show[i]} />
+        <Label key={id} id={id} x={xs[i]} y={SEC_Y + SEC_R + 36} align="middle" show={named[i]} />
       ))}
       {days.map((d, i) => (
-        <Note key={d} x={xs[i]} y={SEC_Y + SEC_R + 60} show={show[i]}>
+        <Note key={d} x={xs[i]} y={SEC_Y + SEC_R + 60} show={named[i]}>
           {d}
         </Note>
       ))}
       <Label id="sinzitiotrofoblastoa" x={190} y={200} ax={300 - (SEC_R - 6) * 0.7071} ay={SEC_Y - (SEC_R - 6) * 0.7071} />
       <Label id="zitotrofoblastoa" x={190} y={410} ax={280} ay={SEC_Y + 24} />
-      <Label id="enbrioi-kanpoko-mesodermoa" x={500} y={150} ax={500} ay={SEC_Y - 20} align="middle" show={g.meso > 0.45 ? show[1] : 0} text="Kanpoko mesodermoa" />
+      <Label id="enbrioi-kanpoko-mesodermoa" x={500} y={150} ax={500} ay={SEC_Y - 20} align="middle" show={clamp((g.meso - 0.4) / 0.1) * show[1]} text="Kanpoko mesodermoa" />
       <Label id="biloxka-kapilarrak" x={810} y={400} ax={722} ay={SEC_Y + 18} show={Math.max(vessel, g.islands) * show[2]} text="Biloxka kapilarrak" />
       <Label id="lakuak" x={810} y={500} ax={770} ay={400} small show={lakunaShow} />
       <Label id="biloxka-arteko-espazioa" x={810} y={500} ax={770} ay={400} small show={ivsShow} />

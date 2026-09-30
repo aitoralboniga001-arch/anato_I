@@ -22,6 +22,8 @@ import { Locator } from './Locator';
 import { ViewBridge, needsBridge, type ViewSnap } from './ViewBridge';
 import { IconRail, Outline, StageInfo } from './SidePanel';
 import { Viewport } from './Viewport';
+import { KimuFace } from '@/components/kimu/KimuFace';
+import { registerKimuHost, setKimuHere, toggleKimu, useKimuOpen } from '@/components/kimu/store';
 import { hush, speak } from './narrate';
 import { setPlayMode, setPref, usePref, type PlayMode } from './prefs';
 import { markVisited, useVisited } from './progress';
@@ -114,6 +116,17 @@ const quickDwellMs = (stage: StageDef, k: number) => Math.max(1600, ideaOf(stage
 
 /** Stage time before a step boundary where a reading hold rests (scenes cross-fade steps over ~0.03). */
 const HOLD_LEAD = 0.035;
+
+/** The frame where a step's change is complete: just before the next step's cross-fade (where reading holds rest). */
+const doneAt = (stage: StageDef, k: number) => {
+  const b = stage.beats[k];
+  if (k + 1 >= stage.beats.length) return 1;
+  const end = stage.beats[k + 1].at;
+  return end - Math.min(HOLD_LEAD, (end - b.at) * 0.25) - 1e-4;
+};
+
+/** How long a paused step takes to play itself out when stepped to (ms): its own pace, kept brief. */
+const glideMs = (stage: StageDef, from: number, to: number) => Math.min(2200, Math.max(550, (Math.abs(to - from) * stage.duration * 1000) / NORMAL_RATE));
 
 /** The preview card stays up until it has had time to be read (ms at 1×). */
 const previewMs = (stage: StageDef) => 2500 + ((stage.intro ?? '').length + stage.keyPoints.slice(0, 3).join('').length) * 40;
@@ -574,11 +587,58 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   // Auto-stop at the end of the stage (or of the week, when auto-continuing).
   if (playing && intro === null && pos.t >= 1 && (!autoContinue || pos.i === week.stages.length - 1)) setPlaying(false);
 
+  // Glide: while paused, a step the viewer moves to plays itself out (from its start to its complete
+  // frame) instead of cutting, so what the caption describes is seen happening.
+  const glideRef = useRef<{ w: number; i: number; from: number; to: number; ms: number; start: number; then?: () => void } | null>(null);
+  const [glideRun, setGlideRun] = useState(0);
+  // The step being glided to: the caption shows it at once, before the frame reaches it.
+  const [glideAim, setGlideAim] = useState<{ w: number; i: number; k: number } | null>(null);
+  const glideBeat = glideAim && glideAim.w === week.week && glideAim.i === pos.i ? glideAim.k : null;
+  useEffect(() => {
+    if (!glideRun) return;
+    let raf = 0;
+    const tick = (now: number) => {
+      const g = glideRef.current;
+      if (!g || g.w !== week.week) return;
+      if (!g.start) g.start = now;
+      const x = Math.min(1, (now - g.start) / g.ms);
+      const next = { i: g.i, t: g.from + (g.to - g.from) * easeInOut(x) };
+      live.current = next;
+      setPos(next);
+      if (x < 1) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      glideRef.current = null;
+      setGlideAim(null);
+      g.then?.();
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [glideRun, week.week]);
+  const stopGlide = () => {
+    if (!glideRef.current) return;
+    glideRef.current = null;
+    setGlideAim(null);
+  };
+
   // Plain functions: nothing downstream depends on their identity (no memo'd children), and the
   // React Compiler lint can't preserve manual useCallback here, so memoization is left to it.
   const place = (next: Pos) => {
+    stopGlide();
     live.current = next;
     setPos(next);
+  };
+  const glideTo = (k: number, from: number, to: number, then?: () => void) => {
+    if (reduced || to - from < 0.002) {
+      place({ i: pos.i, t: to });
+      then?.();
+      return;
+    }
+    place({ i: pos.i, t: from });
+    glideRef.current = { w: week.week, i: pos.i, from, to, ms: glideMs(stage, from, to), start: 0, then };
+    setGlideAim({ w: week.week, i: pos.i, k });
+    setGlideRun((n) => n + 1);
   };
   const clearTour = () => {
     tourRef.current = null;
@@ -613,6 +673,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     speaking.current = false;
   };
   const togglePlay = () => {
+    stopGlide();
     // The preview has finished and is waiting to be read: start the step-by-step playback.
     if (playing && intro !== null && intro >= 1) {
       endIntro();
@@ -656,16 +717,29 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     clearTour();
     const kk = Math.max(0, Math.min(stage.beats.length - 1, k));
     const b = stage.beats[kk];
-    // Paused on a step with a tour: show its first structure; the arrows walk through the rest.
-    if (!playing && b.tour?.length) {
+    if (playing) {
+      place({ i: pos.i, t: b.at + 0.001 });
+      return;
+    }
+    // Paused: the step plays out up to its complete frame, continuing from here when "here" is on the
+    // way (the previous step, or earlier in this one), else replaying it from its start.
+    const tours = !!b.tour?.length;
+    const to = tours ? tourAtOf(stage, kk) : doneAt(stage, kk);
+    const onTheWay = pos.t < to && pos.t >= (stage.beats[kk - 1]?.at ?? 0);
+    glideTo(kk, onTheWay ? pos.t : b.at + 0.001, to, () => {
+      // A step with a tour then shows its first structure; the arrows walk through the rest.
+      if (!tours || !b.tour) return;
       const key = `${pos.i}:${kk}`;
       toured.current = key;
       tourRef.current = { key, items: b.tour, idx: 0, start: 0, said: false };
       setTour({ items: b.tour, idx: 0 });
-      place({ i: pos.i, t: tourAtOf(stage, kk) });
-      return;
-    }
-    place({ i: pos.i, t: b.at + 0.001 });
+    });
+  };
+  /** Paused, the current step's change not yet seen: → first plays it out. */
+  const stepUnseen = () => {
+    if (playing || intro !== null || glideRef.current) return false;
+    const to = stage.beats[activeBeat]?.tour?.length ? tourAtOf(stage, activeBeat) : doneAt(stage, activeBeat);
+    return pos.t < to - 0.004;
   };
   const stepBeat = (delta: number) => {
     const tr = tourRef.current;
@@ -685,8 +759,13 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         return;
       }
     }
+    const shownBeat = glideBeat ?? activeBeat;
+    if (delta > 0 && glideBeat === null && stepUnseen()) {
+      gotoBeat(activeBeat);
+      return;
+    }
     endIntro();
-    const k = activeBeat + delta;
+    const k = shownBeat + delta;
     if (k < 0) {
       if (pos.i > 0) place({ i: pos.i - 1, t: 0.999 });
       return;
@@ -715,7 +794,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   };
 
   /** Time machine: jump to the step where a structure forms and play it, remembering where we were. */
-  const replay = (w: number, stageId: string, at: number, id: string) => {
+  const replay = (w: number, stageId: string, at: number, id?: string) => {
     const here: Back = {
       week: week.week,
       stage: stage.id,
@@ -731,7 +810,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       clearTour();
       setBack(here);
       place({ i: idx, t: at + 0.001 });
-      setSelected(id);
+      setSelected(id ?? null);
       setPlaying(true);
       return;
     }
@@ -740,8 +819,24 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     } catch {
       // Without storage the jump still works; only the way back is lost.
     }
-    router.push(`/astea/${w}?${new URLSearchParams({ etapa: stageId, une: String(at + 0.001), egitura: id, jolastu: '1' }).toString()}`);
+    const q = new URLSearchParams({ etapa: stageId, une: String(at + 0.001), jolastu: '1' });
+    if (id) q.set('egitura', id);
+    router.push(`/astea/${w}?${q.toString()}`);
   };
+
+  // Kimu (the assistant) jumps here through the same time machine, and reads where the student is.
+  const kimuGo = useEffectEvent((t: { week: number; stage: string; at: number; structure?: string }) => {
+    setQuestionsOpen(false);
+    setGlossaryOpen(false);
+    replay(t.week, t.stage, t.at, t.structure);
+  });
+  useEffect(() => registerKimuHost({ go: (t) => kimuGo(t) }), []);
+  useEffect(() => {
+    setKimuHere({ week: week.week, stage: stage.id, beat: activeBeat, structure: selected });
+    return () => setKimuHere(null);
+  }, [week.week, stage.id, activeBeat, selected]);
+  const kimuOpen = useKimuOpen();
+
   const goBack = () => {
     if (!back) return;
     setBack(null);
@@ -1039,6 +1134,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           ))}
         </nav>
         <div className="tb-tools">
+          <button className={`tool tool-main kimu-tool${kimuOpen ? ' is-on' : ''}`} onClick={toggleKimu} aria-expanded={kimuOpen} data-tip="Galdetu Kimuri: lekura eramango zaitu · K" data-tip-pos="bottom">
+            <KimuFace size={26} mood="happy" still /> <span>Kimu</span>
+          </button>
           <button className={`tool tool-main${find ? ' is-on' : ''}`} onClick={() => (find ? setFind(null) : startFind())} data-tip="Irudian galdetzen zaizun egitura klikatu" data-tip-pos="bottom">
             <IconTarget size={16} /> <span>Aurkitu</span>
           </button>
@@ -1181,6 +1279,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               nameOf={nameOf}
               fullscreenRef={appRef}
               onFullscreenChange={setFocusMode}
+              makeRoom={intro !== null}
               overlay={
                 <>
                   <div className="view-tools">
@@ -1341,7 +1440,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             stageCount={week.stages.length}
             nextTitle={nextStage?.title}
             t={pos.t}
-            activeBeat={activeBeat}
+            activeBeat={glideBeat ?? activeBeat}
             playing={playing}
             speed={speed}
             autoContinue={autoContinue}
@@ -1402,7 +1501,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               key={stage.id}
               week={week.week}
               stage={stage}
-              activeBeat={activeBeat}
+              activeBeat={glideBeat ?? activeBeat}
               onSeek={(t) => seek(pos.i, t)}
               onSelect={onSelect}
               onDismiss={() => (narrow() ? setPanelOpen(false) : setPref('panel', false))}

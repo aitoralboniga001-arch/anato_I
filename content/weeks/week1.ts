@@ -396,7 +396,7 @@ export const week1: WeekDef = {
         { at: 0.2, text: 'Blastozistoa umetokiaren paretara hurbiltzen da: normalean atzeko (edo aurreko) paretara, ez albokoetara.', focus: ['blastozistoa', 'endometrioa'] },
         { at: 0.45, text: 'Endometrioko mukosara (zelula epitelialak) abiatzen da enbrioblastoaren ondoko zelula trofoblastikoen bidez: mutur enbrionarioa aurretik.', focus: ['mutur-enbrionarioa', 'trofoblastoa'] },
         { at: 0.66, text: 'Zelula trofoblastikoak amaren endometrioaren zelula epitelialen artean inplantatzen dira: habiratze-prozesua hasten da (6. eguna).', focus: ['habiratzea', 'endometrio-epitelioa'] },
-        { at: 0.84, text: 'Batzuetan blastozistoa umetokitik kanpo ezartzen da (ezohiko habiratzea): umetoki-tronpan, obulutegian edo peritoneo-barrunbean.', focus: ['ezohiko-habiratzea'] },
+        { at: 0.84, view: 'ezohikoa', text: 'Batzuetan blastozistoa umetokitik kanpo ezartzen da (ezohiko habiratzea): umetoki-tronpan, obulutegian edo peritoneo-barrunbean.', focus: ['ezohiko-habiratzea'] },
       ],
       structures: ['endometrioa', 'miometrioa', 'perimetrioa', 'endometrio-estroma', 'endometrio-epitelioa', 'umetoki-guruina', 'amaren-odol-hodiak', 'umetoki-barrunbea', 'blastozistoa', 'trofoblastoa', 'enbrioblastoa', 'blastozelea', 'mutur-enbrionarioa', 'mutur-anenbrionarioa', 'habiratzea', 'ezohiko-habiratzea', 'douglas-zokogunea'],
       keyPoints: [

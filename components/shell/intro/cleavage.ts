@@ -113,12 +113,16 @@ const GENS: Node[][] = (() => {
   return gens;
 })();
 
-/** Blastocyst targets: outer cells flatten into the trophoblast ring, inner ones gather at one pole. */
+/**
+ * Blastocyst targets: outer cells flatten into the trophoblast ring, inner ones gather at one pole.
+ * The inner cell mass is the morula's CENTRE (notes: "erdian"), deep in the ball, leaning only
+ * slightly towards the pole it is pushed to when the blastocoel opens.
+ */
 function blastTargets(gen: number) {
   const morula = GENS[gen];
   const pole = { x: -0.68, y: -0.73 };
   const order = morula
-    .map((c, i) => ({ i, d: (c.x / ZONA - pole.x * 0.5) ** 2 + (c.y / ZONA - pole.y * 0.5) ** 2 }))
+    .map((c, i) => ({ i, d: (c.x / ZONA - pole.x * 0.12) ** 2 + (c.y / ZONA - pole.y * 0.12) ** 2 + ((c.z - 0.5) * 0.5) ** 2 }))
     .sort((a, b) => a.d - b.d);
   const nIn = gen === 4 ? 5 : 9;
   const inner = new Set(order.slice(0, nIn).map((o) => o.i));

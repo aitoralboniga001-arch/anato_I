@@ -225,8 +225,8 @@ const R_MESO = 104;
 
 function VillusCrossDrawing({ t, reduced }: SceneProps) {
   const order = ['endotelioa', 'ehun-konektiboa', 'zitotrofoblastoa', 'sinzitiotrofoblastoa'];
-  const stepAt = [0, 0.08, 0.16, 0.24].map((d) => 0.7 + d);
-  const active = order.map((_, i) => seg(t, stepAt[i], stepAt[i] + 0.05) * (1 - (i < 3 ? seg(t, stepAt[i + 1], stepAt[i + 1] + 0.05) : 0)));
+  const stepAt = [0, 0.04, 0.08, 0.12].map((d) => 0.83 + d);
+  const active = order.map((_, i) => seg(t, stepAt[i], stepAt[i] + 0.03) * (1 - (i < 3 ? seg(t, stepAt[i + 1], stepAt[i + 1] + 0.03) : 0)));
   const litW = (i: number) => lerp(1.4, 3.2, active[i]);
   const capA: [number, number] = [CX - 32, CY - 22];
   const capB: [number, number] = [CX + 28, CY + 30];
@@ -264,7 +264,7 @@ function VillusCrossDrawing({ t, reduced }: SceneProps) {
           <Flow d={`M${capB[0] - 4},${capB[1] + 4} C${capB[0] + 60},${capB[1] + 40} ${CX + 120},${CY + 60} ${CX + 190},${CY + 30}`} n={2} dur={5} r={2.4} color="#94a3b8" reduced={reduced} />
         </>
       )}
-      <Part id="karena-muga" show={vis(t, 0)}>
+      <Part id="karena-muga" show={vis(t, 0.82)}>
         <path d={`M${CX - R_OUT - 14},${CY} h-16`} fill="none" stroke="#e8eefc" strokeWidth={1.6} opacity={0.7} />
       </Part>
     </g>
@@ -272,23 +272,22 @@ function VillusCrossDrawing({ t, reduced }: SceneProps) {
 }
 
 export function VillusCross({ t, reduced }: SceneProps) {
-  const stepAt = [0, 0.08, 0.16, 0.24].map((d) => 0.7 + d);
-  const numberShow = (i: number) => Math.max(vis(t, 0.66), seg(t, stepAt[i] - 0.06, stepAt[i]));
+  const numberShow = () => vis(t, 0.66);
   return (
     <g>
       <VillusCrossDrawing t={t} reduced={reduced} />
       <Label id="biloxka-arteko-espazioa" x={740} y={140} ax={CX + R_OUT - 10} ay={CY - 70} show={vis(t, 0)} />
-      <Label id="sinzitiotrofoblastoa" x={190} y={165} ax={CX - R_OUT + 8} ay={CY - 60} text="1. Sinzitiotrofoblastoa" show={numberShow(3)} />
-      <Label id="zitotrofoblastoa" x={190} y={215} ax={CX - R_CYTO + 8} ay={CY - 20} text="2. Zitotrofoblastoa" show={numberShow(2)} />
-      <Label id="ehun-konektiboa" x={190} y={265} ax={CX - R_MESO + 10} ay={CY + 10} text="3. Ehun konektiboa" show={numberShow(1)} />
-      <Label id="endotelioa" x={190} y={315} ax={CX - 32 + 16} ay={CY - 22} text="4. Endotelioa" show={numberShow(0)} />
+      <Label id="sinzitiotrofoblastoa" x={190} y={165} ax={CX - R_OUT + 8} ay={CY - 60} text="4. Sinzitiotrofoblastoa" show={numberShow()} />
+      <Label id="zitotrofoblastoa" x={190} y={215} ax={CX - R_CYTO + 8} ay={CY - 20} text="3. Zitotrofoblastoa" show={numberShow()} />
+      <Label id="ehun-konektiboa" x={190} y={265} ax={CX - R_MESO + 10} ay={CY + 10} text="2. Ehun konektiboa" show={numberShow()} />
+      <Label id="endotelioa" x={190} y={315} ax={CX - 32 + 16} ay={CY - 22} text="1. Endotelioa" show={numberShow()} />
       <Label id="biloxka-kapilarrak" x={810} y={400} ax={CX + 28 + 16} ay={CY + 30} show={vis(t, 0)} />
       <Mark id="karena-muga" x={CX - R_OUT - 8} y={CY} rx={16} color="#fbbf24" show={vis(t, 0.82)} />
       <Label id="karena-muga" x={190} y={365} ax={CX - R_OUT - 8} ay={CY} show={vis(t, 0.82)} />
       <Note x={500} y={520} show={vis(t, 0.82)} tone="accent">
         Karena muga (barrutik kanpora): endotelioa → ehun konektiboa → zitotrofoblastoa → sinzitiotrofoblastoa
       </Note>
-      <Note x={500} y={80} show={seg(t, 0.7, 0.76)} tone="dim">
+      <Note x={500} y={80} show={seg(t, 0.5, 0.54)} tone="dim">
         O2 amaren odoletik biloxkara · CO2 alderantziz
       </Note>
     </g>
@@ -300,7 +299,7 @@ export function VillusCross({ t, reduced }: SceneProps) {
 /* ------------------------------------------------------------------ */
 
 export function VillusThinning({ t, reduced }: SceneProps) {
-  const thin = seg(t, 0.34, 0.5);
+  const thin = seg(t, 0.5, 0.62);
   const cytoR = lerp(R_CYTO, R_OUT - 10, thin);
   const mesoR = lerp(R_MESO, R_OUT - 9, thin);
   const capR = lerp(30, R_OUT - 16, thin);
@@ -357,17 +356,17 @@ export function VillusThinning({ t, reduced }: SceneProps) {
       <Label id="endotelioa" x={190} y={310} ax={cap[0] - capRadius} ay={cap[1]} show={1} />
       <Mark id="karena-muga" x={CX + R_OUT - 10} y={CY - 50} rx={16} color="#fbbf24" />
       <Label id="karena-muga" x={810} y={200} ax={CX + R_OUT - 10} ay={CY - 50} show={1} />
-      <Label id="karena-mugaren-meheketa" x={810} y={250} ax={CX + capR * 0.4} ay={CY - capR * 0.3} show={seg(t, 0.34, 0.42)} />
+      <Label id="karena-mugaren-meheketa" x={810} y={250} ax={CX + capR * 0.4} ay={CY - capR * 0.3} show={seg(t, 0.34, 0.4)} />
 
       <rect x={870} y={520 - wallThickness} width={14} height={wallThickness} fill="#e8eefc" opacity={0.85} rx={2} />
       <Note x={877} y={540} show={1} size={12}>
         Muga lodiera
       </Note>
 
-      <Note x={500} y={600} show={1 - seg(t, 0.3, 0.4)} tone="dim">
+      <Note x={500} y={600} show={1 - seg(t, 0.5, 0.55)} tone="dim">
         3. hilabetea: lau geruza
       </Note>
-      <Note x={500} y={600} show={seg(t, 0.4, 0.5)} tone="accent">
+      <Note x={500} y={600} show={seg(t, 0.56, 0.62)} tone="accent">
         4. hilabetetik aurrera: bi geruza (endotelioa + sinzitiotrofoblastoa)
       </Note>
     </g>

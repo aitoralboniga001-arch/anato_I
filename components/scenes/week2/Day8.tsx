@@ -32,9 +32,10 @@ import {
 
 /**
  * 8. eguna — blastocyst partially embedded (abembryonic third still in the uterine lumen).
- * t: 0–.25 trophoblast → cyto + syncytio · .22–.42 embryoblast → epiblast + hypoblast
- *    .44–.58 vacuoles between epiblast cells merge into the amniotic cavity; .58–.68 the epiblast cells
- *    next to the cytotrophoblast become amnioblasts · .72–1 oedematous endometrium.
+ * t: 0–.20 trophoblast → cyto + syncytio · .24–.36 embryoblast → epiblast + hypoblast
+ *    .47–.58 vacuoles between epiblast cells merge into the amniotic cavity; .62–.70 the epiblast cells
+ *    next to the cytotrophoblast become amnioblasts · .74–.86 oedematous endometrium.
+ *    Each window ends before its step's complete frame (next beat − 0.035).
  *
  * Disc geometry (all relative to the blastocyst centre): the dorsal (amniotic) side faces the
  * embryonic pole, which is the deepest point in the stroma. The disc and the amnion fill the
@@ -86,13 +87,13 @@ function lensCells({ cx, cy, epiTop }: Geo): Pt[] {
 function Day8Drawing({ t }: SceneProps) {
   const g = geometry(t);
   const { cx, cy, epiTop, discY, hypoBottom, wEpiTop, wDisc, wHypo } = g;
-  const syn = seg(t, 0, 0.25);
-  const disc = seg(t, 0.22, 0.42);
-  const vac = seg(t, 0.44, 0.5) * (1 - seg(t, 0.52, 0.6));
-  const cavity = seg(t, 0.48, 0.58);
-  const amnion = seg(t, 0.58, 0.68);
-  const endo = seg(t, 0.72, 1);
-  const mitosis = seg(t, 0.1, 0.24);
+  const syn = seg(t, 0, 0.2);
+  const disc = seg(t, 0.24, 0.36);
+  const vac = seg(t, 0.47, 0.52) * (1 - seg(t, 0.54, 0.58));
+  const cavity = seg(t, 0.49, 0.58);
+  const amnion = seg(t, 0.62, 0.7);
+  const endo = seg(t, 0.74, 0.86);
+  const mitosis = seg(t, 0.12, 0.2);
   const gap = Math.sqrt(Math.max(0, R * R - (W2.surfaceY - cy) ** 2)) + 6;
 
   // Cells leaving the cytotrophoblast and fusing into the syncytium (they lose their membranes).
@@ -210,9 +211,9 @@ function Day8Drawing({ t }: SceneProps) {
 
 function day8Labels(t: number, at: (x: number, y: number) => [number, number], closeUp: boolean) {
   const { cx, cy, epiTop, discY, hypoBottom, wDisc } = geometry(t);
-  const disc = seg(t, 0.22, 0.42);
-  const cavityShow = seg(t, 0.48, 0.58);
-  const amnion = seg(t, 0.58, 0.68);
+  const disc = seg(t, 0.24, 0.36);
+  const cavityShow = seg(t, 0.49, 0.58);
+  const amnion = seg(t, 0.62, 0.7);
   const L = (id: string, x: number, y: number, p: [number, number], show = 1) => {
     const [ax, ay] = at(p[0], p[1]);
     return <Label key={id} id={id} x={x} y={y} ax={ax} ay={ay} show={show} />;
@@ -266,7 +267,7 @@ function day8Labels(t: number, at: (x: number, y: number) => [number, number], c
 function synAnchor(t: number, deg: number): [number, number] {
   const { cx, cy } = geometry(t);
   const prof = Math.pow(Math.sin(((deg - 160) / 220) * Math.PI), 0.8);
-  const r = R + 0.45 * lerp(18, 66, seg(t, 0, 0.25)) * prof;
+  const r = R + 0.45 * lerp(18, 66, seg(t, 0, 0.2)) * prof;
   const a = (deg * Math.PI) / 180;
   return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
 }

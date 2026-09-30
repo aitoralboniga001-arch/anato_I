@@ -69,8 +69,10 @@ function transverseLabels(t: number) {
       <Label id="bitelo-zaku-sekundarioa" x={190} y={580} ax={s.at.yolk[0]} ay={s.at.yolk[1]} />
       <Label id="hodi-neurala" x={810} y={80} ax={s.at.tube[0]} ay={s.at.tube[1]} small />
       <Label id="enbrioi-barruko-zeloma" x={810} y={470} ax={s.map(330, (22 + s.dEndo(330) - 13) / 2)[0]} ay={s.map(330, (22 + s.dEndo(330) - 13) / 2)[1]} show={coelom} />
-      <Label id={f > 0.8 ? 'erdiko-hestea' : 'endodermoa'} x={810} y={510} ax={gut[0] + 6} ay={gut[1]} />
-      <Label id="hodi-onfalomesenterikoa" x={810} y={550} ax={s.at.vitelline[0] + 2 * (s.yolk.cx - s.at.vitelline[0])} ay={s.at.vitelline[1]} show={seg(t, 0.56, 0.6)} />
+      {/* The endoderm is renamed midgut as it closes into a tube: the two names cross-fade (no swap). */}
+      <Label id="endodermoa" x={810} y={510} ax={gut[0] + 6} ay={gut[1]} show={1 - seg(f, 0.76, 0.84)} />
+      <Label id="erdiko-hestea" x={810} y={510} ax={gut[0] + 6} ay={gut[1]} show={seg(f, 0.76, 0.84)} />
+      <Label id="hodi-onfalomesenterikoa" x={810} y={550} ax={s.at.vitelline[0] + 2 * (s.yolk.cx - s.at.vitelline[0])} ay={s.at.vitelline[1]} show={seg(t, 0.66, 0.7)} />
     </>
   );
 }

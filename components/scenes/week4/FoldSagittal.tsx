@@ -643,7 +643,7 @@ export function FoldingSagittal({ t }: SceneProps) {
       {L('bihotz-hodia', 190, 390, heartC, head)}
       {L('mintz-bukofaringeoa', 190, 430, bmMid)}
       {L('estomodeoa', 190, 470, pits[0].c, pit)}
-      {L('hodi-onfalomesenterikoa', 190, 530, pieces[5][Math.floor(pieces[5].length * 0.45)], gut)}
+      {L('hodi-onfalomesenterikoa', 190, 530, pieces[5][Math.floor(pieces[5].length * 0.45)], at(0.66))}
       {L('bitelo-zaku-sekundarioa', 190, 580, pieces[4][Math.floor(pieces[4].length * 0.62)])}
 
       {L('notokorda', 810, 110, X(map(0.3 * LH, NT0 + 5)))}

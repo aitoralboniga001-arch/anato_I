@@ -526,8 +526,10 @@ export function SectionDrawing({ s, show = {} }: { s: Section; show?: Partial<Re
       )}
 
       {/* Intra-embryonic mesoderm: paraxial (darker), intermediate, lateral plate. */}
+      {/* The undivided sheet's colour cross-fades into the lateral plate's as the paraxial blocks appear (no colour pop). */}
       <Part id={s.id(m < 0.25 ? 'meso' : 'lateral')}>
-        <path d={regionPath(s, -L, L, () => TE - 1, (x) => dEndo(x) + 1, 80)} fill={m < 0.25 ? C.mesoIntra : C.mesoLateral} />
+        <path d={regionPath(s, -L, L, () => TE - 1, (x) => dEndo(x) + 1, 80)} fill={C.mesoLateral} />
+        {m < 0.35 && <path d={regionPath(s, -L, L, () => TE - 1, (x) => dEndo(x) + 1, 80)} fill={C.mesoIntra} opacity={1 - ss((m - 0.25) / 0.1)} />}
       </Part>
       {m >= 0.25 && (
         <>
@@ -609,7 +611,14 @@ export function SectionDrawing({ s, show = {} }: { s: Section; show?: Partial<Re
           const ecto = ectoLine(1).filter((q) => q[0] < ng.crest[0] + 110);
           const xFar = ecto[ecto.length - 1][0];
           const pts: Pt[] = [[0, TE + 2], [xFar, TE + 2], ...ecto.slice().reverse().map((q): Pt => [q[0], q[1] + TE / 2]), ...half.slice().reverse()];
-          return <path key={sd} d={`M${pts.map((q) => map(sd * q[0], q[1])).map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}Z`} fill={m < 0.25 ? C.mesoIntra : C.mesoParaxial} />;
+          const d = `M${pts.map((q) => map(sd * q[0], q[1])).map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}Z`;
+          const intra = 1 - ss((m - 0.25) / 0.1);
+          return (
+            <g key={sd}>
+              <path d={d} fill={C.mesoParaxial} />
+              {intra > 0 && <path d={d} fill={C.mesoIntra} opacity={intra} />}
+            </g>
+          );
         })}
       <Mesenchyme
         s={s}
