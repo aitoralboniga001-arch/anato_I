@@ -239,6 +239,7 @@ export const structures5: StructureDef[] = [
     id: 'zilborrestea',
     name: 'Zilborrestea',
     es: 'Cordón umbilical',
+    aka: ['Zilborestea'],
     category: 'anatomia',
     definition: 'Enbrioia (fetua) karenarekin lotzen duen hodia, alde bentraletik irteten dena.',
     location: 'Enbrioiaren alde bentralean, bihotz (gero gibel) goragunearen eta beheko gorputz-adarren artean.',

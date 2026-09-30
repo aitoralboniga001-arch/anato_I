@@ -242,7 +242,7 @@ function CordFormationDrawing({ t }: SceneProps) {
       <Label id="korion-barrunbea" x={760} y={260} ax={700} ay={300} show={vis(t, 0.36, 0.82)} />
       <Label id="hodi-onfalomesenterikoa" x={760} y={310} ax={downMid[0]} ay={downMid[1]} show={vis(t, 0.24, 0.91)} />
       <Label id="bitelo-zaku-sekundarioa" x={760} y={360} ax={YOLK[0]} ay={YOLK[1]} show={vis(t, 0.24, 0.91)} />
-      <Label id="korion-plaka" x={760} y={410} ax={CHORION_WALL_X} ay={300} show={vis(t, 0.36)} />
+      <Label id="korion-plaka" x={940} y={548} ax={CHORION_WALL_X} ay={450} show={vis(t, 0.36)} />
 
       <Note x={500} y={612} tone="dim" show={vis(t, 0.48, 0.74)}>
         Amnios barrunbea zabaldu ahala, paretak eraztuneko egiturak inguratzen ditu

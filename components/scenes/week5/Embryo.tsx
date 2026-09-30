@@ -852,9 +852,24 @@ export function Embryo42to56({ t }: SceneProps) {
         <ellipse cx={foot[0]} cy={foot[1] + 4} rx={20} ry={13} fill="rgba(255,184,107,0.12)" stroke="#ffb86b" strokeWidth={1.4} strokeDasharray="4 4" />
       </Part>
       <Part id="behatzak" show={d56}>
-          {leg.rays.map(([, b], i) => (
-            <circle key={i} cx={b[0]} cy={b[1]} r={7} fill="rgba(255,184,107,0.14)" stroke="#ffb86b" strokeWidth={1.4} strokeDasharray="3 3" />
-          ))}
+        {/* One dashed arc just outside the toe tips — per-toe circles overlapped into a blotch */}
+        <path
+          d={smoothPath(
+            leg.rays.map(([, b]): Pt => {
+              const dx = b[0] - foot[0];
+              const dy = b[1] - foot[1];
+              const d = Math.hypot(dx, dy) || 1;
+              return [b[0] + (dx / d) * 7, b[1] + (dy / d) * 7];
+            }),
+            false,
+            0.9,
+          )}
+          fill="none"
+          stroke="#ffb86b"
+          strokeWidth={1.6}
+          strokeDasharray="4 4"
+          strokeLinecap="round"
+        />
       </Part>
       <Mark id="eskumuturra" x={arm.joints.dist[0]} y={arm.joints.dist[1]} rx={10} show={d56} />
       <Mark id="ukondoa" x={arm.joints.mid[0]} y={arm.joints.mid[1]} rx={10} show={d56} />

@@ -294,7 +294,7 @@ export function Cotyledons({ t, reduced }: SceneProps) {
 
       {/* Top rows: maternal side */}
       <Label id="deziduaren-trenkadak" x={96} y={24} ax={370} ay={IVS + sLen * 0.5} show={vis(t, 0.38)} align="start" />
-      <Label id="arteria-espiralak" x={400} y={24} ax={480} ay={SHELL - 14} show={vis(t, 0.18)} align="start" />
+      <Label id="arteria-espiralak" text="Arteria kiribilak" x={400} y={24} ax={480} ay={SHELL - 14} show={vis(t, 0.18)} align="start" />
       <Label id="endometrio-zainak" x={690} y={24} ax={620} ay={DEC + 6} show={vis(t, 0.18)} align="start" />
       <Label id="kanpoko-zorro-zitotrofoblastikoa" x={96} y={50} ax={220} ay={SHELL + 3} show={vis(t, 0.18)} align="start" small />
       <Label id="deziduaren-orria" x={560} y={50} ax={540} ay={DEC + 18} show={vis(t, 0.18)} align="start" />
@@ -378,7 +378,7 @@ export function PlacentaCirculation({ t, reduced }: SceneProps) {
         CO₂
       </text>
 
-      <Label id="arteria-espiralak" x={240} y={80} ax={z.at(480, 110)[0]} ay={z.at(480, 110)[1]} show={vis(t, 0)} align="end" />
+      <Label id="arteria-espiralak" text="Arteria kiribilak" x={240} y={80} ax={z.at(480, 110)[0]} ay={z.at(480, 110)[1]} show={vis(t, 0)} align="end" />
       <Label id="dezidua-basala" x={240} y={150} ax={z.at(400, DEC + 16)[0]} ay={z.at(400, DEC + 16)[1]} show={vis(t, 0)} align="end" />
       <Label id="karenaren-zirkulazioa" x={240} y={240} ax={z.at(480, IVS + 120)[0]} ay={z.at(480, IVS + 120)[1]} show={vis(t, 0.4)} align="end" />
       <Label id="biloxka-askea" x={240} y={400} ax={z.at(TRUNKS[3].x - 30, 330)[0]} ay={z.at(TRUNKS[3].x - 30, 330)[1]} show={vis(t, 0)} align="end" />

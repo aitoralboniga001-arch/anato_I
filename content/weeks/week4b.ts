@@ -75,6 +75,7 @@ export const structuresB: StructureDef[] = [
     id: 'enbrioi-barruko-zeloma',
     name: 'Enbrioi barruko zeloma',
     es: 'Celoma intraembrionario',
+    aka: ['Enbriobarruko zeloma'],
     category: 'barrunbea',
     definition: 'Alboko mesodermoan agertzen diren barrunbe txikiak batu ondoren sortzen den barrunbe handiagoa, mesodermoa paretako eta errai orritan banatzen duena.',
     location: 'Alboko mesodermoaren barnean.',
