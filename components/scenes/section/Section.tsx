@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { C, Part, clamp, lerp, rand, smoothPath, type Pt } from '@/components/kit';
 
 /**
@@ -430,15 +430,42 @@ export function SectionDrawing({ s, show = {} }: { s: Section; show?: Partial<Re
   const cavity = `M${[...range(-L, L, 60).map((x) => map(x, -amnionH(x) + 3)), ...range(L, -L, 60).map((x) => map(x, 1))].map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}Z`;
 
   const ys = s.yolk;
+  // Yolk-sac outline: the vitelline duct's straight walls flow into the sac through a fillet (concentric
+  // for every layer offset `dr`, so the endoderm and its mesoderm coat stay parallel). The samples are
+  // spaced by arc length on the inner surface and shared by every offset, so cells stay evenly sized.
+  const yolkGeo = (() => {
+    const xN = ys.A_R[0];
+    const R = ys.Rys;
+    const c = xN - ys.cx;
+    const h = Math.sqrt(Math.max(0, R * R - c * c));
+    const D = Math.max(0, ys.cy - ys.A_R[1] - 2);
+    const rhoMax = R - c > 0.01 ? (D * D - h * h) / (2 * (R - c)) : 0;
+    const rho = clamp(Math.min(20 * p.k, rhoMax), 0, 40);
+    const F: Pt = [xN + rho, ys.cy - Math.sqrt(Math.max(0, (R + rho) ** 2 - (c + rho) ** 2))];
+    const thT = Math.atan2(F[1] - ys.cy, F[0] - ys.cx);
+    const lens = [Math.max(0, F[1] - ys.A_R[1]), rho * -thT, R * (Math.PI - 2 * thT)];
+    const cnt = lens.map((l) => Math.max(1, Math.round(l / 6)));
+    return { F, thT, rho, cnt, total: 2 * lens[0] + 2 * lens[1] + lens[2] };
+  })();
   const yolkPath = (dr: number) => {
-    const pts: Pt[] = [
-      [ys.A_R[0] + dr, ys.A_R[1]],
-      [ys.A_R[0] + dr, ys.A_R[1] + ys.neck * 0.9],
-      ...ys.ring(ys.Rys + dr).slice(1, -1),
-      [ys.A_L[0] - dr, ys.A_L[1] + ys.neck * 0.9],
-      [ys.A_L[0] - dr, ys.A_L[1]],
-    ];
-    return pts;
+    const { F, thT, rho, cnt } = yolkGeo;
+    const fr = rho - dr;
+    // Deeper than the fillet radius the offset is a plain corner: where the offset wall meets the offset sphere.
+    const corner: Pt = [ys.A_R[0] + dr, ys.cy - Math.sqrt(Math.max(0, (ys.Rys + dr) ** 2 - (ys.A_R[0] - ys.cx + dr) ** 2))];
+    const right: Pt[] = [];
+    for (let i = 0; i < cnt[0]; i++) right.push([ys.A_R[0] + dr, lerp(ys.A_R[1], fr > 0 ? F[1] : corner[1], i / cnt[0])]);
+    for (let i = 0; i < cnt[1]; i++) {
+      const a = lerp(Math.PI, thT + Math.PI, i / cnt[1]);
+      right.push(fr > 0 ? [F[0] + fr * Math.cos(a), F[1] + fr * Math.sin(a)] : corner);
+    }
+    const a0 = fr > 0 ? thT : Math.atan2(corner[1] - ys.cy, corner[0] - ys.cx);
+    const sphere: Pt[] = [];
+    for (let i = 0; i <= cnt[2]; i++) {
+      const a = lerp(a0, Math.PI - a0, i / cnt[2]);
+      sphere.push([ys.cx + (ys.Rys + dr) * Math.cos(a), ys.cy + (ys.Rys + dr) * Math.sin(a)]);
+    }
+    const left = right.map((q): Pt => [2 * ys.cx - q[0], q[1]]).reverse();
+    return [...right, ...sphere, ...left];
   };
 
   // Yolk-sac cavity: under the whole endoderm of the disc (the gut roof) and inside the sac.
@@ -497,15 +524,48 @@ export function SectionDrawing({ s, show = {} }: { s: Section; show?: Partial<Re
   const amnionShow = vis('amnion', p.amnion);
   const yolkShow = vis('yolk', p.yolk);
 
+  // Umbilical ring: the curled disc's cut ends must not paint over the vitelline duct (clip), and the gap
+  // between each cut end and the duct wall is coelom opening into the extra-embryonic coelom (wedge fill).
+  const uid = useId().replace(/:/g, '');
+  const ductHW = ys.c + (TEN + 7) * p.k;
+  const ductClip = `M-100,-100H1100V800H-100ZM${f1(ys.cx - ductHW)},${f1(ys.A_R[1])}V${f1(ys.cy)}H${f1(ys.cx + ductHW)}V${f1(ys.A_R[1])}Z`;
+  // While the body wall is still open the fill fades out at the opening (level of the wall's edge);
+  // once the edge reaches the duct it is solid down to the umbilical ring.
+  const wallGap = Math.abs(map(L, 0)[0] - ys.cx) - ductHW;
+  const wedgeK = coelomK * yolkShow * ss((f - 0.5) / 0.15);
+  const wedgeClosed = 1 - ss((wallGap - 6) / 26);
+  const wedgeY0 = map(L, cTop)[1];
+  const wedgeY1 = Math.max(wedgeY0 + 4, map(L, -10)[1] + 4);
+  const wedge = (sd: 1 | -1) => {
+    const cut = range(-10, cBot(L), 12).map((d) => map(sd * L, d));
+    const xW = ys.cx + sd * (ductHW - 1);
+    return `M${[...cut, [xW, cut[cut.length - 1][1]] as Pt, [xW, cut[0][1]] as Pt].map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}Z`;
+  };
+
   return (
     <g>
+      <defs>
+        <clipPath id={`${uid}-duct`}>
+          <path d={ductClip} clipRule="evenodd" />
+        </clipPath>
+        <linearGradient id={`${uid}-ring`} gradientUnits="userSpaceOnUse" x1={0} y1={f1(wedgeY0)} x2={0} y2={f1(wedgeY1)}>
+          <stop offset={0} stopColor="#1a0c22" />
+          <stop offset={1} stopColor="#1a0c22" stopOpacity={f1(wedgeClosed)} />
+        </linearGradient>
+      </defs>
+      {wedgeK > 0.01 && (
+        <Part id={s.id('coelom')} show={wedgeK}>
+          <path d={wedge(1)} fill={`url(#${uid}-ring)`} />
+          <path d={wedge(-1)} fill={`url(#${uid}-ring)`} />
+        </Part>
+      )}
       {/* Yolk sac: endoderm lining + extra-embryonic splanchnic mesoderm; cavity shaded. */}
       {yolkShow > 0.01 && (
         <Part id={s.id('yolk')} show={yolkShow}>
           <path d={yolkCavity} fill="#3a3218" />
           <path d={yolkCavity} fill="url(#g-cavity)" opacity={0.6} />
-          <Cells outer={yolkPath(TEN * p.k)} inner={yolkPath(0)} n={Math.round((ys.Rys * 5) / (11 * p.k)) + 8} fill={C.endoderm} nk={0.5} seed={11} />
-          <Cells outer={yolkPath((TEN + 7) * p.k)} inner={yolkPath(TEN * p.k)} n={Math.round((ys.Rys * 5) / (26 * p.k)) + 6} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={12} />
+          <Cells outer={yolkPath(TEN * p.k)} inner={yolkPath(0)} n={Math.round(yolkGeo.total / (9.5 * p.k)) + 2} fill={C.endoderm} nk={0.5} seed={11} />
+          <Cells outer={yolkPath((TEN + 7) * p.k)} inner={yolkPath(TEN * p.k)} n={Math.round(yolkGeo.total / (22 * p.k)) + 2} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={12} />
         </Part>
       )}
       {yolkShow > 0.01 && f > 0.55 && (
@@ -525,106 +585,114 @@ export function SectionDrawing({ s, show = {} }: { s: Section; show?: Partial<Re
         </Part>
       )}
 
-      {/* Intra-embryonic mesoderm: paraxial (darker), intermediate, lateral plate. */}
-      {/* The undivided sheet's colour cross-fades into the lateral plate's as the paraxial blocks appear (no colour pop). */}
-      <Part id={s.id(m < 0.25 ? 'meso' : 'lateral')}>
-        <path d={regionPath(s, -L, L, () => TE - 1, (x) => dEndo(x) + 1, 80)} fill={C.mesoLateral} />
-        {m < 0.35 && <path d={regionPath(s, -L, L, () => TE - 1, (x) => dEndo(x) + 1, 80)} fill={C.mesoIntra} opacity={1 - ss((m - 0.25) / 0.1)} />}
-      </Part>
-      {m >= 0.25 && (
-        <>
-          <Part id={s.id('paraxial')} show={vis('paraxial', ss((m - 0.25) / 0.1))}>
-            <path d={regionPath(s, X_PAR[0], X_PAR[1], () => TE - 1, (x) => dEndo(x) + 1, 12)} fill={C.mesoParaxial} />
-            <path d={regionPath(s, -X_PAR[1], -X_PAR[0], () => TE - 1, (x) => dEndo(x) + 1, 12)} fill={C.mesoParaxial} />
-          </Part>
-          <Part id={s.id('intermediate')} show={vis('intermediate', ss((m - 0.25) / 0.1))}>
-            <path d={regionPath(s, X_INT[0], X_INT[1], () => TE - 1, (x) => dEndo(x) + 1, 6)} fill={C.mesoIntermediate} />
-            <path d={regionPath(s, -X_INT[1], -X_INT[0], () => TE - 1, (x) => dEndo(x) + 1, 6)} fill={C.mesoIntermediate} />
-          </Part>
-        </>
-      )}
-      {/* Coelom: first isolated vesicles, then one cavity separating parietal and visceral layers. */}
-      {(coelomK > 0.02 || vesK > 0.02) && (
-        <Part id={s.id('coelom')}>
-          {coelomK > 0.02 && (
-            <>
-              {[1, -1].map((sd) => {
-                const x0 = cXm;
-                const top = range(L, x0 + 10, 36).map((x): Pt => [x, cTop + 1]);
-                const bot = range(x0 + 10, L, 36).map((x): Pt => [x, cBot(x) - 1]);
-                const pts = [...top, [x0, (cTop + cBot(x0)) / 2] as Pt, ...bot].map((q) => map(sd * q[0], q[1]));
-                return <path key={sd} d={smoothPath(pts, true, 0.25)} fill="#1a0c22" stroke="rgba(255,160,160,0.25)" strokeWidth={1} />;
-              })}
-            </>
-          )}
-          {vesK > 0.02 &&
-            [230, 292, 354, 416, 478].flatMap((vx) =>
-              [1, -1].map((sd) => {
-                const [X, Y] = map(sd * vx, (cTop + cBot(vx)) / 2);
-                return <ellipse key={`${vx}${sd}`} cx={X} cy={Y} rx={18 * vesK * p.k} ry={(7 * vesK + 1) * p.k} fill="#12091a" />;
-              }),
+      <g clipPath={ys.c < 60 ? `url(#${uid}-duct)` : undefined}>
+        {/* Intra-embryonic mesoderm: paraxial (darker), intermediate, lateral plate. */}
+        {/* The undivided sheet's colour cross-fades into the lateral plate's as the paraxial blocks appear (no colour pop). */}
+        <Part id={s.id(m < 0.25 ? 'meso' : 'lateral')}>
+          <path d={regionPath(s, -L, L, () => TE - 1, (x) => dEndo(x) + 1, 80)} fill={C.mesoLateral} />
+          {m < 0.35 && <path d={regionPath(s, -L, L, () => TE - 1, (x) => dEndo(x) + 1, 80)} fill={C.mesoIntra} opacity={1 - ss((m - 0.25) / 0.1)} />}
+        </Part>
+        {m >= 0.25 && (
+          <>
+            <Part id={s.id('paraxial')} show={vis('paraxial', ss((m - 0.25) / 0.1))}>
+              <path d={regionPath(s, X_PAR[0], X_PAR[1], () => TE - 1, (x) => dEndo(x) + 1, 12)} fill={C.mesoParaxial} />
+              <path d={regionPath(s, -X_PAR[1], -X_PAR[0], () => TE - 1, (x) => dEndo(x) + 1, 12)} fill={C.mesoParaxial} />
+            </Part>
+            <Part id={s.id('intermediate')} show={vis('intermediate', ss((m - 0.25) / 0.1))}>
+              <path d={regionPath(s, X_INT[0], X_INT[1], () => TE - 1, (x) => dEndo(x) + 1, 6)} fill={C.mesoIntermediate} />
+              <path d={regionPath(s, -X_INT[1], -X_INT[0], () => TE - 1, (x) => dEndo(x) + 1, 6)} fill={C.mesoIntermediate} />
+            </Part>
+          </>
+        )}
+        {/* Coelom: first isolated vesicles, then one cavity separating parietal and visceral layers. */}
+        {(coelomK > 0.02 || vesK > 0.02) && (
+          <Part id={s.id('coelom')}>
+            {coelomK > 0.02 && (
+              <>
+                {[1, -1].map((sd) => {
+                  const x0 = cXm;
+                  const top = range(L, x0 + 10, 36).map((x): Pt => [x, cTop + 1]);
+                  const bot = range(x0 + 10, L, 36).map((x): Pt => [x, cBot(x) - 1]);
+                  const pts = [...top, [x0, (cTop + cBot(x0)) / 2] as Pt, ...bot].map((q) => map(sd * q[0], q[1]));
+                  // The lateral end is open (continuous with the extra-embryonic coelom): no outline across it.
+                  return (
+                    <g key={sd}>
+                      <path d={smoothPath(pts, true, 0.25)} fill="#1a0c22" />
+                      <path d={smoothPath(pts, false, 0.25)} fill="none" stroke="rgba(255,160,160,0.25)" strokeWidth={1} />
+                    </g>
+                  );
+                })}
+              </>
             )}
-        </Part>
-      )}
-      {m >= 0.5 && coelomK > 0.3 && (
-        <>
-          <Part id={s.id('parietal')} show={vis('parietal', coelomK)}>
-            {[1, -1].map((sd) => {
-              const x0 = lerp(L, 200, coelomK) + 14;
-              const xs = range(x0, L, 30);
-              const outer = xs.map((x) => map(sd * x, cTop - 3));
-              const inner = xs.map((x) => map(sd * x, cTop + 1.5));
-              return (
-                <g key={sd}>
-                  <path d={regionPath(s, sd > 0 ? x0 : -L, sd > 0 ? L : -x0, () => TE, () => cTop, 30)} fill="#ffc2c2" opacity={0.22} />
-                  <Cells outer={outer} inner={inner} n={Math.max(3, Math.round((L - x0) / 12))} fill="#f9b4b4" nucleus="rgba(120,20,30,0.7)" edge="rgba(120,20,30,0.35)" nk={0.5} seed={81 + sd} />
-                </g>
-              );
-            })}
+            {vesK > 0.02 &&
+              [230, 292, 354, 416, 478].flatMap((vx) =>
+                [1, -1].map((sd) => {
+                  const [X, Y] = map(sd * vx, (cTop + cBot(vx)) / 2);
+                  return <ellipse key={`${vx}${sd}`} cx={X} cy={Y} rx={18 * vesK * p.k} ry={(7 * vesK + 1) * p.k} fill="#12091a" />;
+                }),
+              )}
           </Part>
-          <Part id={s.id('visceral')} show={vis('visceral', coelomK)}>
-            {[1, -1].map((sd) => {
-              const x0 = cXm + 14;
-              const xs = range(x0, L, 30);
-              const outer = xs.map((x) => map(sd * x, cBot(x) - 1.5));
-              const inner = xs.map((x) => map(sd * x, cBot(x) + 3));
-              return (
-                <g key={sd}>
-                  <path d={regionPath(s, sd > 0 ? x0 : -L, sd > 0 ? L : -x0, cBot, (x) => dEndo(x), 30)} fill="#b91c3c" opacity={0.22} />
-                  <Cells outer={outer} inner={inner} n={Math.max(3, Math.round((L - x0) / 12))} fill="#e0707f" nucleus="rgba(90,10,24,0.75)" edge="rgba(90,10,24,0.35)" nk={0.5} seed={91 + sd} />
-                </g>
-              );
-            })}
+        )}
+        {m >= 0.5 && coelomK > 0.3 && (
+          <>
+            <Part id={s.id('parietal')} show={vis('parietal', coelomK)}>
+              {[1, -1].map((sd) => {
+                const x0 = lerp(L, 200, coelomK) + 14;
+                const xs = range(x0, L, 30);
+                const outer = xs.map((x) => map(sd * x, cTop - 3));
+                const inner = xs.map((x) => map(sd * x, cTop + 1.5));
+                return (
+                  <g key={sd}>
+                    <path d={regionPath(s, sd > 0 ? x0 : -L, sd > 0 ? L : -x0, () => TE, () => cTop, 30)} fill="#ffc2c2" opacity={0.22} />
+                    <Cells outer={outer} inner={inner} n={Math.max(3, Math.round((L - x0) / 12))} fill="#f9b4b4" nucleus="rgba(120,20,30,0.7)" edge="rgba(120,20,30,0.35)" nk={0.5} seed={81 + sd} />
+                  </g>
+                );
+              })}
+            </Part>
+            <Part id={s.id('visceral')} show={vis('visceral', coelomK)}>
+              {[1, -1].map((sd) => {
+                const x0 = cXm + 14;
+                const xs = range(x0, L, 30);
+                const outer = xs.map((x) => map(sd * x, cBot(x) - 1.5));
+                const inner = xs.map((x) => map(sd * x, cBot(x) + 3));
+                return (
+                  <g key={sd}>
+                    <path d={regionPath(s, sd > 0 ? x0 : -L, sd > 0 ? L : -x0, cBot, (x) => dEndo(x), 30)} fill="#b91c3c" opacity={0.22} />
+                    <Cells outer={outer} inner={inner} n={Math.max(3, Math.round((L - x0) / 12))} fill="#e0707f" nucleus="rgba(90,10,24,0.75)" edge="rgba(90,10,24,0.35)" nk={0.5} seed={91 + sd} />
+                  </g>
+                );
+              })}
+            </Part>
+          </>
+        )}
+        {/* Dorsal mesentery: the thin midline sheet left between the two coelom halves, hanging the gut tube. */}
+        {mesK > 0.02 && coelomK > 0.5 && (
+          <Part id={s.id('mesentery')} show={vis('mesentery', mesK)}>
+            <path d={regionPath(s, -26, 26, () => dAorta + 4, () => dEndo(0) + 1, 8)} fill="#fda4af" opacity={0.16} />
           </Part>
-        </>
-      )}
-      {/* Dorsal mesentery: the thin midline sheet left between the two coelom halves, hanging the gut tube. */}
-      {mesK > 0.02 && coelomK > 0.5 && (
-        <Part id={s.id('mesentery')} show={vis('mesentery', mesK)}>
-          <path d={regionPath(s, -26, 26, () => dAorta + 4, () => dEndo(0) + 1, 8)} fill="#fda4af" opacity={0.16} />
-        </Part>
-      )}
-      {/* Mesenchyme filling the core of the elevated neural folds (between neuroepithelium and surface ectoderm). */}
-      {p.neural > 0.05 && ng.closed < 0.99 &&
-        [1, -1].map((sd) => {
-          const half = plateOuterD.slice(Math.floor(plateOuterD.length / 2));
-          const ecto = ectoLine(1).filter((q) => q[0] < ng.crest[0] + 110);
-          const xFar = ecto[ecto.length - 1][0];
-          const pts: Pt[] = [[0, TE + 2], [xFar, TE + 2], ...ecto.slice().reverse().map((q): Pt => [q[0], q[1] + TE / 2]), ...half.slice().reverse()];
-          const d = `M${pts.map((q) => map(sd * q[0], q[1])).map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}Z`;
-          const intra = 1 - ss((m - 0.25) / 0.1);
-          return (
-            <g key={sd}>
-              <path d={d} fill={C.mesoParaxial} />
-              {intra > 0 && <path d={d} fill={C.mesoIntra} opacity={intra} />}
-            </g>
-          );
-        })}
-      <Mesenchyme
-        s={s}
-        color="rgba(110,14,30,0.75)"
-        inside={(x, d) => Math.abs(x) < L && d > TE + 2 && d < dEndo(x) - 2 && !inCoelom(x, d) && !tubeIn(x, d) && !notoIn(x, d) && !(epith > 0.3 && somIn(x, d)) && !aortaIn(x, d)}
-      />
+        )}
+        {/* Mesenchyme filling the core of the elevated neural folds (between neuroepithelium and surface ectoderm). */}
+        {p.neural > 0.05 && ng.closed < 0.99 &&
+          [1, -1].map((sd) => {
+            const half = plateOuterD.slice(Math.floor(plateOuterD.length / 2));
+            const ecto = ectoLine(1).filter((q) => q[0] < ng.crest[0] + 110);
+            const xFar = ecto[ecto.length - 1][0];
+            const pts: Pt[] = [[0, TE + 2], [xFar, TE + 2], ...ecto.slice().reverse().map((q): Pt => [q[0], q[1] + TE / 2]), ...half.slice().reverse()];
+            const d = `M${pts.map((q) => map(sd * q[0], q[1])).map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}Z`;
+            const intra = 1 - ss((m - 0.25) / 0.1);
+            return (
+              <g key={sd}>
+                <path d={d} fill={C.mesoParaxial} />
+                {intra > 0 && <path d={d} fill={C.mesoIntra} opacity={intra} />}
+              </g>
+            );
+          })}
+        <Mesenchyme
+          s={s}
+          color="rgba(110,14,30,0.75)"
+          inside={(x, d) => Math.abs(x) < L && d > TE + 2 && d < dEndo(x) - 2 && !inCoelom(x, d) && !tubeIn(x, d) && !notoIn(x, d) && !(epith > 0.3 && somIn(x, d)) && !aortaIn(x, d)}
+        />
+      </g>
 
       {/* Somites: paraxial block → epithelial ball → sclerotome + dermomyotome → dermatome + myotome. */}
       {m >= 0.25 && sK > 0 && <Somites s={s} epith={epith} scler={scler} myo={myo} />}

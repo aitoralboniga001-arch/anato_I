@@ -337,6 +337,30 @@ export function limbGeom(L: LimbPose): LimbGeom {
   };
 }
 
+/** Mask keeping the marks on a plate (rays, grooves) inside the plate and digits, `inset` clear of the rim. */
+export function PlateMask({ id, g, inset }: { id: string; g: LimbGeom; inset: number }) {
+  return (
+    <>
+      {/* Soft edge, so a mark fades out towards the rim instead of ending in a straight cut. */}
+      <filter id={`${id}-soft`} x="-1000" y="-1000" width="3000" height="3000" filterUnits="userSpaceOnUse">
+        <feGaussianBlur stdDeviation={inset * 0.45} />
+      </filter>
+      <mask id={id} maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="3000" height="3000">
+        <g filter={`url(#${id}-soft)`}>
+          {g.hand && <path d={g.hand} fill="#fff" stroke="#000" strokeWidth={inset * 2} />}
+          {g.digitA > 0.02 && (
+            <g stroke="#fff" strokeWidth={Math.max(0, g.digitW - inset * 2)} strokeLinecap="round">
+              {g.digits.map(([a, b], i) => (
+                <path key={i} d={`M${a[0]},${a[1]} L${b[0]},${b[1]}`} />
+              ))}
+            </g>
+          )}
+        </g>
+      </mask>
+    </>
+  );
+}
+
 /** Always-visible age read-out (bottom-left), like the timecode on a microscope camera. */
 export function AgeHud({ value, unit, caption, x = 40, y = 606 }: { value: string | number; unit: string; caption: string; x?: number; y?: number }) {
   return (

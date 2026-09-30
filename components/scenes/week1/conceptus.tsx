@@ -163,9 +163,22 @@ export function Conceptus({ f, x, y, s = 1, corona = 0, polar = 0, mass = 0, id 
         u.goo ? (
           <P key={k} on={on} id={parts ? parts.cell(u.cells[0]) : ''}>
           <g>
+            {/* Outline and shading as for a single cell, so a dividing pair reads as cells (not a flat blob)
+                and nothing pops when the daughters separate: the rim is a slightly larger merged silhouette. */}
+            <g filter={`url(#${id}-goo)`}>
+              {u.cells.map((c, j) => (
+                <g key={j} transform={`rotate(${c.rot} ${c.x} ${c.y})`}>
+                  <ellipse cx={c.x} cy={c.y} rx={Math.max(1, c.rx) + 1.4} ry={Math.max(1, c.ry) + 1.4} fill={fill(c, mass)} />
+                  <ellipse cx={c.x} cy={c.y} rx={Math.max(1, c.rx) + 1.4} ry={Math.max(1, c.ry) + 1.4} fill="rgba(40,16,20,0.55)" />
+                </g>
+              ))}
+            </g>
             <g filter={`url(#${id}-goo)`}>
               {u.cells.map((c, j) => (
                 <CellShape key={j} c={c} mass={mass} stroke={false} />
+              ))}
+              {u.cells.map((c, j) => (
+                <ellipse key={`s${j}`} cx={c.x} cy={c.y} rx={Math.max(1, c.rx)} ry={Math.max(1, c.ry)} transform={`rotate(${c.rot} ${c.x} ${c.y})`} fill="url(#g-cell)" />
               ))}
             </g>
             {u.cells.map((c, j) => (

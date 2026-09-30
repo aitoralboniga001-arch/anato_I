@@ -2,7 +2,7 @@
 
 import { Label, Mark, Note, Part, ellipsePts, lerp, lerpPt, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { EarlyEmbryo, earlyGeom } from './EarlyEmbryo';
-import { AgeHud, SKIN, SkinDefs, atDay, limbGeom, polar, ramp, sampleSpine, spineAt, trunkPath, win, type LimbPose, type Num } from './skin';
+import { AgeHud, PlateMask, SKIN, SkinDefs, atDay, limbGeom, polar, ramp, sampleSpine, spineAt, trunkPath, win, type LimbPose, type Num } from './skin';
 
 /**
  * Topic 5 — the embryo seen from its left side between days 28 and 56 (course figures:
@@ -273,6 +273,14 @@ function Limb({ id, idPlate, g, day, lag }: { id: string; idPlate: string; g: Re
         </mask>
       </defs>
       <g mask={`url(#${id}-mask)`}>
+        {/* Contour of the whole limb (arm, plate and free digits as one piece) under the skin, so the
+            digits read as part of the hand over the body instead of pale ghosts and no seam crosses them. */}
+        <g fill="none" stroke="#3a1512" strokeOpacity={0.75} strokeLinecap="round">
+          <path d={g.body} strokeWidth={2.6} />
+          {g.hand && <path d={g.hand} strokeWidth={2.6} />}
+          {g.digitA > 0.02 &&
+            g.digits.map(([a, b], i) => <path key={i} d={`M${a[0]},${a[1]} L${b[0]},${b[1]}`} strokeWidth={g.digitW + 2.6} strokeOpacity={0.75 * g.digitA} />)}
+        </g>
         <g filter="url(#w5-soft)" fill="url(#w5-skin)">
           <path d={g.body} />
           {g.hand && <path d={g.hand} />}
@@ -284,10 +292,6 @@ function Limb({ id, idPlate, g, day, lag }: { id: string; idPlate: string; g: Re
             </g>
           )}
         </g>
-        <g fill="none" stroke="#3a1512" strokeWidth={1.3} strokeOpacity={0.75}>
-          <path d={g.body} />
-          {g.hand && <path d={g.hand} />}
-        </g>
       </g>
       <Part id={id} show={1 - plate}>
         <path d={g.body} fill="rgba(255,255,255,0.001)" />
@@ -297,20 +301,25 @@ function Limb({ id, idPlate, g, day, lag }: { id: string; idPlate: string; g: Re
           <path d={g.hand} fill="rgba(255,255,255,0.001)" />
         </Part>
       )}
-      {g.rayA > 0.02 && (
-        <Part id="hatzetako-izpiak" show={g.rayA}>
-          {g.rays.map(([a, b], i) => (
-            <path key={i} d={`M${a[0]},${a[1]} L${b[0]},${b[1]}`} stroke={SKIN.light} strokeWidth={4.5} strokeLinecap="round" opacity={0.75} />
-          ))}
-        </Part>
-      )}
-      {g.grooveA > 0.02 && (
-        <Part id="izpiarteko-ildoak" show={g.grooveA}>
-          {g.grooves.map(([a, b], i) => (
-            <path key={i} d={`M${a[0]},${a[1]} L${b[0]},${b[1]}`} stroke={SKIN.line} strokeWidth={1.6} strokeLinecap="round" />
-          ))}
-        </Part>
-      )}
+      <defs>
+        <PlateMask id={`${id}-marks`} g={g} inset={4} />
+      </defs>
+      <g mask={`url(#${id}-marks)`}>
+        {g.rayA > 0.02 && (
+          <Part id="hatzetako-izpiak" show={g.rayA}>
+            {g.rays.map(([a, b], i) => (
+              <path key={i} d={`M${a[0]},${a[1]} L${b[0]},${b[1]}`} stroke={SKIN.light} strokeWidth={4.5} strokeLinecap="round" opacity={0.75} />
+            ))}
+          </Part>
+        )}
+        {g.grooveA > 0.02 && (
+          <Part id="izpiarteko-ildoak" show={g.grooveA}>
+            {g.grooves.map(([a, b], i) => (
+              <path key={i} d={`M${a[0]},${a[1]} L${b[0]},${b[1]}`} stroke={SKIN.line} strokeWidth={1.6} strokeLinecap="round" />
+            ))}
+          </Part>
+        )}
+      </g>
     </g>
   );
 }
@@ -403,6 +412,8 @@ export function EmbryoFigure({ day, kick = 0 }: { day: number; kick?: number }) 
         {nape > 0.02 && ell([b.ear[0] + 4, b.ear[1] + 66, 44 * nape, 46 * nape])}
         {mouth > 0.02 && ell([b.mouth[0] + 16, b.mouth[1] - 4, 30 * mouth, 22 * mouth])}
         {ell([b.heart[0], b.heart[1], b.heart[2], b.heart[3]])}
+        {/* Fills the chink left between the arches, jaw and heart bulges (read as a black notch). */}
+        {ell([(b.arch[0] + 14 + b.face[0] + 40 + b.heart[0]) / 3, (b.arch[1] + 46 + b.face[1] + 38 + b.heart[1]) / 3, 20, 20])}
         {b.liver[2] > 1 && ell([b.liver[0], b.liver[1], b.liver[2], b.liver[3]])}
         {archA > 0.05 && A.bars.map((d, i) => <path key={i} d={d} opacity={archA} />)}
 

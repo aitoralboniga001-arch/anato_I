@@ -40,23 +40,26 @@ const s = (t: number, w: readonly [number, number]) => seg(t, w[0], w[1]);
 const Y = { deciduaBottom: 70, shellSplit: 90, roofBottom: 104, plateSyn: 320, plateCyto: 334, plateMeso: 348, plateBottom: 386, stalkTop: 386, stalkBottom: 560 };
 const VILLUS_TIP = Y.deciduaBottom;
 const VX = 500;
-const EMBRYO = { x: 500, y: 596, rx: 66, ry: 38 };
+/** Mini sagittal embryo (cranial = left): disc line, amniotic dome above, yolk sac below; the stalk
+ *  inserts dorso-caudally and its vessels start inside the dome (their ends hidden under it). */
+const EMBRYO = { cx: 466, disc: 592, amRx: 62, amRy: 34, ysRx: 59, ysRy: 30 };
+const V0 = 574;
 
 /** Full deoxy/oxy guide paths (embryo → villus tip), used only for the faint backdrop and the heartbeat flow. */
 function vesselPaths() {
   const deoxy =
-    `M${VX - 6},${EMBRYO.y - EMBRYO.ry + 4} C${VX - 10},${Y.stalkBottom} ${VX - 9},${Y.stalkTop} ${VX - 5},${Y.plateBottom} ` +
+    `M${VX - 6},${V0} C${VX - 10},${Y.stalkBottom} ${VX - 9},${Y.stalkTop} ${VX - 5},${Y.plateBottom} ` +
     `C${VX - 3},${Y.plateMeso} ${VX - 2},${Y.plateSyn} ${VX},${(Y.plateSyn + VILLUS_TIP) / 2} L${VX},${VILLUS_TIP + 22}`;
   const oxy =
     `M${VX},${VILLUS_TIP + 22} L${VX},${(Y.plateSyn + VILLUS_TIP) / 2} C${VX + 2},${Y.plateSyn} ${VX + 3},${Y.plateMeso} ${VX + 5},${Y.plateBottom} ` +
-    `C${VX + 9},${Y.stalkTop} ${VX + 10},${Y.stalkBottom} ${VX + 6},${EMBRYO.y - EMBRYO.ry + 4}`;
+    `C${VX + 9},${Y.stalkTop} ${VX + 10},${Y.stalkBottom} ${VX + 6},${V0}`;
   return { deoxy, oxy };
 }
 
 /** The three anatomical segments, each owned by its own structure id and revealed on its own window. */
 function segmentPaths() {
-  const stalkDeoxy = `M${VX - 6},${EMBRYO.y - EMBRYO.ry + 4} C${VX - 10},${Y.stalkBottom} ${VX - 9},${Y.stalkTop + 40} ${VX - 5},${Y.stalkTop}`;
-  const stalkOxy = `M${VX + 6},${EMBRYO.y - EMBRYO.ry + 4} C${VX + 10},${Y.stalkBottom} ${VX + 9},${Y.stalkTop + 40} ${VX + 5},${Y.stalkTop}`;
+  const stalkDeoxy = `M${VX - 6},${V0} C${VX - 10},${Y.stalkBottom} ${VX - 9},${Y.stalkTop + 40} ${VX - 5},${Y.stalkTop}`;
+  const stalkOxy = `M${VX + 6},${V0} C${VX + 10},${Y.stalkBottom} ${VX + 9},${Y.stalkTop + 40} ${VX + 5},${Y.stalkTop}`;
   const plate = `M${VX},${Y.stalkTop} L${VX},${Y.plateSyn}`;
   const capillary = `M${VX - 12},${Y.plateSyn} L${VX - 12},${VILLUS_TIP + 26} A12 12 0 0 0 ${VX + 12},${VILLUS_TIP + 26} L${VX + 12},${Y.plateSyn}`;
   return { stalkDeoxy, stalkOxy, plate, capillary };
@@ -71,9 +74,40 @@ const villusD = (b: number, r: number, inset: number) => {
 };
 
 /** Connecting stalk: a soft cord flaring into the chorionic plate, its lower end tucked under the embryo. */
-const STALK = tube(line([VX, Y.stalkTop - 4], [VX, EMBRYO.y - EMBRYO.ry + 5]), (u) => 17 + 18 * Math.max(0, 1 - u / 0.28) ** 2 + 6 * Math.max(0, (u - 0.85) / 0.15) ** 2, 0, 1, 40);
+const STALK = tube(line([VX, Y.stalkTop - 4], [VX, V0 + 8]), (u) => 17 + 18 * Math.max(0, 1 - u / 0.28) ** 2 + 6 * Math.max(0, (u - 0.85) / 0.15) ** 2, 0, 1, 40);
 
 const dash = (p: number) => ({ pathLength: 1, strokeDasharray: '1 1', strokeDashoffset: f1(1 - Math.max(0, Math.min(1, p))) });
+
+/** Amniotic dome over the trilaminar disc, yolk sac under it, all wrapped in extra-embryonic mesoderm. */
+function MiniEmbryo({ heartbeat, pulse }: { heartbeat: number; pulse: number }) {
+  const { cx, disc, amRx, amRy, ysRx, ysRy } = EMBRYO;
+  const dome = `M${cx - amRx},${disc} A${amRx} ${amRy} 0 0 1 ${cx + amRx},${disc}Z`;
+  const yolk = `M${cx - ysRx},${disc} A${ysRx} ${ysRy} 0 0 0 ${cx + ysRx},${disc}Z`;
+  const layer = (dy: number) => `M${cx - amRx + 4},${disc + dy} L${cx + amRx - 4},${disc + dy}`;
+  return (
+    <g pointerEvents="none">
+      {/* Mesoderm coat: both outlines first (wide), then the fills, so only the union's outline shows. */}
+      <g fill="none" stroke={C.mesoExtra} strokeWidth={7} strokeLinejoin="round">
+        <path d={dome} />
+        <path d={yolk} />
+      </g>
+      <path d={dome} fill="#22345e" />
+      <path d={dome} fill="url(#g-shade)" opacity={0.35} />
+      <path d={yolk} fill="#4a3e1e" />
+      <path d={yolk} fill="rgba(242,193,78,0.3)" />
+      <path d={yolk} fill="url(#g-shade)" opacity={0.35} />
+      <g fill="none" strokeLinecap="round">
+        <path d={layer(-2)} stroke={C.ectoderm} strokeWidth={4} />
+        <path d={layer(1.5)} stroke={C.mesoIntra} strokeWidth={3} />
+        <path d={layer(4.5)} stroke={C.endoderm} strokeWidth={3} />
+      </g>
+      {/* The heart forms at the cranial end. */}
+      <g opacity={heartbeat} transform={`translate(${cx - amRx + 16} ${disc + 12}) scale(${0.75 * pulse})`}>
+        <path d="M0,-7 C4,-13 12,-9 0,4 C-12,-9 -4,-13 0,-7 Z" fill={V.oxy} stroke="#7a1020" strokeWidth={0.8} />
+      </g>
+    </g>
+  );
+}
 
 function CirculationDrawing({ t, reduced }: SceneProps) {
   const embryoStalk = s(t, W.embryoStalk);
@@ -140,15 +174,6 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
         </g>
       </Part>
 
-      {/* Embryo schematic (decorative — internal embryo structures belong to week 3A). */}
-      <g opacity={0.9}>
-        <ellipse cx={EMBRYO.x} cy={EMBRYO.y} rx={EMBRYO.rx} ry={EMBRYO.ry} fill="#3a4a72" stroke="#7c93cf" strokeWidth={1.4} />
-        <ellipse cx={EMBRYO.x} cy={EMBRYO.y} rx={EMBRYO.rx} ry={EMBRYO.ry} fill="url(#g-shade)" opacity={0.4} />
-        <g opacity={heartbeat} transform={`translate(${EMBRYO.x} ${EMBRYO.y}) scale(${flowOn ? pulse : 1})`}>
-          <path d="M0,-7 C4,-13 12,-9 0,4 C-12,-9 -4,-13 0,-7 Z" fill={V.oxy} stroke="#7a1020" strokeWidth={0.8} />
-        </g>
-      </g>
-
       {/* Faint full-length guide, always present, so the eventual continuity reads clearly. */}
       <g pointerEvents="none">
         <path d={deoxy} fill="none" stroke={V.deoxy} strokeWidth={5} strokeLinecap="round" opacity={0.18} />
@@ -180,6 +205,9 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
           <Flow d={oxy} n={5} dur={3.2} r={2.4} color={V.oxy} reduced={reduced} />
         </>
       )}
+
+      {/* Embryo schematic (decorative — its own structures belong to week 3A): drawn over the vessel ends. */}
+      <MiniEmbryo heartbeat={heartbeat} pulse={flowOn ? pulse : 1} />
 
       {/* Placental barrier: traced directly on the villus's own syncytial wall (radius 30, matching the
           syncytiotrophoblast outline above), not floating in the blood space. */}

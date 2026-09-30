@@ -48,13 +48,14 @@ export const discX = (u: number) => SAG.cranialX + (SAG.caudalX - SAG.cranialX) 
  */
 export function discOutline(cx: number, cy: number, rxTop: number, rxBot: number, ryTop: number, ryBot: number, n = 72): Pt[] {
   const pts: Pt[] = [];
-  // Blend rx/ry continuously across the equator (sin(a) ~ 0) instead of hard-switching between
-  // the cranial/caudal radii — a hard switch left a visible kink at the disc's widest point.
-  const band = 0.22;
+  // Blend rx/ry smoothly over most of the outline (not only near the equator): a narrow blend made
+  // the radius drop abruptly below the widest point, giving the pear shape hard "shoulders".
+  const band = 0.75;
   for (let i = 0; i < n; i++) {
     const a = (i / n) * Math.PI * 2;
     const s = Math.sin(a);
-    const k = Math.max(0, Math.min(1, (s + band) / (2 * band))); // 0 = cranial half, 1 = caudal half
+    const u = Math.max(0, Math.min(1, (s + band) / (2 * band)));
+    const k = u * u * (3 - 2 * u); // 0 = cranial half, 1 = caudal half
     const rx = rxTop + (rxBot - rxTop) * k;
     const ry = ryTop + (ryBot - ryTop) * k;
     pts.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]);

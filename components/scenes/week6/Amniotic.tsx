@@ -222,11 +222,22 @@ function wallSpot(c: Pt, r: Pt, toward: Pt) {
   const at = (d: number): Pt => [c[0] + (r[0] + d) * Math.cos(a), c[1] + (r[1] + d) * Math.sin(a)];
   return { c: at(6), ins: at(10), tan: (Math.atan2(r[1] * Math.cos(a), -r[0] * Math.sin(a)) * 180) / Math.PI };
 }
+// Mother's abdominal wall: a quadratic whose x runs linearly, so its height at any x is closed-form.
+const wallY = (x: number) => {
+  const k = (x - 100) / 800;
+  return 126 - 156 * k * (1 - k);
+};
 // Ultrasound-guided into a free pocket of fluid, well clear of the fetus and the placenta.
-const NEEDLE_A: Pt = [468, 118];
-const NEEDLE_B: Pt = [468, 318];
+const NEEDLE_X = 468;
+const NEEDLE_B: Pt = [NEEDLE_X, 318];
+/** Needle length from hub to tip: at full depth the syringe barrel stays just above the skin. */
+const NEEDLE_L = 250;
 const VAGINA_A: Pt = [500, 546];
 const VAGINA_B: Pt = [500, 604];
+// Cervix: a narrow neck under the uterus (its top hides inside the uterine silhouette).
+const CERVIX: Pt[] = [[452, 520], [480, 556], [482, 590], [490, 606], [510, 606], [518, 590], [520, 556], [548, 520]];
+const PROBE: Pt = [566, wallY(566)];
+const PROBE_TILT = (Math.atan2(-156 * (1 - 2 * ((566 - 100) / 800)), 800) * 180) / Math.PI;
 
 export function PrenatalTests({ t }: SceneProps) {
   const probeA = seg(t, 0.68, 0.76) * (1 - seg(t, 0.94, 1));
@@ -234,7 +245,10 @@ export function PrenatalTests({ t }: SceneProps) {
   const needleA = seg(t, 0.86, 0.94);
   const cvsA = seg(t, 0.9, 0.98);
 
-  const needleTip: Pt = [lerp(NEEDLE_A[0], NEEDLE_B[0], needleA), lerp(NEEDLE_A[1], NEEDLE_B[1], needleA)];
+  // The syringe slides in from above: the tip crosses the skin early and ends in a free pocket of fluid.
+  const needleTip: Pt = [NEEDLE_X, lerp(wallY(NEEDLE_X) + 6, NEEDLE_B[1], needleA)];
+  const hubY = needleTip[1] - NEEDLE_L;
+  const draw = seg(needleA, 0.85, 1);
   // Through the cervix and up between the uterine wall and the membranes (never through the amniotic cavity) to the villi.
   const inWall = (deg: number, d: number): Pt => [CAV2[0] + (CAV2_R[0] + d) * Math.cos((deg * Math.PI) / 180), CAV2[1] + (CAV2_R[1] + d) * Math.sin((deg * Math.PI) / 180)];
   const cvsEnd = inWall(212, 12);
@@ -245,15 +259,54 @@ export function PrenatalTests({ t }: SceneProps) {
   const pl = wallSpot(CAV2, CAV2_R, PLAC2);
   const cordPts: Pt[] = [cordBase, [cordBase[0] + 6, cordBase[1] + 30], [cordBase[0] - 60, cordBase[1] + 52], [412, 372], [pl.ins[0] + 16, pl.ins[1] + 60], pl.ins];
   const clipId = `${useId().replace(/:/g, '')}-wall2`;
+  // Ultrasound pulses: rings leaving the probe, pure functions of t.
+  const pulses = [0, 1, 2].map((i) => (t * 24 + i / 3) % 1);
+  const fanS = Math.sin((24 * Math.PI) / 180);
+  const fanC = Math.cos((24 * Math.PI) / 180);
 
   return (
     <g>
-      {/* Mother's abdominal wall */}
-      <path d="M120,120 Q500,50 880,120" fill="none" stroke="#e3a7ac" strokeWidth={6} strokeLinecap="round" opacity={0.85} />
+      <defs>
+        {/* The abdominal wall fades out at both ends instead of stopping in round caps. */}
+        <linearGradient id={`${clipId}-abd`} gradientUnits="userSpaceOnUse" x1={100} y1={0} x2={900} y2={0}>
+          <stop offset="0" stopColor="#e3a7ac" stopOpacity="0" />
+          <stop offset="0.14" stopColor="#e3a7ac" stopOpacity="0.9" />
+          <stop offset="0.86" stopColor="#e3a7ac" stopOpacity="0.9" />
+          <stop offset="1" stopColor="#e3a7ac" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id={`${clipId}-abd-d`} gradientUnits="userSpaceOnUse" x1={100} y1={0} x2={900} y2={0}>
+          <stop offset="0" stopColor="#5a2a30" stopOpacity="0" />
+          <stop offset="0.14" stopColor="#5a2a30" />
+          <stop offset="0.86" stopColor="#5a2a30" />
+          <stop offset="1" stopColor="#5a2a30" stopOpacity="0" />
+        </linearGradient>
+        <radialGradient id={`${clipId}-fan`} gradientUnits="userSpaceOnUse" cx={0} cy={0} r={230}>
+          <stop offset="0" stopColor="#8ecae6" stopOpacity="0.3" />
+          <stop offset="1" stopColor="#8ecae6" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id={`${clipId}-myo`} gradientUnits="userSpaceOnUse" cx={CAV2[0]} cy={CAV2[1]} r={270}>
+          <stop offset="0.62" stopColor="#82303a" />
+          <stop offset="1" stopColor="#5e2129" />
+        </radialGradient>
+      </defs>
 
-      {/* Uterus */}
-      <path d={smoothPath(U2, true, 0.55)} fill="#7a2c34" stroke="#4a1a20" strokeWidth={2} opacity={0.92} />
+      {/* Mother's abdominal wall: skin over a thin dark layer, fading at the ends */}
+      <path d="M100,126 Q500,48 900,126" fill="none" stroke={`url(#${clipId}-abd-d)`} strokeWidth={11} />
+      <path d="M100,126 Q500,48 900,126" fill="none" stroke={`url(#${clipId}-abd)`} strokeWidth={7} />
+
+      {/* Uterus and cervix as one organ: both outlines first, then both fills, so no seam shows */}
+      <g fill="none" stroke="#4a1a20" strokeWidth={4} strokeLinejoin="round">
+        <path d={smoothPath(U2, true, 0.55)} />
+        <path d={smoothPath(CERVIX, true, 0.5)} />
+      </g>
+      <path d={smoothPath(CERVIX, true, 0.5)} fill="#6a252d" />
+      <path d={smoothPath(U2, true, 0.55)} fill={`url(#${clipId}-myo)`} />
+      {/* Cervical canal, opening at the external os */}
+      <path d={`M${VAGINA_A[0]},${VAGINA_A[1] - 4} L${VAGINA_B[0]},${VAGINA_B[1] + 1}`} stroke="#2a0c10" strokeWidth={3} strokeLinecap="round" />
+
       <ellipse cx={CAV2[0]} cy={CAV2[1]} rx={CAV2_R[0]} ry={CAV2_R[1]} fill={C.amnionCavity} />
+      <ellipse cx={CAV2[0]} cy={CAV2[1]} rx={CAV2_R[0]} ry={CAV2_R[1]} fill="none" stroke="#8ecae6" strokeWidth={1.4} opacity={0.5} />
+      <ellipse cx={CAV2[0]} cy={CAV2[1]} rx={CAV2_R[0] + 5} ry={CAV2_R[1] + 5} fill="none" stroke="#bfe0f2" strokeWidth={1.2} strokeDasharray="2 5" opacity={0.45} />
 
       <g transform={place.transform}>
         <FetusFigure
@@ -283,22 +336,28 @@ export function PrenatalTests({ t }: SceneProps) {
         </g>
       </Part>
 
-      {/* Cervix / vaginal canal */}
-      <path d={`M${VAGINA_A[0] - 26},${VAGINA_A[1]} L${VAGINA_B[0] - 14},${VAGINA_B[1]} L${VAGINA_B[0] + 14},${VAGINA_B[1]} L${VAGINA_A[0] + 26},${VAGINA_A[1]}Z`} fill="#7a2c34" stroke="#4a1a20" strokeWidth={2} opacity={0.9} />
-
-      {/* Ekografia: probe on the abdomen, emitting an ultrasound fan */}
+      {/* Ekografia: transducer resting on the abdomen, its beam a fan of pulses into the uterus */}
       <Part id="ekografia" show={probeA > 0.02 ? 1 : 0}>
-        <rect x={540} y={92} width={40} height={20} rx={4} fill="#cbd5e1" stroke="#475569" strokeWidth={1.4} />
-        {[0.55, 0.75, 0.95].map((k, i) => (
-          <path
-            key={i}
-            d={`M540,112 A${120 * k},${120 * k} 0 0 1 620,${112 + 190 * k * 0.55}`}
-            fill="none"
-            stroke="#8ecae6"
-            strokeWidth={1.6}
-            opacity={probeA * (1 - i * 0.22)}
-          />
-        ))}
+        <g transform={`translate(${PROBE[0]} ${PROBE[1]}) rotate(${PROBE_TILT})`} opacity={probeA}>
+          <path d={`M0,2 L${-fanS * 230},${2 + fanC * 230} A230,230 0 0 0 ${fanS * 230},${2 + fanC * 230} Z`} fill={`url(#${clipId}-fan)`} />
+          {pulses.map((ph, i) => {
+            const r = 24 + 200 * ph;
+            return (
+              <path
+                key={i}
+                d={`M${-fanS * r},${2 + fanC * r} A${r},${r} 0 0 0 ${fanS * r},${2 + fanC * r}`}
+                fill="none"
+                stroke="#8ecae6"
+                strokeWidth={1.6}
+                strokeLinecap="round"
+                opacity={0.85 * (1 - ph)}
+              />
+            );
+          })}
+          <path d="M3,-50 C8,-74 30,-84 56,-92" fill="none" stroke="#64748b" strokeWidth={3} strokeLinecap="round" />
+          <path d="M-13,-6 L-9,-48 Q0,-55 9,-48 L13,-6 Z" fill="#cbd5e1" stroke="#475569" strokeWidth={1.4} strokeLinejoin="round" />
+          <rect x={-20} y={-9} width={40} height={10} rx={4} fill="#94a3b8" stroke="#475569" strokeWidth={1.4} />
+        </g>
       </Part>
 
       {/* Amaren serumaren azterketa: blood tube, α-fetoproteina */}
@@ -312,8 +371,16 @@ export function PrenatalTests({ t }: SceneProps) {
 
       {/* Amniozentesia: needle through the abdominal/uterine wall */}
       <Part id="amniozentesia" show={needleA > 0.02 ? 1 : 0}>
-        <line x1={NEEDLE_A[0]} y1={NEEDLE_A[1]} x2={needleTip[0]} y2={needleTip[1]} stroke="#e2e8f0" strokeWidth={2.4} strokeLinecap="round" />
-        <circle cx={needleTip[0]} cy={needleTip[1]} r={4} fill="#8ecae6" opacity={0.8} />
+        <g opacity={seg(needleA, 0, 0.15)}>
+          <line x1={NEEDLE_X} y1={hubY} x2={needleTip[0]} y2={needleTip[1]} stroke="#e2e8f0" strokeWidth={2} strokeLinecap="round" />
+          {/* Syringe: hub, barrel (filling with fluid once the tip is in the pocket) and plunger drawn back */}
+          <rect x={NEEDLE_X - 4} y={hubY - 8} width={8} height={9} rx={1.5} fill="#94a3b8" stroke="#475569" strokeWidth={1} />
+          <rect x={NEEDLE_X - 8} y={hubY - 48} width={16} height={41} rx={3} fill="rgba(226,232,240,0.22)" stroke="#cbd5e1" strokeWidth={1.3} />
+          {draw > 0.01 && <rect x={NEEDLE_X - 6.5} y={hubY - 9 - 30 * draw} width={13} height={30 * draw} rx={2} fill="#8ecae6" opacity={0.75} />}
+          <rect x={NEEDLE_X - 6.5} y={hubY - 12 - 30 * draw} width={13} height={4} rx={1} fill="#475569" />
+          <path d={`M${NEEDLE_X},${hubY - 11 - 30 * draw} V${hubY - 60 - 30 * draw} M${NEEDLE_X - 9},${hubY - 60 - 30 * draw} H${NEEDLE_X + 9}`} stroke="#cbd5e1" strokeWidth={2.4} strokeLinecap="round" />
+          <circle cx={needleTip[0]} cy={needleTip[1]} r={4} fill="#8ecae6" opacity={0.8 * draw} />
+        </g>
       </Part>
 
       {/* Biloxka korionikoen biopsia: catheter from the vagina, through the cervix, to the villi */}
@@ -322,7 +389,7 @@ export function PrenatalTests({ t }: SceneProps) {
       </Part>
 
       {/* Labels */}
-      <Label id="ekografia" x={200} y={100} ax={560} ay={102} show={probeA} />
+      <Label id="ekografia" x={200} y={100} ax={PROBE[0] - 12} ay={PROBE[1] - 30} show={probeA} />
       <Label id="alfa-fetoproteina" x={800} y={300} ax={858} ay={300} show={bloodA} />
       <Label id="amniozentesia" x={200} y={400} ax={needleTip[0]} ay={needleTip[1]} show={needleA} />
       <Label id="biloxka-korionikoen-biopsia" x={200} y={460} ax={cvsEnd[0]} ay={cvsEnd[1]} show={cvsA} />

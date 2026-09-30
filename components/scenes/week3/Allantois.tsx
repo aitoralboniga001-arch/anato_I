@@ -16,6 +16,9 @@ import { Cells } from '@/components/scenes/section/Section';
  * Sagittal: see AllantoisSagittal.
  */
 const D = { cx: 500, cy: 330 };
+/** Streak half-width at its caudal end; dorso-ventral legend corner. */
+const SW = 6;
+const LEG: Pt = [790, 120];
 
 function discShape(t: number) {
   const g = seg(t, 0.36, 0.68);
@@ -35,6 +38,7 @@ function DorsalDrawing({ t }: SceneProps) {
   const streakY0 = D.cy + ryBot - 16;
   const streakY1 = streakY0 - streakLen;
   const cloaca = seg(t, 0.72, 0.8);
+  const rxW = Math.max(rxTop, rxBot);
 
   return (
     <g>
@@ -47,18 +51,20 @@ function DorsalDrawing({ t }: SceneProps) {
       </Part>
 
       <Part id="ildo-primitiboa" show={1}>
+        {/* A groove widening caudally, as in the gastrulation view (it shortens as it regresses). */}
         <path
-          d={`M${f1(D.cx - 5)},${f1(streakY0)} L${f1(D.cx + 5)},${f1(streakY0)} L${f1(D.cx + 2)},${f1(streakY1)} L${f1(D.cx - 2)},${f1(streakY1)}Z`}
+          d={`M${f1(D.cx - SW)},${f1(streakY0)} Q${f1(D.cx - SW * 1.3)},${f1((streakY0 + streakY1) / 2)} ${f1(D.cx - SW * 0.4)},${f1(streakY1 + 3)} L${f1(D.cx + SW * 0.4)},${f1(streakY1 + 3)} Q${f1(D.cx + SW * 1.3)},${f1((streakY0 + streakY1) / 2)} ${f1(D.cx + SW)},${f1(streakY0)} Q${f1(D.cx)},${f1(streakY0 + 6)} ${f1(D.cx - SW)},${f1(streakY0)}Z`}
           fill="#0c1730"
           stroke="#93a7d9"
-          strokeWidth={1}
+          strokeWidth={1.2}
         />
       </Part>
       <Part id="nodo-primitiboa" show={1}>
-        <ellipse cx={D.cx} cy={streakY1} rx={9} ry={7} fill="#0c1730" stroke="#dbe4ff" strokeWidth={1.2} />
+        <ellipse cx={D.cx} cy={streakY1} rx={11} ry={9} fill="#0c1730" stroke="#dbe4ff" strokeWidth={1.4} />
+        <ellipse cx={D.cx} cy={streakY1} rx={4} ry={3.4} fill="#02040a" />
       </Part>
       <Part id="kloaka-mintza" show={cloaca}>
-        <ellipse cx={D.cx} cy={streakY0 + 12} rx={13} ry={8} fill="#dfe6f7" opacity={0.85} />
+        <ellipse cx={D.cx} cy={streakY0 + 8} rx={14} ry={7} fill="rgba(223,230,247,0.5)" stroke="#dfe6f7" strokeWidth={1.4} />
       </Part>
 
       {/* Polarity is already fixed on this disc (kept visible throughout, not a new event at .65). */}
@@ -70,22 +76,22 @@ function DorsalDrawing({ t }: SceneProps) {
           ▼ Kaudala
         </text>
         {/* Dorso-ventral is out-of-plane for a top-down view: shown as a symbol + caption, not an in-plane arrow. */}
-        <text x={D.cx + rxTop + 46} y={D.cy - 5} textAnchor="middle" fontSize={13} fill="#fcd34d">
+        <text x={LEG[0]} y={LEG[1]} textAnchor="middle" fontSize={13} fill="#fcd34d">
           ⊙
         </text>
-        <Note x={D.cx + rxTop + 78} y={D.cy - 5} tone="accent" align="start" size={11}>
+        <Note x={LEG[0] + 16} y={LEG[1]} tone="accent" align="start" size={11}>
           Dortsala (irten)
         </Note>
-        <text x={D.cx + rxTop + 46} y={D.cy + 15} textAnchor="middle" fontSize={13} fill="#fcd34d">
+        <text x={LEG[0]} y={LEG[1] + 20} textAnchor="middle" fontSize={13} fill="#fcd34d">
           ⊗
         </text>
-        <Note x={D.cx + rxTop + 78} y={D.cy + 15} tone="accent" align="start" size={11}>
+        <Note x={LEG[0] + 16} y={LEG[1] + 20} tone="accent" align="start" size={11}>
           Bentrala (sartu)
         </Note>
-        <Note x={D.cx - 150} y={D.cy - 16} tone="accent" align="end" size={12}>
+        <Note x={D.cx - rxW - 16} y={D.cy - 4} tone="accent" align="end" size={12}>
           Ezkerra
         </Note>
-        <Note x={D.cx + 150} y={D.cy - 16} tone="accent" align="start" size={12}>
+        <Note x={D.cx + rxW + 16} y={D.cy - 4} tone="accent" align="start" size={12}>
           Eskuina
         </Note>
       </g>
@@ -104,7 +110,7 @@ function dorsalLabels(t: number) {
     <>
       {L('ildo-primitiboa', 190, 460, [D.cx, streakY0 - streakLen / 2])}
       {L('nodo-primitiboa', 810, 460, [D.cx, streakY0 - streakLen])}
-      {L('kloaka-mintza', 810, 500, [D.cx, streakY0 + 12], cloaca)}
+      {L('kloaka-mintza', 810, 500, [D.cx, streakY0 + 8], cloaca)}
     </>
   );
 }

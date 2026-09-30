@@ -1,7 +1,7 @@
 'use client';
 
 import { Label, Note, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
-import { AgeHud, SKIN, SkinDefs, limbGeom, ramp, type LimbGeom } from './skin';
+import { AgeHud, PlateMask, SKIN, SkinDefs, limbGeom, ramp, type LimbGeom } from './skin';
 
 /**
  * Stage `gorputz-adarrak` — upper and lower limb side by side on the same day, so the 1–2 day
@@ -57,20 +57,25 @@ function Panel({ g, root, id, plateId, day, lag }: { g: LimbGeom; root: Pt; id: 
           <path d={g.hand} fill="rgba(255,255,255,0.001)" />
         </Part>
       )}
-      {g.rayA > 0.02 && (
-        <Part id="hatzetako-izpiak" show={g.rayA}>
-          {g.rays.map(([a, b], i) => (
-            <path key={i} d={`M${a[0]},${a[1]} L${b[0]},${b[1]}`} stroke={SKIN.light} strokeWidth={rw} strokeLinecap="round" opacity={0.55} />
-          ))}
-        </Part>
-      )}
-      {g.grooveA > 0.02 && (
-        <Part id="izpiarteko-ildoak" show={g.grooveA}>
-          {g.grooves.map(([a, b], i) => (
-            <path key={i} d={`M${a[0]},${a[1]} L${b[0]},${b[1]}`} stroke={SKIN.line} strokeWidth={2.4} strokeLinecap="round" />
-          ))}
-        </Part>
-      )}
+      <defs>
+        <PlateMask id={`${id}-marks`} g={g} inset={rw / 2 + 3} />
+      </defs>
+      <g mask={`url(#${id}-marks)`}>
+        {g.rayA > 0.02 && (
+          <Part id="hatzetako-izpiak" show={g.rayA}>
+            {g.rays.map(([a, b], i) => (
+              <path key={i} d={`M${a[0]},${a[1]} L${b[0]},${b[1]}`} stroke={SKIN.light} strokeWidth={rw} strokeLinecap="round" opacity={0.55} />
+            ))}
+          </Part>
+        )}
+        {g.grooveA > 0.02 && (
+          <Part id="izpiarteko-ildoak" show={g.grooveA}>
+            {g.grooves.map(([a, b], i) => (
+              <path key={i} d={`M${a[0]},${a[1]} L${b[0]},${b[1]}`} stroke={SKIN.line} strokeWidth={2.4} strokeLinecap="round" />
+            ))}
+          </Part>
+        )}
+      </g>
     </g>
   );
 }

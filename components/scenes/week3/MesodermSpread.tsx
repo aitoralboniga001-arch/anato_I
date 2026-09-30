@@ -19,6 +19,8 @@ const STREAK: [Pt, Pt] = [[D.cx, D.cy + 10], [D.cx, D.cy + D.ry - 42]];
 const CRANIAL: Pt = [D.cx, D.cy - D.ry + 14];
 const CAUDAL: Pt = [D.cx, D.cy + D.ry - 14];
 const MEMBR_R = 17;
+const STREAK_W = 8;
+const STREAK_D = `M${f1(D.cx - STREAK_W)},${f1(STREAK[1][1])} Q${f1(D.cx - STREAK_W * 1.3)},${f1((STREAK[0][1] + STREAK[1][1]) / 2)} ${f1(D.cx - STREAK_W * 0.4)},${f1(STREAK[0][1] + 4)} L${f1(D.cx + STREAK_W * 0.4)},${f1(STREAK[0][1] + 4)} Q${f1(D.cx + STREAK_W * 1.3)},${f1((STREAK[0][1] + STREAK[1][1]) / 2)} ${f1(D.cx + STREAK_W)},${f1(STREAK[1][1])} Q${f1(D.cx)},${f1(STREAK[1][1] + 7)} ${f1(D.cx - STREAK_W)},${f1(STREAK[1][1])}Z`;
 
 function dorsalWindows(t: number) {
   return {
@@ -43,7 +45,8 @@ function DorsalDrawing({ t }: SceneProps) {
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
 
       <Part id="enbrioi-kanpoko-mesodermoa" show={exMeso}>
-        <path d={discOutlinePath(D.cx, D.cy, D.rx + 22, D.rx + 22, D.ry + 22, D.ry + 22)} fill={W3C.mesoExtra} opacity={0.35} />
+        <path d={discOutlinePath(D.cx, D.cy, D.rx + 22, D.rx + 22, D.ry + 22, D.ry + 22)} fill={W3C.mesoExtra} opacity={0.3} />
+        <path d={discOutlinePath(D.cx, D.cy, D.rx + 22, D.rx + 22, D.ry + 22, D.ry + 22)} fill="url(#p-meso-extra)" opacity={0.45} stroke="#c97a52" strokeOpacity={0.7} strokeWidth={1} />
       </Part>
 
       <path d={outline} fill="#1a2540" />
@@ -63,18 +66,19 @@ function DorsalDrawing({ t }: SceneProps) {
         <g clipPath="url(#w3-disc-clip)">
           <Part id="mesodermo-intraenbrionarioa">
             <rect x={D.cx - D.rx - 10} y={D.cy - D.ry - 10} width={2 * D.rx + 20} height={2 * D.ry + 20} fill="url(#w3-meso-intra-dorsal)" />
-            <circle cx={CRANIAL[0]} cy={CRANIAL[1]} r={MEMBR_R} fill="#0f0f11" opacity={bucco} />
-            <circle cx={CAUDAL[0]} cy={CAUDAL[1]} r={MEMBR_R} fill="#0f0f11" opacity={cloaca} />
+            <ellipse cx={CRANIAL[0]} cy={CRANIAL[1]} rx={MEMBR_R + 4} ry={MEMBR_R - 1} fill="#1a2540" opacity={bucco} />
+            <ellipse cx={CAUDAL[0]} cy={CAUDAL[1]} rx={MEMBR_R + 4} ry={MEMBR_R - 1} fill="#1a2540" opacity={cloaca} />
           </Part>
         </g>
       </g>
 
-      {/* Primitive streak and node (in the ectoderm, so on top in a dorsal view) */}
+      {/* Primitive streak (a groove, widening caudally) and node with its pit, drawn as in the gastrulation view. */}
       <Part id="ildo-primitiboa">
-        <path d={`M${STREAK[0][0]},${STREAK[0][1]} L${STREAK[1][0]},${STREAK[1][1]}`} stroke="#0b1020" strokeWidth={7} strokeLinecap="round" />
+        <path d={STREAK_D} fill="#0c1730" stroke="#93a7d9" strokeWidth={1.2} opacity={0.96} />
       </Part>
       <Part id="nodo-primitiboa">
-        <circle cx={STREAK[0][0]} cy={STREAK[0][1] - 4} r={9} fill="#0b1020" stroke="rgba(232,238,252,0.6)" strokeWidth={1.2} />
+        <ellipse cx={STREAK[0][0]} cy={STREAK[0][1] - 4} rx={13} ry={11} fill="#0c1730" stroke="#dbe4ff" strokeWidth={1.4} />
+        <ellipse cx={STREAK[0][0]} cy={STREAK[0][1] - 4} rx={5} ry={4} fill="#02040a" />
       </Part>
       {[
         [STREAK[0][0], STREAK[0][1] + 20, STREAK[0][0], STREAK[0][1] - 90],
@@ -85,14 +89,14 @@ function DorsalDrawing({ t }: SceneProps) {
       ))}
 
       <Part id="mintz-bukofaringeoa" show={bucco}>
-        <circle cx={CRANIAL[0]} cy={CRANIAL[1]} r={MEMBR_R - 3} fill="#dfe6f7" opacity={0.85} />
+        <ellipse cx={CRANIAL[0]} cy={CRANIAL[1]} rx={MEMBR_R + 1} ry={MEMBR_R - 4} fill="rgba(223,230,247,0.5)" stroke="#dfe6f7" strokeWidth={1.4} />
       </Part>
       <Part id="kloaka-mintza" show={cloaca}>
-        <circle cx={CAUDAL[0]} cy={CAUDAL[1]} r={MEMBR_R - 3} fill="#dfe6f7" opacity={0.85} />
+        <ellipse cx={CAUDAL[0]} cy={CAUDAL[1]} rx={MEMBR_R + 1} ry={MEMBR_R - 4} fill="rgba(223,230,247,0.5)" stroke="#dfe6f7" strokeWidth={1.4} />
       </Part>
 
       <Part id="plaka-prekordala" show={prechordal}>
-        <ellipse cx={CRANIAL[0]} cy={CRANIAL[1] + MEMBR_R + 14} rx={20} ry={12} fill={W3C.prechordal} opacity={0.92} />
+        <ellipse cx={CRANIAL[0]} cy={CRANIAL[1] + MEMBR_R + 14} rx={20} ry={12} fill={W3C.prechordal} opacity={0.92} stroke="rgba(255,255,255,0.45)" strokeWidth={1} />
       </Part>
 
       <path d={outline} fill="none" stroke="rgba(232,238,252,0.3)" strokeWidth={1.4} />

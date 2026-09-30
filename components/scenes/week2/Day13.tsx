@@ -37,7 +37,6 @@ const RC_MAX = 198;
 const EDGE_H = (Math.asin(-HYPO_BOTTOM / INNER) * 180) / Math.PI;
 const AMNION_L = 180 + EDGE_H;
 const AMNION_R = 360 - EDGE_H;
-const CYST = '#f2c14e';
 const YOLK_WALL = '#f7d98a';
 
 function fingers(a: number) {
@@ -145,9 +144,20 @@ function Day13Drawing({ t }: SceneProps) {
         <path d={yolkPath(rYSec, wYSec)} fill="url(#g-cavity)" />
       </Part>
       <Part id="kiste-exozelomikoak" show={cysts}>
+        {/* Small vesicles pinched off the old yolk sac: same wall and content, each its own size; they swell as they appear. */}
         {CYST_A.map((a, i) => {
           const [x, y] = cystAt(g, i, secondary);
-          return <ellipse key={i} cx={f1(x)} cy={f1(y)} rx={7} ry={5.4} fill={CYST} opacity={0.55} stroke="#c99a2e" strokeWidth={0.8} />;
+          const k = lerp(0.45, 1, cysts);
+          const rx = (6.5 + 2.5 * Math.sin(i * 1.7 + 0.4)) * k;
+          const ry = rx * (0.72 + 0.1 * Math.cos(i * 2.3));
+          const tr = `rotate(${f1(a + 90)} ${f1(x)} ${f1(y)})`;
+          return (
+            <g key={i} transform={tr}>
+              <ellipse cx={f1(x)} cy={f1(y)} rx={f1(rx)} ry={f1(ry)} fill={C.yolkCavity} stroke={YOLK_WALL} strokeWidth={1.4} strokeOpacity={0.7} />
+              <ellipse cx={f1(x)} cy={f1(y)} rx={f1(rx)} ry={f1(ry)} fill="rgba(242,193,78,0.5)" />
+              <ellipse cx={f1(x)} cy={f1(y)} rx={f1(rx)} ry={f1(ry)} fill="url(#g-cavity)" />
+            </g>
+          );
         })}
       </Part>
 

@@ -206,13 +206,21 @@ function tubeNodes(t: number): Node[] {
 /** The day-28 embryo seen through: the outline of the topic-5 (Langman) figure, no parts. */
 export function Embryo28Outline() {
   const g = G28;
+  const body = smoothPath([...g.spine, ...[...g.inner].reverse().slice(1)], true, 0.5);
+  const lobes = [g.hind, g.cran, g.face, g.heart].map((e, i) => (
+    <ellipse key={i} cx={e[0]} cy={e[1]} rx={e[2]} ry={e[3]} transform={`rotate(${e[4]} ${e[0]} ${e[1]})`} />
+  ));
+  // One silhouette (body ∪ head, face and heart prominences): every outline first at double width,
+  // then every fill on top, so only the union's outline shows instead of overlapping circles.
   return (
     <g pointerEvents="none">
-      <g fill="rgba(229,134,108,0.16)" stroke="rgba(229,134,108,0.55)" strokeWidth={1.4}>
-        <path d={smoothPath([...g.spine, ...[...g.inner].reverse().slice(1)], true, 0.5)} />
-        {[g.hind, g.cran, g.face, g.heart].map((e, i) => (
-          <ellipse key={i} cx={e[0]} cy={e[1]} rx={e[2]} ry={e[3]} transform={`rotate(${e[4]} ${e[0]} ${e[1]})`} />
-        ))}
+      <g fill="none" stroke="#855043" strokeWidth={2.8}>
+        <path d={body} />
+        {lobes}
+      </g>
+      <g fill="#32231f">
+        <path d={body} />
+        {lobes}
       </g>
       {g.bars.map((b, i) => (
         <line key={i} x1={b.top[0]} y1={b.top[1]} x2={b.bot[0]} y2={b.bot[1]} stroke="rgba(229,134,108,0.4)" strokeWidth={b.w * 0.7} strokeLinecap="round" />
