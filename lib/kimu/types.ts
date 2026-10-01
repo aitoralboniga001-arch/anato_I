@@ -15,6 +15,10 @@ export interface KimuTarget {
   at: number;
   /** Structure to select on arrival. */
   structure?: string;
+  /** Only a reviewed formation id can start a bounded movie. */
+  formation?: string;
+  view?: string;
+  action?: 'formation' | 'explanation';
   /** What the button says. */
   label: string;
   /** Where it is: "3. gaia · 16–18. egunak". */

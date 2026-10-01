@@ -1,4 +1,4 @@
-import { CONFIDENT, SAMPLE_TOPICS, blurbOf, toTarget, type Hit } from './search';
+import { CONFIDENT, SAMPLE_TOPICS, blurbOf, isFormationQuestion, toTarget, type Hit } from './search';
 import { structures } from '@/content/registry';
 import type { Lang } from './text';
 import type { KimuReply } from './types';
@@ -49,6 +49,14 @@ export function offlineReply(hits: Hit[], lang: Lang, tired: boolean, question =
     return { reply: c.lost, targets: [], followups: sampleQuestions(lang), mood: 'curious', source: 'offline' };
   }
   const targets = hits.slice(0, 2).map((h, i) => toTarget(h, `c${i + 1}`));
-  const text = c.found(best.doc.label, best.doc.where, blurbOf(best));
+  const missing = isFormationQuestion(question) && !best.doc.formation ? {
+    eu: 'Eraketa ez dago animazio berrikusi batean jasota; azalpena erakutsiko dizut.',
+    es: 'No hay una animación de formación revisada para este destino; te llevo a la explicación.',
+    en: 'There is no reviewed formation animation for this destination; I can take you to the explanation.',
+  }[lang] : '';
+  const st = best.doc.structure ? structures.get(best.doc.structure) : undefined;
+  const detail = /de d[oó]nde viene|origen|nondik|jatorri|origin/i.test(question) && st?.origin ? st.origin
+    : /qu[eé] origina|qu[eé] (?:da|dar[aá])|erator|what does it (?:become|give)|fate/i.test(question) && st?.fate ? st.fate : blurbOf(best);
+  const text = `${c.found(best.doc.label, best.doc.where, detail)}${missing ? ` ${missing}` : ''}`;
   return { reply: tired ? `${c.tired} ${text}` : text, targets, followups: [], mood: 'happy', source: 'offline' };
 }

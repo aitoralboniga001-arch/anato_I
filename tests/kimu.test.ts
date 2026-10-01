@@ -5,6 +5,12 @@ import { buildMessages } from '@/lib/kimu/prompt';
 import { CONFIDENT, search, toTarget } from '@/lib/kimu/search';
 import { detectLang, fold } from '@/lib/kimu/text';
 import type { KimuAsk, KimuModelReply } from '@/lib/kimu/types';
+import { FORMATIONS, formationFrame, formationOf } from '@/content/formation';
+import { getWeek } from '@/content/registry';
+import { expandNotes, sentence } from '@/content/notes-text';
+import { askKimu, retrievalQuestion } from '@/lib/kimu/engine';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 const first = (q: string) => search(q, 4)[0];
 
@@ -30,9 +36,9 @@ describe('Kimu search: finds where the simulator explains something', () => {
     expect(hits[0].score).toBeGreaterThan(CONFIDENT);
   });
 
-  it('plays the notochord from the start of its own stage', () => {
+  it('plays the reviewed notochord formation, rather than guessing the stage start', () => {
     const h = first('cuándo se forma la notocorda');
-    expect(h.doc).toMatchObject({ kind: 'structure', week: 3, stage: 'notokorda', at: 0, structure: 'notokorda' });
+    expect(toTarget(h, 'c1')).toMatchObject({ kind: 'structure', week: 3, stage: 'notokorda', at: .59, structure: 'notokorda', formation: 'notokorda', view: 'zelulak' });
   });
 
   it('finds nothing for chit-chat, so Kimu does not point at random places', () => {
@@ -48,6 +54,81 @@ describe('Kimu search: finds where the simulator explains something', () => {
         expect(h.doc.where).toMatch(/^\d\. gaia/);
       }
     }
+  });
+});
+
+describe('Reviewed formation destinations', () => {
+  it.each([
+    ['heuserren mintza', 'heuser-mintza', 2, 'eguna-9', 'heuser'],
+    ['desidua erreakzioa', 'desidua-erreakzioa', 2, 'eguna-11-12', 'desidua'],
+    ['somatopleura', 'paretako-orria', 4, 'mesodermoa-banatzen', 'zeharkakoa'],
+    ['somatopleura kanpokoa', 'somatopleura-kanpokoa', 2, 'eguna-11-12', 'mesodermoa'],
+  ])('%s goes to its explanation in the correct view', (q, structure, week, stage, view) => {
+    expect(toTarget(first(q), 'c1')).toMatchObject({ structure, week, stage, view });
+  });
+  it.each(FORMATIONS.map(f => [f.structure, f] as const))('%s has a real view, narrative focus and original passage', (id, f) => {
+    expect(formationOf(id)).toEqual(f);
+    const stage = getWeek(f.week)!.stages.find(s => s.id === f.stage)!;
+    expect(stage.beats[f.beat].focus).toContain(id);
+    expect(f.start).toBeGreaterThanOrEqual(0);
+    expect(f.end).toBeGreaterThan(f.start);
+    expect(f.end).toBeLessThanOrEqual(1);
+    const refs = expandNotes(stage.beats[f.beat].notes);
+    expect(refs.length).toBeGreaterThan(0);
+    expect(refs.every(id => !!sentence(id))).toBe(true);
+    const scene = stage.views.find(v => v.id === f.view)!.scene;
+    const drawing = renderToStaticMarkup(createElement('svg', null, createElement(scene, { t: f.end, reduced: true })));
+    expect(drawing.includes(`data-part="${id}"`) || drawing.includes(`data-label="${id}"`)).toBe(true);
+    for (const part of f.highlight ?? [id]) {
+      expect(drawing.includes(`data-part="${part}"`) || drawing.includes(`data-label="${part}"`)).toBe(true);
+    }
+    expect(formationFrame(f, f.start, 10_000, 2)).toBe(f.end);
+    expect(formationFrame(f, f.end, 1, 1)).toBe(f.end);
+  });
+
+  it('only labels reviewed clips as formations; a location question lands on the completed structure', () => {
+    expect(first('¿Cómo se forma el tubo neural?').doc.formation).toBe('hodi-neurala');
+    expect(first('Non dago notokorda?').doc).toMatchObject({ at: formationOf('notokorda')!.end, action: 'explanation' });
+    expect(first('¿Cómo se forma el endometrio?').doc.formation).toBeUndefined();
+    expect(first('¿Cómo se forma el endometrio?').doc.facts).toContain('Do not promise');
+    expect(formationOf('unknown')).toBeUndefined();
+    expect(new Set(FORMATIONS.map(f => f.structure)).size).toBe(FORMATIONS.length);
+  });
+
+  it('keeps short clips readable and cannot overshoot, even at higher playback speeds', () => {
+    const f = formationOf('gandor-neurala')!;
+    expect(formationFrame(f, f.start, 1, 1)).toBeLessThan(f.end);
+    expect(formationFrame(f, f.start, 4, 1)).toBeLessThan(f.end);
+    expect(formationFrame(f, f.start, 0, 1)).toBe(f.start);
+  });
+});
+
+describe('Kimu contextual retrieval', () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const history = [{ role: 'user' as const, text: '¿Cómo se forma la notocorda?' }, { role: 'kimu' as const, text: 'Notokorda…' }];
+  it('retrieves the previous structure for an unnamed follow-up', () => {
+    const q = retrievalQuestion('¿Y de dónde viene?', history, null);
+    expect(q).toContain('Notocorda');
+    expect(first(q).doc.structure).toBe('notokorda');
+    expect(retrievalQuestion('Nondik dator?', history, null)).toContain('Notocorda');
+  });
+  it('uses the currently highlighted structure for this, while respecting an explicitly named topic', () => {
+    const here = { week: 4, stage: 'neurulazioa', beat: 3, structure: 'hodi-neurala' };
+    expect(first(retrievalQuestion('¿Qué es esto?', history, here)).doc.structure).toBe('hodi-neurala');
+    expect(retrievalQuestion('¿Y cómo se forma la notocorda?', history, here)).toBe('¿Y cómo se forma la notocorda?');
+  });
+  it('keeps the reviewed formation as primary even if the model cites a different passage', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ ok: true, reply: 'Hara!', go: ['c2', 'c9'], followups: [], mood: 'happy' })));
+    const result = await askKimu('¿Cómo se forma la notocorda?', [], null);
+    expect(result.targets[0]).toMatchObject({ id: 'c1', formation: 'notokorda', at: .59 });
+    expect(result.targets.some(t => t.id === 'c9')).toBe(false);
+  });
+  it('uses contextual evidence and the same destinations without a model', async () => {
+    const request = vi.fn(async (_url: string, _init: RequestInit) => Response.json({ ok: false, reason: 'nokey' }));
+    vi.stubGlobal('fetch', request);
+    const result = await askKimu('¿Y de dónde viene?', history, null);
+    expect(result.targets[0].structure).toBe('notokorda');
+    expect(JSON.parse(request.mock.calls[0][1].body as string).notes[0]).toContain('Jatorria');
   });
 });
 

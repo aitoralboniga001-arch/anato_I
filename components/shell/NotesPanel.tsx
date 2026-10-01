@@ -135,11 +135,14 @@ interface Props {
   activeBeat: number;
   /** 0..1 progress through the active step (which of its sentences is being read). */
   progress: number;
+  /** Kimu keeps the reviewed formation passage visible while precursor steps play. */
+  sourceBeat?: number;
   onGoto: (anchor: NotesAnchor) => void;
   onDismiss: () => void;
 }
 
-export function NotesPanel({ week, stage, activeBeat, progress, onGoto, onDismiss }: Props) {
+export function NotesPanel({ week, stage, activeBeat: playbackBeat, progress, sourceBeat, onGoto, onDismiss }: Props) {
+  const activeBeat = sourceBeat ?? playbackBeat;
   const blocks = notesOf(week);
   const scroller = useRef<HTMLDivElement>(null);
   const frame = useRef<number | null>(null);
@@ -169,7 +172,7 @@ export function NotesPanel({ week, stage, activeBeat, progress, onGoto, onDismis
   // Sentences are lit in reading order as the step plays, never behind the one the reader picked.
   const current = (() => {
     if (!activeIds.length) return undefined;
-    const played = Math.min(activeIds.length - 1, Math.floor(Math.max(0, Math.min(0.999, progress)) * activeIds.length));
+    const played = sourceBeat !== undefined ? 0 : Math.min(activeIds.length - 1, Math.floor(Math.max(0, Math.min(0.999, progress)) * activeIds.length));
     const from = picked && picked.stageId === stage.id && picked.beat === activeBeat ? activeIds.indexOf(picked.id) : -1;
     return activeIds[Math.max(played, from)];
   })();

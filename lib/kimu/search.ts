@@ -8,6 +8,7 @@
 import { lifeOf, dayLabel, firstSeenOf, spanLabel } from '@/content/chronology';
 import { firstSentence } from '@/content/generate';
 import { structures, weeks } from '@/content/registry';
+import { formationOf } from '@/content/formation';
 import type { KimuTarget } from './types';
 import { dice, queryTokens, tokens } from './text';
 
@@ -33,6 +34,9 @@ interface Doc {
   blurb: string;
   /** What the model gets to read (built once, short). */
   facts: string;
+  view?: string;
+  formation?: string;
+  action?: KimuTarget['action'];
 }
 
 export interface Hit {
@@ -49,6 +53,8 @@ const oneLine = (s: string) => s.replace(/\s+/g, ' ').trim();
  * ("Notokordaren eraketa", "Somitomeroak eta somiten agerpena"), otherwise the step that first shows it.
  */
 function bestSpot(id: string, first: NonNullable<ReturnType<typeof firstSeenOf>>) {
+  const reviewed = formationOf(id);
+  if (reviewed) return { week: reviewed.week, stage: reviewed.stage, at: reviewed.end };
   const st = structures.get(id);
   const fallback = { week: first.week, stage: first.stage, at: Math.max(0, first.at) };
   if (!st) return fallback;
@@ -135,6 +141,7 @@ function build(): { docs: Doc[]; idf: Map<string, number> } {
       stage: spot.stage,
       at: spot.at,
       structure: st.id,
+      view: formationOf(st.id)?.view,
       label: st.name,
       where: stageWhere(spot.week, stage.day),
       names,
@@ -174,7 +181,8 @@ function match(q: string, w: string, fuzzy: boolean): number {
   return 0;
 }
 
-const FORMATION = /(noiz|nola|sort|erak|forma|cuando|cuándo|como|cómo|origen|when|how|aparec|surge|empie|hasi)/i;
+const FORMATION = /(noiz|nola|sort|erak|forma|cuando|cuándo|como|cómo|when|how|aparec|surge|empie|hasi)/i;
+export const isFormationQuestion = (question: string) => FORMATION.test(question);
 
 /** Ranks where the simulator explains what the student asked about, best first. */
 export function search(question: string, limit = 4): Hit[] {
@@ -182,7 +190,7 @@ export function search(question: string, limit = 4): Hit[] {
   const q = queryTokens(question);
   if (!q.length) return [];
   const qFlat = q.map((alts) => alts[0]).join(' ');
-  const wantsFormation = FORMATION.test(question);
+  const wantsFormation = isFormationQuestion(question);
 
   const scored: Hit[] = [];
   for (const doc of docs) {
@@ -207,7 +215,15 @@ export function search(question: string, limit = 4): Hit[] {
     for (const p of doc.phrases) if (p && qFlat.includes(p)) score += 6;
     if (doc.kind === 'structure') score *= wantsFormation ? 1.3 : 1.15;
     else if (doc.kind === 'stage') score *= 0.95;
-    scored.push({ doc, score });
+    const f = doc.kind === 'structure' ? formationOf(doc.structure) : undefined;
+    const destination = wantsFormation && f ? {
+      ...doc, at: f.start, formation: f.structure, action: 'formation' as const,
+      facts: `${doc.facts} SIMULATOR: reviewed formation animation, ${f.beat + 1}. urratsa, ${f.view}; pauses at the end.`,
+    } : {
+      ...doc, action: 'explanation' as const,
+      facts: `${doc.facts} SIMULATOR: explanation only; no reviewed formation animation for this destination. Do not promise to show it forming.`,
+    };
+    scored.push({ doc: destination, score });
   }
   scored.sort((a, b) => b.score - a.score);
 
@@ -237,6 +253,9 @@ export const toTarget = (h: Hit, id: string): KimuTarget => ({
   stage: h.doc.stage,
   at: h.doc.at,
   structure: h.doc.structure,
+  formation: h.doc.formation,
+  view: h.doc.view,
+  action: h.doc.action,
   label: h.doc.label,
   where: h.doc.where,
 });

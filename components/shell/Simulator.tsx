@@ -33,6 +33,8 @@ import { recordAnswer } from './answers';
 import { imageId } from '@/content/pool';
 import { sectionLabel, sectionOf } from '@/content/notes';
 import { examDatesAt } from '@/content/examDates';
+import { formationFrame, formationOf, type Formation } from '@/content/formation';
+import type { KimuTarget } from '@/lib/kimu/types';
 
 interface Pos {
   i: number;
@@ -216,12 +218,15 @@ function readDeepLink(week: WeekDef) {
   const eg = params.get('egitura');
   const une = Number(params.get('une'));
   const idx = sid ? week.stages.findIndex((s) => s.id === sid) : -1;
+  const reviewed = formationOf(params.get('eraketa'));
+  const formation = reviewed?.week === week.week && reviewed.stage === sid ? reviewed : undefined;
   return {
     stageIndex: idx >= 0 ? idx : null,
-    viewId: idx >= 0 ? vid : null,
-    structure: eg && structures.has(eg) ? eg : null,
-    t: idx >= 0 && une > 0 && une <= 1 ? une : 0,
-    play: idx >= 0 && params.get('jolastu') === '1',
+    viewId: formation?.view ?? (idx >= 0 ? vid : null),
+    structure: !formation && eg && structures.has(eg) ? eg : null,
+    t: formation?.start ?? (idx >= 0 && une > 0 && une <= 1 ? une : 0),
+    play: !!formation || (idx >= 0 && params.get('jolastu') === '1'),
+    formation,
     find: idx >= 0 && structures.has(params.get('aurkitu') ?? '') ? params.get('aurkitu') : null,
   };
 }
@@ -302,6 +307,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   // Exam-style image: the find quiz in black and white, like the printed exam figures.
   const [print, setPrint] = useState(false);
   const [back, setBack] = useState<Back | null>(null);
+  const [formation, setFormation] = useState<Formation | null>(null);
   const [helpOpen, setHelpOpen, firstVisit] = useHelpOnce();
   const [nowOpen, setNowOpen] = useState(false);
   const guidedPref = usePref('guided');
@@ -358,6 +364,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   if (mounted && linkedWeek !== week.week && (urlHere || urlWaits >= 3)) {
     setLinkedWeek(week.week);
     const link = readDeepLink(week);
+    setFormation(link.formation ?? null);
+    if (link.formation) setSelected(null);
     if (link.stageIndex !== null) {
       setPos({ i: link.stageIndex, t: link.t });
       const sid = week.stages[link.stageIndex].id;
@@ -398,12 +406,13 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   /** The view-change card (see ViewBridge), set when the simulation itself moves to another view. */
   const [bridge, setBridge] = useState<{ from: ViewSnap; to: ViewSnap } | null>(null);
   const chooseView = (id: string) => {
+    if (formation) { setFormation(null); setPlaying(false); }
     setPickedView(`${week.week}/${stage.id}/${id}`);
     setManualView((m) => ({ ...m, [stage.id]: true }));
     setViewByStage((m) => ({ ...m, [stage.id]: id }));
   };
   // Guided mode asks the step's micro-question once its animation is done, before moving on.
-  const askNow = guided && playing && waiting && intro === null && !tour && !!beat?.ask && !asked.includes(askKey);
+  const askNow = !formation && guided && playing && waiting && intro === null && !tour && !!beat?.ask && !asked.includes(askKey);
 
   // Cross-fade: when the scene changes (stage or view), the previous one fades out over the new one.
   const sceneKey = `${week.week}/${stage.id}/${view.id}`;
@@ -438,14 +447,23 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const GhostScene = ghost && ghostStage ? (ghostStage.views.find((v) => v.id === ghost.view) ?? ghostStage.views[0]).scene : null;
 
   useEffect(() => {
-    if (linkedWeek !== week.week) return;
+    if (!formation) return;
+    setPref('notes', true);
+    setPref('panel', true);
+    const raf = requestAnimationFrame(() => setPanelOpen(!window.matchMedia('(max-width: 1320px)').matches));
+    return () => cancelAnimationFrame(raf);
+  }, [formation]);
+  const notesLinked = useRef<number | null>(null);
+  useEffect(() => {
+    if (linkedWeek !== week.week || notesLinked.current === week.week) return;
+    notesLinked.current = week.week;
     const linked = new URLSearchParams(window.location.search).get('apunteak') === '1';
     if (linked) { setPref('notes', true); setPref('panel', true); }
-    if (linked || getPref('notes')) {
+    if (!formation && (linked || getPref('notes'))) {
       const raf = requestAnimationFrame(() => setPanelOpen(true));
       return () => cancelAnimationFrame(raf);
     }
-  }, [linkedWeek, week.week]);
+  }, [linkedWeek, week.week, formation]);
   useEffect(() => {
     if (linkedWeek !== week.week) return;
     const url = new URL(window.location.href);
@@ -453,7 +471,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     url.searchParams.set('ikuspegia', view.id);
     if (getPref('notes')) url.searchParams.set('apunteak', '1');
     else url.searchParams.delete('apunteak');
-    for (const k of ['egitura', 'une', 'jolastu']) url.searchParams.delete(k);
+    for (const k of ['egitura', 'une', 'jolastu', 'eraketa']) url.searchParams.delete(k);
     window.history.replaceState(null, '', url);
     markVisited(week.week, stage.id);
   }, [linkedWeek, week.week, stage.id, view.id]);
@@ -491,6 +509,18 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       raf = requestAnimationFrame(step);
+
+      // Kimu's reviewed clip owns its range; it cannot enter a tour, a reading hold or another stage.
+      if (formation) {
+        const p = live.current;
+        const st = week.stages[p.i];
+        if (formation.week !== week.week || formation.stage !== st.id) { setPlaying(false); return; }
+        const t = formationFrame(formation, p.t, dt, speed);
+        live.current = { i: p.i, t };
+        setPos(live.current);
+        if (t >= formation.end) setPlaying(false);
+        return;
+      }
 
       // 1) Quick overview of the whole stage; the card then stays until it has been read
       //    (in guided mode, until the viewer presses "Hasi").
@@ -626,7 +656,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [playing, speed, autoContinue, week, guided, quick, voice]);
+  }, [playing, speed, autoContinue, week, guided, quick, voice, formation]);
 
   // Auto-stop at the end of the stage (or of the week, when auto-continuing).
   if (playing && intro === null && pos.t >= 1 && (!autoContinue || pos.i === week.stages.length - 1)) setPlaying(false);
@@ -672,6 +702,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   // Plain functions: nothing downstream depends on their identity (no memo'd children), and the
   // React Compiler lint can't preserve manual useCallback here, so memoization is left to it.
   const place = (next: Pos) => {
+    if (formation) { setFormation(null); setPlaying(false); }
     stopGlide();
     live.current = next;
     setPos(next);
@@ -693,7 +724,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     setTour(null);
   };
   const startIntro = () => {
-    if (quick) return;
+    if (quick || formation) return;
     introRef.current = 0;
     introClock.current = 0;
     clearTour();
@@ -739,6 +770,12 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     else if (getPref('fsAsk')) setFsOffer(true);
   };
   const togglePlay = () => {
+    if (formation) {
+      if (pos.t >= formation.end) place({ ...pos, t: formation.start });
+      setFormation(formation);
+      setPlaying(!playing);
+      return;
+    }
     stopGlide();
     if (playing) setFsOffer(false);
     else if (intro === null && (pos.t <= 0.001 || pos.t >= 1)) offerFull();
@@ -893,21 +930,54 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     router.push(`/astea/${w}?${q.toString()}`);
   };
 
-  // Kimu (the assistant) jumps here through the same time machine, and reads where the student is.
-  const kimuGo = useEffectEvent((t: { week: number; stage: string; at: number; structure?: string }) => {
+  // The model supplies only a search hit; formation timing is looked up again in reviewed content.
+  const kimuGo = useEffectEvent((t: KimuTarget) => {
+    const destination = getWeek(t.week)?.stages.find(s => s.id === t.stage);
+    if (!destination) return;
+    const reviewed = formationOf(t.formation);
+    const f = reviewed?.week === t.week && reviewed.stage === t.stage ? reviewed : undefined;
     setQuestionsOpen(false);
     setGlossaryOpen(false);
-    replay(t.week, t.stage, t.at, t.structure);
+    setFind(null);
+    setHovered(null);
+    setBridge(null);
+    hush();
+    speaking.current = false;
+    endIntro();
+    clearTour();
+    setPlaying(false);
+    const origin: Back = { week: week.week, stage: stage.id, t: pos.t, view: view.id, selected, title: stage.title };
+    if (t.week !== week.week) {
+      try { window.sessionStorage.setItem(BACK_KEY, JSON.stringify({ ...origin, to: `${t.week}/${t.stage}` })); } catch {}
+      const q = new URLSearchParams({ etapa: t.stage, une: String(f?.start ?? t.at) });
+      if (f) { q.set('eraketa', f.structure); q.set('apunteak', '1'); }
+      else if (t.structure) q.set('egitura', t.structure);
+      if (f?.view ?? t.view) q.set('ikuspegia', (f?.view ?? t.view)!);
+      router.push(`/astea/${t.week}?${q}`);
+      return;
+    }
+    setBack(origin);
+    place({ i: week.stages.indexOf(destination), t: f?.start ?? t.at });
+    const vid = f?.view ?? t.view;
+    if (vid && destination.views.some(v => v.id === vid)) {
+      setViewByStage(m => ({ ...m, [t.stage]: vid }));
+      setManualView(m => ({ ...m, [t.stage]: true }));
+    }
+    setSelected(f ? null : t.structure ?? null);
+    setFormation(f ?? null);
+    setPlaying(!!f);
   });
   useEffect(() => registerKimuHost({ go: (t) => kimuGo(t) }), []);
   useEffect(() => {
-    setKimuHere({ week: week.week, stage: stage.id, beat: activeBeat, structure: selected });
+    setKimuHere({ week: week.week, stage: stage.id, beat: activeBeat, structure: selected ?? formation?.structure });
     return () => setKimuHere(null);
-  }, [week.week, stage.id, activeBeat, selected]);
+  }, [week.week, stage.id, activeBeat, selected, formation]);
   const kimuOpen = useKimuOpen();
 
   const goBack = () => {
     if (!back) return;
+    setFormation(null);
+    setPlaying(false);
     setBack(null);
     try {
       window.sessionStorage.removeItem(BACK_KEY);
@@ -1020,6 +1090,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   };
 
   const startFind = (want?: string) => {
+    setFormation(null);
     setPlaying(false);
     setSelected(null);
     setFind({ target: want && presentIds().includes(want) ? want : nextTarget(null), ok: 0, tries: 0, message: null });
@@ -1121,6 +1192,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       answerFind(id);
       return;
     }
+    if (formation) setPlaying(false);
     pick(id);
     openPanel();
   };
@@ -1197,8 +1269,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const ctx: SceneContextValue = {
     selected: find || !selectedLit ? null : selected,
     hovered: find ? hovered : hovered,
-    focus: find || intro !== null ? [] : (beat?.focus ?? []),
-    dimContext: focusLit && !view.ownFocus && !find && intro === null,
+    focus: find || intro !== null ? [] : formation ? (formation.highlight ?? [formation.structure]) : (beat?.focus ?? []),
+    dimContext: !formation && focusLit && !view.ownFocus && !find && intro === null,
     spotlight: !find && intro === null && tour ? tour.items[tour.idx] : null,
     showLabels: showLabels && intro === null,
     quiz: !!find,
@@ -1211,7 +1283,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 
   // Rings for step structures drawn too small to notice: the tour's current one, else the selection, else the step's.
   const spot = !find && intro === null && tour ? tour.items[tour.idx] : null;
-  const marks = find || intro !== null ? [] : spot ? [spot] : selected && selectedLit ? [selected] : (beat?.focus ?? []);
+  const marks = find || intro !== null ? [] : formation ? [formation.structure] : spot ? [spot] : selected && selectedLit ? [selected] : (beat?.focus ?? []);
 
   // Legend: categories present in this stage.
   const legend = legendOf(stage.structures);
@@ -1225,7 +1297,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   if (mounted && seenView?.key !== sceneKey) {
     const from = seenView ?? readLastView(week.week);
     setSeenView(snap);
-    if (from && pickedView !== sceneKey && needsBridge(from, snap)) setBridge({ from, to: snap });
+    if (!formation && from && pickedView !== sceneKey && needsBridge(from, snap)) setBridge({ from, to: snap });
     else if (bridge) setBridge(null);
   }
   const saveView = useEffectEvent(() => {
@@ -1365,7 +1437,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           }}
         />
 
-        <main className={`stage${find && print ? ' is-print' : ''}`}>
+        <main className={`stage${formation ? ' has-formation' : ''}${find && print ? ' is-print' : ''}`}>
           <div className="stage-bar">
             <div className="stage-heading">
               {/* Where this stage sits in the notes: topic › heading, numbered as the notes number it. */}
@@ -1602,6 +1674,29 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             </Viewport>
           </SceneContext.Provider>
 
+          {formation && (
+            <section className="formation-card" aria-label="Kimuren eraketa" data-formation={formation.structure} data-complete={pos.t >= formation.end}>
+              <div>
+                <p className="kicker">Kimu · {pos.t >= formation.end ? 'Amaituta — zure erritmoan jarraitu' : playing ? 'Eraketa ikusten' : 'Pausatuta'}</p>
+                <strong>{nameOf(formation.structure)}</strong>
+                <p>{stage.beats[formation.beat].idea ?? stage.beats[formation.beat].text}</p>
+              </div>
+              <div className="formation-actions">
+                <button className="btn small" onClick={() => {
+                  place({ i: pos.i, t: formation.start });
+                  setFormation(formation); setSelected(null); setPlaying(true);
+                }}>Errepikatu</button>
+                <button className="btn small" onClick={() => {
+                  setFormation(null); setSelected(null); setPlaying(false);
+                  endIntro(); clearTour();
+                  if (activeBeat + 1 < stage.beats.length) gotoBeat(activeBeat + 1);
+                  else if (pos.i + 1 < week.stages.length) gotoStage(1);
+                }}>Jarraitu</button>
+                <button className="btn small ghost" onClick={() => { setPlaying(false); pick(formation.structure); openPanel(); }}>Xehetasunak</button>
+                <button className="btn small ghost" onClick={() => { setPlaying(false); setSelected(null); setPref('notes', true); openPanel(); }}>Apunteak</button>
+              </div>
+            </section>
+          )}
           <Player
             stage={withRecall(week.week, stage)}
             stageIndex={pos.i}
@@ -1623,9 +1718,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             mode={mode}
             onMode={setPlayMode}
             voice={voice}
-            waiting={waiting && playing && intro === null}
-            waitSeconds={waiting && playing && intro === null ? waitSeconds : null}
-            fresh={guided && intro === null && !tour ? fresh : []}
+            waiting={!formation && waiting && playing && intro === null}
+            waitSeconds={!formation && waiting && playing && intro === null ? waitSeconds : null}
+            fresh={!formation && guided && intro === null && !tour ? fresh : []}
             onVoice={(v) => setPref('voice', v)}
             onContinue={continueHold}
             onNextStage={continueNext}
@@ -1666,8 +1761,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               onFind={findConcept}
             />
           ) : notesOpen ? (
-            <NotesPanel key={week.week} week={week.week} stage={stage} activeBeat={notesBeatIndex}
+            <NotesPanel key={`${week.week}/${formation?.structure ?? 'notes'}`} week={week.week} stage={stage} activeBeat={notesBeatIndex}
               progress={notesProgress}
+              sourceBeat={formation?.beat}
               onGoto={gotoNote} onDismiss={toggleNotes} />
           ) : (
             <StageInfo

@@ -39,8 +39,10 @@ const readSaved = (): Msg[] => {
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 const deepLink = (t: KimuTarget) => {
-  const q = new URLSearchParams({ etapa: t.stage, une: String(Math.min(1, t.at + 0.001)), jolastu: '1' });
-  if (t.structure) q.set('egitura', t.structure);
+  const q = new URLSearchParams({ etapa: t.stage, une: String(Math.min(1, t.at + 0.001)) });
+  if (t.formation) { q.set('eraketa', t.formation); q.set('apunteak', '1'); }
+  else if (t.structure) q.set('egitura', t.structure);
+  if (t.view) q.set('ikuspegia', t.view);
   return `/astea/${t.week}?${q.toString()}`;
 };
 
@@ -75,7 +77,7 @@ function GoCard({ t, primary, onGo }: { t: KimuTarget; primary: boolean; onGo: (
       </span>
       <span className="kimu-go-tx">
         <b>{t.label}</b>
-        <small>{t.where}</small>
+        <small>{t.formation ? 'Eraketa ikusi · ' : 'Azalpena · '}{t.where}</small>
       </span>
       <span className="kimu-go-ar" aria-hidden>
         →
