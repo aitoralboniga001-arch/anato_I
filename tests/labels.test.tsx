@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { SceneContext, type SceneContextValue } from '@/components/kit/context';
+import { LabelScaleContext, SceneContext, type SceneContextValue } from '@/components/kit/context';
 import { structures, weeks } from '@/content/registry';
 import type { Orientation } from '@/lib/sim/types';
 
@@ -8,7 +8,8 @@ import type { Orientation } from '@/lib/sim/types';
  * Layout lint for scene labels, run on the server-rendered SVG (no browser needed).
  * Text width is estimated from the character count (13.5px semibold ≈ 7.1 units/char),
  * which is close enough to catch clipped labels, labels under the toolbar or the
- * orientation pills, and labels printed on top of each other.
+ * orientation pills, and labels printed on top of each other. Checked at the drawn size and
+ * at the largest size the viewport grows labels to on small screens.
  */
 
 const ctx: SceneContextValue = {
@@ -25,6 +26,7 @@ const ctx: SceneContextValue = {
 
 const SAMPLES = [0, 0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 0.9, 1];
 const H = 15;
+const SCALES = [1, 1.3];
 
 interface Box {
   id: string;
@@ -41,13 +43,16 @@ function labelBoxes(html: string): Box[] {
   const boxes: Box[] = [];
   const re = /<g data-label="([^"]+)" class="([^"]*)" opacity="([^"]+)"[^>]*>[\s\S]*?<text x="([^"]+)" y="([^"]+)"[^>]*text-anchor="([^"]+)"[^>]*>([^<]*)<\/text>/g;
   for (const m of html.matchAll(re)) {
-    const [, id, cls, op, xs, ys, anchor, raw] = m;
+    const [whole, id, cls, op, xs, ys, anchor, raw] = m;
     if (Number(op) < 0.3) continue;
-    const w = decode(raw).length * (cls.includes('label-small') ? 6.4 : 7.1);
+    const drawn = cls.includes('label-small') ? 12 : 13.5;
+    const k = Number(/font-size:([\d.]+)px/.exec(whole)?.[1] ?? drawn) / drawn;
+    const w = k * decode(raw).length * (cls.includes('label-small') ? 6.4 : 7.1);
+    const h = k * H;
     const x = Number(xs);
     const y = Number(ys);
     const x0 = anchor === 'end' ? x - w : anchor === 'middle' ? x - w / 2 : x;
-    boxes.push({ id, x0, x1: x0 + w, y0: y - H / 2, y1: y + H / 2 });
+    boxes.push({ id, x0, x1: x0 + w, y0: y - h / 2, y1: y + h / 2 });
   }
   return boxes;
 }
@@ -78,17 +83,20 @@ for (const w of weeks)
       for (const v of st.views)
         it(`${st.id} / ${v.id}`, () => {
           const Scene = v.scene;
-          const found = new Map<string, number[]>();
-          for (const t of SAMPLES) {
-            const html = renderToStaticMarkup(
-              <SceneContext.Provider value={ctx}>
-                <svg viewBox="0 0 1000 640">
-                  <Scene t={t} reduced={false} />
-                </svg>
-              </SceneContext.Provider>,
-            );
-            for (const p of problems(labelBoxes(html), v.orientation)) found.set(p, [...(found.get(p) ?? []), t]);
-          }
+          const found = new Map<string, string[]>();
+          for (const k of SCALES)
+            for (const t of SAMPLES) {
+              const html = renderToStaticMarkup(
+                <SceneContext.Provider value={ctx}>
+                  <LabelScaleContext.Provider value={{ k, left: !!v.orientation?.left, right: !!v.orientation?.right }}>
+                    <svg viewBox="0 0 1000 640">
+                      <Scene t={t} reduced={false} />
+                    </svg>
+                  </LabelScaleContext.Provider>
+                </SceneContext.Provider>,
+              );
+              for (const p of problems(labelBoxes(html), v.orientation)) found.set(p, [...(found.get(p) ?? []), k === 1 ? `${t}` : `${t}×${k}`]);
+            }
           expect([...found].map(([p, ts]) => `${p} (t=${ts.join(',')})`)).toEqual([]);
         });
   });

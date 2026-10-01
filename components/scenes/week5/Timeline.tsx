@@ -136,7 +136,7 @@ export function PregnancyTimeline({ t }: SceneProps) {
       <Label id="ernalkuntza" text="Ernalkuntzatik" x={FERT} y={RB - 36} align="start" show={gap} />
       <Stat x={DUE - 14} y={RB - 44} big="38 aste · 266 egun" small="" show={growB} color="#ffb86b" />
       <Label id="enbrioi-aroa" text="Enbrioi aroa · 3.–8. asteak" x={250} y={RB + 70} ax={(embA + embB) / 2} ay={RB + 7} show={phases} />
-      <Label id="fetu-aroa" text="Umeki edo fetu aroa · 9. astetik jaio arte" x={470} y={RB + 70} ax={lerp(embB, DUE, 0.35)} ay={RB + 7} align="start" show={phases} />
+      <Label id="fetu-aroa" text="Umeki edo fetu aroa · 9. astetik jaio arte" x={510} y={RB + 70} ax={lerp(embB, DUE, 0.35)} ay={RB + 7} align="start" show={phases} />
 
       <Note x={FERT} y={RB + 112} align="start" tone="dim" show={seg(t, 0.46, 0.52)}>
         Ernalkuntza-data zaila: obulazioa aldakorra da; espermatozoideak 6 egunez mantentzen dira

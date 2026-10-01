@@ -1,7 +1,8 @@
 'use client';
 
-import { forwardRef, useCallback, useEffect, useEffectEvent, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { forwardRef, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { Defs } from '@/components/kit/Defs';
+import { LabelScaleContext } from '@/components/kit/context';
 import type { Orientation } from '@/lib/sim/types';
 import { IconFit, IconZoomIn, IconZoomOut } from './icons';
 
@@ -216,6 +217,14 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
     }
   }
 
+  // Labels keep about 12.5px on screen however small the frame is drawn (13.5 frame units at scale
+  // ≈0.93), growing at most 30%; zooming in makes them larger as usual.
+  const fit = size ? Math.min(size.w / W, size.h / H) : 1;
+  const labelK = Math.round(Math.min(1.3, Math.max(1, 0.93 / (fit * z.k * room.k))) * 50) / 50;
+  const pillL = !!orientation?.left;
+  const pillR = !!orientation?.right;
+  const labelScale = useMemo(() => ({ k: labelK, left: pillL, right: pillR }), [labelK, pillL, pillR]);
+
   const changed = useEffectEvent((on: boolean) => onFullscreenChange?.(on));
 
   useEffect(() => {
@@ -328,7 +337,9 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
         <Defs />
         <g transform={`translate(${z.x} ${z.y}) scale(${z.k})`}>
           <g className="scene-room" style={{ transform: `translate(${room.x}px, ${room.y}px) scale(${room.k})` }}>
-          <g ref={scene}>{children}</g>
+          <g ref={scene}>
+            <LabelScaleContext.Provider value={labelScale}>{children}</LabelScaleContext.Provider>
+          </g>
           {rings.map((m, i) => {
             const pad = 10 / z.k;
             const rx = m.w / 2 + pad;

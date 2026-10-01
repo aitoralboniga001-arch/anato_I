@@ -172,7 +172,7 @@ export function LimbDevelopment({ t }: SceneProps) {
       <Label id="esku-plaka" x={150} y={A.tip[1] + 26} ax={A.palm[0] - 20} ay={A.palm[1] + 16} show={two(t, 0.34, 0.66)} />
       <Label id="oin-plaka" x={850} y={L.palm[1] + 50} ax={L.palm[0] + 20} ay={L.palm[1] + 20} show={two(t, 0.34, 0.66)} />
       <Label id="hatzetako-izpiak" x={440} y={590} ax={arm.rays[2][1][0]} ay={arm.rays[2][1][1]} show={two(t, 0.5, 0.84)} />
-      <Label id="izpiarteko-ildoak" x={560} y={590} align="start" ax={leg.grooves[1][1][0]} ay={leg.grooves[1][1][1]} show={two(t, 0.5, 0.84)} />
+      <Label id="izpiarteko-ildoak" x={600} y={590} align="start" ax={leg.grooves[1][1][0]} ay={leg.grooves[1][1][1]} show={two(t, 0.5, 0.84)} />
       <Label id="besoa" x={150} y={mid(A.prox, A.mid)[1]} ax={spanX(A.prox, A.mid, -1)} ay={mid(A.prox, A.mid)[1]} show={segs3} />
       <Label id="besaurrea" x={150} y={mid(A.mid, A.dist)[1]} ax={spanX(A.mid, A.dist, -1)} ay={mid(A.mid, A.dist)[1]} show={segs3} />
       <Label id="eskua" x={150} y={mid(A.dist, A.tip)[1]} ax={spanX(A.dist, A.tip, -1)} ay={mid(A.dist, A.tip)[1]} show={segs3} />

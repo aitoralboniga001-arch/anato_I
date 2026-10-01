@@ -305,7 +305,7 @@ export function Cotyledons({ t, reduced }: SceneProps) {
       <Label id="korioneko-odol-hodiak" x={420} y={566} ax={450} ay={PLATE + 19} show={vis(t, 0.04)} align="start" />
       <Label id="zilbor-hodiak" x={690} y={566} ax={CORD_X - 10} ay={CAV - 4} show={vis(t, 0.04)} align="start" />
       <Label id="biloxka-tertziarioa" x={96} y={590} ax={TRUNKS[1].x + 3} ay={PLATE - 40} show={vis(t, 0)} align="start" small />
-      <Label id="biloxka-askea" x={250} y={590} ax={TRUNKS[2].x + 40} ay={PLATE - 110} show={vis(t, 0)} align="start" small />
+      <Label id="biloxka-askea" x={264} y={590} ax={TRUNKS[2].x + 40} ay={PLATE - 110} show={vis(t, 0)} align="start" small />
       <Label id="biloxka-arteko-espazioa" x={420} y={590} ax={560} ay={IVS + 220} show={vis(t, 0.72)} align="start" small />
       <Label id="kotiledoiak" x={690} y={590} ax={700} ay={IVS + 250} show={vis(t, 0.56)} align="start" />
 

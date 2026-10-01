@@ -8418,3 +8418,50 @@ button.tp-switch:hover {
   .formation-card { align-items: flex-start; flex-direction: column; gap: 8px; padding: 10px 14px; }
   .formation-card p:last-child { font-size: 12px; }
 }
+
+/* ---- Legibility of the scene's words ----------------------------------------------------------
+   Context labels and their leaders stay readable (the beat's focus still leads in colour), and the
+   free annotations are a lighter grey. */
+.label-ctx {
+  opacity: 0.72;
+}
+
+.label-leader {
+  stroke: rgba(239, 236, 230, 0.62);
+}
+
+.note-dim {
+  fill: #b5b1a9;
+}
+
+/* Laptop heights: a tighter caption card gives the specimen (and its labels) about a quarter more
+   height; the reading order and sizes stay the same, only the spacing and type step down a notch. */
+@media (max-height: 980px) and (min-width: 1101px) {
+  .dock .cap {
+    gap: 14px;
+    padding: 12px 10px 11px 16px;
+  }
+  .dock .cap .cap-main .cap-idea {
+    font-size: 16px;
+    line-height: 1.35;
+  }
+  .dock .cap .cap-main .cap-idea + p {
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  .cap-text.cap-v2.has-side {
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    column-gap: 18px;
+  }
+  .dock .cap .cap-side .cap-note {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .cap-side {
+    gap: 6px;
+    padding-left: 14px;
+  }
+  .transport {
+    padding: 6px 12px;
+  }
+}

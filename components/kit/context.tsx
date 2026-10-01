@@ -40,6 +40,21 @@ export const SceneContext = createContext<SceneContextValue>({
 
 export const useScene = () => useContext(SceneContext);
 
+/**
+ * How much labels grow so they stay readable when the frame is drawn small (k = 1: their drawn size),
+ * and which side orientation pills cover the frame. The viewport sets it from its on-screen scale;
+ * each label then caps k so it stays inside the frame and clear of the pills and the toolbar.
+ */
+export interface LabelScale {
+  k: number;
+  left: boolean;
+  right: boolean;
+}
+
+export const LabelScaleContext = createContext<LabelScale>({ k: 1, left: false, right: false });
+
+export const useLabelScale = () => useContext(LabelScaleContext);
+
 /** Visual state of a structure id given the current interaction state. */
 export function partState(ctx: SceneContextValue, id: string): 'active' | 'dim' | 'focus' | 'idle' | 'spot' | 'shade' | 'ctx' {
   const pointed = ctx.hovered ?? ctx.selected;
