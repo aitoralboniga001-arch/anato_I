@@ -88,6 +88,30 @@ export const IconBook = ({ size }: P) => (
     <path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5" />
   </svg>
 );
+/** The original course notes: a page of text with a highlighted line. */
+export const IconNotes = ({ size }: P) => (
+  <svg {...base(size)}>
+    <path d="M6.5 3h8l4 4v12.5a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 5.5 19.5v-15A1.5 1.5 0 0 1 6.5 3z" />
+    <path d="M14.5 3v4h4M8.5 11h7M8.5 17h5" />
+    <path d="M8 14h8" strokeWidth={3} strokeOpacity={0.45} />
+  </svg>
+);
+export const IconSun = ({ size }: P) => (
+  <svg {...base(size)}>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
+  </svg>
+);
+export const IconMoon = ({ size }: P) => (
+  <svg {...base(size)}>
+    <path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z" />
+  </svg>
+);
+export const IconList = ({ size }: P) => (
+  <svg {...base(size)}>
+    <path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" />
+  </svg>
+);
 export const IconQuiz = ({ size }: P) => (
   <svg {...base(size)}>
     <rect x="3.5" y="3.5" width="17" height="17" rx="4" />

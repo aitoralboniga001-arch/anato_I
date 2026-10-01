@@ -62,6 +62,8 @@ export interface MicroQuestion {
 
 export interface Beat {
   at: number;
+  /** Original notes sentence ids (week-prefixed), or paragraph ranges such as w1/4.2/p3/s1-s4. */
+  notes?: string[];
   /** AZALPEN LABURRA: what just happened on screen, in 2–4 short sentences. */
   text: string;
   /** IDEIA NAGUSIA: the step in one sentence (the only line the quick replay shows). */

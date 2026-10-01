@@ -475,7 +475,7 @@ export const week2: WeekDef = {
       ],
       beats: [
         {
-          at: 0,
+          at: 0, notes: ['w2/1/p8/s1', 'w2/1/p9/s1', 'w2/1/p6/s1'],
           idea: 'Trofoblastoa (blastozistoaren kanpoko horma) bi geruzatan banatzen da: zitotrofoblastoa eta sinzitiotrofoblastoa.',
           text: 'Gogoratu: blastozistoak kanpoan trofoblastoa du, barruan enbrioblastoa eta blastozelea (barrunbe bat). Orain trofoblastoan barruko geruza, zitotrofoblastoa (nukleo bakarreko zelulak, berde argia), eta kanpokoa, sinzitiotrofoblastoa (nukleo ugariko «magma», berde iluna), bereizten dira.',
           key: 'Zito = zelulak mugekin (barruan). Sinzitio = mugarik gabeko magma (kanpoan, endometrioan sartzen).',
@@ -483,7 +483,7 @@ export const week2: WeekDef = {
           view: 'mozketa',
         },
         {
-          at: 0.12,
+          at: 0.12, notes: ['w2/1/p9/s2-s5'],
           idea: 'Zitotrofoblastoko zelulak zatitu eta sinziziora pasatzen dira: mintza galdu eta fusionatzen dira.',
           text: 'Horregatik hazten da sinzitioa: zitotik datozen zelula berriak bertan urtzen dira. Nukleoak ikusten dira, baina ez zelula-mintzak. Mutur enbrionarioan (enbrioblastoa dagoen aldean) hasten da.',
           caution: 'Sinzitioa ez da bere kabuz zatitzen: zitotrofoblastoak hornitzen du.',
@@ -496,7 +496,7 @@ export const week2: WeekDef = {
           },
         },
         {
-          at: 0.24,
+          at: 0.24, notes: ['w2/1/p11/s1-s2', 'w2/1/p12/s1'],
           idea: 'Enbrioblastoa ere bi zelula motatan banatzen da: epiblastoa eta hipoblastoa.',
           text: 'Epiblastoa: zelula zilindriko altuak (urdinak). Hipoblastoa: zelula kubiko txikiak (horiak), blastozelearen ondoan.',
           key: 'Epiblastoa goian (amniosaren aldean), hipoblastoa behean (blastozelearen aldean).',
@@ -504,7 +504,7 @@ export const week2: WeekDef = {
           view: 'diskoa',
         },
         {
-          at: 0.4,
+          at: 0.4, notes: ['w2/1/p4/s1-s3', 'w2/1/p13/s1', 'w2/1/p16/s1'],
           idea: 'Bi geruzak elkarren gainean: bi orriko ernetze diskoa.',
           text: 'Egitura laua da, bi zelula-orriz osatua. Hortik sortuko dira enbrioiaren organo guztiak: bigarren asteko prozesurik garrantzitsuena da.',
           key: '2. astea = «bikoen astea»: bi trofoblasto, bi orri, bi barrunbe.',
@@ -512,28 +512,28 @@ export const week2: WeekDef = {
           view: 'diskoa',
         },
         {
-          at: 0.47,
+          at: 0.47, notes: ['w2/1/p14/s1'],
           idea: 'Epiblasto-zelulen artean barrunbe txiki bat irekitzen da: amnios barrunbea.',
           text: 'Hutsune txikiak agertu eta elkartzen dira epiblastoaren gainean. Hau ESPAZIOA da (etzanez etiketatua); ez da ehun bat.',
           focus: ['amnios-barrunbea'],
           view: 'diskoa',
         },
         {
-          at: 0.62,
+          at: 0.62, notes: ['w2/1/p14/s2-s3'],
           idea: 'Zitotrofoblastoaren ondoan geratzen diren epiblasto-zelulei amnioblasto deritze.',
           text: 'Amnios barrunbearen «sabaia» osatzen dute. Epiblastokoak dira jatorriz; kokapenak ematen die izen berria.',
           focus: ['amnioblastoak'],
           view: 'diskoa',
         },
         {
-          at: 0.74,
+          at: 0.74, notes: ['w2/1/p17/s1-s3'],
           idea: 'Amaren endometrioa ere aldatzen da: edematoso bihurtzen da.',
           text: 'Odol-hodiak handitu eta likidoa zelulen artean metatzen da. Guruinek glukogenoa, mukia eta glukoproteinak jariatzen dituzte.',
           focus: ['amaren-odol-hodiak', 'umetoki-guruina', 'endometrio-estroma'],
           view: 'mozketa',
         },
         {
-          at: 0.9,
+          at: 0.9, notes: ['w2/1/p17/s4'],
           idea: 'Epiblastoak eta hipoblastoak kokapen finkoa dute: polaritate dortso-bentrala ezarrita dago.',
           text: 'Epiblastoaren aldea dortsala izango da eta hipoblastoarena bentrala. Enbrioiaren lehen ardatza da.',
           focus: ['epiblastoa', 'hipoblastoa'],
@@ -607,28 +607,28 @@ export const week2: WeekDef = {
       ],
       beats: [
         {
-          at: 0,
+          at: 0, notes: ['w2/2/p3/s1', 'w2/2/p7/s1'],
           idea: 'Blastozistoa ia guztiz sartuta dago endometrioan.',
           text: 'Sinzitiotrofoblastoak ia blastozisto osoa inguratzen du, eta mutur enbrionarioan lodiago da.',
           focus: ['blastozistoa', 'sinzitiotrofoblastoa'],
           view: 'mozketa',
         },
         {
-          at: 0.14,
+          at: 0.14, notes: ['w2/2/p3/s2'],
           idea: 'Sartu den lekuan, epitelioaren ordez fibrina-koagulu bat dago.',
           text: 'Endometrioaren gainazalean «tapoi» bat bezala: epitelioa oraindik ez da itxi.',
           focus: ['fibrina-koagulua', 'endometrio-epitelioa'],
           view: 'mozketa',
         },
         {
-          at: 0.28,
+          at: 0.28, notes: ['w2/2/p5/s1'],
           idea: 'Sinzitiotrofoblastoaren barruan hutsune txikiak (bakuolak) agertzen dira.',
           text: 'Ehunaren barruan irekitzen diren espazio txikiak dira, eta handituz doaz.',
           focus: ['bakuolak', 'sinzitiotrofoblastoa'],
           view: 'lakuak',
         },
         {
-          at: 0.42,
+          at: 0.42, notes: ['w2/2/p5/s2'],
           idea: 'Bakuolak handitu eta elkartzean lakuak sortzen dira.',
           text: 'Batez ere mutur enbrionarioan. Oraingoz hutsik daude: ez dago amaren odolik (hori 11–12. egunetan).',
           caution: 'Lakuak sinzitiotrofoblastoaren BARRUKO espazioak dira, ez amaren odol-hodiak.',
@@ -636,7 +636,7 @@ export const week2: WeekDef = {
           view: 'lakuak',
         },
         {
-          at: 0.5,
+          at: 0.5, notes: ['w2/2/p5/s3'],
           idea: 'Lakuengatik, une honi garai lakunarra deritzo.',
           text: 'Izen hori azterketetan agertzen da: 9. eguna = garai lakunarra.',
           focus: ['garai-lakunarra', 'lakuak'],
@@ -649,14 +649,14 @@ export const week2: WeekDef = {
           },
         },
         {
-          at: 0.56,
+          at: 0.56, notes: ['w2/2/p6/s1-s2'],
           idea: 'Mutur anenbrionarioan, hipoblasto-zelula berriek zitotrofoblastoaren barrualdea estaltzen dute: Heuser-en mintza.',
           text: 'Hipoblastoa ugaltzen da eta zelula berriak zitoaren barruko aurpegitik zabaltzen dira, blastozelearen horma osatuz. Beste izenak: mintz exozelomikoa edo zeloma kanpoko mintza.',
           focus: ['hipoblastoa', 'heuser-mintza', 'zitotrofoblastoa'],
           view: 'heuser',
         },
         {
-          at: 0.78,
+          at: 0.78, notes: ['w2/2/p6/s3-s4'],
           idea: 'Blastozelea, orain hipoblastoak eta Heuser-en mintzak inguratuta, hasierako bitelo zakua da.',
           text: 'Barrunbe bera da, izen berriarekin: hasierako bitelo zakua edo barrunbe exozelomikoa. Goian hipoblastoa, beste guztian Heuser-en mintza.',
           key: 'Blastozelea → hasierako bitelo zakua (Heuser-en mintzak estaltzean).',
@@ -670,7 +670,7 @@ export const week2: WeekDef = {
           },
         },
         {
-          at: 0.86,
+          at: 0.86, notes: ['w2/2/p6/s5'],
           idea: 'Endometrioko odol-hodiak handitu eta sinusoide izena hartzen dute.',
           text: 'Batez ere habiratze-gunearen inguruan. 11–12. egunetan sinzitioak horien paretak urratuko ditu.',
           focus: ['sinusoideak'],
@@ -752,28 +752,28 @@ export const week2: WeekDef = {
       ],
       beats: [
         {
-          at: 0,
+          at: 0, notes: ['w2/3/p3/s1-s3'],
           idea: 'Blastozistoa ia guztiz sartuta dago; fibrina-koagulua txiki-txikia da.',
           text: 'Epitelioa ez da oraindik guztiz berreskuratu. Endometrioaren paretan goragune bat antzematen da: hor habiratu da.',
           focus: ['fibrina-koagulua', 'endometrio-epitelioa'],
           view: 'mozketa',
         },
         {
-          at: 0.06,
+          at: 0.06, notes: ['w2/3/p4/s1'],
           idea: 'Lakuak handitu eta elkarrekin komunikatzen dira: laku sarea.',
           text: 'Sinzitiotrofoblastoaren barruko espazioak sare bakarra osatzen hasten dira.',
           focus: ['sare-lakunarra', 'lakuak'],
           view: 'mozketa',
         },
         {
-          at: 0.18,
+          at: 0.18, notes: ['w2/3/p5/s1-s2'],
           idea: 'Sinzitioak endometrioko sinusoideen paretak urratzen ditu.',
           text: 'Sinzitiotrofoblastoa endometrioan barrurago sartzen da eta amaren odol-hodi handituak (sinusoideak) apurtzen ditu.',
           focus: ['sinzitiotrofoblastoa', 'sinusoideak'],
           view: 'mozketa',
         },
         {
-          at: 0.28,
+          at: 0.28, notes: ['w2/3/p5/s3-s4'],
           idea: 'Amaren odola laku sarean zirkulatzen hasten da: hasierako zirkulazio uteroplazentarioa.',
           text: 'Sinusoideetatik irtendako odolak lakuak betetzen ditu (gorriak). Amaren eta enbrioiaren arteko truke-sistemaren hasiera da.',
           key: 'Laku sarea + sinusoide urratuak = zirkulazio uteroplazentarioa.',
@@ -781,7 +781,7 @@ export const week2: WeekDef = {
           view: 'mozketa',
         },
         {
-          at: 0.42,
+          at: 0.42, notes: ['w2/3/p6/s1-s3'],
           idea: 'Ehun berri hau enbrioi kanpoko mesodermoa da.',
           text: 'Hasierako bitelo zakuaren paretako zelulak ugaldu eta zelula-populazio berri bat agertzen da, zitoaren barruko azalaren eta amnios barrunbea/hasierako bitelo zakuaren artean. Konzeptua hazi ahala, ehun hori lodituz doa.',
           caution: 'Enbrioi KANPOKO mesodermoa da (2. astea); enbrioi barrukoa 3. astean sortuko da, gastrulazioan.',
@@ -789,7 +789,7 @@ export const week2: WeekDef = {
           view: 'mesodermoa',
         },
         {
-          at: 0.54,
+          at: 0.54, notes: ['w2/3/p7/s1-s2'],
           idea: 'Mesodermo honen barruan hutsune txikiak agertzen dira; elkartu egiten dira eta korion barrunbea osatzen dute.',
           text: 'Hasieran ehun betea da. Gero hutsune txikiak irekitzen dira leku askotan, handitu eta elkartu egiten dira, barrunbe handi bakar bat osatu arte: enbrioi kanpoko zeloma edo korion barrunbea.',
           key: 'Korion barrunbea BARRUNBEA da (hutsunea); haren paretak mesodermoak osatzen ditu.',
@@ -807,14 +807,14 @@ export const week2: WeekDef = {
           },
         },
         {
-          at: 0.64,
+          at: 0.64, notes: ['w2/3/p8/s2', 'w2/3/p9/s1'],
           idea: 'Barrunbeak mesodermoa bi orritan banatzen du: somatopleura kanpoan, esplaknopleura bitelo zakuaren inguruan.',
           text: 'Zitoaren barruko azalean eta amniosaren inguruan geratzen dena paretako orria da (somatopleura); hasierako bitelo zakuaren inguruan geratzen dena, errai orria (esplaknopleura). Jarraiak dira; kokapenak ematen die izena.',
           focus: ['somatopleura-kanpokoa', 'esplaknopleura-kanpokoa'],
           view: 'mesodermoa',
         },
         {
-          at: 0.72,
+          at: 0.72, notes: ['w2/3/p7/s4-s6'],
           idea: 'Barrunbe horrek enbrioiaren inguruko espazio handi bat sortzen du; enbrioia finkapen pedikuluaren bidez geratzen da lotuta.',
           text: 'Leku batean mesodermoa ez da hutsuneekin zulatzen: finkapen pedikulua, bi mesodermo-orriak elkartzen dituena. Hortik eskegita daude amniosa eta bitelo zakua; hemendik garatuko da zilbor-hestea.',
           key: 'Finkapen pedikulua → zilbor-hestea.',
@@ -822,14 +822,14 @@ export const week2: WeekDef = {
           view: 'mesodermoa',
         },
         {
-          at: 0.82,
+          at: 0.82, notes: ['w2/3/p12/s1-s4'],
           idea: 'Amaren endometrioak desidua erreakzioa jasaten du.',
           text: 'Sinusoideak handitu, likidoa zelulen artean metatu (endometrio edematosoa) eta estroma-zelulak poliedriko bihurtzen dira, glukogenoz eta lipidoz beteta.',
           focus: ['desidua-erreakzioa', 'desidua-zelulak'],
           view: 'desidua',
         },
         {
-          at: 0.92,
+          at: 0.92, notes: ['w2/3/p11/s1', 'w2/3/p10/s1'],
           idea: 'Erreakzioa habiratze-gunean hasi eta endometrio osora hedatzen da.',
           text: 'Bitartean, bi orriko diskoak hazten jarraitzen du, baina trofoblastoa baino motelago.',
           focus: ['desidua-erreakzioa', 'bi-orriko-diskoa'],
@@ -912,14 +912,14 @@ export const week2: WeekDef = {
       ],
       beats: [
         {
-          at: 0,
+          at: 0, notes: ['w2/4/p3/s1-s3', 'w2/4/p6/s1'],
           idea: '13. eguna: blastozistoa guztiz sartuta dago eta epitelioa itxi da.',
           text: 'Fibrina-koagulua desagertu da. Habiratze-lekuan goragune bat ikusten da umetokiaren barrunbera begira.',
           focus: ['endometrio-epitelioa'],
           view: 'mozketa',
         },
         {
-          at: 0.08,
+          at: 0.08, notes: ['w2/4/p4/s1-s2'],
           idea: 'Zitotrofoblastoko zelulak sinzitiotrofoblastoaren barrura hazten dira: biloxka primarioak.',
           text: 'Egun honetako aldaketarik garrantzitsuena. Zito-zelulak ugaldu eta hatz moduan sartzen dira sinzitioaren erdian (berde argiak), laku odoltsuen artean.',
           key: 'Biloxka primarioa = zito-ardatza + sinzitio-estalkia.',
@@ -927,7 +927,7 @@ export const week2: WeekDef = {
           view: 'mozketa',
         },
         {
-          at: 0.22,
+          at: 0.22, notes: ['w2/4/p4/s3'],
           idea: 'Biloxka primario bat zeharka moztuta: erdian zitotrofoblastoa, kanpoan sinzitiotrofoblastoa.',
           text: 'Azterketako irudietan horrela ezagutzen da: bi geruza bakarrik, barrukoa argia (zito) eta kanpokoa iluna (sinzitio).',
           caution: 'Biloxka primarioak EZ du mesodermorik (hori sekundarioa da, 3. astean).',
@@ -941,7 +941,7 @@ export const week2: WeekDef = {
           },
         },
         {
-          at: 0.32,
+          at: 0.32, notes: ['w2/4/p4/s4-s6'],
           idea: 'Korion barrunbea askoz handiagoa egiten da.',
           text: 'Zitotrofoblastoaren barruko aurpegia estaltzen duen enbrioi kanpoko mesodermoari orain korion plaka deritzo.',
           key: 'Korion barrunbea = ESPAZIOA. Korion plaka = haren kanpoko horma (mesodermoa, EHUNA).',
@@ -949,7 +949,7 @@ export const week2: WeekDef = {
           view: 'mozketa',
         },
         {
-          at: 0.5,
+          at: 0.5, notes: ['w2/4/p5/s1-s3'],
           recall: ['heuser-mintza'],
           idea: 'Hipoblasto-zelula berriek Heuser-en mintzaren barrualdea estaltzen dute: bitelo zaku sekundarioa.',
           text: 'Hasierako bitelo zakua txikitu egiten da eta behin betiko bitelo zakua (sekundarioa) geratzen da, gero eta txikiagoa. Haren inguruan errai orria (esplaknopleura) doa.',
@@ -957,7 +957,7 @@ export const week2: WeekDef = {
           view: 'bitelo-zakua',
         },
         {
-          at: 0.62,
+          at: 0.62, notes: ['w2/4/p5/s2'],
           idea: 'Hasierako bitelo zakuaren zati batzuk korion barrunbean geratzen dira: kiste exozelomikoak.',
           text: 'Bitelo zakua txikitzean askatzen diren burbuila txikiak dira (horiak), korion barrunbean flotatzen.',
           focus: ['kiste-exozelomikoak'],
@@ -970,7 +970,7 @@ export const week2: WeekDef = {
           },
         },
         {
-          at: 0.74,
+          at: 0.74, notes: ['w2/4/p5/s4-s5', 'w2/4/p7/s1'],
           idea: 'Finkapen pedikuluak korion plakatik eskegita dauzka amnios barrunbea eta bitelo zaku sekundarioa.',
           text: 'Korion barrunbeak bien inguru osoa hartzen du, pedikulua izan ezik. Haien artean, bi orriko diskoa. Pedikuluaren mesodermotik zilbor-hestea garatuko da.',
           key: 'Finkapen pedikulua → zilbor-hestea.',
@@ -978,14 +978,14 @@ export const week2: WeekDef = {
           view: 'mozketa',
         },
         {
-          at: 0.86,
+          at: 0.86, notes: ['w2/4/p4/s6'],
           idea: 'Korioia = sinzitiotrofoblastoa + zitotrofoblastoa + korion plaka.',
           text: 'Hiru geruza horiek batera korioia osatzen dute; korion barrunbearen kanpoko mintza da, eta karena sortzen lagunduko du.',
           focus: ['korioia', 'korion-plaka'],
           view: 'mozketa',
         },
         {
-          at: 0.94,
+          at: 0.94, notes: ['w2/4/p3/s4-s6'],
           exam: 'Azterketan: «zer EZ dago 2. astean?» — lerro primitiborik, notokordarik eta hiru orriko diskorik ez (3. astekoak dira).',
           idea: 'Egun honetan odol-jario txiki bat gerta daiteke; normala da.',
           text: 'Endometriotik sinzitiora odol-fluxu handiagoa iristen delako. Ez nahastu hilekoarekin (28. eguna): erditze-data kalkulatzeko garrantzitsua da.',

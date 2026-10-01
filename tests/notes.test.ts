@@ -2,6 +2,91 @@ import { describe, expect, it } from 'vitest';
 import { weeks } from '@/content/registry';
 import { NOTES, sectionLabel, sectionOf } from '@/content/notes';
 import { EXAM_DATES } from '@/content/examDates';
+import { createHash } from 'node:crypto';
+import { blockText, expandNotes, firstAnchorInSection, NOTES_EXCEPTIONS, notesOf, sectionMatches, sentence, sentenceAnchors } from '@/content/notes-text';
+
+describe('original notes and reviewed alignment', () => {
+  const lengths = [17921, 10991, 17577, 23697, 13010, 18297];
+  const hashes = [
+    'f8abeb46de6a656b112e6b89b9c99802bab9a7af8affd6c63ed4ac2a6e0524db',
+    'fd368f4eb7b398bec5c5275cd244233a86f4f5e099f796bbf42328b3ac32994c',
+    'a30f3bef515434dc3696800623caffe24375e9782bb688f35ada7160c677d4ee',
+    '87cdeecd4f3886bf3372b8acc920b229a29850a39b48b205fe59d7f2ceb21b28',
+    '4854deb7f05ef579b31896d81de6007cfda719875d8a2843d8dbd2b9174c05dd',
+    '22cbeeff3550f3b502b61bbeec542930188777fde34fe7f28312142656565e59',
+  ];
+
+  it('pins the complete original text of each of the six PDFs', () => {
+    for (const w of weeks) {
+      const text = notesOf(w.week).map(blockText).join(' ');
+      expect(text.length, `w${w.week}`).toBe(lengths[w.week - 1]);
+      expect(createHash('sha256').update(text).digest('hex'), `w${w.week}`).toBe(hashes[w.week - 1]);
+    }
+  });
+
+  it('has unique block and sentence ids across all topics', () => {
+    const ids = weeks.flatMap(w => notesOf(w.week).flatMap(b => [b.id, ...b.sentences.map(s => s.id)]));
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const w of weeks) for (const b of notesOf(w.week)) for (const s of b.sentences) {
+      expect(s.id).toMatch(new RegExp(`^w${w.week}/[^/]+/p\\d+/s\\d+$`));
+      expect(sentence(s.id)).toBe(s);
+    }
+  });
+
+  it('gives every beat real anchors or a justified source exception', () => {
+    let count = 0, unmapped = 0;
+    for (const w of weeks) for (const stage of w.stages) stage.beats.forEach((beat, i) => {
+      count++;
+      const key = `${w.week}/${stage.id}/${i}`;
+      const refs = expandNotes(beat.notes);
+      if (!refs.length) {
+        unmapped++;
+        expect(NOTES_EXCEPTIONS[key]?.reason, key).toBeTruthy();
+        expect(NOTES_EXCEPTIONS[key]?.sections, key).toBeUndefined();
+      }
+      for (const id of refs) expect(sentence(id), `${key}: ${id}`).toBeDefined();
+    });
+    expect(count).toBe(306);
+    expect(unmapped).toBe(1);
+  });
+
+  it('keeps anchors in the stage sections or an explicitly reviewed exception', () => {
+    for (const w of weeks) for (const stage of w.stages) stage.beats.forEach((beat, i) => {
+      const key = `${w.week}/${stage.id}/${i}`;
+      const config = sectionOf(w.week, stage.id)!.section;
+      const exception = NOTES_EXCEPTIONS[key] ?? NOTES_EXCEPTIONS[`${w.week}/${stage.id}`];
+      for (const id of expandNotes(beat.notes)) {
+        expect(id.startsWith(`w${w.week}/`), key).toBe(true);
+        const section = id.split('/')[1];
+        expect(sectionMatches(section, config) || !!exception?.sections?.includes(section), `${key}: ${id}`).toBe(true);
+      }
+    });
+  });
+
+  it('round trips every phrase to the exact stage and beat', () => {
+    for (const w of weeks) for (const stage of w.stages) stage.beats.forEach((beat, i) => {
+      for (const id of expandNotes(beat.notes)) expect(sentenceAnchors.get(id)).toContainEqual({ week: w.week, stageId: stage.id, beat: i });
+    });
+    for (const [id, refs] of sentenceAnchors) for (const ref of refs) {
+      const stage = weeks.find(w => w.week === ref.week)!.stages.find(s => s.id === ref.stageId)!;
+      expect(expandNotes(stage.beats[ref.beat].notes)).toContain(id);
+    }
+  });
+
+  it('expands explicit paragraph ranges without masking invalid ids', () => {
+    expect(expandNotes(['w1/4.2/p3/s1-s3', 'w1/4.2/p3/s2'])).toEqual(['w1/4.2/p3/s1', 'w1/4.2/p3/s2', 'w1/4.2/p3/s3']);
+    expect(sentence(expandNotes(['w1/4.2/p3/s3-s1'])[0])).toBeUndefined();
+    expect(sentence('unknown')).toBeUndefined();
+  });
+
+  it('routes original TOC subsections, merged sections and non-simulated text', () => {
+    expect(firstAnchorInSection(1, '4')).toEqual({ week: 1, stageId: 'ibilbidea', beat: 0 });
+    expect(firstAnchorInSection(1, '3.1')).toBeUndefined();
+    expect(firstAnchorInSection(4, '3.3')?.stageId).toBe('bitarteko-eta-alboko-mesodermoa');
+    expect(firstAnchorInSection(6, '1.4')?.stageId).toBe('biloxka-askeak');
+    expect(firstAnchorInSection(6, '3.2')?.stageId).toBe('karena-aterminoa');
+  });
+});
 
 describe('notes table of contents', () => {
   it('puts every stage in exactly one section, in the order they are played', () => {

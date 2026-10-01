@@ -1,0 +1,534 @@
+{
+  "1": {
+    "file": "1. Enbriologia_Garapenaren lehenengo astea (zuzenduta).docx.pdf",
+    "pages": 11,
+    "characters": 17921,
+    "sha256": "f8abeb46de6a656b112e6b89b9c99802bab9a7af8affd6c63ed4ac2a6e0524db",
+    "removed": [
+      {
+        "page": 1,
+        "text": "GIZA ANATOMIA I, 1. GAIA: GARAPENAREN LEHENENGO ASTEA, 2. taldea (2025/09/12)"
+      },
+      {
+        "page": 1,
+        "text": "1"
+      },
+      {
+        "page": 2,
+        "text": "2"
+      },
+      {
+        "page": 3,
+        "text": "3"
+      },
+      {
+        "page": 4,
+        "text": "4"
+      },
+      {
+        "page": 5,
+        "text": "5"
+      },
+      {
+        "page": 6,
+        "text": "6"
+      },
+      {
+        "page": 7,
+        "text": "7"
+      },
+      {
+        "page": 8,
+        "text": "8"
+      },
+      {
+        "page": 9,
+        "text": "9"
+      },
+      {
+        "page": 10,
+        "text": "10"
+      },
+      {
+        "page": 11,
+        "text": "11"
+      }
+    ]
+  },
+  "2": {
+    "file": "2. ENBRIOLOGIA_GARAPENAREN BIGARREN ASTEA (zuzenduta).pdf",
+    "pages": 7,
+    "characters": 10991,
+    "sha256": "fd368f4eb7b398bec5c5275cd244233a86f4f5e099f796bbf42328b3ac32994c",
+    "removed": [
+      {
+        "page": 1,
+        "text": "GIZA ANATOMIA I, 2. GAIA: GARAPENAREN BIGARREN ASTEA, 8. taldea (2025/09/15)"
+      },
+      {
+        "page": 1,
+        "text": "1"
+      },
+      {
+        "page": 2,
+        "text": "GIZA ANATOMIA I, 2. GAIA: GARAPENAREN BIGARREN ASTEA, 8. taldea (2025/09/15)"
+      },
+      {
+        "page": 2,
+        "text": "2"
+      },
+      {
+        "page": 3,
+        "text": "GIZA ANATOMIA I, 2. GAIA: GARAPENAREN BIGARREN ASTEA, 8. taldea (2025/09/15)"
+      },
+      {
+        "page": 3,
+        "text": "3"
+      },
+      {
+        "page": 4,
+        "text": "GIZA ANATOMIA I, 2. GAIA: GARAPENAREN BIGARREN ASTEA, 8. taldea (2025/09/15)"
+      },
+      {
+        "page": 4,
+        "text": "4"
+      },
+      {
+        "page": 5,
+        "text": "GIZA ANATOMIA I, 2. GAIA: GARAPENAREN BIGARREN ASTEA, 8. taldea (2025/09/15)"
+      },
+      {
+        "page": 5,
+        "text": "5"
+      },
+      {
+        "page": 6,
+        "text": "GIZA ANATOMIA I, 2. GAIA: GARAPENAREN BIGARREN ASTEA, 8. taldea (2025/09/15)"
+      },
+      {
+        "page": 6,
+        "text": "6"
+      },
+      {
+        "page": 7,
+        "text": "GIZA ANATOMIA I, 2. GAIA: GARAPENAREN BIGARREN ASTEA, 8. taldea (2025/09/15)"
+      },
+      {
+        "page": 7,
+        "text": "7"
+      }
+    ]
+  },
+  "3": {
+    "file": "3. Enbriologia_Garapenaren hirugarren astea .pdf",
+    "pages": 11,
+    "characters": 17577,
+    "sha256": "a30f3bef515434dc3696800623caffe24375e9782bb688f35ada7160c677d4ee",
+    "removed": [
+      {
+        "page": 1,
+        "text": "GIZA ANATOMIA I, 3. GAIA: GARAPENAREN HIRUGARREN ASTEA, 8. taldea (2025/09/21)"
+      },
+      {
+        "page": 1,
+        "text": "1"
+      },
+      {
+        "page": 2,
+        "text": "GIZA ANATOMIA I, 3. GAIA: GARAPENAREN HIRUGARREN ASTEA, 8. taldea (2025/09/21)"
+      },
+      {
+        "page": 2,
+        "text": "2"
+      },
+      {
+        "page": 3,
+        "text": "GIZA ANATOMIA I, 3. GAIA: GARAPENAREN HIRUGARREN ASTEA, 8. taldea (2025/09/21)"
+      },
+      {
+        "page": 3,
+        "text": "3"
+      },
+      {
+        "page": 4,
+        "text": "GIZA ANATOMIA I, 3. GAIA: GARAPENAREN HIRUGARREN ASTEA, 8. taldea (2025/09/21)"
+      },
+      {
+        "page": 4,
+        "text": "4"
+      },
+      {
+        "page": 5,
+        "text": "GIZA ANATOMIA I, 3. GAIA: GARAPENAREN HIRUGARREN ASTEA, 8. taldea (2025/09/21)"
+      },
+      {
+        "page": 5,
+        "text": "5"
+      },
+      {
+        "page": 6,
+        "text": "GIZA ANATOMIA I, 3. GAIA: GARAPENAREN HIRUGARREN ASTEA, 8. taldea (2025/09/21)"
+      },
+      {
+        "page": 6,
+        "text": "6"
+      },
+      {
+        "page": 7,
+        "text": "GIZA ANATOMIA I, 3. GAIA: GARAPENAREN HIRUGARREN ASTEA, 8. taldea (2025/09/21)"
+      },
+      {
+        "page": 7,
+        "text": "7"
+      },
+      {
+        "page": 8,
+        "text": "GIZA ANATOMIA I, 3. GAIA: GARAPENAREN HIRUGARREN ASTEA, 8. taldea (2025/09/21)"
+      },
+      {
+        "page": 8,
+        "text": "8"
+      },
+      {
+        "page": 9,
+        "text": "GIZA ANATOMIA I, 3. GAIA: GARAPENAREN HIRUGARREN ASTEA, 8. taldea (2025/09/21)"
+      },
+      {
+        "page": 9,
+        "text": "9"
+      },
+      {
+        "page": 10,
+        "text": "GIZA ANATOMIA I, 3. GAIA: GARAPENAREN HIRUGARREN ASTEA, 8. taldea (2025/09/21)"
+      },
+      {
+        "page": 10,
+        "text": "10"
+      },
+      {
+        "page": 11,
+        "text": "GIZA ANATOMIA I, 3. GAIA: GARAPENAREN HIRUGARREN ASTEA, 8. taldea (2025/09/21)"
+      },
+      {
+        "page": 11,
+        "text": "11"
+      }
+    ]
+  },
+  "4": {
+    "file": "4. Enbriologia_Garapenaren laugarren astea (ZUZENDUTA).pdf",
+    "pages": 12,
+    "characters": 23697,
+    "sha256": "87cdeecd4f3886bf3372b8acc920b229a29850a39b48b205fe59d7f2ceb21b28",
+    "removed": [
+      {
+        "page": 1,
+        "text": "GIZA ANATOMIA I, 4.GAIA: GARAPENAREN LAUGARREN ASTEA, 14.taldea (2025/09/22)."
+      },
+      {
+        "page": 1,
+        "text": "1"
+      },
+      {
+        "page": 2,
+        "text": "2"
+      },
+      {
+        "page": 3,
+        "text": "3"
+      },
+      {
+        "page": 4,
+        "text": "4"
+      },
+      {
+        "page": 5,
+        "text": "5"
+      },
+      {
+        "page": 6,
+        "text": "6"
+      },
+      {
+        "page": 7,
+        "text": "7"
+      },
+      {
+        "page": 8,
+        "text": "8"
+      },
+      {
+        "page": 9,
+        "text": "9"
+      },
+      {
+        "page": 10,
+        "text": "10"
+      },
+      {
+        "page": 11,
+        "text": "11"
+      },
+      {
+        "page": 12,
+        "text": "12"
+      }
+    ]
+  },
+  "5": {
+    "file": "5. GAIA_Enbrioi eta fetuaren ezaugarri nagusiak (zuzenduta).pdf",
+    "pages": 10,
+    "characters": 13010,
+    "sha256": "4854deb7f05ef579b31896d81de6007cfda719875d8a2843d8dbd2b9174c05dd",
+    "removed": [
+      {
+        "page": 1,
+        "text": "MEDIKUNTZA 1. MAILA​ GIZA ANATOMIA I ​"
+      },
+      {
+        "page": 1,
+        "text": "31 TALDEA"
+      },
+      {
+        "page": 1,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 1,
+        "text": "1"
+      },
+      {
+        "page": 2,
+        "text": "MEDIKUNTZA 1. MAILA​ GIZA ANATOMIA I ​"
+      },
+      {
+        "page": 2,
+        "text": "31 TALDEA"
+      },
+      {
+        "page": 2,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 2,
+        "text": "2"
+      },
+      {
+        "page": 3,
+        "text": "MEDIKUNTZA 1. MAILA​ GIZA ANATOMIA I ​"
+      },
+      {
+        "page": 3,
+        "text": "31 TALDEA"
+      },
+      {
+        "page": 3,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 3,
+        "text": "3"
+      },
+      {
+        "page": 4,
+        "text": "MEDIKUNTZA 1. MAILA​ GIZA ANATOMIA I ​"
+      },
+      {
+        "page": 4,
+        "text": "31 TALDEA"
+      },
+      {
+        "page": 4,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 4,
+        "text": "4"
+      },
+      {
+        "page": 5,
+        "text": "MEDIKUNTZA 1. MAILA​ GIZA ANATOMIA I ​"
+      },
+      {
+        "page": 5,
+        "text": "31 TALDEA"
+      },
+      {
+        "page": 5,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 5,
+        "text": "5"
+      },
+      {
+        "page": 6,
+        "text": "MEDIKUNTZA 1. MAILA​ GIZA ANATOMIA I ​"
+      },
+      {
+        "page": 6,
+        "text": "31 TALDEA"
+      },
+      {
+        "page": 6,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 6,
+        "text": "6"
+      },
+      {
+        "page": 7,
+        "text": "MEDIKUNTZA 1. MAILA​ GIZA ANATOMIA I ​"
+      },
+      {
+        "page": 7,
+        "text": "31 TALDEA"
+      },
+      {
+        "page": 7,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 7,
+        "text": "7"
+      },
+      {
+        "page": 8,
+        "text": "MEDIKUNTZA 1. MAILA​ GIZA ANATOMIA I ​"
+      },
+      {
+        "page": 8,
+        "text": "31 TALDEA"
+      },
+      {
+        "page": 8,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 8,
+        "text": "8"
+      },
+      {
+        "page": 9,
+        "text": "MEDIKUNTZA 1. MAILA​ GIZA ANATOMIA I ​"
+      },
+      {
+        "page": 9,
+        "text": "31 TALDEA"
+      },
+      {
+        "page": 9,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 9,
+        "text": "9"
+      },
+      {
+        "page": 10,
+        "text": "MEDIKUNTZA 1. MAILA​ GIZA ANATOMIA I ​"
+      },
+      {
+        "page": 10,
+        "text": "31 TALDEA"
+      },
+      {
+        "page": 10,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 10,
+        "text": "10"
+      }
+    ]
+  },
+  "6": {
+    "file": "6. Enbriologia 3. hilabetetik jaiotzara arte_ fetua eta karena (ZUZENDUTA).docx.pdf",
+    "pages": 10,
+    "characters": 18297,
+    "sha256": "22cbeeff3550f3b502b61bbeec542930188777fde34fe7f28312142656565e59",
+    "removed": [
+      {
+        "page": 1,
+        "text": "ANATOMIA I 2025/09/29 31. Taldea"
+      },
+      {
+        "page": 1,
+        "text": "1"
+      },
+      {
+        "page": 2,
+        "text": "ANATOMIA I 2025/09/29 31. Taldea"
+      },
+      {
+        "page": 2,
+        "text": "2"
+      },
+      {
+        "page": 3,
+        "text": "ANATOMIA I 2025/09/29 31. Taldea"
+      },
+      {
+        "page": 3,
+        "text": "3"
+      },
+      {
+        "page": 4,
+        "text": "ANATOMIA I 2025/09/29 31. Taldea"
+      },
+      {
+        "page": 4,
+        "text": "4"
+      },
+      {
+        "page": 5,
+        "text": "ANATOMIA I 2025/09/29 31. Taldea"
+      },
+      {
+        "page": 5,
+        "text": "5"
+      },
+      {
+        "page": 6,
+        "text": "ANATOMIA I 2025/09/29 31. Taldea"
+      },
+      {
+        "page": 6,
+        "text": "6"
+      },
+      {
+        "page": 7,
+        "text": "ANATOMIA I 2025/09/29 31. Taldea"
+      },
+      {
+        "page": 7,
+        "text": "7"
+      },
+      {
+        "page": 8,
+        "text": "ANATOMIA I 2025/09/29 31. Taldea"
+      },
+      {
+        "page": 8,
+        "text": "8"
+      },
+      {
+        "page": 9,
+        "text": "ANATOMIA I 2025/09/29 31. Taldea"
+      },
+      {
+        "page": 9,
+        "text": "9"
+      },
+      {
+        "page": 10,
+        "text": "ANATOMIA I 2025/09/29 31. Taldea"
+      },
+      {
+        "page": 10,
+        "text": "10"
+      }
+    ]
+  }
+}

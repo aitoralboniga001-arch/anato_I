@@ -5,9 +5,9 @@ import { useSyncExternalStore } from 'react';
  * browser. The playback mode is `quick` (quick replay) over `guided` (guided) over neither (normal).
  */
 /** `fsAsk`: offer full screen when a stage starts playing ("Ez galdetu berriro" turns it off). */
-export type PrefKey = 'guided' | 'quick' | 'voice' | 'outline' | 'panel' | 'fsAsk';
+export type PrefKey = 'guided' | 'quick' | 'voice' | 'outline' | 'panel' | 'fsAsk' | 'notes';
 
-const DEFAULTS: Record<PrefKey, boolean> = { guided: true, quick: false, voice: false, outline: true, panel: true, fsAsk: true };
+const DEFAULTS: Record<PrefKey, boolean> = { guided: true, quick: false, voice: false, outline: true, panel: true, fsAsk: true, notes: false };
 
 export type PlayMode = 'gidatua' | 'arrunta' | 'azkarra';
 

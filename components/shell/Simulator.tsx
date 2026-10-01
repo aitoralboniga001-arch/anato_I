@@ -10,13 +10,15 @@ import { ageLabel, spanOf } from '@/lib/sim/age';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { StageDef, StructureCategory, StructureDef, WeekDef } from '@/lib/sim/types';
 import { Glossary } from './Glossary';
-import { IconBook, IconCalendar, IconClock, IconExpand, IconImage, IconLayers, IconMore, IconPlay, IconQuiz, IconTag, IconTarget, IconTree, PlaneGlyph } from './icons';
+import { IconBook, IconCalendar, IconNotes, IconClock, IconExpand, IconImage, IconLayers, IconMore, IconPlay, IconQuiz, IconTag, IconTarget, IconTree, PlaneGlyph } from './icons';
 import { Popover } from './Popover';
 import { Wordmark, isWip } from './LandNav';
 import { AskCard, Player, TourCard, ideaOf } from './Player';
 import { Help, useHelpOnce } from './Help';
 import { Questions } from './Questions';
 import { Inspector } from './Inspector';
+import { NotesPanel } from './NotesPanel';
+import type { NotesAnchor } from '@/content/notes-text';
 import { NowCard } from './NowCard';
 import { Locator } from './Locator';
 import { ViewBridge, needsBridge, type ViewSnap } from './ViewBridge';
@@ -178,6 +180,23 @@ function usePrefersReducedMotion() {
   );
 }
 
+/** Mid-size screens, where the notes column only fits beside the specimen if the outline folds. */
+const MID_SCREEN = '(min-width: 1321px) and (max-width: 1559px)';
+
+const subscribeMidScreen = (cb: () => void) => {
+  const m = window.matchMedia(MID_SCREEN);
+  m.addEventListener('change', cb);
+  return () => m.removeEventListener('change', cb);
+};
+
+function useMidScreen() {
+  return useSyncExternalStore(
+    subscribeMidScreen,
+    () => window.matchMedia(MID_SCREEN).matches,
+    () => false,
+  );
+}
+
 const subscribeNothing = () => () => {};
 
 /** False on the server and during hydration, true once rendering on the client. */
@@ -294,6 +313,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const [asked, setAsked] = useState<string[]>([]);
   const outlineOpen = usePref('outline');
   const infoOpen = usePref('panel');
+  const notesOpen = usePref('notes');
   // Stage preview progress (0..1 + rest) while the quick overview animation runs; null otherwise.
   const [intro, setIntro] = useState<number | null>(null);
   // Guided mode: the step's animation is done but its text is still being read.
@@ -419,9 +439,20 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 
   useEffect(() => {
     if (linkedWeek !== week.week) return;
+    const linked = new URLSearchParams(window.location.search).get('apunteak') === '1';
+    if (linked) { setPref('notes', true); setPref('panel', true); }
+    if (linked || getPref('notes')) {
+      const raf = requestAnimationFrame(() => setPanelOpen(true));
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [linkedWeek, week.week]);
+  useEffect(() => {
+    if (linkedWeek !== week.week) return;
     const url = new URL(window.location.href);
     url.searchParams.set('etapa', stage.id);
     url.searchParams.set('ikuspegia', view.id);
+    if (getPref('notes')) url.searchParams.set('apunteak', '1');
+    else url.searchParams.delete('apunteak');
     for (const k of ['egitura', 'une', 'jolastu']) url.searchParams.delete(k);
     window.history.replaceState(null, '', url);
     markVisited(week.week, stage.id);
@@ -607,6 +638,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   // The step being glided to: the caption shows it at once, before the frame reaches it.
   const [glideAim, setGlideAim] = useState<{ w: number; i: number; k: number } | null>(null);
   const glideBeat = glideAim && glideAim.w === week.week && glideAim.i === pos.i ? glideAim.k : null;
+  const notesBeatIndex = glideBeat ?? activeBeat;
+  const notesBeat = stage.beats[notesBeatIndex];
+  const notesProgress = (pos.t - notesBeat.at) / Math.max(.0001, (stage.beats[notesBeatIndex + 1]?.at ?? 1) - notesBeat.at);
   useEffect(() => {
     if (!glideRun) return;
     let raf = 0;
@@ -911,9 +945,60 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     if (narrow()) setPanelOpen(true);
     else if (!infoOpen) setPref('panel', true);
   };
+  const setNotesUrl = (on: boolean) => {
+    const url = new URL(window.location.href);
+    if (on) url.searchParams.set('apunteak', '1');
+    else url.searchParams.delete('apunteak');
+    window.history.replaceState(null, '', url);
+  };
+  // On mid-size screens the notes need the room: the outline folds while they are open (nothing saved:
+  // closing the notes or widening the window gives it back), unless the viewer opens it themselves.
+  const midScreen = useMidScreen();
+  const [outlineKept, setOutlineKept] = useState(false);
+  const notesFold = notesOpen && midScreen && !focusMode && !outlineKept;
+  const outlineShown = outlineOpen && !notesFold;
+  const toggleOutline = () => {
+    if (notesFold) {
+      setOutlineKept(true);
+      setPref('outline', true);
+    } else setPref('outline', !outlineOpen);
+  };
   const togglePanel = () => {
+    // The summary and the notes share the right column: from the notes, "Laburpena" swaps to the summary.
+    if (notesOpen) {
+      setPref('notes', false);
+      setNotesUrl(false);
+      setPref('panel', true);
+      if (narrow()) setPanelOpen(true);
+      return;
+    }
     if (narrow()) setPanelOpen((v) => !v);
     else setPref('panel', !infoOpen);
+  };
+  const toggleNotes = () => {
+    const next = !notesOpen;
+    setPref('notes', next);
+    setSelected(null);
+    if (next) {
+      setPref('panel', true);
+      setPanelOpen(true);
+      setOutlineKept(false);
+    } else setPanelOpen(false);
+    setNotesUrl(next);
+  };
+  const gotoNote = (ref: NotesAnchor) => {
+    const target = getWeek(ref.week)?.stages.find(s => s.id === ref.stageId);
+    const targetBeat = target?.beats[ref.beat];
+    if (!targetBeat) return;
+    setSelected(null);
+    setPlaying(false);
+    if (ref.week === week.week) {
+      const i = week.stages.findIndex(s => s.id === ref.stageId);
+      seek(i, targetBeat.at + .00001);
+    } else {
+      const q = new URLSearchParams({ etapa: ref.stageId, une: String(targetBeat.at + .00001), apunteak: '1' });
+      router.push(`/astea/${ref.week}?${q}`);
+    }
   };
 
   // ——— "Aurkitu" (find the structure) quiz ———
@@ -1079,8 +1164,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     } else if (e.key.toLowerCase() === 'l') setShowLabels((v) => !v);
     else if (e.key.toLowerCase() === 'g' && !e.ctrlKey && !e.metaKey) setPlayMode(mode === 'gidatua' ? 'arrunta' : mode === 'arrunta' ? 'azkarra' : 'gidatua');
     else if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey) setFocusMode((v) => !v);
-    else if (e.key === '[') setPref('outline', !outlineOpen);
+    else if (e.key === '[') toggleOutline();
     else if (e.key === ']') togglePanel();
+    else if (e.key.toLowerCase() === 'n' && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); toggleNotes(); }
     else if (e.key === '?') setHelpOpen(true);
     else if (e.key === 'Escape') {
       if (helpOpen) {
@@ -1254,16 +1340,19 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               </div>
             )}
           </Popover>
-          <button className={`tool${panelOpen || infoOpen ? ' is-on' : ''}`} onClick={togglePanel} data-tip="Laburpena, datak eta egiturak erakutsi / ezkutatu · ]" data-tip-pos="bottom" aria-expanded={panelOpen || infoOpen}>
-            <IconRail open={infoOpen || panelOpen} side="right" /> <span>Laburpena</span>
+          <button className={`tool${(panelOpen || infoOpen) && !notesOpen ? ' is-on' : ''}`} onClick={togglePanel} data-tip="Laburpena, datak eta egiturak erakutsi / ezkutatu · ]" data-tip-pos="bottom" aria-expanded={(panelOpen || infoOpen) && !notesOpen}>
+            <IconRail open={(infoOpen || panelOpen) && !notesOpen} side="right" /> <span>Laburpena</span>
+          </button>
+          <button className={`tool${notesOpen ? ' is-on' : ''}`} onClick={toggleNotes} aria-pressed={notesOpen} data-tip="Jatorrizko apunteak, simulazioarekin batera · N" data-tip-pos="bottom-end">
+            <IconNotes size={16} /> <span>Apunteak</span>
           </button>
         </div>
       </header>
 
-      <div className={`workspace${panelOpen ? ' panel-open' : ''}${outlineOpen ? '' : ' no-outline'}${infoOpen ? '' : ' no-info'}${selected ? ' has-sel' : ''}`}>
+      <div className={`workspace${notesOpen ? ' notes-mode' : ''}${panelOpen ? ' panel-open' : ''}${outlineShown ? '' : ' no-outline'}${infoOpen || notesOpen ? '' : ' no-info'}${selected ? ' has-sel' : ''}`}>
         <Outline
-          collapsed={!outlineOpen}
-          onToggle={() => setPref('outline', !outlineOpen)}
+          collapsed={!outlineShown}
+          onToggle={toggleOutline}
           week={week}
           current={pos.i}
           visited={visited}
@@ -1567,6 +1656,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         </main>
 
         <aside className="info" aria-label="Azalpena">
+          {notesOpen && selected && <button className="notes-back" onClick={() => setSelected(null)}>← Apunteak</button>}
           {selected ? (
             <Inspector id={selected} week={week} currentStageId={stage.id} onClose={() => setSelected(null)} onSelect={pick} onGoto={(w, sid) => gotoWeekStage(w, sid, selected)} onReplay={replay}
               onPractice={(id) => {
@@ -1575,6 +1665,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               }}
               onFind={findConcept}
             />
+          ) : notesOpen ? (
+            <NotesPanel key={week.week} week={week.week} stage={stage} activeBeat={notesBeatIndex}
+              progress={notesProgress}
+              onGoto={gotoNote} onDismiss={toggleNotes} />
           ) : (
             <StageInfo
               key={stage.id}

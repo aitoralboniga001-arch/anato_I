@@ -579,7 +579,7 @@ export const week4: WeekDef = {
       ],
       beats: [
         {
-          at: 0,
+          at: 0, notes: ['w4/1/p4/s1', 'w4/1/p5/s1-s2', 'w4/1/p7/s1'],
           recall: ['enbrioi-barruko-zeloma'],
           idea: 'Disko laua bi norabidetan tolesten da, ALDI BEREAN: zefalokaudalki eta zeharka.',
           text: 'Zefalokaudala: buruaren eta buztanaren muturrak bentralera makurtzen dira (ebaki sagitala). Zeharkakoa: alboko ertzak behera eta erdirantz biltzen dira (ebaki zeharkakoa).',
@@ -587,7 +587,7 @@ export const week4: WeekDef = {
           focus: ['tolestura-kraneokaudala', 'tolestura-laterala'],
         },
         {
-          at: 0.08,
+          at: 0.08, notes: ['w4/3.3/p7/s1-s2', 'w4/4/p3/s1'],
           exam: 'Azterketan: tolespen zefalokaudala ← nerbio-sistema zentralaren luzetarako hazkuntza.',
           view: 'sagitala',
           idea: 'Buruaren tolespenak mintz bukofaringeoa eta bihotz-eremua bentralera eramaten ditu.',
@@ -595,7 +595,7 @@ export const week4: WeekDef = {
           focus: ['mintz-bukofaringeoa', 'bihotz-hodia', 'barrunbe-perikardikoa', 'aurreko-hestea'],
         },
         {
-          at: 0.3,
+          at: 0.3, notes: ['w4/4/p3/s1', 'w4/4/p4/s2-s3'],
           recall: ['alantoidea', 'kloaka-mintza'],
           view: 'sagitala',
           idea: 'Buztanaren tolespenak kloaka-mintza eta alantoidea bentralera eramaten ditu.',
@@ -603,7 +603,7 @@ export const week4: WeekDef = {
           focus: ['kloaka-mintza', 'alantoidea', 'finkapen-pedikulua'],
         },
         {
-          at: 0.44,
+          at: 0.44, notes: ['w4/3.3/p6/s1-s3', 'w4/3.3/p9/s1-s3'],
           recall: ['somitak'],
           exam: 'Azterketan: zeharkako tolespena ← somiten hazkuntza.',
           view: 'zeharkakoa',
@@ -623,7 +623,7 @@ export const week4: WeekDef = {
           },
         },
         {
-          at: 0.56,
+          at: 0.56, notes: ['w4/4/p5/s1-s2'],
           view: 'zeharkakoa',
           idea: 'Barneratutako endodermoak heste-hodia osatzen du: aurreko, erdiko eta atzeko hestea.',
           text: 'Erdiko hestea kanpoan geratzen den bitelo zakuarekin lotuta jarraitzen du, hodi onfalomesenterikoaren bidez (lepo estua).',
@@ -631,14 +631,14 @@ export const week4: WeekDef = {
           focus: ['hodi-onfalomesenterikoa', 'bitelo-zaku-sekundarioa', 'erdiko-hestea'],
         },
         {
-          at: 0.66,
+          at: 0.66, notes: ['w4/4/p6/s1-s3'],
           view: 'sagitala',
           idea: 'Finkapen-pedikulua gorputz-paretaren alde bentralera mugitzen da.',
           text: 'Hodi onfalomesenterikoarekin batera, zilbor-hestea eratzeko lehen urratsa da.',
           focus: ['finkapen-pedikulua'],
         },
         {
-          at: 0.72,
+          at: 0.72, notes: ['w4/3.3/p10/s3-s5', 'w4/4/p3/s2'],
           view: 'zeharkakoa',
           idea: 'Alboko ertzak erdiko lerroan elkartzen dira: gorputz-horma bentrala ixten da.',
           text: 'Ektodermoa ektodermoarekin eta paretako orria paretako orriarekin batzen dira; enbrioi barruko zeloma barruan geratzen da eta endodermoa hodi bihurtzen da (erdiko hestea).',
@@ -646,14 +646,14 @@ export const week4: WeekDef = {
           focus: ['tolestura-laterala', 'paretako-orria', 'enbrioi-barruko-zeloma', 'erdiko-hestea'],
         },
         {
-          at: 0.8,
+          at: 0.8, notes: ['w4/3.3/p19/s1-s2'],
           view: 'sagitala',
           idea: 'Amnios barrunbea zabaldu eta enbrioi osoa inguratzen du.',
           text: 'Enbrioia likido amniotikoan flotatzen geratuko da; ektodermoa da haren kanpoko azala.',
           focus: ['amnios-barrunbea'],
         },
         {
-          at: 0.88,
+          at: 0.88, notes: ['w4/4/p16/s4-s8'],
           view: 'sagitala',
           idea: 'Azaleko ektodermoak bi sakongune sortzen ditu: estomodeoa eta proktodeoa.',
           text: 'Estomodeoa mintz bukofaringeoaren aurrean dago (etorkizuneko ahoa), eta proktodeoa kloaka-mintzaren atzean.',
@@ -732,7 +732,7 @@ export const week4: WeekDef = {
       ],
       beats: [
         {
-          at: 0,
+          at: 0, notes: ['w4/2/p3/s1'],
           recall: ['notokorda'],
           exam: 'Azterketan: notokorda beharrezkoa da hodi neurala sortzeko.',
           idea: 'Azaleko ektodermoaren eremu honek plaka neurala osatzen du.',
@@ -751,19 +751,19 @@ export const week4: WeekDef = {
           },
         },
         {
-          at: 0.12,
+          at: 0.12, notes: ['w4/2/p3/s2'],
           idea: 'Plakaren erdialdea sakontzen ari da; hortik sortzen da ildo neurala.',
           text: 'Plaka neurala zefalikotik kaudalera handitzen da, eta erdiko lerroa (notokordaren gainean) behera doa. Ertzak oraindik lau samar daude.',
           focus: ['ildo-neurala'],
         },
         {
-          at: 0.3,
+          at: 0.3, notes: ['w4/2/p3/s3'],
           idea: 'Alboetako ertzak gorantz altxatzen dira; hauek tolesdura neuralak dira.',
           text: 'Bi ertzak altxatu eta erdiko lerrorantz hurbiltzen dira (zeharkako mozketan: geziak; goitik: ertzak elkarrengana). Ildoa gero eta sakonagoa da, eta azaleko ektodermoa ertzekin batera dago oraindik.',
           focus: ['tolesdura-neuralak'],
         },
         {
-          at: 0.44,
+          at: 0.44, notes: ['w4/2/p3/s3-s5'],
           idea: 'Tolesdura neuralak elkartu eta fusionatzean hodi neurala eratzen da.',
           text: 'Fusioa etorkizuneko lepo-eskualdean hasten da eta handik zefalikorantz eta kaudalerantz zabaltzen da, kremailera bat bezala (ikuspegi dortsalean ondo ikusten da).',
           caution: 'Fusioa ez da muturretik hasten: erditik (lepotik) bi norabidetan.',
@@ -780,20 +780,20 @@ export const week4: WeekDef = {
           },
         },
         {
-          at: 0.62,
+          at: 0.62, notes: ['w4/2/p7/s1-s2'],
           idea: 'Ertzetako zelulek gandor neuraleko zelulak emango dituzte.',
           text: 'Tolesduren ertzetan, fusio-lekuan, zelula batzuk ektodermotik askatzen dira (zeharkako mozketan: zelula turkesak). Ez dira ez hodiaren ez azaleko ektodermoaren parte.',
           key: 'Gandor neurala = tolesduren ertzetatik askatutako zelulak.',
           focus: ['gandor-neurala'],
         },
         {
-          at: 0.68,
+          at: 0.68, notes: ['w4/2/p3/s4-s6'],
           idea: 'Hodi neurala itxita dago eta azaleko ektodermoak estaltzen du.',
           text: 'Mozketa honen mailan hodia erabat itxita dago: barruan kanal neurala, gainean azaleko ektodermo jarraitua. Bi ektodermoak bereizita geratu dira.',
           focus: ['hodi-neurala', 'azaleko-ektodermoa'],
         },
         {
-          at: 0.8,
+          at: 0.8, notes: ['w4/2/p7/s2'],
           idea: 'Gandor neuraleko zelulak migratzen hasten dira.',
           text: 'Hodi neuraletik bereizi eta alboetara eta beherantz mugitzen dira (zelula turkesak), mesodermoan barrena. Leku askotara iritsi eta egitura ugari emango dituzte.',
           more: 'Gandor neuralaren eratorriak (ganglioak, melanozitoak, giltzurrun-gaineko medula…) hurrengo gaietan landuko dira.',
@@ -810,7 +810,7 @@ export const week4: WeekDef = {
           },
         },
         {
-          at: 0.9,
+          at: 0.9, notes: ['w4/2/p5/s1-s3', 'w4/2/p6/s1'],
           view: 'dortsala',
           exam: 'Azterketan: neuroporo kraneala ≈25. egunean ixten da, kaudala ≈28. egunean.',
           idea: 'Muturretan, hodia amnios barrunbera irekita dago: neuroporoak.',
@@ -871,12 +871,12 @@ export const week4: WeekDef = {
         },
       ],
       beats: [
-        { at: 0, text: 'Hodi neuralaren alde zefalikoan zabalkuntz desberdinak agertzen hasten dira.', focus: ['hodi-neurala'] },
-        { at: 0.08, text: 'Prosentzefaloa (aurreko entzefaloa): zabalkuntzarik zefalikoena.', focus: ['prosentzefaloa'] },
-        { at: 0.24, text: 'Mesentzefaloa (erdiko entzefaloa): prosentzefaloaren eta erronbentzefaloaren artean.', focus: ['mesentzefaloa'] },
-        { at: 0.4, text: 'Erronbentzefaloa (atzeko entzefaloa): ornomuinarekin jarraia.', focus: ['erronbentzefaloa'] },
-        { at: 0.58, text: 'Hiru burmuin-xixkuak atal jarraiak dira euren artean, eta baita ornomuinarekiko ere.', focus: ['prosentzefaloa', 'mesentzefaloa', 'erronbentzefaloa'] },
-        { at: 0.75, text: 'Gainerako hodi neurala (alde kaudala) askoz estuagoa da: ornomuina izango da.', focus: ['ornomuina'] },
+        { at: 0, notes: ['w4/2/p4/s1'], text: 'Hodi neuralaren alde zefalikoan zabalkuntz desberdinak agertzen hasten dira.', focus: ['hodi-neurala'] },
+        { at: 0.08, notes: ['w4/2/p4/s1'], text: 'Prosentzefaloa (aurreko entzefaloa): zabalkuntzarik zefalikoena.', focus: ['prosentzefaloa'] },
+        { at: 0.24, notes: ['w4/2/p4/s1'], text: 'Mesentzefaloa (erdiko entzefaloa): prosentzefaloaren eta erronbentzefaloaren artean.', focus: ['mesentzefaloa'] },
+        { at: 0.4, notes: ['w4/2/p4/s1'], text: 'Erronbentzefaloa (atzeko entzefaloa): ornomuinarekin jarraia.', focus: ['erronbentzefaloa'] },
+        { at: 0.58, notes: ['w4/2/p4/s1'], text: 'Hiru burmuin-xixkuak atal jarraiak dira euren artean, eta baita ornomuinarekiko ere.', focus: ['prosentzefaloa', 'mesentzefaloa', 'erronbentzefaloa'] },
+        { at: 0.75, notes: ['w4/2/p4/s2'], text: 'Gainerako hodi neurala (alde kaudala) askoz estuagoa da: ornomuina izango da.', focus: ['ornomuina'] },
       ],
       structures: ['hodi-neurala', 'prosentzefaloa', 'mesentzefaloa', 'erronbentzefaloa', 'ornomuina', 'mintz-bukofaringeoa'],
       keyPoints: [
@@ -916,14 +916,14 @@ export const week4: WeekDef = {
       ],
       beats: [
         {
-          at: 0, view: 'zeharkakoa', recall: ['tolesdura-neuralak', 'hodi-neurala'],
+          at: 0, notes: ['w4/2/p7/s1-s2'], view: 'zeharkakoa', recall: ['tolesdura-neuralak', 'hodi-neurala'],
           idea: 'Tolesdura neuralen ertzetako zelulak askatu egiten dira: gandor neurala.',
           text: 'Zelula ektodermikoek trantsizio epitelio-mesenkimatikoa egiten dute: geruzako loturak galdu eta banaka migratzeko gaitasuna hartzen dute. Irudian, zelula luzeak ertzetik bereizi eta hodi neuralaren alde dortsalean biltzen dira.',
           key: 'Jatorria: tolesdura neuralen ertzak. Hurrengo urratsa: migrazioa.',
           focus: ['gandor-neurala', 'tolesdura-neuralak'],
         },
         {
-          at: 0.18, view: 'zeharkakoa', recall: ['azaleko-ektodermoa'],
+          at: 0.18, notes: ['w4/2/p8/s1-s4', 'w4/2/p12/s1'], view: 'zeharkakoa', recall: ['azaleko-ektodermoa'],
           idea: 'Bide dortsolaterala: azaleko ektodermopean, epidermiserantz.',
           text: 'Jarraitu laranja koloreko zelulei: hodi neuralaren alde dortsaletik alboetara doaz, azaleko ektodermopean. Epidermisera iritsita melanozitoak, ile-folikuluak eta azazkalak sortzen dituzte.',
           key: 'Dortsolaterala → epidermisa → melanozitoak, ile-folikuluak eta azazkalak.',
@@ -931,7 +931,7 @@ export const week4: WeekDef = {
           focus: ['gandor-neurala', 'azaleko-ektodermoa'],
         },
         {
-          at: 0.3, view: 'zeharkakoa', recall: ['hodi-neurala', 'somitak'],
+          at: 0.3, notes: ['w4/2/p9/s1-s4'], view: 'zeharkakoa', recall: ['hodi-neurala', 'somitak'],
           idea: 'Bide bentrala: hodi neuralaren eta somiten artetik barrurantz.',
           text: 'Jarraitu turkesa koloreko zelulei: hodi neuralaren alboetatik bentralera migratzen dute. Gongoil errakideoak nerbio espinalen atzeko sustraiekin lotuta daude; gongoil sinpatikoak sakonago kokatzen dira.',
           key: 'Bi bide, jatorri bera: azalera dortsolateraletik; gongoiletara bentraletik.',
@@ -944,14 +944,14 @@ export const week4: WeekDef = {
           },
         },
         {
-          at: 0.5, view: 'eratorriak', recall: ['gandor-neurala'],
+          at: 0.5, notes: ['w4/2/p14/s1', 'w4/2/p15/s1', 'w4/2/p18/s1', 'w4/2/p19/s1', 'w4/2/p26/s1'], view: 'eratorriak', recall: ['gandor-neurala'],
           idea: 'Gandor kranealak buruaren eta aurpegiaren egiturak sortzen laguntzen du.',
           text: 'Zelulak buru-eremura migratu eta hezur eta ehun konjuntibo, odontoblasto eta buru eta lepoaren dermis bihurtzen dira. Bikote kranialaren gongoiletan eta prosentzefaloaren inguruko meningeetan ere ekarpena egiten dute.',
           key: 'Gandor neurala ez da nerbio-egituren iturria bakarrik: hezurrak eta odontoblastoak ere bai.',
           focus: ['buru-aurpegi-hezurrak', 'meningeak-kraneal', 'odontoblastoak'],
         },
         {
-          at: 0.65, view: 'eratorriak', recall: ['gandor-neurala'],
+          at: 0.65, notes: ['w4/2/p16/s1', 'w4/2/p17/s1', 'w4/2/p28/s1'], view: 'eratorriak', recall: ['gandor-neurala'],
           idea: 'Gandor neuralaren eratorri batzuk ez dira nerbio-sistemakoak.',
           text: 'Apunteen zerrendan tiroide guruinaren zelulak, bihotzaren trenkada tronkokonala eta aurpegi eta prosentzefaloaren odol-hodietako muskulu-zelula leunak ageri dira. Irudian helmuga horietara doazen zelulak eta ondorengo bereizketa jarrai ditzakezu.',
           key: 'Eratorriak sailkatzeko, galdetu zer ehun sortzen den; izenean «neural» egoteak ez du esan nahi dena neurona denik.',
@@ -965,7 +965,7 @@ export const week4: WeekDef = {
           },
         },
         {
-          at: 0.78, view: 'eratorriak', recall: ['gandor-neurala', 'hodi-neurala'],
+          at: 0.78, notes: ['w4/2/p20/s1', 'w4/2/p21/s1', 'w4/2/p22/s1', 'w4/2/p23/s1', 'w4/2/p24/s1', 'w4/2/p25/s1', 'w4/2/p11/s2'], view: 'eratorriak', recall: ['gandor-neurala', 'hodi-neurala'],
           idea: 'Gongoilak, Schwann eta glia zelulak; eta, aparte, giltzurrun gaineko muina.',
           text: 'Gongoil errakideoak, sinpatikoak eta digestio aparatuaren gongoil parasinpatikoak, Schwann zelulak eta nerbio periferikoen glia gandor neuraletik datoz. Giltzurrun gaineko guruinaren muineko zelulak ere bai: adrenalina eta noradrenalina ekoizten dituzte.',
           key: 'Muina BAI; kortexa EZ. Gongoil enterikoak hestearen paretan daude.',
@@ -973,7 +973,7 @@ export const week4: WeekDef = {
           focus: ['gongoil-errakideoak', 'gongoil-sinpatikoak', 'gongoil-parasinpatikoak', 'schwann-zelulak', 'glia-zelulak'],
         },
         {
-          at: 0.9, view: 'eratorriak', recall: ['azaleko-ektodermoa', 'gandor-neurala'],
+          at: 0.9, notes: ['w4/2/p8/s2-s4', 'w4/2/p27/s1'], view: 'eratorriak', recall: ['azaleko-ektodermoa', 'gandor-neurala'],
           idea: 'Epidermisera iristen diren gandor-zelulek hiru egitura sortzen dituzte.',
           text: 'Bide dortsolateraletik epidermisera iritsitako gandor neuraleko zelulek melanozitoak, ile-folikuluak eta azazkalak sortzen dituzte. Epidermisa bera azaleko ektodermotik dator: gandor-zelulak kanpotik sartzen zaizkio.',
           key: 'Gandor neurala → epidermisera → melanozitoak, ile-folikuluak eta azazkalak.',
