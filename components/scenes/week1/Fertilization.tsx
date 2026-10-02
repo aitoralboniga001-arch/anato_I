@@ -277,7 +277,11 @@ export function Fertilization({ t }: SceneProps) {
       <Mark id="kapazitazioa" x={winner.x} y={winner.y} rx={27} color="#7dd3fc" show={vis(t, 0.1, 0.26)} />
       <Mark id="akrosoma-erreakzioa" x={winner.x + Math.cos(((WINNER_DEG + 180) * Math.PI) / 180) * 16} y={winner.y + Math.sin(((WINNER_DEG + 180) * Math.PI) / 180) * 16} rx={17} show={vis(t, 0.28, 0.44)} />
       <Mark id="erreakzio-kortikala" show={vis(t, 0.42, 0.58)}>
-        <circle className="mark-ring" cx={CX} cy={CY} r={OO_R - 6} fill="none" stroke="#fde68a" strokeWidth={3} strokeDasharray="5 4" />
+        {/* The reaction runs all round the membrane: a glowing rim, not a dashed line. */}
+        <g>
+          <circle cx={CX} cy={CY} r={OO_R - 6} fill="none" stroke="#fde68a" strokeWidth={12} strokeOpacity={0.16} />
+          <circle className="mark-light" cx={CX} cy={CY} r={OO_R - 6} fill="none" stroke="#fde68a" strokeWidth={2.6} strokeOpacity={0.85} />
+        </g>
       </Mark>
 
       {/* Labels — side gutters only. */}

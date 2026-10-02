@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Cell, Label, Mark, Note, Part, lerp, seg, zoom, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Cell, Destination, Journey, Label, Mark, Note, Part, lerp, seg, zoom, type Pt, type SceneProps } from '@/components/kit';
 
 const GOLD = '#ffba72';
 const TEAL = '#5eead4';
@@ -9,9 +9,24 @@ const TEAL = '#5eead4';
 function geometry(t: number) {
   const close = seg(t, 0, 0.095);
   const gap = lerp(18, 0, close);
-  const z = zoom(0, 61, lerp(3.15, 2.65, seg(t, 0.18, 0.22)), 500, 320);
-  return { gap, close, z };
+  const s = lerp(3.15, 2.65, seg(t, 0.18, 0.22));
+  const z = zoom(0, 61, s, 500, 320);
+  return { gap, close, z, u: 1 / s };
 }
+
+/** Dorsolateral pathway: under the surface ectoderm, toward the epidermis (cell i, side sd). */
+const dorsalPos = (i: number, sd: number, t: number): Pt => [sd * lerp(26, 65 + i * 17, seg(t, 0.182 + i * 0.003, 0.235 + i * 0.005)), 8];
+/** Ventral pathway: between the neural tube and the somite, down to the ganglia. */
+function ventralPos(i: number, sd: number, t: number): Pt {
+  const u = seg(t, 0.305 + i * 0.01, 0.425 + i * 0.014);
+  return [sd * lerp(30, 45, Math.min(1, u * 3)), lerp(13, 66 + i * 26, u)];
+}
+const route = (pos: (t: number) => Pt, t0: number, t: number) => {
+  const pts: Pt[] = [];
+  for (let tt = t0; tt < t; tt += 0.004) pts.push(pos(tt));
+  pts.push(pos(t));
+  return pts;
+};
 function Melanocyte({ x, y }: { x: number; y: number }) {
   return <g transform={`translate(${x} ${y})`}>
     <path d="M0,0L-8,-3M0,0L-7,5M0,0L2,7M0,0L9,2M0,0L5,-5" fill="none" stroke={GOLD} strokeWidth={1.2} />
@@ -20,7 +35,7 @@ function Melanocyte({ x, y }: { x: number; y: number }) {
 }
 
 export function CrestSection({ t, reduced }: SceneProps) {
-  const { gap, close, z } = geometry(t);
+  const { gap, close, z, u: unit } = geometry(t);
   const emt = seg(t, 0.025, 0.13);
   const dorsal = seg(t, 0.182, 0.247);
   const ventral = seg(t, 0.31, 0.455);
@@ -80,11 +95,14 @@ export function CrestSection({ t, reduced }: SceneProps) {
           </Part>
           <g opacity={dimD}>
             <Arrow from={[sd * 29, 8]} to={[sd * 100, 8]} bend={0} color={GOLD} width={1.3} head={4} progress={dorsal} flow={!reduced && dorsal > 0 && dorsal < 1} />
+            {/* Where they go: the epidermis just above, where they will be melanocytes. */}
+            <Destination x={sd > 0 ? 56 : -108} y={-8} w={52} h={15} color={GOLD} oval show={seg(t, 0.186, 0.2) * (1 - seg(t, 0.247, 0.258))} />
+            {[0, 1, 2].map(i => <Journey key={i} pts={route((tt) => dorsalPos(i, sd, tt), 0.182, t)} color={GOLD} head={10} width={2.2} u={unit} r={4.5} route={0.55} show={(1 - seg(t, 0.247, 0.258)) * (1 - m[0])} />)}
             <Part id="gandor-neurala">
               {[0, 1, 2].map(i => {
-                const u = seg(t, 0.182 + i * 0.003, 0.235 + i * 0.005);
+                const [x, y] = dorsalPos(i, sd, t);
                 return <g key={i} opacity={(1 - seg(t, 0.247, 0.258)) * (1 - m[0])}>
-                  <Cell x={sd * lerp(26, 65 + i * 17, u)} y={8} r={4} rx={5} ry={3.7} color={GOLD} nucleus="#874820" />
+                  <Cell x={x} y={y} r={4} rx={5} ry={3.7} color={GOLD} nucleus="#874820" />
                 </g>;
               })}
             </Part>
@@ -94,11 +112,15 @@ export function CrestSection({ t, reduced }: SceneProps) {
           </g>
           <g opacity={dimV}>
             <Arrow from={[sd * 41, 19]} to={[sd * 45, 120]} bend={0.025 * sd} color={TEAL} width={1.5} head={4} progress={ventral} flow={!reduced && ventral > 0 && ventral < 1} />
+            {/* Where they go: the spinal ganglion beside the tube and the sympathetic ganglion by the aorta. */}
+            <Destination x={sd * 45 - 8} y={56} w={16} h={26} color={TEAL} oval show={seg(t, 0.31, 0.33) * (1 - seg(t, 0.419, 0.442))} />
+            <Destination x={sd * 45 - 8} y={117} w={16} h={14} color={TEAL} oval show={seg(t, 0.31, 0.33) * (1 - seg(t, 0.444, 0.463))} />
+            {[0, 1, 2].map(i => <Journey key={i} pts={route((tt) => ventralPos(i, sd, tt), 0.3, t)} color={TEAL} head={10} width={2.2} u={unit} r={4.5} route={0.55} show={seg(t, 0.3, 0.314) * (1 - seg(t, 0.453, 0.461))} />)}
             <Part id="gandor-neurala">
               {[0, 1, 2].map(i => {
-                const u = seg(t, 0.305 + i * 0.01, 0.425 + i * 0.014);
+                const [x, y] = ventralPos(i, sd, t);
                 return <g key={i} opacity={seg(t, 0.3, 0.314) * (1 - seg(t, 0.453, 0.461))}>
-                  <Cell x={sd * lerp(30, 45, Math.min(1, u * 3))} y={lerp(13, 66 + i * 26, u)} r={4.5} rx={4} ry={5.6} color={TEAL} nucleus="#155e59" />
+                  <Cell x={x} y={y} r={4.5} rx={4} ry={5.6} color={TEAL} nucleus="#155e59" />
                 </g>;
               })}
             </Part>

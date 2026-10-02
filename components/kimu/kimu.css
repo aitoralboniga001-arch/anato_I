@@ -744,7 +744,7 @@
   content: '';
   position: absolute;
   top: -6px;
-  left: 50%;
+  left: var(--nudge-tip, 50%);
   width: 10px;
   height: 10px;
   background: var(--surface-2);

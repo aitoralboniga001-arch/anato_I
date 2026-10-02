@@ -1,8 +1,8 @@
 'use client';
 
-import { forwardRef, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { forwardRef, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from 'react';
 import { Defs } from '@/components/kit/Defs';
-import { LabelScaleContext } from '@/components/kit/context';
+import { LabelScaleContext, TextLayerContext } from '@/components/kit/context';
 import type { Orientation } from '@/lib/sim/types';
 import { IconFit, IconZoomIn, IconZoomOut } from './icons';
 
@@ -176,6 +176,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   const wrap = useRef<HTMLDivElement>(null);
   const scene = useRef<SVGGElement>(null);
   const [rings, setRings] = useState<Mark[]>([]);
+  const [textLayer, setTextLayer] = useState<SVGGElement | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenError, setFullscreenError] = useState('');
   const markKey = (marks ?? []).join('|');
@@ -217,10 +218,11 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
     }
   }
 
-  // Labels keep about 12.5px on screen however small the frame is drawn (13.5 frame units at scale
-  // ≈0.93), growing at most 30%; zooming in makes them larger as usual.
+  // Labels keep about 13.5px on screen however small the frame is drawn (13.5 frame units at scale
+  // 1), growing at most 50% (tablets, short laptop screens; each label still only grows as far as it
+  // fits); zooming in makes them larger as usual.
   const fit = size ? Math.min(size.w / W, size.h / H) : 1;
-  const labelK = Math.round(Math.min(1.3, Math.max(1, 0.93 / (fit * z.k * room.k))) * 50) / 50;
+  const labelK = Math.round(Math.min(1.5, Math.max(1, 1 / (fit * z.k * room.k))) * 50) / 50;
   const pillL = !!orientation?.left;
   const pillR = !!orientation?.right;
   const labelScale = useMemo(() => ({ k: labelK, left: pillL, right: pillR }), [labelK, pillL, pillR]);
@@ -269,7 +271,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   }, [fullscreenRef]);
 
   const toSvg = useCallback((clientX: number, clientY: number) => {
-    const el = wrap.current;
+    const el = wrap.current?.querySelector('svg.viewport-svg');
     if (!el) return { x: W / 2, y: H / 2, s: 1 };
     const r = el.getBoundingClientRect();
     const s = Math.min(r.width / W, r.height / H);
@@ -338,41 +340,66 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
         <g transform={`translate(${z.x} ${z.y}) scale(${z.k})`}>
           <g className="scene-room" style={{ transform: `translate(${room.x}px, ${room.y}px) scale(${room.k})` }}>
           <g ref={scene}>
-            <LabelScaleContext.Provider value={labelScale}>{children}</LabelScaleContext.Provider>
+            <TextLayerContext.Provider value={textLayer}>
+              <LabelScaleContext.Provider value={labelScale}>{children}</LabelScaleContext.Provider>
+            </TextLayerContext.Provider>
           </g>
+          {rings.length > 0 && (
+            <defs>
+              <radialGradient id="vp-mark-light">
+                <stop offset="0" stopColor="#ffb86b" stopOpacity={0.5} />
+                <stop offset="0.45" stopColor="#ffb86b" stopOpacity={0.3} />
+                <stop offset="1" stopColor="#ffb86b" stopOpacity={0} />
+              </radialGradient>
+            </defs>
+          )}
           {rings.map((m, i) => {
-            const pad = 10 / z.k;
-            const rx = m.w / 2 + pad;
-            const ry = m.h / 2 + pad;
-            const r = Math.max(rx, ry, 16 / z.k);
+            const u = 1 / z.k;
+            const pad = 10 * u;
+            const r = Math.max(m.w / 2 + pad, m.h / 2 + pad, 16 * u);
+            const rx = Math.max(m.w / 2 + pad, r * 0.6);
+            const ry = Math.max(m.h / 2 + pad, r * 0.6);
             const cx = m.x + m.w / 2;
             const cy = m.y + m.h / 2;
             const name = m.named ? undefined : nameOf?.(m.id);
+            const zoomIn = (e: ReactMouseEvent) => {
+              e.stopPropagation();
+              const k = Math.min(6, Math.max(z.k * 1.5, Math.min(W / (m.w * 6 + 60), H / (m.h * 6 + 60))));
+              glideZoom({ k, x: W / 2 - cx * k, y: H / 2 - cy * k });
+            };
+            // Name pill above the ring (below it when the ring is at the top edge), joined by a short stem.
+            const fs = 11.5 * u;
+            const pw = (name ? name.length * 6.6 + 34 : 0) * u;
+            const ph = 21 * u;
+            const above = cy - ry - 34 * u > 4;
+            const py = above ? cy - ry - 12 * u - ph : cy + ry + 12 * u;
             return (
-              <g key={`${m.id}-${i}`} className="mark" aria-hidden>
-                <ellipse className="mark-ring" cx={cx} cy={cy} rx={Math.max(rx, r * 0.6)} ry={Math.max(ry, r * 0.6)} vectorEffect="non-scaling-stroke" />
-                <ellipse
-                  className="mark-hit"
-                  cx={cx}
-                  cy={cy}
-                  rx={Math.max(rx, r * 0.6)}
-                  ry={Math.max(ry, r * 0.6)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const k = Math.min(6, Math.max(z.k * 1.5, Math.min(W / (m.w * 6 + 60), H / (m.h * 6 + 60))));
-                    glideZoom({ k, x: W / 2 - cx * k, y: H / 2 - cy * k });
-                  }}
-                >
+              <g key={`${m.id}-${i}-${markKey}`} className="mark mark-still" aria-hidden>
+                {/* No outline drawn over the anatomy: a soft pool of warm light on the structure itself. */}
+                <ellipse className="mark-light" cx={cx} cy={cy} rx={rx * 1.45} ry={ry * 1.45} fill="url(#vp-mark-light)" />
+                <ellipse className="mark-hit" cx={cx} cy={cy} rx={rx} ry={ry} onClick={zoomIn}>
                   <title>{name ? `${name}: handitu` : 'Handitu'}</title>
                 </ellipse>
                 {name && i < 3 && (
-                  <text className="mark-tag" x={cx} y={cy - Math.max(ry, r * 0.6) - 6 / z.k} fontSize={11 / z.k} textAnchor="middle">
-                    {name}
-                  </text>
+                  <g className="mark-pill" onClick={zoomIn}>
+                    <title>{`${name}: handitu`}</title>
+                    <path className="mark-tick-casing" d={`M${cx},${cy} L${cx},${above ? py + ph : py}`} vectorEffect="non-scaling-stroke" />
+                    <path className="mark-tick" d={`M${cx},${cy} L${cx},${above ? py + ph : py}`} vectorEffect="non-scaling-stroke" />
+                    <circle className="mark-pin" cx={cx} cy={cy} r={3.2 * u} />
+                    <rect className="mark-pill-plate" x={cx - pw / 2} y={py} width={pw} height={ph} rx={ph / 2} vectorEffect="non-scaling-stroke" />
+                    {/* Magnifier: the pill (and the ring) zoom in on what it points at. */}
+                    <circle className="mark-pill-icon" cx={cx - pw / 2 + 12 * u} cy={py + ph / 2 - 1 * u} r={3.6 * u} vectorEffect="non-scaling-stroke" />
+                    <path className="mark-pill-icon" d={`M${cx - pw / 2 + 14.6 * u},${py + ph / 2 + 1.6 * u} l${3 * u},${3 * u}`} vectorEffect="non-scaling-stroke" />
+                    <text className="mark-tag" x={cx - pw / 2 + 21 * u} y={py + ph / 2} dy="0.35em" fontSize={fs}>
+                      {name}
+                    </text>
+                  </g>
                 )}
               </g>
             );
           })}
+          {/* Names, notes and call-outs land here (kit OnTop): above every leader, arrow and marker. */}
+          <g ref={setTextLayer} className="text-layer" />
           </g>
         </g>
       </svg>

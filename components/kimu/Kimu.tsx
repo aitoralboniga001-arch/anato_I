@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { Fragment, useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent } from 'react';
 import type { KimuReply, KimuTarget, Mood } from '@/lib/kimu/types';
 import { IconClose, IconPlay } from '@/components/shell/icons';
 import { KimuFace } from './KimuFace';
@@ -102,7 +102,7 @@ export function Kimu() {
   const [peek, setPeek] = useState<string | null>(null);
   const [nudge, setNudge] = useState(false);
   // In the simulator the nudge hangs under Kimu's top-bar button instead of the floating launcher.
-  const [nudgeAt, setNudgeAt] = useState<{ x: number; y: number } | null>(null);
+  const [nudgeAt, setNudgeAt] = useState<{ x: number; y: number; tip: number } | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const reduced = useRef(false);
@@ -141,8 +141,13 @@ export function Kimu() {
   useEffect(() => {
     if (!nudge || !inSim) return;
     const place = () => {
-      const r = document.querySelector('.kimu-tool')?.getBoundingClientRect();
-      setNudgeAt(r ? { x: Math.min(window.innerWidth - 120, Math.max(120, r.left + r.width / 2)), y: r.bottom + 10 } : null);
+      // On narrow screens Kimu lives in the Tresnak menu, so the nudge points there instead.
+      const own = document.querySelector('.kimu-tool')?.getBoundingClientRect();
+      const r = own && own.width > 0 ? own : document.querySelector('button[aria-label="Tresnak"]')?.getBoundingClientRect();
+      if (!r || r.width === 0) return setNudgeAt(null);
+      const mid = r.left + r.width / 2;
+      const x = Math.min(window.innerWidth - 120, Math.max(120, mid));
+      setNudgeAt({ x, y: r.bottom + 10, tip: mid - x });
     };
     place();
     window.addEventListener('resize', place);
@@ -289,7 +294,7 @@ export function Kimu() {
       )}
 
       {!open && inSim && nudge && nudgeAt && (
-        <button type="button" className="kimu-nudge is-sim" style={{ left: nudgeAt.x, top: nudgeAt.y }} onClick={openKimu}>
+        <button type="button" className="kimu-nudge is-sim" style={{ left: nudgeAt.x, top: nudgeAt.y, '--nudge-tip': `calc(50% + ${Math.round(nudgeAt.tip)}px)` } as CSSProperties} onClick={openKimu}>
           Zalantzarik? Galdetu niri 🌱
         </button>
       )}

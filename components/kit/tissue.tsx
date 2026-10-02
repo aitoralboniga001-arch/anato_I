@@ -147,21 +147,22 @@ export function Arrow({ from, to, bend = 0.15, color = '#fbbf24', width = 2.4, d
   const cpx = x0 + (cx - x0) * progress;
   const cpy = y0 + (cy - y0) * progress;
   const d = `M${x0},${y0} Q${cpx},${cpy} ${end[0]},${end[1]}`;
-  const hx = (a: number) => end[0] - head * Math.cos(ang + a);
-  const hy = (a: number) => end[1] - head * Math.sin(ang + a);
+  // The head scales with the shaft so thin arrows still end in a point you can see.
+  const hd = Math.max(head, width * 4.2);
+  const hx = (a: number) => end[0] - hd * Math.cos(ang + a);
+  const hy = (a: number) => end[1] - hd * Math.sin(ang + a);
+  const tip = `M${end[0]},${end[1]} L${hx(0.42)},${hy(0.42)} L${hx(-0.42)},${hy(-0.42)}Z`;
+  const dash = dashed || flow ? '7 6' : undefined;
+  // Three layers read on any ground, including a tissue of the arrow's own colour (red mesoderm
+  // arrows over mesoderm): a dark casing, a light rim, then the colour itself.
   return (
     <g opacity={show} className="arrow" pointerEvents="none">
-      <path d={d} fill="none" stroke="rgba(5,8,18,0.55)" strokeWidth={width + 2.4} strokeLinecap="round" />
-      <path
-        d={d}
-        fill="none"
-        stroke={color}
-        strokeWidth={width}
-        strokeLinecap="round"
-        strokeDasharray={dashed || flow ? '7 6' : undefined}
-        className={flow ? 'dash-flow' : undefined}
-      />
-      <path d={`M${end[0]},${end[1]} L${hx(0.45)},${hy(0.45)} L${hx(-0.45)},${hy(-0.45)}Z`} fill={color} stroke="rgba(5,8,18,0.55)" strokeWidth={1} />
+      <path d={d} fill="none" stroke="rgba(6,8,14,0.78)" strokeWidth={width + 4.4} strokeLinecap="round" />
+      <path d={tip} fill="rgba(6,8,14,0.78)" stroke="rgba(6,8,14,0.78)" strokeWidth={4.4} strokeLinejoin="round" />
+      <path d={d} fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth={width + 1.6} strokeLinecap="round" strokeDasharray={dash} className={flow ? 'dash-flow' : undefined} />
+      <path d={tip} fill="rgba(255,255,255,0.8)" stroke="rgba(255,255,255,0.8)" strokeWidth={1.6} strokeLinejoin="round" />
+      <path d={d} fill="none" stroke={color} strokeWidth={width} strokeLinecap="round" strokeDasharray={dash} className={flow ? 'dash-flow' : undefined} />
+      <path d={tip} fill={color} />
     </g>
   );
 }

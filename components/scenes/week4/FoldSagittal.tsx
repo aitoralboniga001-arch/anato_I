@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Label, Mark, Note, Part, clamp, lerp, polyline, rand, seg, tube, type SceneProps } from '@/components/kit';
+import { Arrow, C, Journey, Label, Mark, Note, OnTop, Part, clamp, lerp, polyline, rand, seg, tube, type SceneProps } from '@/components/kit';
 import { useId, type ReactNode } from 'react';
 import { Cells } from '@/components/scenes/section/Section';
 
@@ -573,7 +573,7 @@ function anchorsAt(t: number): Anchors {
   return a;
 }
 
-/** Relation tracking: dashed ghost where the structure started (t=0), dotted trail of its path, dot where it is now. */
+/** Relation tracking: a start dot where the structure was at t=0, the route it has travelled, a dot where it is now. */
 function Track({ t, id, k, from, color, show, tag = false }: { t: number; id: string; k: keyof Anchors; from: number; color: string; show: number; tag?: boolean }) {
   if (show <= 0.02) return null;
   const pts: P2[] = [];
@@ -584,14 +584,19 @@ function Track({ t, id, k, from, color, show, tag = false }: { t: number; id: st
   const moved = Math.hypot(now[0] - g0[0], now[1] - g0[1]) > 6;
   return (
     <g opacity={show} pointerEvents="none" data-track={id}>
-      <circle cx={g0[0]} cy={g0[1]} r={11} fill="none" stroke={color} strokeWidth={1.4} strokeDasharray="3 3" />
-      {tag && (
-        <text x={g0[0]} y={g0[1] - 16} textAnchor="middle" className="note note-dim" style={{ fontSize: 10.5 }}>
-          hasieran
-        </text>
+      {moved && t > from ? (
+        <Journey pts={pts} color={color} head={6} width={2.4} route={0.6} r={4} />
+      ) : (
+        <circle cx={g0[0]} cy={g0[1]} r={3.4} fill={color} stroke="rgba(6,8,14,0.62)" strokeWidth={1.8} />
       )}
-      {moved && t > from && <path d={pathD(pts)} fill="none" stroke={color} strokeWidth={1.8} strokeDasharray="1 4" strokeLinecap="round" />}
-      {moved && <circle cx={now[0]} cy={now[1]} r={4} fill={color} />}
+      {tag && (
+        <OnTop>
+          <text x={g0[0]} y={g0[1] - 14} textAnchor="middle" className="note note-dim" style={{ fontSize: 10.5 }} opacity={show}>
+            hasieran
+          </text>
+        </OnTop>
+      )}
+      {moved && <circle cx={now[0]} cy={now[1]} r={4.5} fill={color} stroke="rgba(6,8,14,0.62)" strokeWidth={1.6} />}
     </g>
   );
 }
@@ -672,7 +677,7 @@ export function FoldingSagittal({ t }: SceneProps) {
       {L('mintz-bukofaringeoa', 190, 430, bmMid)}
       {L('estomodeoa', 190, 470, pits[0].c, pit)}
       {L('hodi-onfalomesenterikoa', 190, 530, pieces[5][Math.floor(pieces[5].length * 0.45)], at(0.66))}
-      {L('bitelo-zaku-sekundarioa', 190, 580, pieces[4][Math.floor(pieces[4].length * 0.62)])}
+      {L('bitelo-zaku-sekundarioa', 190, 562, pieces[4][Math.floor(pieces[4].length * 0.62)])}
 
       {L('notokorda', 810, 110, X(map(0.3 * LH, NT0 + 5)))}
       {L('mesodermo-intraenbrionarioa', 810, 248, X(map(0.45 * LH, NT0 + 9)), layers, true)}

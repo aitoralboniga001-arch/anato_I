@@ -1,6 +1,6 @@
 'use client';
 
-import { clamp, easeInOut, useScene, zoom, type Pt } from '@/components/kit';
+import { OnTop, clamp, easeInOut, useScene, zoom, type Pt } from '@/components/kit';
 import { f1 } from './common';
 
 /** Shared helpers of the gastrulation views: auto-zoom keyframes, label columns and the on-scene call-out chip. */
@@ -58,13 +58,19 @@ export function Callout({ x, y, text, show, color = '#e8eefc', to, align = 'midd
   const w = text.length * 6.9 + 18;
   const x0 = align === 'middle' ? x - w / 2 : align === 'end' ? x - w : x;
   return (
-    <g opacity={show} pointerEvents="none">
-      {to && <path d={`M${f1(x)},${f1(y)} L${f1(to[0])},${f1(to[1])}`} stroke={color} strokeWidth={1.2} strokeDasharray="3 3" opacity={0.8} />}
-      {to && <circle cx={to[0]} cy={to[1]} r={3} fill={color} />}
-      <rect x={f1(x0)} y={y - 12} width={f1(w)} height={24} rx={12} fill="rgba(12,12,16,0.88)" stroke={color} strokeOpacity={0.55} />
-      <text x={f1(x0 + w / 2)} y={y} dy="0.35em" textAnchor="middle" fontSize={12.5} fontWeight={600} fill={color}>
-        {text}
-      </text>
-    </g>
+    <>
+      <g opacity={show} pointerEvents="none">
+        {to && <path d={`M${f1(x)},${f1(y)} L${f1(to[0])},${f1(to[1])}`} stroke={color} strokeWidth={1.2} strokeDasharray="3 3" opacity={0.8} />}
+        {to && <circle cx={to[0]} cy={to[1]} r={3} fill={color} />}
+      </g>
+      <OnTop>
+        <g opacity={show} pointerEvents="none">
+          <rect x={f1(x0)} y={y - 12} width={f1(w)} height={24} rx={12} fill="rgba(12,12,16,0.88)" stroke={color} strokeOpacity={0.55} />
+          <text x={f1(x0 + w / 2)} y={y} dy="0.35em" textAnchor="middle" fontSize={12.5} fontWeight={600} fill={color}>
+            {text}
+          </text>
+        </g>
+      </OnTop>
+    </>
   );
 }

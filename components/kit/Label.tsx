@@ -1,6 +1,7 @@
 'use client';
 
-import type { CSSProperties } from 'react';
+import { useSyncExternalStore, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
+import { OnTop } from './OnTop';
 import { partState, useLabelScale, useScene, type LabelScale } from './context';
 
 /** Semibold text width per character at 1px font size (13.5px ≈ 7.1 frame units per character). */
@@ -31,6 +32,44 @@ function fitScale({ k, left: pillL, right: pillR }: LabelScale, x: number, y: nu
 const grown = (size: number, k: number): CSSProperties | undefined =>
   k > 1 ? { fontSize: `${(size * k).toFixed(2)}px`, strokeWidth: `${(4 * Math.sqrt(k)).toFixed(2)}px` } : undefined;
 
+/** Text widths at 1px font size, measured once per name and weight (the server and hydration use the estimate). */
+const widths = new Map<string, number>();
+let measureCtx: CanvasRenderingContext2D | null | undefined;
+let labelFont = '';
+
+function textWidth(text: string, size: number, weight: number, italic: boolean, measured: boolean) {
+  const estimate = text.length * CHAR_W * size;
+  if (!measured) return estimate;
+  const key = `${weight}${italic ? 'i' : ''}|${text}`;
+  const hit = widths.get(key);
+  if (hit !== undefined) return hit * size;
+  if (measureCtx === undefined) {
+    measureCtx = document.createElement('canvas').getContext('2d');
+    labelFont = getComputedStyle(document.body).fontFamily;
+  }
+  if (!measureCtx) return estimate;
+  measureCtx.font = `${italic ? 'italic ' : ''}${weight} 100px ${labelFont}`;
+  const w = measureCtx.measureText(text).width / 100;
+  // Until the web font arrives the fallback face is measured: use it, but measure again later.
+  if (document.fonts?.status === 'loaded') widths.set(key, w);
+  return w * size;
+}
+
+const noSubscribe = () => () => {};
+/** False on the server and while hydrating, true after: plates are sized by measurement only on the client. */
+const useMeasured = () => useSyncExternalStore(noSubscribe, () => true, () => false);
+
+/**
+ * Backdrop plate behind a label's text: the name stays legible over any tissue colour (pale stroma,
+ * red mesoderm, dark cavities) without changing where the label sits.
+ */
+function plateBox(x: number, y: number, anchor: 'start' | 'middle' | 'end', w: number, fs: number) {
+  const padX = fs * 0.42;
+  const h = fs * 1.42;
+  const x0 = anchor === 'start' ? x - padX : anchor === 'end' ? x - w - padX : x - w / 2 - padX;
+  return { x: x0, y: y - h / 2, w: w + padX * 2, h, padX };
+}
+
 interface LabelProps {
   /** Structure id; the text comes from the registry so names stay consistent everywhere. */
   id: string;
@@ -53,39 +92,53 @@ interface LabelProps {
 export function Label({ id, x, y, ax, ay, align, show = 1, text, small }: LabelProps) {
   const ctx = useScene();
   const scale = useLabelScale();
+  const measured = useMeasured();
   if (!ctx.showLabels || ctx.quiz || show <= 0.02) return null;
   const state = partState(ctx, id);
   const anchor = align ?? (ax !== undefined && ax > x ? 'end' : 'start');
   const hasLeader = ax !== undefined && ay !== undefined;
   const space = !!ctx.isSpace?.(id);
-  // Leader starts at the text edge and bends horizontally first, like textbook call-outs.
-  const lx = x + (anchor === 'end' ? 4 : anchor === 'start' ? -4 : 0);
-  const elbowX = hasLeader ? lx + (ax! - lx) * 0.35 : lx;
   const name = text ?? ctx.nameOf(id);
   const size = state === 'spot' ? 16 : small ? 12 : 13.5;
   const k = fitScale(scale, x, y, anchor, name.length, size);
+  const fs = size * k;
+  const plate = plateBox(x, y, anchor, textWidth(name, fs, state === 'spot' ? 700 : 550, space, measured), fs);
+  // Leader starts at the plate edge and bends horizontally first, like textbook call-outs.
+  const lx = x + (anchor === 'end' ? plate.padX : anchor === 'start' ? -plate.padX : 0);
+  const elbowX = hasLeader ? lx + (ax! - lx) * 0.35 : lx;
+  const leader = hasLeader ? `M${lx},${y} L${elbowX},${y} L${ax},${ay}` : '';
+  const group = {
+    'data-label': id,
+    className: `label label-${state}${small ? ' label-small' : ''}${space ? ' label-space' : ''}`,
+    opacity: show,
+    onClick: (e: ReactMouseEvent) => {
+      e.stopPropagation();
+      ctx.onSelect(id);
+    },
+    onPointerEnter: () => ctx.onHover(id),
+    onPointerLeave: () => ctx.onHover(null),
+  };
+  // The leader stays with the scene; the name goes to the top text layer, so no line (this or any
+  // other leader, arrow or marker) is ever drawn over a word.
   return (
-    <g
-      data-label={id}
-      className={`label label-${state}${small ? ' label-small' : ''}${space ? ' label-space' : ''}`}
-      opacity={show}
-      onClick={(e) => {
-        e.stopPropagation();
-        ctx.onSelect(id);
-      }}
-      onPointerEnter={() => ctx.onHover(id)}
-      onPointerLeave={() => ctx.onHover(null)}
-    >
+    <>
       {hasLeader && (
-        <>
-          <path className="label-leader" d={`M${lx},${y} L${elbowX},${y} L${ax},${ay}`} />
-          <circle className="label-dot" cx={ax} cy={ay} r={space ? 3.4 : 2.6} />
-        </>
+        <g {...group}>
+          {/* A dark casing under the light leader keeps it visible on pale and dark tissue alike. */}
+          <path className="label-casing" d={leader} />
+          <path className="label-leader" d={leader} />
+          <circle className="label-dot" cx={ax} cy={ay} r={space ? 3.8 : 3.1} />
+        </g>
       )}
-      <text x={x} y={y} dy="0.35em" textAnchor={anchor} className="label-text" style={grown(size, k)}>
-        {name}
-      </text>
-    </g>
+      <OnTop>
+        <g {...group}>
+          <rect className="label-plate" x={plate.x} y={plate.y} width={plate.w} height={plate.h} rx={plate.h * 0.3} />
+          <text x={x} y={y} dy="0.35em" textAnchor={anchor} className="label-text" style={k > 1 ? { fontSize: `${fs.toFixed(2)}px` } : undefined}>
+            {name}
+          </text>
+        </g>
+      </OnTop>
+    </>
   );
 }
 
@@ -105,18 +158,21 @@ export function Note({ x, y, children, align = 'middle', show = 1, tone = 'dim',
   const scale = useLabelScale();
   if (show <= 0.02 || (!ctx.showLabels && tone !== 'warn')) return null;
   const base = size ?? 12.5;
-  const k = fitScale(scale, x, y, align, children.length, base);
+  // Sentences grow less than names (at most 30%): they are long and sit beside names.
+  const k = fitScale({ ...scale, k: Math.min(scale.k, 1.3) }, x, y, align, children.length, base);
   return (
-    <text
-      x={x}
-      y={y}
-      dy="0.35em"
-      textAnchor={align}
-      className={`note note-${tone}`}
-      opacity={show}
-      style={grown(base, k) ?? (size ? { fontSize: size } : undefined)}
-    >
-      {children}
-    </text>
+    <OnTop>
+      <text
+        x={x}
+        y={y}
+        dy="0.35em"
+        textAnchor={align}
+        className={`note note-${tone}`}
+        opacity={show}
+        style={grown(base, k) ?? (size ? { fontSize: size } : undefined)}
+      >
+        {children}
+      </text>
+    </OnTop>
   );
 }

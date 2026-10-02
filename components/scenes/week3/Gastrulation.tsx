@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Label, Mark, Note, Part, clamp, lerp, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, FollowRing, Journey, Label, Mark, Note, Part, clamp, lerp, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
 import { discOutlinePath, f1 } from './common';
 import { DiscDrawing, makeDisc } from './DiscSection';
 import { GB } from './GastrulationCells';
@@ -168,16 +168,16 @@ export function GastrulationDorsal({ t, reduced }: SceneProps) {
   const cells = DCELLS.map((c) => ({ c, s: dcellState(c, t) }));
   const showCells = seg(t, GB.converge - 0.02, GB.converge + 0.02);
 
-  // Six followed cells: ring + trail.
+  // Six followed cells: their whole route since convergence, the ring and where they set out from.
+  const win = (a: number, b: number) => seg(t, a, a + 0.03) * (1 - seg(t, b, b + 0.03));
   const tracks = cells
     .filter(({ c }) => c.tracked)
     .map(({ c, s }) => {
       const pts: Pt[] = [];
-      for (let i = 16; i >= 0; i--) {
-        const tt = t - i * 0.011;
-        if (tt >= GB.converge) pts.push(dcellState(c, tt).pos);
-      }
-      return { c, s, pts };
+      for (let tt = GB.converge; tt < t; tt += 0.003) pts.push(dcellState(c, tt).pos);
+      pts.push(s.pos);
+      const told = c.fate === 'A' ? win(GB.invag, GB.meso) : c.fate === 'B' ? win(GB.meso, GB.ecto) : win(GB.ecto, GB.tri);
+      return { c, s, pts, route: Math.max(told, tri) * 0.6 };
     });
 
   const midY = (nodeY + CAUDAL) / 2;
@@ -274,17 +274,12 @@ export function GastrulationDorsal({ t, reduced }: SceneProps) {
               </g>
             </Part>
           ))}
-          {tracks.map(({ c, s, pts }) => {
-            const col = FATE_COLOR[c.fate];
-            const moving = pts.length > 1 && Math.hypot(pts[0][0] - s.pos[0], pts[0][1] - s.pos[1]) > 3;
-            return (
-              <g key={`${c.fate}${c.k}`} pointerEvents="none">
-                {moving && <path d={`M${pts.map((p) => `${f1(p[0])},${f1(p[1])}`).join(' L')}`} fill="none" stroke={col} strokeWidth={2} strokeDasharray="2 4" strokeLinecap="round" />}
-                <circle cx={f1(s.pos[0])} cy={f1(s.pos[1])} r={9} fill="none" stroke="#fff" strokeWidth={1.6} />
-                <circle cx={f1(s.pos[0])} cy={f1(s.pos[1])} r={12} fill="none" stroke={col} strokeWidth={1.3} opacity={0.85} />
-              </g>
-            );
-          })}
+          {tracks.map(({ c, s, pts, route }) => (
+            <g key={`${c.fate}${c.k}`}>
+              <Journey pts={pts} color={FATE_COLOR[c.fate]} head={14} width={2.6} u={1 / z.s} route={route} origin={route > 0.15} r={7.5} />
+              <FollowRing x={s.pos[0]} y={s.pos[1]} r={8.4} u={1 / z.s} />
+            </g>
+          ))}
         </g>
 
         <Mark id="gastrulazioa" x={D.cx} y={(NODE_END + CAUDAL) / 2} rx={54} ry={(CAUDAL - NODE_END) / 2 + 26} show={gast} />

@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Label, Mark, Note, Part, clamp, easeInOut, lerp, lin, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, FollowRing, Journey, Label, Mark, Note, OnTop, Part, clamp, easeInOut, lerp, lin, mix, rand, seg, useScene, type Pt, type SceneProps } from '@/components/kit';
 import { f1 } from './common';
 import { Callout, frameAt, type Key } from './gastroKit';
 
@@ -206,6 +206,7 @@ const STEPS: [number, string, string][] = [
 ];
 
 export function GastrulationCells({ t, reduced }: SceneProps) {
+  const ctx = useScene();
   const em = emphasis(t);
   const ectoName = t >= GB.ecto;
   const hypPush = [-1, 1].map((s) => pushedOf(s, t));
@@ -248,7 +249,8 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
   const mesoOn = seg(t, GB.meso + 0.02, GB.meso + 0.05) * (1 - seg(t, GB.ecto - 0.01, GB.ecto + 0.02));
   const ectoOn = seg(t, GB.ecto + 0.01, GB.ecto + 0.04) * (1 - seg(t, GB.tri - 0.01, GB.tri + 0.02));
   const triOn = seg(t, GB.tri, GB.tri + 0.03);
-  const trailOn = trackOn * (1 - triOn * 0.5);
+  const trailOn = trackOn;
+  const win = (a: number, b: number) => seg(t, a, a + 0.03) * (1 - seg(t, b, b + 0.03));
 
   const z = frameAt(t, CELL_KEYS);
   const A = (x: number, y: number) => z.at(x, y);
@@ -340,28 +342,41 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
           </g>
         </Part>
         <Part id={t < GB.groove ? 'lerro-primitiboa' : 'ildo-primitiboa'} show={seg(t, GB.streak, GB.streak + 0.04)} quiet>
-          <ellipse cx={MID} cy={(EPI_TOP + EPI_BOT) / 2 + 6} rx={21} ry={31} fill="none" stroke="#dbe4ff" strokeWidth={1.4} strokeDasharray="5 4" opacity={0.7} />
+          <ellipse cx={MID} cy={(EPI_TOP + EPI_BOT) / 2 + 6} rx={21} ry={31} fill="none" stroke="#dbe4ff" strokeWidth={1.4} strokeDasharray="5 4" opacity={0.7 * (1 - trackOn)} />
         </Part>
       </g>
 
-      {/* Followed cells: ring and trail, same individuals from start to end. */}
+      {/* Followed cells: the same individuals from start to end; the route links where they set out and where they end. */}
       {trackOn > 0.02 && (
         <g pointerEvents="none">
           {TRACKED.map((q) => {
             const pts: Pt[] = [];
-            for (let i = 14; i >= 0; i--) {
-              const tt = t - i * 0.009;
-              if (tt >= GB.converge) pts.push(posOf(q.k, q.s, tt));
+            for (let tt = GB.converge; tt < t; tt += 0.003) {
+              const p = posOf(q.k, q.s, tt);
+              if (Math.abs(p[0] - MID) < HALF - 14) pts.push(p);
             }
             const [x, y] = posOf(q.k, q.s, t);
+            pts.push([x, y]);
             const col = FATE_COLOR[q.fate];
-            const moving = pts.length > 1 && Math.hypot(pts[0][0] - x, pts[0][1] - y) > 3;
             const subj = q.fate === 'A' ? em.a : q.fate === 'B' ? em.b : em.epi;
+            // Outline that hugs the cell's own shape: a column in the sheet, a block in the row, a round mesenchymal cell.
+            const sc = surfaceCells.find((c) => c.key === `${q.s}:${q.k}`);
+            let outline: string;
+            if (sc) outline = sc.d;
+            else if (q.k < NA) {
+              const p = mover(q.k, q.s, t).settle;
+              const rw = lerp(10, WH / 2 - 1, p) + 1.5;
+              const rh = lerp(10, HYP_H / 2, p) + 1.5;
+              const rr = lerp(10, 5, p) + 1.5;
+              outline = `M${f1(x - rw + rr)},${f1(y - rh)} H${f1(x + rw - rr)} Q${f1(x + rw)},${f1(y - rh)} ${f1(x + rw)},${f1(y - rh + rr)} V${f1(y + rh - rr)} Q${f1(x + rw)},${f1(y + rh)} ${f1(x + rw - rr)},${f1(y + rh)} H${f1(x - rw + rr)} Q${f1(x - rw)},${f1(y + rh)} ${f1(x - rw)},${f1(y + rh - rr)} V${f1(y - rh + rr)} Q${f1(x - rw)},${f1(y - rh)} ${f1(x - rw + rr)},${f1(y - rh)} Z`;
+            } else outline = `M${f1(x - 11)},${f1(y)} a11,9.4 0 1,0 22,0 a11,9.4 0 1,0 -22,0 Z`;
+            // The whole route (and the origin ghost) while this fate is the step's subject, and all together in the summary.
+            const told = q.fate === 'A' ? win(GB.invag, GB.meso) : q.fate === 'B' ? win(GB.meso, GB.ecto) : win(GB.ecto, GB.tri);
+            const route = Math.max(told, triOn) * 0.6;
             return (
-              <g key={`${q.s}:${q.k}`} opacity={trackOn * Math.max(0.45, subj) * clamp((HALF - 12 - Math.abs(x - MID)) / 36)}>
-                {moving && <path d={`M${pts.map((p) => `${f1(p[0])},${f1(p[1])}`).join(' L')}`} fill="none" stroke={col} strokeWidth={2.2} strokeDasharray="2 4" strokeLinecap="round" opacity={trailOn} />}
-                <circle cx={f1(x)} cy={f1(y)} r={q.fate === 'C' ? 9 : 13} fill="none" stroke="#fff" strokeWidth={1.8} />
-                <circle cx={f1(x)} cy={f1(y)} r={q.fate === 'C' ? 12 : 16} fill="none" stroke={col} strokeWidth={1.4} opacity={0.8} />
+              <g key={`${q.s}:${q.k}`} opacity={trackOn * Math.max(0.5, subj)}>
+                <Journey pts={pts} color={col} head={16} width={2.6} route={route} origin={route > 0.15} r={q.fate === 'C' ? 6 : 8} show={trailOn} />
+                <FollowRing d={outline} show={clamp((HALF - 12 - Math.abs(x - MID)) / 36)} />
               </g>
             );
           })}
@@ -391,7 +406,8 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
         )}
       </g>
 
-      <Mark id="gastrulazioa" x={MID} y={276} rx={40} ry={82} show={seg(t, GB.converge, GB.converge + 0.03)} />
+      {/* The process ring marks where it happens while the cells converge, then steps aside so the followed cells stay clear (it returns whenever gastrulation is the subject). */}
+      <Mark id="gastrulazioa" x={MID} y={276} rx={40} ry={82} show={Math.max(conv, ['gastrulazioa'].some((id) => ctx.focus.includes(id) || ctx.selected === id || ctx.hovered === id || ctx.spotlight === id) ? trackOn : 0)} />
       </g>
 
       <Callout x={500} y={565} text="Epiblastoko zelulak → ildo primitibora" show={t >= GB.converge && t < GB.invag ? conv : 0} color={C.epiblast} />
@@ -407,13 +423,15 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
       </Mark>
 
       {/* Step chip. */}
-      <g pointerEvents="none">
-        <rect x={MID - 100} y={34} width={200} height={26} rx={13} fill="rgba(12,12,16,0.86)" stroke="rgba(232,238,252,0.16)" />
-        <circle cx={MID - 84} cy={47} r={5} fill={step[2]} />
-        <text x={MID + 6} y={47} dy="0.35em" textAnchor="middle" fontSize={12.5} fontWeight={650} fill="#e8eefc" key={stepIdx}>
-          {step[1]}
-        </text>
-      </g>
+      <OnTop>
+        <g pointerEvents="none">
+          <rect x={MID - 100} y={34} width={200} height={26} rx={13} fill="rgba(12,12,16,0.86)" stroke="rgba(232,238,252,0.16)" />
+          <circle cx={MID - 84} cy={47} r={5} fill={step[2]} />
+          <text x={MID + 6} y={47} dy="0.35em" textAnchor="middle" fontSize={12.5} fontWeight={650} fill="#e8eefc" key={stepIdx}>
+            {step[1]}
+          </text>
+        </g>
+      </OnTop>
 
       <Legend t={t} />
 
@@ -425,7 +443,7 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
         const currentMeso = bCells.at(-1)?.m;
         const hypoX = MID + (0.5 + hypPush[1]) * WH;
         return <>
-          {label('gastrulazioa', 192, 81, [MID - 38, 270], trackOn)}
+          {label('gastrulazioa', 192, 81, [MID - 8, EPI_BOT - 4], trackOn)}
           {label(t < GB.groove ? 'lerro-primitiboa' : 'ildo-primitiboa', 790, 92, [MID + 3, EPI_TOP + 23], seg(t, GB.streak, GB.streak + 0.025))}
           {label(ectoName ? 'ektodermoa' : 'epiblastoa', 192, 170, [MID - 100, 218])}
           {label('mesodermo-intraenbrionarioa', 192, 368, currentMeso ? [currentMeso.x, currentMeso.y] : [MID, LANE_Y], currentMeso ? 1 : 0)}
@@ -440,7 +458,7 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
   );
 }
 
-/** A compact destination key; its highlight follows the active step. */
+/** The key: the followed-cell ring, then the three fates; the one being told lights up. */
 function Legend({ t }: { t: number }) {
   const on = (a: number, b: number) => seg(t, a, a + 0.03) * (1 - seg(t, b, b + 0.03));
   const rows = [
@@ -448,11 +466,18 @@ function Legend({ t }: { t: number }) {
     { color: C.mesoIntra, text: 'Tartean → mesodermoa', active: on(GB.meso, GB.ecto) },
     { color: C.ectoderm, text: 'Gelditu → ektodermoa', active: on(GB.ecto, 2) },
   ];
-  return <g pointerEvents="none">
-    {rows.map((r, i) => <g key={r.text} opacity={0.38 + 0.62 * r.active}>
-      <circle cx={245 + i * 205} cy={589} r={4} fill={r.color} />
-      <Note x={255 + i * 205} y={589} align="start" tone="accent" size={11}>{r.text}</Note>
-    </g>)}
+  const show = seg(t, GB.converge, GB.converge + 0.03);
+  const X = [214, 384, 556, 726];
+  return <OnTop><g pointerEvents="none">
+    <g opacity={show}>
+      <rect x={196} y={584} width={608} height={30} rx={15} fill="rgba(12,12,16,0.86)" stroke="rgba(232,238,252,0.14)" />
+      <circle cx={X[0] + 6} cy={599} r={6.5} fill="#3a4660" stroke="#fff" strokeWidth={2} />
+      <text x={X[0] + 19} y={599} dy="0.35em" fontSize={12} fontWeight={600} fill="#e8eefc">Jarraitutako zelula</text>
+      {rows.map((r, i) => <g key={r.text} opacity={0.55 + 0.45 * r.active}>
+        <circle cx={X[i + 1] + 6} cy={599} r={5} fill={r.color} stroke="rgba(6,8,14,0.6)" strokeWidth={1.2} />
+        <text x={X[i + 1] + 17} y={599} dy="0.35em" fontSize={12} fontWeight={r.active > 0.5 ? 700 : 550} fill={r.active > 0.5 ? r.color : '#e8eefc'}>{r.text}</text>
+      </g>)}
+    </g>
     <Note x={500} y={76} size={10}>Zelulen bidaia: geruzen arteko tartea handituta, ibilbidea ikusteko.</Note>
-  </g>;
+  </g></OnTop>;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { Label, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
+import { Label, Note, OnTop, Part, lerp, seg, type SceneProps } from '@/components/kit';
 import { LEN, ROWS, TEXT_W20, WT, fmtWeight, interp } from './growth';
 
 /**
@@ -129,9 +129,12 @@ function Cursor({ w }: { w: number }) {
     return (
       <g>
         <circle cx={x} cy={y} r={5.5} fill="#0c1220" stroke={color} strokeWidth={2.4} />
-        <text x={x + (right ? 12 : -12)} y={y - 12} textAnchor={right ? 'start' : 'end'} fill="#f1eee8" fontSize={15} fontWeight={600} style={{ fontVariantNumeric: 'tabular-nums' }}>
-          {text}
-        </text>
+        {/* The value sits above every line (the labels' leaders cross this corner of the chart). */}
+        <OnTop>
+          <text x={x + (right ? 12 : -12)} y={y - 12} textAnchor={right ? 'start' : 'end'} fill="#f1eee8" fontSize={15} fontWeight={600} paintOrder="stroke" stroke="rgba(10,11,14,0.85)" strokeWidth={4} strokeLinejoin="round" pointerEvents="none" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {text}
+          </text>
+        </OnTop>
       </g>
     );
   };

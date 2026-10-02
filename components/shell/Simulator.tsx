@@ -211,7 +211,7 @@ function useHydrated() {
   );
 }
 
-/** Deep link: ?etapa=<stageId>&ikuspegia=<viewId>&egitura=<structureId>&une=<0..1>&jolastu=1&aurkitu=<structureId> */
+/** Deep link: ?etapa=<stageId>&ikuspegia=<viewId>&egitura=<structureId>&une=<0..1>&jolastu=1&aurkitu=<structureId>&galderak=<structureId> */
 function readDeepLink(week: WeekDef) {
   const params = new URLSearchParams(window.location.search);
   const sid = params.get('etapa');
@@ -229,6 +229,8 @@ function readDeepLink(week: WeekDef) {
     play: !!formation || (idx >= 0 && params.get('jolastu') === '1'),
     formation,
     find: idx >= 0 && structures.has(params.get('aurkitu') ?? '') ? params.get('aurkitu') : null,
+    /** Open the question bank on one structure (from the structure atlas). */
+    questions: structures.has(params.get('galderak') ?? '') ? params.get('galderak') : null,
   };
 }
 
@@ -397,6 +399,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     }
     if (link.structure) setSelected(link.structure);
     if (link.find) setPendingFind(link.find);
+    if (link.questions) {
+      setQuestionsConcept(link.questions);
+      setQuestionsOpen(true);
+    }
   }
 
   const stage = week.stages[pos.i];
@@ -1288,7 +1294,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   // Keyboard shortcuts. The listener is subscribed once; the effect event always sees fresh state.
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     const tag = (e.target as HTMLElement)?.tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     if (e.key === ' ') {
       e.preventDefault();
       togglePlay();
@@ -1392,6 +1398,12 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         <Link href="/" className="tb-brand" title="Hasiera">
           <Wordmark size={20} />
         </Link>
+        <label className="mobile-topic">
+          <span>Gaia</span>
+          <select aria-label="Gaia aukeratu" value={week.week} onChange={(e) => router.push(`/astea/${e.target.value}`)}>
+            {weeks.map((w) => <option key={w.week} value={w.week}>{w.week}. gaia{isWip(w) ? ' · prestatzen' : ''}</option>)}
+          </select>
+        </label>
         <span className="tb-weeks-l" aria-hidden>
           Gaia
         </span>
@@ -1410,14 +1422,15 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           ))}
         </nav>
         <div className="tb-tools">
-          <button className={`tool tool-main kimu-tool${kimuOpen ? ' is-on' : ''}`} onClick={toggleKimu} aria-expanded={kimuOpen} data-tip="Galdetu Kimuri: lekura eramango zaitu · K" data-tip-pos="bottom">
+          <button className={`tool tool-main kimu-tool mobile-tool-hidden${kimuOpen ? ' is-on' : ''}`} onClick={toggleKimu} aria-label="Galdetu Kimuri" aria-expanded={kimuOpen} data-tip="Galdetu Kimuri: lekura eramango zaitu · K" data-tip-pos="bottom">
             <KimuFace size={26} mood="happy" still /> <span>Galdetu Kimuri</span>
           </button>
-          <button className={`tool tool-main${find ? ' is-on' : ''}`} onClick={() => (find ? setFind(null) : startFind())} data-tip="Irudian galdetzen zaizun egitura klikatu" data-tip-pos="bottom">
+          <button className={`tool tool-main mobile-tool-hidden${find ? ' is-on' : ''}`} aria-label="Aurkitu" onClick={() => (find ? setFind(null) : startFind())} data-tip="Irudian galdetzen zaizun egitura klikatu" data-tip-pos="bottom">
             <IconTarget size={16} /> <span>Aurkitu</span>
           </button>
           <button
-            className="tool tool-main"
+            className="tool tool-main mobile-questions"
+            aria-label="Galderak"
             onClick={() => {
               setQuestionsConcept(undefined);
               setQuestionsOpen(true);
@@ -1429,13 +1442,26 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           </button>
           <Popover
             trigger={({ open, toggle }) => (
-              <button className={`tool${open ? ' is-on' : ''}`} onClick={toggle} aria-expanded={open} aria-haspopup="menu" data-tip="Glosarioa, kronologia, leinuak, irudiak…" data-tip-pos="bottom">
+              <button className={`tool${open ? ' is-on' : ''}`} aria-label="Tresnak" onClick={toggle} aria-expanded={open} aria-haspopup="menu" data-tip="Glosarioa, kronologia, leinuak, irudiak…" data-tip-pos="bottom">
                 <IconMore size={16} /> <span>Tresnak</span>
               </button>
             )}
           >
             {(close) => (
               <div className="menu" role="menu">
+                <button className="mobile-menu-item" role="menuitem" onClick={() => { close(); toggleKimu(); }}>
+                  <KimuFace size={22} mood="happy" still /> Galdetu Kimuri
+                </button>
+                <button className="mobile-menu-item" role="menuitem" onClick={() => { close(); if (find) setFind(null); else startFind(); }}>
+                  <IconTarget size={16} /> {find ? 'Aurkitu amaitu' : 'Aurkitu'}
+                </button>
+                <button className="mobile-menu-item" role="menuitem" onClick={() => { close(); togglePanel(); }}>
+                  <IconRail open={(infoOpen || panelOpen) && !notesOpen} side="right" /> Laburpena
+                </button>
+                <button className="mobile-menu-item" role="menuitem" onClick={() => { close(); toggleOutline(); }}>
+                  <IconRail open={outlineShown} side="left" /> Aurkibidea
+                </button>
+                <hr className="mobile-menu-item" />
                 <button
                   role="menuitem"
                   onClick={() => {
@@ -1479,10 +1505,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               </div>
             )}
           </Popover>
-          <button className={`tool${(panelOpen || infoOpen) && !notesOpen ? ' is-on' : ''}`} onClick={togglePanel} data-tip="Laburpena, datak eta egiturak erakutsi / ezkutatu · ]" data-tip-pos="bottom" aria-expanded={(panelOpen || infoOpen) && !notesOpen}>
+          <button className={`tool mobile-tool-hidden${(panelOpen || infoOpen) && !notesOpen ? ' is-on' : ''}`} aria-label="Laburpena" onClick={togglePanel} data-tip="Laburpena, datak eta egiturak erakutsi / ezkutatu · ]" data-tip-pos="bottom" aria-expanded={(panelOpen || infoOpen) && !notesOpen}>
             <IconRail open={(infoOpen || panelOpen) && !notesOpen} side="right" /> <span>Laburpena</span>
           </button>
-          <button className={`tool${notesOpen ? ' is-on' : ''}`} onClick={toggleNotes} aria-pressed={notesOpen} data-tip="Jatorrizko apunteak, simulazioarekin batera · N" data-tip-pos="bottom-end">
+          <button className={`tool mobile-notes${notesOpen ? ' is-on' : ''}`} aria-label="Apunteak" onClick={toggleNotes} aria-pressed={notesOpen} data-tip="Jatorrizko apunteak, simulazioarekin batera · N" data-tip-pos="bottom-end">
             <IconNotes size={16} /> <span>Apunteak</span>
           </button>
         </div>

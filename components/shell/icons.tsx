@@ -182,6 +182,20 @@ export const IconVoice = ({ size }: P) => (
     <path d="M18 6.5a7.5 7.5 0 0 1 0 11" />
   </svg>
 );
+/** Narration off: the speaker with a cross instead of sound waves. */
+export const IconVoiceOff = ({ size }: P) => (
+  <svg {...base(size)}>
+    <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+    <path d="M16 9.5l5 5M21 9.5l-5 5" />
+  </svg>
+);
+/** Subtitles: a screen with two caption lines. */
+export const IconCaptions = ({ size }: P) => (
+  <svg {...base(size)}>
+    <rect x="3" y="5" width="18" height="14" rx="2.5" />
+    <path d="M7 12.5h4M13.5 12.5H17M7 15.5h7" />
+  </svg>
+);
 export const IconHome = ({ size }: P) => (
   <svg {...base(size)}>
     <path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" />

@@ -64,3 +64,10 @@ export function partState(ctx: SceneContextValue, id: string): 'active' | 'dim' 
   if (ctx.focus.length) return ctx.focus.includes(id) ? 'focus' : ctx.dimContext ? 'ctx' : 'idle';
   return 'idle';
 }
+
+/**
+ * The viewport's top text layer: label names and notes are portalled here, above every leader line,
+ * arrow and marker, so a line can never be drawn over a word. Null outside the viewport (thumbnails,
+ * server render): text then stays inline.
+ */
+export const TextLayerContext = createContext<SVGGElement | null>(null);

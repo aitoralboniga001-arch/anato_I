@@ -1,6 +1,7 @@
 'use client';
 
-import { Arrow, C, Label, Note, Part, clamp, lerp, lin, mix, rand, seg, useScene, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Destination, FollowRing, Journey, Label, Note, OnTop, Part, clamp, lerp, lin, mix, rand, seg, useScene, type Pt, type SceneProps } from '@/components/kit';
+import { useId } from 'react';
 import { f1 } from './common';
 
 /**
@@ -8,6 +9,9 @@ import { f1 } from './common';
  * A (top): midline sagittal strip, cranial left. Prenotochordal cells leave the primitive pit one by
  *   one and the cord they form grows cranially between ectoderm and endoderm until it meets the
  *   prechordal plate. A dashed line marks where panel B is cut.
+ *   Two cells are followed (outlined in white, with their route from the pit): the first one out, which
+ *   reaches the prechordal plate, and the one that settles at line B; a ghost shows the notochord
+ *   they will form.
  * B (bottom): transverse close-up at that line. The cells arrive at the midline when the cord's front
  *   crosses the line; they intercalate in the endoderm (notochordal plate, the endoderm opening for
  *   them), proliferate and roll up into a solid cord that detaches (notochord), the endoderm closes
@@ -41,6 +45,24 @@ function cordX(i: number, t: number) {
   const f = n <= 1 ? 1 : (n - i) / n;
   return lerp(X_NODE - 10, front(t), f);
 }
+const cordY = (i: number, t: number) => lerp(MID_Y + (i % 2 ? 4 : -4), ENDO_Y + 6, seg(t, NB.plate, NB.plate + 0.08));
+
+/** Followed cord cells: the first one out (it reaches the prechordal plate) and the one that settles at line B. */
+const FOLLOW_A = [0, 7];
+/** Where a cord cell has been, from the pit to now (empty before it leaves the pit). */
+function cordPath(i: number, t: number) {
+  const pts: Pt[] = [];
+  const out = NB.migrate + (i / N_CORD) * (NB.canal - 0.04 - NB.migrate);
+  if (t <= out) return pts;
+  pts.push([X_NODE, ECTO_Y + 8]);
+  for (let s = out; ; s = Math.min(t, s + 0.003)) {
+    const x = cordX(i, s);
+    if (x !== null) pts.push([x, cordY(i, s)]);
+    if (s >= t) break;
+  }
+  return pts;
+}
+const ellipseD = (x: number, y: number, rx: number, ry: number) => `M${f1(x - rx)},${f1(y)} a${f1(rx)},${f1(ry)} 0 1 0 ${f1(rx * 2)},0 a${f1(rx)},${f1(ry)} 0 1 0 ${f1(-rx * 2)},0 Z`;
 
 /* ——— B: transverse close-up ——— */
 const B_ECTO = 302;
@@ -61,19 +83,63 @@ const ROD_Y = B_LANE + 6;
 /** Prenotochordal cells reach the cut once the cord's front has crossed it. */
 const arriveAt = (t: number) => clamp((X_CUT + 20 - front(t)) / 60);
 
+/**
+ * Notochord cell j of panel B: cluster (arrival) → slot in the endoderm row (plate) → place on the
+ * rolled ring (rod), lifted off. The two daughter cells (j ≥ N_PLATE) are born mid-row, so their
+ * neighbours slide outward instead of the row jumping when proliferation starts.
+ */
+function bCell(j: number, t: number): Pt {
+  const plate = seg(t, NB.plate, NB.plate + 0.09);
+  const fold = seg(t, NB.rod, NB.rod + 0.08);
+  const lift = seg(t, NB.rod + 0.07, NB.close);
+  const ang = (j / N_PLATE) * Math.PI * 2 + 0.4;
+  const cl: Pt = [MIDX + Math.cos(ang) * 15, B_LANE + Math.sin(ang) * 11];
+  const slot: Pt = [MIDX + (j - (N_PLATE - 1) / 2) * TH, B_ENDO];
+  const p: Pt = [lerp(cl[0], slot[0], plate), lerp(cl[1], slot[1], plate)];
+  if (fold <= 0) return p;
+  // Roll the row (now N_ROD cells) up into a closed ring: the arc bends until it closes.
+  const half = N_PLATE / 2;
+  const k = j >= N_PLATE ? half + (j - N_PLATE) : j < half ? j : j + (N_ROD - N_PLATE);
+  const L = (N_ROD - 1) * 23;
+  const theta = Math.max(0.001, fold * Math.PI * 2 * ((N_ROD - 1) / N_ROD));
+  const R = L / theta;
+  const phi = -theta / 2 + (theta * k) / (N_ROD - 1);
+  const cy = lerp(B_ENDO - R, ROD_Y, lift);
+  const ring: Pt = fold < 0.02 ? [MIDX + (k - (N_ROD - 1) / 2) * 23, B_ENDO] : [MIDX + R * Math.sin(phi), cy + R * Math.cos(phi)];
+  if (j >= N_PLATE) return ring;
+  const m = seg(fold, 0, 0.3);
+  return [lerp(p[0], ring[0], m), lerp(p[1], ring[1], m)];
+}
+/** The followed cell of panel B (it ends on the right of the ring). */
+const FOLLOW_B = N_PLATE - 1;
+function bPath(t: number) {
+  const pts: Pt[] = [];
+  for (let s: number = NB.plate; ; s = Math.min(t, s + 0.003)) {
+    pts.push(bCell(FOLLOW_B, s));
+    if (s >= t) break;
+  }
+  return pts;
+}
+
 function Callout({ x, y, text, show, color = '#e8eefc', to }: { x: number; y: number; text: string; show: number; color?: string; to?: Pt }) {
   const ctx = useScene();
   if (show <= 0.02 || !ctx.showLabels || ctx.quiz) return null;
   const w = text.length * 6.9 + 18;
   return (
-    <g opacity={show} pointerEvents="none">
-      {to && <path d={`M${f1(x)},${f1(y)} L${f1(to[0])},${f1(to[1])}`} stroke={color} strokeWidth={1.2} strokeDasharray="3 3" opacity={0.8} />}
-      {to && <circle cx={to[0]} cy={to[1]} r={3} fill={color} />}
-      <rect x={f1(x - w / 2)} y={y - 12} width={f1(w)} height={24} rx={12} fill="rgba(12,12,16,0.9)" stroke={color} strokeOpacity={0.55} />
-      <text x={x} y={y} dy="0.35em" textAnchor="middle" fontSize={12.5} fontWeight={600} fill={color}>
-        {text}
-      </text>
-    </g>
+    <>
+      <g opacity={show} pointerEvents="none">
+        {to && <path d={`M${f1(x)},${f1(y)} L${f1(to[0])},${f1(to[1])}`} stroke={color} strokeWidth={1.2} strokeDasharray="3 3" opacity={0.8} />}
+        {to && <circle cx={to[0]} cy={to[1]} r={3} fill={color} />}
+      </g>
+      <OnTop>
+        <g opacity={show} pointerEvents="none">
+          <rect x={f1(x - w / 2)} y={y - 12} width={f1(w)} height={24} rx={12} fill="rgba(12,12,16,0.9)" stroke={color} strokeOpacity={0.55} />
+          <text x={x} y={y} dy="0.35em" textAnchor="middle" fontSize={12.5} fontWeight={600} fill={color}>
+            {text}
+          </text>
+        </g>
+      </OnTop>
+    </>
   );
 }
 
@@ -100,6 +166,11 @@ function Strip({ t, reduced }: { t: number; reduced?: boolean }) {
   const cut = seg(t, NB.migrate, NB.migrate + 0.03);
   const crossing = clamp(1 - Math.abs(front(t) - X_CUT) / 40) * (t < NB.canal ? 1 : 0);
   const cordOn = t >= NB.migrate;
+  // Followed cells are outlined while they are cells (they melt into the rod); their routes stay
+  // drawn once they have arrived, until the plate drops into the endoderm.
+  const follow = seg(t, NB.migrate, NB.migrate + 0.02) * (1 - rod);
+  const route = 0.6 * seg(t, NB.reach, NB.reach + 0.04) * (1 - seg(t, NB.plate, NB.plate + 0.06));
+  const ghost = seg(t, NB.migrate, NB.migrate + 0.04) * (1 - rod);
   // Endoderm segment under the cord: replaced by the plate, then open, then closed again.
   const gapOpen = plate * (1 - close);
   return (
@@ -153,6 +224,8 @@ function Strip({ t, reduced }: { t: number; reduced?: boolean }) {
         <path d={`M${X_NODE + 22},${ECTO_Y + 22} Q${X_NODE + 80},${ECTO_Y + 30} ${SX1 - 20},${ECTO_Y + 22}`} fill="none" stroke="#93a7d9" strokeWidth={2} strokeDasharray="4 4" opacity={0.6} />
       </Part>
 
+      {/* What the moving cells will form: the notochord, from the node to the prechordal plate. */}
+      <Destination x={X_HEAD} y={MID_Y - 8} w={X_NODE - 14 - X_HEAD} h={18} rx={8} color={C.notochord} show={ghost} />
       {/* The cord: prenotochordal cells → plate (in the endoderm row) → rod */}
       {cordOn && (
         <Part id={rod > 0.5 ? 'notokorda' : plate > 0.5 ? 'notokorda-plaka' : 'zelula-prenotokordalak'}>
@@ -167,7 +240,20 @@ function Strip({ t, reduced }: { t: number; reduced?: boolean }) {
           })}
         </Part>
       )}
-      {t >= NB.migrate && t < NB.plate && <Arrow from={[X_NODE - 18, MID_Y - 16]} to={[Math.min(X_NODE - 60, front(t) + 30), MID_Y - 16]} bend={0} color={C.notochord} width={2} head={7} flow={!reduced} />}
+      {FOLLOW_A.map((i) => {
+        const pts = cordPath(i, t);
+        if (pts.length < 2) return null;
+        const [x, y] = pts[pts.length - 1];
+        return (
+          <g key={i}>
+            <Journey pts={pts} color={C.notochord} head={14} width={2.4} route={route} r={7} show={follow} />
+            <FollowRing d={ellipseD(x, y, lerp(9, 6, plate) + 1.6, lerp(6.5, 5.5, plate) + 1.6)} show={follow} />
+          </g>
+        );
+      })}
+      <Note x={X_HEAD + 64} y={MID_Y + 1} size={10} show={ghost * clamp((front(t) - X_HEAD - 170) / 40)}>
+        notokorda izango dena
+      </Note>
       {extent > 0.02 && (
         <g opacity={extent} pointerEvents="none">
           <path d={`M${X_HEAD},${MID_Y - 22} L${X_NODE - 14},${MID_Y - 22}`} stroke="#ffb86b" strokeWidth={2} />
@@ -199,6 +285,7 @@ function Section({ t, reduced }: { t: number; reduced?: boolean }) {
   const plate = seg(t, NB.plate, NB.plate + 0.09);
   const fold = seg(t, NB.rod, NB.rod + 0.08);
   const bud = seg(t, NB.rod, NB.rod + 0.04);
+  const glowId = useId();
   const lift = seg(t, NB.rod + 0.07, NB.close);
   const close = seg(t, NB.close, NB.close + 0.07);
   const induce = seg(t, NB.induce, NB.induce + 0.04);
@@ -217,23 +304,8 @@ function Section({ t, reduced }: { t: number; reduced?: boolean }) {
   const cells: { x: number; y: number; r: number; o: number }[] = [];
   const count = fold > 0 ? N_ROD : N_PLATE;
   for (let j = 0; j < count; j++) {
-    const newborn = j >= N_PLATE;
-    // Cluster position (arrival) and plate slot.
-    const ang = (j / N_PLATE) * Math.PI * 2 + 0.4;
-    const cl: Pt = [MIDX + Math.cos(ang) * 15, B_LANE + Math.sin(ang) * 11];
-    const slot: Pt = [MIDX + (j - (N_PLATE - 1) / 2) * TH, B_ENDO];
-    let p: Pt = [lerp(cl[0], slot[0], plate), lerp(cl[1], slot[1], plate)];
-    if (fold > 0) {
-      // Roll the row (now N_ROD cells) up into a closed ring: the arc bends until it closes.
-      const L = (N_ROD - 1) * 23;
-      const theta = Math.max(0.001, fold * Math.PI * 2 * ((N_ROD - 1) / N_ROD));
-      const R = L / theta;
-      const phi = -theta / 2 + (theta * j) / (N_ROD - 1);
-      const cy = lerp(B_ENDO - R, ROD_Y, lift);
-      p = [MIDX + R * Math.sin(phi), cy + R * Math.cos(phi)];
-      if (fold < 0.02) p = [MIDX + (j - (N_ROD - 1) / 2) * 23, B_ENDO];
-    }
-    cells.push({ x: p[0], y: p[1], r: lerp(10, 11.5, plate), o: newborn ? bud : arrive });
+    const [x, y] = bCell(j, t);
+    cells.push({ x, y, r: lerp(10, 11.5, plate), o: j >= N_PLATE ? bud : arrive });
   }
   const rodC: Pt = [MIDX, lerp(B_ENDO - ROD_R, ROD_Y, lift)];
   // Once the ring closes, its core fills with cells: the notochord is a solid cord, not a tube.
@@ -247,6 +319,8 @@ function Section({ t, reduced }: { t: number; reduced?: boolean }) {
       [11, 9],
     ].forEach(([dx, dy]) => cells.push({ x: rodC[0] + dx, y: rodC[1] + dy, r: 9, o: core }));
   const sheath = seg(t, NB.close - 0.02, NB.close + 0.04);
+  const followB = seg(t, NB.plate - 0.02, NB.plate) * (1 - seg(t, NB.extent, NB.extent + 0.03));
+  const fb = bCell(FOLLOW_B, t);
 
   return (
     <g>
@@ -308,10 +382,23 @@ function Section({ t, reduced }: { t: number; reduced?: boolean }) {
           ))}
         </Part>
       )}
-      {/* Arrival from the cord, perpendicular to this plane. */}
+      {/* Followed cell: from the arrival cluster into the endoderm row, then onto the rolled ring (only its moves leave a trail; the short way needs no route). */}
+      {followB > 0.02 && (
+        <g>
+          <Journey pts={bPath(t)} color={C.notochord} head={12} width={2.6} route={0} origin={false} show={followB} />
+          <FollowRing x={fb[0]} y={fb[1]} r={12.5} show={followB} />
+        </g>
+      )}
+      {/* Arrival from the cord, perpendicular to this plane: a soft light where they come in. */}
       {arrive > 0.01 && arrive < 1 && (
-        <g opacity={Math.sin(arrive * Math.PI)} pointerEvents="none">
-          <circle cx={MIDX} cy={B_LANE} r={26} fill="none" stroke={C.notochord} strokeWidth={1.4} strokeDasharray="3 3" />
+        <g opacity={Math.sin(arrive * Math.PI)} pointerEvents="none" style={{ mixBlendMode: 'screen' }}>
+          <defs>
+            <radialGradient id={glowId}>
+              <stop offset="0" stopColor={C.notochord} stopOpacity={0.55} />
+              <stop offset="1" stopColor={C.notochord} stopOpacity={0} />
+            </radialGradient>
+          </defs>
+          <circle cx={MIDX} cy={B_LANE} r={46} fill={`url(#${glowId})`} />
         </g>
       )}
       {/* Endoderm closing under the rod. */}
@@ -329,6 +416,7 @@ function Section({ t, reduced }: { t: number; reduced?: boolean }) {
 
 function Legend() {
   const rows: [string, string][] = [
+    ['follow', 'Jarraitutako zelula'],
     [C.notochord, 'Zelula prenotokordalak → notokorda'],
     [C.prechordal, 'Plaka prekordala'],
     [C.ectoderm, 'Ektodermoa'],
@@ -338,17 +426,19 @@ function Legend() {
   const x = 772;
   const y = 492;
   return (
+    <OnTop>
     <g pointerEvents="none">
-      <rect x={x - 12} y={y - 22} width={222} height={128} rx={12} fill="rgba(12,12,16,0.82)" stroke="rgba(232,238,252,0.14)" />
+      <rect x={x - 12} y={y - 22} width={222} height={150} rx={12} fill="rgba(12,12,16,0.82)" stroke="rgba(232,238,252,0.14)" />
       {rows.map(([c, text], i) => (
         <g key={text} transform={`translate(${x} ${y + i * 22})`}>
-          <rect x={0} y={-6} width={12} height={12} rx={3} fill={c} />
+          {c === 'follow' ? <circle cx={6} cy={0} r={5.5} fill={C.notochord} stroke="#fff" strokeWidth={2} /> : <rect x={0} y={-6} width={12} height={12} rx={3} fill={c} />}
           <text x={20} y={0} dy="0.35em" fontSize={11} fill="#e8eefc">
             {text}
           </text>
         </g>
       ))}
     </g>
+    </OnTop>
   );
 }
 
@@ -366,13 +456,15 @@ export function NotochordCells({ t, reduced }: SceneProps) {
       <Legend />
 
       {/* Step chip */}
-      <g pointerEvents="none">
-        <rect x={450} y={40} width={200} height={26} rx={13} fill="rgba(12,12,16,0.86)" stroke="rgba(232,238,252,0.16)" />
-        <circle cx={466} cy={53} r={5} fill={step[2]} />
-        <text x={556} y={53} dy="0.35em" textAnchor="middle" fontSize={12.5} fontWeight={650} fill="#e8eefc">
-          {step[1]}
-        </text>
-      </g>
+      <OnTop>
+        <g pointerEvents="none">
+          <rect x={450} y={40} width={200} height={26} rx={13} fill="rgba(12,12,16,0.86)" stroke="rgba(232,238,252,0.16)" />
+          <circle cx={466} cy={53} r={5} fill={step[2]} />
+          <text x={556} y={53} dy="0.35em" textAnchor="middle" fontSize={12.5} fontWeight={650} fill="#e8eefc">
+            {step[1]}
+          </text>
+        </g>
+      </OnTop>
 
       {/* Call-outs */}
       <Callout x={560} y={252} text="nodotik kranealerantz, ektodermoaren eta endodermoaren artean" show={on(NB.migrate, NB.reach)} color="#d8b4fe" to={[Math.min(X_NODE - 40, f + 40), MID_Y]} />
@@ -384,7 +476,7 @@ export function NotochordCells({ t, reduced }: SceneProps) {
       <Callout x={560} y={252} text="notokorda: hobitxotik plaka prekordalera · kaudalean EZ" show={on(NB.extent, NB.induce)} color="#ffb86b" />
       <Callout x={MIDX} y={530} text="notokorda → ektodermoa: indukzioa (plaka neurala)" show={seg(t, NB.induce, NB.induce + 0.03)} />
 
-      <Label id={cordSlot} x={190} y={140} ax={lerp(X_HEAD + 40, X_NODE - 60, 0.3)} ay={cordSlot === 'notokorda-plaka' ? ENDO_Y + 6 : MID_Y} show={seg(t, NB.migrate + 0.04, NB.migrate + 0.07)} small />
+      <Label id={cordSlot} x={190} y={140} ax={cordSlot === 'zelula-prenotokordalak' ? Math.max(lerp(X_HEAD + 40, X_NODE - 60, 0.3), f + 4) : lerp(X_HEAD + 40, X_NODE - 60, 0.3)} ay={cordSlot === 'notokorda-plaka' ? ENDO_Y + 6 : MID_Y} show={seg(t, NB.migrate + 0.04, NB.migrate + 0.07)} small />
       <Label id="plaka-prekordala" x={190} y={172} ax={X_PRE - 6} ay={MID_Y} small />
       <Label id="mintz-bukofaringeoa" x={190} y={204} ax={X_BUCCO - 6} ay={ENDO_Y - 20} small />
       <Label id="nodo-primitiboa" x={690} y={75} ax={X_NODE - 14} ay={ECTO_Y - 8} align="end" small />

@@ -4,11 +4,11 @@ import { firstSentence } from '@/content/generate';
 import { useRef, useState, type ReactNode } from 'react';
 import type { Beat, MicroQuestion, StageDef, StructureDef } from '@/lib/sim/types';
 import { structures } from '@/content/registry';
-import { IconBolt, IconCalendar, IconGuide, IconLoop, IconNext, IconPause, IconPlay, IconPrev, IconSkipNext, IconSkipPrev, IconSliders, IconVoice } from './icons';
+import { IconBolt, IconCalendar, IconCaptions, IconGuide, IconLoop, IconNext, IconNotes, IconPause, IconPlay, IconPrev, IconRestart, IconSkipNext, IconSkipPrev, IconSliders, IconVoice, IconVoiceOff } from './icons';
 import { Popover } from './Popover';
 import { categoryColor } from '@/lib/sim/palette';
 import type { AudioSnapshot } from './narrate';
-import type { PlayMode } from './prefs';
+import { setPref, usePref, type PlayMode } from './prefs';
 import { recordAnswer } from './answers';
 import type { ExamDate } from '@/content/examDates';
 
@@ -198,13 +198,71 @@ function Caption({
   );
 }
 
+const VOICE_STATE: Record<AudioSnapshot['status'], string> = {
+  idle: 'Prest',
+  loading: 'Prestatzen…',
+  playing: 'Azaltzen',
+  paused: 'Pausatuta',
+  observing: 'Begiratu lasai',
+  done: 'Urratsa entzunda',
+  error: 'Etenda',
+};
+
+/**
+ * Narrated step: the step's idea, a live strip that says what the voice is doing (speaking, loading,
+ * paused, letting you look) and which sentence of the step it is on, the reading tools, and the
+ * spoken sentence as a subtitle when asked for (off by default: narration with identical on-screen
+ * text competes with the image).
+ */
+function SpokenCaption({ beat, audio, configured, fullText, onFullText, onRepeat, onOff }: { beat: Beat; audio: AudioSnapshot; configured: boolean | null; fullText: boolean; onFullText: (v: boolean) => void; onRepeat: () => void; onOff: () => void }) {
+  const subtitles = usePref('subtitles');
+  const status = configured === false ? 'error' : audio.status;
+  const count = Math.max(1, audio.count);
+  const active = status === 'playing' || status === 'loading' || status === 'paused';
+  return (
+    <div className={`spoken-caption is-${status}`}>
+      <p className="cap-idea">{ideaOf(beat)}</p>
+      <div className="voice-strip">
+        <div className="voice-status" role="status" aria-live="polite">
+          <span className="voice-eq" aria-hidden>
+            <i /><i /><i /><i />
+          </span>
+          <span className="voice-state">{configured === false ? 'Ahotsa ez dago erabilgarri' : status === 'error' ? audio.error || VOICE_STATE.error : VOICE_STATE[status]}</span>
+          {count > 1 && configured !== false && status !== 'error' && (
+            <span className="voice-pips" aria-label={`${Math.min(audio.segment + 1, count)}. esaldia ${count}etik`}>
+              {Array.from({ length: count }, (_, i) => (
+                <i key={i} className={i < audio.segment || (!active && status !== 'idle') ? 'is-done' : i === audio.segment && active ? 'is-now' : undefined} />
+              ))}
+            </span>
+          )}
+          {status === 'error' && configured !== false && <button className="voice-retry" onClick={onRepeat}>Saiatu berriro</button>}
+        </div>
+        <div className="voice-tools">
+          <button className="voice-tool" onClick={() => setPref('subtitles', !subtitles)} aria-pressed={subtitles} title="Esaten ari den esaldia idatzita">
+            <IconCaptions size={15} /> Azpitituluak
+          </button>
+          <button className="voice-tool" onClick={() => onFullText(!fullText)} aria-pressed={fullText} title="Urratsaren testu osoa, ulertzeko gakoak eta gogoratzekoak">
+            <IconNotes size={15} /> Azalpen osoa
+          </button>
+          <button className="voice-tool" onClick={onRepeat} title="Urrats hau hasieratik entzun">
+            <IconRestart size={15} /> Errepikatu
+          </button>
+          <button className="voice-tool is-off" onClick={onOff} title="Ahotsa itzali eta testuarekin jarraitu">
+            <IconVoiceOff size={15} /> Itzali
+          </button>
+        </div>
+      </div>
+      {subtitles && audio.text && configured !== false && <p className="spoken-subtitle" key={audio.text}>{audio.text}</p>}
+    </div>
+  );
+}
+
 /**
  * Playback dock under the viewport: the current step as a subtitle, then transport controls and a
  * scrubber split into one chapter per step (like chapters on a video timeline).
  */
 export function Player(p: PlayerProps) {
   const bar = useRef<HTMLDivElement>(null);
-  const [subtitles, setSubtitles] = useState(false);
   const [fullText, setFullText] = useState(false);
   const [hover, setHover] = useState<{ x: number; k: number } | null>(null);
   const beats = p.stage.beats;
@@ -232,18 +290,12 @@ export function Player(p: PlayerProps) {
           <i>/{pad(n)}</i>
         </span>
         <div className="cap-body">
-          {!p.voice && <button className="btn small ghost" onClick={() => p.onVoice(true)}><IconVoice size={15} /> Ahotsarekin ikasi</button>}
-          {p.voice && !p.ask && <div className="spoken-caption">
-            <p className="cap-idea">{ideaOf(beat)}</p>
-            <div className="spoken-controls">
-              <button className="btn small ghost" onClick={() => setSubtitles(!subtitles)} aria-pressed={subtitles}>Azpitituluak</button>
-              <button className="btn small ghost" onClick={() => setFullText(!fullText)} aria-expanded={fullText}>Azalpen osoa</button>
-              <button className="btn small ghost" onClick={p.onRepeat}>Errepikatu urratsa</button>
-              <button className="btn small ghost" onClick={() => p.onVoice(false)}>Ahotsa itzali</button>
-            </div>
-            {subtitles && p.audioState.text && <p className="spoken-subtitle">{p.audioState.text}</p>}
-            {p.voiceConfigured === false ? <p role="status">Ahotsa ez dago erabilgarri oraindik.</p> : p.audioState.status === 'loading' ? <p role="status">Ahotsa prestatzen…</p> : p.audioState.status === 'error' ? <p role="alert">{p.audioState.error} <button className="btn small" onClick={p.onRepeat}>Saiatu berriro</button></p> : p.audioState.status === 'observing' ? <p role="status">Begiratu lasai…</p> : null}
-          </div>}
+          {!p.voice && p.voiceConfigured !== false && (
+            <button className="voice-cta" onClick={() => p.onVoice(true)} title="Urrats bakoitza ahoz azaldu, irudiari begira">
+              <IconVoice size={15} /> Ahotsarekin ikasi
+            </button>
+          )}
+          {p.voice && !p.ask && <SpokenCaption beat={beat} audio={p.audioState} configured={p.voiceConfigured} fullText={fullText} onFullText={setFullText} onRepeat={p.onRepeat} onOff={() => p.onVoice(false)} />}
           {p.ask ?? ((!p.voice || fullText) && (
             <Caption
               beat={beat}
@@ -435,6 +487,32 @@ export function Player(p: PlayerProps) {
           )}
         </Popover>
       </div>
+      <nav className="mobile-study-nav" aria-label="Urratsen nabigazioa">
+        <div className="mobile-study-status">
+          <span>Urratsa {p.activeBeat + 1}/{n}</span>
+          {p.ask && <span>Erantzun edo saltatu galdera</span>}
+        </div>
+        <div className="mobile-study-actions">
+          <button className="btn" onClick={() => p.onBeat(-1)} disabled={p.activeBeat === 0 && p.t === 0}>
+            <IconPrev size={15} /> Atzera
+          </button>
+          <button className="btn mobile-study-play" onClick={p.onTogglePlay} aria-label={p.playing ? 'Pausatu' : 'Erreproduzitu'}>
+            {p.playing ? <IconPause size={16} /> : <IconPlay size={16} />}
+            <span>{p.playing ? 'Pausatu' : 'Hasi'}</span>
+          </button>
+          <button
+            className="btn mobile-study-next"
+            disabled={!!p.ask || (atEnd && !p.nextTitle)}
+            onClick={() => {
+              if (atEnd && p.nextTitle) p.onNextStage();
+              else if (p.guided && p.waiting) p.onContinue();
+              else p.onBeat(1);
+            }}
+          >
+            {atEnd && p.nextTitle ? 'Hurrengo etapa' : 'Jarraitu'} <IconNext size={15} />
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }

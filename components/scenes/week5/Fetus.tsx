@@ -146,8 +146,13 @@ export function Fetus3rdMonth({ t }: SceneProps) {
       {/* Ossification centres: skull bones and long bones start to ossify */}
       <Mark id="hezurtzapen-zentroak" show={oss}>
         <g>
-          <circle cx={skull[0]} cy={skull[1]} r={26} fill="#ffb86b" fillOpacity={0.1} stroke="#ffb86b" strokeWidth={1.8} strokeDasharray="5 4" className="mark-ring" />
-          <circle cx={femur[0]} cy={femur[1]} r={20} fill="#ffb86b" fillOpacity={0.1} stroke="#ffb86b" strokeWidth={1.8} strokeDasharray="5 4" className="mark-ring" />
+          <radialGradient id="w5f3-oss-light">
+            <stop offset="0" stopColor="#ffb86b" stopOpacity={0.42} />
+            <stop offset="0.5" stopColor="#ffb86b" stopOpacity={0.24} />
+            <stop offset="1" stopColor="#ffb86b" stopOpacity={0} />
+          </radialGradient>
+          <circle className="mark-light" cx={skull[0]} cy={skull[1]} r={34} fill="url(#w5f3-oss-light)" />
+          <circle className="mark-light" cx={femur[0]} cy={femur[1]} r={26} fill="url(#w5f3-oss-light)" />
           <g transform={Pl.transform}>
             {[
               [-0.35, -0.55, 0.32],
@@ -265,7 +270,7 @@ export function Fetus6to9({ t }: SceneProps) {
       <Note x={40} y={520} align="start" tone="accent" show={vis(t, 0.44, 0.58)}>
         7. hilabetea: bizirautea ~%90
       </Note>
-      <Note x={40} y={520} align="start" tone="accent" show={vis(t, 0.86)}>
+      <Note x={40} y={506} align="start" tone="accent" show={vis(t, 0.86)}>
         Vertex–orpo: 40–50 cm
       </Note>
 
