@@ -50,21 +50,21 @@ function compass(o?: Orientation) {
  * same 3-D sketch with the old plane (dashed) and the new one, so the student sees that it is the
  * same object cut another way, and where up/down/left/right now point.
  */
-export function ViewBridge({ from, to, onClose }: { from: ViewSnap; to: ViewSnap; onClose: () => void }) {
+export function ViewBridge({ from, to, onClose, autoClose = true }: { from: ViewSnap; to: ViewSnap; onClose: () => void; autoClose?: boolean }) {
   const close = useEffectEvent(onClose);
   // The card already explains the new plane: the locator need not open its own explanation after it.
   useEffect(() => markSeen(to.plane), [to.plane]);
   useEffect(() => {
-    const id = window.setTimeout(close, 9000);
+    const id = autoClose ? window.setTimeout(close, 9000) : null;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' || e.key === 'Enter') close();
     };
     window.addEventListener('keydown', onKey);
     return () => {
-      window.clearTimeout(id);
+      if (id !== null) window.clearTimeout(id);
       window.removeEventListener('keydown', onKey);
     };
-  }, []);
+  }, [autoClose]);
 
   const sFrom = shapeFor(from.week, from.day, from.plane);
   const sTo = shapeFor(to.week, to.day, to.plane);

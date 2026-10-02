@@ -7,7 +7,7 @@ import { structures } from '@/content/registry';
 import { IconBolt, IconCalendar, IconGuide, IconLoop, IconNext, IconPause, IconPlay, IconPrev, IconSkipNext, IconSkipPrev, IconSliders, IconVoice } from './icons';
 import { Popover } from './Popover';
 import { categoryColor } from '@/lib/sim/palette';
-import { useCanNarrate } from './narrate';
+import type { AudioSnapshot } from './narrate';
 import type { PlayMode } from './prefs';
 import { recordAnswer } from './answers';
 import type { ExamDate } from '@/content/examDates';
@@ -32,6 +32,9 @@ interface PlayerProps {
   /** Guided mode: slower, holds each step until read, shows the step's new structures. */
   guided: boolean;
   voice: boolean;
+  audioState: AudioSnapshot;
+  voiceConfigured: boolean | null;
+  onRepeat: () => void;
   /** The step's animation has finished and it is waiting for the reading time. */
   waiting: boolean;
   /** Seconds remaining before a timed mode advances this step. */
@@ -201,7 +204,8 @@ function Caption({
  */
 export function Player(p: PlayerProps) {
   const bar = useRef<HTMLDivElement>(null);
-  const narrate = useCanNarrate();
+  const [subtitles, setSubtitles] = useState(false);
+  const [fullText, setFullText] = useState(false);
   const [hover, setHover] = useState<{ x: number; k: number } | null>(null);
   const beats = p.stage.beats;
   const n = beats.length;
@@ -228,7 +232,19 @@ export function Player(p: PlayerProps) {
           <i>/{pad(n)}</i>
         </span>
         <div className="cap-body">
-          {p.ask ?? (
+          {!p.voice && <button className="btn small ghost" onClick={() => p.onVoice(true)}><IconVoice size={15} /> Ahotsarekin ikasi</button>}
+          {p.voice && !p.ask && <div className="spoken-caption">
+            <p className="cap-idea">{ideaOf(beat)}</p>
+            <div className="spoken-controls">
+              <button className="btn small ghost" onClick={() => setSubtitles(!subtitles)} aria-pressed={subtitles}>Azpitituluak</button>
+              <button className="btn small ghost" onClick={() => setFullText(!fullText)} aria-expanded={fullText}>Azalpen osoa</button>
+              <button className="btn small ghost" onClick={p.onRepeat}>Errepikatu urratsa</button>
+              <button className="btn small ghost" onClick={() => p.onVoice(false)}>Ahotsa itzali</button>
+            </div>
+            {subtitles && p.audioState.text && <p className="spoken-subtitle">{p.audioState.text}</p>}
+            {p.voiceConfigured === false ? <p role="status">Ahotsa ez dago erabilgarri oraindik.</p> : p.audioState.status === 'loading' ? <p role="status">Ahotsa prestatzen…</p> : p.audioState.status === 'error' ? <p role="alert">{p.audioState.error} <button className="btn small" onClick={p.onRepeat}>Saiatu berriro</button></p> : p.audioState.status === 'observing' ? <p role="status">Begiratu lasai…</p> : null}
+          </div>}
+          {p.ask ?? ((!p.voice || fullText) && (
             <Caption
               beat={beat}
               quick={p.mode === 'azkarra'}
@@ -256,7 +272,7 @@ export function Player(p: PlayerProps) {
                 )
               }
             />
-          )}
+          ))}
         </div>
         <div className="cap-nav">
           <span className="cap-nav-l" aria-hidden>
@@ -371,7 +387,7 @@ export function Player(p: PlayerProps) {
             <button className={`tp-set-btn${open ? ' is-on' : ''}`} onClick={toggle} aria-expanded={open} aria-haspopup="dialog" data-tip="Erreprodukzio modua, abiadura eta ahotsa · G" data-tip-pos="top-end">
               <ModeIcon mode={p.mode} />
               <span>{MODES.find((m) => m.id === p.mode)?.label}</span>
-              {p.speed !== 1 && <em>{p.speed}×</em>}
+              {p.voice && <IconVoice size={14} />}{p.speed !== 1 && <em>{p.speed}×</em>}
               <IconSliders size={14} />
             </button>
           )}
@@ -401,10 +417,10 @@ export function Player(p: PlayerProps) {
                   ))}
                 </span>
               </div>
-              {p.guided && narrate && (
+              {(
                 <button className="tp-row tp-switch" role="switch" aria-checked={p.voice} onClick={() => p.onVoice(!p.voice)}>
                   <span>
-                    <IconVoice size={15} /> Azalpenak ozen irakurri
+                    <IconVoice size={15} /> Ahotsarekin ikasi
                   </span>
                   <i aria-hidden />
                 </button>
@@ -427,7 +443,7 @@ export function Player(p: PlayerProps) {
  * Guided tour card, floating over the scene: the structure lit right now, in its colour, with its
  * definition. It sits on the viewport so the dock (and the scene size) does not jump while it runs.
  */
-export function TourCard({ item, idx, n, onSkip, onPick }: { item: StructureDef; idx: number; n: number; onSkip: () => void; onPick: (id: string) => void }) {
+export function TourCard({ item, idx, n, onSkip, onPick, compact = false }: { item: StructureDef; idx: number; n: number; onSkip: () => void; onPick: (id: string) => void; compact?: boolean }) {
   return (
     <div className="tour" role="status">
       <div className="tour-top">
@@ -447,8 +463,8 @@ export function TourCard({ item, idx, n, onSkip, onPick }: { item: StructureDef;
         <i className="tour-swatch" style={{ background: item.color ?? categoryColor[item.category] }} />
         <span>
           <b>{item.name}</b>
-          {item.es && <em>{item.es}</em>}
-          <span className="tour-def">{item.definition}</span>
+          {!compact && item.es && <em>{item.es}</em>}
+          {!compact && <span className="tour-def">{item.definition}</span>}
         </span>
       </button>
     </div>

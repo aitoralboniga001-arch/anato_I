@@ -8465,3 +8465,19 @@ button.tp-switch:hover {
     padding: 6px 12px;
   }
 }
+/* Spoken learning keeps the image prominent, with optional reading controls beside its short caption. */
+.spoken-caption .cap-idea { margin: 0 0 8px; }
+.spoken-controls { display: flex; flex-wrap: wrap; gap: 4px; }
+.spoken-caption > p:not(.cap-idea) { margin: 8px 0 0; font-size: 13px; }
+.spoken-subtitle { max-width: 70ch; }
+.is-narrated .cap-main { max-width: 70ch; }
+.is-narrated .tour-def { display: none; }
+/* Keep the spoken lesson caption compact; the complete source remains available via Azalpen osoa. */
+.spoken-caption .cap-idea {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.4;
+}

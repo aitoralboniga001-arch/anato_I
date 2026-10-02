@@ -26,7 +26,8 @@ import { IconRail, Outline, StageInfo } from './SidePanel';
 import { Viewport } from './Viewport';
 import { KimuFace } from '@/components/kimu/KimuFace';
 import { registerKimuHost, setKimuHere, toggleKimu, useKimuOpen } from '@/components/kimu/store';
-import { hush, speak } from './narrate';
+import { NarrationTransport, type AudioSnapshot } from './narrate';
+import { getNarrationSegments, narratedFrame, needsStageRestart, type NarrationKind } from '@/lib/sim/narration';
 import { getPref, setPlayMode, setPref, usePref, type PlayMode } from './prefs';
 import { markVisited, useVisited } from './progress';
 import { recordAnswer } from './answers';
@@ -315,6 +316,19 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const guided = guidedPref && !quick;
   const mode: PlayMode = quick ? 'azkarra' : guided ? 'gidatua' : 'arrunta';
   const voice = usePref('voice');
+  const [audioState, setAudioState] = useState<AudioSnapshot>({ status: 'idle', text: '', focus: [], segment: 0, count: 1, fraction: 0, error: '' });
+  const [transport] = useState(() => new NarrationTransport(setAudioState));
+  const [voiceConfigured, setVoiceConfigured] = useState<boolean | null>(null);
+  const [voiceStarted, setVoiceStarted] = useState(false);
+  useEffect(() => {
+    const abort = new AbortController();
+    void fetch('/api/narration', { signal: abort.signal }).then((r) => r.json()).then((status) => setVoiceConfigured(status.configured === true)).catch(() => { if (!abort.signal.aborted) setVoiceConfigured(false); });
+    return () => { abort.abort(); transport.dispose(); };
+  }, [transport]);
+  useEffect(() => { transport.setSpeed(speed); }, [transport, speed]);
+  useEffect(() => { if (!voice) transport.cancel(); }, [voice, transport]);
+  useEffect(() => { transport.cancel(); }, [week.week, pos.i, transport]);
+
   // Micro-questions already answered or skipped on this visit (stage:step).
   const [asked, setAsked] = useState<string[]>([]);
   const outlineOpen = usePref('outline');
@@ -337,6 +351,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const tourRef = useRef<Tour | null>(null);
   const bridgeHold = useRef(false);
   const toured = useRef('');
+  const narratedTour = useRef<{ key: string; items: string[]; idx: number } | null>(null);
   const [tour, setTour] = useState<{ items: string[]; idx: number } | null>(null);
   // Scenes use floating-point geometry; render them only on the client to avoid hydration mismatches.
   const mounted = useHydrated();
@@ -406,13 +421,14 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   /** The view-change card (see ViewBridge), set when the simulation itself moves to another view. */
   const [bridge, setBridge] = useState<{ from: ViewSnap; to: ViewSnap } | null>(null);
   const chooseView = (id: string) => {
+    transport.cancel();
     if (formation) { setFormation(null); setPlaying(false); }
     setPickedView(`${week.week}/${stage.id}/${id}`);
     setManualView((m) => ({ ...m, [stage.id]: true }));
     setViewByStage((m) => ({ ...m, [stage.id]: id }));
   };
   // Guided mode asks the step's micro-question once its animation is done, before moving on.
-  const askNow = !formation && guided && playing && waiting && intro === null && !tour && !!beat?.ask && !asked.includes(askKey);
+  const askNow = !formation && guided && playing && waiting && intro === null && (!tour || (voice && audioState.status === 'done')) && !!beat?.ask && !asked.includes(askKey);
 
   // Cross-fade: when the scene changes (stage or view), the previous one fades out over the new one.
   const sceneKey = `${week.week}/${stage.id}/${view.id}`;
@@ -487,10 +503,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     if (linkPos) live.current = linkPos;
   }, [linkPos]);
 
-  // Pausing silences the narration and restarts the current step's reading clock on resume.
+  // Narrated pauses retain the current audio sample and observation interval.
   useEffect(() => {
+    if (voice && voiceStarted) { if (playing) transport.resume(); else transport.pause(); return; }
     if (playing) return;
-    hush();
+    transport.cancel();
     speaking.current = false;
     clock.current.key = '';
     if (tourRef.current) {
@@ -498,7 +515,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       tourRef.current.said = false;
     }
     introClock.current = 0;
-  }, [playing]);
+  }, [playing, voice, voiceStarted, transport]);
 
   // Playback loop.
   useEffect(() => {
@@ -509,6 +526,63 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       raf = requestAnimationFrame(step);
+
+      // Speech samples drive scene movement; observation time only advances while playing.
+      if (voice && !formation && !find) {
+        if (!voiceStarted || voiceConfigured !== true) return;
+        const p = live.current;
+        const st = week.stages[p.i];
+        const k = beatIndexAt(st, p.t);
+        const tourKey = `${week.week}/${st.id}/${k}`;
+        if (narratedTour.current?.key !== tourKey) narratedTour.current = null;
+        const currentTour = narratedTour.current;
+        const kind: NarrationKind = introRef.current !== null ? 'intro' : bridge ? 'bridge' : currentTour ? 'structure' : 'beat';
+        const options = kind === 'beat' ? { beat: k } : kind === 'bridge' ? { view: view.id } : kind === 'structure' && currentTour ? { structure: currentTour.items[currentTour.idx] } : {};
+        const key = `${week.week}/${st.id}/${kind}/${k}/${view.id}/${options.structure ?? ''}`;
+        if (transport.key !== key) {
+          transport.start(key, { week: week.week, stage: st.id, kind, ...options }, getNarrationSegments(week, st, kind, options), speed);
+          skipHold.current = false; setWaiting(false);
+        }
+        transport.tick(dt);
+        const audio = transport.snapshot();
+        if (audio.status === 'error' || audio.status === 'loading' || audio.status === 'paused') return;
+        const fraction = audio.status === 'observing' || audio.status === 'done' ? 1 : audio.fraction;
+        if (kind === 'intro') {
+          const it = narratedFrame(0, 1, audio.segment, audio.count, fraction);
+          introRef.current = it; setIntro(it);
+          if (audio.status === 'done') { introRef.current = null; setIntro(null); transport.cancel(); }
+          return;
+        }
+        if (kind === 'bridge') {
+          if (audio.status === 'done') { setBridge(null); transport.cancel(); }
+          return;
+        }
+        const t = kind === 'structure' ? doneAt(st, k) : narratedFrame(st.beats[k].at, doneAt(st, k), audio.segment, audio.count, fraction);
+        live.current = { i: p.i, t }; setPos(live.current);
+        if (audio.status !== 'done') return;
+        if (kind === 'beat' && toured.current !== tourKey) {
+          toured.current = tourKey;
+          const items = (st.beats[k].tour ?? []).filter((id) => structures.has(id) && drawnIn(svgRef.current, id));
+          if (items.length) {
+            narratedTour.current = { key: tourKey, items, idx: 0 };
+            setTour({ items, idx: 0 }); transport.cancel(); return;
+          }
+        }
+        if (kind === 'structure' && currentTour && currentTour.idx + 1 < currentTour.items.length) {
+          currentTour.idx++; setTour({ items: currentTour.items, idx: currentTour.idx }); transport.cancel(); return;
+        }
+        setWaiting(true);
+        if (!skipHold.current && guided) return;
+        narratedTour.current = null; setTour(null);
+        transport.cancel(); setWaiting(false);
+        if (k + 1 < st.beats.length) {
+          live.current = { i: p.i, t: st.beats[k + 1].at + .000001 }; setPos(live.current);
+        } else if (autoContinue && p.i + 1 < week.stages.length) {
+          live.current = { i: p.i + 1, t: 0 }; setPos(live.current);
+          introRef.current = 0; setIntro(0);
+        } else setPlaying(false);
+        return;
+      }
 
       // Kimu's reviewed clip owns its range; it cannot enter a tour, a reading hold or another stage.
       if (formation) {
@@ -533,12 +607,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         const st = week.stages[live.current.i];
         if (!introClock.current) {
           introClock.current = now;
-          if (guided && voice && introRef.current === 0) {
-            speaking.current = true;
-            speak(`${st.title}. ${st.intro ?? st.subtitle ?? ''}`, () => {
-              speaking.current = false;
-            });
-          }
+
         }
         const it = Math.min(1, introRef.current + dt / PREVIEW_S);
         introRef.current = it;
@@ -584,16 +653,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         if (!(speaking.current && !tr.said)) {
           if (!tr.start) tr.start = now;
           const id = tr.items[tr.idx];
-          if (guided && voice && !tr.said) {
-            tr.said = true;
-            const s = structures.get(id);
-            if (s) {
-              speaking.current = true;
-              speak(`${s.name}. ${s.definition}`, () => {
-                speaking.current = false;
-              });
-            }
-          }
+
           if (now - tr.start >= tourMs(id, guided) / speed && !speaking.current) {
             if (tr.idx + 1 < tr.items.length) {
               tr.idx += 1;
@@ -621,13 +681,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       if (clock.current.key !== key) {
         clock.current = { key, start: now };
         skipHold.current = false;
-        if (guided && voice) {
-          speaking.current = true;
-          const b = st.beats[k];
-          speak(b.idea ? `${b.idea} ${b.text}` : b.text, () => {
-            speaking.current = false;
-          });
-        }
+
       }
       const end = k + 1 < st.beats.length ? st.beats[k + 1].at : 1;
       // Rest just before the next step's cross-fade begins, so the frame being read shows this step complete.
@@ -656,10 +710,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [playing, speed, autoContinue, week, guided, quick, voice, formation]);
+  }, [playing, speed, autoContinue, week, guided, quick, voice, formation, find, voiceStarted, voiceConfigured, transport, bridge, view.id]);
 
   // Auto-stop at the end of the stage (or of the week, when auto-continuing).
-  if (playing && intro === null && pos.t >= 1 && (!autoContinue || pos.i === week.stages.length - 1)) setPlaying(false);
+  if (playing && !voice && intro === null && pos.t >= 1 && (!autoContinue || pos.i === week.stages.length - 1)) setPlaying(false);
 
   // Glide: while paused, a step the viewer moves to plays itself out (from its start to its complete
   // frame) instead of cutting, so what the caption describes is seen happening.
@@ -702,6 +756,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   // Plain functions: nothing downstream depends on their identity (no memo'd children), and the
   // React Compiler lint can't preserve manual useCallback here, so memoization is left to it.
   const place = (next: Pos) => {
+    transport.cancel();
     if (formation) { setFormation(null); setPlaying(false); }
     stopGlide();
     live.current = next;
@@ -721,6 +776,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const clearTour = () => {
     tourRef.current = null;
     toured.current = '';
+    narratedTour.current = null;
     setTour(null);
   };
   const startIntro = () => {
@@ -732,7 +788,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   };
   const endIntro = () => {
     if (introRef.current !== null && speaking.current) {
-      hush();
+      transport.cancel();
       speaking.current = false;
     }
     introRef.current = null;
@@ -745,9 +801,16 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     place({ i, t });
   };
   const skipTour = () => {
+    if (voice && narratedTour.current) {
+      narratedTour.current = null; setTour(null); transport.cancel();
+      const next = stage.beats[activeBeat + 1];
+      if (next) place({ i: pos.i, t: next.at + .000001 });
+      else { place({ i: pos.i, t: 1 }); setPlaying(false); }
+      return;
+    }
     tourRef.current = null;
     setTour(null);
-    hush();
+    transport.cancel();
     speaking.current = false;
   };
   /** Focus mode + browser full screen (inside the click/key gesture, as browsers require). */
@@ -770,6 +833,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     else if (getPref('fsAsk')) setFsOffer(true);
   };
   const togglePlay = () => {
+    const continuingNarration = voice && !!transport.key;
+    setVoiceStarted(true);
+    if (voice && !playing) transport.resume();
     if (formation) {
       if (pos.t >= formation.end) place({ ...pos, t: formation.start });
       setFormation(formation);
@@ -778,25 +844,26 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     }
     stopGlide();
     if (playing) setFsOffer(false);
-    else if (intro === null && (pos.t <= 0.001 || pos.t >= 1)) offerFull();
+    else if (!continuingNarration && intro === null && (pos.t <= 0.001 || pos.t >= 1)) offerFull();
     // The preview has finished and is waiting to be read: start the step-by-step playback.
-    if (playing && intro !== null && intro >= 1) {
+    if (!voice && playing && intro !== null && intro >= 1) {
       endIntro();
       return;
     }
-    if (!playing && pos.t >= 1) {
+    if (needsStageRestart(playing, pos.t, continuingNarration)) {
       clearTour();
       place({ ...pos, t: 0 });
     }
-    if (!playing && intro === null && !find && (pos.t <= 0.001 || pos.t >= 1)) startIntro();
-    // Pressing play is the answer to the view-change card: it would otherwise sit behind the preview.
-    if (!playing) setBridge(null);
+    if (!playing && !continuingNarration && intro === null && !find && (pos.t <= 0.001 || pos.t >= 1)) startIntro();
+    // Starting fresh dismisses the view card; resuming narrated speech preserves its view bridge.
+    if (!playing && !continuingNarration) setBridge(null);
     setPlaying(!playing);
   };
   /** Advance from a reading hold; in guided mode this also lets the learner stop narration. */
   const continueHold = () => {
     skipHold.current = true;
-    hush();
+    if (voice) return;
+    transport.cancel();
     speaking.current = false;
   };
   const gotoStage = (delta: number) => {
@@ -823,7 +890,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     clearTour();
     const kk = Math.max(0, Math.min(stage.beats.length - 1, k));
     const b = stage.beats[kk];
-    if (playing) {
+    if (playing || voice) {
       place({ i: pos.i, t: b.at + 0.001 });
       return;
     }
@@ -859,7 +926,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         tr.idx = j;
         tr.start = 0;
         tr.said = false;
-        hush();
+        transport.cancel();
         speaking.current = false;
         setTour({ items: tr.items, idx: j });
         return;
@@ -941,7 +1008,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     setFind(null);
     setHovered(null);
     setBridge(null);
-    hush();
+    transport.cancel();
     speaking.current = false;
     endIntro();
     clearTour();
@@ -1269,7 +1336,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const ctx: SceneContextValue = {
     selected: find || !selectedLit ? null : selected,
     hovered: find ? hovered : hovered,
-    focus: find || intro !== null ? [] : formation ? (formation.highlight ?? [formation.structure]) : (beat?.focus ?? []),
+    focus: find || intro !== null ? [] : formation ? (formation.highlight ?? [formation.structure]) : voice && audioState.focus.length ? audioState.focus : (beat?.focus ?? []),
     dimContext: !formation && focusLit && !view.ownFocus && !find && intro === null,
     spotlight: !find && intro === null && tour ? tour.items[tour.idx] : null,
     showLabels: showLabels && intro === null,
@@ -1283,7 +1350,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 
   // Rings for step structures drawn too small to notice: the tour's current one, else the selection, else the step's.
   const spot = !find && intro === null && tour ? tour.items[tour.idx] : null;
-  const marks = find || intro !== null ? [] : formation ? [formation.structure] : spot ? [spot] : selected && selectedLit ? [selected] : (beat?.focus ?? []);
+  const marks = find || intro !== null ? [] : formation ? [formation.structure] : spot ? [spot] : selected && selectedLit ? [selected] : voice && audioState.focus.length ? audioState.focus : (beat?.focus ?? []);
 
   // Legend: categories present in this stage.
   const legend = legendOf(stage.structures);
@@ -1320,7 +1387,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const pad = (n: number) => String(n).padStart(2, '0');
 
   return (
-    <div ref={appRef} className={`app${focusMode ? ' is-focus' : ''}`}>
+    <div ref={appRef} className={`app${focusMode ? ' is-focus' : ''}${voice ? ' is-narrated' : ''}`}>
       <header className="topbar">
         <Link href="/" className="tb-brand" title="Hasiera">
           <Wordmark size={20} />
@@ -1539,9 +1606,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       </button>
                     </div>
                   )}
-                  {bridge && intro === null && <ViewBridge key={bridge.to.key} from={bridge.from} to={bridge.to} onClose={() => setBridge(null)} />}
+                  {bridge && intro === null && <ViewBridge autoClose={!voice} key={bridge.to.key} from={bridge.from} to={bridge.to} onClose={() => { transport.cancel(); setBridge(null); }} />}
                   {tour && intro === null && structures.get(tour.items[tour.idx]) && (
-                    <TourCard item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} onSkip={skipTour} onPick={onSelect} />
+                    <TourCard compact={voice} item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} onSkip={skipTour} onPick={onSelect} />
                   )}
                   {intro === null && (
                     <p key={`${stage.id}/${view.id}`} className="view-desc">
@@ -1718,10 +1785,13 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             mode={mode}
             onMode={setPlayMode}
             voice={voice}
+            audioState={audioState}
+            voiceConfigured={voiceConfigured}
+            onRepeat={() => { endIntro(); clearTour(); place({ i: pos.i, t: beat.at + .000001 }); setVoiceStarted(true); setPlaying(true); }}
             waiting={!formation && waiting && playing && intro === null}
             waitSeconds={!formation && waiting && playing && intro === null ? waitSeconds : null}
             fresh={!formation && guided && intro === null && !tour ? fresh : []}
-            onVoice={(v) => setPref('voice', v)}
+            onVoice={(v) => { transport.cancel(); setVoiceStarted(true); setPref('voice', v); if (v) { setPlayMode('gidatua'); setPref('panel', false); setPanelOpen(false); setSelected(null); endIntro(); place({ i: pos.i, t: beat.at + .000001 }); setPlaying(true); } }}
             onContinue={continueHold}
             onNextStage={continueNext}
             onPick={onSelect}

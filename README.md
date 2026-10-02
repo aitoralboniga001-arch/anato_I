@@ -39,6 +39,14 @@ Une honetan AI tutorea desgaituta dago nahita. Aktibatzeko etorkizuneko release 
 
 `AI_MODEL` ezartzen ez bada, `gemini-3.5-flash-lite` erabiltzen da. Gakoak server route-an bakarrik erabiltzen dira eta ez dira bezeroari bidaltzen.
 
+## Ahots bidezko simulazioa (6 gaiak)
+
+Ahotsaren audioak aldez aurretik sortzen dira sei gaietarako eta aplikazioarekin argitaratzen dira MP3 fitxategi gisa. Chrome-n eta beste arakatzaileetan erabiltzaileek audio berdinak entzuten dituzte: erreproduzitzeak ez du TTS APIrik deitzen eta ez du sorkuntza-kuotarik kontsumitzen. Ostalaritzaren transferentzia-mugak aplikatzen dira oraindik.
+
+`/api/narration` endpoint-ak gai, etapa, zati eta ikuspegi identifikatzaile kanonikoak bakarrik onartzen ditu, eta lehendik sortutako MP3 fitxategira birbideratzen du. Edukiaren hitzak ez dira aldatzen. `public/narration/manifest.json` katalogoak testuaren SHA256-a audioaren URLarekin lotzen du; URLak azken MP3aren byteen SHA256-a darama. Beste ahots edo erritmo batekin birsortzeak URL berria ematen du.
+
+Audioak [offline sortzeko tresnak](scripts/narration/README.md) erabiltzen dira. Entzuteko ez da API gakorik behar Vercel-en, eta AI tutorearen banderek ez dute narratzaile estatikoa kontrolatzen. Katalogoa hutsik dagoenean GET-ek `configured:false` itzultzen du eta audio-eskaerak `NOT_CONFIGURED` egoera. Google Cloud Standard ahotsaren sorkuntza tokian bakarrik egiten da, `eu-ES-Standard-B` ahotsarekin; prest dagoen katalogoa osorik argitaratu behar da.
+
 ## Vercel
 
 Importatu proiektua Vercel-en eta konfiguratu `.env.local`-eko aldagaiak Project Settings → Environment Variables atalean. `GOOGLE_GENERATIVE_AI_API_KEY` aukerakoa da; hutsik utzita core simulatorrak funtzionatzen jarraitzen du fallback lokalarekin. Vercel-en build komandoa `npm run build` da.

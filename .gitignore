@@ -15,3 +15,7 @@ _source-review/
 
 # Course figures (copyrighted): kept only on this computer, read by /api/irudiak
 private-images/
+
+# Isolated offline speech tooling, models and resumable generation cache
+.narration-tools/
+scripts/narration/__pycache__/
