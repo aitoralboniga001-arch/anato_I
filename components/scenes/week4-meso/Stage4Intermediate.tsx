@@ -109,10 +109,10 @@ export function IntermediateSection({ t }: SceneProps) {
         <Label id="peritoneo-barrunbea" x={802} y={108} ax={788} ay={108} align="start" show={g.fateCoelom} small />
       </g>
 
-      <Note x={500} y={24} tone="dim" show={1 - g.folded}>
+      <Note x={500} y={612} tone="dim" show={1 - g.folded}>
         Tolestura zeharkakoa gertatzen ari da
       </Note>
-      <Note x={500} y={24} tone="accent" show={g.folded}>
+      <Note x={500} y={612} tone="accent" show={g.folded}>
         Tolestura zeharkakoa amaituta: heste-hodia zintzilik, zeloma inguruan
       </Note>
 

@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { atlasDerivatives, atlasHref, atlasOrigins, atlasPath, atlasRelations, atlasTopics } from '@/content/structure-atlas';
+import { atlasConfusions, atlasDerivatives, atlasHref, atlasOrigins, atlasPath, atlasRelations, atlasTopics, namedIn, structureNamed } from '@/content/structure-atlas';
 import { appearances, structures, weeks } from '@/content/registry';
 import { formationOf } from '@/content/formation';
 
@@ -110,6 +110,34 @@ describe('global structure atlas', () => {
     }
     expect(atlasPath('notokorda')[0]).toBe('zigotoa');
     expect(atlasPath('missing')).toEqual([]);
+  });
+
+  it('collects the "ez nahastu" warnings of the notes with the structures they set against each other', () => {
+    const pairs = new Set<string>();
+    for (const id of structures.keys())
+      for (const c of atlasConfusions(id)) {
+        expect(c.ids.length, c.text).toBeGreaterThanOrEqual(2);
+        for (const x of c.ids) expect(structures.has(x), x).toBe(true);
+        // Blood that never mixes is not a confusion.
+        expect(c.text).not.toMatch(/ez dira (inoiz )?nahasten|nahastu gabe/i);
+        pairs.add([...c.ids].sort().join(' '));
+      }
+    expect(pairs).toContain('sinzitiotrofoblastoa zitotrofoblastoa');
+    expect(pairs).toContain('enbrioi-kanpoko-mesodermoa mesodermo-intraenbrionarioa');
+    expect(pairs).toContain('kloaka kloaka-mintza');
+    expect(pairs).toContain('dermatoma ektodermoa');
+    // The cloaca warning is about the cloacal membrane, not every structure the sentence mentions.
+    expect(atlasConfusions('kloaka').find(c => c.ids.includes('kloaka-mintza'))?.ids).toEqual(['kloaka', 'kloaka-mintza']);
+    expect(atlasConfusions('missing')).toEqual([]);
+  });
+
+  it('reads structure names in Basque text and answer options', () => {
+    expect(namedIn('Ez nahastu zitotrofoblastoarekin')).toEqual(['zitotrofoblastoa']);
+    expect(namedIn('enbrioi barruko mesodermoa')).toEqual(['mesodermo-intraenbrionarioa']);
+    expect(structureNamed('Esklerotomatik')).toBe('esklerotoma');
+    expect(structureNamed('Korion barrunbea')).toBe('korion-barrunbea');
+    expect(structureNamed('Ektodermoaren gainean')).toBeNull();
+    expect(structureNamed('18. eguna')).toBeNull();
   });
 
   it('handles unknown ids without inventing topics, links or relationships', () => {

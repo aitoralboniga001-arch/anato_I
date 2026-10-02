@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { useEffect, useEffectEvent, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { appearances, structures, weeks } from '@/content/registry';
-import { atlasDerivatives, atlasHref, atlasOrigins, atlasPath, atlasRelations, atlasTopics, type AtlasRelation } from '@/content/structure-atlas';
+import { atlasConfusions, atlasDerivatives, atlasHref, atlasOrigins, atlasPath, atlasRelations, atlasTopics, structureNamed as optionStructure, type AtlasRelation } from '@/content/structure-atlas';
 import { POOL } from '@/content/pool';
-import { isMastered, useAnswers } from './answers';
+import { isDue, isMastered, useAnswers, type Answers } from './answers';
+import { AtlasFigure } from './AtlasFigure';
 import { categoryColor } from '@/lib/sim/palette';
 import type { StructureDef } from '@/lib/sim/types';
 import { LandFoot, LandNav } from './LandNav';
@@ -29,6 +30,42 @@ const treeLabel = (edge: AtlasRelation) => edge.kind === 'development' && !edge.
 /** Question-bank items about each structure (the simulator's "Galderak", filtered to one concept). */
 const QUESTIONS = new Map<string, string[]>();
 for (const q of POOL) if (q.concept) QUESTIONS.set(q.concept, [...(QUESTIONS.get(q.concept) ?? []), q.id]);
+
+/** Structures with questions waiting for review today (wrong last time, or their review date has come), most first. */
+function dueToday(answers: Answers, now: number) {
+  return [...QUESTIONS].map(([id, qs]) => ({ id, n: qs.filter((q) => isDue(answers[q], now)).length }))
+    .filter((d) => d.n > 0 && structures.has(d.id)).sort((a, b) => b.n - a.n);
+}
+
+/** Basque genitive of a name: "esklerotomaren", "amniosen". */
+const genitive = (name: string) => `${name.toLocaleLowerCase('eu')}${/[aeiou]$/i.test(name) ? 'ren' : 'en'}`;
+
+/**
+ * The viewer's own mix-ups with this structure, from the error log: a wrong option that is one
+ * structure's name where the right answer is another's (options that only mention one don't count). `instead`: they picked the other where this was
+ * the answer; `picked`: they picked this where the other was.
+ */
+function mixUps(id: string, answers: Answers) {
+  const found = new Map<string, { id: string; instead: number; picked: number }>();
+  const bump = (other: string, side: 'instead' | 'picked') => {
+    const m = found.get(other) ?? { id: other, instead: 0, picked: 0 };
+    m[side]++;
+    found.set(other, m);
+  };
+  for (const q of POOL) {
+    const errors = answers[q.id]?.errors ?? [];
+    if (!errors.length) continue;
+    const right = optionStructure(q.options[q.answer]);
+    if (!right) continue;
+    for (const e of errors) {
+      const wrong = optionStructure(e);
+      if (!wrong || wrong === right) continue;
+      if (right === id) bump(wrong, 'instead');
+      if (wrong === id) bump(right, 'picked');
+    }
+  }
+  return [...found.values()].sort((x, y) => y.instead + y.picked - (x.instead + x.picked));
+}
 
 /** A scene that draws the structure: the step that focuses it, else the stage's first view. */
 function sceneOf(id: string) {
@@ -233,6 +270,19 @@ export function StructureAtlas() {
   const asked = selected ? QUESTIONS.get(selected.id) ?? [] : [];
   const tried = asked.filter((id) => answers[id]).length;
   const mastered = asked.filter((id) => isMastered(answers[id])).length;
+  const confusions = selected ? atlasConfusions(selected.id) : [];
+  // One warning per pair of structures (the notes repeat some across topics); the others are counted.
+  const pairs: ((typeof confusions)[number] & { more: number })[] = [];
+  for (const c of confusions) {
+    const key = c.ids.filter((x) => x !== selected?.id).join(' ');
+    const seen = pairs.find((p) => p.ids.filter((x) => x !== selected?.id).join(' ') === key);
+    if (seen) seen.more++;
+    else pairs.push({ ...c, more: 0 });
+  }
+  const mine = selected ? mixUps(selected.id, answers) : [];
+  // eslint-disable-next-line react-hooks/purity -- review dates are compared with "now" on each render, on purpose
+  const now = Date.now();
+  const due = dueToday(answers, now);
   const practiceHref = selected && asked.length
     ? scene ? sceneHref(scene, { galderak: selected.id }) : `/astea/${POOL.find((q) => q.concept === selected.id)!.week}?galderak=${selected.id}`
     : null;
@@ -272,6 +322,13 @@ export function StructureAtlas() {
             <details className={styles.typeHelp}><summary>Lotura motak</summary><p>Geziaren etiketak lotura mota adierazten du; etiketarik gabeko lotura garapena da. Grisez: aurreko gaietako egiturak. Hautatu egitura bat haren azalpena eta garapena ikusteko.</p><dl>{(Object.keys(relationLabels) as AtlasRelation['kind'][]).map((kind) => <div key={kind}><dt>{relationLabels[kind]}</dt><dd>{relationHelp[kind]}</dd></div>)}</dl></details>
             </div>
           </section>
+        {due.length > 0 && <section className={styles.review} aria-labelledby="atlas-review-title">
+          <h2 id="atlas-review-title">Gaur errepasatzeko <span>{due.length}</span></h2>
+          <p>Azken aldiz huts egin zenituen edo errepaso-eguna iritsi zaien galderak dituzten egiturak.</p>
+          <ul>{due.slice(0, 12).map((d) => <li key={d.id}>
+            <button type="button" aria-pressed={selected?.id === d.id} onClick={() => choose(d.id)}><Swatch structure={structures.get(d.id)!} />{structures.get(d.id)!.name}<span className={styles.count} title="Errepasatzeko galderak">{d.n}</span></button>
+          </li>)}</ul>
+        </section>}
         <div className={`${styles.layout} ${selected ? styles.hasDetail : ''}`}>
           <div className={styles.schemes} id="atlas-eskemak">
             {selected && <a href="#egitura-xehetasuna" className={styles.skip}>Hautatutako egiturara <span aria-hidden="true">↓</span></a>}
@@ -287,6 +344,7 @@ export function StructureAtlas() {
                 <p className={styles.meta}><Swatch structure={selected} />{selected.category.replaceAll('-', ' ')} · {atlasTopics(selected.id).map((number) => `${number}. gaia`).join(' / ')}</p>
                 <h2 id="atlas-structure-title">{selected.name}</h2>
                 {selected.es && <p className={styles.translation}>{selected.es}</p>}
+                <AtlasFigure key={selected.id} id={selected.id} />
                 <p>{selected.definition}</p>
                 <div className={styles.study}>
                   {href && <Link href={href} className="btn btn-light small">Simulagailuan ikusi <span aria-hidden="true">↗</span></Link>}
@@ -307,6 +365,23 @@ export function StructureAtlas() {
                     : <button type="button" onClick={() => choose(id)}><Swatch structure={structures.get(id)!} />{structures.get(id)!.name}</button>}</li>)}</ol>
                 </nav>}
               </header>
+              {(pairs.length > 0 || mine.length > 0) && <section className={styles.confuse} aria-labelledby="atlas-confuse-title">
+                <h3 id="atlas-confuse-title">Ez nahastu</h3>
+                {pairs.length > 0 && <ul>{pairs.map((c) => <li key={c.text}>
+                  <p className={styles.confusePair}>
+                    {c.ids.filter((x) => x !== selected.id).map((x) => <button key={x} type="button" onClick={() => choose(x)}><Swatch structure={structures.get(x)!} />{structures.get(x)!.name}</button>)}
+                  </p>
+                  <blockquote>{c.text}</blockquote>
+                  <small>{c.where}{c.more > 0 && ` · apunteetan beste ${c.more} aldiz`}</small>
+                </li>)}</ul>}
+                {mine.length > 0 && <div className={styles.mine}>
+                  <p>Zure erantzunetan</p>
+                  <ul>{mine.map((m) => <li key={m.id}>
+                    <button type="button" onClick={() => choose(m.id)}><Swatch structure={structures.get(m.id)!} />{structures.get(m.id)!.name}</button>
+                    <span>{[m.instead && `${m.instead}× aukeratu duzu ${genitive(selected.name)} ordez`, m.picked && `${m.picked}× ${selected.name.toLocaleLowerCase('eu')} aukeratu duzu haren ordez`].filter(Boolean).join(' · ')}</span>
+                  </li>)}</ul>
+                </div>}
+              </section>}
               <section className={styles.map} aria-labelledby="atlas-relations-title">
                 <h3 id="atlas-relations-title">Loturak</h3>
                 <p className={styles.mapIntro}>Geziak goitik behera irakurtzen dira. Hautatu egitura bat haren loturak ikusteko.</p>
@@ -329,7 +404,7 @@ export function StructureAtlas() {
                   {selected.origin && <div><dt>Jatorria</dt><dd>{selected.origin}</dd></div>}
                   {selected.fate && <div><dt>Patua</dt><dd>{selected.fate}</dd></div>}
                   {selected.location && <div><dt>Kokapena</dt><dd>{selected.location}</dd></div>}
-                  {selected.caution && <div className={styles.caution}><dt>Kontuz</dt><dd>{selected.caution}</dd></div>}
+                  {selected.caution && !confusions.some((c) => c.text === selected.caution) && <div className={styles.caution}><dt>Kontuz</dt><dd>{selected.caution}</dd></div>}
                 </dl>
                 {source && <p className={styles.source}>Iturria: {seen[0]?.week.week ?? owners[0]?.week}. gaiko apunteak · {source.section}</p>}
               </section>

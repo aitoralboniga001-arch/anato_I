@@ -32,6 +32,8 @@ export interface SectionParams {
   crest: number;
   /** When crest cells first show at the fold tips (0..1); defaults to following `neural`. */
   crestAppear?: number;
+  /** How far the sclerotome cells have migrated towards the notochord / tube (0..1); defaults to following `somite`. */
+  scleroGo?: number;
   /** Zoom around the canvas centre. */
   k: number;
   /** Offsets after zoom (svg units). */
@@ -827,8 +829,25 @@ export function SectionDrawing({ s, show = {} }: { s: Section; show?: Partial<Re
   );
 }
 
-function Somites({ s, epith, scler, myo }: { s: Section; epith: number; scler: number; myo: number }) {
+export const SCLERO_N = 26;
+
+/**
+ * Where sclerotome cell `j` of side `sd` is (screen space) when the migration has gone `go` (0..1):
+ * from its place in the ventromedial somite towards the notochord / neural tube, each cell at its
+ * own pace (the fastest reach the notochord / tube; the slowest only a third of the way, so the cloud stays loose).
+ */
+export function scleroCell(s: Section, sd: 1 | -1, j: number, go: number): Pt {
   const { map, somite: so, dNoto, neural: ng } = s;
+  const a = Math.PI * (0.2 + 0.9 * rand(j * 3.3 + sd));
+  const r0 = 0.9 * Math.sqrt(rand(j * 7.1 + sd));
+  const start: Pt = [sd * (so.cx + so.rx * r0 * Math.cos(a)), so.cd + so.rd * r0 * Math.sin(a)];
+  const goal: Pt = [sd * (14 + 26 * rand(j * 1.7)), lerp(ng.cy, dNoto + 10, rand(j * 2.9))];
+  const q = clamp(go) * lerp(0.35, 0.95, rand(j * 4.4 + 1));
+  return map(lerp(start[0], goal[0], q), lerp(start[1], goal[1], q));
+}
+
+function Somites({ s, epith, scler, myo }: { s: Section; epith: number; scler: number; myo: number }) {
+  const { map, somite: so } = s;
   const out: ReactNode[] = [];
   for (const sd of [1, -1] as const) {
     const ring = (rx: number, rd: number, a0 = 0, a1 = Math.PI * 2, n = 40) =>
@@ -849,13 +868,8 @@ function Somites({ s, epith, scler, myo }: { s: Section; epith: number; scler: n
     if (scler > 0.02) {
       // Sclerotome: ventromedial cells become mesenchyme and move towards the notochord / tube.
       const cells: ReactNode[] = [];
-      for (let j = 0; j < 26; j++) {
-        const a = Math.PI * (0.2 + 0.9 * rand(j * 3.3 + sd));
-        const r0 = 0.9 * Math.sqrt(rand(j * 7.1 + sd));
-        const start: Pt = [sd * (so.cx + so.rx * r0 * Math.cos(a)), so.cd + so.rd * r0 * Math.sin(a)];
-        const goal: Pt = [sd * (14 + 26 * rand(j * 1.7)), lerp(ng.cy, dNoto + 10, rand(j * 2.9))];
-        const q = lerp(0, 0.75, ss((scler - 0.2) / 0.8) * rand(j * 4.4 + 1));
-        const [X, Y] = map(lerp(start[0], goal[0], q), lerp(start[1], goal[1], q));
+      for (let j = 0; j < SCLERO_N; j++) {
+        const [X, Y] = scleroCell(s, sd, j, s.p.scleroGo ?? ss((scler - 0.2) / 0.8));
         cells.push(<ellipse key={j} cx={X} cy={Y} rx={3.6 * s.k} ry={2.6 * s.k} fill="#b4533c" stroke="#6b2413" strokeWidth={0.6} />);
       }
       out.push(

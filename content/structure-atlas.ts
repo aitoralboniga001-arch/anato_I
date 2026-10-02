@@ -135,3 +135,72 @@ export function atlasPath(id: string): string[] {
   }
   return path;
 }
+
+/** A "don't confuse" warning from the notes, and the structures it sets against each other. */
+export interface AtlasConfusion {
+  text: string;
+  ids: string[];
+  /** Where the warning is written: a structure's card or a stage. */
+  where: string;
+}
+
+const plain = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('eu').replace(/[-–]/g, ' ').replace(/\s+/g, ' ');
+/** Confusing two things, not blood mixing ("ez dira nahasten", "nahastu gabe"). */
+const CONFUSE = /\bez nahastu\b|\bnahastea\b|nahaste ohiko|nahastu behar/;
+const keysOf = [...structures.values()].map(s => ({
+  id: s.id,
+  // Names without the Basque article (-a), so "zitotrofoblastoarekin" still names zitotrofoblastoa.
+  keys: [s.name, ...(s.aka ?? [])].map(n => plain(n).replace(/\(.*?\)/g, '').trim().replace(/a$/, '')).filter(k => k.length >= 6),
+}));
+
+/** Structures a sentence names, in reading order; a name inside a longer one ("mesodermo" in "enbrioi barruko mesodermo") does not count. */
+export function namedIn(text: string): string[] {
+  const t = plain(text);
+  const hits: { id: string; at: number; end: number }[] = [];
+  for (const { id, keys } of keysOf)
+    for (const k of keys) {
+      const re = new RegExp(`(^|[^a-z])${k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g');
+      for (let m; (m = re.exec(t)); ) hits.push({ id, at: m.index + m[1].length, end: m.index + m[0].length });
+    }
+  const kept = hits.filter(h => !hits.some(o => o !== h && o.at <= h.at && o.end >= h.end && o.end - o.at > h.end - h.at));
+  return [...new Set(kept.sort((a, b) => a.at - b.at).map(h => h.id))];
+}
+
+/**
+ * Structures the warning sets against each other: those named in the clause that says "ez nahastu"
+ * (asides in brackets and the explanation after a colon left out), plus the subject it is about.
+ */
+function confused(text: string, subject: string[]) {
+  const clauses = text.replace(/\(.*?\)/g, '').split(/[.;:]/).filter(c => CONFUSE.test(plain(c)));
+  // "…: ez nahastu geruza bakoitzaren jatorria" names nothing itself: it warns about the statement before it.
+  const named = clauses.flatMap(namedIn).length ? clauses.flatMap(namedIn) : namedIn(text.replace(/\(.*?\)/g, ''));
+  // A clause naming only the other one ("Ez nahastu korion barrunbearekin") is about the text's first-named structure.
+  return [...subject, ...named, ...(subject.length + new Set(named).size < 2 ? namedIn(text).slice(0, 1) : [])];
+}
+
+const confusions: AtlasConfusion[] = (() => {
+  const out: AtlasConfusion[] = [];
+  const add = (text: string, ids: string[], where: string) => {
+    const unique = [...new Set(ids)];
+    if (unique.length >= 2 && !out.some(c => c.text === text)) out.push({ text, ids: unique, where });
+  };
+  for (const s of structures.values()) if (s.caution && CONFUSE.test(plain(s.caution))) add(s.caution, confused(s.caution, [s.id]), s.name);
+  for (const w of weeks)
+    for (const st of w.stages) {
+      const where = `${w.week}. gaia · ${st.title}`;
+      for (const b of st.beats)
+        if (b.caution && CONFUSE.test(plain(b.caution))) add(b.caution, confused(b.caution, b.focus?.length === 1 ? b.focus : []), where);
+      for (const text of [...(st.cautions ?? []), ...st.keyPoints]) if (CONFUSE.test(plain(text))) add(text, confused(text, []), where);
+    }
+  return out;
+})();
+
+/** The notes' "ez nahastu" warnings that involve this structure and at least one other. */
+export const atlasConfusions = (id: string): AtlasConfusion[] => confusions.filter(c => c.ids.includes(id));
+
+/** The structure an answer option *is* (its name, maybe with a case ending: "Esklerotomatik"), else null. */
+export function structureNamed(option: string): string | null {
+  const t = plain(option).replace(/[.]/g, '').trim();
+  for (const { id, keys } of keysOf) if (keys.some(k => t.startsWith(k) && t.length - k.length <= 6 && !t.slice(k.length).includes(' '))) return id;
+  return null;
+}

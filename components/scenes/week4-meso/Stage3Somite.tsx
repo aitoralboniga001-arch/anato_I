@@ -1,7 +1,7 @@
 'use client';
 
-import { Arrow, Label, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
-import { SectionDrawing, makeSection, type Section } from '@/components/scenes/section/Section';
+import { Arrow, FollowRing, Journey, Label, Note, Part, lerp, seg, type SceneProps } from '@/components/kit';
+import { SCLERO_N, SectionDrawing, makeSection, scleroCell, type Section } from '@/components/scenes/section/Section';
 
 /**
  * `somitaren-bereizketa` — a somite's cells are initially uniform (epithelial ball). The somite then
@@ -38,6 +38,8 @@ function somiteSection(t: number, k: number, focus: boolean) {
     // .75: sclerotome out, dorsal plate intact; the plate splits in the dermatome step (.85) and the myotome completes in its own step (.95).
     somite: 0.45 + 0.3 * seg(t, SB.sclero, SB.sclero + 0.1) + 0.1 * seg(t, SB.dermato, SB.dermato + 0.08) + 0.1 * seg(t, SB.myo, SB.myo + 0.08),
     crest: 0,
+    // The cells loosen in place in their own step; they only travel in the migration step.
+    scleroGo: seg(t, SB.migrate, SB.migrate + 0.12),
     aorta: 1,
     k: 1,
     ids: { ectoderm: 'ektodermoa' },
@@ -57,11 +59,9 @@ function somiteSection(t: number, k: number, focus: boolean) {
 type P2 = [number, number];
 const line = (pts: P2[]) => pts.map((q, i) => `${i ? 'L' : 'M'}${q[0].toFixed(1)},${q[1].toFixed(1)}`).join('');
 
-/** Sclerotome fates (vertebra around the notochord/tube, ribs into the body wall) and myotome cells entering the somatic layer. */
-function FateOverlay({ s, fate, myoOut }: { s: Section; fate: number; myoOut: number }) {
-  if (fate <= 0.02 && myoOut <= 0.02) return null;
+/** The vertebra the sclerotome builds: arches up both sides of the neural tube (the body sits on the notochord). */
+function vertebra(s: Section) {
   const ng = s.neural;
-  const [nx, ny] = s.at.notochord;
   const Rx = (ng.rho + 12) * ng.sx + 9;
   const Ry = (ng.rho + 12) * ng.sy + 9;
   const arch = (sd: number) =>
@@ -69,6 +69,14 @@ function FateOverlay({ s, fate, myoOut }: { s: Section; fate: number; myoOut: nu
       const th = lerp(0.92, 0.3, i / 11) * Math.PI;
       return s.map(sd * Rx * Math.sin(th), ng.cy + Ry * Math.cos(th));
     });
+  return { arch };
+}
+
+/** Sclerotome fates (vertebra around the notochord/tube, ribs into the body wall) and myotome cells entering the somatic layer. */
+function FateOverlay({ s, fate, myoOut }: { s: Section; fate: number; myoOut: number }) {
+  if (fate <= 0.02 && myoOut <= 0.02) return null;
+  const { arch } = vertebra(s);
+  const [nx, ny] = s.at.notochord;
   // Ribs: from the vertebral body, ventral to the somite, then out into the somatic body wall.
   const ribD = (x: number) => {
     const u = Math.min(1, Math.max(0, (x - 100) / 100));
@@ -106,17 +114,52 @@ function FateOverlay({ s, fate, myoOut }: { s: Section; fate: number; myoOut: nu
   );
 }
 
-/** Sclerotome cells heading medially to surround the notochord and neural tube. */
-function ScleroArrows({ s, t }: { s: Section; t: number }) {
-  const show = seg(t, SB.migrate, SB.migrate + 0.03) * (1 - seg(t, SB.dermomyo - 0.02, SB.dermomyo + 0.02));
-  if (show <= 0.02) return null;
-  const so = s.somite;
+const SCLERO = '#e0795b';
+/** Cartilage colour of the future vertebra (as in FateOverlay). */
+const BONE = '#f0e6d2';
+
+/** The sclerotome cell we follow on a side: the one that travels furthest. */
+function followOf(s: Section, sd: 1 | -1) {
+  const far = (j: number) => {
+    const [a, b] = [scleroCell(s, sd, j, 0), scleroCell(s, sd, j, 1)];
+    return Math.hypot(b[0] - a[0], b[1] - a[1]);
+  };
+  return Array.from({ length: SCLERO_N }, (_, j) => j).reduce((b, j) => (far(j) > far(b) ? j : b), 0);
+}
+
+/**
+ * Sclerotome migration in the journey language: one cell per side outlined in white with the way
+ * it has come, heading for a faint ghost of what the cloud will build (vertebra around the
+ * notochord and the floor of the neural tube).
+ */
+function ScleroJourney({ s, t }: { s: Section; t: number }) {
+  const go = seg(t, SB.migrate, SB.migrate + 0.12);
+  const follow = seg(t, SB.sclero + 0.06, SB.sclero + 0.1) * (1 - seg(t, SB.dermomyo, SB.dermomyo + 0.04));
+  const ghost = seg(t, SB.migrate, SB.migrate + 0.04) * (1 - seg(t, SB.fate, SB.fate + 0.04));
+  if (follow <= 0.02 && ghost <= 0.02) return null;
+  const { arch } = vertebra(s);
+  const [nx, ny] = s.at.notochord;
   return (
-    <>
-      {[1, -1].map((sd) => (
-        <Arrow key={sd} from={s.map(sd * (so.cx - so.rx * 0.3), so.cd + so.rd * 0.5)} to={s.map(sd * 26, s.dNoto - 6)} bend={sd * 0.18} color="#fbbf24" width={2} show={show} progress={seg(t, SB.migrate, SB.migrate + 0.1)} />
-      ))}
-    </>
+    <g>
+      {/* Ghost of the vertebra they will build, in its cartilage colour (body on the notochord, arches round the tube). */}
+      <g opacity={ghost * 0.32} pointerEvents="none">
+        <ellipse cx={nx} cy={ny} rx={24 * s.k} ry={17 * s.k} fill={BONE} />
+        {[1, -1].map((sd) => (
+          <path key={sd} d={line(arch(sd))} fill="none" stroke={BONE} strokeWidth={6 * s.k} strokeLinecap="round" />
+        ))}
+      </g>
+      {([1, -1] as const).map((sd) => {
+        const j = followOf(s, sd);
+        const pts = Array.from({ length: Math.round(go * 40) + 1 }, (_, i) => scleroCell(s, sd, j, i / 40));
+        const [x, y] = pts[pts.length - 1];
+        return (
+          <g key={sd}>
+            <Journey pts={pts} color={SCLERO} show={follow} r={4 * s.k} head={10} />
+            <FollowRing x={x} y={y} r={3.6 * s.k + 2.5} show={follow} />
+          </g>
+        );
+      })}
+    </g>
   );
 }
 
@@ -187,7 +230,7 @@ export function SomiteContext({ t }: SceneProps) {
     <g>
       <SectionDrawing s={s} show={{ crest: 0 }} />
       <FateOverlay s={s} fate={geometry(t).fate} myoOut={geometry(t).myoOut} />
-      <ScleroArrows s={s} t={t} />
+      <ScleroJourney s={s} t={t} />
       <Note x={500} y={610} tone="dim" size={11}>
         Odol-hodiak mesodermotik sortzen dira (hemangioblastoak), somiten inguruan barne
       </Note>
@@ -203,7 +246,7 @@ export function SomiteClose({ t }: SceneProps) {
     <g>
       <SectionDrawing s={s} show={{ crest: 0 }} />
       <FateOverlay s={s} fate={geometry(t).fate} myoOut={geometry(t).myoOut} />
-      <ScleroArrows s={s} t={t} />
+      <ScleroJourney s={s} t={t} />
       {labels(s, t, true)}
     </g>
   );

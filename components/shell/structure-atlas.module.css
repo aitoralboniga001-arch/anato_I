@@ -166,3 +166,40 @@
 /* One topic shown (filter or search): it gets the full width instead of half a grid. */
 .schemes > section:only-of-type { grid-column: 1 / -1; }
 .study + .progress + .lineage, .study + .lineage { margin-top: 20px; }
+
+/* The structure as the simulator draws it (lit, the rest shaded); hidden while the right frame is found. */
+.figure { margin: 18px 0 0; max-width: 520px; }
+.figure a { display: block; aspect-ratio: 1000 / 640; border: 1px solid var(--line-2); border-radius: 9px; overflow: hidden; background: var(--bg-1); }
+.figure a:hover { border-color: var(--line-3); }
+.figure svg { display: block; width: 100%; height: 100%; visibility: hidden; }
+.figure[data-ready] svg { visibility: visible; animation: figure-in .25s ease-out; }
+.figure figcaption { margin-top: 6px; font-size: 12px; color: var(--text-3); line-height: 1.4; }
+@keyframes figure-in { from { opacity: 0; } }
+
+/* "Ez nahastu": the notes' own warnings that set this structure against another, and the viewer's own mix-ups. */
+.confuse { padding: 0 0 26px; }
+.confuse ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 12px; }
+.confuse li { border-left: 2px solid var(--focus); padding: 2px 0 2px 14px; }
+.confusePair { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.confusePair button { display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 5px 10px; border: 1px solid var(--line-2); border-radius: 7px; background: var(--bg-1); font-size: 14px; font-weight: 600; }
+.confusePair button:hover { border-color: var(--line-3); background: var(--surface-2); }
+.confusePair .count { margin-left: 2px; }
+.confuse blockquote { margin: 8px 0 4px; font-size: 14.5px; line-height: 1.6; color: var(--text-2); }
+.confuse small { font-size: 12px; color: var(--text-4); }
+.mine { margin-top: 16px; }
+.mine > p:first-child { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-3); }
+.mine ul { margin: 0; gap: 8px; }
+.mine li { border-left-color: var(--line-3); display: grid; gap: 4px; justify-items: start; }
+.mine li button { display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 5px 10px; border: 1px solid var(--line-2); border-radius: 7px; background: var(--bg-1); font-size: 14px; font-weight: 600; }
+.mine li button:hover { border-color: var(--line-3); background: var(--surface-2); }
+.mine li span { font-size: 13px; color: var(--text-3); }
+
+/* "Gaur errepasatzeko": structures with questions due today. */
+.review { margin: 0 0 24px; padding: 16px 20px; border: 1px solid var(--line); border-left: 2px solid var(--focus); border-radius: var(--radius); background: var(--surface); }
+.review h2 { display: flex; align-items: center; gap: 8px; font-size: 16px; margin: 0; }
+.review h2 span { font: 600 11px/1 var(--font-mono); padding: 3px 7px; border-radius: 999px; background: var(--surface-3); color: var(--text-2); }
+.review > p { margin: 4px 0 12px; font-size: 13px; color: var(--text-3); }
+.review ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.review button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 7px 11px; border: 1px solid var(--line-2); border-radius: 7px; background: var(--bg-1); font-size: 14px; }
+.review button:hover { border-color: var(--line-3); background: var(--surface-2); }
+.review button[aria-pressed='true'] { border-color: var(--focus); }
