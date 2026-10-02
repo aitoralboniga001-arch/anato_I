@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { weeks } from '@/content/registry';
 import { BrandMark } from './icons';
+import atlasStyles from './structure-atlas.module.css';
 
 /** A week whose only scenes are placeholders is still being prepared. */
 export const isWip = (w: (typeof weeks)[number]) => w.stages.every((s) => s.views.every((v) => v.description === 'Prestatzen'));
@@ -20,7 +21,7 @@ export function Wordmark({ size = 22 }: { size?: number }) {
 
 export function LandNav() {
   return (
-    <header className="land-nav">
+    <header className={`land-nav ${atlasStyles.nav}`}>
       <Link href="/" aria-label="EnbrioAtlas — hasiera">
         <Wordmark />
       </Link>
@@ -29,6 +30,7 @@ export function LandNav() {
         <Link href="/#gaiak">Gaiak</Link>
         <Link href="/irudiak">Irudiak</Link>
         <Link href="/leinuak">Leinuak</Link>
+        <Link href="/egiturak" className={atlasStyles.entry}>Egiturak</Link>
         <Link href={`/astea/${firstReady.week}`} className="btn btn-light small">
           Ireki simulagailua
         </Link>
