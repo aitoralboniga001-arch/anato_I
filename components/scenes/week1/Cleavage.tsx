@@ -63,7 +63,7 @@ export function Segmentation({ t }: SceneProps) {
       <Label id="zigotoa" x={250} y={150} ax={one[0] - 40} ay={one[1] - 30} show={vis(t, 0, 0.12)} />
       <Label id="mintz-peluzidoa" x={800} y={470} ax={zona[0]} ay={zona[1]} />
       <Label id="gorpuskulu-polarrak" x={790} y={236} ax={CX + 90 * S} ay={CY - 84 * S} show={polar * vis(t, 0.1)} />
-      <Label id="blastomeroak" x={250} y={250} ax={one[0]} ay={one[1]} show={vis(t, 0.14, 0.62)} />
+      <Label id="blastomeroak" x={250} y={250} ax={one[0]} ay={one[1]} show={vis(t, 0.14, 0.66)} />
       <Label id="morula" x={250} y={250} ax={CX - 60 * S} ay={CY - 40 * S} show={vis(t, 0.66, 0.86)} />
       <Label id="trofoblastoa" text="Kanpoko masa zelularra" x={800} y={380} ax={CX + outer.x * S} ay={CY + outer.y * S} show={mass} />
       <Label id="enbrioblastoa" text="Barruko masa zelularra" x={250} y={330} ax={CX + inner.x * S} ay={CY + inner.y * S} show={mass} />
@@ -140,14 +140,17 @@ export function BlastocystFormation({ t }: SceneProps) {
         parts={{ cell: (c) => (cav < 0.3 ? 'morula' : c.kind === 'enbrioblasto' || c.fate === 'enbrioblasto' ? 'enbrioblastoa' : 'trofoblastoa') }}
       />
       {/* Fluid entering between the cells: small spaces that grow and fuse. */}
+      {/* They are the blastocoel forming (the step that names them lights them), so they belong to it. */}
       {cav > 0.01 && cav < 0.75 && (
-        <g transform={`translate(${CX} ${CY}) scale(${S})`} pointerEvents="none">
-          {DROPS.map(([x, y, a], i) => {
-            const g = seg(cav, a, a + 0.25);
-            const k = seg(cav, 0.35, 0.75);
-            return g > 0.01 ? <circle key={i} cx={x * (1 - k)} cy={y * (1 - k) + 20 * k} r={lerp(3, 14, g) * (1 - k * 0.6)} fill="#9fd4f2" opacity={0.55 * (1 - k)} stroke="#2a3b5c" strokeWidth={1} /> : null;
-          })}
-        </g>
+        <Part id="blastozelea">
+          <g transform={`translate(${CX} ${CY}) scale(${S})`}>
+            {DROPS.map(([x, y, a], i) => {
+              const g = seg(cav, a, a + 0.25);
+              const k = seg(cav, 0.35, 0.75);
+              return g > 0.01 ? <circle key={i} cx={x * (1 - k)} cy={y * (1 - k) + 20 * k} r={lerp(3, 14, g) * (1 - k * 0.6)} fill="#9fd4f2" opacity={0.55 * (1 - k)} stroke="#2a3b5c" strokeWidth={1} /> : null;
+            })}
+          </g>
+        </Part>
       )}
 
       {/* The two poles: an arc on each end of the axis through the inner cell mass */}
@@ -162,6 +165,7 @@ export function BlastocystFormation({ t }: SceneProps) {
         </>
       )}
 
+      <Label id="morula" x={250} y={300} ax={CX - 60 * S} ay={CY - 20 * S} show={vis(t, 0, 0.3)} />
       <Label id="mintz-peluzidoa" x={800} y={470} ax={CX + 110 * S} ay={CY + 100 * S} show={vis(t, 0, 0.26)} />
       <Label id="trofoblastoa" x={800} y={420} ax={CX + 88 * S} ay={CY + 88 * S} show={done} />
       <Label id="enbrioblastoa" x={250} y={170} ax={embC[0] - 20} ay={embC[1]} show={done} />

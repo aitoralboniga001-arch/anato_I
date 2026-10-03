@@ -275,7 +275,7 @@ export function Fertilization({ t }: SceneProps) {
       {/* Marks for what the steps name but that has no outline: the acrosome, gaitze, the acrosome reaction, the cortical reaction */}
       <Mark id="akrosoma" x={winner.x} y={winner.y} rx={13} show={vis(t, 0.02, 0.46) * winner.headOpacity} />
       <Mark id="kapazitazioa" x={winner.x} y={winner.y} rx={27} color="#7dd3fc" show={vis(t, 0.1, 0.26)} />
-      <Mark id="akrosoma-erreakzioa" x={winner.x + Math.cos(((WINNER_DEG + 180) * Math.PI) / 180) * 16} y={winner.y + Math.sin(((WINNER_DEG + 180) * Math.PI) / 180) * 16} rx={17} show={vis(t, 0.28, 0.44)} />
+      <Mark id="akrosoma-erreakzioa" x={winner.x + Math.cos(((WINNER_DEG + 180) * Math.PI) / 180) * 16} y={winner.y + Math.sin(((WINNER_DEG + 180) * Math.PI) / 180) * 16} rx={17} show={vis(t, 0.28, 0.46)} />
       <Mark id="erreakzio-kortikala" show={vis(t, 0.42, 0.58)}>
         {/* The reaction runs all round the membrane: a glowing rim, not a dashed line. */}
         <g>
@@ -294,9 +294,9 @@ export function Fertilization({ t }: SceneProps) {
 
       <Label id="kapazitazioa" x={210} y={290} ax={pt(CORONA_R1 + 6, WINNER_DEG - 14)[0]} ay={pt(CORONA_R1 + 6, WINNER_DEG - 14)[1]} show={vis(t, 0.1, 0.26)} />
       <Label id="akrosoma" x={210} y={250} ax={winner.x} ay={winner.y} show={vis(t, 0.02, 0.46)} />
-      <Label id="akrosoma-erreakzioa" x={210} y={330} ax={winner.x} ay={winner.y} show={vis(t, 0.28, 0.44)} />
+      <Label id="akrosoma-erreakzioa" x={210} y={330} ax={winner.x} ay={winner.y} show={vis(t, 0.28, 0.46)} />
       <Label id="erreakzio-kortikala" x={790} y={470} align="start" ax={pt(OO_R - 2, -20)[0]} ay={pt(OO_R - 2, -20)[1]} show={vis(t, 0.42, 0.58)} />
-      <Label id="espermatozoidea" x={210} y={200} ax={winner.x - 22} ay={winner.y - 4} show={vis(t, 0.02, 0.44)} />
+      <Label id="espermatozoidea" x={210} y={200} ax={winner.x - 22} ay={winner.y - 4} show={Math.max(vis(t, 0.02, 0.44), vis(t, 0.58, 0.7))} />
       <Label id="pronukleoak" x={790} y={280} align="start" ax={lerp(fPos[0], CX + 8, touch)} ay={lerp(fPos[1], CY, touch)} show={vis(t, 0.76, 0.93)} />
       <Label id="ernalkuntza" x={790} y={90} align="start" ax={CX} ay={CY - OO_R - 10} show={vis(t, 0.58, 0.7)} />
 

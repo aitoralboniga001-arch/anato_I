@@ -291,6 +291,7 @@ function labels(t: number) {
       <Label id="sinzitiotrofoblastoa" x={190} y={460} ax={260} ay={(Y.shellSplit + Y.roofBottom) / 2} />
       <Label id="korion-plaka" x={190} y={510} ax={224} ay={510} />
       <Label id="korion-barrunbea" x={190} y={590} ax={262} ay={590} />
+      <Label id="biloxka-tertziarioa" x={810} y={250} ax={g.trunks[1].x + g.trunks[1].hw + 2} ay={g.trunks[1].y - g.trunks[1].len * 0.45} />
       <Label id="enbrioi-kanpoko-mesodermoa" x={810} y={330} ax={g.trunks[1].x + 60} ay={Y.plateMeso + 20} text="Kanpoko mesodermoa" />
       <Label id="biloxka-kapilarrak" x={810} y={400} ax={g.trunks[1].x + 5.5} ay={g.trunks[1].y - 90} text="Biloxka kapilarrak" />
       <Label

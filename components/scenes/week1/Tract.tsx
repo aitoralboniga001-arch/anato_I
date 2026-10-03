@@ -478,16 +478,19 @@ export function TractJourney({ t }: SceneProps) {
 
       {/* Anatomy (first beat) */}
       <Label id="umetoki-tronpa" x={250} y={40} ax={tp(0.42)[0]} ay={tp(0.42)[1] - 20} show={anat} />
-      <Label id="anpulua" x={140} y={236} ax={amp[0] - 20} ay={amp[1]} show={anat} />
+      <Label id="anpulua" x={140} y={236} ax={amp[0] - 20} ay={amp[1]} show={Math.max(anat, vis(t, 0.24, 0.36))} />
       <Label id="infundibulua" x={140} y={392} ax={inf[0] - 16} ay={inf[1] - 10} show={anat} />
       <Label id="finbriak" x={140} y={470} ax={inf[0] - 18} ay={inf[1] + 34} show={Math.max(anat, vis(t, 0.1, 0.24))} />
       <Label id="istmoa" x={470} y={40} ax={ist[0]} ay={ist[1] - 12} show={Math.max(anat, vis(t, 0.5, 0.62))} />
       <Label id="atal-interstiziala" x={600} y={236} ax={inter[0]} ay={inter[1] + 6} show={anat} />
       <Label id="obulutegia" x={560} y={300} ax={466} ay={292} align="start" show={Math.max(anat, vis(t, 0.1, 0.24))} />
       <Label id="folikulu-heldua" x={140} y={316} ax={274} ay={330} show={Math.max(anat, vis(t, 0.1, 0.16))} />
+      {/* The follicle has just burst: the step's event is named where it happened. */}
+      <Label id="obulazioa" x={140} y={316} ax={274} ay={330} show={vis(t, 0.16, 0.24)} />
+      <Label id="ernalkuntza" x={140} y={160} ax={pos[0] - 8} ay={pos[1] - 6} show={vis(t, 0.26, 0.36)} />
       <Label id="gorputz-luteoa" x={140} y={316} ax={274} ay={330} show={vis(t, 0.4, 0.62)} />
       <Label id="umetokiaren-fundusa" x={790} y={196} ax={880} ay={80} align="start" show={anat} />
-      <Label id="umetoki-barrunbea" x={810} y={262} ax={900} ay={300} align="start" show={anat} />
+      <Label id="umetoki-barrunbea" x={810} y={262} ax={900} ay={300} align="start" show={Math.max(anat, vis(t, 0.62, 0.74))} />
       <Label id="endometrioa" x={830} y={520} ax={endoA.p[0] + endoA.n[0] * 20} ay={endoA.p[1]} show={Math.max(anat, vis(t, 0.86))} />
       <Label id="miometrioa" x={830} y={556} ax={myoA[0]} ay={myoA[1]} show={anat} />
       <Label id="perimetrioa" x={830} y={592} ax={periA.p[0] + periA.n[0] * 122} ay={periA.p[1]} show={anat} />

@@ -184,13 +184,15 @@ function sinusoidPath(q: Sinusoid, k: number) {
   return smoothPath(pts, true);
 }
 
-/** Fibrin plug in the epithelial defect: two halves growing from the cut epithelial edges until they meet. */
 /**
  * Fibrin plug sealing the epithelial gap: two lumpy masses creep in from the cut epithelial edges with
  * rounded fronts and fuse into one plug (no seam) that bulges a little into the uterine lumen.
+ * `gap` is the defect's half-width (days 11–12 reuse it, smaller); `dy` moves it with a bulging surface.
  */
-function fibrinPlug(k: number): string[] {
-  const { cx, surfaceY, epiThickness } = W2;
+export function fibrinPlug(k: number, gap: number = GAP, dy = 0): string[] {
+  const GAP = gap;
+  const { cx, epiThickness } = W2;
+  const surfaceY = W2.surfaceY + dy;
   const top = surfaceY - epiThickness - 2;
   const bottom = (x: number) => surfaceY + 2 + 7 * (1 - ((x - cx) / GAP) ** 2) + 1.3 * Math.sin(x * 0.31) * Math.cos(x * 0.13);
   const piece = (xs: number, xf: number, free: boolean) => {

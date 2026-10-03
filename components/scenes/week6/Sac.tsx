@@ -126,7 +126,7 @@ function SacDrawing({ t, reduced }: SceneProps) {
 
       {/* barrier-thinning glow on the free villi ring */}
       <Part id="karena-mugaren-meheketa" quiet show={seg(t, 0.34, 0.4)}>
-        <path d={smoothPath(villiPts, true, 0.55)} fill="none" stroke="#fbbf24" strokeWidth={2.4} strokeDasharray="3 5" opacity={0.6 + thin * 0.3} />
+        <path d={smoothPath(villiPts, true, 0.55)} fill="none" stroke="#fbbf24" strokeWidth={7} strokeLinejoin="round" filter="url(#f-soft)" opacity={0.25 + thin * 0.25} />
       </Part>
 
       {/* spiral arteries + venous return entering the gap at the top */}
@@ -186,6 +186,7 @@ export function ChorionicSac({ t, reduced }: SceneProps) {
       <Label id="biloxka-enborra" x={300} y={185} align="end" ax={CX - 195} ay={CY - 52} />
       <Label id="korion-plaka" x={190} y={230} ax={CX - 160} ay={CY + 40} />
       <Label id="biloxka-tertziarioa" x={190} y={280} ax={CX - 190} ay={CY + 69} show={vis(t, 0, 0.2)} />
+      <Label id="karena-mugaren-meheketa" x={810} y={235} ax={CX + 208 * Math.cos(-0.3)} ay={CY + 208 * Math.sin(-0.3)} show={seg(t, 0.34, 0.4) * (1 - seg(t, 0.62, 0.66))} />
       <Label id="korion-barrunbea" x={810} y={280} ax={CX + 110} ay={CY + 60} />
       <Label id="finkapen-pedikulua" x={190} y={330} ax={CX - 6} ay={CY - 50} />
       <Label id="amnios-barrunbea" x={810} y={330} ax={CX + 16} ay={CY - 24} />

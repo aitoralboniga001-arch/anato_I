@@ -100,7 +100,7 @@ function DorsalDrawing({ t }: SceneProps) {
 }
 
 function dorsalLabels(t: number) {
-  const { ryBot } = discShape(t);
+  const { rxTop, ryTop, ryBot } = discShape(t);
   const regress = seg(t, 0.5, 0.58);
   const streakY0 = D.cy + ryBot - 16;
   const streakLen = lerp(120, 34, regress);
@@ -108,6 +108,9 @@ function dorsalLabels(t: number) {
   const L = (id: string, x: number, y: number, p: Pt, show = 1) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} />;
   return (
     <>
+      {/* Seen from above, the disc's surface is its ectoderm. */}
+      {L('hiru-orriko-diskoa', 190, 200, [D.cx - rxTop * 0.71, D.cy - ryTop * 0.71])}
+      {L('ektodermoa', 190, 400, [D.cx - 70, D.cy + 40])}
       {L('ildo-primitiboa', 190, 460, [D.cx, streakY0 - streakLen / 2])}
       {L('nodo-primitiboa', 810, 460, [D.cx, streakY0 - streakLen])}
       {L('kloaka-mintza', 810, 500, [D.cx, streakY0 + 8], cloaca)}

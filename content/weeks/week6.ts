@@ -51,7 +51,7 @@ export const week6: WeekDef = {
         { at: 0.32, notes: ['w6/1/p5/s1', 'w6/1/p3/s5-s6'], text: 'Fetuaren odola: enbrioi barruko odol-hodiak → finkapen pedikuluko zilbor-hodiak → korion plakako odol-hodiak → biloxka tertziarioetako odol-hodiak.', focus: ['zilbor-hodiak', 'korion-plaka', 'biloxka-kapilarrak'] },
         { at: 0.5, notes: ['w6/1/p6/s3-s4', 'w6/1/p7/s1', 'w6/1/p8/s1'], text: 'Karena amaren eta fetuaren arteko elkartrukatze-prozesuak gauzatzen dituen egitura da: fetu-osagaia (trofoblastoa + enbrioi kanpoko mesodermoa) eta ama-osagaia (endometrioa).', focus: ['karena', 'karenaren-fetu-atala', 'karenaren-ama-atala'] },
         { at: 0.66, notes: ['w6/1.2/p3/s1-s4', 'w6/1.2/p4/s1'], text: 'Biloxka tertziarioaren erdigunean enbrioi kanpoko mesodermoa (ehun konektiboa) dago, odol-hodiekin; inguruan zitotrofoblastoa eta, dena inguratuz, sinzitiotrofoblastoa.', focus: ['ehun-konektiboa', 'zitotrofoblastoa', 'sinzitiotrofoblastoa'] },
-        { at: 0.82, notes: ['w6/1.1/p3/s1-s2', 'w6/1.1/p4/s1', 'w6/1.1/p5/s1', 'w6/1.1/p6/s1', 'w6/1.1/p7/s1', 'w6/1.1/p8/s1', 'w6/1.1/p9/s1'], text: 'Karena muga (barrutik kanpora): endotelioa, ehun konektiboa, zitotrofoblastoa eta sinzitiotrofoblastoa. Lehen 3 hilabeteetan osagaiek lau geruza hauek zeharkatu behar dituzte.', focus: ['karena-muga', 'endotelioa'] },
+        { at: 0.82, view: 'zeharkakoa', notes: ['w6/1.1/p3/s1-s2', 'w6/1.1/p4/s1', 'w6/1.1/p5/s1', 'w6/1.1/p6/s1', 'w6/1.1/p7/s1', 'w6/1.1/p8/s1', 'w6/1.1/p9/s1'], text: 'Karena muga (barrutik kanpora): endotelioa, ehun konektiboa, zitotrofoblastoa eta sinzitiotrofoblastoa. Lehen 3 hilabeteetan osagaiek lau geruza hauek zeharkatu behar dituzte.', focus: ['karena-muga', 'endotelioa'] },
       ],
       structures: [
         'karena',
@@ -438,7 +438,7 @@ export const week6: WeekDef = {
         { at: 0.3, notes: ['w6/5/p10/s1-s2'], text: 'Bolumena: 10. astean 30 ml; 30.ean 200–500 ml; 37.–38.ean 800–1000 ml (1 L inguru).', focus: ['likido-amniotikoa'] },
         { at: 0.46, notes: ['w6/5/p12/s1'], text: 'Funtzioak: fetuaren hazkuntza baimendu, mugimenduak erraztu, astinketak baretu eta fetua amnios paretara itsastea galarazi.', focus: ['likido-amniotikoa'] },
         { at: 0.58, notes: ['w6/5/p13/s1-s2'], text: '5. hilabetetik fetuak ~400 ml irensten ditu: digestio aparatutik zirkulaziora (karenara) eta gernu sistemara, eta berriro barrunbera.', focus: ['degluzioa', 'likido-amniotikoa'] },
-        { at: 0.7, notes: ['w6/5/p15/s1'], text: 'Ekografia (ultrasoinuak): gehien erabiltzen dena — karena eta posizioa, adina, hazkuntza, organoak, akatsak, zilbor-hesteko fluxua, luzerak.', focus: ['ekografia'] },
+        { at: 0.7, view: 'teknikak', notes: ['w6/5/p15/s1'], text: 'Ekografia (ultrasoinuak): gehien erabiltzen dena — karena eta posizioa, adina, hazkuntza, organoak, akatsak, zilbor-hesteko fluxua, luzerak.', focus: ['ekografia'] },
         { at: 0.8, notes: ['w6/5/p16/s1', 'w6/5/p17/s1-s2'], text: 'Arrisku handiko haurdunaldietan (35 urtetik gora, alterazio genetikoak…): amaren serumaren azterketa (α-fetoproteina).', focus: ['alfa-fetoproteina'] },
         { at: 0.88, notes: ['w6/5/p18/s1-s3', 'w6/5/p19/s1-s2'], text: 'Amniozentesia: uteroaren pareta ziztatu likido lagina hartzeko (ezin lehen 14 asteetan). Biloxka korionikoen biopsia: baginatik edo abdomenetik; arriskutsua baina oso fidagarria.', focus: ['amniozentesia', 'biloxka-korionikoen-biopsia'] },
       ],

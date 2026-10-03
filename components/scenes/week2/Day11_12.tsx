@@ -1,6 +1,7 @@
 'use client';
 
-import { C, Arrow, Cell, Flow, Label, Mark, Note, Part, lerp, mix, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
+import { C, Cell, Flow, Label, Mark, Note, Part, lerp, mix, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
+import { fibrinPlug } from './Day9';
 import { CYTO, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, bandAround, circlePath, stalkBridge, conceptusAt, discGeometry, f1, lensPath, toCyto } from './common';
 
 /**
@@ -11,7 +12,8 @@ import { CYTO, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, bandAround, circleP
  *   .16-.28 sinzitiotrofoblastoak sinusoideen pareta urratzen du · .26-.40 amaren odola lakuetan zirkulatzen hasten da
  *   .42-.68 konzeptua hazi eta enbrioi kanpoko mesodermoa agertzen da (zito eta amnios/bitelo zakuaren artean)
  *   .54-.64 mesodermoan hutsune txikiak ireki, handitu eta fusionatzen dira -> korion barrunbea; finkapen pedikulua geratzen da
- *   .78-.89 desidua erreakzioa: estroma edematoso · .84-.96 zelula poliedrikoak glukogenoz beteta (habiratze-gunetik hedatuz)
+ *   .78-.88 desidua erreakzioa: estroma edematoso · .80-.875 zelula poliedrikoak glukogenoz beteta habiratze-gunean
+ *   .92-.965 erreakzioa endometrio osora hedatzen da (urruneko estroma-zelulak ere poliedriko)
  */
 export const W = {
   fibrin: [0, 0.06],
@@ -20,16 +22,21 @@ export const W = {
   circulation: [0.26, 0.4],
   mesoGrow: [0.42, 0.68],
   cavitate: [0.54, 0.64],
-  decidua: [0.78, 0.89],
-  cells: [0.84, 0.96],
+  decidua: [0.78, 0.88],
+  cells: [0.8, 0.875],
+  spread: [0.92, 0.965],
 } as const;
 
 const s = (t: number, w: readonly [number, number]) => seg(t, w[0], w[1]);
 const rad = (deg: number) => (deg * Math.PI) / 180;
 const norm = (a: number) => (a < 90 ? a + 360 : a);
 
-/** The abembryonic pole stays just under the surface (small residual gap); the centre deepens as the conceptus grows. */
-const GAP0 = 16;
+/** Half-width of the fibrin plug still sealing the entry point: small on day 11 ("txiki-txikia"), smaller by day 12 as the epithelium closes over it. */
+const PLUG: [number, number] = [24, 13];
+/** The implantation site bulges into the uterine lumen ("goragunea"); day 13 continues it. */
+export const BULGE = 9;
+/** Surface of the endometrium at x: flat, bulging into the lumen over the implantation site. */
+export const surfaceAt = (x: number, bulge: number) => W2.surfaceY + bulge * Math.exp(-(((x - W2.cx) / 150) ** 2));
 /** Trophoblast radius at the end of day 12; day 13 continues from here. */
 export const RC_END = 175;
 const CY0 = W2.surfaceY - 10 - R;
@@ -58,7 +65,7 @@ function geometry(t: number) {
   const { cyC, cy, D } = conceptusAt(Rc);
   const core = discGeometry(W2.cx, cy);
   const cav = s(t, W.cavitate);
-  return { ...core, cyC, Rc, cav, thickness: D, fib: lerp(1, 0.3, s(t, W.fibrin)) };
+  return { ...core, cyC, Rc, cav, thickness: D, plug: lerp(PLUG[0], PLUG[1], s(t, W.fibrin)) };
 }
 type Geo = ReturnType<typeof geometry>;
 
@@ -131,6 +138,21 @@ function vesselAt(g: Geo, i: number, rx: number): Pt {
   return d >= need ? [x, y] : [g.cx + (dx / d) * need, g.cyC + (dy / d) * need];
 }
 
+const DECIDUAL_CELLS: Pt[] = [
+  [340, 180],
+  [660, 165],
+  [300, 90],
+  [700, 95],
+  [380, 140],
+  [620, 220],
+  [260, 210],
+  [740, 200],
+  [440, 70],
+  [560, 75],
+];
+/** Decidual cells next to the implantation site (they change first). */
+const nearSite = (x: number, y: number) => Math.hypot(x - W2.cx, y - 400) < 290;
+
 function Day1112Drawing({ t, reduced }: SceneProps) {
   const g = geometry(t);
   const { cx, cy, epiTop, discY, hypoBottom, wEpiTop, wDisc, wHypo, Rc, cav, thickness } = g;
@@ -139,19 +161,20 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
   const circ = s(t, W.circulation);
   const decidua = s(t, W.decidua);
   const cells = s(t, W.cells);
+  const spread = s(t, W.spread);
   const lens = lensPath(g);
 
   // Mesoderm between the embryo complex and the cyto: solid first, then it hollows into two thin
   // layers joined by the stalk. Widths vary with the angle (short at the stalk, widest abembryonically).
   const width = (a: number) => Math.max(0, outR(g, a) - INNER);
-  const bandTh = (a: number) => Math.max(2.2, lerp(width(a) / 2, 5, cav));
+  const bandTh = (a: number) => Math.max(4, lerp(width(a) / 2, 9, cav));
   const inner = () => INNER;
   const innerB = (a: number) => INNER + bandTh(a);
   const outer = (a: number) => outR(g, a);
   const outerB = (a: number) => Math.max(innerB(a), outR(g, a) - bandTh(a));
   // Connecting stalk: a short neck at the embryonic pole whose sides fillet into both layers.
   const STALK_A = 260;
-  const stalk = stalkBridge(cx, cy, STALK_A, INNER + bandTh(STALK_A) / 2, innerB(STALK_A), outerB(STALK_A), outer(STALK_A) - bandTh(STALK_A) / 2, 8, 12);
+  const stalk = stalkBridge(cx, cy, STALK_A, INNER + bandTh(STALK_A) / 2, innerB(STALK_A), outerB(STALK_A), outer(STALK_A) - bandTh(STALK_A) / 2, 22, 14);
   // The solid tissue stays between the spaces until they have merged; only then are the two layers left.
   const genericShow = thickness > 3 ? 1 - seg(cav, 0.7, 0.9) : 0;
   const layerShow = seg(cav, 0.7, 0.9);
@@ -293,28 +316,11 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
         <TrapBand cx={cx} yTop={discY} yBottom={hypoBottom} wTop={wDisc} wBottom={wHypo} n={17} color={C.hypoblast} shape="cuboidal" />
       </Part>
 
-      {/* Small residual epithelial defect / fibrin (almost healed). */}
-      {g.fib > 0.02 && (
-        <Part id="fibrina-koagulua" show={g.fib}>
-          <ellipse cx={cx} cy={W2.surfaceY - 4} rx={GAP0 * g.fib} ry={6 * g.fib} fill="url(#p-fibrin)" stroke="#b9ae95" strokeWidth={1} />
-        </Part>
-      )}
-
       {/* Decidual cells: polyhedral, glycogen/lipid-rich, oedematous stroma. */}
       <Part id="desidua-zelulak" show={cells}>
-        {[
-          [340, 180],
-          [660, 165],
-          [300, 90],
-          [700, 95],
-          [380, 140],
-          [620, 220],
-          [260, 210],
-          [740, 200],
-          [440, 70],
-          [560, 75],
-        ].map(([x, y], i) => (
-          <Cell key={i} x={x} y={y} r={9} rx={9} ry={7.4} color="#f4d99a" nucleus="rgba(90,60,10,0.55)" nucleusScale={0.4} opacity={0.92} />
+        {/* First around the implantation site, then (next step) out through the rest of the endometrium. */}
+        {DECIDUAL_CELLS.map(([x, y], i) => (
+          <Cell key={i} x={x} y={y} r={9} rx={9} ry={7.4} color="#f4d99a" nucleus="rgba(90,60,10,0.55)" nucleusScale={0.4} opacity={0.92 * (nearSite(x, y) ? 1 : spread)} />
         ))}
       </Part>
     </g>
@@ -329,7 +335,7 @@ function makeL(at: At) {
   };
 }
 
-/** A dashed ring at a point of the drawing, for what a step names but has no outline (the decidual reaction, the flow). */
+/** A soft glow at a point of the drawing, for what a step names but has no outline (the decidual reaction, the flow). */
 function makeM(at: At) {
   return function mark(id: string, p: Pt, rx: number, show = 1, color?: string) {
     const [x, y] = at(p[0], p[1]);
@@ -370,9 +376,10 @@ export function Day1112Section(props: SceneProps) {
   const M = makeM((x, y) => [x, y]);
   return (
     <g>
-      <EndometriumBack decidua={k.decidua} />
+      <EndometriumBack decidua={k.decidua} bulge={BULGE} />
       <Day1112Drawing {...props} />
-      <EndometriumFront gap={GAP0 * k.g.fib} />
+      <EndometriumFront gap={k.g.plug - 7} bulge={BULGE} />
+      <FibrinPlug half={k.g.plug} />
       {M('desidua-erreakzioa', [340, 130], 56, k.decidua)}
       {M('zirkulazio-uteroplazentarioa', k.lacuna(259), 42, k.circ, '#ff8a8a')}
       {L('endometrio-estroma', 190, 50, [300, 60])}
@@ -384,11 +391,14 @@ export function Day1112Section(props: SceneProps) {
       {L('zirkulazio-uteroplazentarioa', 208, 430, k.lacuna(259), k.circ)}
       {L('sinzitiotrofoblastoa', 190, 470, k.syn(150))}
       {L('zitotrofoblastoa', 190, 515, k.cyto(140))}
-      {L('endometrio-epitelioa', 190, 560, [300, W2.surfaceY - 8])}
+      {L('endometrio-epitelioa', 190, 560, [300, surfaceAt(300, BULGE) - 4])}
+      {/* Right under the plug, in the lumen: the step names it, so it is named where it is. */}
+      <Label id="fibrina-koagulua" x={500} y={549} ax={500} ay={W2.surfaceY + BULGE + 8} align="middle" small />
       {L('mutur-enbrionarioa', 810, 250, k.cyto(276))}
+      {L('sinusoideak', 810, 315, vesselAt(k.g, 4, 13 * VESSELS[4][2] * lerp(1, 2, k.erosion)), seg(t, 0.14, 0.18))}
       {/* Still named while it hollows out (step "Hasieran ehun betea da…"), then its two sheets take over. */}
       {L('enbrioi-kanpoko-mesodermoa', 810, 380, k.meso(300, 0.5), Math.max(k.generic, seg(t, 0.42, 0.46) * (1 - seg(t, 0.62, 0.64))))}
-      {L('korion-barrunbea', 810, 430, k.meso(220, 0.5), k.cavity)}
+      {L('korion-barrunbea', 810, 430, k.meso(12, 0.5), k.cavity)}
       {L('finkapen-pedikulua', 810, 470, k.stalk, k.layer)}
       {L('amnios-barrunbea', 810, 515, k.amnios)}
       {L('epiblastoa', 810, 560, k.epi)}
@@ -401,7 +411,7 @@ export function Day1112Section(props: SceneProps) {
 }
 
 /** Stroma + glands + surface epithelium drawn locally so the mesoderm ring's mask stays independent of Endometrium's children order. Exported so day 13 (which continues this implantation site) can reuse it. */
-export function EndometriumBack({ decidua }: { decidua: number }) {
+export function EndometriumBack({ decidua, bulge = 0 }: { decidua: number; bulge?: number }) {
   const GLANDS: Pt[][] = [
     [[262, 500], [272, 452], [252, 400], [270, 350], [256, 300], [266, 250]],
     [[742, 500], [734, 446], [754, 392], [738, 340], [750, 288]],
@@ -409,8 +419,9 @@ export function EndometriumBack({ decidua }: { decidua: number }) {
   return (
     <g mask="url(#m-slab)">
       <Part id="endometrio-estroma" quiet>
-        <rect x={0} y={0} width={1000} height={W2.surfaceY} fill="url(#p-stroma)" />
-        <rect x={0} y={0} width={1000} height={W2.surfaceY} fill="url(#p-decidua)" opacity={decidua} />
+        {/* Down to the bottom of the bulge; the lumen (EndometriumFront) covers what lies below the surface. */}
+        <rect x={0} y={0} width={1000} height={W2.surfaceY + bulge} fill="url(#p-stroma)" />
+        <rect x={0} y={0} width={1000} height={W2.surfaceY + bulge} fill="url(#p-decidua)" opacity={decidua} />
       </Part>
       <Part id="umetoki-guruina">
         {GLANDS.map((gl, i) => {
@@ -427,25 +438,40 @@ export function EndometriumBack({ decidua }: { decidua: number }) {
   );
 }
 
-export function EndometriumFront({ gap }: { gap: number }) {
-  const { surfaceY, epiThickness, cx } = W2;
+export function EndometriumFront({ gap, bulge = 0 }: { gap: number; bulge?: number }) {
+  const { epiThickness, cx } = W2;
+  // The surface follows the bulge of the implantation site; `gap` is the half-width still open (the fibrin plug).
+  const line = (x0: number, x1: number) => {
+    const n = Math.max(1, Math.ceil(Math.abs(x1 - x0) / 10));
+    return Array.from({ length: n + 1 }, (_, i) => {
+      const x = lerp(x0, x1, i / n);
+      return `${i ? 'L' : 'M'}${f1(x)},${f1(surfaceAt(x, bulge))}`;
+    }).join('');
+  };
+  const lumen = `${line(0, 1000)}L1000,640L0,640Z`;
   return (
     <g mask="url(#m-slab)">
       <Part id="endometrio-epitelioa">
-        {gap > 3 ? (
-          <>
-            <path d={`M0,${surfaceY} L${cx - gap},${surfaceY}`} stroke={C.epithelium} strokeWidth={epiThickness} strokeLinecap="round" />
-            <path d={`M${cx + gap},${surfaceY} L1000,${surfaceY}`} stroke={C.epithelium} strokeWidth={epiThickness} strokeLinecap="round" />
-          </>
-        ) : (
-          <path d={`M0,${surfaceY} L1000,${surfaceY}`} stroke={C.epithelium} strokeWidth={epiThickness} strokeLinecap="round" />
-        )}
+        {(gap > 3 ? [line(0, cx - gap), line(cx + gap, 1000)] : [line(0, 1000)]).map((d) => (
+          <path key={d.slice(0, 12)} d={d} fill="none" stroke={C.epithelium} strokeWidth={epiThickness} strokeLinecap="round" strokeLinejoin="round" />
+        ))}
       </Part>
       <Part id="umetoki-barrunbea" quiet>
-        <rect x={0} y={surfaceY + 1} width={1000} height={640 - surfaceY} fill="#1a1426" />
-        <rect x={0} y={surfaceY + 1} width={1000} height={640 - surfaceY} fill="url(#g-shade)" opacity={0.4} />
+        <path d={lumen} transform="translate(0 1)" fill="#1a1426" />
+        <path d={lumen} transform="translate(0 1)" fill="url(#g-shade)" opacity={0.4} />
       </Part>
     </g>
+  );
+}
+
+/** What is left of the fibrin plug: in the epithelial gap, on the bulge, over the lumen. */
+function FibrinPlug({ half }: { half: number }) {
+  return (
+    <Part id="fibrina-koagulua">
+      {fibrinPlug(1, half, BULGE).map((d, i) => (
+        <path key={i} d={d} fill="url(#p-fibrin)" stroke="#b9ae95" strokeWidth={1} />
+      ))}
+    </Part>
   );
 }
 
@@ -454,9 +480,8 @@ export function Day1112Meso(props: SceneProps) {
   const k = anchors(t);
   const { cx, cy } = k.g;
   // Fixed frame (centred where the shell ends up), so the growth of the chorionic cavity is seen.
-  const z = zoom(cx, W2.surfaceY - 10 - RC_END, 1.25, 500, 320);
+  const z = zoom(cx, W2.surfaceY - 10 - RC_END, 1.45, 500, 320);
   const L = makeL(z.at);
-  const arrowShow = k.layer;
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#101828" />
@@ -464,17 +489,16 @@ export function Day1112Meso(props: SceneProps) {
         <EndometriumBack decidua={0} />
         <Day1112Drawing {...props} />
       </g>
-      <Arrow from={z.at(...k.meso(230, 1, 6))} to={z.at(...k.meso(230, 0, -6))} bend={0} color={C.mesoExtra} show={arrowShow * 0.9} progress={1} />
       {L('zitotrofoblastoa', 180, 90, k.cyto(200))}
-      {L('enbrioi-kanpoko-mesodermoa', 192, 150, k.meso(300, 0.5), Math.max(k.generic, seg(t, 0.42, 0.46) * (1 - seg(t, 0.62, 0.64))))}
-      {L('somatopleura-kanpokoa', 180, 210, k.meso(300, 1, -4), k.layer)}
+      {L('enbrioi-kanpoko-mesodermoa', 192, 150, k.meso(222, 0.5), Math.max(k.generic, seg(t, 0.42, 0.46) * (1 - seg(t, 0.62, 0.64))))}
+      {L('somatopleura-kanpokoa', 180, 210, k.meso(212, 1, -5), k.layer)}
       {L('korion-barrunbea', 180, 400, k.meso(215, 0.5), k.cavity)}
       {L('esplaknopleura-kanpokoa', 180, 460, k.meso(160, 0, 4), k.layer)}
       {L('hasierako-bitelo-zakua', 180, 520, k.yolk)}
       {L('finkapen-pedikulua', 800, 150, k.stalk, k.layer)}
       {L('amnios-barrunbea', 800, 210, k.amnios)}
       {L('epiblastoa', 800, 260, k.epi)}
-      {L('sinzitiotrofoblastoa', 800, 460, k.syn(200))}
+      {L('sinzitiotrofoblastoa', 800, 460, k.syn(15))}
       <Note x={500} y={585} tone="accent" show={k.cavity}>
         Korion barrunbeak amnios barrunbea eta bitelo zakua inguratzen ditu, finkapen pedikulua izan ezik
       </Note>

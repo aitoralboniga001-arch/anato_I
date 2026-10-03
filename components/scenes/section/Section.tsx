@@ -882,7 +882,8 @@ function Somites({ s, epith, scler, myo }: { s: Section; epith: number; scler: n
       const outer = arc.map((q) => map(q[0], q[1]));
       const inner = ring(so.rx * 0.95 - 11, so.rd * 0.85 - 11, -Math.PI * 0.95, -Math.PI * 0.08, 24).map((q) => map(q[0], q[1]));
       out.push(
-        <Part key={`dm${sd}`} id={s.id(myo > 0.5 ? 'dermatome' : 'dermomyotome')} show={scler}>
+        // Renamed dermatome as soon as the plate splits (somite .85, the step that names it), before the myotome is complete.
+        <Part key={`dm${sd}`} id={s.id(myo > 0.2 ? 'dermatome' : 'dermomyotome')} show={scler}>
           <Cells outer={outer} inner={inner} n={14} fill="#9a3b2e" pseudo seed={61 + sd} nucleus="rgba(50,8,8,0.7)" />
         </Part>,
       );
