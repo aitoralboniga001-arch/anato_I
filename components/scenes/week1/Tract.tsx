@@ -625,7 +625,7 @@ export function TractJourney({ t }: SceneProps) {
       ))}
 
       {/* Marks: ovulation (the follicle and the fimbriae over it) and implantation */}
-      <Mark id="obulazioa" x={292} y={338} rx={78} ry={56} show={vis(t, 0.1, 0.26)} />
+      <Mark id="obulazioa" x={290} y={350} rx={52} ry={42} show={vis(t, 0.1, 0.26)} />
       <Mark id="ernalkuntza" x={pos[0]} y={pos[1]} rx={34} color="#fbbf24" show={vis(t, 0.24, 0.4)} />
       <Mark id="habiratzea" x={pos[0] + 6} y={pos[1]} rx={30} show={seg(t, 0.9, 0.94)} />
 
