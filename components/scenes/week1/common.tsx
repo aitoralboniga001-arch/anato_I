@@ -74,10 +74,10 @@ export function MiniTract({ day, x = 32, y = 28, show = 1 }: { day: number; x?: 
 export function Hud({ value, unit, caption, second }: { value: string | number; unit: string; caption: string; second?: [string, string | number, string] }) {
   return (
     <g pointerEvents="none">
-      <text x={40} y={572} fill="#7c7870" fontSize={11} letterSpacing="0.12em" style={{ textTransform: 'uppercase' }}>
+      <text x={40} y={556} fill="#7c7870" fontSize={11} letterSpacing="0.12em" style={{ textTransform: 'uppercase' }}>
         {caption}
       </text>
-      <text x={40} y={606} fill="#f1eee8" fontSize={30} fontWeight={600} style={{ fontVariantNumeric: 'tabular-nums' }}>
+      <text x={40} y={590} fill="#f1eee8" fontSize={30} fontWeight={600} style={{ fontVariantNumeric: 'tabular-nums' }}>
         {value}
         <tspan fill="#b4afa6" fontSize={16} fontWeight={500} dx={2}>
           {unit}
@@ -85,10 +85,10 @@ export function Hud({ value, unit, caption, second }: { value: string | number; 
       </text>
       {second && (
         <g transform="translate(250 0)">
-          <text x={0} y={572} fill="#7c7870" fontSize={11} letterSpacing="0.12em" style={{ textTransform: 'uppercase' }}>
+          <text x={0} y={556} fill="#7c7870" fontSize={11} letterSpacing="0.12em" style={{ textTransform: 'uppercase' }}>
             {second[0]}
           </text>
-          <text x={0} y={606} fill="#f1eee8" fontSize={24} fontWeight={600} style={{ fontVariantNumeric: 'tabular-nums' }}>
+          <text x={0} y={590} fill="#f1eee8" fontSize={24} fontWeight={600} style={{ fontVariantNumeric: 'tabular-nums' }}>
             {second[1]}
             <tspan fill="#b4afa6" fontSize={14} fontWeight={500} dx={2}>
               {second[2]}

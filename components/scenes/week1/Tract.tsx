@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Label, Mark, Note, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
+import { C, Label, Mark, Note, OnTop, Part, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
 import { useId } from 'react';
 import { cleavageFrame } from '@/components/shell/intro/cleavage';
 import { Hud, vis } from './common';
@@ -76,7 +76,7 @@ const OUTER = sample([[1000, 30], [770, 38], [652, 80], [600, 150], [610, 300], 
 const INNER = sample([[1000, 138], [836, 146], [764, 166], [730, 206], [734, 300], [754, 460], [778, 640]], 16);
 const N_IN = normals(INNER); // points into the wall
 const N_OUT = normals(OUTER); // points away from the wall
-const ENDO = 46;
+const ENDO = 56;
 
 /** x of a wall border (sampled top → bottom, y increasing) at height y. */
 function xAtY(s: Pt[], y: number): number {
@@ -114,6 +114,21 @@ const TUBE_PARTS: [string, number, number][] = [
   ['atal-interstiziala', 0.84, 1],
 ];
 
+/** Ovarian follicles in growth (inside the ovary, away from the mature follicle). */
+const PRIMORDIAL: Pt[] = [[352, 250], [460, 288], [472, 270], [430, 324], [322, 300], [392, 302]];
+const PRIMARY: Pt[] = [[446, 262], [338, 280], [404, 332]];
+const ANTRAL: [number, number, number][] = [[420, 296, 14], [374, 262, 9]];
+
+/** Closed wavy outline (a folded wall) around c: radius r ± a, k folds, phase ph. */
+export function wavy(c: Pt, r: number, a: number, k: number, ph: number) {
+  const pts: Pt[] = Array.from({ length: 96 }, (_, i) => {
+    const th = (i / 96) * Math.PI * 2;
+    const rr = r + a * (0.55 * Math.sin(th * k + ph) + 0.35 * Math.sin(th * (k + 4) + ph * 2.3) + 0.45 * Math.sin(th * 3 + ph * 3.1));
+    return [c[0] + Math.cos(th) * rr, c[1] + Math.sin(th) * rr];
+  });
+  return poly(pts);
+}
+
 export interface TractProps {
   /** 0..1 infundibulum and fimbriae sweeping over the ovary (ovulation). */
   reach?: number;
@@ -145,6 +160,7 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
       walls: [poly([...offset(s, sn, wi), ...offset(s, sn, li).reverse()]), poly([...offset(s, sn, (i) => -li(i)), ...offset(s, sn, (i) => -wi(i)).reverse()])],
       lumen: poly([...offset(s, sn, li), ...offset(s, sn, (i) => -li(i)).reverse()]),
       sides: [line(offset(s, sn, wi)), line(offset(s, sn, (i) => -wi(i)))],
+      hi: line(offset(s, sn, (i) => -wi(i) * 0.8)),
     };
   };
   // Pieces are drawn as wall bands + lumen over the whole tube (same colours), so their joins leave no seam.
@@ -186,17 +202,36 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
   const endo = poly([...INNER, ...[...endoBack].reverse()]);
   const periIn = offset(OUTER, N_OUT, -8);
   const peri = poly([...OUTER, ...[...periIn].reverse()]);
-  const glands = INNER.filter((_, i) => i % 3 === 1).map((p, k) => {
-    const i = INNER.indexOf(p);
-    const n = N_IN[i];
-    const t: Pt = [-n[1], n[0]];
-    const pts: Pt[] = [0, 1, 2, 3, 4, 5].map((j) => {
-      const r = 5 + j * 6.2;
-      const zz = (j % 2 ? 1 : -1) * (3 + (k % 3));
-      return [p[0] + n[0] * r + t[0] * zz, p[1] + n[1] * r + t[1] * zz];
+  // Progestational (secretory) endometrium, as in the course figure: tortuous, corkscrew glands
+  // opening on the surface, spiral arteries between them and a darker basal layer.
+  const glands = INNER.map((p, i) => ({ p, i }))
+    .filter(({ i }) => i % 3 === 1)
+    .map(({ p, i }, k) => {
+      const n = N_IN[i];
+      const tg: Pt = [-n[1], n[0]];
+      const depth = ENDO * (0.78 + 0.1 * ((k * 5) % 3));
+      const pts: Pt[] = Array.from({ length: 25 }, (_, j) => {
+        const s = j / 24;
+        const r = 3 + s * depth;
+        const zz = Math.sin(s * Math.PI * 6.5 + k * 1.7) * (1.4 + 4.2 * s);
+        return [p[0] + n[0] * r + tg[0] * zz, p[1] + n[1] * r + tg[1] * zz];
+      });
+      return line(pts);
     });
-    return line(pts);
-  });
+  const arteries = INNER.map((p, i) => ({ p, i }))
+    .filter(({ i }) => i % 6 === 4)
+    .map(({ p, i }, k) => {
+      const n = N_IN[i];
+      const tg: Pt = [-n[1], n[0]];
+      const pts: Pt[] = Array.from({ length: 31 }, (_, j) => {
+        const s = j / 30;
+        const r = ENDO + 4 - s * (ENDO - 10);
+        const zz = Math.sin(s * Math.PI * 9 + k) * 2.2;
+        return [p[0] + n[0] * r + tg[0] * zz, p[1] + n[1] * r + tg[1] * zz];
+      });
+      return line(pts);
+    });
+  const basal = poly([...offset(INNER, N_IN, ENDO - 11), ...[...endoBack].reverse()]);
   const fol: Pt = [300, 338];
   const fundus = poly([...OUTER.filter((p) => p[1] < 170), ...INNER.filter((p) => p[1] < 170).reverse()]);
   return (
@@ -206,38 +241,56 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
         <path d={poly([...INNER, [1000, 640]])} fill="rgba(255, 214, 226, 0.07)" />
       </Part>
 
-      {/* Ovary */}
+      {/* Ovary: follicles at every stage of growth (primordial → primary → antral), lit from the top left */}
+      <radialGradient id={`${uid}-ov`} cx="36%" cy="30%" r="78%">
+        <stop offset="0" stopColor="#fff" stopOpacity={0.24} />
+        <stop offset="0.55" stopColor="#fff" stopOpacity={0} />
+        <stop offset="1" stopColor="#2a140a" stopOpacity={0.32} />
+      </radialGradient>
       <Part id="obulutegia">
         <ellipse cx={374} cy={292} rx={98} ry={60} transform="rotate(-12 374 292)" fill={C.ovary} stroke="rgba(60,30,20,0.55)" strokeWidth={1.4} />
         <ellipse cx={374} cy={292} rx={98} ry={60} transform="rotate(-12 374 292)" fill="url(#p-stroma)" opacity={0.25} />
-        {[
-          [420, 262, 9],
-          [452, 300, 6],
-          [396, 320, 7],
-          [348, 262, 5],
-          [440, 330, 5],
-        ].map(([x, y, r], i) => (
-          <g key={i}>
-            <circle cx={x} cy={y} r={r} fill="#fbe6d0" stroke="rgba(90,50,30,0.5)" strokeWidth={1} />
-            <circle cx={x} cy={y} r={r * 0.35} fill={C.oocyte} stroke="#c0405e" strokeWidth={0.8} />
+        <ellipse cx={374} cy={292} rx={98} ry={60} transform="rotate(-12 374 292)" fill={`url(#${uid}-ov)`} />
+        {PRIMORDIAL.map(([x, y], i) => (
+          <g key={`p${i}`}>
+            <circle cx={x} cy={y} r={3.4} fill="#fbe6d0" stroke="rgba(90,50,30,0.45)" strokeWidth={0.8} />
+            <circle cx={x} cy={y} r={1.4} fill={C.oocyte} />
+          </g>
+        ))}
+        {PRIMARY.map(([x, y], i) => (
+          <g key={`q${i}`}>
+            <circle cx={x} cy={y} r={6.6} fill="#f6dcc0" stroke="rgba(90,50,30,0.5)" strokeWidth={0.9} />
+            <circle cx={x} cy={y} r={2.8} fill={C.oocyte} stroke="#c0405e" strokeWidth={0.7} />
+          </g>
+        ))}
+        {ANTRAL.map(([x, y, r], i) => (
+          <g key={`a${i}`}>
+            <circle cx={x} cy={y} r={r} fill="#f4d9bd" stroke="rgba(90,50,30,0.55)" strokeWidth={1} />
+            <circle cx={x + r * 0.14} cy={y - r * 0.1} r={r * 0.64} fill="#fbf3d9" />
+            <circle cx={x - r * 0.5} cy={y + r * 0.3} r={r * 0.25} fill={C.oocyte} stroke="#c0405e" strokeWidth={0.8} />
           </g>
         ))}
       </Part>
       {/* Mature follicle bulging at the surface → ruptured → corpus luteum */}
       <Part id="folikulu-heldua" show={1 - luteum}>
         <circle cx={fol[0]} cy={fol[1]} r={32} fill="#fbe6d0" stroke="rgba(90,50,30,0.6)" strokeWidth={1.3} opacity={1 - luteum} />
-        <circle cx={fol[0]} cy={fol[1]} r={24} fill="#f3e9c6" opacity={(1 - rupture) * (1 - luteum)} />
+        <circle cx={fol[0] + 3} cy={fol[1] - 3} r={24} fill="#f7efcf" opacity={(1 - rupture) * (1 - luteum)} />
+        <circle cx={fol[0] - 6} cy={fol[1] - 8} r={13} fill="#fff" opacity={0.18 * (1 - rupture) * (1 - luteum)} />
         {oocyteIn > 0.01 && (
           <g opacity={oocyteIn}>
-            <circle cx={fol[0] - 10} cy={fol[1] + 10} r={9} fill={C.oocyte} stroke="#c0405e" strokeWidth={2} />
+            <circle cx={fol[0] - 13} cy={fol[1] + 13} r={13} fill="#f1d3b4" opacity={0.9} />
+            <circle cx={fol[0] - 13} cy={fol[1] + 13} r={9} fill={C.oocyte} stroke="#c0405e" strokeWidth={2} />
           </g>
         )}
         {rupture > 0.01 && <path d={`M${fol[0] - 30},${fol[1] + 12} q-6,${10 * rupture} 4,${18 * rupture}`} stroke="#0b1220" strokeWidth={6 * rupture} fill="none" opacity={1 - luteum} />}
       </Part>
+      {/* Corpus luteum: the folded, golden wall of the emptied follicle around its central clot */}
       <Part id="gorputz-luteoa" show={luteum}>
         <g opacity={luteum}>
-          <circle cx={fol[0]} cy={fol[1]} r={30} fill="#f5d77e" stroke="rgba(120,80,20,0.6)" strokeWidth={1.3} />
-          <path d={`M${fol[0] - 18},${fol[1] - 6} q8,-14 16,-2 t16,-4 M${fol[0] - 16},${fol[1] + 10} q8,-10 16,0 t14,-6`} stroke="#9a6b16" strokeWidth={4} fill="none" strokeLinecap="round" />
+          <path d={wavy(fol, 29, 1.6, 7, 0)} fill="#efc860" stroke="rgba(120,80,20,0.65)" strokeWidth={1.3} />
+          <path d={wavy(fol, 20, 3.2, 9, 0.6)} fill="none" stroke="#b07f22" strokeWidth={1.4} opacity={0.7} />
+          <path d={wavy(fol, 11, 2.2, 5, 1.3)} fill="#8f4630" stroke="#6d2f1f" strokeWidth={1} />
+          <ellipse cx={fol[0] - 9} cy={fol[1] - 11} rx={10} ry={6} fill="#fff" opacity={0.16} />
         </g>
       </Part>
 
@@ -246,6 +299,7 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
       <Part id="umetoki-tronpa">
         <path d={poly(tubeOuter)} fill={C.tube} />
         <path d={poly(tubeLumen)} fill="#3a1b2e" />
+        <path d={line(offset(T, TN, (i) => -w(i) * 0.8))} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth={2} />
         <g fill="none" stroke="rgba(60,10,30,0.6)" strokeWidth={1.3}>
           {tubeSides.map((d, i) => (
             <path key={i} d={d} />
@@ -258,6 +312,7 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
             <path key={i} d={d} fill={C.tube} />
           ))}
           <path d={q.lumen} fill="#3a1b2e" />
+          <path d={q.hi} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth={2} />
           <g fill="none" stroke="rgba(60,10,30,0.45)" strokeWidth={1}>
             {q.sides.map((d, i) => (
               <path key={i} d={d} />
@@ -293,12 +348,24 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
       </Part>
       <Part id="endometrioa">
         <path d={endo} fill={C.stroma} />
-        <g fill="none" stroke="#fdf2f4" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" opacity={0.85}>
-          {glands.map((g, i) => (
+        <path d={endo} fill="url(#p-stroma)" opacity={0.18} />
+        <path d={basal} fill="rgba(130,40,62,0.2)" />
+        <g fill="none" stroke="#c23f5b" strokeWidth={1.6} strokeLinecap="round" opacity={0.85}>
+          {arteries.map((g, i) => (
             <path key={i} d={g} />
           ))}
         </g>
+        <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+          {glands.map((g, i) => (
+            <g key={i}>
+              <path d={g} stroke="#b9566f" strokeWidth={7} opacity={0.35} />
+              <path d={g} stroke="#fdf2f4" strokeWidth={5.2} />
+              <path d={g} stroke="#d27f95" strokeWidth={1.9} />
+            </g>
+          ))}
+        </g>
         <path d={line(INNER)} fill="none" stroke={C.epithelium} strokeWidth={3} />
+        <path d={line(offset(INNER, N_IN, 1.2))} fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth={0.9} />
       </Part>
       <clipPath id={`${uid}-wall`}>
         {/* 2 px past the outer surface, so the canal overlaps the tube there (no hairline at the join) */}
@@ -322,13 +389,13 @@ export function Tract({ reach = 0, rupture = 0, luteum = 0, oocyteIn = 1 }: Trac
 // ---------------------------------------------------------------------------
 // The journey
 
-const piece = (tab: [number, number][], t: number) => {
+export const piece = (tab: [number, number][], t: number) => {
   for (let i = 0; i < tab.length - 1; i++) if (t <= tab[i + 1][0]) return lerp(tab[i][1], tab[i + 1][1], seg(t, tab[i][0], tab[i + 1][0]));
   return tab[tab.length - 1][1];
 };
 
 // Stage time → position along the tube (u), then into the cavity.
-const U_T: [number, number][] = [[0.14, 0], [0.22, U.ampulla], [0.36, U.ampulla + 0.04], [0.42, 0.34], [0.5, 0.66], [0.58, 0.86], [0.64, 1]];
+export const U_T: [number, number][] = [[0.14, 0], [0.22, U.ampulla], [0.36, U.ampulla + 0.04], [0.42, 0.34], [0.5, 0.66], [0.58, 0.86], [0.64, 1]];
 // Stage time → cleavage progress (gens 5), held on each step's number while its caption is read: zygote,
 // 2 cells at 30 h (the whole step), 16 on the 3rd day (notes: 12–16), ~32 on the 4th, then the blastocyst.
 const P_T: [number, number][] = [[0.24, 0], [0.34, 0.99], [0.42, 2], [0.5, 2], [0.585, 5], [0.62, 5], [0.7, 6], [0.76, 6.15], [0.84, 7]];
@@ -336,7 +403,7 @@ const P_T: [number, number][] = [[0.24, 0], [0.34, 0.99], [0.42, 2], [0.5, 2], [
 const LOUPE: Pt = [520, 472];
 const LR = 80;
 
-function stageOf(t: number): { id: string; hud: [string, string] } {
+export function stageOf(t: number): { id: string; hud: [string, string] } {
   if (t < 0.12) return { id: 'obozito-sekundarioa', hud: ['14.', ' eguna'] };
   if (t < 0.24) return { id: 'obozito-sekundarioa', hud: ['14.', ' eguna'] };
   if (t < 0.41) return { id: 'zigotoa', hud: ['12–24', ' ordu'] };
@@ -377,6 +444,55 @@ function Sperm({ T, t }: { T: Pt[]; t: number }) {
   );
 }
 
+/** The conceptus as it is at stage time t (the live one, and the frozen milestones of the trail). */
+function conceptusAt(t: number) {
+  const p = piece(P_T, t);
+  const f = cleavageFrame(p, 0, 5);
+  if (t < 0.24) f.pro.o = 0;
+  f.zonaO = Math.min(f.zonaO, 1 - seg(t, 0.64, 0.72));
+  return { p, f, corona: 1 - seg(t, 0.34, 0.44), polar: t < 0.5 ? 1 : 0, mass: seg(t, 0.56, 0.62), rot: lerp(0, -47, seg(t, 0.72, 0.84)) };
+}
+
+const SITE = surfaceAt(430);
+const ATTACH: Pt = [SITE.p[0] - SITE.n[0] * 12, SITE.p[1] - SITE.n[1] * 12];
+/** Route through the uterine cavity: from the uterine ostium, free in the cavity, to the wall. */
+const CAVITY: Pt[] = [[742, 190], [806, 250], [812, 340], ATTACH];
+
+/**
+ * Milestones of the course figure (Langman 3-12): where the conceptus is at each time. Each one is
+ * stamped (number + time) on arrival and leaves a frozen copy of itself when the conceptus moves on.
+ */
+const STATIONS: { time: string; arrive: number; leave: number; snap: number; u?: number; at?: Pt; chip: [number, number, 'start' | 'middle' | 'end'] }[] = [
+  { time: '14. eguna', arrive: 0.17, leave: 0.2, snap: 0.18, u: 0.04, chip: [214, 432, 'end'] },
+  { time: '12–24 h', arrive: 0.26, leave: 0.37, snap: 0.32, u: U.ampulla, chip: [207, 283, 'start'] },
+  { time: '30 h', arrive: 0.42, leave: 0.45, snap: 0.46, u: 0.34, chip: [222, 186, 'start'] },
+  { time: '3. eguna', arrive: 0.585, leave: 0.63, snap: 0.6, u: 0.87, chip: [636, 190, 'middle'] },
+  { time: '4. eguna', arrive: 0.74, leave: 0.76, snap: 0.74, at: CAVITY[1], chip: [806, 226, 'middle'] },
+  { time: '4,5–5 egun', arrive: 0.86, leave: 0.88, snap: 0.86, at: CAVITY[2], chip: [834, 340, 'start'] },
+  { time: '5,5–6 egun', arrive: 0.92, leave: 2, snap: 1, at: ATTACH, chip: [786, 470, 'start'] },
+];
+
+/** A milestone stamp: its number in a disc and its time; bright while current, quiet once passed. */
+function Stamp({ n, time, x, y, align, show, now }: { n: number; time: string; x: number; y: number; align: 'start' | 'middle' | 'end'; show: number; now: number }) {
+  if (show <= 0.01) return null;
+  const w = 26 + time.length * 6.3;
+  const x0 = align === 'start' ? x : align === 'end' ? x - w : x - w / 2;
+  return (
+    <OnTop>
+      <g opacity={show} pointerEvents="none" transform={`translate(${x0} ${y})`}>
+        <rect x={0} y={-10} width={w} height={20} rx={10} fill="rgba(10,14,24,0.86)" stroke={`rgba(255,184,107,${0.28 + 0.5 * now})`} strokeWidth={1} />
+        <circle cx={10} cy={0} r={7} fill={now > 0.5 ? '#ffb86b' : 'rgba(255,184,107,0.18)'} stroke="#ffb86b" strokeWidth={1} />
+        <text x={10} y={3.6} textAnchor="middle" fontSize={10} fontWeight={700} fill={now > 0.5 ? '#1a1206' : '#ffcf99'}>
+          {n}
+        </text>
+        <text x={21} y={4} fontSize={11} fontWeight={600} fill={now > 0.5 ? '#fff4e6' : '#d9cbb8'} style={{ fontVariantNumeric: 'tabular-nums' }}>
+          {time}
+        </text>
+      </g>
+    </OnTop>
+  );
+}
+
 export function TractJourney({ t }: SceneProps) {
   const reach = seg(t, 0.08, 0.16) * (1 - seg(t, 0.32, 0.42));
   const rupture = seg(t, 0.13, 0.16);
@@ -384,37 +500,35 @@ export function TractJourney({ t }: SceneProps) {
   const T = tubePoints(reach);
 
   // Conceptus position.
-  const fol: Pt = [290, 348];
+  const fol: Pt = [287, 351];
   let pos: Pt;
   if (t < 0.14) pos = fol;
   else if (t < 0.64) {
     const u = piece(U_T, t);
     pos = t < 0.17 ? [lerp(fol[0], at(T, 0)[0], seg(t, 0.14, 0.17)), lerp(fol[1], at(T, 0)[1], seg(t, 0.14, 0.17))] : at(T, u);
   } else {
-    const site = surfaceAt(430);
-    const attach: Pt = [site.p[0] - site.n[0] * 12, site.p[1] - site.n[1] * 12];
-    const route: Pt[] = [T[T.length - 1], [806, 250], [812, 340], attach];
+    const route: Pt[] = [T[T.length - 1], CAVITY[1], CAVITY[2], ATTACH];
     const k = piece([[0.64, 0], [0.74, 1], [0.86, 2], [0.94, 3]], t);
     const i = Math.min(2, Math.floor(k));
     const f = k - i;
     pos = [lerp(route[i][0], route[i + 1][0], f), lerp(route[i][1], route[i + 1][1], f)];
   }
-  const p = piece(P_T, t);
-  const f = cleavageFrame(p, 0, 5);
-  if (t < 0.24) f.pro.o = 0;
-  f.zonaO = Math.min(f.zonaO, 1 - seg(t, 0.64, 0.72));
-  const corona = 1 - seg(t, 0.34, 0.44);
-  const rot = lerp(0, -47, seg(t, 0.72, 0.84));
-  const mass = seg(t, 0.56, 0.62);
+  const { p, f, corona, polar, mass, rot } = conceptusAt(t);
   const out = seg(t, 0.14, 0.16);
   const st = stageOf(t);
   const cells = t < 0.36 ? 1 : 2 ** Math.min(5, Math.floor(p) - 1 + (p % 1 > 0.6 ? 1 : 0));
+  // Route already travelled through the cavity (drawn as it goes).
+  const cavRoute = seg(t, 0.64, 0.94);
 
-  // Loupe leader: from the loupe rim towards the conceptus.
+  // Magnifier: two tangents from the conceptus to the loupe's rim (a soft cone, no pointer line).
   const dx = pos[0] - LOUPE[0];
   const dy = pos[1] - LOUPE[1];
   const L = Math.hypot(dx, dy) || 1;
-  const rim: Pt = [LOUPE[0] + (dx / L) * LR, LOUPE[1] + (dy / L) * LR];
+  const ang = Math.atan2(dy, dx);
+  const half = Math.acos(Math.min(1, LR / L));
+  const tan1: Pt = [LOUPE[0] + Math.cos(ang + half) * LR, LOUPE[1] + Math.sin(ang + half) * LR];
+  const tan2: Pt = [LOUPE[0] + Math.cos(ang - half) * LR, LOUPE[1] + Math.sin(ang - half) * LR];
+  const tip: Pt = [pos[0] - (dx / L) * 14, pos[1] - (dy / L) * 14];
   const loupe = seg(t, 0.12, 0.16);
 
   const anat = vis(t, 0, 0.13);
@@ -431,32 +545,64 @@ export function TractJourney({ t }: SceneProps) {
   return (
     <g>
       <ConceptusDefs id="w1t" />
+      <defs>
+        <radialGradient id="w1t-glow">
+          <stop offset="0" stopColor="#ffb86b" stopOpacity={0.55} />
+          <stop offset="0.45" stopColor="#ffb86b" stopOpacity={0.18} />
+          <stop offset="1" stopColor="#ffb86b" stopOpacity={0} />
+        </radialGradient>
+        <radialGradient id="w1t-lens" cx="42%" cy="36%" r="70%">
+          <stop offset="0" stopColor="#16223a" />
+          <stop offset="1" stopColor="#0a1120" />
+        </radialGradient>
+        <linearGradient id="w1t-cone" gradientUnits="userSpaceOnUse" x1={pos[0]} y1={pos[1]} x2={LOUPE[0]} y2={LOUPE[1]}>
+          <stop offset="0" stopColor="#ffb86b" stopOpacity={0.35} />
+          <stop offset="1" stopColor="#ffb86b" stopOpacity={0.04} />
+        </linearGradient>
+      </defs>
       <clipPath id="w1t-loupe">
         <circle cx={LOUPE[0]} cy={LOUPE[1]} r={LR} />
       </clipPath>
       <Tract reach={reach} rupture={rupture} luteum={luteum} oocyteIn={1 - out} />
       <Sperm T={T} t={t} />
 
-      {/* Stations already passed (as in the course figure). */}
-      {[0.22, 0.34, 0.42, 0.5, 0.64].map((a) => {
-        if (t < a + 0.02) return null;
-        const q = a < 0.64 ? at(T, piece(U_T, a)) : T[T.length - 1];
-        return <circle key={a} cx={q[0]} cy={q[1]} r={3} fill="#ffb86b" opacity={0.45} />;
+      {/* Route through the cavity, drawn as the conceptus travels it */}
+      {cavRoute > 0.001 && (
+        <path d={`M${CAVITY.map((q) => q.join(',')).join(' L')}`} pathLength={1} strokeDasharray={`${cavRoute} 1`} fill="none" stroke="#ffb86b" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" opacity={0.4} pointerEvents="none" />
+      )}
+
+      {/* Milestones already passed: frozen copies of the conceptus where it was (course figure 1-7) */}
+      {STATIONS.map((s0, i) => {
+        const g = seg(t, s0.leave, s0.leave + 0.03);
+        if (g <= 0.01) return null;
+        const q = s0.at ?? at(T, s0.u ?? 0);
+        const c = conceptusAt(s0.snap);
+        return (
+          <g key={i} opacity={0.72 * g} pointerEvents="none">
+            <Conceptus f={c.f} x={q[0]} y={q[1]} s={0.085} corona={c.corona} polar={c.polar} mass={c.mass} rot={c.rot} id="w1t" tiny />
+          </g>
+        );
       })}
 
-      {/* The conceptus in the tract */}
+      {/* The conceptus in the tract, on a soft warm light */}
+      {t >= 0.14 && <circle cx={pos[0]} cy={pos[1]} r={30} fill="url(#w1t-glow)" pointerEvents="none" />}
       {t >= 0.14 && (
         <Part id={st.id}>
-          <Conceptus f={f} x={pos[0]} y={pos[1]} s={0.085} corona={corona} polar={t < 0.5 ? 1 : 0} mass={mass} rot={rot} id="w1t" tiny />
+          <Conceptus f={f} x={pos[0]} y={pos[1]} s={0.085} corona={corona} polar={polar} mass={mass} rot={rot} id="w1t" tiny />
         </Part>
       )}
-      {t >= 0.14 && <circle cx={pos[0]} cy={pos[1]} r={20} fill="none" stroke="#ffb86b" strokeWidth={1.4} opacity={0.8} />}
 
       {/* Loupe */}
       {loupe > 0.01 && (
         <g opacity={loupe}>
-          <line x1={rim[0]} y1={rim[1]} x2={pos[0] - (dx / L) * 20} y2={pos[1] - (dy / L) * 20} stroke="#ffb86b" strokeWidth={1} strokeDasharray="3 4" opacity={0.7} />
-          <circle cx={LOUPE[0]} cy={LOUPE[1]} r={LR} fill="#0d1526" />
+          {L > LR + 30 && (
+            <g pointerEvents="none">
+              <path d={`M${tip[0]},${tip[1]} L${tan1[0]},${tan1[1]} L${tan2[0]},${tan2[1]}Z`} fill="url(#w1t-cone)" opacity={0.5} />
+              <path d={`M${tip[0]},${tip[1]} L${tan1[0]},${tan1[1]} M${tip[0]},${tip[1]} L${tan2[0]},${tan2[1]}`} stroke="#ffb86b" strokeWidth={0.8} opacity={0.32} fill="none" />
+            </g>
+          )}
+          <circle cx={LOUPE[0]} cy={LOUPE[1] + 4} r={LR + 2} fill="#000" opacity={0.35} filter="url(#f-soft)" />
+          <circle cx={LOUPE[0]} cy={LOUPE[1]} r={LR} fill="url(#w1t-lens)" />
           <g clipPath="url(#w1t-loupe)">
             {t < 0.14 ? (
               <g>
@@ -464,12 +610,19 @@ export function TractJourney({ t }: SceneProps) {
               </g>
             ) : null}
             <Part id={st.id}>
-              <Conceptus f={f} x={LOUPE[0]} y={LOUPE[1]} s={0.4} corona={corona} polar={t < 0.5 ? 1 : 0} mass={mass} rot={rot} id="w1t" />
+              <Conceptus f={f} x={LOUPE[0]} y={LOUPE[1]} s={0.4} corona={corona} polar={polar} mass={mass} rot={rot} id="w1t" />
             </Part>
+            <ellipse cx={LOUPE[0] - 26} cy={LOUPE[1] - 40} rx={44} ry={20} transform={`rotate(-28 ${LOUPE[0] - 26} ${LOUPE[1] - 40})`} fill="#fff" opacity={0.07} pointerEvents="none" />
           </g>
           <circle cx={LOUPE[0]} cy={LOUPE[1]} r={LR} fill="none" stroke="#ffb86b" strokeWidth={1.6} />
+          <circle cx={LOUPE[0]} cy={LOUPE[1]} r={LR - 3} fill="none" stroke="#fff" strokeWidth={0.8} opacity={0.12} />
         </g>
       )}
+
+      {/* Milestone stamps: number + time, on arrival */}
+      {STATIONS.map((s0, i) => (
+        <Stamp key={i} n={i + 1} time={s0.time} x={s0.chip[0]} y={s0.chip[1]} align={s0.chip[2]} show={seg(t, s0.arrive, s0.arrive + 0.025)} now={1 - seg(t, s0.leave, s0.leave + 0.03)} />
+      ))}
 
       {/* Marks: ovulation (the follicle and the fimbriae over it) and implantation */}
       <Mark id="obulazioa" x={292} y={338} rx={78} ry={56} show={vis(t, 0.1, 0.26)} />
@@ -515,13 +668,29 @@ export function TractJourney({ t }: SceneProps) {
 
 // ---------------------------------------------------------------------------
 
-/** A blastocyst at an implantation site: green ring = usual place, dashed red = ectopic. */
+/** A blastocyst at an implantation site, on a soft light: green = usual place, red = ectopic. */
 function Blast({ f, p, show, ok }: { f: ReturnType<typeof cleavageFrame>; p: Pt; show: number; ok?: boolean }) {
   if (show <= 0.01) return null;
   return (
     <g opacity={show}>
-      <circle cx={p[0]} cy={p[1]} r={21} fill="none" stroke={ok ? '#86dc9b' : '#fb7185'} strokeWidth={2} strokeDasharray={ok ? undefined : '4 3'} />
+      <circle cx={p[0]} cy={p[1]} r={28} fill={ok ? 'url(#w1e-ok)' : 'url(#w1e-bad)'} pointerEvents="none" />
       <Conceptus f={f} x={p[0]} y={p[1]} s={0.11} rot={ok ? -47 : 0} mass={1} id="w1e" tiny />
+    </g>
+  );
+}
+
+/** A tubal pregnancy distends the tube where it implants: a swelling along the tube's direction. */
+function Swelling({ T, u, show }: { T: Pt[]; u: number; show: number }) {
+  if (show <= 0.01) return null;
+  const p = at(T, u);
+  const q = at(T, u + 0.02);
+  const a = (Math.atan2(q[1] - p[1], q[0] - p[0]) * 180) / Math.PI;
+  const k = 0.6 + 0.4 * show;
+  return (
+    <g transform={`translate(${p[0]} ${p[1]}) rotate(${a}) scale(${k})`} opacity={show} pointerEvents="none">
+      <ellipse rx={34} ry={tubeWidth(u) / 2 + 9} fill={C.tube} stroke="rgba(60,10,30,0.6)" strokeWidth={1.3} />
+      <ellipse rx={27} ry={tubeWidth(u) / 2 + 2} fill="#4a1c2c" />
+      <ellipse rx={27} ry={tubeWidth(u) / 2 + 2} fill="#b4233c" opacity={0.25} />
     </g>
   );
 }
@@ -554,14 +723,33 @@ export function EctopicSites({ t: stageT }: SceneProps) {
   return (
     <g>
       <ConceptusDefs id="w1e" />
+      <defs>
+        <radialGradient id="w1e-ok">
+          <stop offset="0" stopColor="#86dc9b" stopOpacity={0.55} />
+          <stop offset="1" stopColor="#86dc9b" stopOpacity={0} />
+        </radialGradient>
+        <radialGradient id="w1e-bad">
+          <stop offset="0" stopColor="#fb7185" stopOpacity={0.6} />
+          <stop offset="1" stopColor="#fb7185" stopOpacity={0} />
+        </radialGradient>
+        <linearGradient id="w1e-pouch" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#f2b8c6" stopOpacity={0} />
+          <stop offset="1" stopColor="#f2b8c6" stopOpacity={0.16} />
+        </linearGradient>
+      </defs>
       <Tract luteum={1} oocyteIn={0} />
       {/* Peritoneal cavity: the pouch of Douglas lies behind the uterus, below this plane. */}
       <Part id="douglas-zokogunea">
-        <path d="M150,540 C200,600 420,612 470,560" fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth={1.5} strokeDasharray="5 6" opacity={seg(t, 0.56, 0.62)} />
+        <g opacity={seg(t, 0.56, 0.62)}>
+          <path d="M150,532 C196,604 424,616 474,552 L474,532Z" fill="url(#w1e-pouch)" />
+          <path d="M150,532 C196,604 424,616 474,552" fill="none" stroke="rgba(242,184,198,0.55)" strokeWidth={1.6} />
+        </g>
       </Part>
-      {fall > 0.01 && fall < 0.99 && (
-        <path d={`M${mouth[0]},${mouth[1] + 20} Q${mouth[0] + 30},${(mouth[1] + douglas[1]) / 2} ${douglas[0]},${douglas[1]}`} fill="none" stroke="#fb7185" strokeWidth={1.4} strokeDasharray="3 5" opacity={0.7} />
+      {fall > 0.01 && (
+        <path d={`M${mouth[0]},${mouth[1] + 20} Q${mouth[0] + 30},${(mouth[1] + douglas[1]) / 2} ${douglas[0]},${douglas[1]}`} pathLength={1} strokeDasharray={`${fall} 1`} fill="none" stroke="#fb7185" strokeWidth={1.4} strokeLinecap="round" opacity={0.45} />
       )}
+      <Swelling T={T} u={0.24} show={s1} />
+      <Swelling T={T} u={0.6} show={s2} />
       <Blast f={f} p={normal} show={seg(t, 0.14, 0.2)} ok />
       <Mark id="ezohiko-habiratzea" x={amp[0]} y={amp[1]} rx={30} color="#fb7185" show={s1} />
       <Mark id="ezohiko-habiratzea" x={ist[0]} y={ist[1]} rx={30} color="#fb7185" show={s2} />
@@ -577,7 +765,7 @@ export function EctopicSites({ t: stageT }: SceneProps) {
       <Label id="anpulua" x={140} y={200} ax={amp[0] - 22} ay={amp[1]} show={s1} />
       <Label id="istmoa" x={470} y={40} ax={ist[0]} ay={ist[1] - 22} show={s2} />
       <Label id="obulutegia" x={560} y={300} ax={ov[0] + 22} ay={ov[1]} align="start" show={s3} />
-      <Label id="douglas-zokogunea" text="Peritoneo-barrunbea (Douglas-en zokogunea)" x={40} y={500} ax={douglas[0] - 10} ay={douglas[1] - 18} align="start" show={seg(t, 0.8, 0.84)} />
+      <Label id="douglas-zokogunea" text="Peritoneo-barrunbea (Douglas-en zokogunea)" x={252} y={500} ax={douglas[0] - 8} ay={douglas[1] - 16} show={seg(t, 0.8, 0.84)} />
       <Label id="ezohiko-habiratzea" x={40} y={40} align="start" show={seg(t, 0.28, 0.32)} />
 
       <Note x={410} y={618} show={vis(t, 0, 0.28)}>Normalean blastozistoa umetokiaren endometrioan habiratzen da</Note>
