@@ -19,7 +19,8 @@ import {
   type Pt,
   type SceneProps,
 } from '@/components/kit';
-import { CYTO, Endometrium, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, discGeometry, f1, lensPath } from './common';
+import { CYTO, Endometrium, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, discGeometry, f1, lensPath, synTh8, synTh9 } from './common';
+import { CellRing, LacunaFill, SinusoidShape, SynFill } from './materials';
 
 /**
  * 9. eguna — blastocyst almost completely embedded; lacunar period; Heuser's membrane.
@@ -54,7 +55,6 @@ const CY1 = 370;
 /** The epithelial defect keeps the width it had at the end of day 8; the fibrin plug fills it. */
 const GAP = Math.sqrt(R * R - (W2.surfaceY - CY0) ** 2) + 6;
 const HEUSER = '#f7d98a';
-const LACUNA = '#d3ebe6';
 const rad = (deg: number) => (deg * Math.PI) / 180;
 /** Angle (from the horizontal) where the hypoblast's lower edge meets the cytotrophoblast. */
 const EDGE_H = (Math.asin(-HYPO_BOTTOM / INNER) * 180) / Math.PI;
@@ -67,18 +67,13 @@ function geometry(t: number) {
 }
 type Geo = ReturnType<typeof geometry>;
 
-/** Finger-like invasive fronts of the syncytium (same function as day 8, so t = 0 continues it). */
-const fingers = (a: number) => 1 + 0.22 * Math.sin((a * Math.PI) / 11) + 0.12 * Math.sin((a * Math.PI) / 5.3);
 
 /**
  * Syncytiotrophoblast thickness at angle `a` (degrees, 90 = abembryonic pole, 270 = embryonic pole, sampled 90..450).
  * cover = 0: day-8 profile (only 160°–380°); cover = 1: whole circle, thick at the embryonic pole, thin abembryonically.
  */
 function synTh(a: number, cover: number) {
-  const th8 = a > 160 && a < 380 ? 66 * Math.pow(Math.sin(((a - 160) / 220) * Math.PI), 0.8) * fingers(a) : 0;
-  const p = Math.pow((1 - Math.sin(rad(a))) / 2, 0.9);
-  const th9 = (7 + 63 * p) * (1 + (fingers(a) - 1) * p);
-  return lerp(th8, th9, cover);
+  return lerp(synTh8(a, 1), synTh9(a), cover);
 }
 const norm = (a: number) => (a < 90 ? a + 360 : a);
 /** Minimum and maximum thickness over [a - span, a + span]. */
@@ -121,17 +116,21 @@ const LOOSE_VACUOLES: [number, number][] = [
 
 function lacunaShape(g: Geo, a: number, k: number, seed: number) {
   const [lo] = thRange(a, 9, 1);
-  const [cx, cy] = synAt(g, a, 0.5);
-  const tr = Math.min(17, (R + 30) * rad(7)) * k;
-  const rr = 0.24 * lo * k;
-  const tx = -Math.sin(rad(a));
-  const ty = Math.cos(rad(a));
-  const nx = Math.cos(rad(a));
-  const ny = Math.sin(rad(a));
+  // Each lacuna its own size, shape and tilt (Langman: irregular slits, some lying across the syncytium).
+  const size = 0.8 + 0.4 * Math.sin(seed * 3.1);
+  const tilt = rad(28 * Math.sin(seed * 2.3));
+  const [cx, cy] = synAt(g, a + 3 * Math.sin(seed * 1.3), 0.5 + 0.08 * Math.cos(seed * 1.9));
+  const tr = Math.min(17, (R + 30) * rad(7)) * k * size;
+  const rr = 0.26 * lo * k * (1.25 - 0.3 * size);
+  const ang = rad(a) + tilt;
+  const tx = -Math.sin(ang);
+  const ty = Math.cos(ang);
+  const nx = Math.cos(ang);
+  const ny = Math.sin(ang);
   const pts: Pt[] = [];
-  for (let i = 0; i < 12; i++) {
-    const phi = (i / 12) * Math.PI * 2;
-    const w = 1 + 0.16 * Math.sin(3 * phi + seed) + 0.08 * Math.cos(5 * phi + seed * 2.3);
+  for (let i = 0; i < 14; i++) {
+    const phi = (i / 14) * Math.PI * 2;
+    const w = 1 + 0.24 * Math.sin(3 * phi + seed) + 0.12 * Math.cos(5 * phi + seed * 2.3) + 0.1 * Math.sin(2 * phi + seed * 0.7);
     const u = tr * w * Math.cos(phi);
     const v = rr * w * Math.sin(phi);
     pts.push([cx + u * tx + v * nx, cy + u * ty + v * ny]);
@@ -144,7 +143,7 @@ function lacunaShape(g: Geo, a: number, k: number, seed: number) {
  * the other capillaries. `vessel` = index into VESSELS when the sinusoid is that capillary dilating in place.
  */
 const G_END = geometry(1);
-const SINUSOIDS = [
+export const SINUSOIDS = [
   { a: 165, len: 30, rr: 13 },
   { a: 211, len: 30, rr: 12, vessel: 3 },
   { a: 243, len: 46, rr: 16 },
@@ -161,14 +160,14 @@ const SINUSOIDS = [
   }
   return { x, y, a, len, rr, vessel, seed: i + 1 };
 });
-type Sinusoid = (typeof SINUSOIDS)[number];
+export type Sinusoid = (typeof SINUSOIDS)[number];
 /** VESSELS entries that the advancing blastocyst grows over (they fade as the syncytium reaches them). */
 const COVERED = VESSELS.map(([x, y]) => Math.hypot(x - G_END.cx, y - G_END.cy) < 215);
 
 /** Capillary (k = 0) → dilated, irregular sinusoid (k = 1), elongated along the syncytial surface. */
-function sinusoidPath(q: Sinusoid, k: number) {
-  const tr = lerp(9, q.len, k);
-  const rr = lerp(5.5, q.rr, k);
+export function sinusoidPath(q: Sinusoid, k: number, c: Pt = [q.x, q.y], scale = 1) {
+  const tr = lerp(9, q.len, k) * scale;
+  const rr = lerp(5.5, q.rr, k) * scale;
   const tx = -Math.sin(rad(q.a));
   const ty = Math.cos(rad(q.a));
   const nx = Math.cos(rad(q.a));
@@ -179,7 +178,7 @@ function sinusoidPath(q: Sinusoid, k: number) {
     const w = 1 + 0.14 * k * Math.sin(3 * phi + q.seed) + 0.1 * k * Math.sin(2 * phi + q.seed * 1.7);
     const u = tr * w * Math.cos(phi);
     const v = rr * w * Math.sin(phi);
-    pts.push([q.x + u * tx + v * nx, q.y + u * ty + v * ny]);
+    pts.push([c[0] + u * tx + v * nx, c[1] + u * ty + v * ny]);
   }
   return smoothPath(pts, true);
 }
@@ -256,15 +255,12 @@ function Day9Drawing({ t, reduced }: SceneProps) {
         {/* Capillaries near the implantation site that dilate into sinusoids. */}
         <Part id="amaren-odol-hodiak" show={1 - sinOn}>
           {SINUSOIDS.filter((q) => q.vessel === undefined).map((q) => (
-            <path key={q.seed} d={sinusoidPath(q, 0)} fill="url(#p-blood)" stroke="#8d1024" strokeWidth={1.4} />
+            <SinusoidShape key={q.seed} d={sinusoidPath(q, 0)} rim="#f6c3cd" />
           ))}
         </Part>
         <Part id="sinusoideak" show={sinOn}>
           {SINUSOIDS.map((q) => (
-            <g key={q.seed}>
-              <path d={sinusoidPath(q, sin)} fill="url(#p-blood)" stroke="#f3b3c0" strokeWidth={2.2} />
-              <path d={sinusoidPath(q, sin)} fill="none" stroke="#8d1024" strokeWidth={1} />
-            </g>
+            <SinusoidShape key={q.seed} d={sinusoidPath(q, sin)} />
           ))}
         </Part>
         {sin > 0.5 && (
@@ -282,7 +278,10 @@ function Day9Drawing({ t, reduced }: SceneProps) {
       {/* Fibrin plug where the epithelium should be (drawn under the blastocyst it abuts). */}
       <Part id="fibrina-koagulua" show={seg(fib, 0, 0.15)}>
         {fibrinPlug(fib).map((d, i) => (
-          <path key={i} d={d} fill="url(#p-fibrin)" stroke="#b9ae95" strokeWidth={1} />
+          <g key={i}>
+            <path d={d} fill="url(#w2-g-fibrin)" stroke="#b9ae95" strokeWidth={1} />
+            <path d={d} fill="url(#p-fibrin)" opacity={0.55} />
+          </g>
         ))}
       </Part>
 
@@ -292,13 +291,11 @@ function Day9Drawing({ t, reduced }: SceneProps) {
         <circle cx={cx} cy={cy} r={INNER} fill={C.blastocele} />
       </Part>
       <Part id="hasierako-bitelo-zakua" show={rename}>
-        <path d={yolk} fill={C.yolkCavity} />
-        <path d={yolk} fill="rgba(242,193,78,0.12)" />
-        <path d={yolk} fill="url(#g-cavity)" />
+        <path d={yolk} fill="url(#w2-g-yolk)" />
       </Part>
 
       <Part id="sinzitiotrofoblastoa">
-        <path d={syncytioPath(g)} fill="url(#p-syncytio)" fillRule="evenodd" stroke={C.syncytioDeep} strokeWidth={1.4} />
+        <SynFill d={syncytioPath(g)} />
       </Part>
 
       {/* Vacuoles between syncytial "cells": appear, enlarge, then move together and fuse into lacunae. */}
@@ -320,9 +317,9 @@ function Day9Drawing({ t, reduced }: SceneProps) {
                 cy={f1(lerp(p[1], c[1], k * 0.7))}
                 rx={f1(r)}
                 ry={f1(r * 0.8)}
-                fill={LACUNA}
+                fill="url(#w2-g-lacuna)"
                 stroke={C.syncytioDeep}
-                strokeWidth={0.7}
+                strokeWidth={0.8}
                 opacity={1 - seg(merge, 0.45, 1)}
               />
             );
@@ -330,27 +327,27 @@ function Day9Drawing({ t, reduced }: SceneProps) {
         )}
         {LOOSE_VACUOLES.map(([a, fr], i) => {
           const [x, y] = synAt(g, a, fr);
-          return <ellipse key={`l${i}`} cx={f1(x)} cy={f1(y)} rx={f1(lerp(0.8, 3, vac))} ry={f1(lerp(0.6, 2.4, vac))} fill={LACUNA} stroke={C.syncytioDeep} strokeWidth={0.7} />;
+          return <ellipse key={`l${i}`} cx={f1(x)} cy={f1(y)} rx={f1(lerp(0.8, 3, vac))} ry={f1(lerp(0.6, 2.4, vac))} fill="url(#w2-g-lacuna)" stroke={C.syncytioDeep} strokeWidth={0.8} />;
         })}
       </Part>
 
       <Part id="lakuak" show={seg(merge, 0, 0.35)}>
         {LACUNAE.map((a, i) => (
-          <path key={i} d={lacunaShape(g, a, lerp(0.35, 1, merge), i * 1.9 + 0.7)} fill={LACUNA} stroke={C.syncytioDeep} strokeWidth={1} />
+          <LacunaFill key={i} d={lacunaShape(g, a, lerp(0.35, 1, merge), i * 1.9 + 0.7)} />
         ))}
       </Part>
 
       <Part id="zitotrofoblastoa">
-        <CellBand curve={ellipseArc(cx, cy, R, R, 0, 360)} n={44} thickness={CYTO} color={C.cyto} inward shape="cuboidal" />
+        <CellRing cx={cx} cy={cy} r={R} th={CYTO} n={44} seed={8} />
       </Part>
 
       <Part id="heuser-mintza" show={seg(spread, 0, 0.04)}>
-        <CellBand curve={ellipseArc(cx, cy, INNER, INNER, HEUSER_L0, 90)} n={N_HEUSER} grow={done / N_HEUSER} thickness={4.5} color={HEUSER} inward shape="squamous" />
-        <CellBand curve={ellipseArc(cx, cy, INNER, INNER, HEUSER_R0, 450)} n={N_HEUSER} grow={done / N_HEUSER} thickness={4.5} color={HEUSER} inward shape="squamous" />
+        <CellBand curve={ellipseArc(cx, cy, INNER, INNER, HEUSER_L0, 90)} n={N_HEUSER} grow={done / N_HEUSER} thickness={6} color={HEUSER} nucleus="rgba(120,80,10,0.75)" stroke="rgba(90,60,10,0.7)" inward shape="squamous" />
+        <CellBand curve={ellipseArc(cx, cy, INNER, INNER, HEUSER_R0, 450)} n={N_HEUSER} grow={done / N_HEUSER} thickness={6} color={HEUSER} nucleus="rgba(120,80,10,0.75)" stroke="rgba(90,60,10,0.7)" inward shape="squamous" />
         {done < N_HEUSER &&
           leaders.map((a, i) => {
-            const [x, y] = polar(g, a, INNER - 2.4);
-            return <Cell key={i} x={x} y={y} r={3} rx={5.4} ry={2.6} rotate={a + 90} color={HEUSER} nucleusScale={0.5} opacity={seg(lead, 0, 0.3)} />;
+            const [x, y] = polar(g, a, INNER - 3);
+            return <Cell key={i} x={x} y={y} r={3.2} rx={6} ry={3.2} rotate={a + 90} color={HEUSER} nucleusScale={0.5} opacity={seg(lead, 0, 0.3)} />;
           })}
       </Part>
 
@@ -380,9 +377,8 @@ function Day9Drawing({ t, reduced }: SceneProps) {
           d={`M${f1(cx - wEpiTop)},${f1(epiTop)} L${f1(cx + wEpiTop)},${f1(epiTop)} L${f1(cx + wHypo)},${f1(hypoBottom)} L${f1(cx - wHypo)},${f1(hypoBottom)}Z`}
           fill="none"
           stroke="#e8eefc"
-          strokeWidth={1.1}
-          strokeDasharray="3 3"
-          opacity={0.75}
+          strokeWidth={1}
+          opacity={0.55}
         />
       </Part>
     </g>
@@ -393,7 +389,7 @@ function Day9Drawing({ t, reduced }: SceneProps) {
 function PeriodBadge({ x, y, show }: { x: number; y: number; show: number }) {
   return (
     <Part id="garai-lakunarra" show={show}>
-      <rect x={x - 74} y={y - 13} width={148} height={26} rx={13} fill="rgba(24,18,8,0.88)" stroke="#fbbf24" strokeWidth={1.3} strokeDasharray="4 3" />
+      <rect x={x - 74} y={y - 13} width={148} height={26} rx={13} fill="rgba(24,18,8,0.88)" stroke="#fbbf24" strokeWidth={1.3} />
       <text x={x} y={y} dy="0.35em" textAnchor="middle" fill="#fcd34d" fontSize={13} fontWeight={700}>
         Garai lakunarra
       </text>

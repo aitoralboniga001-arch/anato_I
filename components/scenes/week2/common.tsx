@@ -1,6 +1,7 @@
 'use client';
 
-import { C, CellBand, Part, lerp, line, smoothPath, type Pt } from '@/components/kit';
+import { Part, lerp, type Pt } from '@/components/kit';
+import { Epithelium, Gland, SpiralArtery, Vessel, W2Defs, glandPath, lumps, spiralPath } from './materials';
 
 /**
  * Shared geometry for week-2 implantation sections (Langman orientation):
@@ -21,17 +22,24 @@ interface EndometriumProps {
   decidua?: number;
   /** 0..1 gland secretion (glycogen & mucus). */
   secretion?: number;
+  /** 0..1 oedema: fluid between the stromal cells (paler, looser stroma). */
+  oedema?: number;
   /** Vessel scale (1 = normal capillaries, ~2 = dilated, sinusoids handled by the stage). */
   vesselScale?: number;
   /** Optional per-vessel opacity (index into VESSELS), e.g. vessels the blastocyst grows over. */
   vesselFade?: readonly number[];
+  /** 0..1 opacity of the spiral arteries (they are eroded / pushed aside on later days). */
+  arteries?: number;
   /** Extra content rendered inside the slab mask, above stroma (e.g. sinusoids). */
   children?: React.ReactNode;
 }
 
-const GLANDS: Pt[][] = [
-  [[262, 500], [272, 452], [252, 400], [270, 350], [256, 300], [266, 250]],
-  [[742, 500], [734, 446], [754, 392], [738, 340], [750, 288]],
+/** Secretory (corkscrew) glands opening on the surface, clear of the implantation site. */
+export const GLANDS: Pt[][] = [
+  glandPath([262, 486], 250, 2),
+  glandPath([742, 486], 236, 5),
+  glandPath([118, 486], 220, 3),
+  glandPath([890, 486], 228, 1),
 ];
 
 export const VESSELS: [number, number, number][] = [
@@ -45,53 +53,87 @@ export const VESSELS: [number, number, number][] = [
   [560, 200, 0.7],
 ];
 
+/** Spiral arteries coiling down from the deep endometrium (top) towards the surface. */
+export const ARTERIES: Pt[][] = [spiralPath([344, -10], [352, 240], 6, 6, 0.4), spiralPath([668, -10], [660, 250], 6.5, 6, 1.9)];
+
+/** Stroma with its cells and fibres, decidual change, oedema and the light from the top left (no Part). */
+export function StromaFill({ h, decidua = 0, oedema = 0 }: { h: number; decidua?: number; oedema?: number }) {
+  return (
+    <>
+      <rect x={0} y={0} width={1000} height={h} fill="url(#w2-p-stroma)" />
+      <rect x={0} y={0} width={1000} height={h} fill="url(#w2-p-stroma2)" />
+      {decidua > 0 && <rect x={0} y={0} width={1000} height={h} fill="url(#w2-p-decidua)" opacity={decidua} />}
+      {oedema > 0 && <rect x={0} y={0} width={1000} height={h} fill="url(#w2-p-oedema)" opacity={oedema} />}
+      <rect x={0} y={0} width={1000} height={h} fill="url(#w2-g-light)" />
+    </>
+  );
+}
+
+/** Organic invasive front of the syncytium (no regular period), shared by days 8–13 so they continue each other. */
+export const synFront = (a: number) => lumps(a, 0.7);
+/** Tongues of syncytium advancing into the stroma (angles, degrees). */
+const TONGUE_A = [204, 247, 291, 334];
+export const tongues = (a: number) => TONGUE_A.reduce((acc, b) => acc + Math.exp(-(((a - b) / 7) ** 2)), 0);
+
+/** Day-8 syncytium thickness at angle a (degrees, 90 = abembryonic pole, 270 = embryonic pole, sampled 90..450); grow 0..1. */
+export function synTh8(a: number, grow: number) {
+  if (a <= 160 || a >= 380) return 0;
+  const prof = Math.pow(Math.sin(((a - 160) / 220) * Math.PI), 0.8);
+  return lerp(18, 66, grow) * prof * synFront(a) * (1 + 0.32 * grow * tongues(a));
+}
+
+/** Day 9 onwards: the syncytium all round, thick at the embryonic pole (270°), thin abembryonically (90°). */
+export function synTh9(a: number) {
+  const p = Math.pow((1 - Math.sin((a * Math.PI) / 180)) / 2, 0.9);
+  return (7 + 63 * p) * (1 + (synFront(a) - 1) * p) * (1 + 0.32 * tongues(a) * p);
+}
+
 /** Endometrium background: stroma, glands, capillaries and surface epithelium (with a gap). */
-export function Endometrium({ gap, decidua = 0, secretion = 0, vesselScale = 1, vesselFade, children }: EndometriumProps) {
+export function Endometrium({ gap, decidua = 0, secretion = 0, oedema = 0, vesselScale = 1, vesselFade, arteries = 1, children }: EndometriumProps) {
   const { surfaceY, epiThickness, cx } = W2;
   return (
     <g mask="url(#m-slab)">
+      <W2Defs />
       <Part id="endometrio-estroma" quiet>
-        <rect x={0} y={0} width={1000} height={surfaceY} fill="url(#p-stroma)" />
-        {decidua > 0 && <rect x={0} y={0} width={1000} height={surfaceY} fill="url(#p-decidua)" opacity={decidua} />}
-      </Part>
-
-      <Part id="umetoki-guruina">
-        {GLANDS.map((g, i) => {
-          const d = smoothPath(g, false);
-          return (
-            <g key={i}>
-              <path d={d} fill="none" stroke={C.gland} strokeWidth={22} strokeLinecap="round" />
-              <path d={d} fill="none" stroke="#b9607a" strokeWidth={22} strokeLinecap="round" strokeDasharray="2 7" opacity={0.7} />
-              <path d={d} fill="none" stroke="#7a2f45" strokeWidth={5} strokeLinecap="round" />
-              {secretion > 0 &&
-                [0.2, 0.45, 0.7, 0.9].map((k, j) => {
-                  const p = g[Math.min(g.length - 1, Math.round(k * (g.length - 1)))];
-                  return <circle key={j} cx={p[0]} cy={p[1]} r={3.2 * secretion} fill="#fff4d6" opacity={0.9 * secretion} />;
-                })}
-            </g>
-          );
-        })}
+        <StromaFill h={surfaceY} decidua={decidua} oedema={oedema} />
       </Part>
 
       <Part id="amaren-odol-hodiak">
+        {arteries > 0.01 && ARTERIES.map((a, i) => <SpiralArtery key={`a${i}`} pts={a} w={4.2 * lerp(1, 1.2, oedema)} opacity={arteries} />)}
         {VESSELS.map(([x, y, s], i) => (
-          <g key={i} opacity={vesselFade?.[i]}>
-            <ellipse cx={x} cy={y} rx={13 * s * vesselScale} ry={8 * s * vesselScale} fill="url(#p-blood)" stroke="#8d1024" strokeWidth={1.4} />
-          </g>
+          <Vessel key={i} x={x} y={y} rx={11 * s * vesselScale} ry={7 * s * vesselScale} rot={(i * 37) % 60 - 30} opacity={vesselFade?.[i] ?? 1} />
+        ))}
+      </Part>
+
+      <Part id="umetoki-guruina">
+        {GLANDS.map((g, i) => (
+          <Gland key={i} pts={g} secretion={secretion} scale={1 + 0.12 * secretion} />
         ))}
       </Part>
 
       {children}
 
       <Part id="endometrio-epitelioa">
-        <CellBand curve={line([0, surfaceY], [cx - gap, surfaceY])} n={Math.max(1, Math.round((cx - gap) / 17))} thickness={epiThickness} color={C.epithelium} shape="columnar" />
-        <CellBand curve={line([cx + gap, surfaceY], [1000, surfaceY])} n={Math.max(1, Math.round((1000 - cx - gap) / 17))} thickness={epiThickness} color={C.epithelium} shape="columnar" />
+        <Epithelium x0={0} x1={cx - gap} y={surfaceY} th={epiThickness} w={16} />
+        <Epithelium x0={cx + gap} x1={1000} y={surfaceY} th={epiThickness} w={16} />
       </Part>
 
       <Part id="umetoki-barrunbea" quiet>
-        <rect x={0} y={surfaceY + 1} width={1000} height={640 - surfaceY} fill="#1a1426" />
-        <rect x={0} y={surfaceY + 1} width={1000} height={640 - surfaceY} fill="url(#g-shade)" opacity={0.4} />
+        <rect x={0} y={surfaceY + 2} width={1000} height={640 - surfaceY} fill="#1a1426" />
+        <rect x={0} y={surfaceY + 2} width={1000} height={640 - surfaceY} fill="url(#g-shade)" opacity={0.4} />
       </Part>
+      {/* Secretion (glycogen, mucus, glycoproteins) leaving the gland mouths into the lumen. */}
+      {secretion > 0.05 && (
+        <Part id="umetoki-guruina">
+          {GLANDS.map((g, i) =>
+            [0, 1, 2].map((j) => {
+              const k = Math.min(1, secretion * 1.3 - j * 0.15);
+              if (k <= 0) return null;
+              return <circle key={`${i}-${j}`} cx={g[0][0] + (j - 1) * 6} cy={surfaceY + 7 + j * 7 * k} r={2.8 - j * 0.5} fill="#fff4d6" stroke="#d8c08a" strokeWidth={0.6} opacity={0.9 * k} />;
+            }),
+          )}
+        </Part>
+      )}
     </g>
   );
 }
@@ -258,6 +300,7 @@ export function TrapBand({
           stroke="rgba(10,14,28,0.45)"
           strokeWidth={0.8}
         />
+        <path d={`M${f1(xt0)},${f1(yTop)} L${f1(xt1)},${f1(yTop)} L${f1(xb1)},${f1(yBottom)} L${f1(xb0)},${f1(yBottom)}Z`} fill="url(#w2-g-cell)" opacity={0.75} />
         <ellipse
           cx={f1(nx)}
           cy={f1(ny)}
@@ -265,6 +308,7 @@ export function TrapBand({
           ry={f1(shape === 'columnar' ? Math.min(h * 0.2, 5) : Math.min(h * 0.26, w * 0.24))}
           fill="rgba(20,24,40,0.55)"
         />
+        <circle cx={f1(nx)} cy={f1(ny)} r={f1(Math.min(w * 0.07, 1.3))} fill="rgba(5,8,20,0.7)" />
       </g>,
     );
   }

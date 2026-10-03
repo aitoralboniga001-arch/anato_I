@@ -537,6 +537,7 @@ export const week2: WeekDef = {
           idea: 'Epiblastoak eta hipoblastoak kokapen finkoa dute: polaritate dortso-bentrala ezarrita dago.',
           text: 'Epiblastoaren aldea dortsala izango da eta hipoblastoarena bentrala. Enbrioiaren lehen ardatza da.',
           focus: ['epiblastoa', 'hipoblastoa'],
+          view: 'diskoa',
         },
       ],
       structures: [
