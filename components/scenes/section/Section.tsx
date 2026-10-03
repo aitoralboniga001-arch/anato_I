@@ -761,7 +761,13 @@ export function SectionDrawing({ s, show = {} }: { s: Section; show?: Partial<Re
         <Part id={s.id('folds')} show={foldK}>
           {[1, -1].map((sd) => {
             const tip = map(sd * ng.crest[0], ng.crest[1]);
-            return <circle key={sd} cx={tip[0]} cy={tip[1]} r={15 * p.k} fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth={1.2} strokeDasharray="3 3" />;
+            // Soft sheen on the fold crest (no drawn ring): gives the label a target and the lit state a body.
+            return (
+              <g key={sd}>
+                <circle cx={tip[0]} cy={tip[1]} r={14 * p.k} fill="rgba(170,200,255,0.08)" />
+                <circle cx={tip[0]} cy={tip[1]} r={8 * p.k} fill="rgba(210,228,255,0.12)" />
+              </g>
+            );
           })}
         </Part>
       )}
