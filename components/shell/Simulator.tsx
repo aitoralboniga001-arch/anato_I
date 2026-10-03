@@ -24,6 +24,7 @@ import { Locator } from './Locator';
 import { ViewBridge, needsBridge, type ViewSnap } from './ViewBridge';
 import { IconRail, Outline, StageInfo } from './SidePanel';
 import { Viewport } from './Viewport';
+import { ViewSwitch } from './ViewSwitch';
 import { KimuFace } from '@/components/kimu/KimuFace';
 import { registerKimuHost, setKimuHere, toggleKimu, useKimuOpen } from '@/components/kimu/store';
 import { NarrationTransport, type AudioSnapshot } from './narrate';
@@ -1561,16 +1562,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             </div>
             <div className="stage-side">
               <Locator plane={view.plane} week={week.week} day={day} level={view.locator?.level} orientation={view.orientation} note={view.locator?.note} viewKey={`${stage.id}/${view.id}`} hold={helpOpen || questionsOpen || glossaryOpen || !!bridge} />
-              {stage.views.length > 1 && (
-                <div className="seg" role="tablist" aria-label="Ikuspegiak">
-                  {stage.views.map((v, k) => (
-                    <button key={v.id} role="tab" aria-selected={v.id === view.id} className={v.id === view.id ? 'is-on' : ''} onClick={() => chooseView(v.id)} title={`${v.description} (${k + 1})`}>
-                      <PlaneGlyph plane={v.plane} size={18} />
-                      <span>{v.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+              {stage.views.length > 1 && <ViewSwitch views={stage.views} current={view.id} onChoose={chooseView} />}
             </div>
           </div>
 
@@ -1821,6 +1813,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             onContinue={continueHold}
             onNextStage={continueNext}
             onPick={onSelect}
+            onTermHover={(id) => setHovered(id && inScene(id) ? id : null)}
+            noTerms={!!find}
             dates={intro === null && !find ? dates : []}
             onRecall={(id) => {
               const f = firstSeenOf(id);

@@ -1,7 +1,7 @@
 'use client';
 
 import { firstSentence } from '@/content/generate';
-import { useRef, useState, type ReactNode } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Beat, MicroQuestion, StageDef, StructureDef } from '@/lib/sim/types';
 import { structures } from '@/content/registry';
 import { IconBolt, IconCalendar, IconCaptions, IconGuide, IconLoop, IconNext, IconNotes, IconPause, IconPlay, IconPrev, IconRestart, IconSkipNext, IconSkipPrev, IconSliders, IconVoice, IconVoiceOff } from './icons';
@@ -10,6 +10,7 @@ import { categoryColor } from '@/lib/sim/palette';
 import type { AudioSnapshot } from './narrate';
 import { setPref, usePref, type PlayMode } from './prefs';
 import { recordAnswer } from './answers';
+import { linkTerms, termsOf, type Term } from './terms';
 import type { ExamDate } from '@/content/examDates';
 
 interface PlayerProps {
@@ -53,9 +54,14 @@ interface PlayerProps {
   onRecall?: (id: string) => void;
   /** Exam dates the current step shows. */
   dates?: ExamDate[];
+  /** A structure named in the caption is pointed at (lit in the scene) or let go. */
+  onTermHover?: (id: string | null) => void;
+  /** No caption links (the find quiz: a linked name would answer the question). */
+  noTerms?: boolean;
 }
 
 const SPEEDS = [0.5, 1, 1.5, 2];
+const NO_TERMS: Term[] = [];
 const pad = (n: number) => String(n).padStart(2, '0');
 
 /** The step in one line: its IDEIA NAGUSIA, or the first sentence of its explanation ("15. eguna" is not a sentence end). */
@@ -107,6 +113,9 @@ function Caption({
   dates,
   extra,
   onRecall,
+  terms,
+  onPick,
+  onTermHover,
 }: {
   beat: Beat | undefined;
   quick: boolean;
@@ -115,15 +124,21 @@ function Caption({
   dates: ExamDate[];
   extra?: ReactNode;
   onRecall?: (id: string) => void;
+  terms: readonly Term[];
+  onPick: (id: string) => void;
+  onTermHover?: (id: string | null) => void;
 }) {
   const [openKey, setOpenKey] = useState('');
   if (!beat) return null;
   const key = `${stageId}-${k}`;
+  // The structures the step names, each linked once (hover: lit in the scene; click: its card).
+  const used = new Set<string>();
+  const link = (text: string) => linkTerms(text, terms, used, { onPick, onHover: onTermHover });
   if (quick)
     return (
       <p key={key} className="cap-idea is-quick">
         <DateTag dates={dates} />
-        {ideaOf(beat)}
+        {link(ideaOf(beat))}
       </p>
     );
   const open = openKey === key;
@@ -135,7 +150,7 @@ function Caption({
         {beat.idea ? (
           <p className="cap-idea">
             <DateTag dates={dates} />
-            {beat.idea}
+            {link(beat.idea)}
           </p>
         ) : (
           dates.length > 0 && (
@@ -144,7 +159,7 @@ function Caption({
             </p>
           )
         )}
-        <p>{beat.text}</p>
+        <p>{link(beat.text)}</p>
         {open && beat.more && <p className="cap-more">{beat.more}</p>}
       </div>
       {side && (
@@ -269,6 +284,8 @@ export function Player(p: PlayerProps) {
   const n = beats.length;
   const beat = beats[p.activeBeat];
   const atEnd = p.t >= 1;
+  const allTerms = useMemo(() => termsOf([...p.stage.structures, ...p.stage.beats.flatMap((b) => b.focus ?? [])]), [p.stage]);
+  const terms = p.noTerms ? NO_TERMS : allTerms;
 
   const tAt = (clientX: number) => {
     const r = bar.current!.getBoundingClientRect();
@@ -304,6 +321,9 @@ export function Player(p: PlayerProps) {
               k={p.activeBeat}
               dates={p.dates ?? []}
               onRecall={p.onRecall}
+              terms={terms}
+              onPick={p.onPick}
+              onTermHover={p.onTermHover}
               extra={
                 p.fresh.length > 0 && (
                   <ul className="fresh" key={`f-${p.stage.id}-${p.activeBeat}`}>
@@ -327,8 +347,10 @@ export function Player(p: PlayerProps) {
           ))}
         </div>
         <div className="cap-nav">
-          <span className="cap-nav-l" aria-hidden>
-            Urratsa
+          <span className="cap-nav-l">
+            Urratsa{' '}
+            <b>{pad(p.activeBeat + 1)}</b>
+            <i>/{pad(n)}</i>
           </span>
           <button className="icon-btn" onClick={() => p.onBeat(-1)} aria-label="Aurreko urratsa" data-tip="Aurreko urratsa · ←" data-tip-pos="top">
             <IconPrev />
@@ -409,7 +431,7 @@ export function Player(p: PlayerProps) {
             return (
               <span
                 key={k}
-                className={`scrub-seg${k === p.activeBeat ? ' is-on' : ''}`}
+                className={`scrub-seg${k === p.activeBeat ? ' is-on' : k < p.activeBeat ? ' is-past' : ''}${hover?.k === k ? ' is-hover' : ''}`}
                 style={{
                   left: `${b.at * 100}%`,
                   width: `${(end - b.at) * 100}%`,
@@ -422,7 +444,10 @@ export function Player(p: PlayerProps) {
           <span className="scrub-head" style={{ left: `${p.t * 100}%` }} />
           {hover && (
             <span className="scrub-tip" style={{ left: hover.x }}>
-              <b>{pad(hover.k + 1)}</b>
+              <b>
+                {pad(hover.k + 1)}
+                <i>/{pad(n)}</i>
+              </b>
               <span>{ideaOf(beats[hover.k])}</span>
             </span>
           )}
@@ -431,6 +456,12 @@ export function Player(p: PlayerProps) {
         <span className="tp-tc" title="Garapenaren eguna">
           {p.day}
         </span>
+
+        {!p.voice && p.voiceConfigured !== false && (
+          <button className="voice-cta tp-voice" onClick={() => p.onVoice(true)} aria-label="Ahotsarekin ikasi" data-tip="Urrats bakoitza ahoz azaldu, irudiari begira" data-tip-pos="top">
+            <IconVoice size={15} /> <span>Ahotsarekin ikasi</span>
+          </button>
+        )}
 
         <Popover
           up

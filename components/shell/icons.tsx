@@ -40,6 +40,12 @@ export const IconNext = ({ size }: P) => (
     <path d="M9 5l7 7-7 7" />
   </svg>
 );
+/** Fold marker of a collapsible section (points down when open). */
+export const IconChevron = ({ size, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M6 9l6 6 6-6" />
+  </svg>
+);
 export const IconSkipNext = ({ size }: P) => (
   <svg {...base(size)}>
     <path d="M6 5l8 7-8 7z" fill="currentColor" stroke="none" />

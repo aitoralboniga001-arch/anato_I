@@ -9,6 +9,8 @@ import { LandFoot, LandNav } from './LandNav';
 import { PRESENCE_GROUPS } from './NowCard';
 
 const TICKS = [0, 7, 14, 21, 28, 35, 42, 56, 84, 140, 266];
+/** Tick labels that crowd their neighbour on narrower rulers (12 weeks sits right after day 56). */
+const MINOR_TICKS = [84];
 const tickLabel = (d: number) => (d === 266 ? 'jaiotza' : d <= 56 ? String(d) : `${d / 7}. a.`);
 
 const GROUPS = PRESENCE_GROUPS;
@@ -162,7 +164,7 @@ export function Timeline() {
           </div>
           <div className="kr-ticks" aria-hidden>
             {TICKS.map((d) => (
-              <small key={d} style={{ left: `${dayToX(d) * 100}%` }}>
+              <small key={d} className={MINOR_TICKS.includes(d) ? 'is-minor' : undefined} style={{ left: `${dayToX(d) * 100}%` }}>
                 {tickLabel(d)}
               </small>
             ))}

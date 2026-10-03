@@ -53,6 +53,7 @@ const WELCOME: [string, string][] = [
 const STEPS: [string, string][] = [
   ['Aurrebista', 'Etapa bakoitza prozesu osoaren ikuspegi labur batekin hasten da. Irakurri lasai eta sakatu «Hasi».'],
   ['Urratsez urrats', 'Testua eta animazioa batera doaz: lerro lodia da ideia nagusia, azpian zer gertatu den. «Gakoa» eta «Kontuz» ere urrats berean.'],
+  ['Izen azpimarratuak', 'Testuko egitura-izen bakoitza bere kolorez azpimarratuta dago: sagua gainetik pasatuta, egitura irudian argitzen da; klik eginda, haren fitxa irekitzen da.'],
   ['Hiru modu', 'Beheko eskuineko botoiak aukeratzen du (G tekla): «Gidatua»: mantso, urrats bakoitzean gelditu, egiturak banan-banan eta galdera txikiak. «Arrunta»: jarraian. «Azkarra»: prozesu osoa minutu batean baino gutxiagoan, errepasatzeko. Bertan: abiadura eta ahotsa.'],
   ['Egitura baten fitxa', 'Klikatu edozein egitura: zer den, noiz agertzen den, non dagoen, nondik datorren, nola sortzen den eta zertan bihurtzen den.'],
   ['Denboran atzera', '«Ikusi nola sortzen den» sakatuta, egitura sortzen den urratsera salto egiten da; «Bueltatu» sakatuta, zeunden lekura itzultzen zara.'],

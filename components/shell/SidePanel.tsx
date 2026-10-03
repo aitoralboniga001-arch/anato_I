@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { structures } from '@/content/registry';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import { spanOf } from '@/lib/sim/age';
 import { NOTES, sectionLabel, type NotesSection } from '@/content/notes';
 import type { StageDef, WeekDef } from '@/lib/sim/types';
-import { IconCalendar, IconCheck, IconClose, IconWarn } from './icons';
+import { IconCalendar, IconCheck, IconChevron, IconClose, IconList, IconWarn } from './icons';
 import { stageExamDates } from '@/content/examDates';
 import { StageLineage, branchOf } from './StageLineage';
 
@@ -179,6 +179,10 @@ export function Outline(p: OutlineProps) {
             </li>
           ))}
         </ol>
+        {/* What the folded rail is: the notes' index of this topic (the full list opens on hover or "["). */}
+        <button className="rail-label" onClick={onToggle} tabIndex={-1} aria-hidden>
+          {week.week}. gaia · Aurkibidea
+        </button>
         {peek && (
           <div className="rail-peek">
             <p className="kicker nt-kicker">{week.week}. gaia · Apunteen aurkibidea</p>
@@ -234,6 +238,62 @@ interface InfoProps {
 
 type Tab = 'gakoak' | 'egiturak' | 'leinuak';
 
+/** Which summary sections the student folded, remembered per browser (all open by default). */
+const FOLD_KEY = 'enbrioatlas:info-folded';
+const foldListeners = new Set<() => void>();
+let foldCache: string | null = null;
+const readFolds = () => {
+  if (foldCache === null) {
+    try {
+      foldCache = window.localStorage.getItem(FOLD_KEY) ?? '';
+    } catch {
+      foldCache = '';
+    }
+  }
+  return foldCache;
+};
+const setFold = (id: string, folded: boolean) => {
+  const ids = new Set(readFolds().split(',').filter(Boolean));
+  if (folded) ids.add(id);
+  else ids.delete(id);
+  foldCache = [...ids].join(',');
+  try {
+    window.localStorage.setItem(FOLD_KEY, foldCache);
+  } catch {
+    // Storage unavailable: the fold lasts for this page only.
+  }
+  foldListeners.forEach((l) => l());
+};
+const subscribeFolds = (cb: () => void) => {
+  foldListeners.add(cb);
+  return () => {
+    foldListeners.delete(cb);
+  };
+};
+
+/** A summary section with a heading that folds it away (kicker, count, chevron). */
+function InfoSection({ id, title, icon, count, tone, children }: { id: string; title: string; icon: ReactNode; count?: number; tone?: 'date' | 'key' | 'warn'; children: ReactNode }) {
+  const folded = useSyncExternalStore(subscribeFolds, () => readFolds().split(',').includes(id), () => false);
+  const bodyId = `info-sec-${id}`;
+  return (
+    <section className={`info-sec${tone ? ` is-${tone}` : ''}${folded ? ' is-folded' : ''}`}>
+      <h3 className="info-sec-h">
+        <button aria-expanded={!folded} aria-controls={bodyId} onClick={() => setFold(id, !folded)} title={folded ? 'Zabaldu' : 'Tolestu'}>
+          {icon}
+          <span>{title}</span>
+          {count !== undefined && <small>{count}</small>}
+          <IconChevron size={14} className="info-sec-chev" />
+        </button>
+      </h3>
+      {!folded && (
+        <div className="info-sec-body" id={bodyId}>
+          {children}
+        </div>
+      )}
+    </section>
+  );
+}
+
 /** Right column: exam dates and key points, the structures of the stage, and where they come from. */
 export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, onDismiss }: InfoProps) {
   const [picked, setTab] = useState<Tab>('gakoak');
@@ -264,11 +324,8 @@ export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, 
       ) : tab === 'gakoak' ? (
         <div className="info-scroll">
           {dates.length > 0 && (
-            <section className="xd" aria-label="Azterketarako datak">
-              <p className="xd-h">
-                <IconCalendar size={14} /> Azterketarako datak
-              </p>
-              <ol>
+            <InfoSection id="datak" title="Azterketarako datak" icon={<IconCalendar size={14} />} count={dates.length} tone="date">
+              <ol className="xd">
                 {dates.map((d, i) => (
                   <li key={i} className={d.k === activeBeat ? 'is-on' : ''}>
                     <button onClick={() => onSeek(stage.beats[d.k].at + 0.001)} title="Joan urrats honetara">
@@ -278,28 +335,33 @@ export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, 
                   </li>
                 ))}
               </ol>
-            </section>
+            </InfoSection>
           )}
           {stage.keyPoints.length > 0 ? (
-            <ol className="keypoints">
-              {stage.keyPoints.map((k, i) => (
-                <li key={i}>
-                  <span>{pad(i + 1)}</span>
-                  <p>{k}</p>
-                </li>
-              ))}
-            </ol>
+            <InfoSection id="gakoak" title="Gakoak" icon={<IconList size={14} />} count={stage.keyPoints.length} tone="key">
+              <ol className="keypoints">
+                {stage.keyPoints.map((k, i) => (
+                  <li key={i}>
+                    <span>{pad(i + 1)}</span>
+                    <p>{k}</p>
+                  </li>
+                ))}
+              </ol>
+            </InfoSection>
           ) : (
             <p className="muted">Etapa honetarako ez dago gakorik.</p>
           )}
-          {stage.cautions?.map((c, i) => (
-            <aside key={i} className="caution">
-              <p className="caution-h">
-                <IconWarn size={14} /> Kontuz
-              </p>
-              <p>{c}</p>
-            </aside>
-          ))}
+          {!!stage.cautions?.length && (
+            <InfoSection id="kontuz" title="Kontuz" icon={<IconWarn size={14} />} count={stage.cautions.length} tone="warn">
+              <ul className="cautions">
+                {stage.cautions.map((c, i) => (
+                  <li key={i} className="caution">
+                    <p>{c}</p>
+                  </li>
+                ))}
+              </ul>
+            </InfoSection>
+          )}
           <p className="source">
             Iturria: {stage.source.file} · {stage.source.section}
           </p>
