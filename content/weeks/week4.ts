@@ -591,7 +591,7 @@ export const week4: WeekDef = {
           exam: 'Azterketan: tolespen zefalokaudala ← nerbio-sistema zentralaren luzetarako hazkuntza.',
           view: 'sagitala',
           idea: 'Buruaren tolespenak mintz bukofaringeoa eta bihotz-eremua bentralera eramaten ditu.',
-          text: 'Eragilea: nerbio-sistema zentralaren luzetarako hazkuntza. Endodermoaren alde kraneala enbrioi barrura sartzen da: aurreko hestea eratzen hasten da. Begiratu marra puntudunari: bihotzaren eta mintzaren bidea.',
+          text: 'Eragilea: nerbio-sistema zentralaren luzetarako hazkuntza. Endodermoaren alde kraneala enbrioi barrura sartzen da: aurreko hestea eratzen hasten da. Begiratu ibilbideei: puntu txikia hasierako lekua da, borobil handia oraingoa (bihotza eta mintza).',
           focus: ['mintz-bukofaringeoa', 'bihotz-hodia', 'barrunbe-perikardikoa', 'aurreko-hestea'],
         },
         {
@@ -687,6 +687,11 @@ export const week4: WeekDef = {
         'aorta-dortsalak',
         'bihotz-hodia',
         'barrunbe-perikardikoa',
+        'somitak',
+        'mesenterio-dortsala',
+        'korion-barrunbea',
+        'enbrioi-kanpoko-mesodermoa',
+        'hasierako-zilbor-hestea',
       ],
       keyPoints: [
         'Enbrioi aroa (3.–8. astea) = enbriogenesi edo organogenesi garaia. Enbrioi aroaren amaierarako (2. hilabetea, 8. astea) sistema guztietako organo eta ehunak agertuta daude eta kanpoko ezaugarri nagusiak nabariak dira.',

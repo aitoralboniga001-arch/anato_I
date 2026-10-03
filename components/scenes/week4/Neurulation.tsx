@@ -1,8 +1,9 @@
 'use client';
 
-import { Arrow, C, Label, Note, Part, clamp, lerp, lin, seg, smoothPath, type SceneProps } from '@/components/kit';
-import { SectionDrawing, makeSection } from '@/components/scenes/section/Section';
+import { Arrow, C, Label, Mark, Note, Part, clamp, lerp, lin, seg, smoothPath, type SceneProps } from '@/components/kit';
+import { useId, type ReactNode } from 'react';
 import { f1, type Pt } from './common';
+import { K, NS, NeuruDrawing, SX, TE, crestCells, neuruGeo, type NeuruParams } from './NeuruSection';
 
 /**
  * Stage `neurulazioa` — plaka neurala → ildo neurala → tolesdura neuralak → hodi neurala,
@@ -11,87 +12,137 @@ import { f1, type Pt } from './common';
  */
 
 // ---------------------------------------------------------------------------
-// Transverse view — realistic section (cells, layers) from the shared section engine.
+// Transverse view — one continuous neuroepithelium + surface ectoderm sheet (NeuruSection).
 // ---------------------------------------------------------------------------
 
 /**
  * Step windows (the stage beats): .00 induction → plate · .12 groove · .30 folds rise and approach ·
- * .44 fusion (zipping) · .62 crest cells leave the fold edges · .68 tube closed under the surface
- * ectoderm · .80 crest cells migrate · .90 neuropores. Each change starts at its beat and is finished
- * by the step's complete frame (next beat − 0.035), eased in and out (no speed jumps between steps).
+ * .44 folds meet (tube) · .62 crest cells leave the junction · .68 tube separates under a continuous
+ * surface ectoderm · .80 crest cells migrate · .90 neuropores (dorsal view). Each change is finished by
+ * the step's complete frame (next beat − 0.035).
  */
-function neuralAt(t: number) {
-  return 0.15 * seg(t, 0.12, 0.26) + 0.27 * seg(t, 0.3, 0.405) + 0.48 * seg(t, 0.44, 0.58) + 0.1 * seg(t, 0.68, 0.76);
+function neuruParams(t: number): NeuruParams {
+  return {
+    plate: seg(t, 0, 0.085),
+    groove: seg(t, 0.12, 0.265),
+    folds: seg(t, 0.3, 0.405),
+    close: seg(t, 0.44, 0.585),
+    detach: seg(t, 0.68, 0.765),
+    oval: seg(t, 0.68, 0.78),
+    somite: seg(t, 0.12, 0.4),
+  };
 }
 
-function transverseSection(t: number) {
-  return makeSection({
-    fold: 0,
-    neural: neuralAt(t),
-    meso: lerp(0.3, 0.55, seg(t, 0.2, 1)),
-    somite: lerp(0.15, 0.45, seg(t, 0.1, 0.6)),
-    crest: 0.58 * seg(t, 0.8, 0.87),
-    crestAppear: seg(t, 0.62, 0.655),
-    aorta: seg(t, 0.3, 0.6),
-    k: 1.5,
-    oy: 60,
-  });
-}
-
-function transverseLabels(t: number) {
-  const s = transverseSection(t);
-  const n = neuralAt(t);
-  const groove = seg(t, 0.12, 0.16) * (1 - seg(t, 0.5, 0.56));
-  const folds = seg(t, 0.3, 0.34) * (1 - seg(t, 0.52, 0.58));
-  const tube = seg(t, 0.52, 0.58);
-  const crest = seg(t, 0.62, 0.655);
-  const ecto = s.map(-150, 4.5);
-  const fold = s.at.folds;
-  const tubeL = s.map(-s.neural.pt(Math.PI / 2, s.neural.rho)[0], s.neural.pt(Math.PI / 2, s.neural.rho)[1]);
-  const crestR = s.map(s.neural.closed > 0.5 ? 14 : s.neural.crest[0] + 4, s.neural.closed > 0.5 ? s.neural.topBasal - 4 : s.neural.crest[1] - 4);
-  return (
-    <>
-      <Label id="plaka-neurala" x={190} y={155} ax={s.at.plate[0] - 2 * (s.at.plate[0] - 500)} ay={s.at.plate[1]} show={1 - seg(t, 0.3, 0.45)} />
-      <Label id="ildo-neurala" x={190} y={200} ax={s.at.groove[0]} ay={s.at.groove[1]} show={groove} />
-      <Label id="azaleko-ektodermoa" x={190} y={110} ax={ecto[0]} ay={ecto[1]} />
-      <Label id="somitak" x={190} y={480} ax={s.map(-s.somite.cx - 20, s.somite.cd)[0]} ay={s.map(-s.somite.cx - 20, s.somite.cd)[1]} show={seg(t, 0.15, 0.3)} />
-      <Label id="notokorda" x={190} y={525} ax={s.at.notochord[0] - 14} ay={s.at.notochord[1]} />
-      <Label id="tolesdura-neuralak" x={790} y={155} ax={fold[0] + 8} ay={fold[1] - 6} show={folds * (n > 0.2 ? 1 : 0)} />
-      <Label id="hodi-neurala" x={810} y={110} ax={tubeL[0] + 2 * (500 - tubeL[0])} ay={tubeL[1]} show={tube} />
-      <Label id="gandor-neurala" x={810} y={200} ax={crestR[0]} ay={crestR[1]} show={crest} />
-      <Label id="aorta-dortsalak" x={810} y={500} ax={s.map(48, s.dAorta)[0] + 8} ay={s.map(48, s.dAorta)[1]} show={seg(t, 0.4, 0.6)} small />
-    </>
-  );
-}
+const part = (id: string, node: ReactNode, show = 1) => (
+  <Part id={id} show={show}>
+    {node}
+  </Part>
+);
 
 export function NeurulationTransverse({ t, reduced }: SceneProps) {
-  const s = transverseSection(t);
+  const g = neuruGeo(neuruParams(t));
+  const tube = g.p.close > 0.9;
+  const foldsOn = t >= 0.3;
   const induce = seg(t, 0, 0.03) * (1 - seg(t, 0.12, 0.16));
   const rise = seg(t, 0.3, 0.33) * (1 - seg(t, 0.44, 0.47));
-  const fold = s.at.folds;
-  return (
+  const zip = seg(t, 0.44, 0.47) * (1 - seg(t, 0.56, 0.6));
+  const appear = seg(t, 0.62, 0.655);
+  const migrate = seg(t, 0.8, 0.865);
+  const routes = seg(t, 0.8, 0.83) * (1 - seg(t, 0.9, 0.93));
+  const cells = appear > 0.01 ? crestCells(g, appear, g.p.detach, migrate) : [];
+  const tipR = SX(g.tipA);
+  const tipL = SX(g.mirror(g.tipA));
+  const midOf = (i: number, sd: 1 | -1) => {
+    const q: Pt = [(g.ap[i][0] + g.bas[i][0]) / 2, (g.ap[i][1] + g.bas[i][1]) / 2];
+    return SX(sd > 0 ? q : g.mirror(q));
+  };
+  const crestR = cells.find((c) => c.side > 0);
+  const foldAt = (sd: 1 | -1) => midOf(NS - 6, sd);
+
+  const over = (
     <g>
-      <SectionDrawing s={s} />
       {/* Induction: the notochord signals to the ectoderm above it, which thickens into the plate. */}
       {induce > 0.02 &&
-        [-26, 0, 26].map((dx) => (
-          <Arrow key={dx} from={[s.at.notochord[0] + dx * 0.3, s.at.notochord[1] - 14]} to={[s.at.notochord[0] + dx, s.at.plate[1] + 10]} bend={0} color="#e8eefc" width={2} head={7} show={induce} flow={!reduced} />
+        ([-1, 1] as const).map((sd) => (
+          <Arrow key={sd} from={SX([sd * 10, g.noto[1] - 6])} to={SX([sd * 34, g.TNt - 4])} bend={sd * -0.35} color="#e8eefc" width={2.2} head={7} show={induce} flow={!reduced} />
         ))}
       {/* Folds rising and approaching each other. */}
       {rise > 0.02 &&
-        [-1, 1].map((sd) => (
-          <Arrow key={sd} from={[500 + sd * (Math.abs(fold[0] - 500) + 34), fold[1] + 16]} to={[500 + sd * (Math.abs(fold[0] - 500) + 6), fold[1] - 26]} bend={sd * 0.25} color="#a9c3ff" width={2.2} head={8} show={rise} flow={!reduced} />
+        ([-1, 1] as const).map((sd) => {
+          const tp = sd > 0 ? tipR : tipL;
+          return <Arrow key={sd} from={[tp[0] + sd * 64, tp[1] + 40]} to={[tp[0] + sd * 26, tp[1] - 24]} bend={sd * 0.3} color="#a9c3ff" width={2.4} head={8} show={rise} flow={!reduced} />;
+        })}
+      {/* The folds meet in the midline. */}
+      {zip > 0.02 &&
+        ([-1, 1] as const).map((sd) => {
+          const tp = sd > 0 ? tipR : tipL;
+          return <Arrow key={sd} from={[tp[0] + sd * 40, tp[1] - 22]} to={[500 + sd * 12, tp[1] - 18]} bend={sd * 0.2} color="#a9c3ff" width={2.2} head={7} show={zip * clamp(Math.abs(tp[0] - 500) / 20)} />;
+        })}
+      {/* The folds: lit where they rise (no drawn ring). */}
+      <Mark id="tolesdura-neuralak" x={foldAt(1)[0]} y={foldAt(1)[1]} rx={30} show={rise} />
+      <Mark id="tolesdura-neuralak" x={foldAt(-1)[0]} y={foldAt(-1)[1]} rx={30} show={rise} />
+
+      {/* Migration routes: dorsolateral (under the ectoderm) and ventral (between tube and somite). */}
+      {routes > 0.02 &&
+        ([-1, 1] as const).map((sd) => (
+          <g key={sd}>
+            <Arrow from={SX([sd * 18, g.roofBasal - 8])} to={SX([sd * 170, g.ectoUnder(170) + 10])} bend={sd * 0.12} color="#2dd4bf" width={2.2} head={8} show={routes} flow={!reduced} />
+            <Arrow from={SX([sd * 30, g.roofBasal + 10])} to={SX([sd * 54, 96])} bend={sd * -0.15} color="#2dd4bf" width={2.2} head={8} show={routes} flow={!reduced} />
+          </g>
         ))}
-      <Note x={500} y={590} show={induce} tone="accent">
+
+      {/* Neural crest cells: released at the junction (EMT), then migrating. */}
+      {cells.length > 0 &&
+        part(
+          'gandor-neurala',
+          <g>
+            {cells.map((c, i) => {
+              const [X, Y] = SX(c.q);
+              const moving = migrate > 0.02 && migrate < 0.98;
+              const rot = moving ? (c.route === 'dl' ? c.side * 10 : c.side * 70) : 0;
+              return (
+                <g key={i}>
+                  <ellipse cx={X} cy={Y} rx={(moving ? 5.6 : 4.6) * K} ry={3.4 * K} transform={`rotate(${rot} ${f1(X)} ${f1(Y)})`} fill={C.neuralCrest} stroke="#0f766e" strokeWidth={1} />
+                  <circle cx={X} cy={Y} r={1.6 * K} fill="#0f4f49" />
+                </g>
+              );
+            })}
+          </g>,
+          appear,
+        )}
+
+      <Note x={500} y={596} show={induce} tone="accent">
         Notokorda → ektodermoa: indukzioa. Ektodermoaren eremu hau plaka neurala bihurtzen da.
       </Note>
-      <Note x={500} y={590} show={seg(t, 0.62, 0.65) * (1 - seg(t, 0.68, 0.7))} tone="accent">
-        Ertzetako zelulak askatzen dira: gandor neurala
+      <Note x={500} y={596} show={seg(t, 0.62, 0.65) * (1 - seg(t, 0.68, 0.7))} tone="accent">
+        Fusio-lekuko zelulak askatzen dira (epitelio → mesenkima): gandor neurala
       </Note>
-      <Note x={500} y={590} show={seg(t, 0.8, 0.83) * (1 - seg(t, 0.9, 0.92))} tone="accent">
-        Gandor neuraleko zelulak migratzen: azpitik (dortsala) eta hodiaren eta somitaren artetik (bentrala)
+      <Note x={500} y={596} show={seg(t, 0.8, 0.83) * (1 - seg(t, 0.9, 0.92))} tone="accent">
+        Bi bide: ektodermoaren azpitik (dortsolaterala) eta hodiaren eta somitaren artetik (bentrala)
       </Note>
-      {transverseLabels(t)}
+    </g>
+  );
+
+  const ecto = SX([-210, g.ectoUnder(210) - TE / 2]);
+  const plate = midOf(10, -1);
+  const groove = SX([0, g.tipA[1] * 0.35 - 2]);
+  const som = SX(g.mirror(g.somC));
+  const noto = SX(g.noto);
+  const wall = midOf(NS >> 1, 1);
+  const fold = foldAt(1);
+  const ao = SX(g.aorta);
+  return (
+    <g>
+      <NeuruDrawing g={g} part={part} plateId="plaka-neurala" foldId={foldsOn ? 'tolesdura-neuralak' : 'plaka-neurala'} tube={tube} aortaShow={seg(t, 0.3, 0.6)} over={over} />
+      <Label id="azaleko-ektodermoa" x={190} y={110} ax={ecto[0]} ay={ecto[1]} />
+      <Label id="plaka-neurala" x={190} y={160} ax={plate[0]} ay={plate[1]} show={1 - seg(t, 0.3, 0.45)} />
+      <Label id="ildo-neurala" x={190} y={205} ax={groove[0]} ay={groove[1]} show={seg(t, 0.12, 0.16) * (1 - seg(t, 0.5, 0.56))} />
+      <Label id="somitak" x={190} y={470} ax={som[0]} ay={som[1]} show={seg(t, 0.15, 0.3)} />
+      <Label id="notokorda" x={190} y={520} ax={noto[0] - 8} ay={noto[1] + 4} />
+      <Label id="hodi-neurala" x={810} y={110} ax={wall[0]} ay={wall[1]} show={seg(t, 0.52, 0.58)} />
+      <Label id="tolesdura-neuralak" x={810} y={242} ax={fold[0]} ay={fold[1]} show={seg(t, 0.3, 0.34) * (1 - seg(t, 0.54, 0.58))} />
+      {crestR && <Label id="gandor-neurala" x={810} y={205} ax={SX(crestR.q)[0]} ay={SX(crestR.q)[1]} show={appear} />}
+      <Label id="aorta-dortsalak" x={810} y={500} ax={ao[0] + 10} ay={ao[1]} show={seg(t, 0.4, 0.6)} small />
     </g>
   );
 }
@@ -101,18 +152,26 @@ export function NeurulationTransverse({ t, reduced }: SceneProps) {
 // transient neuropores (notes: closure days are approximate — "inguruan").
 // ---------------------------------------------------------------------------
 
-const D_TOP = 120;
-const D_BOTTOM = 540;
+const D_TOP = 112;
+const D_BOTTOM = 548;
 const ZIP_START = 0.44;
 
 function yAt(frac: number) {
   return lerp(D_TOP, D_BOTTOM, frac);
 }
+const sm = (v: number) => {
+  const k = clamp(v);
+  return k * k * (3 - 2 * k);
+};
+/** Embryo half-width (Langman 6-3/6-4): broad head folds, a waist at the future neck, slender trunk, tapering tail. */
 function bodyHalfWidth(frac: number) {
-  return 46 + 64 * Math.pow(Math.sin(Math.PI * clamp(frac, 0.02, 0.98)), 0.8);
+  const head = 30 * sm((0.3 - frac) / 0.22);
+  const tail = 38 * sm((frac - 0.72) / 0.3);
+  return (100 + head - tail) * Math.pow(Math.sin(Math.PI * clamp((frac + 0.065) / 1.13, 0, 1)), 0.42);
 }
+/** Neural plate half-width: wide brain plates cranially, narrow over the spinal cord, a little wider at the caudal end. */
 function plateHalfWidth(frac: number) {
-  return bodyHalfWidth(frac) * 0.52;
+  return (24 + 50 * sm((0.36 - frac) / 0.3) + 8 * sm((frac - 0.86) / 0.12)) * (0.5 + 0.5 * sm(frac / 0.16));
 }
 /** Neuropores exist once fusion has left just two open ends. */
 const poresOn = (t: number) => seg(t, 0.52, 0.58);
@@ -137,17 +196,18 @@ function localClosure(frac: number, spread: Zip) {
 }
 
 /** Distance of a neural fold's crest from the midline. */
-const ridgeX = (frac: number, spread: Zip, approach: number) => plateHalfWidth(frac) * (1 - approach * 0.3) * (1 - localClosure(frac, spread) * 0.94);
+const ridgeX = (frac: number, spread: Zip, approach: number) => plateHalfWidth(frac) * (1 - approach * 0.32) * (1 - localClosure(frac, spread) * 0.92);
 
-/** A fold's crest, optionally only over [a, b] (arc fractions). */
-function ridgePath(side: -1 | 1, spread: Zip, approach = 0, n = 40, a = 0.03, b = 0.97) {
+/** A fold's crest over [a, b] (arc fractions). */
+function ridgePts(side: -1 | 1, spread: Zip, approach = 0, n = 40, a = 0.03, b = 0.97) {
   const pts: Pt[] = [];
   for (let i = 0; i <= n; i++) {
     const frac = a + ((b - a) * i) / n;
     pts.push([500 + side * ridgeX(frac, spread, approach), yAt(frac)]);
   }
-  return pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${f1(p[0])},${f1(p[1])}`).join('');
+  return pts;
 }
+const polyD = (pts: Pt[]) => pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${f1(p[0])},${f1(p[1])}`).join('');
 
 /** Where the folds have effectively met (a tube), from the zipper's two fronts. */
 const FUSED = 0.75;
@@ -157,8 +217,8 @@ function fusedRange(spread: Zip): [number, number] | null {
   return [Math.max(0.03, ZIP_START - spread.cr - k), Math.min(0.97, ZIP_START + spread.ca + k)];
 }
 
-/** Neural tube half-width: broader where the brain will be, narrowing caudally. */
-const tubeHW = (frac: number) => 10 + 6 * (1 - frac) ** 2;
+/** Neural tube half-width: broad where the brain will be, narrow over the spinal cord. */
+const tubeHW = (frac: number) => 9 + 16 * sm((0.34 - frac) / 0.28) + 2 * sm((frac - 0.88) / 0.1);
 
 /** Filled tube between two arc fractions, with rounded ends. */
 function tubeD(a: number, b: number, f: (frac: number) => number) {
@@ -174,84 +234,130 @@ function tubeD(a: number, b: number, f: (frac: number) => number) {
   return smoothPath([...fr.map((q): Pt => [500 - w(q), yAt(q)]), ...[...fr].reverse().slice(1, -1).map((q): Pt => [500 + w(q), yAt(q)])], true, 0.5);
 }
 
+/** Somite pairs present at t: about 4 when the folds rise, 7 when they meet (≈22 days), ~16 by the neuropores. */
+const somiteCount = (t: number) => 3 + 4 * seg(t, 0.15, 0.44) + 9 * seg(t, 0.44, 1);
+
 function DorsalDrawing({ t }: SceneProps) {
+  const uid = useId().replace(/:/g, '');
   const spread = zipOf(t);
   const cranialOpen = 1 - localClosure(0.05, spread);
   const caudalOpen = 1 - localClosure(0.95, spread);
-  const somiteShow = seg(t, 0.15, 0.4);
   // Folds rise and draw towards each other before they touch at the future neck.
   const approach = seg(t, 0.3, 0.4);
+  const rise = seg(t, 0.12, 0.4); // how raised the folds look
+  const streak = 1 - seg(t, 0.3, 0.6); // the primitive streak remnant at the caudal end, regressing
 
-  // Body outline with rounded head and tail ends (a little beyond the plate).
-  const bodyW = (frac: number) => {
-    const u = (frac + 0.07) / 1.13;
-    return 112 * Math.pow(Math.sin(Math.PI * clamp(u, 0, 1)), 0.55) * (1.04 - 0.08 * u);
-  };
-  const bf = Array.from({ length: 81 }, (_, i) => lerp(-0.07, 1.06, (1 - Math.cos((Math.PI * i) / 80)) / 2));
-  // (the return side skips the two tips the sides share, so they stay round instead of a corner)
-  const outlineD = smoothPath([...bf.map((q): Pt => [500 - bodyW(q), yAt(q)]), ...[...bf].reverse().slice(1, -1).map((q): Pt => [500 + bodyW(q), yAt(q)])], true, 0.5);
+  // Body outline with rounded head and tail ends; the cut edge of the amnion just outside it.
+  const bf = Array.from({ length: 81 }, (_, i) => lerp(-0.065, 1.065, (1 - Math.cos((Math.PI * i) / 80)) / 2));
+  const outline = (grow: number) =>
+    smoothPath([...bf.map((q): Pt => [500 - bodyHalfWidth(q) - grow, yAt(q) + (q < 0.5 ? -grow : grow) * 0.6]), ...[...bf].reverse().slice(1, -1).map((q): Pt => [500 + bodyHalfWidth(q) + grow, yAt(q) + (q < 0.5 ? -grow : grow) * 0.6])], true, 0.5);
 
   // Only the stretch the zipper has already closed is tube; the rest is still open plate / folds.
   const fused = fusedRange(spread);
-  const ridges = (side: -1 | 1) =>
-    !fused
-      ? [ridgePath(side, spread, approach)]
-      : ([
-          [0.03, fused[0] + 0.01],
-          [fused[1] - 0.01, 0.97],
-        ] as [number, number][])
-          .filter(([a, b]) => b - a > 0.012)
-          .map(([a, b]) => ridgePath(side, spread, approach, 16, a, b));
-  // The plate between the folds, rounded at both ends.
+  const spans: [number, number][] = !fused
+    ? [[0.03, 0.97]]
+    : ([
+        [0.03, fused[0] + 0.01],
+        [fused[1] - 0.01, 0.97],
+      ] as [number, number][]).filter(([a, b]) => b - a > 0.012);
+  const ridges = (side: -1 | 1) => spans.map(([a, b]) => ridgePts(side, spread, approach, fused ? 18 : 44, a, b));
+  // The open plate / groove between the folds, rounded at both ends.
   const openPlate = () => {
-    const fr = Array.from({ length: 41 }, (_, i) => 0.03 + (0.94 * i) / 40);
+    const fr = Array.from({ length: 49 }, (_, i) => 0.03 + (0.94 * i) / 48);
     const side = (sd: number) => fr.map((q): Pt => [500 + sd * ridgeX(q, spread, approach), yAt(q)]);
     return smoothPath([[500, yAt(0.03) - 6], ...side(-1), [500, yAt(0.97) + 6], ...side(1).reverse()], true, 0.5);
   };
+  const plateFade = 1 - seg(Math.min(localClosure(0.03, spread), localClosure(0.97, spread)), 0.6, 0.8);
+
+  const nSom = somiteCount(t);
+  const somites = Array.from({ length: 16 }, (_, i) => {
+    const frac = 0.31 + i * 0.034;
+    const o = clamp(nSom - i);
+    return { frac, o };
+  }).filter((s) => s.o > 0.01);
 
   return (
     <g>
-      <path d={outlineD} fill="#101828" stroke="rgba(232,238,252,0.25)" strokeWidth={1.2} />
+      <defs>
+        <radialGradient id={`${uid}-body`} cx="45%" cy="35%" r="70%">
+          <stop offset="0%" stopColor="#24375f" />
+          <stop offset="100%" stopColor="#111b30" />
+        </radialGradient>
+        <linearGradient id={`${uid}-ridge`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#2c4fc4" />
+          <stop offset="50%" stopColor="#8fb0ff" />
+          <stop offset="100%" stopColor="#2c4fc4" />
+        </linearGradient>
+        <linearGradient id={`${uid}-tube`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#2546b0" />
+          <stop offset="42%" stopColor="#5a7ff0" />
+          <stop offset="58%" stopColor="#5a7ff0" />
+          <stop offset="100%" stopColor="#2546b0" />
+        </linearGradient>
+        <linearGradient id={`${uid}-som`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#f0606a" />
+          <stop offset="100%" stopColor="#b52a35" />
+        </linearGradient>
+      </defs>
 
-      {/* Somites: pairs appearing cranio-caudally beside the folds, drawn in with them as the tube closes. */}
-      {somiteShow > 0 &&
-        Array.from({ length: 7 }, (_, i) => {
-          const frac = 0.3 + i * 0.062;
+      {/* cut edge of the amnion, then the embryo's dorsal surface (surface ectoderm) */}
+      <path d={outline(10)} fill="none" stroke={C.mesoExtra} strokeWidth={5} opacity={0.55} />
+      <path d={outline(10)} fill="none" stroke={C.amnioblast} strokeWidth={1.6} opacity={0.6} />
+      <path d={outline(0)} fill={`url(#${uid}-body)`} stroke="rgba(122,167,245,0.5)" strokeWidth={1.4} />
+
+      {/* primitive streak remnant at the caudal end (regresses as the folds form) */}
+      {streak > 0.02 && <path d={`M500,${f1(yAt(0.99))}L500,${f1(yAt(1.05))}`} stroke="#c9d6f5" strokeWidth={3} strokeLinecap="round" opacity={0.45 * streak} />}
+
+      {/* Somites: pairs appearing cranio-caudally beside the neural folds. */}
+      <Part id="somitak" show={seg(t, 0.15, 0.2)}>
+        {somites.map(({ frac, o }, i) => {
           const y = yAt(frac);
-          const x = Math.max(ridgeX(frac, spread, approach) + 8, tubeHW(frac) + 5);
-          const o = seg(somiteShow, i * 0.1, i * 0.1 + 0.4);
+          const x = Math.max(ridgeX(frac, spread, approach) + 9, tubeHW(frac) + 6);
+          const h = 13.5;
+          const w = 19 - i * 0.25;
           return (
-            <g key={i} opacity={o} fill={C.mesoParaxial} stroke="rgba(90,20,30,0.55)" strokeWidth={0.9}>
-              <rect x={500 - x - 17} y={y - 10} width={17} height={20} rx={6} />
-              <rect x={500 + x} y={y - 10} width={17} height={20} rx={6} />
+            <g key={i} opacity={o}>
+              {[-1, 1].map((sd) => (
+                <rect key={sd} x={sd > 0 ? 500 + x : 500 - x - w} y={y - h / 2} width={w} height={h} rx={5.5} fill={`url(#${uid}-som)`} stroke="rgba(90,20,30,0.6)" strokeWidth={0.9} />
+              ))}
             </g>
           );
         })}
+      </Part>
 
       {/* Open neural plate / groove between the folds. */}
       <Part id={t < 0.12 ? 'plaka-neurala' : 'ildo-neurala'}>
-        <path d={openPlate()} fill={C.neural} opacity={0.28 * (1 - seg(Math.min(localClosure(0.03, spread), localClosure(0.97, spread)), 0.6, 0.8))} />
-        {t >= 0.12 && <path d={`M500,${f1(yAt(0.04))} L500,${f1(yAt(0.96))}`} stroke="#0c1730" strokeWidth={3} strokeDasharray="6 5" opacity={seg(t, 0.12, 0.16)} />}
+        <path d={openPlate()} fill={C.neural} opacity={lerp(0.55, 0.3, rise) * plateFade} />
+        <path d={openPlate()} fill="#0a1430" opacity={0.55 * rise * plateFade} />
+        {t >= 0.12 && <path d={`M500,${f1(yAt(0.04))} L500,${f1(yAt(0.96))}`} stroke="#050a18" strokeWidth={2.4} strokeLinecap="round" opacity={0.85 * seg(t, 0.12, 0.16) * plateFade} />}
       </Part>
 
-      {/* Fused neural tube: only where the folds have met. */}
-      {/* Open neural folds where fusion has not yet reached (under the tube, so they run into its ends). */}
+      {/* Open neural folds where fusion has not yet reached: raised ridges, lit along their crest. */}
       <Part id="tolesdura-neuralak">
-        {([-1, 1] as const).flatMap((sd) => ridges(sd).map((d, i) => <path key={`${sd}${i}`} d={d} stroke={C.neural} strokeWidth={10} fill="none" strokeLinecap="round" />))}
+        {([-1, 1] as const).flatMap((sd) =>
+          ridges(sd).map((pts, i) => (
+            <g key={`${sd}${i}`}>
+              <path d={polyD(pts.map((q) => [q[0] + sd * 2.5, q[1] + 2]))} stroke="#060b1a" strokeWidth={lerp(7, 13, rise)} fill="none" strokeLinecap="round" opacity={0.6} />
+              <path d={polyD(pts)} stroke={C.neural} strokeWidth={lerp(6, 11, rise)} fill="none" strokeLinecap="round" />
+              <path d={polyD(pts.map((q) => [q[0] - sd * 1.2, q[1]]))} stroke="#a9c3ff" strokeWidth={lerp(1, 2.6, rise)} fill="none" strokeLinecap="round" opacity={0.85} />
+            </g>
+          )),
+        )}
       </Part>
+      {/* Fused neural tube: only where the folds have met; a soft highlight along its length reads as a cylinder under the skin. */}
       {fused && (
         <Part id="hodi-neurala" show={seg(t, 0.44, 0.47)}>
-          <path d={tubeD(fused[0], fused[1], tubeHW)} fill={C.neural} stroke="#1e3a8a" strokeWidth={1.2} />
-          <path d={tubeD(fused[0], fused[1], (q) => tubeHW(q) * 0.22)} fill="#1b2f7a" opacity={0.6} />
+          <path d={tubeD(fused[0], fused[1], tubeHW)} fill={`url(#${uid}-tube)`} stroke="#1e3a8a" strokeWidth={1.2} />
+          <path d={tubeD(fused[0], fused[1], (q) => tubeHW(q) * 0.18)} fill="#c7d6ff" opacity={0.35} />
         </Part>
       )}
 
-      {/* Neuropores. */}
+      {/* Neuropores: the still-open ends, looking down into the tube. */}
       <Part id="neuroporo-kraneala" show={cranialOpen * poresOn(t)}>
-        <ellipse cx={500} cy={yAt(0.05)} rx={22 * cranialOpen + 4} ry={12 * cranialOpen + 3} fill="#0c0c0e" stroke={C.neural} strokeWidth={2} />
+        <ellipse cx={500} cy={yAt(0.05)} rx={20 * cranialOpen + 4} ry={11 * cranialOpen + 3} fill="#05070d" stroke="#8fb0ff" strokeWidth={1.6} />
       </Part>
       <Part id="neuroporo-kaudala" show={caudalOpen * poresOn(t)}>
-        <ellipse cx={500} cy={yAt(0.95)} rx={16 * caudalOpen + 4} ry={20 * caudalOpen + 3} fill="#0c0c0e" stroke={C.neural} strokeWidth={2} />
+        <ellipse cx={500} cy={yAt(0.95)} rx={10 * caudalOpen + 3} ry={18 * caudalOpen + 3} fill="#05070d" stroke="#8fb0ff" strokeWidth={1.6} />
       </Part>
 
       <Note x={500} y={74} tone="warn" show={seg(t, 0.9, 0.93)}>

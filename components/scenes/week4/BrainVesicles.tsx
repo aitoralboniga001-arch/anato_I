@@ -1,7 +1,7 @@
 'use client';
 
 import { useId } from 'react';
-import { C, Label, Mark, Part, lerp, lerpPt, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { C, Label, Mark, Note, Part, lerp, lerpPt, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { earlyGeom } from '@/components/scenes/week5/EarlyEmbryo';
 import { spineAt } from '@/components/scenes/week5/skin';
 
@@ -69,8 +69,19 @@ function DorsalDrawing({ t }: SceneProps) {
   const ys = Array.from({ length: N + 1 }, (_, i) => lerp(yTop, D_BOTTOM + 8, (1 - Math.cos((Math.PI * i) / N)) / 2));
   const outline = (f: (y: number) => number) => smoothPath([...ys.map((y): Pt => [VX - f(y), y]), ...[...ys].reverse().slice(1, -1).map((y): Pt => [VX + f(y), y])], true, 0.5);
   const tube = outline(hw);
-  // Ventricles and central canal: the lumen follows the swellings.
-  const lumen = outline((y) => Math.max(0, hw(y) * 0.4 - 3));
+  // Ventricles and central canal (seen through the thin roof): wide in the vesicles, the rhomboid fossa of
+  // the 4th ventricle in the rhombencephalon (thin roof plate: the diamond that names it), a narrow canal
+  // in the spinal cord.
+  const lumenW = (y: number) => {
+    const base = hw(y) * (y < rhombY ? 0.55 : lerp(0.55, 0.26, Math.min(1, Math.max(0, (y - rhombY) / 60))));
+    const dia = rhombR * 0.88 * Math.max(0, 1 - Math.abs(y - (rhombY + rhombR * 0.08)) / (rhombR * 0.98)) * rhombA;
+    return Math.max(0, Math.max(base, dia) - 3);
+  };
+  const lumen = outline(lumenW);
+  const fossa = outline((y) => rhombR * 0.8 * Math.max(0, 1 - Math.abs(y - (rhombY + rhombR * 0.08)) / (rhombR * 0.9)) * rhombA);
+  const shadow = smoothPath([...ys.map((y): Pt => [VX - hw(y) + 5, y + 7]), ...[...ys].reverse().slice(1, -1).map((y): Pt => [VX + hw(y) + 5, y + 7])], true, 0.5);
+  // faint context: somite pairs beside the spinal cord, the body outline
+  const somY = Array.from({ length: 12 }, (_, i) => rhombY + rhombR * 1.1 + 14 + i * 21).filter((y) => y < D_BOTTOM - 6);
   // Region boundaries at the necks (narrowest point between two centres).
   const neck = (a: number, b: number) => {
     let best = a;
@@ -102,20 +113,33 @@ function DorsalDrawing({ t }: SceneProps) {
           </clipPath>
         ))}
       </defs>
+      {/* context: somites beside the cord (dorsal view, amnion removed) */}
+      <g opacity={0.32} pointerEvents="none">
+        {somY.map((y, i) => (
+          <g key={i} fill={C.mesoParaxial}>
+            <rect x={VX + 26} y={y - 8} width={20} height={16} rx={6} />
+            <rect x={VX - 46} y={y - 8} width={20} height={16} rx={6} />
+          </g>
+        ))}
+      </g>
+      <path d={shadow} fill="#000" opacity={0.35} pointerEvents="none" />
       {/* One unclipped copy underneath hides the hairlines where the regions' clips meet. */}
       <g opacity={0.45 + 0.55 * Math.min(prosA, mesA, rhombA, cordA)} pointerEvents="none">
         <path d={tube} fill={`url(#${uid}-g)`} />
-        <path d={lumen} fill="#1b2f7a" opacity={0.45} />
+        <path d={lumen} fill="#14245e" opacity={0.6} />
       </g>
       {regions.map(([id, , , a]) => (
         <Part key={id} id={id} show={0.45 + 0.55 * a}>
           <g clipPath={`url(#${uid}-${id})`}>
             <path d={tube} fill={`url(#${uid}-g)`} />
-            <path d={lumen} fill="#1b2f7a" opacity={0.45} />
+            <path d={lumen} fill="#14245e" opacity={0.6} />
+            {id === 'erronbentzefaloa' && <path d={fossa} fill="#9db8ff" opacity={0.22} stroke="#b9ccff" strokeOpacity={0.5} strokeWidth={1} />}
           </g>
         </Part>
       ))}
       <path d={tube} fill="none" stroke="#1e3a8a" strokeWidth={1.4} pointerEvents="none" />
+      {/* soft highlight down the dorsal surface (light from upper left) */}
+      <path d={outline((y) => hw(y) * 0.16)} transform={`translate(${-0.0} 0)`} fill="#dfe8ff" opacity={0.13} pointerEvents="none" />
     </g>
   );
 }
@@ -131,6 +155,9 @@ function dorsalLabels(t: number) {
       <Label id="prosentzefaloa" x={190} y={170} ax={VX - 40} ay={prosY} show={prosL} />
       <Label id="mesentzefaloa" x={190} y={230} ax={VX - 24} ay={mesY} show={mesL} />
       <Label id="erronbentzefaloa" x={190} y={290} ax={VX - 30} ay={rhombY} show={rhombL} />
+      <Note x={500} y={606} tone="dim" show={seg(t, 0.58, 0.62) * (1 - seg(t, 0.73, 0.75))}>
+        Aurrerago, kurtsoan: prosentzefaloak telentzefaloa eta dientzefaloa emango ditu
+      </Note>
       <Label id="ornomuina" x={810} y={420} ax={VX + 14} ay={D_BOTTOM - 60} show={seg(t, 0.4, 0.46)} />
       {/* Before the vesicles bulge, it is one continuous tube. */}
       <Label id="hodi-neurala" x={810} y={360} ax={VX + 14} ay={(D_TOP + D_BOTTOM) / 2} show={1 - seg(t, 0.1, 0.14)} />
@@ -190,7 +217,7 @@ function tubeNodes(t: number): Node[] {
   for (let i = 0; i < ctrl.length - 1; i++) {
     const a = ctrl[i];
     const b = ctrl[i + 1];
-    const n = Math.max(2, Math.ceil(Math.hypot(b.p[0] - a.p[0], b.p[1] - a.p[1]) / 3));
+    const n = Math.max(2, Math.ceil(Math.hypot(b.p[0] - a.p[0], b.p[1] - a.p[1]) / 1.6));
     for (let k = 0; k < n; k++) {
       const u = k / n;
       const e = u * u * (3 - 2 * u);
@@ -234,24 +261,46 @@ function LateralDrawing({ t }: SceneProps) {
   const nodes = tubeNodes(t);
   const parts = ['ornomuina', 'erronbentzefaloa', 'mesentzefaloa', 'prosentzefaloa'] as const;
   const b0 = g.bars[0];
+  // Ventricles (wide in the vesicles) and the narrow central canal of the cord, seen through the wall.
+  const lumenR = (n: Node) => Math.max(1.4, n.r * (n.part === 'ornomuina' ? 0.3 : 0.56) - 1.5);
+  // Each layer is a union of discs drawn opaque inside a group, so overlaps never stack up.
   return (
     <g>
       <Embryo28Outline />
-      {/* Neural tube: outline pass, then fill pass, one Part per region */}
-      <g fill="#1e3a8a">
+      <g fill="#14286b" pointerEvents="none">
         {nodes.map((n, i) => (
-          <circle key={i} cx={n.p[0]} cy={n.p[1]} r={n.r + 2} />
+          <circle key={i} cx={n.p[0]} cy={n.p[1]} r={n.r + 2.2} />
         ))}
       </g>
       {parts.map((id) => (
         <Part key={id} id={id}>
-          {nodes
-            .filter((n) => n.part === id)
-            .map((n, i) => (
-              <circle key={i} cx={n.p[0]} cy={n.p[1]} r={n.r} fill={C.neural} />
-            ))}
+          <g fill={C.neural}>
+            {nodes
+              .filter((n) => n.part === id)
+              .map((n, i) => (
+                <circle key={i} cx={n.p[0]} cy={n.p[1]} r={n.r} />
+              ))}
+          </g>
         </Part>
       ))}
+      {/* the ventricular system is one continuous cavity: lumens after all the walls */}
+      {parts.map((id) => (
+        <Part key={`l-${id}`} id={id}>
+          <g fill="#14245e" opacity={0.72}>
+            {nodes
+              .filter((n) => n.part === id)
+              .map((n, i) => (
+                <circle key={i} cx={n.p[0]} cy={n.p[1]} r={lumenR(n)} />
+              ))}
+          </g>
+        </Part>
+      ))}
+      {/* light from the upper left: a soft sheen along the dorsal side of the wall */}
+      <g fill="#dbe6ff" opacity={0.16} pointerEvents="none">
+        {nodes.map((n, i) => (
+          <circle key={i} cx={n.p[0] - n.r * 0.38} cy={n.p[1] - n.r * 0.42} r={n.r * 0.3} />
+        ))}
+      </g>
       <Part id="mintz-bukofaringeoa" quiet>
         <circle cx={b0.bot[0] - b0.w * 0.55} cy={b0.bot[1] - b0.w * 0.3} r={5} fill="#dfe7ff" stroke="#3a5fd9" strokeWidth={1.2} />
       </Part>
@@ -269,6 +318,9 @@ function lateralLabels(t: number) {
       <Label id="mesentzefaloa" x={190} y={110} ax={P_MES[0]} ay={P_MES[1]} show={mesL} />
       <Label id="erronbentzefaloa" x={810} y={110} ax={P_RHOMB[0]} ay={P_RHOMB[1]} show={rhombL} />
       <Label id="ornomuina" x={810} y={400} ax={cord[0]} ay={cord[1]} />
+      <Note x={500} y={606} tone="dim" show={seg(t, 0.58, 0.62) * (1 - seg(t, 0.73, 0.75))}>
+        Hodia tolestuta: flexura zefalikoa (mesentzefaloan) eta zerbikala (erronbentzefaloa → ornomuina)
+      </Note>
       <Label id="mintz-bukofaringeoa" x={190} y={380} ax={b0.bot[0] - b0.w * 0.55} ay={b0.bot[1] - b0.w * 0.3} small />
     </>
   );

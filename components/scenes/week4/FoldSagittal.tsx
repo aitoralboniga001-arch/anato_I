@@ -40,6 +40,7 @@ const ss = (a: number, b: number, x: number) => {
 const add = (a: P2, b: P2, k = 1): P2 => [a[0] + b[0] * k, a[1] + b[1] * k];
 const sub = (a: P2, b: P2): P2 => [a[0] - b[0], a[1] - b[1]];
 const len = (a: P2) => Math.hypot(a[0], a[1]);
+const lerp2 = (a: P2, b: P2, k: number): P2 => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k];
 const unit = (a: P2): P2 => {
   const l = len(a) || 1;
   return [a[0] / l, a[1] / l];
@@ -173,7 +174,7 @@ function build(t: number, spMax = 5) {
   const LF = lerp(80, 150, hf);
   const LFT = lerp(60, 120, tf);
   const sp = (v: number) => spMax * ss(4, 12, v); // splanchnic layer
-  const cav = (v: number) => (39 - spMax) * ss(8, 26, v) - 12 * ss(LF - 30, LF, v); // coelom
+  const cav = (v: number) => (39 - spMax) * ss(8, 26, v) + 9 * ss(14, 34, v) * (1 - ss(LF * 0.58, LF * 0.78, v)) - 12 * ss(LF - 30, LF, v); // coelom (deeper round the heart)
   const WH = (v: number) => H0 + ENDO + sp(v) + cav(v) + 5 * ss(4, 12, v) + 5; // outer ectoderm surface
   const mt = (v: number) => 26 * ss(5, 20, v); // tail-flap mesenchyme (carries the allantois)
   const WT = (v: number) => H0T + ENDO + mt(v) + 5;
@@ -256,13 +257,15 @@ function build(t: number, spMax = 5) {
 type Geo = ReturnType<typeof build>;
 
 /** Fit the body into the viewport (cranial left, dorsal up). */
-function screen(g: Geo) {
+function screen(g: Geo, zoom = 0) {
   const pts = [...g.ecto, ...g.ball];
   const xs = pts.map((p) => p[0]);
   const ys = pts.map((p) => p[1]);
   const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
   const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
-  const k = lerp(K, 1, g.mf);
+  // `zoom` (own scene only) enlarges the folded embryo as it compacts, never beyond the drawing area.
+  const fit = Math.min(596 / (Math.max(...xs) - Math.min(...xs) + 72), 540 / (Math.max(...ys) - Math.min(...ys) + 40)); // + amnion margin
+  const k = Math.max(lerp(K, 1, g.mf), Math.min(lerp(K, 1, g.mf) * (1 + zoom * 0.3 * g.mf), fit));
   return (p: P2): P2 => [500 + k * (p[0] - cx), 318 + k * (p[1] - cy)];
 }
 
@@ -304,9 +307,9 @@ function amnionPath(ecto: P2[], gap: number, dome: number): P2[] {
 }
 
 /** Everything the folded-embryo drawing needs, in screen space (shared with the week-4 gut views). */
-export function computeFold(t: number, spMax = 5) {
+export function computeFold(t: number, spMax = 5, zoom = 0) {
   const g = build(t, spMax);
-  const X = screen(g);
+  const X = screen(g, zoom);
   const S = (pts: P2[]) => pts.map(X);
   const { map, fH, fT, LF, LFT } = g;
   const pit = foldTiming(t).pit;
@@ -352,18 +355,24 @@ export function computeFold(t: number, spMax = 5) {
   const hs = lerp(0.5, 1, g.hf);
   const hv = LF * 0.42;
   const hw0 = H0 + ENDO + g.sp(hv);
-  const heartC = X(fH(hv, hw0 + 1 + 12 * hs));
-  const hA = X(fH(hv + 1, hw0 + 1 + 12 * hs));
+  const heartC = X(fH(hv, hw0 + 1.5 + 16 * hs));
+  const hA = X(fH(hv + 1, hw0 + 1.5 + 16 * hs));
   const heartRot = Math.atan2(hA[1] - heartC[1], hA[0] - heartC[0]);
-  const heartO = ring(heartC, 26 * hs * K, 12 * hs * K, heartRot);
-  const heartI = ring(heartC, 17 * hs * K, 6 * hs * K, heartRot);
+  const heartO = ring(heartC, 31 * hs * K, 15.5 * hs * K, heartRot);
+  const heartI = ring(heartC, 21 * hs * K, 7.5 * hs * K, heartRot);
+  // dorsal mesocardium: the heart hangs from the splanchnic layer under the foregut
+  const meso1 = X(fH(hv - 7, hw0 - 1));
+  const meso2 = X(fH(hv + 7, hw0 - 1));
+  const meso3 = X(fH(hv + 4, hw0 + 9));
+  const meso4 = X(fH(hv - 4, hw0 + 9));
+  const mesocardium: P2[] = [meso1, meso2, meso3, meso4];
 
   // tail: allantois from the cloacal floor into the connecting stalk
   const wm = (H0T + ENDO + g.WT(LFT)) / 2;
   const B = fT(LFT, wm);
   const es = unit(sub(fT(LFT, wm), fT(LFT - 8, wm)));
   const a0 = Math.atan2(es[1], es[0]) - 0.4;
-  let a1 = Math.atan2(g.ndir[1], g.ndir[0]) - 0.35;
+  let a1 = Math.atan2(g.ndir[1], g.ndir[0]) - 0.2;
   while (a1 - a0 > Math.PI) a1 -= 2 * Math.PI;
   while (a0 - a1 > Math.PI) a1 += 2 * Math.PI;
   const sa = lerp(a0, a1, g.tf);
@@ -399,21 +408,100 @@ export function computeFold(t: number, spMax = 5) {
   // anchors
   const bmMid = X(map(S_BM - 2, D_ROOF + 6 + (PD + H0 + 12 - D_ROOF) * Math.max(0, -Math.cos(g.psiH)) * 0.4));
   const cmMid = X(map(S_CM + 2, D_ROOF + 6 + (PDT + H0T + 12 - D_ROOF) * Math.max(0, -Math.cos(g.psiT)) * 0.4));
+  // Membranes: where ectoderm and endoderm touch with no mesoderm between — the bilaminar plate across
+  // the end of the foregut (buccopharyngeal) and of the hindgut (cloacal).
+  const plate = (r1: P2, r2: P2, tan: P2, out: number) => {
+    const a = X(r1);
+    const b = X(r2);
+    const tv = unit(sub(X(add(r1, tan, 1)), a));
+    return [a, b, add(b, tv, out * 8.5), add(a, tv, out * 8.5)] as P2[];
+  };
+  const bmPlate = plate(map(S_BM + 0.5, D_ROOF - 0.5), fH(0, H0 + ENDO + 0.5), g.tangent(S_BM), -1);
+  const cmPlate = plate(map(S_CM - 0.5, D_ROOF - 0.5), fT(0, H0T + ENDO + 0.5), g.tangent(S_CM), 1);
   const kloakaC = X(fT(12, 0));
   const kloakaRing = ring(kloakaC, 15 * K, 9 * K, 0);
+  // Cloaca: the dilated end of the hindgut (lumen between its roof and floor), which the allantois enters.
+  const kloakaLumen = [...range(S_CM - 30, S_CM, 3).map((s) => X(map(s, D_ROOF + ENDO + 0.5))), ...range(0, 28, 3).map((v) => X(fT(v, H0T - 0.5)))];
+  // Stomodeum / proctodeum: the pits of the surface ectoderm in front of each membrane (cavity side of the ectoderm).
+  const pitPoly = (deep: P2, reach: number) => {
+    let ib = 0;
+    let bd = 1e9;
+    ecto.forEach((q, i) => {
+      const d = Math.hypot(q[0] - deep[0], q[1] - deep[1]);
+      if (d < bd) {
+        bd = d;
+        ib = i;
+      }
+    });
+    let i0 = ib;
+    let acc = 0;
+    while (i0 > 0 && acc < reach) {
+      acc += Math.hypot(ecto[i0][0] - ecto[i0 - 1][0], ecto[i0][1] - ecto[i0 - 1][1]);
+      i0--;
+    }
+    let i1 = ib;
+    acc = 0;
+    while (i1 < ecto.length - 1 && acc < reach) {
+      acc += Math.hypot(ecto[i1 + 1][0] - ecto[i1][0], ecto[i1 + 1][1] - ecto[i1][1]);
+      i1++;
+    }
+    const pts = ecto.slice(i0, i1 + 1);
+    const c: P2 = [(pts[0][0] + pts[pts.length - 1][0] + 2 * ecto[ib][0]) / 4, (pts[0][1] + pts[pts.length - 1][1] + 2 * ecto[ib][1]) / 4];
+    return { pts, c };
+  };
+  const stom = pitPoly(X(map(S_BM - 5, D_ROOF)), 30 * K);
+  const prok = pitPoly(X(map(S_CM + 5, D_ROOF)), 24 * K);
   const pits = [
-    { id: 'estomodeoa', c: X(add(fH(0, g.WH(0) + 6), g.tangent(S_BM), -8)) },
-    { id: 'proktodeoa', c: X(add(fT(0, g.WT(0) + 6), g.tangent(S_CM), 8)) },
+    { id: 'estomodeoa', c: stom.c, pts: stom.pts },
+    { id: 'proktodeoa', c: prok.c, pts: prok.pts },
   ];
 
-  return { g, X, S, map, fH, fT, LF, LFT, pit, ecto, ectoIn, pieces, loopIn, pieceIn, meso, ntTop, ntBot, lumTop, lumBot, noTop, noBot, splO, splI, somO, somI, cavPoly, vSplit, heartC, heartO, heartI, stalkS, stalkTube, neckEndo, neckMeso, allC, allO1, allI1, allO2, allI2, amn, amnIn, amnOut, dots, bmMid, cmMid, kloakaC, kloakaRing, pits };
+  // Primitive umbilical cord: from the umbilical ring the amnion starts to sheathe the vitelline duct and
+  // the connecting stalk together (notes fig. 2 D; Langman 6-18 D).
+  const cordK = ss(0.6, 0.9, t);
+  /** From the body-wall margin `from`, follow `path` (starting at its point nearest the margin) for arc length L. */
+  const sheath = (from: P2, path: P2[], L: number) => {
+    let ib = 0;
+    path.forEach((q, i) => {
+      if (Math.hypot(q[0] - from[0], q[1] - from[1]) < Math.hypot(path[ib][0] - from[0], path[ib][1] - from[1])) ib = i;
+    });
+    // run away from the body (towards the chorion)
+    const body = X(map(0, D_ROOF));
+    const far = (i: number) => Math.hypot(path[clamp(i, 0, path.length - 1)][0] - body[0], path[clamp(i, 0, path.length - 1)][1] - body[1]);
+    const dir = far(ib + 4) > far(ib - 4) ? 1 : -1;
+    const out: P2[] = [from];
+    let acc = 0;
+    for (let i = ib; i >= 0 && i < path.length && acc < L; i += dir) {
+      const last = out[out.length - 1];
+      acc += Math.hypot(path[i][0] - last[0], path[i][1] - last[1]);
+      out.push(path[i]);
+    }
+    return out;
+  };
+  const ductOut = offset(pieces[5], -5 * K - 1.8);
+  const cordCran = cordK > 0.01 ? sheath(ecto[0], ductOut, polyLen(pieces[5]) * 0.6 * cordK) : [];
+  const stalkSide = (sgn: 1 | -1) =>
+    stalkS.map((q, i) => {
+      const a = stalkS[Math.max(0, i - 1)];
+      const b = stalkS[Math.min(stalkS.length - 1, i + 1)];
+      const n = unit([-(b[1] - a[1]), b[0] - a[0]]);
+      return add(q, n, sgn * (stalkW(i / (stalkS.length - 1)) + 2.6));
+    });
+  const sideA = stalkSide(1);
+  const sideB = stalkSide(-1);
+  const dDuct = (pts: P2[]) => Math.hypot(pts[6][0] - pieces[5][0][0], pts[6][1] - pieces[5][0][1]);
+  const stalkOut = dDuct(sideA) > dDuct(sideB) ? sideA : sideB;
+  const cordCaud = cordK > 0.01 ? sheath(ecto[ecto.length - 1], stalkOut, polyLen(stalkS) * 0.5 * cordK) : [];
+  const cordAt = X(fT(LFT, g.WT(LFT) + 6));
+
+  return { g, X, S, map, fH, fT, LF, LFT, pit, ecto, ectoIn, pieces, loopIn, pieceIn, meso, ntTop, ntBot, lumTop, lumBot, noTop, noBot, splO, splI, somO, somI, cavPoly, vSplit, heartC, heartO, heartI, stalkS, stalkTube, neckEndo, neckMeso, allC, allO1, allI1, allO2, allI2, amn, amnIn, amnOut, dots, bmMid, cmMid, kloakaC, kloakaRing, pits, bmPlate, cmPlate, kloakaLumen, mesocardium, cordK, cordCran, cordCaud, cordAt };
 }
 export type Fold = ReturnType<typeof computeFold>;
 
 /** The cellular folded-embryo section (no labels). `children` are drawn over the gut, under the surface ectoderm. */
 export function FoldBody({ f, kloakaShow, children, bare = false, endoName = false }: { f: Fold; kloakaShow: number; children?: ReactNode; bare?: boolean; endoName?: boolean }) {
   const uid = useId().replace(/:/g, '');
-  const { g, LF, pit, ecto, ectoIn, pieces, loopIn, pieceIn, meso, ntTop, ntBot, lumTop, lumBot, noTop, noBot, splO, splI, somO, somI, cavPoly, vSplit, heartO, heartI, stalkS, stalkTube, neckEndo, neckMeso, allC, allO1, allI1, allO2, allI2, amn, amnIn, amnOut, dots, bmMid, cmMid, kloakaRing, pits } = f;
+  const { g, LF, pit, ecto, ectoIn, pieces, loopIn, pieceIn, meso, ntTop, ntBot, lumTop, lumBot, noTop, noBot, splO, splI, somO, somI, cavPoly, vSplit, heartO, heartI, stalkS, stalkTube, neckEndo, neckMeso, allC, allO1, allI1, allO2, allI2, amn, amnIn, amnOut, dots, kloakaLumen, pits, bmPlate, cmPlate, mesocardium, heartC, cordK, cordCran, cordCaud } = f;
   return (
     <g>
       {!bare && <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />}
@@ -488,10 +576,13 @@ export function FoldBody({ f, kloakaShow, children, bare = false, endoName = fal
         <Cells outer={somO} inner={somI} n={cellsFor(somO, somI, 8)} fill={C.mesoLateral} nucleus="rgba(120,20,20,0.6)" seed={411} />
       </Part>
       <Part id="bihotz-hodia">
-        <Cells outer={heartO} inner={heartI} n={16} fill="#e0363f" nucleus="rgba(90,10,10,0.7)" seed={412} />
-        <path d={pathD(heartI, true)} fill="#4a0f16" />
-        {[0.3, 0.7].map((k, i) => (
-          <circle key={i} cx={lerp(heartI[3][0], heartI[17][0], k)} cy={lerp(heartI[3][1], heartI[17][1], k)} r={1.6} fill="#f87171" />
+        {/* dorsal mesocardium, then myocardium (cells) round cardiac jelly and the endocardial tube */}
+        <path d={pathD(mesocardium, true)} fill={C.mesoLateral} opacity={0.85} />
+        <Cells outer={heartO} inner={heartI} n={18} fill="#e0363f" nucleus="rgba(90,10,10,0.7)" seed={412} />
+        <path d={pathD(heartI, true)} fill="#7a2a36" />
+        <path d={pathD(heartI.map((q) => lerp2(heartC, q, 0.62)), true)} fill="#3a0a12" stroke="#fca5a5" strokeWidth={1.1} strokeOpacity={0.8} />
+        {[0.32, 0.68].map((k, i) => (
+          <ellipse key={i} cx={lerp(heartI[3][0], heartI[17][0], k)} cy={lerp(heartI[3][1], heartI[17][1], k)} rx={2} ry={1.4} fill="#f87171" />
         ))}
       </Part>
 
@@ -504,6 +595,12 @@ export function FoldBody({ f, kloakaShow, children, bare = false, endoName = fal
         <Cells outer={ntTop} inner={lumTop} n={cellsFor(ntTop, lumTop, 5.5)} fill={C.neural} nucleus="rgba(10,20,70,0.7)" pseudo seed={414} />
         <Cells outer={ntBot} inner={lumBot} n={cellsFor(ntBot, lumBot, 5.5)} fill={C.neural} nucleus="rgba(10,20,70,0.7)" pseudo seed={415} />
         {g.nc > 0.02 && <path d={pathD([...lumTop, ...lumBot.slice().reverse()], true)} fill="#0f1733" opacity={Math.min(1, g.nc * 3)} />}
+      </Part>
+
+      {/* Cloaca: the dilated terminal hindgut lumen (allantois opens into it), lit warm under the endoderm cells. */}
+      <Part id="kloaka" show={kloakaShow}>
+        <path d={pathD(kloakaLumen, true)} fill="#6b5420" />
+        <path d={pathD(kloakaLumen, true)} fill="url(#g-cavity)" />
       </Part>
 
       {/* endoderm: foregut, midgut, hindgut (the loop continues into the vitelline duct and yolk sac above) */}
@@ -531,29 +628,56 @@ export function FoldBody({ f, kloakaShow, children, bare = false, endoName = fal
       </Part>
 
       {children}
-      <Part id="kloaka" show={kloakaShow}>
-        <path d={pathD(kloakaRing, true)} fill="none" stroke="#fde68a" strokeWidth={1.3} strokeDasharray="3 3" />
-      </Part>
 
       <Part id="ektodermoa">
         <Cells outer={ecto} inner={ectoIn} n={cellsFor(ecto, ectoIn, 6)} fill={C.surfaceEcto} nucleus="rgba(20,40,110,0.7)" seed={440} />
       </Part>
 
-      <Part id="mintz-bukofaringeoa">
-        <ellipse cx={bmMid[0]} cy={bmMid[1]} rx={9} ry={9 + 8 * g.hf} fill="none" stroke="#e8eefc" strokeWidth={1.2} strokeDasharray="3 2" opacity={0.85} />
-      </Part>
-      <Part id="kloaka-mintza">
-        <ellipse cx={cmMid[0]} cy={cmMid[1]} rx={9} ry={9 + 8 * g.tf} fill="none" stroke="#e8eefc" strokeWidth={1.2} strokeDasharray="3 2" opacity={0.85} />
-      </Part>
+      {/* Membranes: ectoderm directly on endoderm, no mesoderm between (bilaminar plates closing each end of the gut). */}
+      {(
+        [
+          ['mintz-bukofaringeoa', bmPlate],
+          ['kloaka-mintza', cmPlate],
+        ] as const
+      ).map(([id, q]) => {
+        const m1 = lerp2(q[0], q[3], 0.5);
+        const m2 = lerp2(q[1], q[2], 0.5);
+        return (
+          <Part id={id} key={id}>
+            <path d={pathD([q[0], q[1], m2, m1], true)} fill={C.endoderm} />
+            <path d={pathD([m1, m2, q[2], q[3]], true)} fill={C.surfaceEcto} />
+            <path d={pathD([q[0], q[1], q[2], q[3]], true)} fill="none" stroke="rgba(8,12,26,0.55)" strokeWidth={0.9} />
+            {[0.25, 0.75].map((k) => (
+              <g key={k}>
+                <circle cx={lerp(lerp2(q[0], m1, 0.5)[0], lerp2(q[1], m2, 0.5)[0], k)} cy={lerp(lerp2(q[0], m1, 0.5)[1], lerp2(q[1], m2, 0.5)[1], k)} r={1.2} fill="rgba(90,60,10,0.75)" />
+                <circle cx={lerp(lerp2(m1, q[3], 0.5)[0], lerp2(m2, q[2], 0.5)[0], k)} cy={lerp(lerp2(m1, q[3], 0.5)[1], lerp2(m2, q[2], 0.5)[1], k)} r={1.2} fill="rgba(20,40,110,0.75)" />
+              </g>
+            ))}
+          </Part>
+        );
+      })}
+      {/* Stomodeum / proctodeum: the ectodermal pits in front of each membrane (tinted hollow + brighter lining). */}
       {pits.map((p) => (
         <Part id={p.id} key={p.id} show={pit}>
-          <circle cx={p.c[0]} cy={p.c[1]} r={9} fill="rgba(122,167,245,0.28)" stroke={C.surfaceEcto} strokeWidth={1.2} strokeDasharray="2 2" />
+          <path d={pathD(p.pts, true)} fill="rgba(122,167,245,0.26)" />
+          <path d={pathD(p.pts)} fill="none" stroke="#a9c6ff" strokeWidth={2.2} strokeLinecap="round" opacity={0.85} />
         </Part>
       ))}
 
       <Part id="amnios-barrunbea">
         <Cells outer={amn} inner={amnIn} n={cellsFor(amn, amnIn, 9)} fill={C.amnioblast} nucleus="rgba(30,60,140,0.6)" seed={450} />
         <Cells outer={amnOut} inner={amn} n={cellsFor(amnOut, amn, 12)} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.5)" edge="rgba(150,70,50,0.25)" seed={451} opacity={0.9} />
+      </Part>
+      {/* Primitive umbilical cord: the amnion, continuing from the body-wall margins, sheathes duct and stalk together. */}
+      <Part id="hasierako-zilbor-hestea" show={cordK}>
+        {[cordCran, cordCaud].map((c, i) =>
+          c.length > 1 ? (
+            <g key={i}>
+              <path d={pathD(c)} fill="none" stroke={C.mesoExtra} strokeWidth={5.2} strokeLinecap="round" opacity={0.9} />
+              <path d={pathD(c)} fill="none" stroke={C.amnioblast} strokeWidth={2.6} strokeLinecap="round" />
+            </g>
+          ) : null,
+        )}
       </Part>
 
     </g>
@@ -567,7 +691,7 @@ function anchorsAt(t: number): Anchors {
   const key = Math.round(t * 100);
   let a = anchorCache.get(key);
   if (!a) {
-    const f = computeFold(key / 100);
+    const f = computeFold(key / 100, 5, 1);
     a = { heart: f.heartC, bm: f.bmMid, cm: f.cmMid, all: f.allC[Math.floor(f.allC.length * 0.8)], stalk: f.stalkS[18] };
     anchorCache.set(key, a);
   }
@@ -610,7 +734,7 @@ const RELATIONS: [number, number, string][] = [
 ];
 
 export function FoldingSagittal({ t }: SceneProps) {
-  const f = computeFold(t);
+  const f = computeFold(t, 5, 1);
   const { g, X, map, fH, fT, LF, LFT, pit, pieces, heartC, stalkS, allC, bmMid, cmMid, kloakaC, pits } = f;
   const L = (id: string, x: number, y: number, p: P2, show = 1, small = false) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} small={small} />;
   // Labels arrive with the step that talks about them (a beginner meets ~6 names first, not 22).
@@ -690,6 +814,7 @@ export function FoldingSagittal({ t }: SceneProps) {
       {L('proktodeoa', 810, 360, pits[1].c, pit)}
       {L('alantoidea', 810, 420, allC[Math.floor(allC.length * 0.8)], tail)}
       {L('finkapen-pedikulua', 810, 480, stalkS[18], tail)}
+      {f.cordCran.length > 2 && L('hasierako-zilbor-hestea', 810, 540, f.cordCran[Math.floor(f.cordCran.length * 0.5)], f.cordK, true)}
     </g>
   );
 }
