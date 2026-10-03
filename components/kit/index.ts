@@ -5,6 +5,7 @@ export { CellBand, Cell, Arrow, Flow, scatterInEllipse } from './tissue';
 export { Journey, FollowRing, Destination } from './journey';
 export { useScene } from './context';
 export { OnTop } from './OnTop';
+export { dual, useInPane, type Pane } from './Dual';
 export { C } from '@/lib/sim/palette';
 export { seg, lin, fade, lerp, lerpPt, lerpPts, mix, clamp, rand, easeOut, easeIn, easeInOut } from '@/lib/sim/anim';
 export { ellipseArc, line, bezier, polyline, curvePath, bandPath, smoothPath, ellipsePts, ellipseD, curveLength, tube } from '@/lib/sim/geometry';

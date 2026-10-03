@@ -66,7 +66,8 @@ function transverseLabels(t: number) {
       <Label id="tolestura-laterala" x={190} y={160} ax={edge[0]} ay={edge[1]} show={seg(t, 0.44, 0.48)} />
       <Label id="paretako-orria" x={190} y={470} ax={s.map(-300, 16)[0]} ay={s.map(-300, 16)[1]} show={coelom} />
       <Label id="errai-orria" x={190} y={510} ax={s.map(-300, s.dEndo(300) - 6)[0]} ay={s.map(-300, s.dEndo(300) - 6)[1]} show={coelom} />
-      <Label id="bitelo-zaku-sekundarioa" x={190} y={580} ax={s.at.yolk[0]} ay={s.at.yolk[1]} />
+      {/* While the folds pinch it, the huge sac reaches below the picture: keep the name on its visible part. */}
+      <Label id="bitelo-zaku-sekundarioa" x={190} y={580} ax={s.at.yolk[0]} ay={Math.min(s.at.yolk[1], 600)} />
       <Label id="hodi-neurala" x={810} y={80} ax={s.at.tube[0]} ay={s.at.tube[1]} small />
       <Label id="enbrioi-barruko-zeloma" x={810} y={470} ax={s.map(330, (22 + s.dEndo(330) - 13) / 2)[0]} ay={s.map(330, (22 + s.dEndo(330) - 13) / 2)[1]} show={coelom} />
       {/* The endoderm is renamed midgut as it closes into a tube: the two names cross-fade (no swap). */}

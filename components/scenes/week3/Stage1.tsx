@@ -60,13 +60,19 @@ const stalkW = (u: number) => 12 + 6 * Math.max(0, 1 - u / 0.22) ** 2 + 11 * Mat
 /** Mesenchymal nuclei scattered through the stalk (fixed positions, revealed as it grows). */
 const STALK_NUCLEI = Array.from({ length: 30 }, (_, i) => ({ u: Math.min(0.95, (i + 0.2 + rand(i * 7.3) * 0.6) / 30), v: (rand(i * 3.7 + 1) - 0.5) * 1.3 }));
 
+/** Outer edge of the embryo complex: amnion (dorsal) and yolk sac (ventral), each with its mesoderm coat. */
+function complexOutline(s: ReturnType<typeof embryo>) {
+  const coat = 10 * s.k;
+  const up = s.arc(s.cyA, s.rx + coat, s.p.amnionH * s.k + coat, true);
+  const down = s.arc(s.cyY, s.rx + coat, s.p.yolkH * s.k + coat, false).reverse();
+  return pathD([...up, ...down]) + 'Z';
+}
 
 function Stage1Drawing({ t }: SceneProps) {
   const s = embryo(0.6, 485, 336, 150, 160);
   // Primary villi: cytotrophoblast cores push into the syncytium.
   const V = villi(lerp(0.15, 1, seg(t, 0, 0.1)));
-  const embryoO = lerp(0.22, 1, seg(t, 0.42, 0.48));
-  const sheath = Math.min(seg(t, 0.72, 0.76), 1 - seg(t, 0.86, 0.9));
+  const sheath = t >= 0.72 && t < 0.88 ? 1 : 0;
   const stalkG = seg(t, 0.32, 0.4);
   const stalk = stalkCurve(s);
   const ST = tube(stalk, stalkW, 1 - stalkG, 1, 40, stalkG < 0.999);
@@ -74,8 +80,10 @@ function Stage1Drawing({ t }: SceneProps) {
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
+      {/* The cavity is only the space around the embryo complex: the amnion and yolk sac (with their mesoderm
+          coat) are cut out, so lighting the cavity never lights the complex inside it. */}
       <Part id="korion-barrunbea" quiet>
-        <path d={pathD(ring(R_MESO))} fill="#141c30" />
+        <path d={pathD(ring(R_MESO)) + complexOutline(s)} fill="#141c30" fillRule="evenodd" />
       </Part>
       {/* Primary villi, then the chorionic plate over their roots. */}
       <Part id="biloxka-primarioa">
@@ -86,11 +94,14 @@ function Stage1Drawing({ t }: SceneProps) {
           </g>
         ))}
       </Part>
-      <Part id="korion-plaka">
+      {/* Chorion, outside in: syncytiotrophoblast, cytotrophoblast, and (below) the chorionic plate lining it. */}
+      <Part id="sinzitiotrofoblastoa">
         <path d={pathD(ring(R_OUT)) + pathD(ring(R_SYN).reverse())} fill="#b7824f" fillRule="evenodd" />
         {ring(R_SYN + 5.5, 70).map((q, i) => (
           <ellipse key={i} cx={q[0]} cy={q[1]} rx={1.8} ry={1.3} fill="rgba(70,40,15,0.75)" />
         ))}
+      </Part>
+      <Part id="zitotrofoblastoa">
         <Cells outer={ring(R_SYN)} inner={ring(R_CYTO)} n={96} fill="#e3c58f" nucleus="rgba(90,60,20,0.6)" seed={81} />
       </Part>
       {/* Connecting stalk: extra-embryonic mesoderm continuous with the chorionic lining and with the coat of the
@@ -105,16 +116,15 @@ function Stage1Drawing({ t }: SceneProps) {
         <path d={ST.left} fill="none" stroke="#c96b45" strokeWidth={1.1} strokeLinecap="round" />
         <path d={ST.right} fill="none" stroke="#c96b45" strokeWidth={1.1} strokeLinecap="round" />
       </Part>
-      <Part id="enbrioi-kanpoko-mesodermoa">
+      {/* The extra-embryonic mesoderm lining the cytotrophoblast is the chorionic plate. While the step tells
+          that this mesoderm lines every cavity (chorionic, amniotic, yolk sac), it lights as that mesoderm. */}
+      <Part id={sheath > 0.5 ? 'enbrioi-kanpoko-mesodermoa' : 'korion-plaka'}>
         <Cells outer={ring(R_CYTO)} inner={ring(R_MESO)} n={90} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={82} />
       </Part>
 
 
-      <g opacity={embryoO}>
-        <DiscDrawing s={s} ids={IDS} />
-      </g>
-      {/* The extra-embryonic mesoderm lines every cavity: chorionic, amniotic and yolk sac. */}
-      {sheath > 0.01 && <path d={pathD(ring(R_MESO + 4))} fill="none" stroke="#fbbf24" strokeWidth={1.6} strokeDasharray="6 6" opacity={sheath * 0.8} />}
+      {/* Shown whole from the start: the cavity and the stalk steps are explained by the germ disc they surround and hold. */}
+      <DiscDrawing s={s} ids={IDS} />
       <Part id="bi-orriko-diskoa" quiet show={seg(t, 0.52, 0.56)}>
         <path d={pathD([...Array.from({ length: 31 }, (_, i) => s.map(lerp(-270, 270, i / 30), -1.5)), ...Array.from({ length: 31 }, (_, i) => s.map(lerp(270, -270, i / 30), s.dEnd(lerp(270, -270, i / 30)) + 9.5))]) + 'Z'} fill="none" stroke="#e8eefc" strokeWidth={0.9} strokeDasharray="4 3" opacity={0.5} />
       </Part>
@@ -131,10 +141,13 @@ export function Stage1Sagittal(props: SceneProps) {
   return (
     <g>
       <Stage1Drawing {...props} />
-      {L('biloxka-primarioa', 190, 150, VILLI[16].tip, from(t, 0))}
-      {L('korion-plaka', 190, 200, onRing(R_SYN, 218), from(t, 0.22))}
+      {L('biloxka-primarioa', 190, 130, VILLI[16].tip, from(t, 0))}
+      {L('korion-plaka', 190, 175, onRing(R_MESO + 6, 212), from(t, 0.22))}
+      {L('sinzitiotrofoblastoa', 190, 220, onRing((R_SYN + R_OUT) / 2, 196), from(t, 0))}
+      {L('zitotrofoblastoa', 190, 265, onRing((R_CYTO + R_SYN) / 2, 188), from(t, 0))}
       {L('korion-barrunbea', 190, 400, [300, 420], from(t, 0.12))}
-      {L('enbrioi-kanpoko-mesodermoa', 190, 440, onRing(R_MESO + 5, 150), from(t, 0.22))}
+      {/* On the amnion's coat (the chorionic lining is named as the plate). */}
+      {L('enbrioi-kanpoko-mesodermoa', 190, 440, [2 * s.p.cx - s.at.extraMeso[0], s.at.extraMeso[1]], from(t, 0.22))}
       {L('epiblastoa', 190, 480, s.at.epiblast, from(t, 0.52))}
       {L('bi-orriko-diskoa', 190, 520, s.map(-150, 20), from(t, 0.52))}
       {L('finkapen-pedikulua', 810, 235, ((c) => [c.x, c.y] as Pt)(stalkCurve(s)(0.62)), from(t, 0.34))}

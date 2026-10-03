@@ -1775,8 +1775,38 @@ kbd {
   opacity: 0.45;
 }
 
+/* While a step talks about something, the other names step back (still readable on their plates). */
 .label-ctx {
-  opacity: 0.78;
+  opacity: 0.5;
+}
+
+/* The step's names: bigger, bold, on a warm lit plate — also for spaces (italic and dashed, in the focus colour). */
+.label-focus .label-text,
+.label-space.label-focus .label-text {
+  fill: var(--focus);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.label-small.label-focus .label-text {
+  font-size: 13.5px;
+}
+
+.label-focus .label-plate,
+.label-space.label-focus .label-plate {
+  fill: rgba(38, 24, 10, 0.92);
+  stroke: var(--focus);
+  stroke-width: 1.4;
+  filter: drop-shadow(0 0 6px rgba(255, 184, 107, 0.55));
+}
+
+.label-space.label-focus .label-leader {
+  stroke: var(--focus);
+  stroke-width: 1.7;
+}
+
+.label-space.label-focus .label-dot {
+  stroke: var(--focus);
 }
 
 /* Spaces (cavities, lacunae) vs tissues: italic cyan text, dashed leader and plate edge, hollow ring. */

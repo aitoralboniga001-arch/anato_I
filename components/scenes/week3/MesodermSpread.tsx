@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Label, Mark, Note, Part, lerp, line, CellBand, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, Mark, Note, Part, dual, lerp, line, CellBand, seg, type Pt, type SceneProps } from '@/components/kit';
 import { W3C, amnionArc, discOutlinePath, discX, f1, SAG, yolkArc } from './common';
 import { CellCluster, DiscDrawing, MembraneMark, makeDisc } from './DiscSection';
 
@@ -78,6 +78,8 @@ function DorsalDrawing({ t }: SceneProps) {
       </Part>
       <Part id="nodo-primitiboa">
         <ellipse cx={STREAK[0][0]} cy={STREAK[0][1] - 4} rx={13} ry={11} fill="#0c1730" stroke="#dbe4ff" strokeWidth={1.4} />
+      </Part>
+      <Part id="hobitxo-primitiboa">
         <ellipse cx={STREAK[0][0]} cy={STREAK[0][1] - 4} rx={5} ry={4} fill="#02040a" />
       </Part>
       {[
@@ -115,8 +117,9 @@ function dorsalLabels(t: number) {
     <>
       {L('enbrioi-kanpoko-mesodermoa', 190, 150, [D.cx, D.cy - D.ry - 11], exMeso)}
       {L('mesodermo-intraenbrionarioa', 190, 220, [D.cx - D.rx * 0.55, D.cy], growth)}
-      {L('ildo-primitiboa', 810, 400, [STREAK[0][0] + 3, (STREAK[0][1] + STREAK[1][1]) / 2])}
-      {L('nodo-primitiboa', 810, 350, [STREAK[0][0] + 8, STREAK[0][1] - 4])}
+      {L('ildo-primitiboa', 810, 425, [STREAK[0][0] + 3, (STREAK[0][1] + STREAK[1][1]) / 2])}
+      {L('nodo-primitiboa', 810, 345, [STREAK[0][0] + 10, STREAK[0][1] - 8])}
+      {L('hobitxo-primitiboa', 810, 385, [STREAK[0][0] + 2, STREAK[0][1] - 3])}
       {L('mintz-bukofaringeoa', 810, 245, CRANIAL, bucco)}
       {L('plaka-prekordala', 810, 295, [CRANIAL[0] + 16, CRANIAL[1] + MEMBR_R + 14], prechordal)}
       {L('kloaka-mintza', 810, 490, CAUDAL, cloaca)}
@@ -179,6 +182,41 @@ function sagittalDisc(t: number) {
   return { s, g };
 }
 
+/**
+ * Transverse section through the primitive streak (dorsal up): the mesoderm leaves the groove and
+ * spreads laterally between ectoderm and endoderm (.16–.44) until, at the disc's edges, it meets the
+ * extra-embryonic mesoderm that coats the amnion and the yolk sac (.42, continuity).
+ */
+export function MesodermTransverse({ t }: SceneProps) {
+  const grow = seg(t, 0.16, 0.44);
+  const s = makeDisc({ endo: 1, ecto: 1, meso: lerp(0.12, 1, grow), streak: 1, groove: 1, invag: 1, phase: t * 14 });
+  const mid = (x: number) => s.map(x, (s.base(x) + s.dEnd(x)) / 2);
+  const front = Math.min(s.spread * 0.6, s.W * 0.45);
+  const join = seg(t, 0.42, 0.46) * (1 - seg(t, 0.58, 0.6));
+  const edge = (sd: 1 | -1): Pt => [s.p.cx + sd * (s.rx + 6 * s.k), (s.cyA + s.cyY) / 2];
+  const L = (id: string, x: number, y: number, p: Pt, show = 1, small = false) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} small={small} />;
+  return (
+    <g>
+      <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
+      <DiscDrawing s={s} ids={{ epiblast: 'ektodermoa' }} />
+      {([1, -1] as const).map((sd) => (
+        <Arrow key={sd} from={mid(sd * 30)} to={mid(sd * lerp(60, 230, grow))} bend={0} color="#fde68a" width={1.8} head={7} show={grow > 0.02 ? 1 - seg(t, 0.46, 0.52) : 0} />
+      ))}
+      {/* Where the two mesoderms meet, at both edges of the disc. */}
+      <Mark id="enbrioi-kanpoko-mesodermoa" x={edge(-1)[0]} y={edge(-1)[1]} rx={30} show={join} />
+      <Mark id="enbrioi-kanpoko-mesodermoa" x={edge(1)[0]} y={edge(1)[1]} rx={30} show={join} />
+
+      {L('amnios-barrunbea', 190, 120, s.at.amnion)}
+      {L('ektodermoa', 190, 190, s.at.epiblast)}
+      {L('mesodermo-intraenbrionarioa', 190, 300, mid(-front), seg(t, 0.12, 0.16))}
+      {L('endodermoa', 190, 380, s.map(-120, s.dEnd(-120) + 6))}
+      {L('ildo-primitiboa', 810, 240, s.at.groove)}
+      {L('enbrioi-kanpoko-mesodermoa', 810, 330, edge(1), 1, true)}
+      {L('bitelo-zaku-sekundarioa', 810, 470, s.at.yolk)}
+    </g>
+  );
+}
+
 const ss = (v: number) => {
   const c = Math.max(0, Math.min(1, v));
   return c * c * (3 - 2 * c);
@@ -218,3 +256,13 @@ export function MesodermSagittal({ t }: SceneProps) {
     </g>
   );
 }
+
+/** Both at once: from above with the cross-section (lateral spread) or with the sagittal section (cranial spread, membranes). */
+export const MesodermBothTransverse = dual(
+  { scene: MesodermDorsal, title: 'Goitik · goian kraneala', fx: 500, fy: 318, s: 0.62 },
+  { scene: MesodermTransverse, title: 'Zeharkako mozketa · goian dortsala', fx: 500, fy: 310, s: 0.52 },
+);
+export const MesodermBothSagittal = dual(
+  { scene: MesodermDorsal, title: 'Goitik · goian kraneala', fx: 500, fy: 318, s: 0.62 },
+  { scene: MesodermSagittal, title: 'Mozketa sagitala · ezkerrean kraneala', fx: 500, fy: 300, s: 0.55 },
+);

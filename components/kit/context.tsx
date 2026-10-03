@@ -71,3 +71,6 @@ export function partState(ctx: SceneContextValue, id: string): 'active' | 'dim' 
  * server render): text then stays inline.
  */
 export const TextLayerContext = createContext<SVGGElement | null>(null);
+
+/** Inside a dual view's pane (see Dual.tsx): the pane's own text layer stays out; the dual sets its names. */
+export const PaneContext = createContext(false);

@@ -151,8 +151,12 @@ function Section({ branch, septa, tint, cross, jets, veins, cordId, reduced, id 
         </radialGradient>
       </defs>
       <g mask={`url(#${id}-fade)`}>
-        {/* Uterine wall and the decidual plate (maternal side) */}
-        <rect x={X0} y={WALL} width={X1 - X0} height={DEC - WALL} fill="url(#p-muscle)" />
+        {/* Maternal side: myometrium, the basal decidua and its central functional layer, the decidual plate. */}
+        <rect x={X0} y={WALL} width={X1 - X0} height={12} fill="url(#p-muscle)" />
+        <Part id="dezidua-basala">
+          <rect x={X0} y={WALL + 12} width={X1 - X0} height={DEC - WALL - 12} fill="url(#p-decidua)" />
+          <rect x={X0} y={WALL + 12} width={X1 - X0} height={DEC - WALL - 12} fill="#3b1f14" opacity={0.35} />
+        </Part>
         <Part id="deziduaren-orria">
           <rect x={X0} y={DEC} width={X1 - X0} height={SHELL - DEC} fill="url(#p-decidua)" />
         </Part>
@@ -298,6 +302,7 @@ export function Cotyledons({ t, reduced }: SceneProps) {
       <Label id="endometrio-zainak" x={690} y={24} ax={620} ay={DEC + 6} show={vis(t, 0.18)} align="start" />
       <Label id="kanpoko-zorro-zitotrofoblastikoa" x={96} y={50} ax={220} ay={SHELL + 3} show={vis(t, 0.18)} align="start" small />
       <Label id="deziduaren-orria" x={560} y={50} ax={540} ay={DEC + 18} show={vis(t, 0.18)} align="start" />
+      <Label id="dezidua-basala" x={384} y={50} ax={330} ay={(WALL + 12 + DEC) / 2} show={vis(t, 0.18)} align="start" small />
 
       {/* Bottom rows: fetal side */}
       <Label id="amniosa" x={96} y={556} ax={130} ay={AMN + 4} show={vis(t, 0)} align="start" />

@@ -483,6 +483,8 @@ export function Day9Lacunae(props: SceneProps) {
   const sL = SINUSOIDS[2];
   const sR = SINUSOIDS[3];
   const vacShow = k.vac * (1 - seg(k.merge, 0.4, 0.8));
+  // The camera follows the sinking blastocyst: the capillaries come into the picture just after t = 0.
+  const vesselsIn = seg(t, 0.03, 0.06);
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#101828" />
@@ -491,14 +493,14 @@ export function Day9Lacunae(props: SceneProps) {
       </g>
       <PeriodBadge x={112} y={572} show={s(t, W.period)} />
       {L('endometrio-estroma', 180, 64, [cx - 110, cy - 250])}
-      {L('amaren-odol-hodiak', 180, 180, [sL.x, sL.y], 1 - k.sinOn, 'vessel-l')}
+      {L('amaren-odol-hodiak', 180, 180, [sL.x, sL.y], (1 - k.sinOn) * vesselsIn, 'vessel-l')}
       {L('sinusoideak', 180, 180, [sL.x, sL.y], k.sinOn)}
       {L('bakuolak', 180, 250, synAt(k.g, 236, 0.64), vacShow, 'bakuolak-early')}
       {L('bakuolak', 180, 250, synAt(k.g, 247, 0.86), k.vac * seg(k.merge, 0.4, 0.8))}
       {L('lakuak', 180, 300, k.lacuna(236), seg(k.merge, 0, 0.35))}
       {L('sinzitiotrofoblastoa', 180, 350, k.syn(224))}
       {L('zitotrofoblastoa', 180, 420, k.cyto(242))}
-      {L('amaren-odol-hodiak', 800, 330, [sR.x, sR.y], 1 - k.sinOn, 'vessel-r')}
+      {L('amaren-odol-hodiak', 800, 330, [sR.x, sR.y], (1 - k.sinOn) * vesselsIn, 'vessel-r')}
       {L('sinusoideak', 800, 330, [sR.x, sR.y], k.sinOn, 'sinus-r')}
       {L('lakuak', 800, 375, k.lacuna(305), seg(k.merge, 0, 0.35), 'lakuak-r')}
       {L('amnioblastoak', 800, 420, k.amnioblast)}

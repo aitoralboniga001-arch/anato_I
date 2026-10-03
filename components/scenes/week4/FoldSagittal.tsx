@@ -411,7 +411,7 @@ export function computeFold(t: number, spMax = 5) {
 export type Fold = ReturnType<typeof computeFold>;
 
 /** The cellular folded-embryo section (no labels). `children` are drawn over the gut, under the surface ectoderm. */
-export function FoldBody({ f, kloakaShow, children, bare = false }: { f: Fold; kloakaShow: number; children?: ReactNode; bare?: boolean }) {
+export function FoldBody({ f, kloakaShow, children, bare = false, endoName = false }: { f: Fold; kloakaShow: number; children?: ReactNode; bare?: boolean; endoName?: boolean }) {
   const uid = useId().replace(/:/g, '');
   const { g, LF, pit, ecto, ectoIn, pieces, loopIn, pieceIn, meso, ntTop, ntBot, lumTop, lumBot, noTop, noBot, splO, splI, somO, somI, cavPoly, vSplit, heartO, heartI, stalkS, stalkTube, neckEndo, neckMeso, allC, allO1, allI1, allO2, allI2, amn, amnIn, amnOut, dots, bmMid, cmMid, kloakaRing, pits } = f;
   return (
@@ -515,7 +515,8 @@ export function FoldBody({ f, kloakaShow, children, bare = false }: { f: Fold; k
         ] as const
       ).map(([id, i]) =>
         pieces[i].length > 1 ? (
-          <Part id={id} key={id}>
+          // Until the midgut is named (`endoName`) the middle stretch is simply the endoderm being folded in.
+          <Part id={id === 'erdiko-hestea' && endoName ? 'endodermoa' : id} key={id}>
             <Cells outer={pieces[i]} inner={pieceIn(pieces[i])} n={cellsFor(pieces[i], pieces[i], 6.5)} fill={C.endoderm} nucleus="rgba(90,60,10,0.7)" seed={420 + i} />
           </Part>
         ) : null,
@@ -633,7 +634,7 @@ export function FoldingSagittal({ t }: SceneProps) {
 
   return (
     <g>
-      <FoldBody f={f} kloakaShow={kloakaShow} />
+      <FoldBody f={f} kloakaShow={kloakaShow} endoName={gut < 0.5} />
       <Note x={500} y={612} tone="warn" show={seg(t, 0, 0.03) * (1 - seg(t, 0.09, 0.12))}>
         Zeharkako tolespena eta tolespen zefalokaudala aldi berean gertatzen dira
       </Note>
@@ -681,6 +682,7 @@ export function FoldingSagittal({ t }: SceneProps) {
 
       {L('notokorda', 810, 110, X(map(0.3 * LH, NT0 + 5)))}
       {L('mesodermo-intraenbrionarioa', 810, 248, X(map(0.45 * LH, NT0 + 9)), layers, true)}
+      {L('endodermoa', 810, 150, X(map((g.sAIP + g.sCIP) / 2, D_ROOF + 9)), 1 - gut)}
       {L('erdiko-hestea', 810, 150, X(map((g.sAIP + g.sCIP) / 2, D_ROOF + 9)), gut)}
       {L('atzeko-hestea', 810, 190, X(fT(LFT * 0.45, 0)), tail)}
       {L('kloaka', 810, 318, kloakaC, kloakaShow)}

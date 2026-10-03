@@ -1,9 +1,9 @@
 'use client';
 
-import { Arrow, C, FollowRing, Journey, Label, Mark, Note, Part, clamp, lerp, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, FollowRing, Journey, Label, Mark, Note, Part, clamp, dual, lerp, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
 import { discOutlinePath, f1 } from './common';
 import { DiscDrawing, makeDisc } from './DiscSection';
-import { GB } from './GastrulationCells';
+import { GB, GastrulationCells } from './GastrulationCells';
 import { Callout, columnY, frameAt, inFrame, type Key } from './gastroKit';
 
 /**
@@ -163,6 +163,8 @@ export function GastrulationDorsal({ t, reduced }: SceneProps) {
   const mesoArrow = seg(t, GB.meso + 0.01, GB.meso + 0.07) * (1 - seg(t, GB.ecto - 0.02, GB.ecto + 0.01));
 
   const streakPath = `M${f1(D.cx - streakW)},${f1(CAUDAL + 6)} Q${f1(D.cx - streakW * 1.3)},${f1((CAUDAL + nodeY) / 2)} ${f1(D.cx - streakW * 0.4)},${f1(nodeY + 10)} L${f1(D.cx + streakW * 0.4)},${f1(nodeY + 10)} Q${f1(D.cx + streakW * 1.3)},${f1((CAUDAL + nodeY) / 2)} ${f1(D.cx + streakW)},${f1(CAUDAL + 6)} Z`;
+  const gw = streakW * 0.45;
+  const groovePath = `M${f1(D.cx - gw)},${f1(CAUDAL)} Q${f1(D.cx - gw * 1.3)},${f1((CAUDAL + nodeY) / 2)} ${f1(D.cx - gw * 0.4)},${f1(nodeY + 14)} L${f1(D.cx + gw * 0.4)},${f1(nodeY + 14)} Q${f1(D.cx + gw * 1.3)},${f1((CAUDAL + nodeY) / 2)} ${f1(D.cx + gw)},${f1(CAUDAL)} Z`;
   const ellipse = (rx: number, ry: number, cy = D.cy) => `M${f1(D.cx - rx)},${f1(cy)} a${f1(rx)},${f1(ry)} 0 1,0 ${f1(2 * rx)},0 a${f1(rx)},${f1(ry)} 0 1,0 ${f1(-2 * rx)},0Z`;
 
   const cells = DCELLS.map((c) => ({ c, s: dcellState(c, t) }));
@@ -184,6 +186,7 @@ export function GastrulationDorsal({ t, reduced }: SceneProps) {
   const A = (x: number, y: number) => z.at(x, y);
   const ringTop = A(D.cx - 40, NODE_END - 26);
   const streakMid = A(D.cx, midY);
+  const streakEdge = A(D.cx - streakW * 0.85, midY + 46);
   const nodeAt = A(D.cx - lerp(4, 15, node) * 0.9, nodeY - 4);
   const pitAt = A(D.cx + 3, nodeY);
   const epiAt = A(D.cx + D.rx * 0.36, D.cy - D.ry * 0.3);
@@ -192,10 +195,10 @@ export function GastrulationDorsal({ t, reduced }: SceneProps) {
   const hypoAt = A(D.cx + D.rx * 0.9 * Math.cos(0.5), D.cy + D.ry * 0.9 * Math.sin(0.5));
   const triAt = A(D.cx + D.rx * Math.cos((200 * Math.PI) / 180), D.cy + D.ry * Math.sin((200 * Math.PI) / 180));
 
-  const leftY = columnY([ringTop[1], nodeAt[1], streakMid[1], mesoAt[1]], 90, 575);
+  const leftY = columnY([ringTop[1], nodeAt[1], streakMid[1], mesoAt[1], streakEdge[1]], 90, 575);
   const rightY = columnY([epiAt[1], pitAt[1], endoAt[1], hypoAt[1], triAt[1]], 240, 575);
-  const lerroOn = t < GB.groove ? seg(t, GB.streak, GB.streak + 0.03) : 0;
-  const ildoOn = t >= GB.groove ? seg(t, GB.groove, GB.groove + 0.03) : 0;
+  const lerroOn = seg(t, GB.streak, GB.streak + 0.03);
+  const ildoOn = seg(t, GB.groove, GB.groove + 0.03);
   const gast = seg(t, GB.streak, GB.streak + 0.05);
 
   return (
@@ -227,12 +230,12 @@ export function GastrulationDorsal({ t, reduced }: SceneProps) {
           <path d={outline} fill="none" stroke="rgba(232,238,252,0.5)" strokeWidth={3} />
         </Part>
 
-        {/* Hard cut between lerro / ildo: same geometry, only one can be the topmost hit-target. */}
-        <Part id="lerro-primitiboa" show={t < GB.groove ? seg(t, GB.streak, GB.streak + 0.03) : 0}>
+        {/* The streak (thickening) stays; the groove deepens along its middle, inside it. */}
+        <Part id="lerro-primitiboa" show={seg(t, GB.streak, GB.streak + 0.03)}>
           <path d={streakPath} fill="#2a3a63" stroke="#93a7d9" strokeWidth={1} opacity={0.95} />
         </Part>
-        <Part id="ildo-primitiboa" show={t >= GB.groove ? 1 : 0}>
-          <path d={streakPath} fill="#0c1730" stroke="#93a7d9" strokeWidth={1.2} opacity={0.96} />
+        <Part id="ildo-primitiboa" show={seg(t, GB.groove, GB.groove + 0.03)}>
+          <path d={groovePath} fill="#0c1730" stroke="#93a7d9" strokeWidth={1} opacity={0.96} />
         </Part>
         <Part id="nodo-primitiboa" show={node}>
           <ellipse cx={D.cx} cy={nodeY} rx={lerp(4, 15, node)} ry={lerp(4, 13, node)} fill="#0c1730" stroke="#dbe4ff" strokeWidth={1.4} />
@@ -292,7 +295,7 @@ export function GastrulationDorsal({ t, reduced }: SceneProps) {
 
       <Label id="gastrulazioa" x={190} y={leftY[0]} ax={ringTop[0]} ay={ringTop[1]} show={gast * inFrame(ringTop)} />
       <Label id="nodo-primitiboa" x={190} y={leftY[1]} ax={nodeAt[0]} ay={nodeAt[1]} show={node * inFrame(nodeAt)} />
-      <Label id="lerro-primitiboa" x={190} y={leftY[2]} ax={streakMid[0]} ay={streakMid[1]} show={lerroOn * inFrame(streakMid)} />
+      <Label id="lerro-primitiboa" x={190} y={leftY[4]} ax={streakEdge[0]} ay={streakEdge[1]} show={lerroOn * inFrame(streakEdge)} />
       <Label id="ildo-primitiboa" x={190} y={leftY[2]} ax={streakMid[0]} ay={streakMid[1]} show={ildoOn * inFrame(streakMid)} />
       <Label id="mesodermo-intraenbrionarioa" x={190} y={leftY[3]} ax={mesoAt[0]} ay={mesoAt[1]} show={seg(t, GB.meso + 0.06, GB.meso + 0.1) * inFrame(mesoAt)} />
       <Label id="epiblastoa" x={810} y={rightY[0]} ax={epiAt[0]} ay={epiAt[1]} show={(ecto < 0.5 ? 1 : 0) * inFrame(epiAt)} />
@@ -417,3 +420,9 @@ export function GastrulationTransverse({ t, reduced }: SceneProps) {
     </g>
   );
 }
+
+/** Both at once: the disc from above and the cell-by-cell cross-section through the streak. */
+export const GastrulationBoth = dual(
+  { scene: GastrulationDorsal, title: 'Goitik · goian kraneala', fx: 500, fy: 320, s: 0.68 },
+  { scene: GastrulationCells, title: 'Zeharkako mozketa · goian dortsala', fx: 500, fy: 300, s: 0.38 },
+);

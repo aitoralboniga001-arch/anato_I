@@ -183,7 +183,8 @@ function mapLabels(t: number) {
   return <>
     <Label id="gandor-neurala" x={740} y={140} ax={ox} ay={oy} small />
     {DESTS.map(d => {
-      const w = groupW(t, d.group);
+      // Trunk names wait for the camera to reach the trunk (it moves .78–.825), so none points off the picture.
+      const w = groupW(t, d.group) * (d.group >= 2 ? seg(t, 0.805, 0.83) : 1);
       if (w <= 0.01) return null;
       const [ax, ay] = mapZoom.at(...d.at);
       return <Label key={d.id} id={d.id} x={d.x} y={d.y} ax={ax} ay={ay} small show={w} />;

@@ -1,8 +1,8 @@
 import type { QuizQuestion, StageDef, StructureDef, WeekDef } from '@/lib/sim/types';
 import { AllantoisDorsal, AllantoisSagittal } from '@/components/scenes/week3/Allantois';
-import { GastrulationDorsal, GastrulationTransverse } from '@/components/scenes/week3/Gastrulation';
+import { GastrulationBoth, GastrulationDorsal, GastrulationTransverse } from '@/components/scenes/week3/Gastrulation';
 import { GastrulationCells } from '@/components/scenes/week3/GastrulationCells';
-import { MesodermDorsal, MesodermSagittal } from '@/components/scenes/week3/MesodermSpread';
+import { MesodermBothSagittal, MesodermBothTransverse, MesodermDorsal, MesodermSagittal, MesodermTransverse } from '@/components/scenes/week3/MesodermSpread';
 import { NotochordSagittal, NotochordTransverse } from '@/components/scenes/week3/Notochord';
 import { NB, NotochordCells } from '@/components/scenes/week3/NotochordCells';
 import { Stage1Disc, Stage1Sagittal } from '@/components/scenes/week3/Stage1';
@@ -313,6 +313,14 @@ const stagesA: StageDef[] = [
     source: { file: FILE, section: '1. Hiru orriko ernetze diskoaren eraketa (15-16 egunak)' },
     views: [
       {
+        id: 'biak',
+        label: 'Goitik + zeharka',
+        plane: 'xehetasuna',
+        description: 'Bi ikuspegi aldi berean: diskoa goitik (amniosa kenduta) eta lerro primitiboaren mailako zeharkako mozketa, zelulak banan-banan.',
+        scene: GastrulationBoth,
+        ownFocus: true,
+      },
+      {
         id: 'zelulak',
         label: 'Zelulen bidaia',
         plane: 'zeharkakoa',
@@ -351,7 +359,7 @@ const stagesA: StageDef[] = [
       },
       {
         at: 0.08, notes: ['w3/1/p5/s2'],
-        view: 'dortsala',
+        view: 'biak',
         idea: 'Erdiko lerroan epiblastoa loditzen da: lerro primitiboa.',
         text: 'Goitik begiratuta, epiblastoko zelulak erdiko lerroan metatzen dira, diskoaren alde kaudalean. Loditze luzanga hori lerro primitiboa da. Kraneala goian dago; kaudala, behean.',
         key: 'Lerro primitiboa: epiblastoaren loditzea, alde kaudalean.',
@@ -361,7 +369,7 @@ const stagesA: StageDef[] = [
       },
       {
         at: 0.16, notes: ['w3/1/p5/s2', 'w3/1/p6/s1'],
-        view: 'dortsala',
+        view: 'biak',
         idea: 'Lerroaren erdia sakondu egiten da: ildo primitiboa.',
         key: 'Lerroa = loditzea; ildoa = sarrera izango den sakonunea.',
         recall: ['lerro-primitiboa'],
@@ -370,7 +378,7 @@ const stagesA: StageDef[] = [
       },
       {
         at: 0.23, notes: ['w3/1/p5/s4-s5'],
-        view: 'dortsala',
+        view: 'biak',
         idea: 'Lerroaren mutur kranealean: nodo primitiboa eta, haren erdian, hobitxo primitiboa.',
         text: 'Hurbilduta, lerroaren mutur kranealeko goragunea ikusten da: nodo primitiboa (Hensen-en nodoa). Haren erdiko sakonunea hobitxo primitiboa da. Biak goitik ikusten dituzu hemen.',
         key: 'Nodoa lerroaren mutur kranealean; hobitxoa nodoaren erdian.',
@@ -379,7 +387,7 @@ const stagesA: StageDef[] = [
       },
       {
         at: 0.31, notes: ['w3/1/p5/s6'],
-        view: 'zelulak',
+        view: 'biak',
         idea: 'Epiblastoko zelulak ildorantz hurbiltzen dira.',
         text: 'Epiblastoa ugaltzen da eta zelulak alboetatik erdiko lerrorantz lerratzen dira. Ildora iristen direnek botila-itxura hartzen dute: goiko muturra estutu eta gorputza behera doa. Zuriz inguratutako zelulen arrastoak jatorria eta helmuga lotzen ditu.',
         key: 'Jatorria: epiblastoa. Sarrera: ildo primitiboa.',
@@ -388,7 +396,7 @@ const stagesA: StageDef[] = [
       },
       {
         at: 0.41, notes: ['w3/1/p6/s1'],
-        view: 'zelulak',
+        view: 'biak',
         idea: 'Zelula hauek ildoaren hondotik beherantz sartzen dira: inbaginazioa.',
         text: 'Ildoaren hondoan, zelula bakoitza epiblastotik askatzen da (lotura hausten da) eta azpira jaisten da, bi geruzen arteko espaziora. Hau da inbaginazioa: zelula ez da desagertzen, lekuz aldatzen da.',
         key: 'Sartzen den zelula oro epiblastokoa da.',
@@ -397,7 +405,7 @@ const stagesA: StageDef[] = [
       },
       {
         at: 0.5, notes: ['w3/1/p8/s1'],
-        view: 'zelulak',
+        view: 'biak',
         idea: 'Lehen zelulek hipoblastoa ordezkatzen dute: endodermo definitiboa.',
         text: 'Lehen taldea (horia) hipoblastoaren mailaraino jaisten da eta erdian txertatzen da. Zelula berri bakoitzak hipoblastoko zelulak alboetara bultzatzen ditu, eta endodermoa erditik kanpora hazten da.',
         key: 'Lehenengo sartzen direnak → hipoblastoa ordezkatu → endodermo definitiboa.',
@@ -418,7 +426,7 @@ const stagesA: StageDef[] = [
       },
       {
         at: 0.64, notes: ['w3/1/p9/s1', 'w3/1/p14/s1'],
-        view: 'zelulak',
+        view: 'biak',
         idea: 'Hurrengo zelulak bi geruzen artean geratzen dira: mesodermo intraenbrionarioa.',
         text: 'Bigarren taldea (gorria) ere ildotik sartzen da, baina ez da behera iristen: epiblastoaren eta endodermoaren artean geratzen da eta alboetara zabaltzen da, zelula izartsu (mesenkima) gisa.',
         key: 'Hurrengoak → bi geruzen artean → mesodermo intraenbrionarioa.',
@@ -439,7 +447,7 @@ const stagesA: StageDef[] = [
       },
       {
         at: 0.78, notes: ['w3/1/p10/s1'],
-        view: 'zelulak',
+        view: 'biak',
         idea: 'Azalean geratzen diren epiblastoko zelulek ektodermoa eratuko dute.',
         text: 'Inbaginatzen ez diren zelulak goiko aldean geratzen dira. Haiek ere erdirantz mugitu dira (ikus arrastoa), baina ez dira sartu: geruza horri orain ektodermoa deritzo.',
         more: 'Ektodermotik nerbio-sistema (plaka neurala → hodi neurala, gandor neurala) eta azaleko ektodermoa (epidermisa) sortuko dira 4. astean.',
@@ -520,12 +528,34 @@ const stagesA: StageDef[] = [
         orientation: { left: 'Kraneala', right: 'Kaudala', top: 'Dortsala', bottom: 'Bentrala' },
         scene: MesodermSagittal,
       },
+      {
+        id: 'zeharkakoa',
+        label: 'Zeharkako mozketa',
+        plane: 'zeharkakoa',
+        description: 'Lerro primitiboaren mailako zeharkako mozketa: mesodermoa ildotik alboetara hedatzen da, ertzetan enbrioi kanpoko mesodermoarekin bat egin arte.',
+        orientation: { top: 'Dortsala (amniosa)', bottom: 'Bentrala (bitelo zakua)' },
+        scene: MesodermTransverse,
+      },
+      {
+        id: 'biak-zeharka',
+        label: 'Goitik + zeharka',
+        plane: 'xehetasuna',
+        description: 'Bi ikuspegi aldi berean: diskoa goitik eta zeharkako mozketa, mesodermoaren hedapen laterala ikusteko.',
+        scene: MesodermBothTransverse,
+      },
+      {
+        id: 'biak-sagitala',
+        label: 'Goitik + sagitala',
+        plane: 'xehetasuna',
+        description: 'Bi ikuspegi aldi berean: diskoa goitik eta erdiko lerroko mozketa sagitala, hedapen kraneala eta bi mintzak ikusteko.',
+        scene: MesodermBothSagittal,
+      },
     ],
     beats: [
-      { at: 0, notes: ['w3/1/p15/s1'], text: 'Amnios barrunbearen eta bitelo zakuaren inguruan enbrioi kanpoko mesodermoa dago jada.', focus: ['enbrioi-kanpoko-mesodermoa'] },
+      { at: 0, view: 'biak-zeharka', notes: ['w3/1/p15/s1'], text: 'Amnios barrunbearen eta bitelo zakuaren inguruan enbrioi kanpoko mesodermoa dago jada.', focus: ['enbrioi-kanpoko-mesodermoa'] },
       { at: 0.16, notes: ['w3/1/p14/s1'], text: 'Ildo primitibotik inbaginatutako enbrioi barruko mesodermoko zelulak diskoaren alde kraneal eta lateraletara desplazatzen dira.', focus: ['mesodermo-intraenbrionarioa'] },
       { at: 0.42, notes: ['w3/1/p14/s1', 'w3/1/p15/s1'], exam: 'Azterketan: diskoaren ertzetan enbrioi barruko mesodermoa enbrioi kanpokoarekin jarraitzen du.', text: 'Diskoaren alboko ertzetara ailegatzean, enbrioi barruko mesodermoa jarraia egiten da enbrioi kanpoko mesodermoarekin.', focus: ['mesodermo-intraenbrionarioa', 'enbrioi-kanpoko-mesodermoa'] },
-      { at: 0.6, notes: ['w3/1/p16/s1-s2'], text: 'Diskoaren alde zefalikoan, mintz bukofaringeoa (orofaringeoa) agertzen da: bertan ektodermoa eta endodermoa itsatsita daude, mesodermorik ez dagoelako.', focus: ['mintz-bukofaringeoa'] },
+      { at: 0.6, view: 'biak-sagitala', notes: ['w3/1/p16/s1-s2'], text: 'Diskoaren alde zefalikoan, mintz bukofaringeoa (orofaringeoa) agertzen da: bertan ektodermoa eta endodermoa itsatsita daude, mesodermorik ez dagoelako.', focus: ['mintz-bukofaringeoa'] },
       { at: 0.68, notes: ['w3/1/p16/s1-s2'], text: 'Diskoaren alde kaudalean, kloaka mintza agertzen da, egitura bera baina kaudalean.', focus: ['kloaka-mintza'] },
       { at: 0.78, notes: ['w3/1/p17/s1'], text: 'Bi eskualde hauetan, mesodermo faltagatik, ez dira odol-hodiak garatuko: geroago zelulak endekatu eta zuloak sortuko dira (digestio-aparatuaren sarrera eta irteera).', focus: ['mintz-bukofaringeoa', 'kloaka-mintza'] },
       { at: 0.86, notes: ['w3/2/p3/s1-s3', 'w3/2/p4/s1'], text: 'Hobitxo primitibotik inbaginatzen diren lehen zelula epiblastikoek plaka prekordala osatzen dute, mintz bukofaringeoaren alde kaudalean.', focus: ['plaka-prekordala'] },

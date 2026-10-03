@@ -418,7 +418,8 @@ export function Day13Yolk(props: SceneProps) {
   const { t } = props;
   const k = anchors(t);
   const { cx, cy } = k.g;
-  const z = zoom(cx - 10, cy + 60, 2.1, 500, 320);
+  // Wide enough to keep the connecting stalk (top) and the pinched-off cysts (bottom) in the picture.
+  const z = zoom(cx - 10, cy + 30, 1.8, 500, 320);
   const L = makeL(z.at);
   const liningNote = seg(t, W.lining[0], W.lining[0] + 0.01) * (1 - k.secondary);
   return (

@@ -64,7 +64,8 @@ export function Segmentation({ t }: SceneProps) {
       <Label id="mintz-peluzidoa" x={800} y={470} ax={zona[0]} ay={zona[1]} />
       <Label id="gorpuskulu-polarrak" x={790} y={236} ax={CX + 90 * S} ay={CY - 84 * S} show={polar * vis(t, 0.1)} />
       <Label id="blastomeroak" x={250} y={250} ax={one[0]} ay={one[1]} show={vis(t, 0.14, 0.66)} />
-      <Label id="morula" x={250} y={250} ax={CX - 60 * S} ay={CY - 40 * S} show={vis(t, 0.66, 0.86)} />
+      {/* Still a morula while its outer and inner cell masses are told (last step). */}
+      <Label id="morula" x={250} y={250} ax={CX - 60 * S} ay={CY - 40 * S} show={vis(t, 0.66)} />
       <Label id="trofoblastoa" text="Kanpoko masa zelularra" x={800} y={380} ax={CX + outer.x * S} ay={CY + outer.y * S} show={mass} />
       <Label id="enbrioblastoa" text="Barruko masa zelularra" x={250} y={330} ax={CX + inner.x * S} ay={CY + inner.y * S} show={mass} />
 
@@ -165,7 +166,8 @@ export function BlastocystFormation({ t }: SceneProps) {
         </>
       )}
 
-      <Label id="morula" x={250} y={300} ax={CX - 60 * S} ay={CY - 20 * S} show={vis(t, 0, 0.3)} />
+      {/* Named a morula until the blastocoel makes it a blastocyst (.6). */}
+      <Label id="morula" x={250} y={300} ax={CX - 60 * S} ay={CY - 20 * S} show={vis(t, 0, 0.6)} />
       <Label id="mintz-peluzidoa" x={800} y={470} ax={CX + 110 * S} ay={CY + 100 * S} show={vis(t, 0, 0.26)} />
       <Label id="trofoblastoa" x={800} y={420} ax={CX + 88 * S} ay={CY + 88 * S} show={done} />
       <Label id="enbrioblastoa" x={250} y={170} ax={embC[0] - 20} ay={embC[1]} show={done} />

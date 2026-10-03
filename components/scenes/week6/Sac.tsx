@@ -93,7 +93,9 @@ function SacDrawing({ t, reduced }: SceneProps) {
       <Part id="kanpoko-zorro-zitotrofoblastikoa" show={vis(t, 0)}>
         <path d={smoothPath(outerPts, true, 0.55)} fill="#4f9a63" stroke="#2c6b41" strokeWidth={1.4} />
       </Part>
-      <Part id="biloxka-askea" show={Math.max(vis(t, 0), branch)}>
+      {/* While the stems are branching (first step) the band is the tertiary villi tree; its branches are named
+          free villi from the next step on. */}
+      <Part id={t < 0.16 ? 'biloxka-tertziarioa' : 'biloxka-askea'} show={Math.max(vis(t, 0), branch)}>
         <path d={smoothPath(villiPts, true, 0.55)} fill="url(#w6s-villi)" stroke="#7a3a24" strokeWidth={1} opacity={lerp(0.55, 1, branch)} />
       </Part>
       <Part id="biloxka-arteko-espazioa" quiet show={vis(t, 0.16)}>

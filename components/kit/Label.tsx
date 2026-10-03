@@ -1,8 +1,8 @@
 'use client';
 
-import { useSyncExternalStore, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
+import { useContext, useSyncExternalStore, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import { OnTop } from './OnTop';
-import { partState, useLabelScale, useScene, type LabelScale } from './context';
+import { PaneContext, partState, useLabelScale, useScene, type LabelScale } from './context';
 
 /** Semibold text width per character at 1px font size (13.5px ≈ 7.1 frame units per character). */
 const CHAR_W = 7.1 / 13.5;
@@ -93,16 +93,19 @@ export function Label({ id, x, y, ax, ay, align, show = 1, text, small }: LabelP
   const ctx = useScene();
   const scale = useLabelScale();
   const measured = useMeasured();
-  if (!ctx.showLabels || ctx.quiz || show <= 0.02) return null;
+  // A name left inside a dual view's pane would shrink with it: the dual lifts and sets the pane's names.
+  const inPane = useContext(PaneContext);
+  if (!ctx.showLabels || ctx.quiz || show <= 0.02 || inPane) return null;
   const state = partState(ctx, id);
   const anchor = align ?? (ax !== undefined && ax > x ? 'end' : 'start');
   const hasLeader = ax !== undefined && ay !== undefined;
   const space = !!ctx.isSpace?.(id);
   const name = text ?? ctx.nameOf(id);
-  const size = state === 'spot' ? 16 : small ? 12 : 13.5;
+  // The step's own names are bigger and bolder than the rest, so the eye goes straight to them.
+  const size = state === 'spot' ? 16 : state === 'focus' ? (small ? 13.5 : 15) : small ? 12 : 13.5;
   const k = fitScale(scale, x, y, anchor, name.length, size);
   const fs = size * k;
-  const plate = plateBox(x, y, anchor, textWidth(name, fs, state === 'spot' ? 700 : 550, space, measured), fs);
+  const plate = plateBox(x, y, anchor, textWidth(name, fs, state === 'spot' || state === 'focus' ? 700 : 550, space, measured), fs);
   // Leader starts at the plate edge and bends horizontally first, like textbook call-outs.
   const lx = x + (anchor === 'end' ? plate.padX : anchor === 'start' ? -plate.padX : 0);
   const elbowX = hasLeader ? lx + (ax! - lx) * 0.35 : lx;

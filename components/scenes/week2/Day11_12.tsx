@@ -12,7 +12,7 @@ import { CYTO, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, bandAround, circleP
  *   .16-.28 sinzitiotrofoblastoak sinusoideen pareta urratzen du · .26-.40 amaren odola lakuetan zirkulatzen hasten da
  *   .42-.68 konzeptua hazi eta enbrioi kanpoko mesodermoa agertzen da (zito eta amnios/bitelo zakuaren artean)
  *   .54-.64 mesodermoan hutsune txikiak ireki, handitu eta fusionatzen dira -> korion barrunbea; finkapen pedikulua geratzen da
- *   .78-.88 desidua erreakzioa: estroma edematoso · .80-.875 zelula poliedrikoak glukogenoz beteta habiratze-gunean
+ *   .82-.88 desidua erreakzioa: estroma edematoso · .83-.875 zelula poliedrikoak glukogenoz beteta habiratze-gunean
  *   .92-.965 erreakzioa endometrio osora hedatzen da (urruneko estroma-zelulak ere poliedriko)
  */
 export const W = {
@@ -22,8 +22,8 @@ export const W = {
   circulation: [0.26, 0.4],
   mesoGrow: [0.42, 0.68],
   cavitate: [0.54, 0.64],
-  decidua: [0.78, 0.88],
-  cells: [0.8, 0.875],
+  decidua: [0.82, 0.88],
+  cells: [0.83, 0.875],
   spread: [0.92, 0.965],
 } as const;
 
@@ -150,6 +150,14 @@ const DECIDUAL_CELLS: Pt[] = [
   [440, 70],
   [560, 75],
 ];
+/** A decidual cell stays in the stroma: pushed out radially ahead of the growing syncytium (like the vessels). */
+function decidualAt(g: Geo, [x, y]: Pt): Pt {
+  const dx = x - g.cx;
+  const dy = y - g.cyC;
+  const d = Math.hypot(dx, dy) || 1;
+  const need = g.Rc + synTh((Math.atan2(dy, dx) * 180) / Math.PI) + 14;
+  return d >= need ? [x, y] : [g.cx + (dx / d) * need, g.cyC + (dy / d) * need];
+}
 /** Decidual cells next to the implantation site (they change first). */
 const nearSite = (x: number, y: number) => Math.hypot(x - W2.cx, y - 400) < 290;
 
@@ -319,9 +327,10 @@ function Day1112Drawing({ t, reduced }: SceneProps) {
       {/* Decidual cells: polyhedral, glycogen/lipid-rich, oedematous stroma. */}
       <Part id="desidua-zelulak" show={cells}>
         {/* First around the implantation site, then (next step) out through the rest of the endometrium. */}
-        {DECIDUAL_CELLS.map(([x, y], i) => (
-          <Cell key={i} x={x} y={y} r={9} rx={9} ry={7.4} color="#f4d99a" nucleus="rgba(90,60,10,0.55)" nucleusScale={0.4} opacity={0.92 * (nearSite(x, y) ? 1 : spread)} />
-        ))}
+        {DECIDUAL_CELLS.map((p, i) => {
+          const [x, y] = decidualAt(g, p);
+          return <Cell key={i} x={x} y={y} r={9} rx={9} ry={7.4} color="#f4d99a" nucleus="rgba(90,60,10,0.55)" nucleusScale={0.4} opacity={0.92 * (nearSite(p[0], p[1]) ? 1 : spread)} />;
+        })}
       </Part>
     </g>
   );
@@ -510,8 +519,11 @@ export function Day1112Desidua(props: SceneProps) {
   const { t } = props;
   const k = anchors(t);
   const { cx, cy } = k.g;
-  // Framed so the slab's feathered left edge (x≈205) falls under the label column, not mid-picture.
-  const z = zoom(cx - 147, k.g.cyC - 170, 2.1, 500, 320);
+  // Framed on where it happens: the stroma over the conceptus (decidual cells, sinusoids) down to the
+  // syncytium's lacunae. For the decidual reaction (.82) it widens to the whole stroma around the grown
+  // conceptus, still with the endometrial slab (x 205–795) filling the frame edge to edge.
+  const cam = seg(t, 0.82, 0.85);
+  const z = zoom(cx, lerp(236, 250, cam), lerp(1.85, 1.69, cam), 500, 320);
   const L = makeL(z.at);
   const M = makeM(z.at);
   return (
@@ -521,20 +533,23 @@ export function Day1112Desidua(props: SceneProps) {
         <EndometriumBack decidua={k.decidua} />
         <Day1112Drawing {...props} />
       </g>
-      {M('desidua-erreakzioa', [340, 140], 90, k.decidua)}
-      {M('zirkulazio-uteroplazentarioa', k.lacuna(236), 70, k.circ, '#ff8a8a')}
+      {M('desidua-erreakzioa', decidualAt(k.g, [340, 150]), 90, k.decidua)}
+      {M('zirkulazio-uteroplazentarioa', k.lacuna(305), 70, k.circ, '#ff8a8a')}
       {L('endometrio-estroma', 180, 60, [280, 120])}
-      {L('desidua-erreakzioa', 180, 110, [340, 150], k.decidua)}
-      {L('desidua-zelulak', 180, 160, [340, 140], k.cells)}
+      {L('desidua-erreakzioa', 180, 110, decidualAt(k.g, [300, 200]), k.decidua)}
+      {L('desidua-zelulak', 180, 160, decidualAt(k.g, DECIDUAL_CELLS[4]), k.cells)}
       {L('umetoki-guruina', 180, 210, [266, 250])}
       {L('amaren-odol-hodiak', 800, 60, vesselAt(k.g, 3, 13 * VESSELS[3][2]))}
-      {L('sinusoideak', 800, 110, vesselAt(k.g, 4, 13 * VESSELS[4][2] * lerp(1, 2, k.erosion)))}
-      {L('sare-lakunarra', 800, 160, k.lacuna(212), k.network)}
-      {L('zirkulazio-uteroplazentarioa', 790, 250, k.lacuna(236), k.circ)}
-      {L('sinzitiotrofoblastoa', 800, 400, k.syn(240))}
+      {L('sinusoideak', 800, 110, vesselAt(k.g, 7, 13 * VESSELS[7][2] * lerp(1, 2, k.erosion)))}
+      {L('sare-lakunarra', 180, 330, k.lacuna(212), k.network)}
+      {L('zirkulazio-uteroplazentarioa', 770, 250, k.lacuna(305), k.circ)}
+      {L('sinzitiotrofoblastoa', 800, 400, k.syn(320))}
       {L('bi-orriko-diskoa', 800, 460, [cx + 12, k.g.discY], seg(t, 0.9, 0.93))}
-      <Note x={500} y={588} tone="warn" show={seg(k.erosion, 0.5, 1)}>
+      <Note x={500} y={588} tone="warn" show={seg(k.erosion, 0.5, 1) * (1 - seg(t, 0.8, 0.82))}>
         Sinzitiotrofoblastoak sinusoideen pareta urratu du: amaren odola laku sarean zirkulatzen hasten da
+      </Note>
+      <Note x={500} y={588} tone="accent" show={seg(t, 0.83, 0.85) * (1 - seg(t, 0.9, 0.92))}>
+        Desidua erreakzioa: endometrio edematosoa eta estroma-zelula poliedrikoak (glukogenoa, lipidoak)
       </Note>
     </g>
   );

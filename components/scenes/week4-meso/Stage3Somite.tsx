@@ -188,6 +188,8 @@ function anchors(s: Section, t: number): Record<string, P2> {
 function labels(s: Section, t: number, close: boolean) {
   const g = geometry(t);
   const a = anchors(s, t);
+  // The close-up shows only the right side: name the ectoderm right over the somite.
+  if (close) a.ektodermoa = s.map(s.somite.cx + s.somite.rx * 0.6, 4.5);
   const L = (id: string, x: number, y: number, show = 1, small = false) => <Label key={id} id={id} x={x} y={y} ax={a[id][0]} ay={a[id][1]} show={show} small={small} />;
   if (close)
     return (
