@@ -765,7 +765,7 @@ export function EctopicSites({ t: stageT }: SceneProps) {
       <Label id="anpulua" x={140} y={200} ax={amp[0] - 22} ay={amp[1]} show={s1} />
       <Label id="istmoa" x={470} y={40} ax={ist[0]} ay={ist[1] - 22} show={s2} />
       <Label id="obulutegia" x={560} y={300} ax={ov[0] + 22} ay={ov[1]} align="start" show={s3} />
-      <Label id="douglas-zokogunea" text="Peritoneo-barrunbea (Douglas-en zokogunea)" x={252} y={500} ax={douglas[0] - 8} ay={douglas[1] - 16} show={seg(t, 0.8, 0.84)} />
+      <Label id="douglas-zokogunea" text="Peritoneo-barrunbea (Douglas-en zokogunea)" x={326} y={524} ax={douglas[0] + 14} ay={douglas[1] - 6} align="start" show={seg(t, 0.8, 0.84)} />
       <Label id="ezohiko-habiratzea" x={40} y={40} align="start" show={seg(t, 0.28, 0.32)} />
 
       <Note x={410} y={618} show={vis(t, 0, 0.28)}>Normalean blastozistoa umetokiaren endometrioan habiratzen da</Note>

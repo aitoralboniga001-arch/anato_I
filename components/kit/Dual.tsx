@@ -2,7 +2,7 @@
 
 import { cloneElement, isValidElement, useContext, type ReactNode } from 'react';
 import type { SceneComponent, SceneProps } from '@/lib/sim/types';
-import { PaneContext } from './context';
+import { PaneContext, useScene } from './context';
 import { Label, Note } from './Label';
 
 /**
@@ -89,6 +89,9 @@ function rows(wanted: number[], lo: number, hi: number, gap = 31): number[] {
 
 export function dual(left: Pane, right: Pane): SceneComponent {
   function Dual({ t, reduced }: SceneProps) {
+    const { nameOf } = useScene();
+    // A side column is ~185 units wide: long names are set small so they never run off the frame.
+    const fits = (l: LabelProps) => (l.text ?? nameOf(l.id)).length <= 20;
     const notes: NoteProps[] = [];
     const panes = [left, right].map((pane, i) => {
       const [x0, x1] = PANES[i];
@@ -127,7 +130,7 @@ export function dual(left: Pane, right: Pane): SceneComponent {
               {pane.title}
             </Note>
             {shown.map(({ l, at }, j) => (
-              <Label key={`${l.id}-${j}`} id={l.id} x={i ? COL_R : COL_L} y={ys[j]} ax={at![0]} ay={at![1]} align={i ? 'start' : 'end'} show={l.show ?? 1} text={l.text} small={l.small} />
+              <Label key={`${l.id}-${j}`} id={l.id} x={i ? COL_R : COL_L} y={ys[j]} ax={at![0]} ay={at![1]} align={i ? 'start' : 'end'} show={l.show ?? 1} text={l.text} small={l.small || !fits(l)} />
             ))}
           </g>
         ))}
