@@ -1,331 +1,102 @@
 'use client';
 
-import { Arrow, C, Flow, Label, Mark, Note, Part, clamp, lerp, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
-import { V, VilliDefs, f1, fingerD, place } from '@/components/scenes/week3-villi/common';
+import { Arrow, C, Flow, Label, Mark, Note, Part, lerp, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
+import { VilliDefs } from '@/components/scenes/week3-villi/common';
+import { K, W3bDefs } from '@/components/scenes/week3-villi/art';
+import { useId } from 'react';
+import { COTS, CORD_X, FA, FV, PlacentaSection, SEPTA, SEPT_L, VEIN_X, Y, at, spiralPts } from './placentaSection';
+import { FaceDefs, FetalFace, INS, MaternalFace, MiniMaternal, Profile, RX, RY, TH, lobeAt } from './placentaFaces';
 
 /**
- * Topic 6 — the placenta.
- * - Cotyledons (6:kotiledoiak:ebakia): apunteetako irudia (img_p06_0) — deziduaren orria goian, trenkadak
- *   behera, arteria kiribilak eta endometrio-zainak; korion orria behean, biloxka zuhaitzak gora, amniosa eta
- *   zilborresteko / korioneko odol-hodiak.
- * - PlacentaCirculation: the same section, zoomed on one cotyledon (jets, return, exchange).
- * - PlacentaFaces (img_p06_1): fetal face (amniosa, zilborrestea, orri korionikoa, odol-hodi korionikoak)
- *   and maternal face (kotiledoiak, dezidua basala).
- * - PlacentaFunctions: mother | barrier | fetus scheme with the notes' functions and harmful exchanges.
+ * Topic 6 — the placenta (Langman ch. 8, figs. 8-13 and 8-14; notes 2 and 3).
+ * - Cotyledons (6:kotiledoiak:ebakia): the placenta cut through, maternal side up: deziduaren orria,
+ *   trenkadak hanging part of the way down, kotiledoiak, the villous trees, arteria kiribilak and
+ *   endometrio-zainak; korion plaka, amniosa and the cord below.
+ * - PlacentaCirculation: the same section closed in on one cotyledon (jet, return), with the term
+ *   placental barrier (sinzitiotrofoblastoa + endotelioa) magnified.
+ * - PlacentaFaces: the term placenta whole, at its real proportions: fetal and maternal faces.
+ * - PlacentaFunctions: maternal blood | placental barrier | fetal blood, one row per function.
  */
 
 const vis = (t: number, a: number, b = 2) => Math.min(a <= 0 ? 1 : seg(t, a, a + 0.03), 1 - seg(t, b - 0.03, b));
-const hash = (n: number) => {
-  const s = Math.sin(n * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
+const f1 = (v: number) => v.toFixed(1);
+
+/** A tree anchor for labels: a point on cotyledon i's stem or on one of its free villi (bowed). */
+const stemAt = (i: number, u: number): Pt => at(COTS[i] + Math.sin(u * 3) * 2, lerp(Y.plate, Y.plate - 118, u));
+const branchAt = (i: number, side: -1 | 1, u: number): Pt => {
+  const c = COTS[i];
+  const f: Pt = [c, Y.plate - 118];
+  const k: Pt = [c + side * 70, Y.plate - 190];
+  const e: Pt = [c + side * 60, Y.shell + 2];
+  const x = (1 - u) * (1 - u) * f[0] + 2 * (1 - u) * u * k[0] + u * u * e[0];
+  const y = (1 - u) * (1 - u) * f[1] + 2 * (1 - u) * u * k[1] + u * u * e[1];
+  return at(x, y);
 };
 
-// ——— Section geometry (maternal side up, fetal side down, as in the figure) ———
-const X0 = 70;
-const X1 = 900;
-const WALL = 72;
-const DEC = 102;
-const SHELL = 138;
-const IVS = 145;
-const PLATE = 452;
-const PLATE_H = 28;
-const AMN = PLATE + PLATE_H;
-const CAV = 540;
-const SEPTA = [150, 370, 590, 810];
-const COTS = [260, 480, 700];
-const TRUNKS: { x: number; out: -1 | 1; k: number }[] = [
-  { x: 108, out: -1, k: 0.75 },
-  ...COTS.flatMap((c) => [
-    { x: c - 62, out: -1 as const, k: 1 },
-    { x: c + 62, out: 1 as const, k: 1 },
-  ]),
-  { x: 856, out: 1, k: 0.75 },
-];
-const CORD_X = 800;
+/* ---------------------------------------------------------------------------------------------- */
+/* 6:kotiledoiak:ebakia                                                                             */
+/* ---------------------------------------------------------------------------------------------- */
 
-type Seg = { a: Pt; b: Pt; w: number };
-
-/** A stem (tertiary, anchoring) villus from the chorionic plate up to the shell, with free villi branching off it. */
-function villusTree(x: number, seed: number, grow: number, out: -1 | 1) {
-  const sway = (hash(seed) - 0.5) * 14;
-  const at = (f: number): Pt => [x + Math.sin(f * 3 + seed) * 5 + sway * f, lerp(PLATE, IVS, f)];
-  const trunk = [0, 0.25, 0.5, 0.75, 1].map(at);
-  const stem: Seg[] = trunk.slice(0, -1).map((a, i) => ({ a, b: trunk[i + 1], w: lerp(12, 7.5, i / 3) }));
-  const free: Seg[] = [];
-  const tips: { p: Pt; r: number }[] = [];
-  const LEVELS = [0.13, 0.22, 0.31, 0.4, 0.49, 0.58, 0.67, 0.76, 0.85];
-  const twig = (from: Pt, ang: number, L: number, w: number, g: number, depth: number, key: number) => {
-    const end: Pt = [from[0] + Math.sin(ang) * L, from[1] - Math.cos(ang) * L];
-    free.push({ a: from, b: end, w });
-    if (depth === 0) {
-      tips.push({ p: end, r: 1 + 3.6 * g });
-      return;
-    }
-    tips.push({ p: end, r: 1 + 4.2 * g });
-    [0.45, 0.78].forEach((u, j) => {
-      const m: Pt = [lerp(from[0], end[0], u), lerp(from[1], end[1], u)];
-      const side = j % 2 ? 1 : -1;
-      const a2 = ang + side * (0.6 + hash(key * 5 + j) * 0.5);
-      twig(m, a2, L * (0.42 + hash(key * 3 + j) * 0.18), Math.max(3, w - 1.6), g, depth - 1, key * 7 + j + 1);
-    });
-  };
-  LEVELS.forEach((f, i) => {
-    const g = clamp(grow * 1.8 - i * 0.08, 0, 1);
-    if (g <= 0.02) return;
-    const dir = i >= 6 ? out : (i + seed) % 2 ? 1 : -1;
-    const ang = (dir * (44 + hash(seed * 7 + i) * 30) * Math.PI) / 180;
-    const L = (34 + hash(seed * 3 + i) * 24) * g * (i >= 6 ? 0.8 : 1);
-    twig(at(f), ang, L, 5.4, g, 1, seed * 13 + i);
-  });
-  return { stem, free, tips, trunk };
-}
-
-const segD = (s: Seg[]) => s.map(({ a, b }) => `M${f1(a[0])},${f1(a[1])}L${f1(b[0])},${f1(b[1])}`).join('');
-
-function Branches({ segs, tips, w = 0 }: { segs: Seg[]; tips?: { p: Pt; r: number }[]; w?: number }) {
-  // Outer syncytiotrophoblast, then the mesoderm core (drawn per width class so joints stay smooth).
-  const widths = [...new Set(segs.map((s) => s.w))];
-  return (
-    <g>
-      {widths.map((wd) => (
-        <path key={`o${wd}`} d={segD(segs.filter((s) => s.w === wd))} stroke={C.syncytio} strokeWidth={wd + 3.4 + w} strokeLinecap="round" fill="none" />
-      ))}
-      {tips?.map((tp, i) => <circle key={`to${i}`} cx={tp.p[0]} cy={tp.p[1]} r={tp.r + 1.7} fill={C.syncytio} />)}
-      {widths.map((wd) => (
-        <path key={`i${wd}`} d={segD(segs.filter((s) => s.w === wd))} stroke="#f2b08c" strokeWidth={wd + w * 0.5} strokeLinecap="round" fill="none" />
-      ))}
-      {tips?.map((tp, i) => <circle key={`ti${i}`} cx={tp.p[0]} cy={tp.p[1]} r={tp.r} fill="#f2b08c" />)}
-    </g>
-  );
-}
-
-/** Coiled spiral artery through the decidua, opening into the intervillous space at (x, IVS). */
-const spiralD = (x: number) => {
-  const pts: Pt[] = [];
-  for (let i = 0; i <= 24; i++) {
-    const y = lerp(WALL - 6, IVS, i / 24);
-    pts.push([x + Math.sin(i * 1.3) * 7, y]);
-  }
-  return smoothPath(pts, false, 0.5);
-};
-
-interface SectionProps {
-  /** Free-villus branching, 0..1. */
-  branch: number;
-  /** Decidual septa grown, 0..1. */
-  septa: number;
-  /** Cotyledon compartments tinted. */
-  tint: number;
-  /** Blood passing between cotyledons under the septa. */
-  cross: number;
-  /** Arterial jets into the intervillous space. */
-  jets: number;
-  /** Venous return to the endometrial veins. */
-  veins: number;
-  /** Structure id used for the umbilical vessels stub. */
-  cordId: string;
-  reduced: boolean;
-  id: string;
-}
-
-function Section({ branch, septa, tint, cross, jets, veins, cordId, reduced, id }: SectionProps) {
-  const trees = TRUNKS.map((tr, i) => villusTree(tr.x, i + 1, branch * tr.k, tr.out));
-  const sLen = 188 * septa;
-  const tintCols = ['rgba(255,190,120,1)', 'rgba(150,200,255,1)', 'rgba(255,150,200,1)'];
-  return (
-    <g>
-      <defs>
-        <linearGradient id={`${id}-fadeg`} x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0" stopColor="#000" />
-          <stop offset="0.05" stopColor="#fff" />
-          <stop offset="0.95" stopColor="#fff" />
-          <stop offset="1" stopColor="#000" />
-        </linearGradient>
-        <mask id={`${id}-fade`} maskUnits="userSpaceOnUse" x={X0} y={0} width={X1 - X0} height={640}>
-          <rect x={X0} y={0} width={X1 - X0} height={640} fill={`url(#${id}-fadeg)`} />
-        </mask>
-        <radialGradient id={`${id}-jet`} cx="0.5" cy="0.2" r="0.8">
-          <stop offset="0" stopColor="#ff4d63" stopOpacity="0.95" />
-          <stop offset="0.55" stopColor="#e0344f" stopOpacity="0.45" />
-          <stop offset="1" stopColor="#e0344f" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <g mask={`url(#${id}-fade)`}>
-        {/* Maternal side: myometrium, the basal decidua and its central functional layer, the decidual plate. */}
-        <rect x={X0} y={WALL} width={X1 - X0} height={12} fill="url(#p-muscle)" />
-        <Part id="dezidua-basala">
-          <rect x={X0} y={WALL + 12} width={X1 - X0} height={DEC - WALL - 12} fill="url(#p-decidua)" />
-          <rect x={X0} y={WALL + 12} width={X1 - X0} height={DEC - WALL - 12} fill="#3b1f14" opacity={0.35} />
-        </Part>
-        <Part id="deziduaren-orria">
-          <rect x={X0} y={DEC} width={X1 - X0} height={SHELL - DEC} fill="url(#p-decidua)" />
-        </Part>
-
-        {/* Intervillous space with maternal blood */}
-        <Part id="biloxka-arteko-espazioa" quiet>
-          <rect x={X0} y={IVS} width={X1 - X0} height={PLATE - IVS} fill="#3a0f19" />
-          <rect x={X0} y={IVS} width={X1 - X0} height={PLATE - IVS} fill="url(#w3v-mblood)" opacity={0.32} />
-        </Part>
-        {tint > 0.02 && (
-          <Part id="kotiledoiak" show={tint}>
-            {COTS.map((c, i) => (
-              <rect key={c} x={SEPTA[i] + 2} y={IVS} width={SEPTA[i + 1] - SEPTA[i] - 4} height={PLATE - IVS} fill={tintCols[i]} opacity={0.13} rx={10} />
-            ))}
-          </Part>
-        )}
-
-        {/* Outer cytotrophoblastic shell under the decidual plate, lining the septa too */}
-        <Part id="kanpoko-zorro-zitotrofoblastikoa">
-          <rect x={X0} y={SHELL} width={X1 - X0} height={IVS - SHELL} fill={C.cyto} />
-        </Part>
-        {sLen > 1 && (
-          <Part id="deziduaren-trenkadak">
-            {SEPTA.map((s) => (
-              <g key={s} transform={place(s, IVS - 1, 180)}>
-                <path d={fingerD(sLen, 13, 12)} fill="url(#p-decidua)" stroke={C.cyto} strokeWidth={3.2} />
-              </g>
-            ))}
-          </Part>
-        )}
-
-        {/* Endometrial veins leave the intervillous space near each septum */}
-        <Part id="endometrio-zainak">
-          {SEPTA.flatMap((s) => [s - 30, s + 30]).map((x) => (
-            <g key={x}>
-              <rect x={x - 4} y={SHELL - 1} width={8} height={IVS - SHELL + 2} fill="#241016" />
-              <path d={`M${x},${IVS} L${x},${WALL - 4}`} stroke="#2d4fb8" strokeWidth={7} strokeLinecap="round" />
-              <path d={`M${x},${IVS} L${x},${WALL - 4}`} stroke="#5b86f0" strokeWidth={3.4} strokeLinecap="round" />
-            </g>
-          ))}
-        </Part>
-
-        {/* Villous trees: tertiary (stem, anchoring) villi and the free villi branching off them */}
-        <Part id="biloxka-askea">
-          {trees.map((tr, i) => (
-            <Branches key={i} segs={tr.free} tips={tr.tips} />
-          ))}
-        </Part>
-        <Part id="biloxka-tertziarioa">
-          {trees.map((tr, i) => (
-            <Branches key={i} segs={tr.stem} />
-          ))}
-          {trees.map((tr, i) => (
-            <g key={`c${i}`} fill="none" strokeLinecap="round">
-              <path d={smoothPath(tr.trunk.map(([x, y]) => [x - 2.4, y] as Pt), false)} stroke={V.deoxy} strokeWidth={1.6} />
-              <path d={smoothPath(tr.trunk.map(([x, y]) => [x + 2.4, y] as Pt), false)} stroke={V.oxy} strokeWidth={1.6} />
-            </g>
-          ))}
-        </Part>
-
-        {/* Spiral arteries and their jets */}
-        <Part id="arteria-espiralak">
-          {COTS.map((c) => (
-            <g key={c}>
-              <rect x={c - 5} y={SHELL - 1} width={10} height={IVS - SHELL + 2} fill="#241016" />
-              <path d={spiralD(c)} fill="none" stroke="#6b0f1c" strokeWidth={7.5} strokeLinecap="round" />
-              <path d={spiralD(c)} fill="none" stroke="#ef4444" strokeWidth={4} strokeLinecap="round" />
-              <ellipse cx={c} cy={IVS + 18 + 60 * jets} rx={10 + 26 * jets} ry={16 + 64 * jets} fill={`url(#${id}-jet)`} opacity={0.35 + 0.65 * jets} />
-            </g>
-          ))}
-        </Part>
-
-        {/* Chorionic plate with the chorionic vessels; amnion below */}
-        <Part id="korion-plaka">
-          <rect x={X0} y={PLATE} width={X1 - X0} height={PLATE_H} fill="url(#p-meso-extra)" />
-          <rect x={X0} y={PLATE - 2} width={X1 - X0} height={3} fill={C.syncytio} />
-        </Part>
-        <Part id="korioneko-odol-hodiak">
-          <path d={`M${X0},${PLATE + 9} L${CORD_X - 8},${PLATE + 9}`} stroke={V.deoxy} strokeWidth={4.5} strokeLinecap="round" />
-          <path d={`M${X0},${PLATE + 19} L${CORD_X + 8},${PLATE + 19}`} stroke={V.oxy} strokeWidth={5.5} strokeLinecap="round" />
-          {TRUNKS.map((tr) => (
-            <g key={tr.x}>
-              <path d={`M${tr.x - 2.4},${PLATE} L${tr.x - 2.4},${PLATE + 9}`} stroke={V.deoxy} strokeWidth={1.6} />
-              <path d={`M${tr.x + 2.4},${PLATE} L${tr.x + 2.4},${PLATE + 19}`} stroke={V.oxy} strokeWidth={1.6} />
-            </g>
-          ))}
-        </Part>
-        <Part id="amniosa">
-          <rect x={X0} y={AMN} width={X1 - X0} height={7} fill="#9fc3e6" opacity={0.85} />
-        </Part>
-        <rect x={X0} y={AMN + 7} width={X1 - X0} height={CAV - AMN - 7} fill="#121a2e" />
-        <Part id={cordId}>
-          <rect x={CORD_X - 22} y={AMN} width={44} height={CAV - AMN + 40} rx={10} fill="#e7c6d2" />
-          <path d={`M${CORD_X - 10},${PLATE + 9} L${CORD_X - 10},${CAV + 40}`} stroke={V.deoxy} strokeWidth={5} />
-          <path d={`M${CORD_X + 10},${PLATE + 9} L${CORD_X + 10},${CAV + 40}`} stroke={V.deoxy} strokeWidth={5} />
-          <path d={`M${CORD_X},${PLATE + 19} L${CORD_X},${CAV + 40}`} stroke={V.oxy} strokeWidth={7} />
-        </Part>
-
-        {/* Blood flow: jets from the spiral arteries, return to the veins, and between cotyledons */}
-        <g opacity={jets}>
-          {COTS.flatMap((c) =>
-            [-1, 1].map((d) => {
-              const vx = c + d * 80;
-              return <Flow key={`${c}${d}`} d={`M${c},${IVS + 4} C${c},${IVS + 170} ${vx + d * 10},${IVS + 170} ${vx},${IVS + 10} L${vx},${DEC}`} n={5} dur={3.6} r={2.6} color="#ff6b7d" reduced={reduced} />;
-            }),
-          )}
-        </g>
-        <g opacity={veins}>
-          {SEPTA.flatMap((s) => [s - 30, s + 30]).map((x) => (
-            <Flow key={x} d={`M${x},${IVS + 26} L${x},${WALL}`} n={3} dur={2.4} r={2.4} color="#7aa2ff" reduced={reduced} />
-          ))}
-        </g>
-        <g opacity={cross}>
-          {SEPTA.slice(1, 3).map((s) => (
-            <g key={s}>
-              <Flow d={`M${s - 84},${IVS + 150} Q${s},${IVS + sLen + 110} ${s + 84},${IVS + 150}`} n={5} dur={3} r={2.8} color="#ffd166" reduced={reduced} />
-              <Arrow from={[s - 70, IVS + sLen + 10]} to={[s + 70, IVS + sLen + 10]} bend={-0.35} color="#ffd166" width={2.2} show={cross} />
-            </g>
-          ))}
-        </g>
-      </g>
-    </g>
-  );
-}
-
-// ——— 6:kotiledoiak:ebakia ———
 export function Cotyledons({ t, reduced }: SceneProps) {
-  const branch = 0.5 + 0.5 * seg(t, 0, 0.2);
+  const uid = useId().replace(/:/g, '');
+  const branch = 0.55 + 0.45 * seg(t, 0, 0.16);
   const septa = seg(t, 0.38, 0.54);
-  const tint = vis(t, 0.56) * (0.75 + 0.25 * Math.sin(t * 40));
+  const tint = vis(t, 0.56);
   const cross = vis(t, 0.72);
   const jets = 0.3 + 0.7 * seg(t, 0.86, 0.9);
   const veins = 0.25 + 0.75 * seg(t, 0.86, 0.92);
-  const sLen = 188 * septa;
+  const L = SEPT_L * septa;
+  const sp = spiralPts(COTS[0]);
+  const lobes = vis(t, 0.56, 0.72);
   return (
     <g>
       <VilliDefs />
-      <Section id="w6cot" branch={branch} septa={septa} tint={tint} cross={cross} jets={jets} veins={veins} cordId="zilbor-hodiak" reduced={reduced} />
+      <W3bDefs />
+      <FaceDefs uid={uid} />
+      <g mask="url(#m-slab)">
+        <PlacentaSection id={`${uid}-s`} branch={branch} septa={septa} tint={tint} cross={cross} jets={jets} veins={veins} cordId="zilbor-hodiak" reduced={reduced} />
+      </g>
 
-      {/* Top rows: maternal side */}
-      <Label id="deziduaren-trenkadak" x={96} y={24} ax={370} ay={IVS + sLen * 0.5} show={vis(t, 0.38)} align="start" />
-      <Label id="arteria-espiralak" text="Arteria kiribilak" x={400} y={24} ax={480} ay={SHELL - 14} show={vis(t, 0.18)} align="start" />
-      <Label id="endometrio-zainak" x={690} y={24} ax={620} ay={DEC + 6} show={vis(t, 0.18)} align="start" />
-      <Label id="kanpoko-zorro-zitotrofoblastikoa" x={96} y={50} ax={220} ay={SHELL + 3} show={vis(t, 0.18)} align="start" small />
-      <Label id="deziduaren-orria" x={560} y={50} ax={540} ay={DEC + 18} show={vis(t, 0.18)} align="start" />
-      <Label id="dezidua-basala" x={384} y={50} ax={330} ay={(WALL + 12 + DEC) / 2} show={vis(t, 0.18)} align="start" small />
+      {/* 16–20 cotyledons: the same compartments seen from the maternal face */}
+      <g opacity={lobes}>
+        <MiniMaternal cx={300} cy={566} rx={50} ry={26} uid={uid} />
+      </g>
+      <Note x={362} y={570} align="start" show={lobes} tone="accent">
+        Amaren aurpegian: 16–20 kotiledoi
+      </Note>
 
-      {/* Bottom rows: fetal side */}
-      <Label id="amniosa" x={96} y={556} ax={130} ay={AMN + 4} show={vis(t, 0)} align="start" />
-      <Label id="korion-plaka" x={250} y={556} ax={300} ay={PLATE + 14} show={vis(t, 0)} align="start" />
-      <Label id="korioneko-odol-hodiak" x={420} y={556} ax={450} ay={PLATE + 19} show={vis(t, 0.04)} align="start" />
-      <Label id="zilbor-hodiak" x={690} y={556} ax={CORD_X - 10} ay={CAV - 4} show={vis(t, 0.04)} align="start" />
-      <Label id="biloxka-tertziarioa" x={96} y={586} ax={TRUNKS[1].x + 3} ay={PLATE - 40} show={vis(t, 0)} align="start" small />
-      <Label id="biloxka-askea" x={264} y={586} ax={TRUNKS[2].x + 40} ay={PLATE - 110} show={vis(t, 0)} align="start" small />
-      <Label id="biloxka-arteko-espazioa" x={420} y={586} ax={560} ay={IVS + 220} show={vis(t, 0.72)} align="start" small />
-      <Label id="kotiledoiak" x={690} y={586} ax={700} ay={IVS + 250} show={vis(t, 0.56)} align="start" />
+      {/* Left gutter: maternal side above, fetal side below */}
+      <Label id="arteria-espiralak" x={190} y={40} ax={sp[6][0]} ay={sp[6][1]} show={vis(t, 0.18)} />
+      <Label id="dezidua-basala" x={190} y={78} ax={at(262, (Y.dec + Y.plt) / 2)[0]} ay={at(262, (Y.dec + Y.plt) / 2)[1]} show={vis(t, 0.18)} />
+      <Label id="deziduaren-orria" x={190} y={114} ax={at(262, Y.plt + 14)[0]} ay={at(262, Y.plt + 14)[1]} show={vis(t, 0.18)} />
+      <Label id="kanpoko-zorro-zitotrofoblastikoa" x={234} y={150} align="end" small ax={at(276, (Y.shell + Y.ivs) / 2)[0]} ay={at(276, (Y.shell + Y.ivs) / 2)[1]} show={vis(t, 0.18)} />
+      <Label id="biloxka-askea" x={190} y={250} ax={branchAt(0, -1, 0.55)[0] - 28} ay={branchAt(0, -1, 0.55)[1] + 6} show={vis(t, 0)} />
+      <Label id="biloxka-tertziarioa" x={190} y={392} ax={stemAt(0, 0.35)[0] - 6} ay={stemAt(0, 0.35)[1]} show={vis(t, 0)} />
+      <Label id="korion-plaka" x={190} y={468} ax={at(244, Y.plate + 13)[0]} ay={at(244, Y.plate + 13)[1]} show={vis(t, 0)} />
+      <Label id="amniosa" x={190} y={504} ax={at(244, Y.plateB + 3)[0]} ay={at(244, Y.plateB + 3)[1]} show={vis(t, 0)} />
 
+      {/* Right gutter */}
+      <Label id="endometrio-zainak" x={810} y={64} ax={at(VEIN_X[VEIN_X.length - 2], Y.dec + 14)[0]} ay={at(VEIN_X[VEIN_X.length - 2], Y.dec + 14)[1]} show={vis(t, 0.18)} />
+      <Label id="deziduaren-trenkadak" x={810} y={240} ax={at(SEPTA[3] + 8, Y.shell + L * 0.55)[0]} ay={at(SEPTA[3] + 8, Y.shell + L * 0.55)[1]} show={vis(t, 0.38)} />
+      <Label id="kotiledoiak" x={810} y={300} ax={at(726, 300)[0]} ay={at(726, 300)[1]} show={vis(t, 0.56)} />
+      <Label id="biloxka-arteko-espazioa" x={810} y={360} ax={at(742, 410)[0]} ay={at(742, 410)[1]} show={vis(t, 0.72)} />
+      <Label id="korioneko-odol-hodiak" x={810} y={470} ax={at(772, Y.plate + 18)[0]} ay={at(772, Y.plate + 18)[1]} show={vis(t, 0.04)} />
+      <Label id="zilbor-hodiak" x={810} y={548} ax={CORD_X + 20} ay={548} show={vis(t, 0.04)} />
 
       <Note x={500} y={618} show={vis(t, 0, 0.18)}>Korion plakatik biloxka tertziarioak; hauetatik biloxka askeak</Note>
       <Note x={500} y={618} show={vis(t, 0.18, 0.38)}>Biloxka tertziarioek deziduaren orriarekin kontaktatzen dute</Note>
       <Note x={500} y={618} tone="accent" show={vis(t, 0.38, 0.56)}>4.–5. hilabeteak: deziduaren trenkadak biloxka arteko guneetan</Note>
-      <Note x={500} y={618} tone="accent" show={vis(t, 0.56, 0.72)}>Kotiledoiak: 16–20</Note>
+      <Note x={500} y={618} tone="accent" show={vis(t, 0.56, 0.72)}>Trenkadek karena konpartimendutan banatzen dute: kotiledoiak</Note>
       <Note x={500} y={618} show={vis(t, 0.72, 0.86)}>Trenkadak ez dira korion plakara heltzen: odola kotiledoi batetik bestera</Note>
-      <Note x={500} y={618} tone="warn" show={vis(t, 0.86)}>Biloxka arteko odola amaren arteria kiribiletatik dator</Note>
+      <Note x={500} y={618} tone="warn" show={vis(t, 0.86)}>Biloxka arteko odola amaren endometriotik dator (arteria kiribilak)</Note>
     </g>
   );
 }
 
-// ——— Shared captions for the three views of 6:karena-aterminoa ———
+/* ---------------------------------------------------------------------------------------------- */
+/* Shared captions for the three views of 6:karena-aterminoa                                        */
+/* ---------------------------------------------------------------------------------------------- */
+
 function TermNotes({ t }: { t: number }) {
   return (
     <>
@@ -335,7 +106,7 @@ function TermNotes({ t }: { t: number }) {
       <Note x={500} y={618} tone="accent" show={vis(t, 0.3, 0.4)}>Amaren aurpegia: kotiledoiak, dezidua basalez inguratuta</Note>
       <Note x={500} y={618} show={vis(t, 0.4, 0.5)}>80–100 arteria espiral: lumen estua → presio handia</Note>
       <Note x={500} y={618} show={vis(t, 0.5, 0.6)}>Endometrio-zainetatik itzuli · 150–200 ml, 3–4 aldiz minutuko</Note>
-      <Note x={500} y={618} show={vis(t, 0.6, 0.68)}>Umetokiaren azaleraren %20–30</Note>
+      <Note x={500} y={618} show={vis(t, 0.6, 0.68)}>Umetokiaren azaleraren %20–30; gero eta lodiagoa</Note>
       <Note x={500} y={618} tone="accent" show={vis(t, 0.68, 0.78)}>Gasak (difusioz) eta elikagaiak</Note>
       <Note x={500} y={618} tone="accent" show={vis(t, 0.78, 0.88)}>Hormonak eta IgG antigorputzak</Note>
       <Note x={500} y={618} tone="warn" show={vis(t, 0.88)}>Ez dira beti onuragarriak</Note>
@@ -343,289 +114,317 @@ function TermNotes({ t }: { t: number }) {
   );
 }
 
-// ——— 6:karena-aterminoa:zirkulazioa ———
+/* ---------------------------------------------------------------------------------------------- */
+/* 6:karena-aterminoa:zirkulazioa                                                                   */
+/* ---------------------------------------------------------------------------------------------- */
+
+/** The magnified barrier card (bottom left, over the neighbouring cotyledon). */
+const CARD = { x: 210, y: 300, w: 176, h: 196 };
+const STRIP = { syn0: CARD.x + 70, syn1: CARD.x + 80, lam: CARD.x + 81.5, endo1: CARD.x + 86 };
+
 export function PlacentaCirculation({ t, reduced }: SceneProps) {
-  const z = zoom(480, 300, 1.2, 500, 318);
+  const uid = useId().replace(/:/g, '');
+  const z = zoom(500, 262, 1.3, 500, 318);
   const jets = 0.25 + 0.75 * seg(t, 0.4, 0.46);
   const veins = 0.2 + 0.8 * seg(t, 0.5, 0.56);
-  const branch = 0.82 + 0.18 * seg(t, 0.6, 0.68);
-  const ex = vis(t, 0.68);
-  const [lx] = z.at(SEPTA[1], 0);
-  const [rx] = z.at(SEPTA[2], 0);
-  const O2 = [
-    [440, 300, 420, 330],
-    [520, 250, 540, 275],
-    [450, 380, 430, 405],
-  ];
+  const zat = (p: Pt) => z.at(p[0], p[1]);
+  const sp = spiralPts(COTS[1]).map(zat);
+  const vein = zat(at(SEPTA[2] - 27, Y.dec + 30));
+  const yRows = [CARD.y + 62, CARD.y + 92, CARD.y + 122];
+  const tt = reduced ? 0 : t;
   return (
     <g>
       <VilliDefs />
-      <g transform={z.transform}>
-        <Section id="w6circ" branch={branch} septa={1} tint={0} cross={0} jets={jets} veins={veins} cordId="zilborrestea" reduced={reduced} />
-        {/* Exchange across the free villi: O2 into the fetal blood, CO2 out */}
-        <g opacity={ex}>
-          {O2.map(([x0, y0, x1, y1], i) => (
-            <g key={i}>
-              <Arrow from={[x0, y0]} to={[x1, y1]} bend={0.1} color="#ff8a8a" width={2} head={7} progress={seg(t, 0.68, 0.72)} />
-              <Arrow from={[x1 + 18, y1 + 16]} to={[x0 + 18, y0 + 16]} bend={0.1} color="#93b4ff" width={2} head={7} progress={seg(t, 0.7, 0.74)} />
-            </g>
-          ))}
+      <W3bDefs />
+      <g mask="url(#m-slab)">
+        <g transform={z.transform}>
+          <PlacentaSection id={`${uid}-s`} branch={1} septa={1} tint={0} cross={0} jets={jets} veins={veins} cordId="zilborrestea" reduced={reduced} arrowCots={[1]} />
         </g>
       </g>
-      <Mark id="karenaren-zirkulazioa" x={z.at(480, IVS + 120)[0]} y={z.at(480, IVS + 120)[1]} rx={72} ry={92} color="#ff8a8a" show={vis(t, 0.4)} />
-      {/* Dim the neighbouring cotyledons so the central one reads as the subject */}
-      <rect x={0} y={0} width={lx} height={640} fill="#0a0c12" opacity={0.55} />
-      <rect x={rx} y={0} width={1000 - rx} height={640} fill="#0a0c12" opacity={0.55} />
-      <text x={z.at(440, 300)[0] - 18} y={z.at(440, 300)[1] - 8} className="note note-accent" opacity={ex} textAnchor="end">
-        O₂
-      </text>
-      <text x={z.at(540, 275)[0] + 26} y={z.at(540, 275)[1] + 10} className="note note-dim" opacity={ex}>
-        CO₂
-      </text>
+      <Mark id="karenaren-zirkulazioa" x={z.at(500, Y.ivs + 130)[0]} y={z.at(500, Y.ivs + 130)[1]} rx={70} ry={96} show={vis(t, 0.4)} />
 
-      <Label id="arteria-espiralak" text="Arteria kiribilak" x={240} y={80} ax={z.at(480, 110)[0]} ay={z.at(480, 110)[1]} show={vis(t, 0)} align="end" />
-      <Label id="dezidua-basala" x={240} y={150} ax={z.at(400, DEC + 16)[0]} ay={z.at(400, DEC + 16)[1]} show={vis(t, 0)} align="end" />
-      <Label id="karenaren-zirkulazioa" x={240} y={240} ax={z.at(480, IVS + 120)[0]} ay={z.at(480, IVS + 120)[1]} show={vis(t, 0.4)} align="end" />
-      <Label id="biloxka-askea" x={240} y={400} ax={z.at(TRUNKS[3].x - 30, 330)[0]} ay={z.at(TRUNKS[3].x - 30, 330)[1]} show={vis(t, 0)} align="end" />
-      <Label id="korion-plaka" x={240} y={470} ax={z.at(430, PLATE + 12)[0]} ay={z.at(430, PLATE + 12)[1]} show={vis(t, 0)} align="end" />
+      {/* The term placental barrier, magnified: two thin layers between the two bloods, which never mix */}
+      <g>
+        <rect x={CARD.x} y={CARD.y} width={CARD.w} height={CARD.h} rx={12} fill="#0b1020" stroke="#3b4a6b" strokeWidth={1.4} opacity={0.96} />
+        <text x={CARD.x + CARD.w / 2} y={CARD.y + 18} textAnchor="middle" fontSize={11.5} fontWeight={700} fill="#e6ecf8">
+          Karena muga, bukaeran
+        </text>
+        <clipPath id={`${uid}-card`}>
+          <rect x={CARD.x + 8} y={CARD.y + 28} width={CARD.w - 16} height={CARD.h - 62} rx={6} />
+        </clipPath>
+        <g clipPath={`url(#${uid}-card)`}>
+          <Part id="biloxka-arteko-espazioa" quiet>
+            <rect x={CARD.x} y={CARD.y + 20} width={STRIP.syn0 - CARD.x} height={CARD.h} fill="url(#w3b-blood)" />
+          </Part>
+          <Part id="karena-muga">
+            <Part id="sinzitiotrofoblastoa">
+              <rect x={STRIP.syn0} y={CARD.y + 20} width={STRIP.syn1 - STRIP.syn0} height={CARD.h} fill="url(#w3b-syn)" />
+              <path d={Array.from({ length: 16 }, (_, i) => `M${STRIP.syn0},${CARD.y + 30 + i * 9} l-3,1.6`).join('')} stroke={K.fringe} strokeWidth={1} />
+            </Part>
+            <rect x={STRIP.syn1} y={CARD.y + 20} width={STRIP.lam - STRIP.syn1} height={CARD.h} fill={C.fibrin} opacity={0.8} />
+            <Part id="endotelioa">
+              <rect x={STRIP.lam} y={CARD.y + 20} width={STRIP.endo1 - STRIP.lam} height={CARD.h} fill={K.endo} />
+              {[0, 1, 2].map((i) => (
+                <ellipse key={i} cx={STRIP.endo1 - 1} cy={CARD.y + 52 + i * 52} rx={3} ry={7} fill={K.endoNuc} />
+              ))}
+            </Part>
+          </Part>
+          {/* fetal capillary blood with its red cells */}
+          <rect x={STRIP.endo1} y={CARD.y + 20} width={CARD.x + CARD.w - STRIP.endo1} height={CARD.h} fill="#5a1430" />
+          {[0, 1, 2, 3, 4].map((i) => {
+            const y = CARD.y + 40 + ((i * 31 + tt * 300) % 140);
+            return <ellipse key={i} cx={STRIP.endo1 + 22 + (i % 3) * 22} cy={y} rx={7} ry={4.5} fill="#d94a63" stroke="#7c0f25" strokeWidth={0.6} />;
+          })}
+        </g>
+        {/* exchange by diffusion */}
+        <Arrow from={[CARD.x + 26, yRows[0]]} to={[CARD.x + CARD.w - 22, yRows[0]]} bend={0} color="#ff8a8a" width={2.2} head={8} />
+        <Arrow from={[CARD.x + CARD.w - 22, yRows[1]]} to={[CARD.x + 26, yRows[1]]} bend={0} color="#93b4ff" width={2.2} head={8} />
+        <Arrow from={[CARD.x + 26, yRows[2]]} to={[CARD.x + CARD.w - 22, yRows[2]]} bend={0} color="#fbbf24" width={2.2} head={8} />
+        <text x={CARD.x + 16} y={yRows[0] - 7} fontSize={10.5} fontWeight={700} fill="#ffb4b4">
+          O₂
+        </text>
+        <text x={CARD.x + CARD.w - 16} y={yRows[1] - 7} textAnchor="end" fontSize={10.5} fontWeight={700} fill="#b9ccff">
+          CO₂
+        </text>
+        <text x={CARD.x + 16} y={yRows[2] - 7} fontSize={10.5} fontWeight={700} fill="#fde68a">
+          elikagaiak
+        </text>
+        <text x={CARD.x + 38} y={CARD.y + CARD.h - 22} textAnchor="middle" fontSize={9.5} fill="#ffb4bf">
+          ama
+        </text>
+        <text x={CARD.x + CARD.w - 40} y={CARD.y + CARD.h - 22} textAnchor="middle" fontSize={9.5} fill="#ffb4bf">
+          fetua
+        </text>
+        <text x={CARD.x + CARD.w / 2} y={CARD.y + CARD.h - 8} textAnchor="middle" fontSize={10.5} fontWeight={700} fill="#fbbf24">
+          Bi odolak ez dira nahasten
+        </text>
+      </g>
 
-      <Label id="endometrio-zainak" x={770} y={250} ax={z.at(SEPTA[2] - 30, 120)[0]} ay={z.at(SEPTA[2] - 30, 120)[1]} show={vis(t, 0.5)} align="start" />
-      <Label id="deziduaren-trenkadak" x={770} y={380} ax={z.at(SEPTA[2], 230)[0]} ay={z.at(SEPTA[2], 230)[1]} show={vis(t, 0)} align="start" />
-      <Label id="biloxka-arteko-espazioa" x={770} y={420} ax={z.at(540, 390)[0]} ay={z.at(540, 390)[1]} show={vis(t, 0.4)} align="start" small />
-      <Label id="korioneko-odol-hodiak" x={770} y={470} ax={z.at(560, PLATE + 19)[0]} ay={z.at(560, PLATE + 19)[1]} show={vis(t, 0)} align="start" />
-      <Label id="amniosa" x={770} y={520} ax={z.at(560, AMN + 4)[0]} ay={z.at(560, AMN + 4)[1]} show={vis(t, 0)} align="start" />
+      {/* Umbilical vessels: arteries carry deoxygenated blood to the placenta, the vein oxygenated blood back */}
+      <g>
+        <rect x={CARD.x} y={CARD.y + CARD.h + 8} width={250} height={46} rx={10} fill="#0b1020" stroke="#3b4a6b" strokeWidth={1.2} opacity={0.96} />
+        <path d={`M${CARD.x + 12},${CARD.y + CARD.h + 23} h22`} stroke={FA} strokeWidth={5} strokeLinecap="round" />
+        <path d={`M${CARD.x + 12},${CARD.y + CARD.h + 41} h22`} stroke={FV} strokeWidth={5} strokeLinecap="round" />
+        <text x={CARD.x + 42} y={CARD.y + CARD.h + 23} dy="0.35em" fontSize={10.5} fill="#c7d2fe">
+          Zilbor-arteriak: odol desoxigenatua
+        </text>
+        <text x={CARD.x + 42} y={CARD.y + CARD.h + 41} dy="0.35em" fontSize={10.5} fill="#fecaca">
+          Zilbor-zaina: odol oxigenatua
+        </text>
+      </g>
+
+      {/* Left gutter */}
+      <Label id="arteria-espiralak" x={190} y={60} ax={sp[8][0]} ay={sp[8][1]} show={vis(t, 0)} />
+      <Label id="dezidua-basala" x={190} y={104} ax={z.at(420, Y.dec + 18)[0]} ay={z.at(420, Y.dec + 18)[1]} show={vis(t, 0)} />
+      <Label id="karenaren-zirkulazioa" x={190} y={200} ax={z.at(470, Y.ivs + 120)[0]} ay={z.at(470, Y.ivs + 120)[1]} show={vis(t, 0.4)} />
+      <Label id="biloxka-askea" x={190} y={250} ax={zat(branchAt(1, -1, 0.6))[0] - 34} ay={zat(branchAt(1, -1, 0.6))[1] + 8} show={vis(t, 0)} />
+      {/* horizontal leaders between the card's arrows and words */}
+      <Label id="karena-muga" x={190} y={CARD.y + 40} ax={STRIP.syn1} ay={CARD.y + 40} show={vis(t, 0)} />
+      <Label id="sinzitiotrofoblastoa" x={190} y={CARD.y + 76} ax={(STRIP.syn0 + STRIP.syn1) / 2} ay={CARD.y + 76} show={vis(t, 0)} small />
+      <Label id="endotelioa" x={190} y={CARD.y + 140} ax={STRIP.endo1 - 2} ay={CARD.y + 140} show={vis(t, 0)} />
+      <Label id="korion-plaka" x={190} y={560} ax={z.at(420, Y.plate + 6)[0]} ay={z.at(420, Y.plate + 6)[1]} show={vis(t, 0)} />
+
+      {/* Right gutter */}
+      <Label id="endometrio-zainak" x={810} y={110} ax={vein[0]} ay={vein[1]} show={vis(t, 0)} />
+      <Label id="deziduaren-trenkadak" x={810} y={300} ax={z.at(SEPTA[2] + 6, Y.shell + SEPT_L * 0.55)[0]} ay={z.at(SEPTA[2] + 6, Y.shell + SEPT_L * 0.55)[1] + 10} show={vis(t, 0)} />
+      <Label id="biloxka-arteko-espazioa" x={810} y={370} ax={z.at(560, Y.ivs + 200)[0]} ay={z.at(560, Y.ivs + 200)[1]} show={vis(t, 0)} />
+      <Label id="korioneko-odol-hodiak" x={810} y={540} ax={z.at(600, Y.plate + 18)[0]} ay={z.at(600, Y.plate + 18)[1]} show={vis(t, 0)} />
+      <Label id="amniosa" x={810} y={584} ax={z.at(640, Y.plateB + 3)[0]} ay={z.at(640, Y.plateB + 3)[1]} show={vis(t, 0)} />
 
       <TermNotes t={t} />
     </g>
   );
 }
 
-// ——— 6:karena-aterminoa:aurpegiak ———
-const RX = 132;
-const RY = 76;
-const TH = 18;
+/* ---------------------------------------------------------------------------------------------- */
+/* 6:karena-aterminoa:aurpegiak                                                                     */
+/* ---------------------------------------------------------------------------------------------- */
 
-/** Maternal-face lobes (cotyledons): Voronoi cells of 18 jittered seeds, clipped to the unit disc. */
-const LOBES: Pt[][] = (() => {
-  const seeds: Pt[] = [[0.02, -0.03]];
-  const ring = (r: number, n: number, off: number, key: number) => {
-    for (let i = 0; i < n; i++) {
-      const a = ((i + off + (hash(key + i) - 0.5) * 0.5) / n) * Math.PI * 2;
-      const rr = r + (hash(key + 50 + i) - 0.5) * 0.12;
-      seeds.push([Math.cos(a) * rr, Math.sin(a) * rr]);
-    }
-  };
-  ring(0.43, 6, 0.1, 10);
-  ring(0.8, 11, 0.4, 30);
-  const disc: Pt[] = Array.from({ length: 48 }, (_, i) => [Math.cos((i / 48) * Math.PI * 2) * 0.98, Math.sin((i / 48) * Math.PI * 2) * 0.98]);
-  // Keep the part of `poly` closer to seed p than to seed q (Sutherland–Hodgman against one half-plane).
-  const clip = (poly: Pt[], p: Pt, q: Pt): Pt[] => {
-    const nx = q[0] - p[0];
-    const ny = q[1] - p[1];
-    const c = (q[0] * q[0] + q[1] * q[1] - p[0] * p[0] - p[1] * p[1]) / 2;
-    const inside = (v: Pt) => v[0] * nx + v[1] * ny <= c;
-    const res: Pt[] = [];
-    poly.forEach((cur, i) => {
-      const prev = poly[(i + poly.length - 1) % poly.length];
-      const ci = inside(cur);
-      const pi = inside(prev);
-      if (ci !== pi) {
-        const dp = prev[0] * nx + prev[1] * ny - c;
-        const dc = cur[0] * nx + cur[1] * ny - c;
-        const u = dp / (dp - dc);
-        res.push([lerp(prev[0], cur[0], u), lerp(prev[1], cur[1], u)]);
-      }
-      if (ci) res.push(cur);
-    });
-    return res;
-  };
-  return seeds.map((p) => seeds.reduce((poly, q) => (q === p ? poly : clip(poly, p, q)), disc));
-})();
-
-/** Shrink a lobe towards its centroid so grooves show between lobes. */
-const inset = (pts: Pt[], k: number): Pt[] => {
-  const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length;
-  const cy = pts.reduce((s, p) => s + p[1], 0) / pts.length;
-  return pts.map(([x, y]) => [cx + (x - cx) * k, cy + (y - cy) * k]);
-};
-
-/** Chorionic vessels radiating from the cord insertion (fetal face), in disc coordinates. */
-const VESSELS: Pt[][] = Array.from({ length: 8 }, (_, i) => {
-  const a = (i / 8) * Math.PI * 2 + 0.3;
-  const pts: Pt[] = [[-0.08, -0.06]];
-  for (let j = 1; j <= 4; j++) {
-    const r = (j / 4) * 0.9;
-    const w = Math.sin(j * 1.7 + i) * 0.12;
-    pts.push([-0.08 + Math.cos(a + w) * r, -0.06 + Math.sin(a + w) * r]);
-  }
-  return pts;
-});
-const TWIGS: Pt[][] = VESSELS.flatMap((v, i) => {
-  const [x, y] = v[2];
-  const a = Math.atan2(y + 0.06, x + 0.08) + (i % 2 ? 0.7 : -0.7);
-  return [[v[2], [x + Math.cos(a) * 0.28, y + Math.sin(a) * 0.28]] as Pt[]];
-});
-
-const toDisc = (cx: number, cy: number) => (p: Pt): Pt => [cx + p[0] * RX, cy + p[1] * RY];
-
-function FetalFace({ cx, cy, t }: { cx: number; cy: number; t: number }) {
-  const m = toDisc(cx, cy);
-  const ins = m([-0.08, -0.06]);
-  const sway = Math.sin(t * 30) * 5;
-  const cord: Pt[] = [ins, [ins[0] + 18, ins[1] - 50], [ins[0] - 14 + sway, ins[1] - 104], [ins[0] + 26 + sway, ins[1] - 150], [ins[0] + 6 + sway, ins[1] - 186]];
-  const cordD = smoothPath(cord, false, 0.5);
-  const frill: Pt[] = Array.from({ length: 40 }, (_, i) => {
-    const a = (i / 40) * Math.PI * 2;
-    const r = 1.08 + (i % 2 ? 0.07 : 0) + hash(i + 3) * 0.05;
-    return m([Math.cos(a) * r, Math.sin(a) * r]);
-  });
-  return (
-    <g>
-      {/* Torn membranes (amnion + chorion leuna) around the edge */}
-      <Part id="amniosa">
-        <path d={smoothPath(frill, true, 0.3)} fill="#d9c7cf" opacity={0.45} stroke="rgba(255,255,255,0.35)" strokeWidth={1} />
-      </Part>
-      <path d={`M${cx - RX},${cy} A${RX} ${RY} 0 0 0 ${cx + RX},${cy} L${cx + RX},${cy + TH} A${RX} ${RY} 0 0 1 ${cx - RX},${cy + TH} Z`} fill="#6e1f33" />
-      <Part id="korion-plaka">
-        <ellipse cx={cx} cy={cy} rx={RX} ry={RY} fill="url(#w6f-fetal)" stroke="#4a1022" strokeWidth={1.2} />
-        <ellipse cx={cx - 30} cy={cy - 26} rx={RX * 0.55} ry={RY * 0.3} fill="#fff" opacity={0.08} />
-      </Part>
-      <Part id="korioneko-odol-hodiak">
-        {VESSELS.map((v, i) => (
-          <g key={i} fill="none" strokeLinecap="round">
-            <path d={smoothPath(v.map(m), false)} stroke="#6a0f24" strokeWidth={4.2} />
-            <path d={smoothPath(v.map(m), false)} stroke="#3456c4" strokeWidth={1.6} transform="translate(1.5 -1.2)" />
-            <path d={smoothPath(v.map(m), false)} stroke="#ff9aa8" strokeWidth={1.1} strokeDasharray="4 12" strokeDashoffset={-t * 900} opacity={0.8} />
-          </g>
-        ))}
-        {TWIGS.map((v, i) => (
-          <path key={`t${i}`} d={`M${f1(m(v[0])[0])},${f1(m(v[0])[1])} L${f1(m(v[1])[0])},${f1(m(v[1])[1])}`} stroke="#6a0f24" strokeWidth={2.4} strokeLinecap="round" />
-        ))}
-      </Part>
-      <Part id="zilborrestea">
-        <path d={cordD} fill="none" stroke="#5c2a3a" strokeWidth={19} strokeLinecap="round" />
-        <path d={cordD} fill="none" stroke="#e7c6d2" strokeWidth={16} strokeLinecap="round" />
-        <path d={cordD} fill="none" stroke="#b9637c" strokeWidth={16} strokeDasharray="3 9" opacity={0.55} />
-      </Part>
-    </g>
-  );
-}
-
-function MaternalFace({ cx, cy }: { cx: number; cy: number }) {
-  const m = toDisc(cx, cy);
-  const tones = ['#9b2a40', '#8a2238', '#a3344a', '#932740'];
-  const patch = LOBES[3];
-  return (
-    <g>
-      <path d={`M${cx - RX},${cy} A${RX} ${RY} 0 0 0 ${cx + RX},${cy} L${cx + RX},${cy + TH} A${RX} ${RY} 0 0 1 ${cx - RX},${cy + TH} Z`} fill="#4d1422" />
-      <Part id="dezidua-basala">
-        <ellipse cx={cx} cy={cy} rx={RX} ry={RY} fill="#5a1626" stroke="#2c0a12" strokeWidth={1.2} />
-      </Part>
-      <Part id="kotiledoiak">
-        {LOBES.map((l, i) => (
-          <path key={i} d={smoothPath(inset(l, 0.9).map(m), true, 0.25)} fill={tones[i % tones.length]} stroke="rgba(255,190,200,0.18)" strokeWidth={0.8} />
-        ))}
-      </Part>
-      {/* A piece of basal decidua torn away */}
-      <path d={smoothPath(inset(patch, 0.6).map(m), true, 0.2)} fill="#d27a8c" opacity={0.85} stroke="#f4b6c2" strokeWidth={0.8} />
-    </g>
-  );
-}
+const FCY = 322;
+/** The uterus inset (beat .6): the placenta covers 20–30 % of the uterine wall. */
+const UT: Pt = [500, 150];
 
 export function PlacentaFaces({ t }: SceneProps) {
+  const uid = useId().replace(/:/g, '');
   const detach = seg(t, 0.02, 0.09);
-  // Step .2 slides the fetal face left; step .3 lifts a copy out from under it (same spot, so nothing
-  // pops), slides it right and turns it over to show the maternal face — both done by the complete frames.
+  // Step .2 slides the fetal face left; step .3 lifts a copy out from under it, slides it right and turns
+  // it over to show the maternal face — both done by the complete frames.
   const split = seg(t, 0.2, 0.26);
-  const lx = lerp(500, 300, split);
+  const lx = lerp(500, 334, split);
   const flip = seg(t, 0.3, 0.36);
-  const rxPos = lerp(lx, 700, seg(t, 0.3, 0.35));
+  const rxPos = lerp(lx, 666, seg(t, 0.3, 0.35));
   const showRight = t > 0.3;
   const sq = flip < 0.5 ? 1 - flip * 2 : flip * 2 - 1;
-  const dims = vis(t, 0.1, 0.24);
-  const cy = 330;
+  const dims = vis(t, 0.1, 0.22);
   const bob = Math.sin(t * 20) * 2;
+  const ut = vis(t, 0.6, 0.68);
+  const thick = seg(t, 0.6, 0.66);
+  const ins: Pt = [lx + INS[0] * RX, FCY + INS[1] * RY];
+  // Placenta arc in the inset: a quarter of the wall, thickening as it grows.
+  const uw = (a: number, d: number): Pt => [UT[0] + (46 + d) * Math.cos(a), UT[1] + (52 + d) * Math.sin(a)];
+  const arc = (d: number) => smoothPath(Array.from({ length: 13 }, (_, i) => uw(lerp(-2.6, -0.95, i / 12), d)), false);
   return (
     <g>
-      <defs>
-        <radialGradient id="w6f-fetal" cx="0.42" cy="0.38" r="0.7">
-          <stop offset="0" stopColor="#d27d95" />
-          <stop offset="0.7" stopColor="#a4465f" />
-          <stop offset="1" stopColor="#7b2a42" />
-        </radialGradient>
-      </defs>
+      <FaceDefs uid={uid} />
 
       {/* Uterine wall the placenta peels away from */}
       <g opacity={1 - detach} transform={`translate(0 ${-70 * detach})`}>
-        <path d={`M${lx - RX - 60},${cy - RY + 20} Q${lx},${cy - RY - 70} ${lx + RX + 60},${cy - RY + 20} L${lx + RX + 60},${cy - RY - 20} Q${lx},${cy - RY - 110} ${lx - RX - 60},${cy - RY - 20} Z`} fill="url(#p-muscle)" opacity={0.9} />
+        <path d={`M${lx - RX - 60},${FCY - RY + 20} Q${lx},${FCY - RY - 70} ${lx + RX + 60},${FCY - RY + 20} L${lx + RX + 60},${FCY - RY - 20} Q${lx},${FCY - RY - 110} ${lx - RX - 60},${FCY - RY - 20} Z`} fill="url(#p-muscle)" opacity={0.9} />
+        <path d={`M${lx - RX - 60},${FCY - RY + 20} Q${lx},${FCY - RY - 70} ${lx + RX + 60},${FCY - RY + 20}`} fill="none" stroke="#f3cdd5" strokeWidth={5} opacity={0.8} />
       </g>
 
-      <Mark id="karena-aterminoa" x={lx} y={cy + TH / 2} rx={RX + 22} ry={RY + TH + 22} show={vis(t, 0, 0.28)} />
+      <Mark id="karena-aterminoa" x={lx} y={FCY + TH / 2} rx={RX + 22} ry={RY + TH + 22} show={vis(t, 0, 0.28)} />
       <Part id="fetuaren-aurpegia">
         <g transform={`translate(0 ${bob})`}>
-          <FetalFace cx={lx} cy={cy} t={t} />
+          <FetalFace cx={lx} cy={FCY} t={t} uid={uid} />
         </g>
       </Part>
       {showRight && (
         <Part id="amaren-aurpegia">
-          <g transform={`translate(${rxPos} ${cy - bob}) scale(1 ${Math.max(sq, 0.02)}) translate(${-rxPos} ${-cy})`}>
-            {flip < 0.5 ? <FetalFace cx={rxPos} cy={cy} t={t} /> : <MaternalFace cx={rxPos} cy={cy} />}
+          <g transform={`translate(${rxPos} ${FCY - bob}) scale(1 ${Math.max(sq, 0.02)}) translate(${-rxPos} ${-FCY})`}>
+            {flip < 0.5 ? <FetalFace cx={rxPos} cy={FCY} t={t} uid={uid} /> : <MaternalFace cx={rxPos} cy={FCY} uid={uid} />}
           </g>
         </Part>
       )}
 
-      {/* Size of the term placenta */}
+      {/* Size of the term placenta: diameter under the disc, thickness on its profile, weight */}
       <g opacity={dims} pointerEvents="none">
-        <Arrow from={[lx - RX + 8, cy + RY + TH + 24]} to={[lx + RX - 8, cy + RY + TH + 24]} bend={0} color="#fbbf24" width={1.6} head={7} />
-        <Arrow from={[lx + RX - 8, cy + RY + TH + 24]} to={[lx - RX + 8, cy + RY + TH + 24]} bend={0} color="#fbbf24" width={1.6} head={7} />
-        <path d={`M${lx + RX + 16},${cy} L${lx + RX + 16},${cy + TH}`} stroke="#fbbf24" strokeWidth={1.6} />
+        <Arrow from={[lx - RX + 8, FCY + RY + TH + 26]} to={[lx + RX - 8, FCY + RY + TH + 26]} bend={0} color="#fbbf24" width={1.6} head={7} />
+        <Arrow from={[lx + RX - 8, FCY + RY + TH + 26]} to={[lx - RX + 8, FCY + RY + TH + 26]} bend={0} color="#fbbf24" width={1.6} head={7} />
+        <Profile cx={lx} cy={548} w={RX * 2} th={2 * RX * (3.5 / 17.5)} />
+        <Arrow from={[lx + 14, 548 - RX * 0.2 - 4]} to={[lx + 14, 548 - RX * 0.2 + 20]} bend={0} color="#fbbf24" width={1.4} head={6} />
+        <Arrow from={[lx + 14, 548 + RX * 0.2 + 4]} to={[lx + 14, 548 + RX * 0.2 - 20]} bend={0} color="#fbbf24" width={1.4} head={6} />
       </g>
-      <Note x={lx} y={cy + RY + TH + 44} show={dims} tone="accent">15–20 cm diametroa</Note>
-      <Note x={lx + RX + 26} y={cy + TH / 2} align="start" show={dims} tone="accent">3–4 cm lodiera</Note>
-      <Note x={lx - RX - 24} y={cy + TH / 2} align="end" show={dims} tone="accent">500–600 g</Note>
+      <Note x={lx} y={FCY + RY + TH + 46} show={dims} tone="accent">15–20 cm diametroa</Note>
+      <Note x={lx + RX + 18} y={552} align="start" show={dims} tone="accent">3–4 cm lodiera (erdian)</Note>
+      <Note x={lx - RX - 18} y={FCY + TH / 2} align="end" show={dims} tone="accent">500–600 g</Note>
 
-      <Label id="karena-aterminoa" x={850} y={250} ax={lx + RX * 0.7} ay={cy + 10} show={vis(t, 0, 0.28)} align="start" />
-      <Label id="karena" x={240} y={330} ax={lx - RX + 6} ay={cy + TH / 2} show={vis(t, 0.6, 0.68)} align="end" />
-      <Label id="zilborrestea" x={240} y={80} ax={lx + 4} ay={cy - RY - 80} show={vis(t, 0.2)} align="end" />
-      <Label id="fetuaren-aurpegia" x={240} y={160} ax={lx - RX * 0.55} ay={cy - RY * 0.5} show={vis(t, 0.2)} align="end" />
-      <Label id="korion-plaka" x={240} y={230} ax={lx - RX * 0.35} ay={cy + RY * 0.1} show={vis(t, 0.2)} align="end" text="Orri korionikoa" />
-      <Label id="korioneko-odol-hodiak" x={240} y={420} ax={lx - RX * 0.5} ay={cy + RY * 0.4} show={vis(t, 0.2)} align="end" />
-      <Label id="amniosa" x={240} y={480} ax={lx - RX * 0.9} ay={cy + RY * 0.62} show={vis(t, 0.2)} align="end" />
+      {/* The uterus with the placenta on its wall: 20–30 % of the surface, ever thicker */}
+      <g opacity={ut}>
+        <path d={`M${UT[0] - 60},${UT[1] - 6} C${UT[0] - 62},${UT[1] - 80} ${UT[0] + 62},${UT[1] - 80} ${UT[0] + 60},${UT[1] - 6} C${UT[0] + 58},${UT[1] + 40} ${UT[0] + 22},${UT[1] + 62} ${UT[0] + 12},${UT[1] + 84} L${UT[0] - 12},${UT[1] + 84} C${UT[0] - 22},${UT[1] + 62} ${UT[0] - 58},${UT[1] + 40} ${UT[0] - 60},${UT[1] - 6} Z`} fill="url(#p-muscle)" stroke="#4a1a20" strokeWidth={1.4} />
+        <ellipse cx={UT[0]} cy={UT[1]} rx={46} ry={52} fill="#121a2e" />
+        <ellipse cx={UT[0]} cy={UT[1]} rx={46} ry={52} fill="rgba(110,170,255,0.16)" stroke="#9fc3e6" strokeWidth={1.2} />
+      </g>
+      <Part id="karena" show={ut}>
+        <path d={arc(-2)} fill="none" stroke="#7c1f36" strokeWidth={lerp(8, 13, thick) + 2.4} strokeLinecap="round" />
+        <path d={arc(-2)} fill="none" stroke="#c2415f" strokeWidth={lerp(8, 13, thick)} strokeLinecap="round" />
+      </Part>
+      <Note x={UT[0] + 72} y={UT[1] - 40} align="start" show={ut} tone="accent">%20–30</Note>
 
-      <Label id="amaren-aurpegia" x={850} y={250} ax={rxPos + RX * 0.6} ay={cy - RY * 0.5} show={vis(t, 0.33)} align="start" />
-      <Label id="kotiledoiak" x={850} y={380} ax={rxPos + RX * 0.5} ay={cy + RY * 0.35} show={vis(t, 0.33)} align="start" />
-      <Label id="dezidua-basala" x={850} y={440} ax={rxPos + RX * 0.9} ay={cy + TH + 4} show={vis(t, 0.33)} align="start" />
-      <Note x={rxPos} y={cy + RY + TH + 30} show={vis(t, 0.33)}>Dezidua basala erauzia (zati bat)</Note>
+      <Label id="karena-aterminoa" x={812} y={250} ax={lx + RX * 0.7} ay={FCY + 10} show={vis(t, 0, 0.28)} />
+      <Label id="karena" x={190} y={120} ax={uw(-1.9, 2)[0]} ay={uw(-1.9, 2)[1]} show={ut} />
+      <Label id="zilborrestea" x={190} y={78} ax={ins[0] + 4} ay={ins[1] - 120} show={vis(t, 0.2)} />
+      <Label id="fetuaren-aurpegia" x={190} y={180} ax={lx - RX * 0.62} ay={FCY - RY * 0.5} show={vis(t, 0.2)} />
+      <Label id="korion-plaka" x={190} y={232} ax={lx - RX * 0.4} ay={FCY + RY * 0.12} show={vis(t, 0.2)} text="Orri korionikoa" />
+      <Label id="korioneko-odol-hodiak" x={190} y={420} ax={lx + RX * 0.2} ay={FCY + RY * 0.5} show={vis(t, 0.2)} />
+      <Label id="amniosa" x={190} y={472} ax={lx - RX * 1.03} ay={FCY + RY * 0.42} show={vis(t, 0.2)} />
+
+      <Label id="amaren-aurpegia" x={812} y={232} ax={rxPos + RX * 0.62} ay={FCY - RY * 0.5} show={vis(t, 0.33)} />
+      <Label id="kotiledoiak" x={812} y={392} ax={lobeAt(rxPos, FCY, 9)[0]} ay={lobeAt(rxPos, FCY, 9)[1]} show={vis(t, 0.33)} />
+      <Label id="dezidua-basala" x={812} y={444} ax={rxPos + RX * 0.86} ay={FCY + RY * 0.38} show={vis(t, 0.33)} />
+      <Note x={rxPos} y={FCY + RY + TH + 34} show={vis(t, 0.33)}>Kolore argiagoa: dezidua basala erauzi den tokia</Note>
 
       <TermNotes t={t} />
     </g>
   );
 }
 
-// ——— 6:karena-aterminoa:funtzioak ———
-const MOM: [number, number] = [320, 500];
-const BAR: [number, number] = [500, 562];
-const FET: [number, number] = [562, 880];
-const TOP = 96;
-const BOT = 588;
-const ROWS = { gas: 142, food: 222, horm: 304, igg: 386, rh: 470, bad: 548 };
+/* ---------------------------------------------------------------------------------------------- */
+/* 6:karena-aterminoa:funtzioak                                                                     */
+/* ---------------------------------------------------------------------------------------------- */
 
-function Mover({ y, dir, t, color, n = 3, speed = 8, glyph = 'dot', x0 = MOM[0] + 20, x1 = FET[1] - 20 }: { y: number; dir: 1 | -1; t: number; color: string; n?: number; speed?: number; glyph?: 'dot' | 'y' | 'x'; x0?: number; x1?: number }) {
+const MOM: [number, number] = [272, 480];
+const BAR: [number, number] = [480, 522];
+const FET: [number, number] = [522, 790];
+/** Row names sit left of the panel (the longest, 38 characters, needs ~245 units). */
+const LX = 262;
+const MID = (MOM[0] + FET[1]) / 2;
+const TOP = 92;
+const BOT = 586;
+const ROWS = { gas: 140, food: 220, horm: 300, igg: 380, rh: 460, bad: 540 };
+const SYN1 = BAR[0] + 26;
+
+type Glyph = 'o2' | 'co2' | 'food' | 'horm' | 'igg' | 'rh' | 'virus' | 'drug';
+
+function GlyphAt({ g, x, y, o }: { g: Glyph; x: number; y: number; o: number }) {
+  switch (g) {
+    case 'o2':
+      return (
+        <g opacity={o}>
+          <circle cx={x - 3.4} cy={y} r={4} fill="#ff6b6b" stroke="#7c0f25" strokeWidth={0.7} />
+          <circle cx={x + 3.4} cy={y} r={4} fill="#ff6b6b" stroke="#7c0f25" strokeWidth={0.7} />
+        </g>
+      );
+    case 'co2':
+      return (
+        <g opacity={o}>
+          <circle cx={x - 6} cy={y} r={3.2} fill="#93b4ff" />
+          <circle cx={x} cy={y} r={4} fill="#4b5d86" stroke="#1d2a5c" strokeWidth={0.7} />
+          <circle cx={x + 6} cy={y} r={3.2} fill="#93b4ff" />
+        </g>
+      );
+    case 'food':
+      return <path d={Array.from({ length: 6 }, (_, i) => `${i ? 'L' : 'M'}${f1(x + 5.5 * Math.cos((i * Math.PI) / 3))},${f1(y + 5.5 * Math.sin((i * Math.PI) / 3))}`).join('') + 'Z'} fill="#fbbf24" stroke="#8a5a00" strokeWidth={0.8} opacity={o} />;
+    case 'horm':
+      return <path d={`M${x},${y - 6} L${x + 5},${y} L${x},${y + 6} L${x - 5},${y} Z`} fill="#c084fc" stroke="#5b2a8a" strokeWidth={0.8} opacity={o} />;
+    case 'igg':
+    case 'rh':
+      return <path d={`M${x},${y + 6} L${x},${y} L${x - 5},${y - 6} M${x},${y} L${x + 5},${y - 6}`} stroke={g === 'igg' ? '#7ed492' : '#ff7b72'} strokeWidth={2.4} fill="none" opacity={o} strokeLinecap="round" />;
+    case 'virus':
+      return (
+        <g opacity={o} stroke="#ff7b72" strokeWidth={1.4} strokeLinecap="round">
+          {Array.from({ length: 8 }, (_, i) => {
+            const a = (i * Math.PI) / 4;
+            return <path key={i} d={`M${f1(x + 4 * Math.cos(a))},${f1(y + 4 * Math.sin(a))} L${f1(x + 7 * Math.cos(a))},${f1(y + 7 * Math.sin(a))}`} />;
+          })}
+          <circle cx={x} cy={y} r={4.2} fill="#7f1d1d" />
+        </g>
+      );
+    case 'drug':
+      return (
+        <g opacity={o}>
+          <rect x={x - 7} y={y - 3.5} width={14} height={7} rx={3.5} fill="#fca5a5" stroke="#7f1d1d" strokeWidth={0.8} />
+          <rect x={x} y={y - 3.5} width={7} height={7} rx={0} fill="#f87171" />
+        </g>
+      );
+  }
+}
+
+/** Molecules crossing (or leaving) the barrier along a row, positions pure functions of t. */
+function Movers({ y, dir, t, glyphs, n = 3, speed = 0.9, x0 = MOM[0] + 22, x1 = FET[1] - 22 }: { y: number; dir: 1 | -1; t: number; glyphs: Glyph[]; n?: number; speed?: number; x0?: number; x1?: number }) {
   return (
     <g pointerEvents="none">
       {Array.from({ length: n }, (_, i) => {
-        const u = (t * speed + i / n) % 1;
+        const u = (t * speed * 8 + i / n) % 1;
         const x = dir > 0 ? lerp(x0, x1, u) : lerp(x1, x0, u);
         const o = Math.min(1, u * 6, (1 - u) * 6);
-        if (glyph === 'y')
-          return <path key={i} d={`M${f1(x)},${y + 5} L${f1(x)},${y} L${f1(x - 5)},${y - 6} M${f1(x)},${y} L${f1(x + 5)},${y - 6}`} stroke={color} strokeWidth={2} fill="none" opacity={o} strokeLinecap="round" />;
-        if (glyph === 'x')
-          return <path key={i} d={`M${f1(x - 4)},${y - 4} L${f1(x + 4)},${y + 4} M${f1(x + 4)},${y - 4} L${f1(x - 4)},${y + 4}`} stroke={color} strokeWidth={2.2} opacity={o} strokeLinecap="round" />;
-        return <circle key={i} cx={x} cy={y} r={3.4} fill={color} opacity={o} />;
+        return <GlyphAt key={i} g={glyphs[i % glyphs.length]} x={x} y={y} o={o} />;
       })}
     </g>
   );
 }
+
+/** One function row: a soft band (lit as one part) holding its arrows and molecules. */
+function Row({ id, y, show, tint, children }: { id: string; y: number; show: number; tint: string; children: React.ReactNode }) {
+  return (
+    <Mark id={id} show={show}>
+      <g>
+        <rect x={MOM[0] + 6} y={y - 30} width={FET[1] - MOM[0] - 12} height={60} rx={14} fill={tint} fillOpacity={0.1} />
+        {children}
+      </g>
+    </Mark>
+  );
+}
+
+/** Number chip at a row's start, in the maternal column. */
+const Chip = ({ n, y, show, warn = false }: { n: string; y: number; show: number; warn?: boolean }) => (
+  <g opacity={show}>
+    <circle cx={MOM[0] + 22} cy={y - 16} r={9} fill={warn ? '#7f1d1d' : '#1e293b'} stroke={warn ? '#ff7b72' : '#94a3b8'} strokeWidth={1.2} />
+    <text x={MOM[0] + 22} y={y - 16} dy="0.35em" textAnchor="middle" fontSize={10.5} fontWeight={700} fill="#f1f5f9">
+      {n}
+    </text>
+  </g>
+);
 
 export function PlacentaFunctions({ t, reduced }: SceneProps) {
   const g = vis(t, 0.68);
@@ -635,97 +434,113 @@ export function PlacentaFunctions({ t, reduced }: SceneProps) {
   const rh = vis(t, 0.88);
   const bad = vis(t, 0.91);
   const tt = reduced ? 0 : t;
+  // Fetal red cells hit by the Rh antibodies: they burst (pale, broken outline) once the antibodies arrive.
+  const lysis = seg(t, 0.9, 0.95);
   return (
     <g>
       <VilliDefs />
-      {/* Maternal blood | placental barrier | fetal blood */}
+      <W3bDefs />
+      {/* Maternal blood | placental barrier (at term: syncytiotrophoblast + endothelium) | fetal blood */}
       <Part id="biloxka-arteko-espazioa" quiet>
-        <rect x={MOM[0]} y={TOP} width={MOM[1] - MOM[0]} height={BOT - TOP} rx={14} fill="#3a0f19" />
-        <rect x={MOM[0]} y={TOP} width={MOM[1] - MOM[0]} height={BOT - TOP} rx={14} fill="url(#w3v-mblood)" opacity={0.3} />
+        <rect x={MOM[0]} y={TOP} width={MOM[1] - MOM[0] + 8} height={BOT - TOP} rx={16} fill="url(#w3b-blood)" />
+        <rect x={MOM[0]} y={TOP} width={MOM[1] - MOM[0] + 8} height={BOT - TOP} rx={16} fill="#1a0610" opacity={0.45} />
       </Part>
-      <rect x={FET[0]} y={TOP} width={FET[1] - FET[0]} height={BOT - TOP} rx={14} fill="#131b36" />
-      <Part id="biloxka-askea">
-        <rect x={BAR[0]} y={TOP} width={18} height={BOT - TOP} fill={C.syncytio} />
-        <rect x={BAR[0] + 18} y={TOP} width={32} height={BOT - TOP} fill="url(#p-meso-extra)" />
-        <rect x={BAR[0] + 50} y={TOP} width={12} height={BOT - TOP} fill={V.endothelium} />
+      <rect x={FET[0] - 8} y={TOP} width={FET[1] - FET[0] + 8} height={BOT - TOP} rx={16} fill="#3a0f24" />
+      <rect x={FET[0] - 8} y={TOP} width={FET[1] - FET[0] + 8} height={BOT - TOP} rx={16} fill="#0c0612" opacity={0.4} />
+      <Part id="karena-muga">
+        <Part id="sinzitiotrofoblastoa">
+          <rect x={BAR[0]} y={TOP} width={SYN1 - BAR[0]} height={BOT - TOP} fill="url(#w3b-syn)" />
+          <path d={Array.from({ length: 50 }, (_, i) => `M${BAR[0]},${TOP + 6 + i * 10} l-4,2`).join('')} stroke={K.fringe} strokeWidth={1.1} />
+        </Part>
+        <rect x={SYN1} y={TOP} width={3} height={BOT - TOP} fill={C.fibrin} opacity={0.8} />
+        <Part id="endotelioa">
+          <rect x={SYN1 + 3} y={TOP} width={BAR[1] - SYN1 - 3} height={BOT - TOP} fill={K.endo} />
+          {Array.from({ length: 7 }, (_, i) => (
+            <ellipse key={i} cx={BAR[1] - 2} cy={TOP + 40 + i * 72} rx={4} ry={10} fill={K.endoNuc} />
+          ))}
+        </Part>
       </Part>
       {/* Ambient blood flow on both sides */}
-      <Flow d={`M${MOM[0] + 40},${TOP + 4} L${MOM[0] + 40},${BOT - 4}`} n={6} dur={5} r={2.8} color="#ff6b7d" reduced={reduced} />
-      <Flow d={`M${MOM[1] - 30},${TOP + 4} L${MOM[1] - 30},${BOT - 4}`} n={6} dur={6} r={2.8} color="#ff6b7d" reduced={reduced} />
-      <Flow d={`M${FET[1] - 30},${BOT - 4} L${FET[1] - 30},${TOP + 4}`} n={6} dur={5.5} r={2.6} color="#7aa2ff" reduced={reduced} />
+      <Flow d={`M${MOM[0] + 40},${TOP + 4} L${MOM[0] + 40},${BOT - 4}`} n={6} dur={5} r={2.8} color="#ff8a9b" reduced={reduced} />
+      <Flow d={`M${FET[1] - 30},${BOT - 4} L${FET[1] - 30},${TOP + 4}`} n={6} dur={5.5} r={2.6} color="#d94a63" reduced={reduced} />
 
-      <Note x={(MOM[0] + MOM[1]) / 2} y={76} tone="accent">Amaren odola</Note>
-      <Note x={(BAR[0] + BAR[1]) / 2} y={76}>Karena muga</Note>
-      <Note x={(FET[0] + FET[1]) / 2} y={76} tone="accent">Fetuaren odola</Note>
+      <Note x={(MOM[0] + MOM[1]) / 2} y={72} tone="accent">Amaren odola</Note>
+      <Note x={(FET[0] + FET[1]) / 2} y={72} tone="accent">Fetuaren odola</Note>
 
-      {/* 1) Gases */}
-      <Mark id="gasen-elkartrukea" show={g}>
-        <g>
-          <rect x={MOM[0] + 8} y={ROWS.gas - 26} width={FET[1] - MOM[0] - 16} height={60} rx={10} fill="#ff8a8a" fillOpacity={0.07} stroke="#ff8a8a" strokeOpacity={0.5} strokeDasharray="5 4" pointerEvents="stroke" />
-        <Arrow from={[MOM[0] + 24, ROWS.gas - 10]} to={[FET[1] - 24, ROWS.gas - 10]} bend={0} color="#ff8a8a" width={2.2} progress={seg(t, 0.68, 0.72)} />
-        <Arrow from={[FET[1] - 24, ROWS.gas + 12]} to={[MOM[0] + 24, ROWS.gas + 12]} bend={0} color="#93b4ff" width={2.2} progress={seg(t, 0.69, 0.73)} />
-        <Mover y={ROWS.gas - 10} dir={1} t={tt} color="#ff8a8a" />
-        <Mover y={ROWS.gas + 12} dir={-1} t={tt} color="#93b4ff" />
-        </g>
-      </Mark>
-      <Note x={FET[0] + 20} y={ROWS.gas - 26} align="start" show={g} tone="accent">O₂ fetura</Note>
-      <Note x={MOM[1] - 20} y={ROWS.gas + 32} align="end" show={g}>CO₂ eta CO amarengana</Note>
-      <Label id="gasen-elkartrukea" x={300} y={ROWS.gas} show={g} align="end" />
+      {/* 1) Gases, by diffusion */}
+      <Row id="gasen-elkartrukea" y={ROWS.gas} show={g} tint="#ff8a8a">
+        <Arrow from={[MOM[0] + 40, ROWS.gas - 10]} to={[FET[1] - 24, ROWS.gas - 10]} bend={0} color="#ff8a8a" width={2.2} progress={seg(t, 0.68, 0.72)} />
+        <Arrow from={[FET[1] - 24, ROWS.gas + 12]} to={[MOM[0] + 40, ROWS.gas + 12]} bend={0} color="#93b4ff" width={2.2} progress={seg(t, 0.69, 0.73)} />
+        <Movers y={ROWS.gas - 10} dir={1} t={tt} glyphs={['o2']} />
+        <Movers y={ROWS.gas + 12} dir={-1} t={tt} glyphs={['co2']} />
+      </Row>
+      <Chip n="1" y={ROWS.gas} show={g} />
+      <Note x={FET[0] + 24} y={ROWS.gas + 29} align="start" show={g} tone="accent">O₂ fetura</Note>
+      <Note x={MOM[1] - 16} y={ROWS.gas + 29} align="end" show={g}>CO₂ eta CO amarengana</Note>
+      <Label id="gasen-elkartrukea" x={LX} y={ROWS.gas} align="end" show={g} />
 
       {/* 2) Nutrients and electrolytes */}
-      <Mark id="elikagaien-elkartrukea" show={food}>
-        <g>
-          <rect x={MOM[0] + 8} y={ROWS.food - 26} width={FET[1] - MOM[0] - 16} height={60} rx={10} fill="#fbbf24" fillOpacity={0.07} stroke="#fbbf24" strokeOpacity={0.5} strokeDasharray="5 4" pointerEvents="stroke" />
-        <Arrow from={[MOM[0] + 24, ROWS.food]} to={[FET[1] - 24, ROWS.food]} bend={0} color="#fbbf24" width={2.2} progress={seg(t, 0.71, 0.75)} />
-        <Mover y={ROWS.food} dir={1} t={tt} color="#fbbf24" n={4} speed={6} />
-        </g>
-      </Mark>
-      <Note x={(MOM[0] + FET[1]) / 2} y={ROWS.food + 22} show={food} size={11.5}>aminoazidoak · karbohidratoak · gantz-azido askeak · bitaminak</Note>
-      <Label id="elikagaien-elkartrukea" x={300} y={ROWS.food} show={food} align="end" small />
+      <Row id="elikagaien-elkartrukea" y={ROWS.food} show={food} tint="#fbbf24">
+        <Arrow from={[MOM[0] + 40, ROWS.food - 4]} to={[FET[1] - 24, ROWS.food - 4]} bend={0} color="#fbbf24" width={2.2} progress={seg(t, 0.71, 0.75)} />
+        <Movers y={ROWS.food - 4} dir={1} t={tt} glyphs={['food']} n={4} speed={0.75} />
+      </Row>
+      <Chip n="2" y={ROWS.food} show={food} />
+      <Note x={MID} y={ROWS.food + 20} show={food} size={11.5}>aminoazidoak · karbohidratoak · gantz-azido askeak · bitaminak</Note>
+      <Label id="elikagaien-elkartrukea" x={LX} y={ROWS.food} align="end" show={food} small />
 
-      {/* 3) Hormones made by the placenta */}
-      <Mark id="karenaren-hormonak" show={horm}>
-        <g>
-          <rect x={MOM[0] + 8} y={ROWS.horm - 26} width={FET[1] - MOM[0] - 16} height={60} rx={10} fill="#c084fc" fillOpacity={0.07} stroke="#c084fc" strokeOpacity={0.5} strokeDasharray="5 4" pointerEvents="stroke" />
-        <circle cx={BAR[0] + 9} cy={ROWS.horm} r={10 + 3 * Math.sin(t * 60)} fill="#c084fc" opacity={0.35} />
-        <Arrow from={[BAR[0] + 4, ROWS.horm]} to={[MOM[0] + 24, ROWS.horm]} bend={0} color="#c084fc" width={2.2} progress={seg(t, 0.78, 0.82)} />
-        <Mover y={ROWS.horm} dir={-1} t={tt} color="#c084fc" x0={MOM[0] + 20} x1={BAR[0]} speed={5} />
-        </g>
-      </Mark>
-      <Note x={(MOM[0] + FET[1]) / 2} y={ROWS.horm + 22} show={horm} size={11.5}>estrogenoa · progesterona · gonadotropina · hazkuntza hormonaren antzekoa · somatomamotropina</Note>
-      <Label id="karenaren-hormonak" x={300} y={ROWS.horm} show={horm} align="end" />
+      {/* 3) Hormones made by the placenta (syncytiotrophoblast), into the mother's blood */}
+      <Row id="karenaren-hormonak" y={ROWS.horm} show={horm} tint="#c084fc">
+        <ellipse cx={(BAR[0] + SYN1) / 2} cy={ROWS.horm - 4} rx={16} ry={20 + 3 * Math.sin(t * 60)} fill="#c084fc" opacity={0.3} />
+        <Arrow from={[BAR[0] - 4, ROWS.horm - 4]} to={[MOM[0] + 40, ROWS.horm - 4]} bend={0} color="#c084fc" width={2.2} progress={seg(t, 0.78, 0.82)} />
+        <Movers y={ROWS.horm - 4} dir={-1} t={tt} glyphs={['horm']} x0={MOM[0] + 40} x1={BAR[0] - 4} speed={0.6} />
+      </Row>
+      <Chip n="3" y={ROWS.horm} show={horm} />
+      <Note x={MID} y={ROWS.horm + 20} show={horm} size={11}>estrogenoa · progesterona · gonadotropina · hazkuntza hormonaren antzekoa · somatomamotropina</Note>
+      <Label id="karenaren-hormonak" x={LX} y={ROWS.horm} align="end" show={horm} />
 
       {/* 4) IgG antibodies from mother to fetus */}
-      <Mark id="igg-antigorputzak" show={igg}>
-        <g>
-          <rect x={MOM[0] + 8} y={ROWS.igg - 26} width={FET[1] - MOM[0] - 16} height={60} rx={10} fill="#7ed492" fillOpacity={0.07} stroke="#7ed492" strokeOpacity={0.5} strokeDasharray="5 4" pointerEvents="stroke" />
-        <Arrow from={[MOM[0] + 24, ROWS.igg]} to={[FET[1] - 24, ROWS.igg]} bend={0} color="#7ed492" width={2.2} progress={seg(t, 0.81, 0.85)} />
-        <Mover y={ROWS.igg - 2} dir={1} t={tt} color="#7ed492" glyph="y" speed={5} />
-        </g>
-      </Mark>
-      <Note x={FET[0] + 20} y={ROWS.igg + 22} align="start" show={igg} size={11.5}>amarengandik fetura</Note>
-      <Label id="igg-antigorputzak" x={300} y={ROWS.igg} show={igg} align="end" />
+      <Row id="igg-antigorputzak" y={ROWS.igg} show={igg} tint="#7ed492">
+        <Arrow from={[MOM[0] + 40, ROWS.igg - 4]} to={[FET[1] - 24, ROWS.igg - 4]} bend={0} color="#7ed492" width={2.2} progress={seg(t, 0.81, 0.85)} />
+        <Movers y={ROWS.igg - 4} dir={1} t={tt} glyphs={['igg']} speed={0.6} />
+      </Row>
+      <Chip n="4" y={ROWS.igg} show={igg} />
+      <Note x={FET[0] + 24} y={ROWS.igg + 20} align="start" show={igg} size={11.5}>amarengandik fetura: babesa</Note>
+      <Label id="igg-antigorputzak" x={LX} y={ROWS.igg} align="end" show={igg} />
 
-      {/* Not always beneficial */}
-      <Mark id="eritroblastosi-fetala" show={rh}>
-        <g>
-          <rect x={MOM[0] + 8} y={ROWS.rh - 26} width={FET[1] - MOM[0] - 16} height={60} rx={10} fill="#ff7b72" fillOpacity={0.07} stroke="#ff7b72" strokeOpacity={0.5} strokeDasharray="5 4" pointerEvents="stroke" />
-        <Arrow from={[MOM[0] + 24, ROWS.rh]} to={[FET[1] - 24, ROWS.rh]} bend={0} color="#ff7b72" width={2.2} progress={seg(t, 0.88, 0.92)} />
-        <Mover y={ROWS.rh - 2} dir={1} t={tt} color="#ff7b72" glyph="y" speed={5} />
-        </g>
-      </Mark>
-      <Note x={(MOM[0] + FET[1]) / 2} y={ROWS.rh + 22} show={rh} tone="warn" size={11.5}>Rh antigorputzak: 2. haurdunaldian fetuaren globulu gorriak suntsitu</Note>
-      <Label id="eritroblastosi-fetala" x={300} y={ROWS.rh} show={rh} align="end" />
+      {/* Not always beneficial: Rh antibodies destroy the (second) fetus's red cells */}
+      <Row id="eritroblastosi-fetala" y={ROWS.rh} show={rh} tint="#ff7b72">
+        <Arrow from={[MOM[0] + 40, ROWS.rh - 4]} to={[FET[1] - 70, ROWS.rh - 4]} bend={0} color="#ff7b72" width={2.2} progress={seg(t, 0.88, 0.92)} />
+        <Movers y={ROWS.rh - 4} dir={1} t={tt} glyphs={['rh']} x1={FET[1] - 70} speed={0.6} />
+        {[0, 1].map((k) => {
+          const cx = FET[1] - 48 + k * 18;
+          const cy = ROWS.rh - 4 + k * 6;
+          // a burst cell: its outline turns ragged and pale
+          const d = Array.from({ length: 14 }, (_, i) => {
+            const a = (i / 14) * Math.PI * 2;
+            const j = 1 + lysis * (i % 2 ? -0.28 : 0.12);
+            return `${i ? 'L' : 'M'}${f1(cx + 9 * j * Math.cos(a))},${f1(cy + 6 * j * Math.sin(a))}`;
+          }).join('') + 'Z';
+          return <path key={k} d={d} fill={lysis > 0.5 ? '#f3a6b4' : '#d94a63'} fillOpacity={1 - 0.5 * lysis} stroke="#7c0f25" strokeWidth={1} />;
+        })}
+      </Row>
+      <Chip n="!" y={ROWS.rh} show={rh} warn />
+      <Note x={MID} y={ROWS.rh + 20} show={rh} tone="warn" size={11.5}>Rh antigorputzak: 2. haurdunaldian fetuaren globulu gorriak suntsitu</Note>
+      <Label id="eritroblastosi-fetala" x={LX} y={ROWS.rh} align="end" show={rh} />
 
-      <Mark id="karena-zeharkatzen-duten-kalteak" show={bad}>
-        <g>
-          <rect x={MOM[0] + 8} y={ROWS.bad - 26} width={FET[1] - MOM[0] - 16} height={60} rx={10} fill="#ff7b72" fillOpacity={0.07} stroke="#ff7b72" strokeOpacity={0.5} strokeDasharray="5 4" pointerEvents="stroke" />
-        <Arrow from={[MOM[0] + 24, ROWS.bad]} to={[FET[1] - 24, ROWS.bad]} bend={0} color="#ff7b72" width={2.2} progress={seg(t, 0.91, 0.95)} />
-        <Mover y={ROWS.bad} dir={1} t={tt} color="#ff7b72" glyph="x" speed={6} n={4} />
-        </g>
-      </Mark>
-      <Note x={(MOM[0] + FET[1]) / 2} y={ROWS.bad + 22} show={bad} tone="warn" size={11.5}>biruela · barizela · poliomielitisa · errubeola · drogak · alkohola</Note>
-      <Label id="karena-zeharkatzen-duten-kalteak" x={300} y={ROWS.bad} show={bad} align="end" small />
+      <Row id="karena-zeharkatzen-duten-kalteak" y={ROWS.bad} show={bad} tint="#ff7b72">
+        <Arrow from={[MOM[0] + 40, ROWS.bad - 4]} to={[FET[1] - 24, ROWS.bad - 4]} bend={0} color="#ff7b72" width={2.2} progress={seg(t, 0.91, 0.95)} />
+        <Movers y={ROWS.bad - 4} dir={1} t={tt} glyphs={['virus', 'drug']} n={4} speed={0.7} />
+      </Row>
+      <Chip n="!" y={ROWS.bad} show={bad} warn />
+      <Note x={MID} y={ROWS.bad + 20} show={bad} tone="warn" size={11.5}>biruela · barizela · poliomielitisa · errubeola · drogak · alkohola</Note>
+      <Label id="karena-zeharkatzen-duten-kalteak" x={LX} y={ROWS.bad} align="end" show={bad} small />
+
+      {/* The barrier named once the rows are on, from the right gutter */}
+      {/* Leaders run along the gaps between the rows, so they cross no words */}
+      <Label id="karena-muga" x={810} y={TOP + 8} ax={BAR[1] + 1} ay={TOP + 8} show={g} />
+      <Label id="endotelioa" x={810} y={ROWS.food - 35} ax={BAR[1] - 3} ay={ROWS.food - 35} show={g} />
+      <Label id="sinzitiotrofoblastoa" x={810} y={(ROWS.food + ROWS.horm) / 2} ax={(BAR[0] + SYN1) / 2} ay={(ROWS.food + ROWS.horm) / 2} show={g} small />
+      <Note x={(FET[0] + FET[1]) / 2} y={BOT + 16} show={g} size={11}>4. hilabetetik: endotelioa + sinzitiotrofoblastoa (muga mehea)</Note>
 
       <TermNotes t={t} />
     </g>
