@@ -1,14 +1,15 @@
 'use client';
 
-import { Arrow, C, Destination, FollowRing, Journey, Label, Note, OnTop, Part, clamp, lerp, lin, mix, rand, seg, useScene, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Destination, FollowRing, Journey, Label, Note, OnTop, Part, clamp, lerp, lin, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
 import { useId } from 'react';
 import { f1 } from './common';
+import { Callout } from './gastroKit';
 
 /**
  * 16–18. egunak — notochord, cell by cell, in two linked panels.
  * A (top): midline sagittal strip, cranial left. Prenotochordal cells leave the primitive pit one by
  *   one and the cord they form grows cranially between ectoderm and endoderm until it meets the
- *   prechordal plate. A dashed line marks where panel B is cut.
+ *   prechordal plate. A thin orange plane (B) marks where panel B is cut.
  *   Two cells are followed (outlined in white, with their route from the pit): the first one out, which
  *   reaches the prechordal plate, and the one that settles at line B; a ghost shows the notochord
  *   they will form.
@@ -121,28 +122,6 @@ function bPath(t: number) {
   return pts;
 }
 
-function Callout({ x, y, text, show, color = '#e8eefc', to }: { x: number; y: number; text: string; show: number; color?: string; to?: Pt }) {
-  const ctx = useScene();
-  if (show <= 0.02 || !ctx.showLabels || ctx.quiz) return null;
-  const w = text.length * 6.9 + 18;
-  return (
-    <>
-      <g opacity={show} pointerEvents="none">
-        {to && <path d={`M${f1(x)},${f1(y)} L${f1(to[0])},${f1(to[1])}`} stroke={color} strokeWidth={1.2} strokeDasharray="3 3" opacity={0.8} />}
-        {to && <circle cx={to[0]} cy={to[1]} r={3} fill={color} />}
-      </g>
-      <OnTop>
-        <g opacity={show} pointerEvents="none">
-          <rect x={f1(x - w / 2)} y={y - 12} width={f1(w)} height={24} rx={12} fill="rgba(12,12,16,0.9)" stroke={color} strokeOpacity={0.55} />
-          <text x={x} y={y} dy="0.35em" textAnchor="middle" fontSize={12.5} fontWeight={600} fill={color}>
-            {text}
-          </text>
-        </g>
-      </OnTop>
-    </>
-  );
-}
-
 const STEPS: [number, string, string][] = [
   [0, 'Nodoa eta hobitxoa', '#dbe4ff'],
   [NB.migrate, 'Zelulak kranealerantz', C.notochord],
@@ -176,6 +155,9 @@ function Strip({ t, reduced }: { t: number; reduced?: boolean }) {
   return (
     <g>
       <rect x={SX0 - 8} y={82} width={SX1 - SX0 + 16} height={160} rx={12} fill="rgba(12,12,16,0.55)" stroke="rgba(232,238,252,0.12)" />
+      {/* Amniotic cavity above, yolk sac below: a faint tint so the strip reads as a cut through the disc. */}
+      <rect x={SX0} y={100} width={SX1 - SX0} height={ECTO_Y - 104} rx={6} fill="url(#nc-amn)" pointerEvents="none" />
+      <rect x={SX0} y={ENDO_Y + 14} width={SX1 - SX0} height={22} rx={6} fill="url(#nc-yolk)" pointerEvents="none" />
       <Note x={SX0 + 4} y={96} align="start" size={10.5}>
         A · Erdiko mozketa sagitala · ◀ kraneala
       </Note>
@@ -189,7 +171,15 @@ function Strip({ t, reduced }: { t: number; reduced?: boolean }) {
           const node = Math.exp(-(((x - X_NODE) / 16) ** 2));
           const groove = x > X_NODE + 18 ? 8 * Math.exp(-(((x - (X_NODE + 70)) / 60) ** 2)) : 0;
           const lit = induce * clamp((x - X_HEAD + 10) / 20) * clamp((X_NODE - 20 - x) / 20);
-          return <rect key={i} x={f1(x - 5.5)} y={f1(ECTO_Y - 6 * node + groove)} width={11} height={f1(20 + 6 * node)} rx={3} fill={mix(C.ectoderm, '#a9c3ff', lit)} stroke="rgba(10,14,28,0.5)" strokeWidth={0.7} />;
+          const y = ECTO_Y - 6 * node + groove;
+          const h = 20 + 6 * node;
+          return (
+            <g key={i}>
+              <rect x={f1(x - 5.5)} y={f1(y)} width={11} height={f1(h)} rx={3} fill={mix(C.ectoderm, '#a9c3ff', lit)} stroke="rgba(10,14,28,0.5)" strokeWidth={0.7} />
+              <rect x={f1(x - 5.5)} y={f1(y)} width={11} height={f1(h)} rx={3} fill="url(#nc-shine)" />
+              <ellipse cx={f1(x)} cy={f1(y + h * 0.62)} rx={2.6} ry={3.2} fill="rgba(22,30,74,0.5)" />
+            </g>
+          );
         })}
       </Part>
       {/* Endoderm */}
@@ -199,20 +189,32 @@ function Strip({ t, reduced }: { t: number; reduced?: boolean }) {
           const under = x > X_HEAD - 4 && x < X_NODE - 14;
           const y = x < X_BUCCO + 10 ? ENDO_Y - 50 * clamp((X_BUCCO + 10 - x) / 16) : ENDO_Y;
           const o = under ? 1 - gapOpen * 0.85 : 1;
-          return <rect key={i} x={f1(x - 5.5)} y={f1(y)} width={11} height={12} rx={3} fill={C.endoderm} opacity={o} stroke="rgba(10,14,28,0.5)" strokeWidth={0.7} />;
+          return (
+            <g key={i} opacity={o}>
+              <rect x={f1(x - 5.5)} y={f1(y)} width={11} height={12} rx={3} fill={C.endoderm} stroke="rgba(10,14,28,0.5)" strokeWidth={0.7} />
+              <rect x={f1(x - 5.5)} y={f1(y)} width={11} height={12} rx={3} fill="url(#nc-shine)" />
+              <circle cx={f1(x)} cy={f1(y + 6.5)} r={2.2} fill="rgba(110,70,10,0.5)" />
+            </g>
+          );
         })}
       </Part>
       <Part id="mintz-bukofaringeoa">
-        <rect x={X_BUCCO - 12} y={ECTO_Y - 4} width={24} height={ENDO_Y - ECTO_Y + 20} rx={8} fill="none" stroke="#dfe6f7" strokeWidth={1.2} strokeDasharray="3 3" />
+        {/* Ectoderm pressed on endoderm with no mesoderm between: a pale, solid sheet. */}
+        <rect x={X_BUCCO - 7} y={ECTO_Y + 2} width={14} height={ENDO_Y - ECTO_Y + 8} rx={6} fill="rgba(238,242,255,0.32)" stroke="#eef2ff" strokeWidth={1.1} />
       </Part>
       <Part id="plaka-prekordala">
         {Array.from({ length: 7 }, (_, i) => (
-          <circle key={i} cx={f1(X_PRE - 12 + (i % 4) * 8 + rand(i) * 3)} cy={f1(MID_Y - 10 + Math.floor(i / 4) * 12 + rand(i + 9) * 4)} r={5.2} fill={C.prechordal} stroke="rgba(10,14,28,0.5)" strokeWidth={0.7} />
+          <g key={i}>
+            <circle cx={f1(X_PRE - 12 + (i % 4) * 8 + rand(i) * 3)} cy={f1(MID_Y - 10 + Math.floor(i / 4) * 12 + rand(i + 9) * 4)} r={5.2} fill={C.prechordal} stroke="rgba(10,14,28,0.5)" strokeWidth={0.7} />
+            <circle cx={f1(X_PRE - 13.5 + (i % 4) * 8 + rand(i) * 3)} cy={f1(MID_Y - 11.5 + Math.floor(i / 4) * 12 + rand(i + 9) * 4)} r={1.8} fill="rgba(255,255,255,0.4)" />
+          </g>
         ))}
       </Part>
       {/* Node, pit, groove */}
       <Part id="nodo-primitiboa">
-        <ellipse cx={X_NODE} cy={ECTO_Y + 6} rx={20} ry={17} fill="none" stroke="#fcd34d" strokeWidth={1.3} strokeDasharray="3 3" />
+        {/* The node is the thickened, raised ectoderm round the pit: lit from above like a mound. */}
+        <ellipse cx={X_NODE} cy={ECTO_Y + 4} rx={21} ry={16} fill="url(#nc-node)" />
+        <path d={`M${X_NODE - 20},${ECTO_Y - 4} Q${X_NODE},${ECTO_Y - 17} ${X_NODE + 20},${ECTO_Y - 4}`} fill="none" stroke="#d6e2ff" strokeWidth={1.4} strokeLinecap="round" opacity={0.8} />
       </Part>
       <Part id="hobitxo-primitiboa">
         <path d={`M${X_NODE - 7},${ECTO_Y - 7} L${X_NODE},${ECTO_Y + 10} L${X_NODE + 7},${ECTO_Y - 7} Z`} fill="#0c1730" />
@@ -221,7 +223,8 @@ function Strip({ t, reduced }: { t: number; reduced?: boolean }) {
         <rect x={X_NODE - 4} y={ECTO_Y - 8} width={8} height={ENDO_Y - ECTO_Y + 24} rx={3} fill="#2a3a5c" stroke="#9fb6e8" strokeWidth={1.1} />
       </Part>
       <Part id="ildo-primitiboa" quiet>
-        <path d={`M${X_NODE + 22},${ECTO_Y + 22} Q${X_NODE + 80},${ECTO_Y + 30} ${SX1 - 20},${ECTO_Y + 22}`} fill="none" stroke="#93a7d9" strokeWidth={2} strokeDasharray="4 4" opacity={0.6} />
+        <path d={`M${X_NODE + 16},${ECTO_Y - 1} Q${X_NODE + 70},${ECTO_Y + 6} ${SX1 - 20},${ECTO_Y + 1}`} fill="none" stroke="#0c1730" strokeWidth={2.6} strokeLinecap="round" opacity={0.75} />
+        <path d={`M${X_NODE + 16},${ECTO_Y - 3} Q${X_NODE + 70},${ECTO_Y + 4} ${SX1 - 20},${ECTO_Y - 1}`} fill="none" stroke="#b9cdfb" strokeWidth={1} strokeLinecap="round" opacity={0.55} />
       </Part>
 
       {/* What the moving cells will form: the notochord, from the node to the prechordal plate. */}
@@ -230,7 +233,10 @@ function Strip({ t, reduced }: { t: number; reduced?: boolean }) {
       {cordOn && (
         <Part id={rod > 0.5 ? 'notokorda' : plate > 0.5 ? 'notokorda-plaka' : 'zelula-prenotokordalak'}>
           {rod > 0.02 && (
-            <rect x={X_HEAD} y={f1(lerp(ENDO_Y, MID_Y - 8, rod))} width={X_NODE - 14 - X_HEAD} height={f1(lerp(12, 18, rod))} rx={8} fill={C.notochord} opacity={rod} stroke="rgba(40,10,70,0.7)" />
+            <g opacity={rod}>
+              <rect x={X_HEAD} y={f1(lerp(ENDO_Y, MID_Y - 8, rod))} width={X_NODE - 14 - X_HEAD} height={f1(lerp(12, 18, rod))} rx={8} fill={C.notochord} stroke="rgba(40,10,70,0.7)" />
+              <rect x={X_HEAD} y={f1(lerp(ENDO_Y, MID_Y - 8, rod))} width={X_NODE - 14 - X_HEAD} height={f1(lerp(12, 18, rod))} rx={8} fill="url(#nc-shine)" />
+            </g>
           )}
           {Array.from({ length: N_CORD }, (_, i) => {
             const x = cordX(i, t);
@@ -256,9 +262,11 @@ function Strip({ t, reduced }: { t: number; reduced?: boolean }) {
       </Note>
       {extent > 0.02 && (
         <g opacity={extent} pointerEvents="none">
-          <path d={`M${X_HEAD},${MID_Y - 22} L${X_NODE - 14},${MID_Y - 22}`} stroke="#ffb86b" strokeWidth={2} />
-          <path d={`M${X_HEAD},${MID_Y - 28} v12 M${X_NODE - 14},${MID_Y - 28} v12`} stroke="#ffb86b" strokeWidth={2} />
-          <path d={`M${X_NODE + 30},${MID_Y} L${SX1 - 30},${MID_Y}`} stroke="#fca5a5" strokeWidth={2} strokeDasharray="5 4" />
+          <path d={`M${X_HEAD},${MID_Y + 22} L${X_NODE - 14},${MID_Y + 22}`} stroke="#ffb86b" strokeWidth={2} />
+          <path d={`M${X_HEAD},${MID_Y + 16} v12 M${X_NODE - 14},${MID_Y + 16} v12`} stroke="#ffb86b" strokeWidth={2} />
+          {/* Caudal to the node: no notochord (a muted bar with a stop at the node). */}
+          <path d={`M${X_NODE + 30},${MID_Y + 22} L${SX1 - 30},${MID_Y + 22}`} stroke="#fca5a5" strokeWidth={2} opacity={0.55} />
+          <path d={`M${X_NODE + 30},${MID_Y + 16} v12`} stroke="#fca5a5" strokeWidth={2} opacity={0.8} />
         </g>
       )}
       {induce > 0.02 &&
@@ -269,7 +277,8 @@ function Strip({ t, reduced }: { t: number; reduced?: boolean }) {
 
       {/* Cut line for panel B */}
       <g opacity={cut} pointerEvents="none">
-        <line x1={X_CUT} y1={104} x2={X_CUT} y2={232} stroke="#ffb86b" strokeWidth={1.4 + crossing * 1.6} strokeDasharray="5 4" />
+        <rect x={X_CUT - 4} y={110} width={8} height={122} rx={4} fill="#ffb86b" opacity={0.1 + crossing * 0.12} />
+        <line x1={X_CUT} y1={112} x2={X_CUT} y2={232} stroke="#ffb86b" strokeWidth={1.2 + crossing * 1.4} opacity={0.75} />
         <circle cx={X_CUT} cy={104} r={9} fill="#ffb86b" />
         <text x={X_CUT} y={104} dy="0.35em" textAnchor="middle" fontSize={10.5} fontWeight={700} fill="#0f0f11">
           B
@@ -341,6 +350,7 @@ function Section({ t, reduced }: { t: number; reduced?: boolean }) {
           return (
             <g key={i}>
               <rect x={f1(x - TW / 2 + 1)} y={f1(B_ECTO - lit * 6)} width={TW - 2} height={f1(B_ECTO_H + lit * 6)} rx={4} fill={mix(C.ectoderm, '#a9c3ff', lit)} stroke="rgba(10,14,28,0.55)" strokeWidth={0.9} />
+              <rect x={f1(x - TW / 2 + 1)} y={f1(B_ECTO - lit * 6)} width={TW - 2} height={f1(B_ECTO_H + lit * 6)} rx={4} fill="url(#nc-shine)" />
               <ellipse cx={f1(x)} cy={f1(B_ECTO + 14 + rand(i) * 16)} rx={5.5} ry={6} fill="rgba(30,20,50,0.55)" />
             </g>
           );
@@ -358,6 +368,7 @@ function Section({ t, reduced }: { t: number; reduced?: boolean }) {
                   return <line key={a} x1={f1(x)} y1={f1(y)} x2={f1(x + Math.cos(ang) * 17)} y2={f1(y + Math.sin(ang) * 12)} stroke={C.mesoIntra} strokeWidth={2.2} strokeLinecap="round" />;
                 })}
                 <ellipse cx={f1(x)} cy={f1(y)} rx={8.5} ry={7} fill={C.mesoIntra} stroke="rgba(10,14,28,0.5)" strokeWidth={0.8} />
+                <circle cx={f1(x - 2.5)} cy={f1(y - 2)} r={2.6} fill="rgba(255,255,255,0.32)" />
               </g>
             );
           }),
@@ -367,6 +378,7 @@ function Section({ t, reduced }: { t: number; reduced?: boolean }) {
         {endo.map((c) => (
           <g key={c.key} opacity={c.o}>
             <rect x={f1(c.x - TH / 2 + 1)} y={B_ENDO - B_ENDO_H / 2} width={TH - 2} height={B_ENDO_H} rx={5} fill={C.endoderm} stroke="rgba(10,14,28,0.5)" strokeWidth={0.9} />
+            <rect x={f1(c.x - TH / 2 + 1)} y={B_ENDO - B_ENDO_H / 2} width={TH - 2} height={B_ENDO_H} rx={5} fill="url(#nc-shine)" />
             <circle cx={f1(c.x)} cy={B_ENDO + 1} r={4.4} fill="rgba(30,20,50,0.5)" />
           </g>
         ))}
@@ -377,6 +389,7 @@ function Section({ t, reduced }: { t: number; reduced?: boolean }) {
           {cells.map((c, j) => (
             <g key={j} opacity={c.o}>
               <ellipse cx={f1(c.x)} cy={f1(c.y)} rx={f1(c.r * lerp(0.6, 1, c.o))} ry={f1(c.r * 0.86 * lerp(0.6, 1, c.o))} fill={C.notochord} stroke="rgba(40,10,70,0.75)" strokeWidth={0.9} />
+              <ellipse cx={f1(c.x)} cy={f1(c.y)} rx={f1(c.r * lerp(0.6, 1, c.o))} ry={f1(c.r * 0.86 * lerp(0.6, 1, c.o))} fill="url(#nc-ball)" />
               <circle cx={f1(c.x + 0.5)} cy={f1(c.y + 0.5)} r={3.8} fill="rgba(20,6,40,0.6)" />
             </g>
           ))}
@@ -451,6 +464,31 @@ export function NotochordCells({ t, reduced }: SceneProps) {
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
+      <defs>
+        <linearGradient id="nc-shine" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity={0.32} />
+          <stop offset="0.45" stopColor="#fff" stopOpacity={0} />
+          <stop offset="1" stopColor="#000" stopOpacity={0.24} />
+        </linearGradient>
+        <radialGradient id="nc-ball" cx="35%" cy="30%" r="75%">
+          <stop offset="0" stopColor="#fff" stopOpacity={0.38} />
+          <stop offset="0.55" stopColor="#fff" stopOpacity={0} />
+          <stop offset="1" stopColor="#000" stopOpacity={0.3} />
+        </radialGradient>
+        <radialGradient id="nc-node" cx="50%" cy="30%" r="65%">
+          <stop offset="0" stopColor="#dbe6ff" stopOpacity={0.6} />
+          <stop offset="0.7" stopColor="#8fb0f5" stopOpacity={0.18} />
+          <stop offset="1" stopColor="#8fb0f5" stopOpacity={0} />
+        </radialGradient>
+        <linearGradient id="nc-amn" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#8fb4f7" stopOpacity={0} />
+          <stop offset="1" stopColor="#8fb4f7" stopOpacity={0.1} />
+        </linearGradient>
+        <linearGradient id="nc-yolk" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#f2c14e" stopOpacity={0.12} />
+          <stop offset="1" stopColor="#f2c14e" stopOpacity={0} />
+        </linearGradient>
+      </defs>
       <Strip t={t} reduced={reduced} />
       <Section t={t} reduced={reduced} />
       <Legend />
@@ -476,7 +514,7 @@ export function NotochordCells({ t, reduced }: SceneProps) {
       <Callout x={560} y={252} text="notokorda: hobitxotik plaka prekordalera · kaudalean EZ" show={on(NB.extent, NB.induce)} color="#ffb86b" />
       <Callout x={MIDX} y={530} text="notokorda → ektodermoa: indukzioa (plaka neurala)" show={seg(t, NB.induce, NB.induce + 0.03)} />
 
-      <Label id={cordSlot} x={190} y={140} ax={cordSlot === 'zelula-prenotokordalak' ? Math.max(lerp(X_HEAD + 40, X_NODE - 60, 0.3), f + 4) : lerp(X_HEAD + 40, X_NODE - 60, 0.3)} ay={cordSlot === 'notokorda-plaka' ? ENDO_Y + 6 : MID_Y} show={seg(t, NB.migrate + 0.04, NB.migrate + 0.07)} small />
+      <Label id={cordSlot} x={190} y={140} ax={cordSlot === 'zelula-prenotokordalak' ? Math.max(lerp(X_HEAD + 40, X_NODE - 60, 0.3), f + 4) : lerp(X_HEAD + 40, X_NODE - 60, 0.3)} ay={cordSlot === 'notokorda-plaka' ? ENDO_Y + 6 : cordSlot === 'notokorda' ? lerp(ENDO_Y + 6, MID_Y + 1, seg(t, NB.rod, NB.rod + 0.08)) : MID_Y} show={seg(t, NB.migrate + 0.04, NB.migrate + 0.07)} small />
       <Label id="plaka-prekordala" x={190} y={172} ax={X_PRE - 6} ay={MID_Y} small />
       <Label id="mintz-bukofaringeoa" x={190} y={204} ax={X_BUCCO - 6} ay={ENDO_Y - 20} small />
       <Label id="nodo-primitiboa" x={690} y={75} ax={X_NODE - 14} ay={ECTO_Y - 8} align="end" small />

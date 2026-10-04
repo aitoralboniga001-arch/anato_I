@@ -1,7 +1,9 @@
 'use client';
 
-import { Arrow, C, CellBand, Label, Note, Part, bezier, lerp, line, rand, seg, tube, type Pt, type SceneProps } from '@/components/kit';
-import { W3C, amnionArc, discOutlinePath, f1, SAG, yolkArc } from './common';
+import { Arrow, C, Label, Note, Part, bezier, lerp, rand, seg, tube, type Pt, type SceneProps } from '@/components/kit';
+import { discOutline, discOutlinePath, f1 } from './common';
+import { DorsalDefs } from './dorsalKit';
+import { useId } from 'react';
 import { DiscDrawing, MembraneMark, makeDisc } from './DiscSection';
 import { Cells } from '@/components/scenes/section/Section';
 
@@ -10,110 +12,197 @@ import { Cells } from '@/components/scenes/section/Section';
  * faster cranially (pear/slipper shape) while the streak regresses caudally — gastrulation
  * continues caudally until the end of week 4. Around day 16 the allantois buds from the posterior
  * yolk-sac wall into the connecting stalk, which itself thins by days 19–20.
- * Dorsal t (each change right after its beat): .36–.68 disc grows cranially (pear shape) ·
- *    .50–.58 streak shortens caudally · .72–.80 cloacal membrane appears at the caudal tip ·
- *    polarity already fixed (shown throughout).
- * Sagittal: see AllantoisSagittal.
+ *
+ * Dorsal view, drawn like the other week-3 discs seen from above (dorsalKit): the ectoderm as a lit
+ * mosaic of cell apices, the cut amnion as a pale rim, the streak as a ridge with its groove and the
+ * node as a mound with the pit. A stepped cut-away on the right shows the three layers under the
+ * surface (ectoderm | mesoderm | endoderm), so the disc reads as trilaminar from above.
+ * Each change plays right after its beat: .18 polarity axes brighten · .36 cranial layers complete
+ * first (captions) · .50–.58 streak shortens caudally (node moves caudally) · .62–.68 disc grows
+ * cranially (round → pear) · .72–.80 cloacal membrane at the caudal tip.
  */
-const D = { cx: 500, cy: 330 };
-/** Streak half-width at its caudal end; dorso-ventral legend corner. */
-const SW = 6;
+const D = { cx: 500, cy: 318 };
+/** D-V legend corner (out of plane for a top-down view). */
 const LEG: Pt = [790, 120];
 
 function discShape(t: number) {
-  const g = seg(t, 0.36, 0.68);
+  const g = seg(t, 0.62, 0.68);
   return {
-    rxTop: lerp(150, 215, g),
-    rxBot: lerp(150, 158, g),
-    ryTop: lerp(120, 148, g),
-    ryBot: lerp(120, 112, g),
+    rxTop: lerp(128, 178, g),
+    rxBot: lerp(128, 124, g),
+    ryTop: lerp(160, 200, g),
+    ryBot: lerp(160, 156, g),
   };
 }
 
-function DorsalDrawing({ t }: SceneProps) {
-  const { rxTop, rxBot, ryTop, ryBot } = discShape(t);
-  const outline = discOutlinePath(D.cx, D.cy, rxTop, rxBot, ryTop, ryBot);
+/** Streak geometry: its caudal end stays put while it shortens, so the node moves caudally. */
+function streakGeom(t: number) {
+  const { ryBot } = discShape(t);
   const regress = seg(t, 0.5, 0.58);
-  const streakLen = lerp(120, 34, regress);
-  const streakY0 = D.cy + ryBot - 16;
-  const streakY1 = streakY0 - streakLen;
-  const cloaca = seg(t, 0.72, 0.8);
-  const rxW = Math.max(rxTop, rxBot);
+  const caudal = D.cy + ryBot - 26;
+  const len = lerp(150, 62, regress);
+  return { regress, caudal, nodeY: caudal - len, len };
+}
 
+/** Where the stepped cut-away sits: ectoderm lifted right of WX1, mesoderm too right of WX2. */
+const WX1 = D.cx + 44;
+const WX2 = D.cx + 86;
+const WY: [number, number] = [D.cy - 70, D.cy + 96];
+const WY2: [number, number] = [D.cy - 46, D.cy + 74];
+
+function DorsalDrawing({ t }: SceneProps) {
+  const clipId = useId();
+  const { rxTop, rxBot, ryTop, ryBot } = discShape(t);
+  const out = discOutline(D.cx, D.cy, rxTop, rxBot, ryTop, ryBot);
+  const OUT = discOutlinePath(D.cx, D.cy, rxTop, rxBot, ryTop, ryBot);
+  const RIM = discOutlinePath(D.cx, D.cy, rxTop + 9, rxBot + 9, ryTop + 9, ryBot + 9);
+  const { regress, caudal, nodeY } = streakGeom(t);
+  const cloaca = seg(t, 0.72, 0.8);
+  const polarity = seg(t, 0.18, 0.22) * (1 - seg(t, 0.34, 0.37));
+  const cranialFirst = seg(t, 0.36, 0.4) * (1 - seg(t, 0.6, 0.63));
+  const growArrows = seg(t, 0.62, 0.64) * (1 - seg(t, 0.69, 0.72));
+  const regressArrow = seg(t, 0.5, 0.52) * (1 - seg(t, 0.6, 0.62));
+  const rxW = Math.max(rxTop, rxBot);
+  const sw = 11;
+  const streakPath = `M${f1(D.cx - sw)},${f1(caudal + 6)} Q${f1(D.cx - sw * 1.35)},${f1((caudal + nodeY) / 2)} ${f1(D.cx - sw * 0.5)},${f1(nodeY + 8)} L${f1(D.cx + sw * 0.5)},${f1(nodeY + 8)} Q${f1(D.cx + sw * 1.35)},${f1((caudal + nodeY) / 2)} ${f1(D.cx + sw)},${f1(caudal + 6)} Z`;
+  const gw = sw * 0.42;
+  const groovePath = `M${f1(D.cx - gw)},${f1(caudal - 2)} Q${f1(D.cx - gw * 1.3)},${f1((caudal + nodeY) / 2)} ${f1(D.cx - gw * 0.45)},${f1(nodeY + 13)} L${f1(D.cx + gw * 0.45)},${f1(nodeY + 13)} Q${f1(D.cx + gw * 1.3)},${f1((caudal + nodeY) / 2)} ${f1(D.cx + gw)},${f1(caudal - 2)} Z`;
+  const hole1 = `M${WX1},${WY[0]}H${D.cx + 260}V${WY[1]}H${WX1}Z`;
+  const hole2 = `M${WX2},${WY2[0]}H${D.cx + 260}V${WY2[1]}H${WX2}Z`;
+  // Cranial edge points for the growth arrows (on the current outline).
+  const edge = (a: number): Pt => {
+    const i = Math.round(((a + 2 * Math.PI) % (2 * Math.PI)) / (2 * Math.PI) * out.length) % out.length;
+    return out[i];
+  };
+  const axisGlow = 1 + polarity * 0.18;
+  const axisFill = mixHex('#93c5fd', '#e3edff', polarity);
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
-      <Part id="hiru-orriko-diskoa" show={1}>
-        <path d={outline} fill="#1a2540" stroke="rgba(232,238,252,0.3)" strokeWidth={1.4} />
-      </Part>
-      <Part id="ektodermoa" quiet>
-        <path d={outline} fill={C.ectoderm} opacity={0.15} />
+      <defs>
+        <DorsalDefs />
+        <clipPath id={clipId}>
+          <path d={OUT} />
+        </clipPath>
+        <pattern id="w3al-hex" width="13" height="11.3" patternUnits="userSpaceOnUse">
+          <path d="M0,2.8 L3.2,0 L9.7,0 L13,2.8 L13,8.5 L9.7,11.3 L3.2,11.3 L0,8.5Z" fill="#6a99f2" stroke="rgba(18,36,92,0.45)" strokeWidth={0.8} />
+          <circle cx={6.5} cy={5.6} r={1.5} fill="rgba(24,40,98,0.35)" />
+        </pattern>
+        <pattern id="w3al-meso" width="18" height="16" patternUnits="userSpaceOnUse">
+          <rect width="18" height="16" fill="#a92f36" />
+          <path d="M2,5 L11,9 M6,1 L7,12" stroke="#ff7676" strokeWidth={1.1} strokeLinecap="round" opacity={0.85} />
+          <ellipse cx={6.5} cy={7} rx={2.6} ry={2.1} fill="#ff7676" stroke="rgba(70,8,14,0.6)" strokeWidth={0.5} />
+          <path d="M11,13 L17,15 M14,10 L15,16" stroke="#ff7676" strokeWidth={1.1} strokeLinecap="round" opacity={0.7} />
+          <ellipse cx={14.5} cy={13} rx={2.2} ry={1.8} fill="#ff7676" />
+        </pattern>
+      </defs>
+
+      {/* The disc as a whole (three layers): rim of the cut amnion, the layers seen through the cut-away, a casing. */}
+      <Part id="hiru-orriko-diskoa">
+        <path d={RIM} fill="#000" opacity={0.35} transform="translate(3 6)" />
+        <path d={RIM + OUT} fill={C.amnioblast} fillRule="evenodd" opacity={0.42} />
+        <path d={RIM} fill="none" stroke="#c9dbff" strokeWidth={1} opacity={0.5} />
+        <path d={OUT} fill={C.ectoderm} />
+        <g clipPath={`url(#${clipId})`}>
+          <path d={hole1} fill="url(#w3al-meso)" />
+          <path d={hole2} fill="url(#w3g-endo)" />
+          {/* Cut edges: each lifted layer shows its thickness. */}
+          <rect x={WX2 - 4} y={WY2[0]} width={4} height={WY2[1] - WY2[0]} fill="#6e1c22" />
+          <path d={`M${WX2},${WY2[0]}H${D.cx + 260}M${WX2},${WY2[1]}H${D.cx + 260}`} stroke="#6e1c22" strokeWidth={3} />
+          <rect x={WX1 - 5} y={WY[0]} width={5} height={WY[1] - WY[0]} fill="url(#w3g-cut)" />
+          <path d={`M${WX1},${WY[0]}H${D.cx + 260}M${WX1},${WY[1]}H${D.cx + 260}`} stroke="#2d4c9c" strokeWidth={4} />
+        </g>
+        <path d={OUT} fill="none" stroke="#0b1020" strokeWidth={3.2} opacity={0.75} />
+        <path d={OUT} fill="none" stroke="#f3f6ff" strokeWidth={1.2} opacity={0.7} />
       </Part>
 
-      <Part id="ildo-primitiboa" show={1}>
-        {/* A groove widening caudally, as in the gastrulation view (it shortens as it regresses). */}
-        <path
-          d={`M${f1(D.cx - SW)},${f1(streakY0)} Q${f1(D.cx - SW * 1.3)},${f1((streakY0 + streakY1) / 2)} ${f1(D.cx - SW * 0.4)},${f1(streakY1 + 3)} L${f1(D.cx + SW * 0.4)},${f1(streakY1 + 3)} Q${f1(D.cx + SW * 1.3)},${f1((streakY0 + streakY1) / 2)} ${f1(D.cx + SW)},${f1(streakY0)} Q${f1(D.cx)},${f1(streakY0 + 6)} ${f1(D.cx - SW)},${f1(streakY0)}Z`}
-          fill="#0c1730"
-          stroke="#93a7d9"
-          strokeWidth={1.2}
-        />
+      {/* The surface seen from above is the ectoderm: a mosaic of cell apices, lit from the top left. */}
+      <Part id="ektodermoa">
+        <path d={OUT + hole1} fill="url(#w3al-hex)" fillRule="evenodd" clipPath={`url(#${clipId})`} />
+        <path d={OUT + hole1} fill="url(#w3g-light)" fillRule="evenodd" clipPath={`url(#${clipId})`} pointerEvents="none" />
       </Part>
-      <Part id="nodo-primitiboa" show={1}>
-        <ellipse cx={D.cx} cy={streakY1} rx={11} ry={9} fill="#0c1730" stroke="#dbe4ff" strokeWidth={1.4} />
-        <ellipse cx={D.cx} cy={streakY1} rx={4} ry={3.4} fill="#02040a" />
+
+      {/* Streak (ridge), groove (furrow) and node (mound with the pit) — they shorten caudally. */}
+      <Part id="ildo-primitiboa">
+        <path d={streakPath} fill="rgba(6,10,30,0.45)" transform="translate(2.5 2)" />
+        <path d={streakPath} fill="url(#w3g-ridge)" />
+        <path d={groovePath} fill="#132453" />
+        <path d={groovePath} fill="none" stroke="#dbe6ff" strokeWidth={0.9} opacity={0.55} transform="translate(0.8 0.6)" />
+      </Part>
+      <Part id="nodo-primitiboa">
+        <ellipse cx={D.cx + 2.5} cy={nodeY + 3} rx={17} ry={14} fill="rgba(6,10,30,0.5)" />
+        <ellipse cx={D.cx} cy={nodeY} rx={17} ry={14} fill="url(#w3g-node)" />
+        <ellipse cx={D.cx} cy={nodeY + 0.5} rx={6.5} ry={5.5} fill="#081230" />
+        <path d={`M${f1(D.cx - 5.5)},${f1(nodeY + 2)} Q${f1(D.cx)},${f1(nodeY + 8)} ${f1(D.cx + 5.5)},${f1(nodeY + 2)}`} fill="none" stroke="#e3ecff" strokeWidth={1} opacity={0.7} />
       </Part>
       <Part id="kloaka-mintza" show={cloaca}>
-        <ellipse cx={D.cx} cy={streakY0 + 8} rx={14} ry={7} fill="rgba(223,230,247,0.5)" stroke="#dfe6f7" strokeWidth={1.4} />
+        <ellipse cx={D.cx} cy={caudal + 22} rx={17} ry={8.5} fill="url(#w3g-memb)" stroke="#eef2ff" strokeWidth={1.2} />
       </Part>
 
-      {/* Polarity is already fixed on this disc (kept visible throughout, not a new event at .65). */}
-      <g opacity={1}>
-        <text x={D.cx} y={D.cy - ryTop - 44} textAnchor="middle" fontSize={12} fill="#93c5fd">
-          ▲ Kraneala
+      {/* Regression: the streak shortens towards the caudal end. */}
+      <Arrow from={[D.cx - 34, nodeY - 4]} to={[D.cx - 34, nodeY + 52]} bend={0} color="#a9c3ff" width={2.4} head={8} show={regressArrow} progress={Math.max(0.25, regress)} />
+      {/* Cranial growth: the cranial half widens and lengthens (round → pear). */}
+      {[0.24, 0.5, 0.76].map((k) => {
+        const p = edge(Math.PI * (1 + k));
+        const dir: Pt = [p[0] - D.cx, p[1] - D.cy];
+        const len = Math.hypot(dir[0], dir[1]) || 1;
+        return <Arrow key={k} from={[p[0] + (dir[0] / len) * 8, p[1] + (dir[1] / len) * 8]} to={[p[0] + (dir[0] / len) * 46, p[1] + (dir[1] / len) * 46]} bend={0} color="#a9c3ff" width={2.4} head={8} show={growArrows} />;
+      })}
+
+      {/* Polarity is already fixed on this disc (kept visible throughout; it brightens on its beat). */}
+      <g pointerEvents="none">
+        <text x={D.cx} y={D.cy - ryTop - 60} textAnchor="middle" fontSize={12 * axisGlow} fontWeight={600} fill={axisFill}>
+          ▲ Kraneala{cranialFirst > 0.5 ? ' · geruzak lehenago osatzen dira' : ''}
         </text>
-        <text x={D.cx} y={D.cy + ryBot + 46} textAnchor="middle" fontSize={12} fill="#93c5fd">
-          ▼ Kaudala
+        <text x={D.cx} y={D.cy + ryBot + 40} textAnchor="middle" fontSize={12 * axisGlow} fontWeight={600} fill={axisFill}>
+          ▼ Kaudala{cranialFirst > 0.5 ? ' · gastrulazioak jarraitzen du' : ''}
         </text>
-        {/* Dorso-ventral is out-of-plane for a top-down view: shown as a symbol + caption, not an in-plane arrow. */}
-        <text x={LEG[0]} y={LEG[1]} textAnchor="middle" fontSize={13} fill="#fcd34d">
+        <text x={D.cx - rxW - 24} y={D.cy - 110} dy="0.35em" textAnchor="end" fontSize={12 * axisGlow} fontWeight={600} fill={axisFill}>
+          Ezkerra
+        </text>
+        <text x={D.cx + rxW + 24} y={D.cy - 110} dy="0.35em" textAnchor="start" fontSize={12 * axisGlow} fontWeight={600} fill={axisFill}>
+          Eskuina
+        </text>
+        {/* Dorso-ventral is out of plane for a top-down view: a symbol + caption, not an in-plane arrow. */}
+        <text x={LEG[0]} y={LEG[1]} dy="0.35em" textAnchor="middle" fontSize={13 * axisGlow} fill="#fcd34d">
           ⊙
         </text>
         <Note x={LEG[0] + 16} y={LEG[1]} tone="accent" align="start" size={11}>
           Dortsala (irten)
         </Note>
-        <text x={LEG[0]} y={LEG[1] + 20} textAnchor="middle" fontSize={13} fill="#fcd34d">
+        <text x={LEG[0]} y={LEG[1] + 20} dy="0.35em" textAnchor="middle" fontSize={13 * axisGlow} fill="#fcd34d">
           ⊗
         </text>
         <Note x={LEG[0] + 16} y={LEG[1] + 20} tone="accent" align="start" size={11}>
           Bentrala (sartu)
-        </Note>
-        <Note x={D.cx - rxW - 16} y={D.cy - 4} tone="accent" align="end" size={12}>
-          Ezkerra
-        </Note>
-        <Note x={D.cx + rxW + 16} y={D.cy - 4} tone="accent" align="start" size={12}>
-          Eskuina
         </Note>
       </g>
     </g>
   );
 }
 
+/** Linear blend of two #rrggbb colours. */
+function mixHex(a: string, b: string, k: number) {
+  const pa = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16));
+  const pb = [1, 3, 5].map((i) => parseInt(b.slice(i, i + 2), 16));
+  return `rgb(${pa.map((v, i) => Math.round(lerp(v, pb[i], k))).join(',')})`;
+}
+
 function dorsalLabels(t: number) {
-  const { rxTop, ryTop, ryBot } = discShape(t);
-  const regress = seg(t, 0.5, 0.58);
-  const streakY0 = D.cy + ryBot - 16;
-  const streakLen = lerp(120, 34, regress);
+  const { rxTop, ryTop } = discShape(t);
+  const { caudal, nodeY } = streakGeom(t);
   const cloaca = seg(t, 0.72, 0.8);
-  const L = (id: string, x: number, y: number, p: Pt, show = 1) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} />;
+  const L = (id: string, x: number, y: number, p: Pt, show = 1, small = false) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} small={small} />;
   return (
     <>
+      {L('hiru-orriko-diskoa', 190, 170, [D.cx - (rxTop + 1) * Math.cos(0.9), D.cy - (ryTop + 1) * Math.sin(0.9)])}
       {/* Seen from above, the disc's surface is its ectoderm. */}
-      {L('hiru-orriko-diskoa', 190, 200, [D.cx - rxTop * 0.71, D.cy - ryTop * 0.71])}
-      {L('ektodermoa', 190, 400, [D.cx - 70, D.cy + 40])}
-      {L('ildo-primitiboa', 190, 460, [D.cx, streakY0 - streakLen / 2])}
-      {L('nodo-primitiboa', 810, 460, [D.cx, streakY0 - streakLen])}
-      {L('kloaka-mintza', 810, 500, [D.cx, streakY0 + 8], cloaca)}
+      {L('ektodermoa', 190, 290, [D.cx - 80, D.cy - 40])}
+      {L('ildo-primitiboa', 190, 450, [D.cx - 4, (caudal + nodeY) / 2 + 22])}
+      {L('mesodermo-intraenbrionarioa', 804, 280, [(WX1 + WX2) / 2, WY[0] + 30], 1, true)}
+      {L('endodermoa', 810, 330, [WX2 + 18, WY2[0] + 56], 1, true)}
+      {L('nodo-primitiboa', 810, 420, [D.cx + 14, nodeY + 4])}
+      {L('kloaka-mintza', 810, 500, [D.cx + 14, caudal + 22], cloaca)}
     </>
   );
 }
@@ -261,10 +350,21 @@ export function AllantoisSagittal({ t }: SceneProps) {
         <MembraneMark s={s} x={W - 22} />
       </Part>
       <Part id="nodo-primitiboa">
-        <ellipse cx={nx} cy={ny + 11 * K} rx={16 * K} ry={14 * K} fill="none" stroke="#fcd34d" strokeWidth={1.4} strokeDasharray="3 3" />
+        {/* The node: thickened, raised ectoderm round the pit, lit from above (no ring drawn round it). */}
+        <defs>
+          <radialGradient id="w3al-node" cx="50%" cy="28%" r="68%">
+            <stop offset="0" stopColor="#dbe6ff" stopOpacity={0.62} />
+            <stop offset="0.7" stopColor="#8fb0f5" stopOpacity={0.2} />
+            <stop offset="1" stopColor="#8fb0f5" stopOpacity={0} />
+          </radialGradient>
+        </defs>
+        <ellipse cx={nx} cy={ny + 7 * K} rx={19 * K} ry={14 * K} fill="url(#w3al-node)" />
+        <path d={`M${f1(nx - 17 * K)},${f1(ny - 1)} Q${f1(nx)},${f1(ny - 12 * K)} ${f1(nx + 17 * K)},${f1(ny - 1)}`} fill="none" stroke="#d6e2ff" strokeWidth={1.5} strokeLinecap="round" opacity={0.85} />
       </Part>
       <Part id="hiru-orriko-diskoa" show={0.9}>
-        <path d={outline} fill="none" stroke="#e8eefc" strokeWidth={1.1} strokeDasharray="5 4" opacity={0.55} />
+        {/* The disc's outline as a solid casing (light line on a dark one), not a dashed pointer. */}
+        <path d={outline} fill="none" stroke="#0b1020" strokeWidth={3} opacity={0.6} />
+        <path d={outline} fill="none" stroke="#f3f6ff" strokeWidth={1.1} opacity={0.6} />
       </Part>
       <Arrow from={mid(-W * 0.2)} to={mid(-W * 0.2 - 110)} bend={0} color="#fde68a" width={1.8} head={7} show={g.grow * (1 - seg(t, 0.69, 0.72))} />
 

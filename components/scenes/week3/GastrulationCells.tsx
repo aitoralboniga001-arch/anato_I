@@ -153,7 +153,9 @@ function Stellate({ x, y, r, color, arms, seed, opacity = 1 }: { x: number; y: n
         return <line key={i} x1={f1(x)} y1={f1(y)} x2={f1(x + Math.cos(a) * L)} y2={f1(y + Math.sin(a) * L * 0.7)} stroke={color} strokeWidth={2.4} strokeLinecap="round" />;
       })}
       <ellipse cx={f1(x)} cy={f1(y)} rx={r} ry={r * 0.82} fill={color} stroke="rgba(10,14,28,0.5)" strokeWidth={0.9} />
+      <ellipse cx={f1(x)} cy={f1(y)} rx={r} ry={r * 0.82} fill="url(#gc-shine)" />
       <circle cx={f1(x + 0.6)} cy={f1(y + 0.5)} r={r * 0.4} fill="rgba(30,20,50,0.55)" />
+      <circle cx={f1(x - 0.6)} cy={f1(y - 0.4)} r={r * 0.13} fill="rgba(255,255,255,0.4)" />
     </g>
   );
 }
@@ -264,6 +266,12 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
           <stop offset="0.93" stopColor="#fff" stopOpacity={1} />
           <stop offset="1" stopColor="#fff" stopOpacity={0} />
         </linearGradient>
+        {/* Light from the top left on every cell: a soft highlight that fades into a shaded lower-right edge. */}
+        <linearGradient id="gc-shine" x1="0" x2="0.7" y1="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity={0.3} />
+          <stop offset="0.38" stopColor="#fff" stopOpacity={0.04} />
+          <stop offset="1" stopColor="#000" stopOpacity={0.24} />
+        </linearGradient>
         <mask id="gc-fade" maskUnits="userSpaceOnUse" x={0} y={0} width={1000} height={640}>
           <rect x={MID - HALF} y={0} width={HALF * 2} height={640} fill="url(#gc-edge)" />
         </mask>
@@ -292,7 +300,9 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
                 return (
                   <g key={`${s}:${h}`}>
                     <rect x={f1(x - WH / 2 + 1)} y={HYP_Y - HYP_H / 2} width={WH - 2} height={HYP_H} rx={5} fill={HYP_COLOR} stroke="rgba(10,14,28,0.5)" strokeWidth={0.9} />
+                    <rect x={f1(x - WH / 2 + 1)} y={HYP_Y - HYP_H / 2} width={WH - 2} height={HYP_H} rx={5} fill="url(#gc-shine)" />
                     <circle cx={f1(x)} cy={HYP_Y + 1} r={4.6} fill="rgba(30,20,50,0.5)" />
+                    <circle cx={f1(x - 1.2)} cy={HYP_Y} r={1.3} fill="rgba(255,255,255,0.35)" />
                   </g>
                 );
               }),
@@ -311,7 +321,9 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
                 <g key={c.key}>
                   {neck(c)}
                   <rect x={f1(c.m.x - rw)} y={f1(c.m.y - rh)} width={f1(rw * 2)} height={f1(rh * 2)} rx={f1(lerp(10, 5, p))} fill={c.m.color} stroke="rgba(10,14,28,0.5)" strokeWidth={0.9} />
+                  <rect x={f1(c.m.x - rw)} y={f1(c.m.y - rh)} width={f1(rw * 2)} height={f1(rh * 2)} rx={f1(lerp(10, 5, p))} fill="url(#gc-shine)" />
                   <circle cx={f1(c.m.x)} cy={f1(c.m.y + 1)} r={4.4} fill="rgba(30,20,50,0.55)" />
+                  <circle cx={f1(c.m.x - 1.2)} cy={f1(c.m.y)} r={1.3} fill="rgba(255,255,255,0.35)" />
                 </g>
               );
             })}
@@ -336,14 +348,15 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
             {surfaceCells.map((c) => (
               <g key={c.key}>
                 <path d={c.d} fill={ectoName ? mix(C.epiblast, '#7aa2ff', seg(t, GB.ecto, GB.ecto + 0.04)) : C.epiblast} stroke="rgba(10,14,28,0.55)" strokeWidth={0.9} />
+                <path d={c.d} fill="url(#gc-shine)" />
                 <ellipse cx={f1(c.nx)} cy={f1(c.ny)} rx={f1(c.nr)} ry={5.5} fill="rgba(30,20,50,0.55)" />
+                <circle cx={f1(c.nx - c.nr * 0.25)} cy={f1(c.ny - 1.5)} r={1.3} fill="rgba(255,255,255,0.35)" />
               </g>
             ))}
           </g>
         </Part>
-        <Part id={t < GB.groove ? 'lerro-primitiboa' : 'ildo-primitiboa'} show={seg(t, GB.streak, GB.streak + 0.04)} quiet>
-          <ellipse cx={MID} cy={(EPI_TOP + EPI_BOT) / 2 + 6} rx={21} ry={31} fill="none" stroke="#dbe4ff" strokeWidth={1.4} strokeDasharray="5 4" opacity={0.7 * (1 - trackOn)} />
-        </Part>
+        {/* Where the streak / groove is: a soft pool of light on the midline cells (no ring drawn over them). */}
+        <Mark id={t < GB.groove ? 'lerro-primitiboa' : 'ildo-primitiboa'} x={MID} y={(EPI_TOP + EPI_BOT) / 2 + 8} rx={30} ry={40} show={seg(t, GB.streak, GB.streak + 0.04) * Math.max(0.35, 1 - trackOn)} />
       </g>
 
       {/* Followed cells: the same individuals from start to end; the route links where they set out and where they end. */}
@@ -419,7 +432,10 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
 
       {/* A bracket is a real, clickable representation of the three-layer disc. */}
       <Mark id="hiru-orriko-diskoa" show={triOn}>
-        <path d={`M${A(MID - 156, EPI_TOP - 4).join(',')}h-12V${A(0, HYP_Y + 19)[1]}h12M${A(MID + 156, EPI_TOP - 4).join(',')}h12V${A(0, HYP_Y + 19)[1]}h-12`} fill="none" stroke="#e8eefc" strokeWidth={2} strokeDasharray="5 4" />
+        <g fill="none" strokeLinejoin="round" strokeLinecap="round">
+          <path d={`M${A(MID + 156, EPI_TOP - 4).join(',')}h12V${A(0, HYP_Y + 19)[1]}h-12`} stroke="rgba(6,8,14,0.7)" strokeWidth={5} />
+          <path d={`M${A(MID + 156, EPI_TOP - 4).join(',')}h12V${A(0, HYP_Y + 19)[1]}h-12`} stroke="#e8eefc" strokeWidth={2.2} />
+        </g>
       </Mark>
 
       {/* Step chip. */}
@@ -446,7 +462,7 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
           {label('gastrulazioa', 192, 81, [MID - 8, EPI_BOT - 4], trackOn)}
           {label(t < GB.groove ? 'lerro-primitiboa' : 'ildo-primitiboa', 790, 92, [MID + 3, EPI_TOP + 23], seg(t, GB.streak, GB.streak + 0.025))}
           {label(ectoName ? 'ektodermoa' : 'epiblastoa', 192, 170, [MID - 100, 218])}
-          {label('mesodermo-intraenbrionarioa', 192, 368, currentMeso ? [currentMeso.x, currentMeso.y] : [MID, LANE_Y], currentMeso ? 1 : 0)}
+          {label('mesodermo-intraenbrionarioa', 198, 368, currentMeso ? [currentMeso.x, currentMeso.y] : [MID, LANE_Y], currentMeso ? 1 : 0)}
           {label('endodermoa', 192, 469, [MID - WH / 2, HYP_Y], seg(t, GB.endo + 0.015, GB.endo + 0.035))}
           {label('hipoblastoa', 790, 506, [hypoX, HYP_Y], 1 - seg(t, GB.meso, GB.meso + 0.02))}
           {label('amnios-barrunbea', 790, 241, [MID + 85, EPI_TOP - 24])}

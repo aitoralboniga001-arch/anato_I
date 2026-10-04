@@ -1,11 +1,104 @@
 'use client';
 
-import { C, Flow, Label, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Flow, Label, Mark, Note, Part, lerp, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { fetusGeom, FetusFigure, placeFetus } from '@/components/scenes/week5/FetusFigure';
 import { useId } from 'react';
 import { CordRope } from './CordRope';
 
 const vis = (t: number, a: number, b = 2) => Math.min(a <= 0 ? 1 : seg(t, a, a + 0.03), 1 - seg(t, b - 0.03, b));
+const f1 = (v: number) => v.toFixed(1);
+
+/* ---------------------------------------------------------------------------------------------- */
+/* Shared materials: uterine wall, decidua, fetal membranes, amniotic fluid, placenta               */
+/* ---------------------------------------------------------------------------------------------- */
+
+/** Gradients for one scene instance (ids from useId, since the frames page renders many at once). */
+function WombDefs({ uid, c, r }: { uid: string; c: Pt; r: Pt }) {
+  return (
+    <defs>
+      <radialGradient id={`${uid}-myo`} gradientUnits="userSpaceOnUse" cx={c[0]} cy={c[1]} r={Math.max(r[0], r[1]) * 1.45}>
+        <stop offset="0.6" stopColor="#8a3440" />
+        <stop offset="0.85" stopColor="#6e2630" />
+        <stop offset="1" stopColor="#521a22" />
+      </radialGradient>
+      <radialGradient id={`${uid}-fluid`} gradientUnits="userSpaceOnUse" cx={c[0] - r[0] * 0.3} cy={c[1] - r[1] * 0.35} r={Math.max(r[0], r[1]) * 1.25}>
+        <stop offset="0" stopColor="#3f6f9c" stopOpacity={0.62} />
+        <stop offset="0.65" stopColor="#24456c" stopOpacity={0.6} />
+        <stop offset="1" stopColor="#173152" stopOpacity={0.7} />
+      </radialGradient>
+      <radialGradient id={`${uid}-plac`} cx="0.5" cy="0.4" r="0.7">
+        <stop offset="0" stopColor="#d3506c" />
+        <stop offset="1" stopColor="#9c2942" />
+      </radialGradient>
+    </defs>
+  );
+}
+
+/** Decidua lining the uterine cavity: a soft pink band just outside the fetal membranes. */
+function Decidua({ c, r }: { c: Pt; r: Pt }) {
+  return (
+    <g>
+      <ellipse cx={c[0]} cy={c[1]} rx={r[0] + 17} ry={r[1] + 17} fill="#a54a58" />
+      <ellipse cx={c[0]} cy={c[1]} rx={r[0] + 10} ry={r[1] + 10} fill="#bf6673" />
+    </g>
+  );
+}
+
+/** Amniotic fluid: a clear blue body of liquid with a few cells and vernix flecks drifting in it. */
+const FLECKS = Array.from({ length: 24 }, (_, i) => ({ a: rand(i * 2.7 + 5) * Math.PI * 2, r: Math.sqrt(rand(i * 4.1 + 7)) * 0.86, s: 1 + rand(i * 1.3 + 2) * 1.4, ph: rand(i * 3.3) * 6.28 }));
+function Fluid({ uid, c, r, t }: { uid: string; c: Pt; r: Pt; t: number }) {
+  return (
+    <g>
+      <ellipse cx={c[0]} cy={c[1]} rx={r[0]} ry={r[1]} fill={`url(#${uid}-fluid)`} />
+      <g fill="#dbeeff" opacity={0.32}>
+        {FLECKS.map((p, i) => (
+          <circle key={i} cx={f1(c[0] + Math.cos(p.a) * p.r * r[0] + 6 * Math.sin(t * 9 + p.ph))} cy={f1(c[1] + Math.sin(p.a) * p.r * r[1] + 5 * Math.cos(t * 7 + p.ph))} r={f1(p.s)} />
+        ))}
+      </g>
+      {/* a soft sheen along the upper wall: the cavity reads as liquid */}
+      <path d={`M${f1(c[0] - r[0] * 0.78)},${f1(c[1] - r[1] * 0.42)} A${r[0] * 0.92},${r[1] * 0.92} 0 0 1 ${f1(c[0] + r[0] * 0.1)},${f1(c[1] - r[1] * 0.9)}`} fill="none" stroke="#cfe6ff" strokeWidth={5} strokeLinecap="round" opacity={0.12} />
+    </g>
+  );
+}
+
+/** Fetal membranes: chorion laeve outside, the amnion lining the cavity (fused, solid). */
+function Membranes({ c, r }: { c: Pt; r: Pt }) {
+  return (
+    <g fill="none">
+      <ellipse cx={c[0]} cy={c[1]} rx={r[0] + 5} ry={r[1] + 5} stroke="#e1c7d0" strokeWidth={3.2} opacity={0.75} />
+      <ellipse cx={c[0]} cy={c[1]} rx={r[0] + 1.2} ry={r[1] + 1.2} stroke="#9fc3e6" strokeWidth={2.2} />
+    </g>
+  );
+}
+
+/**
+ * The placenta as a lens in the uterine wall whose fetal surface is the cavity wall: cotyledons
+ * separated by septa, and the chorionic plate with the cord's vessels fanning out from the insertion.
+ * Drawn inside clips that keep it out of the cavity and inside the uterus.
+ */
+function PlacentaLens({ uid, pc, rx, ry, tan, cav, cr, ins }: { uid: string; pc: Pt; rx: number; ry: number; tan: number; cav: Pt; cr: Pt; ins: number }) {
+  const on = (a: number, d: number): Pt => [cav[0] + (cr[0] + d) * Math.cos(a), cav[1] + (cr[1] + d) * Math.sin(a)];
+  const span = (rx / Math.max(cr[0], cr[1])) * 0.95;
+  const arc = (d: number, a0: number, a1: number) => smoothPath(Array.from({ length: 13 }, (_, i) => on(lerp(a0, a1, i / 12), d)), false);
+  return (
+    <g>
+      <ellipse cx={pc[0]} cy={pc[1]} rx={rx} ry={ry} transform={`rotate(${f1(tan)} ${f1(pc[0])} ${f1(pc[1])})`} fill={`url(#${uid}-plac)`} stroke="#6e1a30" strokeWidth={2} />
+      {/* septa between the cotyledons, from the plate towards the basal plate */}
+      <g stroke="#7c1f36" strokeWidth={1.5} opacity={0.75} strokeLinecap="round">
+        {[-0.72, -0.4, -0.1, 0.22, 0.52, 0.8].map((k) => {
+          const a = ins + k * span;
+          const p0 = on(a, 8);
+          const p1 = on(a, 30 + 8 * Math.cos(k * 3));
+          return <path key={k} d={`M${f1(p0[0])},${f1(p0[1])} L${f1(p1[0])},${f1(p1[1])}`} />;
+        })}
+      </g>
+      {/* chorionic plate (fetal surface) with the cord vessels branching over it */}
+      <path d={arc(3, ins - span, ins + span)} fill="none" stroke="#efb3c3" strokeWidth={4} strokeLinecap="round" />
+      <path d={arc(6.5, ins - span * 0.8, ins + span * 0.8)} fill="none" stroke={C.vein} strokeWidth={1.8} strokeLinecap="round" />
+      <path d={arc(9.5, ins - span * 0.7, ins + span * 0.7)} fill="none" stroke={C.artery} strokeWidth={1.5} strokeLinecap="round" />
+    </g>
+  );
+}
 
 /* ---------------------------------------------------------------------------------------------- */
 /* AmnioticFluid — stage `likido-amniotikoa`, view `bolumena`                                       */
@@ -36,12 +129,18 @@ function volumeAt(t: number) {
   return { ml: Math.round(ml), week: b > 0.98 ? '37.–38. asteak' : `${Math.round(wk)}. astea` };
 }
 
+// Graduated cylinder in the lower-left gutter (clear of the labels above and the uterus).
+const GAUGE = { x: 34, w: 30, y0: 556, h: 160 };
+const gaugeY = (ml: number) => GAUGE.y0 - (Math.min(ml, 1000) / 1000) * GAUGE.h;
+
 export function AmnioticFluid({ t, reduced }: SceneProps) {
+  const uid = useId().replace(/:/g, '');
   const { ml, week } = volumeAt(t);
   const fill = (ml - 30) / 870; // amnios barrunbea filling out with the volume
   const cavRx = lerp(232, 258, fill);
   const cavRy = lerp(196, 220, fill);
   const cavC: Pt = [500, 330];
+  const cavR: Pt = [cavRx, cavRy];
 
   const pose = {
     kick: 0.5 + 0.5 * Math.sin(t * 42),
@@ -60,9 +159,6 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
   const functionsA = vis(t, 0.46, 0.58);
   const swallowA = vis(t, 0.58, 1);
 
-  const gaugeH = 100;
-  const gaugeFill = Math.min(1, ml / 1000) * gaugeH;
-
   // The cord leaves the belly, loops round in front of the knees and rises to the placenta's fetal
   // surface, which lies on the cavity wall right under the placenta.
   const ins = Math.atan2((PLACENTA_C[1] - cavC[1]) / cavRy, (PLACENTA_C[0] - cavC[0]) / cavRx);
@@ -72,25 +168,39 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
   const cordPts: Pt[] = [cordBase, [cordBase[0] + 34, cordBase[1] + 22], [cordBase[0] + 92, cordBase[1] - 6], [cordBase[0] + 104, cordBase[1] - 96], [insertion[0] + 22, insertion[1] + 110], [insertion[0] + 2, insertion[1] + 36], insertion];
   const cordD = smoothPath(cordPts, false, 0.5);
   const cordMid = cordPts[3];
-  const clipId = `${useId().replace(/:/g, '')}-wall`;
+  const clipId = `${uid}-wall`;
+
+  // Where the fluid comes from (numbered as in the note): amnios wall, fetal urine, decidua through the
+  // membranes, intervillous blood through the chorionic plate, fetal lungs/gut.
+  const wallAt = (deg: number, d: number): Pt => [cavC[0] + (cavRx + d) * Math.cos((deg * Math.PI) / 180), cavC[1] + (cavRy + d) * Math.sin((deg * Math.PI) / 180)];
+  const sources: [Pt, Pt][] = [
+    [wallAt(196, -2), wallAt(196, -50)],
+    [[hip[0] + 4, hip[1] + 16], [hip[0] - 18, hip[1] + 46]],
+    [wallAt(150, 13), wallAt(150, -36)],
+    [[plC[0] - 14, plC[1] + 22], [plC[0] - 70, plC[1] + 70]],
+    [[mouth[0] - 6, mouth[1] + 4], [mouth[0] - 46, mouth[1] - 10]],
+  ];
 
   return (
     <g>
-      {/* Uterine wall */}
-      <path d={smoothPath(UTERUS, true, 0.55)} fill="#7a2c34" stroke="#4a1a20" strokeWidth={2} opacity={0.92} />
-      <path d={smoothPath(UTERUS, true, 0.55)} fill="none" stroke="#c88a90" strokeWidth={1} opacity={0.35} />
+      <WombDefs uid={uid} c={cavC} r={cavR} />
+      {/* Uterine wall: myometrium, then the decidua lining the cavity */}
+      <path d={smoothPath(UTERUS, true, 0.55)} fill={`url(#${uid}-myo)`} stroke="#3e1218" strokeWidth={2} />
+      <path d={smoothPath(UTERUS, true, 0.55)} fill="none" stroke="#e4b3b8" strokeWidth={1.4} opacity={0.4} />
+      <Decidua c={cavC} r={cavR} />
+      {/* opaque ground under the cavity, so the fluid stays blue when its part is dimmed */}
+      <ellipse cx={cavC[0]} cy={cavC[1]} rx={cavRx} ry={cavRy} fill="#0b1626" />
 
-
-      {/* Amnios barrunbea: the fluid-filled cavity, its size a proxy for the growing volume */}
+      {/* Amnios barrunbea filled with likido amniotikoa; its size a proxy for the growing volume */}
       <Part id="amnios-barrunbea">
-        <ellipse cx={cavC[0]} cy={cavC[1]} rx={cavRx} ry={cavRy} fill="#8ecae6" opacity={0.22} />
+        <ellipse cx={cavC[0]} cy={cavC[1]} rx={cavRx} ry={cavRy} fill="#0d1a2c" />
         <ellipse cx={cavC[0]} cy={cavC[1]} rx={cavRx} ry={cavRy} fill={C.amnionCavity} />
       </Part>
       <Part id="likido-amniotikoa">
-        <ellipse cx={cavC[0]} cy={cavC[1]} rx={cavRx} ry={cavRy} fill="none" stroke="#8ecae6" strokeWidth={1.6} opacity={0.7} />
+        <Fluid uid={uid} c={cavC} r={cavR} t={t} />
       </Part>
       <Part id="amniosa">
-        <ellipse cx={cavC[0]} cy={cavC[1]} rx={cavRx + 5} ry={cavRy + 5} fill="none" stroke="#bfe0f2" strokeWidth={1.4} strokeDasharray="2 5" opacity={0.6} />
+        <Membranes c={cavC} r={cavR} />
       </Part>
 
       <Part id="fetu-aroa" quiet>
@@ -103,7 +213,7 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
             vernix={0.4}
             cord={
               <Part id="zilborrestea">
-                <CordRope pts={cordPts.map(place.inv)} w={11 / place.s} turns={9} />
+                <CordRope pts={cordPts.map(place.inv)} w={12 / place.s} turns={9} />
               </Part>
             }
           />
@@ -120,28 +230,24 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
       <Part id="karena" quiet>
         <g clipPath={`url(#${clipId})`}>
           <g clipPath={`url(#${clipId}-u)`}>
-            <ellipse cx={plC[0]} cy={plC[1]} rx={104} ry={44} transform={`rotate(${wallTan} ${plC[0]} ${plC[1]})`} fill="#c2415f" stroke="#7c1f36" strokeWidth={2} />
+            <PlacentaLens uid={uid} pc={plC} rx={104} ry={44} tan={wallTan} cav={cavC} cr={cavR} ins={ins} />
           </g>
         </g>
       </Part>
 
-      {/* Sources: amnios wall, fetal urine, decidua, villous blood via the chorionic plate, lungs/gut */}
-      {!reduced && sourcesA > 0.02 && (
-        <g opacity={sourcesA}>
-          {[
-            [[cavC[0] - cavRx + 10, cavC[1] - 20], [cavC[0] - cavRx + 60, cavC[1] - 4]],
-            [[hip[0] + 4, hip[1] + 18], [hip[0] - 10, hip[1] + 44]],
-            [[220, 460], [280, 420]],
-            [[PLACENTA_C[0] + 40, PLACENTA_C[1] + 30], [420, 220]],
-            [[mouth[0] - 4, mouth[1] + 30], [mouth[0] - 14, mouth[1] + 8]],
-          ].map(([from, to], i) => (
-            <g key={i} stroke="#bfe0f2" strokeWidth={1.6} fill="none" markerEnd="none">
-              <path d={`M${from[0]},${from[1]} L${to[0]},${to[1]}`} strokeDasharray="5 4" />
-              <circle cx={to[0]} cy={to[1]} r={3} fill="#bfe0f2" />
+      {/* Sources: solid arrows with numbered chips, in the order of the note */}
+      {sourcesA > 0.02 &&
+        sources.map(([from, to], i) => (
+          <g key={i}>
+            <Arrow from={from} to={to} bend={0.12} color="#8ecae6" width={2} head={8} show={sourcesA} progress={reduced ? 1 : seg(t, 0.14 + i * 0.012, 0.19 + i * 0.012)} />
+            <g opacity={sourcesA}>
+              <circle cx={from[0]} cy={from[1]} r={8} fill="#0b1626" stroke="#8ecae6" strokeWidth={1.4} />
+              <text x={from[0]} y={from[1]} dy="0.35em" textAnchor="middle" fontSize={10} fontWeight={700} fill="#cfe6f5">
+                {i + 1}
+              </text>
             </g>
-          ))}
-        </g>
-      )}
+          </g>
+        ))}
 
       {/* Swallowing cycle: mouth → gut → blood → placenta/kidneys → back to the cavity */}
       {!reduced && swallowA > 0.02 && (
@@ -151,29 +257,41 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
           <Flow d={`M${PLACENTA_C[0] - 20},${PLACENTA_C[1] + 20} Q${cavC[0] - 100},${cavC[1] - 120} ${mouth[0] - 40},${mouth[1] - 60}`} n={2} dur={5} r={2} color="#5fa8cc" />
         </g>
       )}
-      <Part id="degluzioa" show={swallowA} quiet>
-        <circle cx={mouth[0]} cy={mouth[1]} r={0.1} />
-      </Part>
+      <Mark id="degluzioa" x={mouth[0]} y={mouth[1]} rx={14} show={swallowA} />
 
-      {/* Volume gauge, bottom-left, clear of the toolbar/pill zones */}
+      {/* Volume gauge: a graduated cylinder, bottom-left, clear of the toolbar/pill zones */}
       <g>
-        <rect x={44} y={480 - gaugeH} width={26} height={gaugeH} fill="none" stroke="#8ecae6" strokeWidth={1.4} opacity={0.7} />
-        <rect x={44} y={480 - gaugeFill} width={26} height={gaugeFill} fill="#8ecae6" opacity={0.8} />
-        <text x={57} y={498} textAnchor="middle" fontSize={12} fill="#cfe6f5">
+        <rect x={GAUGE.x} y={GAUGE.y0 - GAUGE.h - 8} width={GAUGE.w} height={GAUGE.h + 8} rx={4} fill="#0b1626" stroke="#8ecae6" strokeWidth={1.4} opacity={0.9} />
+        {ml > 1 && (
+          <>
+            <rect x={GAUGE.x + 2} y={gaugeY(ml)} width={GAUGE.w - 4} height={GAUGE.y0 - gaugeY(ml) - 1} rx={2.5} fill="#5fa8cc" opacity={0.85} />
+            <ellipse cx={GAUGE.x + GAUGE.w / 2} cy={gaugeY(ml)} rx={GAUGE.w / 2 - 2} ry={2.4} fill="#bfe0f2" opacity={0.8} />
+          </>
+        )}
+        {/* scale: a tick every 100 ml, a longer one every 250 */}
+        <g stroke="#8fa3c4" strokeWidth={1}>
+          {Array.from({ length: 11 }, (_, i) => (
+            <line key={i} x1={GAUGE.x} x2={GAUGE.x + (i % 5 === 0 ? 10 : 5)} y1={gaugeY(i * 100)} y2={gaugeY(i * 100)} />
+          ))}
+        </g>
+        <text x={GAUGE.x - 4} y={gaugeY(1000) + 3.5} textAnchor="end" fontSize={9} fill="#8fa3c4">
+          1 L
+        </text>
+        <text x={GAUGE.x + GAUGE.w / 2} y={GAUGE.y0 + 18} textAnchor="middle" fontSize={14} fontWeight={700} fill="#cfe6f5">
           {ml} ml
         </text>
-        <text x={57} y={514} textAnchor="middle" fontSize={10} fill="#8fa3c4">
+        <text x={GAUGE.x + GAUGE.w / 2} y={GAUGE.y0 + 33} textAnchor="middle" fontSize={10.5} fill="#8fa3c4">
           {week}
         </text>
         {/* Reference volumes from the notes, ticked off as the gauge passes them */}
         {VOL_MARKS.map((m) => {
           const o = vis(t, m.at);
-          const y0 = 480 - (m.hi / 1000) * gaugeH;
-          const y1 = 480 - (m.lo / 1000) * gaugeH;
+          const y0 = gaugeY(m.hi);
+          const y1 = gaugeY(m.lo);
           return (
             <g key={m.text} opacity={o}>
-              <path d={`M72,${y0} h6 V${Math.max(y1, y0 + 1)} h-6`} fill="none" stroke="#fbbf24" strokeWidth={1.2} />
-              <text x={82} y={(y0 + y1) / 2 + 3.5} fontSize={10} fill="#fde68a">
+              <path d={`M${GAUGE.x + GAUGE.w + 2},${y0} h6 V${Math.max(y1, y0 + 1)} h-6`} fill="none" stroke="#fbbf24" strokeWidth={1.3} />
+              <text x={GAUGE.x + GAUGE.w + 12} y={(y0 + y1) / 2 + 3.5} fontSize={10.5} fill="#fde68a">
                 {m.text}
               </text>
             </g>
@@ -183,7 +301,7 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
 
       {/* Labels — left gutter */}
       <Label id="likido-amniotikoa" x={200} y={100} ax={cavC[0] - cavRx * 0.5} ay={cavC[1] - cavRy * 0.6} />
-      <Label id="amniosa" x={200} y={150} ax={cavC[0] - cavRx - 5} ay={cavC[1]} />
+      <Label id="amniosa" x={200} y={150} ax={cavC[0] - cavRx - 1} ay={cavC[1] - 30} />
       <Label id="amnios-barrunbea" x={200} y={200} ax={cavC[0] - 60} ay={cavC[1] + 60} />
       <Label id="fetu-aroa" x={200} y={250} ax={place.xf([0, 40])[0]} ay={place.xf([0, 40])[1]} />
       <Label id="degluzioa" x={200} y={300} ax={mouth[0]} ay={mouth[1]} show={swallowA} />
@@ -193,7 +311,7 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
       <Label id="zilborrestea" x={800} y={200} ax={cordMid[0]} ay={cordMid[1]} />
 
       <Note x={500} y={612} tone="dim" show={sourcesA > 0.02 ? 1 : 0}>
-        Jatorria: amniosa, fetuaren gernua, dezidua, biloxka-odola, arnas/digestio aparatua
+        Jatorria: 1 amniosa · 2 fetuaren gernua · 3 dezidua · 4 biloxka-odola · 5 arnas/digestio aparatua
       </Note>
       <Note x={500} y={612} tone="dim" show={functionsA}>
         Funtzioak: hazkuntza, mugimenduak, astinketak baretu, itsaste-eragozpena
@@ -216,11 +334,11 @@ const U2: Pt[] = [
 const PLAC2: Pt = [352, 230];
 const CAV2: Pt = [500, 352];
 const CAV2_R: Pt = [190, 170];
-/** Where a placenta centred towards `toward` sits on the cavity wall: its centre, the wall's tangent (°) and the cord insertion (just inside the wall). */
+/** Where a placenta centred towards `toward` sits on the cavity wall: its centre, the wall's tangent (°), the cord insertion (just inside the wall) and its angle. */
 function wallSpot(c: Pt, r: Pt, toward: Pt) {
   const a = Math.atan2((toward[1] - c[1]) / r[1], (toward[0] - c[0]) / r[0]);
   const at = (d: number): Pt => [c[0] + (r[0] + d) * Math.cos(a), c[1] + (r[1] + d) * Math.sin(a)];
-  return { c: at(6), ins: at(10), tan: (Math.atan2(r[1] * Math.cos(a), -r[0] * Math.sin(a)) * 180) / Math.PI };
+  return { a, c: at(6), ins: at(10), tan: (Math.atan2(r[1] * Math.cos(a), -r[0] * Math.sin(a)) * 180) / Math.PI };
 }
 // Mother's abdominal wall: a quadratic whose x runs linearly, so its height at any x is closed-form.
 const wallY = (x: number) => {
@@ -238,8 +356,15 @@ const VAGINA_B: Pt = [500, 604];
 const CERVIX: Pt[] = [[452, 520], [480, 556], [482, 590], [490, 606], [510, 606], [518, 590], [520, 556], [548, 520]];
 const PROBE: Pt = [566, wallY(566)];
 const PROBE_TILT = (Math.atan2(-156 * (1 - 2 * ((566 - 100) / 800)), 800) * 180) / Math.PI;
+/** Ultrasound monitor in the right gutter (below the toolbar zone), fed by the probe's cable. */
+const MON = { x: 818, y: 246, w: 156, h: 104 };
+/** The serum sample: a blood tube in the lower right. */
+const TUBE: Pt = [878, 470];
+/** Fixed speckle for the echo image. */
+const SPECKLE = Array.from({ length: 70 }, (_, i) => ({ a: (rand(i * 1.7 + 3) - 0.5) * 1.05, r: 12 + rand(i * 2.9 + 1) * 76, o: 0.15 + rand(i * 0.7) * 0.4 }));
 
 export function PrenatalTests({ t }: SceneProps) {
+  const uid = useId().replace(/:/g, '');
   const probeA = seg(t, 0.68, 0.76) * (1 - seg(t, 0.94, 1));
   const bloodA = vis(t, 0.78);
   const needleA = seg(t, 0.86, 0.94);
@@ -258,14 +383,20 @@ export function PrenatalTests({ t }: SceneProps) {
   const cordBase = place.xf(fetusGeom(22).cordBase);
   const pl = wallSpot(CAV2, CAV2_R, PLAC2);
   const cordPts: Pt[] = [cordBase, [cordBase[0] + 6, cordBase[1] + 30], [cordBase[0] - 60, cordBase[1] + 52], [412, 372], [pl.ins[0] + 16, pl.ins[1] + 60], pl.ins];
-  const clipId = `${useId().replace(/:/g, '')}-wall2`;
+  const clipId = `${uid}-wall2`;
   // Ultrasound pulses: rings leaving the probe, pure functions of t.
   const pulses = [0, 1, 2].map((i) => (t * 24 + i / 3) % 1);
   const fanS = Math.sin((24 * Math.PI) / 180);
   const fanC = Math.cos((24 * Math.PI) / 180);
+  // The probe cable's free end (probe-local (56,-92)) in scene coordinates, then on to the monitor.
+  const tr = (PROBE_TILT * Math.PI) / 180;
+  const cableEnd: Pt = [PROBE[0] + 56 * Math.cos(tr) + 92 * Math.sin(tr), PROBE[1] + 56 * Math.sin(tr) - 92 * Math.cos(tr)];
+  const monIn: Pt = [MON.x, MON.y + MON.h * 0.7];
+  const fanO: Pt = [MON.x + MON.w / 2, MON.y + 10];
 
   return (
     <g>
+      <WombDefs uid={uid} c={CAV2} r={CAV2_R} />
       <defs>
         {/* The abdominal wall fades out at both ends instead of stopping in round caps. */}
         <linearGradient id={`${clipId}-abd`} gradientUnits="userSpaceOnUse" x1={100} y1={0} x2={900} y2={0}>
@@ -284,10 +415,9 @@ export function PrenatalTests({ t }: SceneProps) {
           <stop offset="0" stopColor="#8ecae6" stopOpacity="0.3" />
           <stop offset="1" stopColor="#8ecae6" stopOpacity="0" />
         </radialGradient>
-        <radialGradient id={`${clipId}-myo`} gradientUnits="userSpaceOnUse" cx={CAV2[0]} cy={CAV2[1]} r={270}>
-          <stop offset="0.62" stopColor="#82303a" />
-          <stop offset="1" stopColor="#5e2129" />
-        </radialGradient>
+        <clipPath id={`${clipId}-scr`}>
+          <rect x={MON.x + 5} y={MON.y + 5} width={MON.w - 10} height={MON.h - 10} rx={3} />
+        </clipPath>
       </defs>
 
       {/* Mother's abdominal wall: skin over a thin dark layer, fading at the ends */}
@@ -295,18 +425,19 @@ export function PrenatalTests({ t }: SceneProps) {
       <path d="M100,126 Q500,48 900,126" fill="none" stroke={`url(#${clipId}-abd)`} strokeWidth={7} />
 
       {/* Uterus and cervix as one organ: both outlines first, then both fills, so no seam shows */}
-      <g fill="none" stroke="#4a1a20" strokeWidth={4} strokeLinejoin="round">
+      <g fill="none" stroke="#3e1218" strokeWidth={4} strokeLinejoin="round">
         <path d={smoothPath(U2, true, 0.55)} />
         <path d={smoothPath(CERVIX, true, 0.5)} />
       </g>
       <path d={smoothPath(CERVIX, true, 0.5)} fill="#6a252d" />
-      <path d={smoothPath(U2, true, 0.55)} fill={`url(#${clipId}-myo)`} />
+      <path d={smoothPath(U2, true, 0.55)} fill={`url(#${uid}-myo)`} />
       {/* Cervical canal, opening at the external os */}
       <path d={`M${VAGINA_A[0]},${VAGINA_A[1] - 4} L${VAGINA_B[0]},${VAGINA_B[1] + 1}`} stroke="#2a0c10" strokeWidth={3} strokeLinecap="round" />
 
-      <ellipse cx={CAV2[0]} cy={CAV2[1]} rx={CAV2_R[0]} ry={CAV2_R[1]} fill={C.amnionCavity} />
-      <ellipse cx={CAV2[0]} cy={CAV2[1]} rx={CAV2_R[0]} ry={CAV2_R[1]} fill="none" stroke="#8ecae6" strokeWidth={1.4} opacity={0.5} />
-      <ellipse cx={CAV2[0]} cy={CAV2[1]} rx={CAV2_R[0] + 5} ry={CAV2_R[1] + 5} fill="none" stroke="#bfe0f2" strokeWidth={1.2} strokeDasharray="2 5" opacity={0.45} />
+      <Decidua c={CAV2} r={CAV2_R} />
+      <ellipse cx={CAV2[0]} cy={CAV2[1]} rx={CAV2_R[0]} ry={CAV2_R[1]} fill="#0d1a2c" />
+      <Fluid uid={uid} c={CAV2} r={CAV2_R} t={t} />
+      <Membranes c={CAV2} r={CAV2_R} />
 
       <g transform={place.transform}>
         <FetusFigure
@@ -315,7 +446,7 @@ export function PrenatalTests({ t }: SceneProps) {
           s={place.s}
           cord={
             <Part id="zilborrestea" quiet>
-              <CordRope pts={cordPts.map(place.inv)} w={7 / place.s} turns={8} />
+              <CordRope pts={cordPts.map(place.inv)} w={9 / place.s} turns={8} />
             </Part>
           }
         />
@@ -331,13 +462,38 @@ export function PrenatalTests({ t }: SceneProps) {
       <Part id="karena" quiet>
         <g clipPath={`url(#${clipId})`}>
           <g clipPath={`url(#${clipId}-u)`}>
-            <ellipse cx={pl.c[0]} cy={pl.c[1]} rx={84} ry={36} transform={`rotate(${pl.tan} ${pl.c[0]} ${pl.c[1]})`} fill="#c2415f" stroke="#7c1f36" strokeWidth={2} />
+            <PlacentaLens uid={uid} pc={pl.c} rx={84} ry={36} tan={pl.tan} cav={CAV2} cr={CAV2_R} ins={pl.a} />
           </g>
         </g>
       </Part>
 
-      {/* Ekografia: transducer resting on the abdomen, its beam a fan of pulses into the uterus */}
+      {/* Ekografia: transducer resting on the abdomen, its beam a fan of pulses into the uterus, its image on the monitor */}
       <Part id="ekografia" show={probeA > 0.02 ? 1 : 0}>
+        <g opacity={probeA}>
+          <path d={`M${f1(cableEnd[0])},${f1(cableEnd[1])} C${f1(cableEnd[0] + 60)},${f1(cableEnd[1] - 20)} ${f1(monIn[0] - 70)},${f1(monIn[1] - 40)} ${monIn[0]},${monIn[1]}`} fill="none" stroke="#64748b" strokeWidth={3} strokeLinecap="round" />
+          {/* monitor: bezel, screen, and the echo sector with the fetus in it */}
+          <rect x={MON.x} y={MON.y} width={MON.w} height={MON.h} rx={7} fill="#1e293b" stroke="#475569" strokeWidth={1.6} />
+          <rect x={MON.x + 5} y={MON.y + 5} width={MON.w - 10} height={MON.h - 10} rx={3} fill="#05080d" />
+          <g clipPath={`url(#${clipId}-scr)`}>
+            <path d={`M${fanO[0]},${fanO[1]} L${f1(fanO[0] - Math.sin(0.55) * 92)},${f1(fanO[1] + Math.cos(0.55) * 92)} A92,92 0 0 0 ${f1(fanO[0] + Math.sin(0.55) * 92)},${f1(fanO[1] + Math.cos(0.55) * 92)} Z`} fill="#323d4d" />
+            <g fill="#cbd5e1">
+              {SPECKLE.map((p, i) => (
+                <circle key={i} cx={f1(fanO[0] + Math.sin(p.a) * p.r)} cy={f1(fanO[1] + Math.cos(p.a) * p.r)} r={1.1} opacity={Math.min(1, p.o * 1.8)} />
+              ))}
+            </g>
+            {/* the fluid shows black, the fetus bright: head, trunk and a limb */}
+            <ellipse cx={fanO[0]} cy={fanO[1] + 50} rx={42} ry={26} fill="#05080d" opacity={0.9} />
+            {/* fetus in profile: bright skull ring, soft trunk, the spine as a row of echoes */}
+            <ellipse cx={fanO[0] + 10} cy={fanO[1] + 54} rx={19} ry={10} transform={`rotate(-18 ${fanO[0] + 10} ${fanO[1] + 54})`} fill="#94a3b8" opacity={0.55} />
+            <ellipse cx={fanO[0] - 16} cy={fanO[1] + 42} rx={11} ry={10} fill="#64748b" opacity={0.5} stroke="#f8fafc" strokeWidth={2.4} />
+            <g fill="#f8fafc">
+              {[0, 1, 2, 3, 4, 5].map((k) => (
+                <circle key={k} cx={f1(fanO[0] - 3 + k * 5.6)} cy={f1(fanO[1] + 47 + k * 1.2 - (k - 2.5) ** 2 * 0.5)} r={1.5} />
+              ))}
+            </g>
+          </g>
+          <circle cx={MON.x + MON.w - 12} cy={MON.y + MON.h - 4} r={1.6} fill="#22c55e" />
+        </g>
         <g transform={`translate(${PROBE[0]} ${PROBE[1]}) rotate(${PROBE_TILT})`} opacity={probeA}>
           <path d={`M0,2 L${-fanS * 230},${2 + fanC * 230} A230,230 0 0 0 ${fanS * 230},${2 + fanC * 230} Z`} fill={`url(#${clipId}-fan)`} />
           {pulses.map((ph, i) => {
@@ -360,12 +516,18 @@ export function PrenatalTests({ t }: SceneProps) {
         </g>
       </Part>
 
-      {/* Amaren serumaren azterketa: blood tube, α-fetoproteina */}
+      {/* Amaren serumaren azterketa: the mother's blood sample, its serum tested for α-fetoproteina */}
       <Part id="alfa-fetoproteina" show={bloodA}>
-        <g transform="translate(858 290)">
-          <rect x={-9} y={0} width={18} height={40} rx={5} fill="#cbd5e1" stroke="#475569" strokeWidth={1.2} />
-          <rect x={-9} y={18} width={18} height={22} rx={5} fill="#b91c3c" opacity={0.85} />
-          <rect x={-12} y={-8} width={24} height={9} rx={2} fill="#94a3b8" />
+        <g transform={`translate(${TUBE[0]} ${TUBE[1]})`}>
+          <rect x={-11} y={0} width={22} height={58} rx={7} fill="rgba(226,232,240,0.25)" stroke="#94a3b8" strokeWidth={1.3} />
+          {/* clotted cells below, pale serum above */}
+          <rect x={-9.5} y={30} width={19} height={26.5} rx={6} fill="#b91c3c" />
+          <rect x={-9.5} y={16} width={19} height={15} fill="#f5d77a" opacity={0.85} />
+          <rect x={-14} y={-9} width={28} height={11} rx={3} fill="#8b5cf6" stroke="#5b3fb8" strokeWidth={1} />
+          <rect x={-8} y={36} width={16} height={12} rx={1.5} fill="#f8fafc" opacity={0.9} />
+          <text x={0} y={42} dy="0.35em" textAnchor="middle" fontSize={7.5} fontWeight={700} fill="#334155">
+            AFP
+          </text>
         </g>
       </Part>
 
@@ -386,13 +548,14 @@ export function PrenatalTests({ t }: SceneProps) {
       {/* Biloxka korionikoen biopsia: catheter from the vagina, through the cervix, to the villi */}
       <Part id="biloxka-korionikoen-biopsia" show={cvsA > 0.02 ? 1 : 0}>
         <path d={catheterD} fill="none" stroke="#e2e8f0" strokeWidth={2.4} strokeLinecap="round" strokeDasharray="600" strokeDashoffset={600 * catheterLen} />
+        <circle cx={cvsEnd[0]} cy={cvsEnd[1]} r={3.4} fill="#e2e8f0" opacity={seg(cvsA, 0.9, 1)} />
       </Part>
 
       {/* Labels */}
       <Label id="ekografia" x={200} y={100} ax={PROBE[0] - 12} ay={PROBE[1] - 30} show={probeA} />
-      <Label id="alfa-fetoproteina" x={800} y={300} ax={858} ay={300} show={bloodA} />
+      <Label id="alfa-fetoproteina" x={TUBE[0]} y={TUBE[1] - 36} align="middle" ax={TUBE[0]} ay={TUBE[1] - 10} show={bloodA} />
       <Label id="amniozentesia" x={200} y={400} ax={needleTip[0]} ay={needleTip[1]} show={needleA} />
-      <Label id="biloxka-korionikoen-biopsia" x={200} y={460} ax={cvsEnd[0]} ay={cvsEnd[1]} show={cvsA} />
+      <Label id="biloxka-korionikoen-biopsia" x={204} y={460} small ax={cvsEnd[0]} ay={cvsEnd[1]} show={cvsA} />
       <Label id="karena" x={200} y={200} ax={pl.c[0] - 14} ay={pl.c[1] - 10} />
 
       <Note x={500} y={612} tone="warn" show={needleA}>

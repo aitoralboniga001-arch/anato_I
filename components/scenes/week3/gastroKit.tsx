@@ -60,7 +60,7 @@ export function Callout({ x, y, text, show, color = '#e8eefc', to, align = 'midd
   return (
     <>
       <g opacity={show} pointerEvents="none">
-        {to && <path d={`M${f1(x)},${f1(y)} L${f1(to[0])},${f1(to[1])}`} stroke={color} strokeWidth={1.2} strokeDasharray="3 3" opacity={0.8} />}
+        {to && <path d={`M${f1(x)},${f1(y)} L${f1(to[0])},${f1(to[1])}`} stroke={color} strokeWidth={1.2} opacity={0.6} />}
         {to && <circle cx={to[0]} cy={to[1]} r={3} fill={color} />}
       </g>
       <OnTop>

@@ -103,7 +103,16 @@ export function NotochordSagittal({ t }: SceneProps) {
       )}
 
       <Part id="nodo-primitiboa">
-        <ellipse cx={nodeTop[0]} cy={nodeTop[1] + 12 * s.k} rx={17 * s.k} ry={15 * s.k} fill="none" stroke="#fcd34d" strokeWidth={1.4} strokeDasharray="3 3" />
+        {/* The node: thickened, raised ectoderm round the pit, lit from above (no ring drawn round it). */}
+        <defs>
+          <radialGradient id="w3n-node" cx="50%" cy="28%" r="68%">
+            <stop offset="0" stopColor="#dbe6ff" stopOpacity={0.62} />
+            <stop offset="0.7" stopColor="#8fb0f5" stopOpacity={0.2} />
+            <stop offset="1" stopColor="#8fb0f5" stopOpacity={0} />
+          </radialGradient>
+        </defs>
+        <ellipse cx={nodeTop[0]} cy={nodeTop[1] + 8 * s.k} rx={20 * s.k} ry={15 * s.k} fill="url(#w3n-node)" />
+        <path d={`M${f1(nodeTop[0] - 18 * s.k)},${f1(nodeTop[1] - 1)} Q${f1(nodeTop[0])},${f1(nodeTop[1] - 13 * s.k)} ${f1(nodeTop[0] + 18 * s.k)},${f1(nodeTop[1] - 1)}`} fill="none" stroke="#d6e2ff" strokeWidth={1.5} strokeLinecap="round" opacity={0.85} />
       </Part>
       <Part id="hobitxo-primitiboa">
         <path d={pit} fill="#15294a" stroke="#0b1530" strokeWidth={1.2} />
@@ -122,7 +131,7 @@ export function NotochordSagittal({ t }: SceneProps) {
       {L('plaka-prekordala', 190, 205, mid(X_PRE))}
       {L(notoSlot, 190, 250, g.plate >= 0.5 ? s.map(-80, s.dEnd(-80) + 3) : mid((front + X_NODE) / 2), notoSlot === 'notokorda-plaka' ? 1 - g.rod : seg(t, NB.migrate, NB.migrate + 0.05))}
       {L('notokorda', 190, 430, mid(-80), g.rod)}
-      {L('endodermoa', 190, 470, s.map(-150, s.dEnd(-150) + 6))}
+      {L('endodermoa', 190, 470, s.map(-214, s.dEnd(-214) + 6))}
       {L('nodo-primitiboa', 810, 150, [nodeTop[0] + 14 * s.k, nodeTop[1] + 6 * s.k])}
       {L('hobitxo-primitiboa', 810, 235, [nodeTop[0], nodeTop[1] + 6])}
       {L('hodi-neuroenterikoa', 810, 415, s.map(X_NODE, s.dEnd(X_NODE) + 12), g.canal)}
@@ -149,6 +158,78 @@ function notoGeometry(t: number) {
 
 const PANEL = { k: 0.95, w: 300, amnionH: 70, yolkH: 70 };
 
+/** Section heading as a chip numbered like its cut on the locator. */
+function Heading({ y, color, n, text }: { y: number; color: string; n: number; text: string }) {
+  const w = text.length * 7.6 + 46;
+  return (
+    <g pointerEvents="none">
+      <rect x={f1(500 - w / 2)} y={y - 14} width={f1(w)} height={28} rx={14} fill="rgba(12,12,16,0.86)" stroke={color} strokeOpacity={0.45} />
+      <circle cx={f1(500 - w / 2 + 16)} cy={y} r={9} fill={color} />
+      <text x={f1(500 - w / 2 + 16)} y={y} dy="0.35em" textAnchor="middle" fontSize={11} fontWeight={800} fill="#0f0f11">
+        {n}
+      </text>
+      <text x={f1(500 + 12)} y={y} dy="0.35em" textAnchor="middle" fontSize={14} fontWeight={700} fill={color}>
+        {text}
+      </text>
+    </g>
+  );
+}
+
+/**
+ * Where the two sections are cut: the disc seen from above (cranial up) with the streak and node, the
+ * notochord growing cranially from the node, and the two planes — 1 above the node, 2 below it.
+ */
+function Locator({ t }: { t: number }) {
+  const cx = 905;
+  const cy = 330;
+  const rx = 30;
+  const ryT = 46;
+  const ryB = 42;
+  const nodeY = cy + 8;
+  const g = notoGeometry(t);
+  const grow = seg(t, NB.migrate, NB.canal - 0.04);
+  const notoTop = lerp(nodeY - 4, cy - ryT + 14, grow);
+  const disc = `M${cx},${cy - ryT} C${cx + rx * 1.1},${cy - ryT} ${cx + rx},${cy + ryB * 0.7} ${cx},${cy + ryB} C${cx - rx},${cy + ryB * 0.7} ${cx - rx * 1.1},${cy - ryT} ${cx},${cy - ryT}Z`;
+  const cut1 = cy - 20;
+  const cut2 = cy + 24;
+  return (
+    <g pointerEvents="none">
+      <rect x={cx - 56} y={cy - ryT - 28} width={112} height={ryT + ryB + 40} rx={12} fill="rgba(12,12,16,0.7)" stroke="rgba(232,238,252,0.12)" />
+      <text x={cx} y={cy - ryT - 13} textAnchor="middle" fontSize={9.5} fill="#c9d3ea" fontStyle="italic">
+        Goitik · goian kraneala
+      </text>
+      <path d={disc} fill={C.ectoderm} stroke="#24407e" strokeWidth={1.2} />
+      <path d={disc} fill="url(#w3n-loc)" />
+      <defs>
+        <radialGradient id="w3n-loc" cx="35%" cy="25%" r="80%">
+          <stop offset="0" stopColor="#fff" stopOpacity={0.25} />
+          <stop offset="0.55" stopColor="#fff" stopOpacity={0} />
+          <stop offset="1" stopColor="#000" stopOpacity={0.35} />
+        </radialGradient>
+      </defs>
+      {/* streak and node */}
+      <path d={`M${cx - 3},${nodeY + 4} L${cx},${cy + ryB - 8} L${cx + 3},${nodeY + 4}Z`} fill="#2a4a96" />
+      <circle cx={cx} cy={nodeY} r={4.2} fill="#a9c3ff" stroke="#2a4a96" strokeWidth={1} />
+      {/* notochord, growing cranially from the node */}
+      {grow > 0.02 && <path d={`M${cx},${nodeY - 4} L${cx},${f1(notoTop)}`} stroke={C.notochord} strokeWidth={g.rod > 0.5 ? 4 : 3} strokeLinecap="round" />}
+      <circle cx={cx} cy={cy - ryT + 9} r={3.6} fill={C.prechordal} />
+      {/* the two cutting planes */}
+      {[
+        [cut1, '#93c5fd', 1],
+        [cut2, '#fcd34d', 2],
+      ].map(([y, c, n]) => (
+        <g key={n as number}>
+          <line x1={cx - rx - 6} y1={y as number} x2={cx + rx + 6} y2={y as number} stroke={c as string} strokeWidth={1.8} />
+          <circle cx={cx + rx + 12} cy={y as number} r={7} fill={c as string} />
+          <text x={cx + rx + 12} y={y as number} dy="0.35em" textAnchor="middle" fontSize={9.5} fontWeight={800} fill="#0f0f11">
+            {n}
+          </text>
+        </g>
+      ))}
+    </g>
+  );
+}
+
 export function NotochordTransverse({ t }: SceneProps) {
   const g = notoGeometry(t);
   const cranial = makeDisc({ ...PANEL, y: 172, endo: 1, meso: 1, ecto: 1, pre: g.pre, plate: g.plate, rod: g.rod, close: g.close });
@@ -161,12 +242,9 @@ export function NotochordTransverse({ t }: SceneProps) {
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <DiscDrawing s={cranial} ids={{ epiblast: 'ektodermoa' }} />
       <DiscDrawing s={caudal} ids={{ epiblast: 'ektodermoa' }} />
-      <text x={500} y={86} textAnchor="middle" fontSize={14} fill="#93c5fd" fontWeight={700}>
-        Nodotik gora (kraneala): notokorda eratzen
-      </text>
-      <text x={500} y={360} textAnchor="middle" fontSize={14} fill="#fcd34d" fontWeight={700}>
-        Nodotik behera (kaudala): ildo primitiboa, notokordarik EZ
-      </text>
+      <Heading y={86} color="#93c5fd" n={1} text="Nodotik gora (kraneala): notokorda eratzen" />
+      <Heading y={360} color="#fcd34d" n={2} text="Nodotik behera (kaudala): ildo primitiboa, notokordarik EZ" />
+      <Locator t={t} />
 
       <Note x={500} y={606} show={seg(t, NB.extent, NB.extent + 0.04)} tone="accent" size={11}>
         Notokorda: hobitxo primitibotik alde zefalikora, plaka prekordaleraino; hobitxotik behera ez dago notokordarik

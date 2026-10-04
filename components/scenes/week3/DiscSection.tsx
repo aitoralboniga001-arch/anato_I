@@ -392,7 +392,13 @@ export function membranePath(s: Disc, xm: number) {
 }
 
 export function MembraneMark({ s, x }: { s: Disc; x: number }) {
-  return <path d={membranePath(s, x)} fill="rgba(226,232,240,0.16)" stroke="#e2e8f0" strokeWidth={1.3} strokeDasharray="4 3" />;
+  // The membrane itself, lit: ectoderm and endoderm pressed together with nothing between (no pointer drawn round it).
+  return (
+    <g>
+      <path d={membranePath(s, x)} fill="rgba(238,242,255,0.3)" />
+      <path d={membranePath(s, x)} fill="none" stroke="#eef2ff" strokeWidth={1.2} opacity={0.85} />
+    </g>
+  );
 }
 
 /** A compact cluster of round cells centred in the ecto–endo gap at x (e.g. the prechordal plate). */
