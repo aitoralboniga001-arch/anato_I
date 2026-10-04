@@ -1,21 +1,27 @@
 'use client';
 
-import { Label, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, Label, Note, Part, clamp, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { AgeHud, SkinDefs } from './skin';
-import { D3, dayOf } from './Fetus';
 
 /**
  * Stage `hirugarren-hilabetea`, view `ernia`: the abdomen cut open from the left side.
  * From week 6 the gut loops (from the midgut) have no room in the abdominal cavity and go
  * out into the proximal umbilical cord: a PHYSIOLOGICAL hernia. By week 12 the cavity is
  * larger, the loops return and the bulge disappears.
+ *
+ * The view runs its own clock, the weeks on its dial (6 → 12): it opens at the 6th week with the loops
+ * still inside, plays the way out in the step that names the hernia (.60–.69) and the way back in the
+ * step that names the return (.74–.83), so both halves of the process are watched, each with its arrow.
  */
 
 const C: Pt = [610, 290];
 const E: Pt = [72, 468]; // cut end of the cord
 
-/** Week shown: the same clock as the fetus view (weeks 9–12), read the same way (whole weeks, rounded up). */
-const weekAt = (t: number) => Math.ceil(dayOf(D3, t) / 7);
+const EXIT: [number, number] = [0.6, 0.69];
+const BACK: [number, number] = [0.74, 0.83];
+/** Hernia clock: 6th week until the step, out by the 10th, 11th while they wait, back by the 12th. */
+const weekAt = (t: number) => (t < EXIT[1] ? lerp(6, 10, seg(t, EXIT[0], EXIT[1])) : t < BACK[0] ? lerp(10, 11, seg(t, EXIT[1], BACK[0], (k) => k)) : lerp(11, 12, seg(t, BACK[0], BACK[1])));
+const smooth = (k: number) => k * k * (3 - 2 * k);
 
 const bez = (a: Pt, b: Pt, c: Pt, d: Pt, u: number): Pt => {
   const v = 1 - u;
@@ -24,8 +30,8 @@ const bez = (a: Pt, b: Pt, c: Pt, d: Pt, u: number): Pt => {
 
 export function UmbilicalHernia({ t }: SceneProps) {
   const week = weekAt(t);
-  // Weeks 9–11: the loops (out since week 6) sit in the cord; they return in the step that says so (.74).
-  const out = 1 - seg(t, 0.74, 0.83); // loops in the cord
+  // The loops go out into the cord in the hernia step and come back in the return step.
+  const out = Math.min(seg(t, EXIT[0], EXIT[1]), 1 - seg(t, BACK[0], BACK[1])); // loops in the cord
   const grow = seg(t, 0.72, 0.83); // the abdominal cavity enlarges
   const rx = lerp(168, 222, grow);
   const ry = lerp(150, 188, grow);
@@ -79,7 +85,13 @@ export function UmbilicalHernia({ t }: SceneProps) {
     const c = coil(i, 12);
     return [p[0] + n[0] * side + c[0], p[1] + n[1] * side + c[1]];
   });
-  const loops = inside.map((p, i) => [lerp(p[0], outside[i][0], out), lerp(p[1], outside[i][1], out)] as Pt);
+  // The hairpin's tip leads the way out and is the last to come back: each point of the loop moves
+  // with a delay set by how far along the loop it lies from the tip.
+  const loops = inside.map((p, i) => {
+    const far = Math.abs(i - (N - 1) / 2) / ((N - 1) / 2);
+    const k = smooth(clamp(out * 1.6 - far * 0.6));
+    return [lerp(p[0], outside[i][0], k), lerp(p[1], outside[i][1], k)] as Pt;
+  });
   const gut = smoothPath([S0, [S0[0] - rx * 0.25, S0[1] + ry * 0.3], ...loops, [S1[0] - rx * 0.2, S1[1] - 4], S1], false, 0.5);
   const inner = (u: number) => out * Math.max(0, halfW(u) - 9) * (1 - seg(u, 0.3, 0.42));
   const cus = Array.from({ length: 18 }, (_, i) => -0.06 + (i / 17) * 0.48);
@@ -163,14 +175,35 @@ export function UmbilicalHernia({ t }: SceneProps) {
         </g>
       </Part>
 
+      {/* Direction of the process: out along the cord, then back into the enlarged cavity. */}
+      {(() => {
+        // Beside the cord on its lower side, clear of the bulge at its widest (and of the names above it).
+        const side = (u: number): Pt => {
+          const { p, n } = at(u);
+          const o = 25 + 34 + 26;
+          return [p[0] - n[0] * o, p[1] - n[1] * o];
+        };
+        const goOut = seg(t, EXIT[0], EXIT[0] + 0.07);
+        const goIn = seg(t, BACK[0], BACK[0] + 0.07);
+        return (
+          <>
+            <Arrow from={side(0.03)} to={side(0.4)} bend={-0.05} color="#ffb86b" width={3.6} progress={goOut} show={1 - seg(t, 0.71, 0.74)} />
+            <Arrow from={side(0.4)} to={side(0.03)} bend={0.05} color="#8fb4f7" width={3.6} progress={goIn} show={1 - seg(t, 0.85, 0.88)} />
+          </>
+        );
+      })()}
+
       <Label id="zilbor-ernia-fisiologikoa" x={250} y={120} ax={bulge.p[0] + bulge.n[0] * halfW(bulgeU) * 1.2} ay={bulge.p[1] + bulge.n[1] * halfW(bulgeU) * 1.2} show={seg(out, 0.5, 0.8)} />
       <Label id="heste-lakioak" x={250} y={190} ax={loopC[0]} ay={loopC[1]} />
       <Label id="zilborrestea" x={470} y={560} ax={at(0.66).p[0]} ay={at(0.66).p[1] + 14} />
-      <Label id="barrunbe-abdominala" x={846} y={262} ax={C[0] + rx * 0.62} ay={C[1] - ry * 0.3} />
-      <Label id="erdiko-hestea" x={846} y={440} ax={S1[0] + rx * 0.2} ay={S1[1] + 9} />
+      <Label id="barrunbe-abdominala" x={820} y={262} ax={C[0] + rx * 0.62} ay={C[1] - ry * 0.3} />
+      <Label id="erdiko-hestea" x={820} y={440} ax={S1[0] + rx * 0.2} ay={S1[1] + 9} />
 
-      <Note x={610} y={36} tone="accent" show={seg(t, 0.6, 0.64) * (1 - seg(t, 0.74, 0.77))}>
+      <Note x={610} y={36} tone="accent" show={seg(t, 0.6, 0.64) * (1 - seg(t, 0.74, 0.76))}>
         Ernia FISIOLOGIKOA: normala, ez patologikoa (6. astetik)
+      </Note>
+      <Note x={610} y={60} show={seg(t, 0.62, 0.66) * (1 - seg(t, 0.74, 0.76))}>
+        Heste lakioek ez daukate lekurik barrunbe abdominalean → zilborrestera sartzen dira
       </Note>
       <Note x={610} y={36} tone="accent" show={seg(t, 0.78, 0.82)}>
         12. astea: barrunbea handiagoa, goragunea desagertu da
@@ -179,7 +212,7 @@ export function UmbilicalHernia({ t }: SceneProps) {
       <g pointerEvents="none">
         {(() => {
           const wx = (w: number) => 620 + ((w - 5) / 8) * 260;
-          const now = Math.min(13, Math.max(5, dayOf(D3, t) / 7));
+          const now = week;
           return (
             <>
               <text x={620} y={548} fill="#8b867d" fontSize={11} letterSpacing="0.12em" style={{ textTransform: 'uppercase' }}>
@@ -197,7 +230,7 @@ export function UmbilicalHernia({ t }: SceneProps) {
           );
         })()}
       </g>
-      <AgeHud value={week} unit=". astea" caption="Adina" />
+      <AgeHud value={Math.floor(week + 0.001)} unit=". astea" caption="Adina" />
     </g>
   );
 }

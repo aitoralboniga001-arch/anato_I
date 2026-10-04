@@ -292,12 +292,16 @@ export function Fetus6to9({ t }: SceneProps) {
 // ---------------------------------------------------------------------------
 
 /** The course figure "A 9 · B 12 · C 20 · D 28 · E 38 astea": fetuses drawn to the same scale. */
-const LINEUP: { tag: string; week: number; x: number }[] = [
-  { tag: 'A', week: 9, x: 72 },
-  { tag: 'B', week: 12, x: 158 },
-  { tag: 'C', week: 20, x: 305 },
-  { tag: 'D', week: 28, x: 520 },
-  { tag: 'E', week: 38, x: 790 },
+// `at`: when each fetus joins the row, on the steps of the stage (week5.ts beats .44 and .58): A–C
+// (already past at the 22nd week) at the start, D (28 wk) with the 7th-month step, when the fetus view
+// reaches the 28th week, E (38 wk) with the "body rounds off" step. `kick`: the big ones only stir,
+// so a stretched leg never reaches into the neighbour.
+const LINEUP: { tag: string; week: number; x: number; at: number; kick: number }[] = [
+  { tag: 'A', week: 9, x: 72, at: 0, kick: 0.55 },
+  { tag: 'B', week: 12, x: 158, at: 0.035, kick: 0.55 },
+  { tag: 'C', week: 20, x: 305, at: 0.07, kick: 0.4 },
+  { tag: 'D', week: 28, x: 520, at: 0.44, kick: 0.14 },
+  { tag: 'E', week: 38, x: 790, at: 0.58, kick: 0.1 },
 ];
 const LINE_PX = 11;
 const BASE = 522;
@@ -307,20 +311,22 @@ export function FetusLineup({ t }: SceneProps) {
     <g>
       <line x1={40} x2={960} y1={BASE + 6} y2={BASE + 6} stroke="rgba(255,255,255,0.08)" />
       {LINEUP.map((f, i) => {
-        const show = vis(t, i * 0.1);
+        const show = vis(t, f.at);
         if (show < 0.01) return null;
+        // Joins the row rising a little from the ground line, rather than a dark ghost fading in place.
+        const rise = (1 - show) * 14;
         const cm = interp(LEN, f.week);
         const ph = t * 60 + i * 1.7;
         const pose = {
           breathe: Math.sin(ph),
           suck: 0.8 + 0.2 * Math.sin(ph * 0.8),
-          kick: Math.max(0, Math.sin(t * 26 + i * 2.3)) ** 8 * 0.55,
+          kick: Math.max(0, Math.sin(t * 26 + i * 2.3)) ** 8 * f.kick,
           nod: 3 * Math.sin(ph * 0.3),
         };
         const Pl = placeFetus(cm, LINE_PX, f.x, BASE, true, true);
         return (
           <g key={f.tag} opacity={show}>
-            <g transform={Pl.transform}>
+            <g transform={`translate(0 ${rise.toFixed(2)}) ${Pl.transform}`}>
               <FetusFigure id={`w5l${i}`} week={f.week} pose={pose} s={Pl.s} hernia={f.week <= 10 ? 1 : 0} vernix={f.week >= 36 ? 0.7 : 0} />
             </g>
             <text x={f.x} y={BASE + 36} textAnchor="middle" fontSize={15} fontWeight={600} fill="#f1eee8">
@@ -333,7 +339,7 @@ export function FetusLineup({ t }: SceneProps) {
           </g>
         );
       })}
-      <Note x={500} y={612} show={vis(t, 0.55)}>
+      <Note x={500} y={612} show={vis(t, 0.6)}>
         Eskala berean: buruaren tamaina erlatiboa txikitu egiten da (3. hilabetean ½, jaiotzean ¼)
       </Note>
     </g>

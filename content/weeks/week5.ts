@@ -301,7 +301,7 @@ export const week5: WeekDef = {
           id: 'ernia',
           label: 'Zilbor ernia',
           plane: 'eskema',
-          description: 'Eskema: heste lakioak 6. astean zilborrestera irteten dira eta 12. asterako barrunbe abdominalera itzultzen dira.',
+          description: 'Eskema, bere aste-erlojuarekin (6.–12. astea): heste lakioak 6. astean zilborrestera irteten dira eta 12. asterako barrunbe abdominalera itzultzen dira.',
           scene: UmbilicalHernia,
         },
       ],

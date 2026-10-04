@@ -531,12 +531,16 @@ export function FetusFigure({ id, week, pose, s, hernia = 0, vernix = 0, cord }:
         <circle cx={f2(cranLit[0])} cy={f2(cranLit[1])} r={f2(R * 1.15)} fill={`url(#${id}-cran)`} />
         <circle cx={f2(flank[0])} cy={f2(flank[1])} r={26} fill={`url(#${id}-backlit)`} />
         <circle cx={f2(g.hip[0] + 10)} cy={f2(g.hip[1] - 4)} r={30} fill={`url(#${id}-occ)`} />
-        {/* contact shadows of the near limbs */}
-        <g fill={tones.edge} transform={`translate(${f2(sh[0])} ${f2(sh[1])})`} opacity={0.15}>
-          {nearSil.map((d, i) => (
-            <path key={i} d={d} />
-          ))}
-        </g>
+        {/* Contact shadows of the near limbs: three thin offsets stacked, so the shadow darkens toward the
+            limb and fades out at its edge (one hard offset copy left a crisp dark line beside every limb on
+            the big figures). */}
+        {[0.4, 0.8, 1.25].map((k) => (
+          <g key={k} fill={tones.edge} transform={`translate(${f2(sh[0] * k)} ${f2(sh[1] * k)})`} opacity={0.055}>
+            {nearSil.map((d, i) => (
+              <path key={i} d={d} />
+            ))}
+          </g>
+        ))}
         {/* Thin red skin of the 5th–6th month: fine wrinkles */}
         {red > 0.05 && (
           <g fill="none" stroke={tones.edge} strokeWidth={0.26} opacity={0.2 * red} strokeLinecap="round">
@@ -639,20 +643,19 @@ export function FetusFigure({ id, week, pose, s, hernia = 0, vernix = 0, cord }:
         ))}
       </g>
 
-      {/* Fat from the 7th month: creases at the wrist, ankle, knee and neck */}
+      {/* Fat folds at the wrist and ankle: short and soft (full-width lines read as seams across the limb) */}
       {fat > 0.02 && (
-        <g fill="none" stroke={edge} strokeWidth={0.45} opacity={0.45 * fat} strokeLinecap="round">
+        <g fill="none" stroke={edge} strokeWidth={0.4} opacity={0.32 * fat} strokeLinecap="round">
           {[
             [arm.end, arm.j, g.wA * 0.85, 0.12],
             [leg.end, leg.j, g.wL * 0.62, 0.1],
-            [leg.a, leg.j, g.wL * 1.05, 0.42],
           ].map(([p, q, w, k], i) => {
             const a = p as Pt;
             const b = q as Pt;
             const c = lerpPt(a, b, k as number);
             const th = Math.atan2(b[1] - a[1], b[0] - a[0]);
-            const nx = -Math.sin(th) * (w as number) * 0.9;
-            const ny = Math.cos(th) * (w as number) * 0.9;
+            const nx = -Math.sin(th) * (w as number) * 0.55;
+            const ny = Math.cos(th) * (w as number) * 0.55;
             return <path key={i} d={`M${f2(c[0] + nx)},${f2(c[1] + ny)} Q${f2(c[0] + Math.cos(th) * 1.2)},${f2(c[1] + Math.sin(th) * 1.2)} ${f2(c[0] - nx)},${f2(c[1] - ny)}`} />;
           })}
         </g>

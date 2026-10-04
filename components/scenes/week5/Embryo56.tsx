@@ -621,10 +621,25 @@ export function Embryo42to56({ t }: SceneProps) {
 
       {/* 48. eguna */}
       {L('begia', 250, 228, [e[0] - g.eyeR * 0.5, e[1]], vis(t, 0.5))}
-      {L('hatzetako-izpiak', 250, 388, arm.rays[1][1], limb48)}
-      {L('izpiarteko-ildoak', 250, 420, arm.grooves[1][1], limb48)}
+      {/* In the 48-day push-in the hand plate sits high and the foot plate below it: the hand's names sit
+          level with the hand and the foot's beside the foot, so no line crosses a plate. As the camera pulls
+          out they hand over to their places beside the whole embryo (out fully, then in: never two at once,
+          never sliding through the face names that come back into the picture). */}
+      {(() => {
+        const near = seg(pLimb, 0.5, 1, (k) => k);
+        const far = 1 - seg(pLimb, 0, 0.5, (k) => k);
+        return (
+          <>
+            {L('hatzetako-izpiak', 250, 160, arm.rays[1][1], limb48 * near)}
+            {L('izpiarteko-ildoak', 250, 204, arm.grooves[1][1], limb48 * near)}
+            {L('hatzetako-izpiak', 250, 290, leg.rays[2][1], limb48 * near, 'Behatzetako izpiak')}
+            {L('hatzetako-izpiak', 250, 388, arm.rays[1][1], limb48 * far)}
+            {L('izpiarteko-ildoak', 250, 420, arm.grooves[1][1], limb48 * far)}
+            {L('hatzetako-izpiak', 250, 530, leg.rays[2][1], limb48 * far, 'Behatzetako izpiak')}
+          </>
+        );
+      })()}
       {L('gibelaren-goragunea', 250, 452, [g.liver[0] - g.liver[2] * 0.35, g.liver[1] + 4], ear48)}
-      {L('hatzetako-izpiak', 770, 560, leg.rays[2][1], limb48, 'Behatzetako izpiak')}
       {L('lepoko-tolestura', 770, 130, [g.outline[0][0] - 12, g.outline[0][1] + 10], vis(t, 0.6) * (1 - half))}
       {L('kanpoko-entzumenbidea', 770, 180, [ear[0] + 2, ear[1] + 2], vis(t, 0.6) * (1 - half))}
       {L('belarriaren-pabiloia', 770, 235, [ear[0] + g.earR * 0.85, ear[1] + g.earR * 0.2], vis(t, 0.6) * (1 - half))}
