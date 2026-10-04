@@ -29,18 +29,23 @@ const RB = 138 * SB;
 const ROT = 43; // embryonic pole up, towards the endometrium
 
 /** Secretory glands: mouths on the surface (clear of the implantation site at x≈500). */
-const GLANDS = [-330, -120, 90, 395, 615, 830, 1040, 1250].map((x, i) => glandPath([x, SURF - 14], 228 + ((i * 37) % 40), i + 1));
+const GLANDS = [-330, -120, 90, 340, 615, 830, 1040, 1250].map((x, i) => glandPath([x, SURF - 18], 224 + ((i * 37) % 40), i + 1));
 /** Spiral arteries: straight radial arteries through the myometrium, coiling in the functional layer. */
 const ARTERIES = [-230, -10, 250, 515, 735, 950, 1150].map((x, i) => ({
   radial: spiralPath([x - 4, 50], [x, BASAL - 20], 1.2, 1.4, i),
   spiral: spiralPath([x, BASAL - 20], [x + 8 + (i % 2) * 6, 404 + ((i * 23) % 30)], 6.5, 6.5, i * 1.3),
 }));
+/**
+ * One subepithelial capillary placed where both close-ups keep it in view, left of the implantation
+ * site and clear of the glands: the anchor of the maternal vessels' name (short leader, crossing nothing).
+ */
+const CAP_A: [number, number, number, number] = [452, 434, 7, 20];
 /** Subepithelial capillaries (cross-sections). */
 const CAPS: [number, number, number, number][] = Array.from({ length: 26 }, (_, i) => {
   const x = -380 + i * 70 + rand(i * 5.1) * 36;
   const y = 296 + rand(i * 2.3 + 1) * 170;
   return [x, y, 5 + rand(i * 7.7) * 3.5, rand(i * 3.3) * 180] as [number, number, number, number];
-}).filter(([x, y]) => !(Math.abs(x - 500) < 70 && y > 420));
+}).filter(([x, y]) => !(Math.abs(x - 500) < 70 && y > 420) && Math.hypot(x - CAP_A[0], y - CAP_A[1]) > 34);
 /** Arcuate vessels in the vascular (middle) layer of the myometrium. */
 const ARCUATE: Pt[] = [-260, 0, 250, 520, 770, 1020, 1280].map((x, i) => [x + 10, 40 + (i % 2) * 18]);
 /** Smooth-muscle fascicles cut across in the myometrium. */
@@ -49,14 +54,20 @@ const FASCICLES = Array.from({ length: 34 }, (_, i) => {
   return { x: -390 + Math.floor(i / 2) * 106 + row * 53 + rand(i) * 18, y: (row ? 112 : -40) + rand(i * 1.9) * 26, rx: 34 + rand(i * 4.1) * 10, ry: 16 + rand(i * 2.7) * 6 };
 });
 
-/** Finger-like tongues of invading trophoblast: offset from the pole, length, sway. */
-/** Surface epithelium: x0, x1, cell width. */
+/** Surface epithelium: x0, x1, cell width; columnar cells (taller than wide), as in Langman fig. 3-10 C. */
 const EPI = [-400, 1400, 16] as const;
+const EPI_TH = 22;
+/**
+ * Wedges of invading trophoblast (day 6): offset from the pole, extra length, sway. Each pushes up
+ * between two epithelial cells and its tip only just passes the epithelium's base (Langman fig. 3-10 C):
+ * the deep invasion of the stroma is the syncytiotrophoblast of week 2, not this.
+ */
 const TONGUES: [number, number, number][] = [
-  [-27, 34, -1],
-  [1, 50, 1],
-  [28, 32, 1],
+  [-27, 18, -1],
+  [1, 25, 1],
+  [28, 16, 1],
 ];
+const TONGUE_W = 7;
 
 function tonguePath(x: number, base: number, len: number, w: number, sway: number) {
   const n = 9;
@@ -78,8 +89,8 @@ export function Implantation({ t }: SceneProps) {
   // Camera: overview → endometrial surface → the contact itself.
   const e = seg(t, 0.2, 0.38);
   const e2 = seg(t, 0.66, 0.74);
-  const zs = lerp(lerp(0.62, 1.75, e), 2.25, e2);
-  const z = zoom(500, lerp(lerp(300, 540, e), 515, e2), zs, 500, lerp(lerp(320, 300, e), 318, e2));
+  const zs = lerp(lerp(0.62, 1.75, e), 2.35, e2);
+  const z = zoom(lerp(500, 506, e2), lerp(lerp(300, 540, e), 510, e2), zs, 500, lerp(lerp(320, 300, e), 318, e2));
   const u = 1 / zs;
 
   // Blastocyst: approaches, turns its embryonic pole to the wall, touches, flattens, sinks in slightly.
@@ -100,13 +111,13 @@ export function Implantation({ t }: SceneProps) {
   const invader = mix(C.trophoblast, C.syncytio, 0.72);
   // Each tongue goes up where two epithelial cells part (a cell boundary next to its place on the pole).
   const tx = TONGUES.map(([dx]) => epiBoundary(cx + dx, EPI[0], EPI[1], EPI[2]));
-  const gaps: [number, number][] = TONGUES.map((_, i) => [tx[i], 6.5 * seg(inv, i * 0.12, 0.35 + i * 0.12)]);
+  const gaps: [number, number][] = TONGUES.map((_, i) => [tx[i], 9 * seg(inv, i * 0.12, 0.35 + i * 0.12)]);
 
   const P = (x: number, y: number) => z.at(x, y);
   const pole = P(cx, top + 6);
   const abpole = P(cx, cy + RB - 8);
   const emb = P(cx - 10, top + 40);
-  const cav = P(cx + 22, cy + 30);
+  const cav = P(cx + 22, cy + 30 - 40 * e2);
   const tro = P(cx + RB * 0.74, cy + RB * 0.6);
   const epi = P(612, SURF - 8);
   const str = P(440, 400);
@@ -114,12 +125,11 @@ export function Implantation({ t }: SceneProps) {
   const nearY = (pts: Pt[], y: number) => pts.reduce((b, p) => (Math.abs(p[1] - y) < Math.abs(b[1] - y) ? p : b));
   const gl = nearY(GLANDS[4], SURF - 80);
   const gland = P(gl[0], gl[1]);
-  const art = nearY(ARTERIES[3].spiral, SURF - 120);
-  const artery = P(art[0], art[1]);
+  const artery = P(CAP_A[0] - CAP_A[2] * 0.6, CAP_A[1]);
   const layer = (y: number): Pt => P(1000, y);
   const over = vis(t, 0, 0.26);
   const close = seg(t, 0.35, 0.4);
-  const tipY = SURF - 16 - 50 * inv;
+  const tipY = SURF - EPI_TH - 16 * inv;
   const site = P(tx[1], lerp(SURF - 8, tipY + 18, inv));
 
   // The approach as a route: where the blastocyst has come from, newest stretch bright.
@@ -157,7 +167,7 @@ export function Implantation({ t }: SceneProps) {
             </g>
           </Part>
           <Part id="amaren-odol-hodiak">
-            {CAPS.map(([x, y, r, a], i) => (
+            {[CAP_A, ...CAPS].map(([x, y, r, a], i) => (
               <Vessel key={i} x={x} y={y} rx={r} ry={r * 0.62} rot={a} />
             ))}
             {ARTERIES.map((a, i) => (
@@ -207,7 +217,7 @@ export function Implantation({ t }: SceneProps) {
           </g>
 
           <Part id="endometrio-epitelioa">
-            <Epithelium x0={EPI[0]} x1={EPI[1]} y={SURF} th={16} w={EPI[2]} gaps={gaps} />
+            <Epithelium x0={EPI[0]} x1={EPI[1]} y={SURF} th={EPI_TH} w={EPI[2]} gaps={gaps} />
           </Part>
 
           {/* The trophoblast next to the embryoblast proliferates (a thicker, darker cap) … */}
@@ -224,7 +234,7 @@ export function Implantation({ t }: SceneProps) {
                 const L = 16 + len * k;
                 const x = tx[i];
                 const at = (s: number): Pt => [x + sway * Math.sin(s * Math.PI * 1.2) * 4, base - s * L];
-                const d = tonguePath(x, base, L, 5.6, sway);
+                const d = tonguePath(x, base, L, TONGUE_W, sway);
                 return (
                   <g key={i}>
                     <path d={d} fill={invader} stroke="#0c4a2f" strokeWidth={0.9} />
@@ -232,8 +242,8 @@ export function Implantation({ t }: SceneProps) {
                     {/* Borders between the cells of the column, and their nuclei. */}
                     {[0.36, 0.68].map((s) => {
                       const [px, py] = at(s);
-                      const hw = 5.6 * (1 - 0.45 * s);
-                      return L * s > 18 ? <path key={`b${s}`} d={`M${px - hw},${py + 1.5} Q${px},${py - 1.5} ${px + hw},${py + 1.5}`} fill="none" stroke="#0c4a2f" strokeWidth={0.8} /> : null;
+                      const hw = TONGUE_W * (1 - 0.45 * s);
+                      return L * s > 14 ? <path key={`b${s}`} d={`M${px - hw},${py + 1.5} Q${px},${py - 1.5} ${px + hw},${py + 1.5}`} fill="none" stroke="#0c4a2f" strokeWidth={0.8} /> : null;
                     })}
                     {[0.2, 0.52, 0.84].map((s) => {
                       const [px, py] = at(s);

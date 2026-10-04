@@ -400,8 +400,10 @@ export const U_T: [number, number][] = [[0.14, 0], [0.22, U.ampulla], [0.36, U.a
 // 2 cells at 30 h (the whole step), 16 on the 3rd day (notes: 12–16), ~32 on the 4th, then the blastocyst.
 const P_T: [number, number][] = [[0.24, 0], [0.34, 0.99], [0.42, 2], [0.5, 2], [0.585, 5], [0.62, 5], [0.7, 6], [0.76, 6.15], [0.84, 7]];
 
-const LOUPE: Pt = [520, 472];
-const LR = 80;
+const LOUPE: Pt = [512, 462];
+const LR = 94;
+/** Scale of the conceptus inside the loupe (the tract copy is 0.085). */
+const LS = 0.48;
 
 export function stageOf(t: number): { id: string; hud: [string, string] } {
   if (t < 0.12) return { id: 'obozito-sekundarioa', hud: ['14.', ' eguna'] };
@@ -610,9 +612,9 @@ export function TractJourney({ t }: SceneProps) {
               </g>
             ) : null}
             <Part id={st.id}>
-              <Conceptus f={f} x={LOUPE[0]} y={LOUPE[1]} s={0.4} corona={corona} polar={polar} mass={mass} rot={rot} id="w1t" />
+              <Conceptus f={f} x={LOUPE[0]} y={LOUPE[1]} s={LS} corona={corona} polar={polar} mass={mass} rot={rot} id="w1t" />
             </Part>
-            <ellipse cx={LOUPE[0] - 26} cy={LOUPE[1] - 40} rx={44} ry={20} transform={`rotate(-28 ${LOUPE[0] - 26} ${LOUPE[1] - 40})`} fill="#fff" opacity={0.07} pointerEvents="none" />
+            <ellipse cx={LOUPE[0] - 31} cy={LOUPE[1] - 47} rx={52} ry={23} transform={`rotate(-28 ${LOUPE[0] - 31} ${LOUPE[1] - 47})`} fill="#fff" opacity={0.07} pointerEvents="none" />
           </g>
           <circle cx={LOUPE[0]} cy={LOUPE[1]} r={LR} fill="none" stroke="#ffb86b" strokeWidth={1.6} />
           <circle cx={LOUPE[0]} cy={LOUPE[1]} r={LR - 3} fill="none" stroke="#fff" strokeWidth={0.8} opacity={0.12} />
@@ -673,8 +675,8 @@ function Blast({ f, p, show, ok }: { f: ReturnType<typeof cleavageFrame>; p: Pt;
   if (show <= 0.01) return null;
   return (
     <g opacity={show}>
-      <circle cx={p[0]} cy={p[1]} r={28} fill={ok ? 'url(#w1e-ok)' : 'url(#w1e-bad)'} pointerEvents="none" />
-      <Conceptus f={f} x={p[0]} y={p[1]} s={0.11} rot={ok ? -47 : 0} mass={1} id="w1e" tiny />
+      <circle cx={p[0]} cy={p[1]} r={36} fill={ok ? 'url(#w1e-ok)' : 'url(#w1e-bad)'} pointerEvents="none" />
+      <Conceptus f={f} x={p[0]} y={p[1]} s={0.15} rot={ok ? -47 : 0} mass={1} id="w1e" tiny />
     </g>
   );
 }
@@ -688,9 +690,9 @@ function Swelling({ T, u, show }: { T: Pt[]; u: number; show: number }) {
   const k = 0.6 + 0.4 * show;
   return (
     <g transform={`translate(${p[0]} ${p[1]}) rotate(${a}) scale(${k})`} opacity={show} pointerEvents="none">
-      <ellipse rx={34} ry={tubeWidth(u) / 2 + 9} fill={C.tube} stroke="rgba(60,10,30,0.6)" strokeWidth={1.3} />
-      <ellipse rx={27} ry={tubeWidth(u) / 2 + 2} fill="#4a1c2c" />
-      <ellipse rx={27} ry={tubeWidth(u) / 2 + 2} fill="#b4233c" opacity={0.25} />
+      <ellipse rx={40} ry={tubeWidth(u) / 2 + 13} fill={C.tube} stroke="rgba(60,10,30,0.6)" strokeWidth={1.3} />
+      <ellipse rx={32} ry={tubeWidth(u) / 2 + 5} fill="#4a1c2c" />
+      <ellipse rx={32} ry={tubeWidth(u) / 2 + 5} fill="#b4233c" opacity={0.25} />
     </g>
   );
 }

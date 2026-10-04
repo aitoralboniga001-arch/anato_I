@@ -186,8 +186,10 @@ function Lumen({ t }: { t: number }) {
 export function BlastocystFormation({ t }: SceneProps) {
   const u = piece(B_SEG, t);
   const f = cleavageFrame(6 + u, 0, 5);
-  // Notes 4.4: in the uterine cavity the morula loses its zona (step .08), then the fluid enters.
-  f.zonaO = Math.min(f.zonaO, 1 - seg(t, 0.09, 0.25));
+  // Notes 4.4: in the uterine cavity the morula loses its zona (step .08): it thins and breaks into
+  // drifting fragments that stay in sight for the whole step (its held frame shows the loss happening),
+  // and clear only as the fluid step begins (.30).
+  f.zonaO = (1 - 0.62 * seg(t, 0.09, 0.22)) * (1 - seg(t, 0.275, 0.32));
   const day = lerp(4, 5, seg(t, 0, 0.72));
   const done = seg(t, 0.72, 0.78);
   // Named as soon as the single cavity (blastocoel) exists, the step that introduces the word.
@@ -274,8 +276,8 @@ export function BlastocystFormation({ t }: SceneProps) {
 
       {/* Named a morula until the blastocoel makes it a blastocyst (.6). */}
       <Label id="morula" x={250} y={300} ax={morulaA[0]} ay={morulaA[1]} show={vis(t, 0, 0.6)} />
-      <Label id="mintz-peluzidoa" x={800} y={470} ax={zonaA[0]} ay={zonaA[1]} show={vis(t, 0, 0.26)} />
-      <Label id="umetoki-barrunbea" x={250} y={470} ax={326} ay={462} show={vis(t, 0, 0.26)} />
+      <Label id="mintz-peluzidoa" x={800} y={470} ax={zonaA[0]} ay={zonaA[1]} show={vis(t, 0, 0.3)} />
+      <Label id="umetoki-barrunbea" x={250} y={470} ax={326} ay={462} show={vis(t, 0, 0.3)} />
       <Label id="trofoblastoa" x={800} y={420} ax={troA[0]} ay={troA[1]} show={done} />
       <Label id="enbrioblastoa" x={250} y={170} ax={embA[0]} ay={embA[1]} show={done} />
       <Label id="blastozelea" x={800} y={300} ax={cavA[0]} ay={cavA[1]} show={seg(t, 0.6, 0.65)} />
@@ -283,7 +285,7 @@ export function BlastocystFormation({ t }: SceneProps) {
       <Label id="mutur-enbrionarioa" x={800} y={110} ax={CX + 40} ay={CY - Math.sqrt(R * R - 1600)} show={poleOn} />
       <Label id="mutur-anenbrionarioa" x={250} y={540} ax={CX - 30} ay={CY + Math.sqrt(R * R - 900)} show={poleOn} />
 
-      <Note x={CX} y={606} tone="accent" show={vis(t, 0.08, 0.26)}>
+      <Note x={CX} y={606} tone="accent" show={vis(t, 0.08, 0.3)}>
         Umetokiaren barrunbean mintz peluzidoa galtzen da
       </Note>
       <Note x={CX} y={606} tone="accent" show={vis(t, 0.3, 0.6)}>

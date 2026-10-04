@@ -24,6 +24,7 @@ const WIN = 208; // where the winning sperm enters
 const POLE = -76; // animal pole: meiosis II spindle and second polar body
 const PB1 = -55; // first polar body (from ovulation)
 const DENT = -66; // the oocyte surface is flattened under the polar bodies (perivitelline pocket)
+const SP1 = 90; // first cleavage spindle, pole to pole
 
 type P2 = [number, number];
 const rad = (d: number) => (d * Math.PI) / 180;
@@ -58,9 +59,12 @@ const KEYS: [number, number, number, number][] = [
   [0.738, SPIN[0], SPIN[1] + 4, 3.3],
   [0.81, SPIN[0], SPIN[1] + 4, 3.3],
   [0.852, CX - 14, CY - 22, 1.85],
-  [0.915, CX - 4, CY - 6, 1.85],
-  [0.96, CX, CY, 1.5],
-  [1, CX, CY, 1.5],
+  // Push in as the pronuclei meet (their DNA replicates), keeping the polar bodies in the picture…
+  [0.885, CX + 10, CY - 30, 2.5],
+  [0.92, CX + 10, CY - 30, 2.5],
+  // …then back to the whole zygote inside its zona, with the first cleavage spindle at its centre.
+  [0.95, CX + 8, CY, 1.6],
+  [1, CX + 8, CY, 1.6],
 ];
 
 function camera(t: number): Cam {
@@ -442,10 +446,14 @@ export function Fertilization({ t }: SceneProps) {
           <stop offset="0.55" stopColor="#060506" stopOpacity="0.7" />
           <stop offset="1" stopColor="#060506" stopOpacity="0" />
         </radialGradient>
+        {/* Eased (no knee where it starts), so it never reads as an edge across the cell. */}
         <linearGradient id="w1f-band" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#060506" stopOpacity="0" />
-          <stop offset="0.45" stopColor="#060506" stopOpacity="0.55" />
-          <stop offset="1" stopColor="#060506" stopOpacity="0.88" />
+          <stop offset="0.2" stopColor="#060506" stopOpacity="0.035" />
+          <stop offset="0.4" stopColor="#060506" stopOpacity="0.13" />
+          <stop offset="0.6" stopColor="#060506" stopOpacity="0.3" />
+          <stop offset="0.8" stopColor="#060506" stopOpacity="0.52" />
+          <stop offset="1" stopColor="#060506" stopOpacity="0.72" />
         </linearGradient>
         <pattern id="w1f-gran" width="23" height="21" patternUnits="userSpaceOnUse">
           <circle cx="3" cy="4" r="0.9" fill="#b0606c" fillOpacity="0.32" />
@@ -565,17 +573,17 @@ export function Fertilization({ t }: SceneProps) {
           {/* First cleavage spindle: maternal and paternal chromosomes on one plate. */}
           {t > 0.925 && (
             <g pointerEvents="none">
-              <Spindle x={CX} y={CY} axis={0} len={70} o={spindle1} colors={[C.pronucleusF, C.pronucleusM, C.pronucleusF, C.pronucleusM, C.pronucleusF, C.pronucleusM]} asters />
+              <Spindle x={CX} y={CY} axis={0} len={SP1} o={spindle1} colors={[C.pronucleusF, C.pronucleusM, C.pronucleusF, C.pronucleusM, C.pronucleusF, C.pronucleusM]} asters />
               {[0, 1, 2, 3, 4, 5].map((i) => {
                 const fromF = i % 2 === 0;
                 const src = fromF ? [CX + 15, CY] : [CX - 15, CY];
-                const v = (i / 5 - 0.5) * 70 * 0.62;
+                const v = (i / 5 - 0.5) * SP1 * 0.62;
                 const x = lerp(src[0] + (i % 3) * 3 - 3, CX, gather);
                 const y = lerp(src[1] + v * 0.6, CY + v, gather);
                 return (
                   <g key={i} opacity={seg(t, 0.925, 0.945) * (1 - spindle1)}>
-                    <ellipse cx={x - 1.3} cy={y} rx={1.1} ry={3.4} transform={`rotate(${i * 25} ${x} ${y})`} fill={fromF ? '#d9468f' : '#3f7fe0'} />
-                    <ellipse cx={x + 1.3} cy={y} rx={1.1} ry={3.4} transform={`rotate(${i * 25} ${x} ${y})`} fill={fromF ? '#d9468f' : '#3f7fe0'} />
+                    <ellipse cx={x - 2.2} cy={y} rx={1.9} ry={6.2} transform={`rotate(${i * 25} ${x} ${y})`} fill={fromF ? '#d9468f' : '#3f7fe0'} />
+                    <ellipse cx={x + 2.2} cy={y} rx={1.9} ry={6.2} transform={`rotate(${i * 25} ${x} ${y})`} fill={fromF ? '#d9468f' : '#3f7fe0'} />
                   </g>
                 );
               })}
@@ -628,13 +636,22 @@ export function Fertilization({ t }: SceneProps) {
         </g>
       </g>
 
+      {/* Quiet backdrops so the overlays stay legible over the zoomed tissue (under every name and note). */}
+      {zoomed > 0.01 && (
+        <g pointerEvents="none" opacity={zoomed}>
+          <rect x={0} y={0} width={420} height={260} fill="url(#w1f-corner)" />
+          <rect x={0} y={380} width={1000} height={260} fill="url(#w1f-band)" />
+        </g>
+      )}
+
       {/* Labels — side gutters; anchors follow the camera. */}
       {(() => {
         // On the animal-pole close-up the corona is only a fringe at the far edge: the name steps back
         // rather than send a leader across the scene.
-        const a = ringAnchor(cam, [COR + 11, COR + 28, COR + 45], [200, 150]);
-        const far = clamp((Math.hypot(a[0] - 200, a[1] - 150) - 240) / 60);
-        return <Label id="koroa-erradiatua" x={200} y={150} ax={a[0]} ay={a[1]} show={coronaO * (1 - far)} />;
+        // Below the route map (it ends at y≈146), so nothing covers the name.
+        const a = ringAnchor(cam, [COR + 11, COR + 28, COR + 45], [200, 174]);
+        const far = clamp((Math.hypot(a[0] - 200, a[1] - 174) - 240) / 60);
+        return <Label id="koroa-erradiatua" x={200} y={174} ax={a[0]} ay={a[1]} show={coronaO * (1 - far)} />;
       })()}
       {(() => {
         // While the camera is on the animal pole the zona shows at the top left: the name rises to meet it.
@@ -703,13 +720,6 @@ export function Fertilization({ t }: SceneProps) {
         Zigotoa: mintz peluzidoz inguratua
       </Note>
 
-      {/* Quiet backdrops so the overlays stay legible over the zoomed tissue. */}
-      {zoomed > 0.01 && (
-        <g pointerEvents="none" opacity={zoomed}>
-          <rect x={0} y={0} width={420} height={260} fill="url(#w1f-corner)" />
-          <rect x={0} y={480} width={1000} height={160} fill="url(#w1f-band)" />
-        </g>
-      )}
       <PhaseTrail t={t} />
       <MiniTract day={0.24} />
       <Hud value="0." unit=" eguna" caption="Ernalkuntza" second={['Fasea', t < 0.14 ? '0' : t < 0.3 ? '1' : t < 0.58 ? '2' : t < 0.7 ? '3' : '—', t < 0.7 ? '/3' : '']} />
