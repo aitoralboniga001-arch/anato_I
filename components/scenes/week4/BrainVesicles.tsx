@@ -31,11 +31,29 @@ function vesicles(t: number) {
   };
 }
 
+/**
+ * Dorsal camera: the whole tube for step 1, then a push-in on the head while the three vesicles swell
+ * (steps 2–5), and back out for the spinal cord (step 6).
+ */
+function dorsalCamera(t: number) {
+  const z = seg(t, 0.07, 0.12) * (1 - seg(t, 0.75, 0.79));
+  const s = lerp(1, 1.6, z);
+  const fy = 232;
+  const ty = lerp(fy, 300, z);
+  return {
+    z,
+    s,
+    view: `translate(${VX} ${ty.toFixed(2)}) scale(${s.toFixed(4)}) translate(${-VX} ${-fy})`,
+    Z: (x: number, y: number): Pt => [VX + s * (x - VX), ty + s * (y - fy)],
+  };
+}
+
 /** Smooth maximum (soft union of two profiles, so the vesicles blend through real necks). */
 const smax = (a: number, b: number, k = 0.22) => Math.max(a, b) + Math.log1p(Math.exp(-Math.abs(a - b) * k)) / k;
 
 function DorsalDrawing({ t }: SceneProps) {
   const uid = useId().replace(/:/g, '');
+  const u = 1 / dorsalCamera(t).s; // strokes keep their on-screen weight inside the camera
   const { prosA, mesA, rhombA } = vesicles(t);
   const cordA = 0.35 + 0.65 * seg(t, 0.1, 0.5);
 
@@ -147,7 +165,7 @@ function DorsalDrawing({ t }: SceneProps) {
       </defs>
       {/* the embryo's back: calm sculpted body (light from the upper left), dark rim + light rim */}
       <g pointerEvents="none">
-        <path d={bodyPath} fill="none" stroke="#7a4a3d" strokeWidth={2.6} />
+        <path d={bodyPath} fill="none" stroke="#7a4a3d" strokeWidth={2.6 * u} />
         <g clipPath={`url(#${uid}-bc)`}>
           <path d={bodyPath} fill="#7a5547" />
           <path d={bodyPath} fill={`url(#${uid}-bd)`} transform="translate(2.4 2.8)" />
@@ -174,11 +192,11 @@ function DorsalDrawing({ t }: SceneProps) {
           <g clipPath={`url(#${uid}-${id})`}>
             <path d={tube} fill={`url(#${uid}-g)`} />
             <path d={lumen} fill="#14245e" opacity={0.6} />
-            {id === 'erronbentzefaloa' && <path d={fossa} fill="#9db8ff" opacity={0.22} stroke="#b9ccff" strokeOpacity={0.5} strokeWidth={1} />}
+            {id === 'erronbentzefaloa' && <path d={fossa} fill="#9db8ff" opacity={0.22} stroke="#b9ccff" strokeOpacity={0.5} strokeWidth={u} />}
           </g>
         </Part>
       ))}
-      <path d={tube} fill="none" stroke="#1e3a8a" strokeWidth={1.4} pointerEvents="none" />
+      <path d={tube} fill="none" stroke="#1e3a8a" strokeWidth={1.4 * u} pointerEvents="none" />
       {/* soft highlight down the dorsal surface (light from upper left) */}
       <path d={outline((y) => hw(y) * 0.16)} transform={`translate(${-0.0} 0)`} fill="#dfe8ff" opacity={0.13} pointerEvents="none" />
     </g>
@@ -190,18 +208,30 @@ function dorsalLabels(t: number) {
   const prosY = D_TOP + 40;
   const mesY = prosY + lerp(20, 54, prosA) * 0.6 + lerp(17, 40, mesA) * 0.75;
   const rhombY = mesY + lerp(17, 40, mesA) * 0.6 + lerp(17, 46, rhombA) * 0.8;
+  const rhombR = lerp(17, 46, rhombA);
+  const { z, Z, s } = dorsalCamera(t);
+  const P = Z(VX - 40, prosY);
+  const M = Z(VX - 24, mesY);
+  const R = Z(VX - 30, rhombY);
+  // the cord anchor slides up to the top of the cord while the camera is on the head, so it stays in frame
+  const O = Z(VX + 10, lerp(D_BOTTOM - 60, rhombY + rhombR + 40, z));
+  const H = Z(VX + 14, (D_TOP + D_BOTTOM) / 2);
+  // names line up with their vesicle (leaders stay short and horizontal at either zoom)
+  // (kept clear of the left orientation pill at y≈302–338)
+  const clearPill = (y: number) => (y > 286 && y < 320 ? 286 : y >= 320 && y < 354 ? 354 : y);
+  const ly = (y0: number, y: number) => lerp(y0, clearPill(Math.min(560, Math.max(60, y))), z);
   return (
     <>
-      <Mark id="hodi-neurala" x={VX} y={(D_TOP + D_BOTTOM) / 2} rx={26} ry={(D_BOTTOM - D_TOP) / 2 + 12} color="#7ad9a3" show={1 - seg(t, 0.1, 0.14)} />
-      <Label id="prosentzefaloa" x={190} y={170} ax={VX - 40} ay={prosY} show={prosL} />
-      <Label id="mesentzefaloa" x={190} y={230} ax={VX - 24} ay={mesY} show={mesL} />
-      <Label id="erronbentzefaloa" x={190} y={290} ax={VX - 30} ay={rhombY} show={rhombL} />
+      <Mark id="hodi-neurala" x={VX} y={Z(VX, (D_TOP + D_BOTTOM) / 2)[1]} rx={26 * s} ry={((D_BOTTOM - D_TOP) / 2 + 12) * s} color="#7ad9a3" show={1 - seg(t, 0.1, 0.14)} />
+      <Label id="prosentzefaloa" x={190} y={ly(170, P[1])} ax={P[0]} ay={P[1]} show={prosL} />
+      <Label id="mesentzefaloa" x={190} y={ly(230, M[1])} ax={M[0]} ay={M[1]} show={mesL} />
+      <Label id="erronbentzefaloa" x={190} y={ly(290, R[1])} ax={R[0]} ay={R[1]} show={rhombL} />
       <Note x={500} y={606} tone="dim" show={seg(t, 0.58, 0.62) * (1 - seg(t, 0.73, 0.75))}>
         Aurrerago, kurtsoan: prosentzefaloak telentzefaloa eta dientzefaloa emango ditu
       </Note>
-      <Label id="ornomuina" x={810} y={420} ax={VX + 14} ay={D_BOTTOM - 60} show={seg(t, 0.4, 0.46)} />
+      <Label id="ornomuina" x={810} y={ly(420, O[1])} ax={O[0]} ay={O[1]} show={seg(t, 0.4, 0.46)} />
       {/* Before the vesicles bulge, it is one continuous tube. */}
-      <Label id="hodi-neurala" x={810} y={360} ax={VX + 14} ay={(D_TOP + D_BOTTOM) / 2} show={1 - seg(t, 0.1, 0.14)} />
+      <Label id="hodi-neurala" x={810} y={360} ax={H[0]} ay={H[1]} show={1 - seg(t, 0.1, 0.14)} />
     </>
   );
 }
@@ -209,7 +239,9 @@ function dorsalLabels(t: number) {
 export function BrainVesiclesDorsal(props: SceneProps) {
   return (
     <g>
-      <DorsalDrawing {...props} />
+      <g transform={dorsalCamera(props.t).view}>
+        <DorsalDrawing {...props} />
+      </g>
       {dorsalLabels(props.t)}
     </g>
   );

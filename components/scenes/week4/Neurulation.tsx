@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Label, Mark, Note, Part, clamp, lerp, lin, seg, smoothPath, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, Mark, Note, OnTop, Part, clamp, lerp, lin, seg, smoothPath, type SceneProps } from '@/components/kit';
 import { useId, type ReactNode } from 'react';
 import { f1, type Pt } from './common';
 import { K, NS, NeuruDrawing, SX, TE, crestCells, neuruGeo, type NeuruParams } from './NeuruSection';
@@ -30,7 +30,21 @@ function neuruParams(t: number): NeuruParams {
     detach: seg(t, 0.68, 0.765),
     oval: seg(t, 0.68, 0.78),
     somite: seg(t, 0.12, 0.4),
+    lift: seg(t, 0.62, 0.655),
   };
+}
+
+/**
+ * Camera: push in on the neural plate for the folding itself (plate → groove → folds → tube → covered tube),
+ * so the student sees the sheet bend at a readable size; pull back to the whole section for the migration.
+ */
+function camera(t: number) {
+  const z = seg(t, 0.01, 0.075) * (1 - seg(t, 0.795, 0.83));
+  const s = lerp(1, 1.55, z);
+  const fy = 235;
+  const ty = lerp(fy, 282, z);
+  const Z = (q: Pt): Pt => [500 + s * (q[0] - 500), ty + s * (q[1] - fy)];
+  return { view: `translate(500 ${ty.toFixed(2)}) scale(${s.toFixed(4)}) translate(-500 ${(-fy).toFixed(2)})`, Z, U: 1 / s, z };
 }
 
 const part = (id: string, node: ReactNode, show = 1) => (
@@ -41,6 +55,8 @@ const part = (id: string, node: ReactNode, show = 1) => (
 
 export function NeurulationTransverse({ t, reduced }: SceneProps) {
   const g = neuruGeo(neuruParams(t));
+  const { view, Z, U, z } = camera(t);
+  const ZX = (q: Pt) => Z(SX(q));
   const tube = g.p.close > 0.9;
   const foldsOn = t >= 0.3;
   const induce = seg(t, 0, 0.03) * (1 - seg(t, 0.12, 0.16));
@@ -52,42 +68,43 @@ export function NeurulationTransverse({ t, reduced }: SceneProps) {
   const cells = appear > 0.01 ? crestCells(g, appear, g.p.detach, migrate) : [];
   const tipR = SX(g.tipA);
   const tipL = SX(g.mirror(g.tipA));
-  const midOf = (i: number, sd: 1 | -1) => {
+  const midOf = (i: number, sd: 1 | -1): Pt => {
     const q: Pt = [(g.ap[i][0] + g.bas[i][0]) / 2, (g.ap[i][1] + g.bas[i][1]) / 2];
-    return SX(sd > 0 ? q : g.mirror(q));
+    return sd > 0 ? q : g.mirror(q);
   };
   const crestR = cells.find((c) => c.side > 0);
   const foldAt = (sd: 1 | -1) => midOf(NS - 6, sd);
 
+  // Drawn inside the camera (pre-zoom screen space); strokes divided by the magnification keep their weight.
   const over = (
     <g>
       {/* Induction: the notochord signals to the ectoderm above it, which thickens into the plate. */}
       {induce > 0.02 &&
         ([-1, 1] as const).map((sd) => (
-          <Arrow key={sd} from={SX([sd * 10, g.noto[1] - 6])} to={SX([sd * 34, g.TNt - 4])} bend={sd * -0.35} color="#e8eefc" width={2.2} head={7} show={induce} flow={!reduced} />
+          <Arrow key={sd} from={SX([sd * 10, g.noto[1] - 6])} to={SX([sd * 34, g.TNt - 4])} bend={sd * -0.35} color="#e8eefc" width={2.4 * U} head={8 * U} show={induce} flow={!reduced} />
         ))}
       {/* Folds rising and approaching each other. */}
       {rise > 0.02 &&
         ([-1, 1] as const).map((sd) => {
           const tp = sd > 0 ? tipR : tipL;
-          return <Arrow key={sd} from={[tp[0] + sd * 64, tp[1] + 40]} to={[tp[0] + sd * 26, tp[1] - 24]} bend={sd * 0.3} color="#a9c3ff" width={2.4} head={8} show={rise} flow={!reduced} />;
+          return <Arrow key={sd} from={[tp[0] + sd * 52, tp[1] + 34]} to={[tp[0] + sd * 22, tp[1] - 20]} bend={sd * 0.3} color="#a9c3ff" width={2.6 * U} head={9 * U} show={rise} flow={!reduced} />;
         })}
       {/* The folds meet in the midline. */}
       {zip > 0.02 &&
         ([-1, 1] as const).map((sd) => {
           const tp = sd > 0 ? tipR : tipL;
-          return <Arrow key={sd} from={[tp[0] + sd * 40, tp[1] - 22]} to={[500 + sd * 12, tp[1] - 18]} bend={sd * 0.2} color="#a9c3ff" width={2.2} head={7} show={zip * clamp(Math.abs(tp[0] - 500) / 20)} />;
+          return <Arrow key={sd} from={[tp[0] + sd * 34, tp[1] - 20]} to={[500 + sd * 10, tp[1] - 16]} bend={sd * 0.2} color="#a9c3ff" width={2.4 * U} head={8 * U} show={zip * clamp(Math.abs(tp[0] - 500) / 20)} />;
         })}
       {/* The folds: lit where they rise (no drawn ring). */}
-      <Mark id="tolesdura-neuralak" x={foldAt(1)[0]} y={foldAt(1)[1]} rx={30} show={rise} />
-      <Mark id="tolesdura-neuralak" x={foldAt(-1)[0]} y={foldAt(-1)[1]} rx={30} show={rise} />
+      <Mark id="tolesdura-neuralak" x={SX(foldAt(1))[0]} y={SX(foldAt(1))[1]} rx={24} show={rise} />
+      <Mark id="tolesdura-neuralak" x={SX(foldAt(-1))[0]} y={SX(foldAt(-1))[1]} rx={24} show={rise} />
 
       {/* Migration routes: dorsolateral (under the ectoderm) and ventral (between tube and somite). */}
       {routes > 0.02 &&
         ([-1, 1] as const).map((sd) => (
           <g key={sd}>
-            <Arrow from={SX([sd * 18, g.roofBasal - 8])} to={SX([sd * 170, g.ectoUnder(170) + 10])} bend={sd * 0.12} color="#2dd4bf" width={2.2} head={8} show={routes} flow={!reduced} />
-            <Arrow from={SX([sd * 30, g.roofBasal + 10])} to={SX([sd * 54, 96])} bend={sd * -0.15} color="#2dd4bf" width={2.2} head={8} show={routes} flow={!reduced} />
+            <Arrow from={SX([sd * 18, g.roofBasal - 8])} to={SX([sd * 170, g.ectoUnder(170) + 10])} bend={sd * 0.12} color="#2dd4bf" width={2.2 * U} head={8 * U} show={routes} flow={!reduced} />
+            <Arrow from={SX([sd * 30, g.roofBasal + 10])} to={SX([sd * 54, 96])} bend={sd * -0.15} color="#2dd4bf" width={2.2 * U} head={8 * U} show={routes} flow={!reduced} />
           </g>
         ))}
 
@@ -102,7 +119,7 @@ export function NeurulationTransverse({ t, reduced }: SceneProps) {
               const rot = moving ? (c.route === 'dl' ? c.side * 10 : c.side * 70) : 0;
               return (
                 <g key={i}>
-                  <ellipse cx={X} cy={Y} rx={(moving ? 5.6 : 4.6) * K} ry={3.4 * K} transform={`rotate(${rot} ${f1(X)} ${f1(Y)})`} fill={C.neuralCrest} stroke="#0f766e" strokeWidth={1} />
+                  <ellipse cx={X} cy={Y} rx={(moving ? 5.6 : 4.6) * K} ry={3.4 * K} transform={`rotate(${rot} ${f1(X)} ${f1(Y)})`} fill={C.neuralCrest} stroke="#0f766e" strokeWidth={1 * U} />
                   <circle cx={X} cy={Y} r={1.6 * K} fill="#0f4f49" />
                 </g>
               );
@@ -110,30 +127,30 @@ export function NeurulationTransverse({ t, reduced }: SceneProps) {
           </g>,
           appear,
         )}
-
-      <Note x={500} y={596} show={induce} tone="accent">
-        Notokorda → ektodermoa: indukzioa. Ektodermoaren eremu hau plaka neurala bihurtzen da.
-      </Note>
-      <Note x={500} y={596} show={seg(t, 0.62, 0.65) * (1 - seg(t, 0.68, 0.7))} tone="accent">
-        Fusio-lekuko zelulak askatzen dira (epitelio → mesenkima): gandor neurala
-      </Note>
-      <Note x={500} y={596} show={seg(t, 0.8, 0.83) * (1 - seg(t, 0.9, 0.92))} tone="accent">
-        Bi bide: ektodermoaren azpitik (dortsolaterala) eta hodiaren eta somitaren artetik (bentrala)
-      </Note>
     </g>
   );
 
-  const ecto = SX([-210, g.ectoUnder(210) - TE / 2]);
-  const plate = midOf(10, -1);
-  const groove = SX([0, g.tipA[1] * 0.35 - 2]);
-  const som = SX(g.mirror(g.somC));
-  const noto = SX(g.noto);
-  const wall = midOf(NS >> 1, 1);
-  const fold = foldAt(1);
-  const ao = SX(g.aorta);
+  // Label anchors, mapped through the camera; the ectoderm anchor slides inward while zoomed so it stays in frame.
+  const ecto = ZX([-lerp(210, 132, z), g.ectoUnder(lerp(210, 132, z)) - TE / 2]);
+  const plate = ZX(midOf(10, -1));
+  const groove = ZX([0, g.tipA[1] * 0.35 - 2]);
+  const som = ZX(g.mirror(g.somC));
+  const noto = ZX(g.noto);
+  const wall = ZX(midOf(NS >> 1, 1));
+  const fold = ZX(foldAt(1));
+  const ao = ZX(g.aorta);
   return (
     <g>
-      <NeuruDrawing g={g} part={part} plateId="plaka-neurala" foldId={foldsOn ? 'tolesdura-neuralak' : 'plaka-neurala'} tube={tube} aortaShow={seg(t, 0.3, 0.6)} over={over} />
+      <NeuruDrawing g={g} part={part} plateId="plaka-neurala" foldId={foldsOn ? 'tolesdura-neuralak' : 'plaka-neurala'} tube={tube} aortaShow={seg(t, 0.3, 0.6)} over={over} view={view} />
+      <Note x={500} y={612} show={induce} tone="accent">
+        Notokorda → ektodermoa: indukzioa. Ektodermoaren eremu hau plaka neurala bihurtzen da.
+      </Note>
+      <Note x={500} y={612} show={seg(t, 0.62, 0.65) * (1 - seg(t, 0.68, 0.7))} tone="accent">
+        Fusio-lekuko zelulak askatzen dira (epitelio → mesenkima): gandor neurala
+      </Note>
+      <Note x={500} y={612} show={seg(t, 0.8, 0.83) * (1 - seg(t, 0.9, 0.92))} tone="accent">
+        Bi bide: ektodermoaren azpitik (dortsolaterala) eta hodiaren eta somitaren artetik (bentrala)
+      </Note>
       <Label id="azaleko-ektodermoa" x={190} y={110} ax={ecto[0]} ay={ecto[1]} />
       <Label id="plaka-neurala" x={190} y={160} ax={plate[0]} ay={plate[1]} show={1 - seg(t, 0.3, 0.45)} />
       <Label id="ildo-neurala" x={190} y={205} ax={groove[0]} ay={groove[1]} show={seg(t, 0.12, 0.16) * (1 - seg(t, 0.5, 0.56))} />
@@ -141,7 +158,7 @@ export function NeurulationTransverse({ t, reduced }: SceneProps) {
       <Label id="notokorda" x={190} y={520} ax={noto[0] - 8} ay={noto[1] + 4} />
       <Label id="hodi-neurala" x={810} y={110} ax={wall[0]} ay={wall[1]} show={seg(t, 0.52, 0.58)} />
       <Label id="tolesdura-neuralak" x={810} y={242} ax={fold[0]} ay={fold[1]} show={seg(t, 0.3, 0.34) * (1 - seg(t, 0.54, 0.58))} />
-      {crestR && <Label id="gandor-neurala" x={810} y={205} ax={SX(crestR.q)[0]} ay={SX(crestR.q)[1]} show={appear} />}
+      {crestR && <Label id="gandor-neurala" x={810} y={205} ax={ZX(crestR.q)[0]} ay={ZX(crestR.q)[1]} show={appear} />}
       <Label id="aorta-dortsalak" x={810} y={500} ax={ao[0] + 10} ay={ao[1]} show={seg(t, 0.4, 0.6)} small />
     </g>
   );
@@ -352,13 +369,25 @@ function DorsalDrawing({ t }: SceneProps) {
         </Part>
       )}
 
-      {/* Neuropores: the still-open ends, looking down into the tube. */}
-      <Part id="neuroporo-kraneala" show={cranialOpen * poresOn(t)}>
-        <ellipse cx={500} cy={yAt(0.05)} rx={20 * cranialOpen + 4} ry={11 * cranialOpen + 3} fill="#05070d" stroke="#8fb0ff" strokeWidth={1.6} />
+      {/* Neuropores: the still-open ends, looking down into the tube. Once closed, the sealed site stays
+          marked (a short lit seam + its closure day), so the held frame of the neuropore step still shows both. */}
+      <Part id="neuroporo-kraneala" show={poresOn(t)}>
+        <ellipse cx={500} cy={yAt(0.05)} rx={20 * cranialOpen + 4} ry={11 * cranialOpen + 3} fill="#05070d" stroke="#8fb0ff" strokeWidth={1.6} opacity={seg(cranialOpen, 0, 0.25)} />
+        <path d={`M${f1(500 - 10 * (1 - cranialOpen))},${f1(yAt(0.05))}L${f1(500 + 10 * (1 - cranialOpen))},${f1(yAt(0.05))}`} stroke="#c7d6ff" strokeWidth={2.4} strokeLinecap="round" opacity={1 - seg(cranialOpen, 0, 0.25)} />
       </Part>
-      <Part id="neuroporo-kaudala" show={caudalOpen * poresOn(t)}>
-        <ellipse cx={500} cy={yAt(0.95)} rx={10 * caudalOpen + 3} ry={18 * caudalOpen + 3} fill="#05070d" stroke="#8fb0ff" strokeWidth={1.6} />
+      <Part id="neuroporo-kaudala" show={poresOn(t)}>
+        <ellipse cx={500} cy={yAt(0.95)} rx={10 * caudalOpen + 3} ry={18 * caudalOpen + 3} fill="#05070d" stroke="#8fb0ff" strokeWidth={1.6} opacity={seg(caudalOpen, 0, 0.25)} />
+        <path d={`M500,${f1(yAt(0.95) - 9 * (1 - caudalOpen))}L500,${f1(yAt(0.95) + 9 * (1 - caudalOpen))}`} stroke="#c7d6ff" strokeWidth={2.4} strokeLinecap="round" opacity={1 - seg(caudalOpen, 0, 0.25)} />
       </Part>
+      {/* closure day beside each sealed pore */}
+      <OnTop>
+        <text x={466} y={yAt(0.05) + 4} textAnchor="end" className="note note-accent" style={{ fontSize: 12.5 }} opacity={1 - seg(cranialOpen, 0, 0.3)}>
+          ≈25. eguna
+        </text>
+        <text x={470} y={yAt(0.95) + 4} textAnchor="end" className="note note-accent" style={{ fontSize: 12.5 }} opacity={1 - seg(caudalOpen, 0, 0.3)}>
+          ≈28. eguna
+        </text>
+      </OnTop>
 
       <Note x={500} y={74} tone="warn" show={seg(t, 0.9, 0.93)}>
         Neuroporoen itxiera-egunak gutxi gorabeherakoak dira (inguruan)
@@ -375,7 +404,7 @@ const T_CAUDAL = 0.995; // localClosure(0.95) reaches 1
 function DayRuler({ t }: { t: number }) {
   const show = seg(t, ZIP_START, ZIP_START + 0.03);
   if (show <= 0.02) return null;
-  const x = (d: number) => lerp(70, 330, (d - 21) / 8);
+  const x = (d: number) => lerp(56, 352, (d - 21) / 8);
   const day = t < T_OPEN ? lerp(22, 24.5, lin(t, ZIP_START, T_OPEN)) : t < T_CRANIAL ? lerp(24.5, 25, lin(t, T_OPEN, T_CRANIAL)) : lerp(25, 28, lin(t, T_CRANIAL, T_CAUDAL));
   const ticks: [number, string][] = [
     [22, 'fusioa hasi'],
@@ -388,10 +417,10 @@ function DayRuler({ t }: { t: number }) {
       {ticks.map(([d, txt]) => (
         <g key={d}>
           <line x1={x(d)} x2={x(d)} y1={594} y2={606} stroke={day >= d - 0.05 ? '#fbbf24' : 'rgba(232,238,252,0.45)'} strokeWidth={1.5} />
-          <text x={x(d)} y={588} textAnchor="middle" className="note note-dim" style={{ fontSize: 10.5 }}>
+          <text x={x(d)} y={586} textAnchor="middle" className={day >= d - 0.05 ? 'note note-accent' : 'note note-dim'} style={{ fontSize: 12.5 }}>
             ≈{d}. eguna
           </text>
-          <text x={x(d)} y={620} textAnchor="middle" className="note note-dim" style={{ fontSize: 10 }}>
+          <text x={x(d)} y={621} textAnchor="middle" className="note note-dim" style={{ fontSize: 11.5 }}>
             {txt}
           </text>
         </g>
@@ -410,8 +439,8 @@ function dorsalLabels(t: number) {
       <Label id="hodi-neurala" x={190} y={360} ax={500 - 14} ay={yAt(0.5)} show={spread ? seg(t, 0.44, 0.47) : 0} />
       <Label id={t < 0.12 ? 'plaka-neurala' : 'ildo-neurala'} x={810} y={400} ax={500 + 6} ay={yAt(0.7)} show={1 - localClosure(0.7, spread)} />
       <Label id="tolesdura-neuralak" x={190} y={200} ax={500 - plateHalfWidth(0.2) * 0.5} ay={yAt(0.2)} show={seg(t, 0.3, 0.34) * (1 - localClosure(0.2, spread))} />
-      <Label id="neuroporo-kraneala" x={790} y={150} ax={500 + 18} ay={yAt(0.05)} show={cranialOpen * poresOn(t)} />
-      <Label id="neuroporo-kaudala" x={810} y={480} ax={500 + 14} ay={yAt(0.95)} show={caudalOpen * poresOn(t)} />
+      <Label id="neuroporo-kraneala" x={790} y={150} ax={500 + 4 + 14 * cranialOpen} ay={yAt(0.05)} show={poresOn(t)} />
+      <Label id="neuroporo-kaudala" x={810} y={480} ax={500 + 3 + 11 * caudalOpen} ay={yAt(0.95)} show={poresOn(t)} />
       <Label id="somitak" x={810} y={260} ax={500 + plateHalfWidth(0.4) + 20} ay={yAt(0.4)} small show={seg(t, 0.2, 0.3)} />
     </>
   );

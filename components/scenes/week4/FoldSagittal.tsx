@@ -726,6 +726,35 @@ function Track({ t, id, k, from, color, show, tag = false }: { t: number; id: st
   );
 }
 
+/**
+ * Link to the transverse view: during the lateral-fold steps, the plane of the transverse section (the same
+ * line as the key in that view) crosses the embryo at the midgut, then slides just caudal to the umbilicus.
+ */
+function SectionPlane({ f, t }: { f: Fold; t: number }) {
+  const show = 0.85 * seg(t, 0.44, 0.47) * (1 - seg(t, 0.86, 0.9));
+  if (show <= 0.02) return null;
+  const { g, X } = f;
+  const lam = seg(t, 0.72, 0.785);
+  const sMid = (g.sAIP + g.sCIP) / 2 + 46 * lam;
+  const a = X(g.map(sMid, -NT0 - 20));
+  const b = X(g.map(sMid, D_ROOF + ENDO + 36));
+  const u = unit(sub(a, b));
+  // short caps across each end: the cut-line convention of the exam figures
+  const cap = (p: P2) => `M${f1(p[0] - u[1] * 7)},${f1(p[1] + u[0] * 7)}L${f1(p[0] + u[1] * 7)},${f1(p[1] - u[0] * 7)}`;
+  const d = `M${f1(a[0])},${f1(a[1])}L${f1(b[0])},${f1(b[1])}${cap(a)}${cap(b)}`;
+  return (
+    <>
+      <g opacity={show} pointerEvents="none">
+        <path d={d} stroke="#0f0f11" strokeWidth={4.6} strokeLinecap="round" />
+        <path d={d} stroke="#ffb86b" strokeWidth={2.1} strokeLinecap="round" />
+      </g>
+      <Note x={500} y={588} tone="dim" show={show}>
+        Marra laranja: ebaki zeharkakoaren maila (ikus «Ebaki zeharkakoa» ikuspegia)
+      </Note>
+    </>
+  );
+}
+
 /** Before/after of the relations (one line per beat), in the words of the notes. */
 const RELATIONS: [number, number, string][] = [
   [0.08, 0.3, 'Hasieran bihotz-eremua mintz bukofaringeoaren AURREAN (kranealean) → tolestu ondoren haren AZPIAN (bentralean)'],
@@ -784,6 +813,8 @@ export function FoldingSagittal({ t }: SceneProps) {
       <Mark id="tolestura-kraneokaudala" x={tipT[0]} y={tipT[1]} rx={30} show={fold} />
       <Label id="tolestura-kraneokaudala" x={190} y={62} ax={tipH[0]} ay={tipH[1]} show={fold} />
 
+      <SectionPlane f={f} t={t} />
+
       <Track t={t} id="bihotz-hodia" k="heart" from={0.08} tag color="#f87171" show={headTr} />
       <Track t={t} id="mintz-bukofaringeoa" k="bm" from={0.08} color="#e8eefc" show={headTr} />
       <Track t={t} id="kloaka-mintza" k="cm" from={0.3} color="#e8eefc" show={tailTr} />
@@ -793,10 +824,10 @@ export function FoldingSagittal({ t }: SceneProps) {
       {L('amnios-barrunbea', 190, 110, X(map(-0.35 * LH, -NT0 - 40)))}
       {L('ektodermoa', 190, 145, X(map(-0.25 * LH, g.cen(-0.25 * LH) - g.NTe(-0.25 * LH) - 3)))}
       {L('hodi-neurala', 190, 180, X(map(-0.6 * LH, g.cen(-0.6 * LH))))}
-      {L('aurreko-hestea', 190, 215, X(fH(LF * 0.3, 0)), head)}
-      {L('errai-orria', 190, 320, X(fH(LF * 0.3, H0 + ENDO + 2.5)), layers, true)}
-      {L('enbrioi-barruko-zeloma', 190, 250, X(fH(LF * 0.88, H0 + ENDO + g.sp(LF) + g.cav(LF * 0.88) * 0.5)), layers, true)}
-      {L('paretako-orria', 190, 285, X(fH(LF * 0.6, g.WH(LF * 0.6) - 7.5)), layers, true)}
+      {L('aurreko-hestea', 190, 250, X(fH(LF * 0.3, 0)), head)}
+      {L('errai-orria', 190, 320, X(fH(LF * 0.15, H0 + ENDO + 2.5)), layers, true)}
+      {L('enbrioi-barruko-zeloma', 190, 215, X(fH(LF * 0.88, H0 + ENDO + g.sp(LF) + g.cav(LF * 0.88) * 0.5)), layers, true)}
+      {L('paretako-orria', 190, 285, X(fH(LF * 0.85, g.WH(LF * 0.85) - 7.5)), layers, true)}
       {L('barrunbe-perikardikoa', 190, 355, X(fH(LF * 0.22, H0 + ENDO + g.sp(LF * 0.22) + g.cav(LF * 0.22) * 0.55)), head, true)}
       {L('bihotz-hodia', 190, 390, heartC, head)}
       {L('mintz-bukofaringeoa', 190, 430, bmMid)}

@@ -47,6 +47,8 @@ export type NeuruParams = {
   oval: number;
   /** somites epithelialise 0..1 */
   somite: number;
+  /** the fused ectoderm lifts a little off the roof as the crest cells let go (before detachment) 0..1 */
+  lift?: number;
 };
 
 export type NeuruGeo = ReturnType<typeof neuruGeo>;
@@ -57,12 +59,16 @@ export function neuruGeo(p: NeuruParams) {
   const aM = 0.5 * p.groove;
   const aD = 1.28 * p.folds;
   const c = p.close;
+  // As the folds meet, the surface ectoderm of both sides meets OVER the tube (Langman 6-6 A): the
+  // junction climbs onto the roof and the ectoderm arches broadly over the closing tube (mesenchyme fills
+  // the plump folds), so the tube never sits bare on top of a flat ectoderm.
+  const ck = ss((c - 0.55) / 0.45);
   const theta = (s: number) => (1 - c) * (aM * bend(s, 6, 12) + aD * bend(s, 0.56 * NA, 16)) + c * ((Math.PI * s) / NA);
   // thickness: tapers to the ectoderm at the junction until the folds fuse; then lateral walls thicken,
   // floor and roof plates stay thin
   const th = (s: number) => {
     const u = s / NA;
-    const taper = ss((s - (NA - 13)) / 13) * (1 - p.detach);
+    const taper = ss((s - (NA - 13)) / 13) * (1 - p.detach) * (1 - 0.85 * ck);
     const base = TNt - (TNt - TE) * taper;
     return base * (1 + 0.32 * p.oval * Math.sin(Math.PI * u)) * (1 - 0.16 * p.oval * (1 - ss(s / 14))) * (1 - 0.14 * p.oval * ss((s - (NA - 14)) / 14));
   };
@@ -91,11 +97,12 @@ export function neuruGeo(p: NeuruParams) {
   // surface ectoderm (apical/amniotic surface) from the junction outwards: a hairpin over the fold crest,
   // down the outside of the fold, then flat. After detachment it starts at the midline above the tube.
   const gap = 16 * p.detach;
-  const P0: Pt = [lerp(tipA[0], 0, p.detach), lerp(tipA[1], roofBasal - gap - TE, p.detach)];
-  const h0 = Math.min(thetaTip, Math.PI / 2) * (1 - p.detach);
-  const hDown = lerp(-Math.min(1.1, 0.75 * thetaTip), -0.72, p.detach);
-  const rT = lerp(10, 80, p.detach);
-  const R2 = lerp(44, 110, p.detach);
+  const att: Pt = [tipA[0], lerp(tipA[1], roofBasal - TE - 7 * (p.lift ?? 0), ck)];
+  const P0: Pt = [lerp(att[0], 0, p.detach), lerp(att[1], roofBasal - gap - TE, p.detach)];
+  const h0 = lerp(Math.min(thetaTip, Math.PI / 2), 0.12, ck) * (1 - p.detach);
+  const hDown = lerp(lerp(-Math.min(1.1, 0.75 * thetaTip), -0.8, ck), -0.72, p.detach);
+  const rT = lerp(lerp(10, 46, ck), 80, p.detach);
+  const R2 = lerp(lerp(44, 88, ck), 110, p.detach);
   const eA: Pt[] = [P0];
   const eH: number[] = [h0];
   {
@@ -142,7 +149,7 @@ export function neuruGeo(p: NeuruParams) {
   const aorta: Pt = [42, DEN - 18];
   const mirror = (q: Pt): Pt => [-q[0], q[1]];
 
-  return { p, ap: apT, bas, hs, tipA, thetaTip, roofBasal, eA, eB, ectoUnder, somC, somR, noto, aorta, mirror, gap, TNt };
+  return { p, ap: apT, bas, hs, tipA, thetaTip, roofBasal, eA, eB, ectoUnder, somC, somR, noto, aorta, mirror, gap, TNt, ck };
 }
 
 /** Screen mapping. */
@@ -412,6 +419,13 @@ export function NeuruDrawing({ g, part, plateId, foldId, tube, aortaShow, under,
           </>
         )}
 
+        {/* the junction while the folds close: where the neural tip climbs onto the roof to meet the ectoderm */}
+        {g.ck > 0.01 &&
+          p.detach < 0.999 &&
+          sides.map((sd) => {
+            const m = (q: Pt) => SX(sd > 0 ? q : mirror(q));
+            return <path key={`j${sd}`} d={pathOf([m(ap[NS]), m(bas[NS]), m(eB[0]), m(eA[0])], true)} fill="#4f74e6" />;
+          })}
         {/* same navy base under the surface ectoderm */}
         {p.detach > 0.001 ? (
           <path d={pathOf([...ectoFull.outer, ...ectoFull.inner.slice().reverse()], true)} fill="#22356f" />
@@ -449,9 +463,10 @@ export function crestCells(g: NeuruGeo, appear: number, gather: number, migrate:
     for (let i = 0; i < n; i++) {
       const r1 = rand(i * 7.1 + sd * 3.3);
       const r2 = rand(i * 2.9 + sd * 11.7);
-      // 1) at the junction, on the outside of the fold tip
-      const ang = lerp(0.18, 0.62, i / (n - 1));
-      const a: Pt = [Math.sin(ang) * (Math.abs(g.bas[NS - 6][0]) + 6), top + 4 + (1 - Math.cos(ang)) * 30 + r1 * 3];
+      // 1) at the junction: on the outer face of the fused roof, under the lifting ectoderm
+      const ia = NS - 1 - 2 * i;
+      const nb: Pt = [Math.sin(g.hs[ia]), Math.cos(g.hs[ia])];
+      const a: Pt = [Math.abs(g.bas[ia][0] + nb[0] * (3.6 + r1)), g.bas[ia][1] + nb[1] * (3.6 + r1)];
       // 2) gathered in the space between the tube roof and the separated ectoderm
       const row = i < 5 ? 0 : 1;
       const b: Pt = [3.5 + 6.6 * (row ? i - 5 + 0.5 : i) + r1 * 1.2, top - 4.2 - row * 6.4 - (row ? 0 : (i / 5) * 1.5)];

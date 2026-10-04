@@ -119,7 +119,7 @@ export function FoldingTransverse({ t }: SceneProps) {
       <Note x={500} y={612} show={seg(t, 0.82, 0.86)}>
         Zilbor-eskualdean ez da ixten: hodi onfalomesenterikoa kanpora doa
       </Note>
-      <Note x={500} y={590} tone="dim" show={seg(t, 0.02, 0.06) * (1 - seg(t, 0.68, 0.72))}>
+      <Note x={500} y={590} tone="dim" show={seg(t, 0.02, 0.06) * (1 - seg(t, 0.72, 0.745))}>
         Tolestu arte, enbrioi barruko zeloma korion barrunbearekin jarraia da
       </Note>
 
