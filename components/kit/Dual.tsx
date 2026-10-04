@@ -46,9 +46,11 @@ interface NoteProps {
 /** Name columns (outer) and panes (inner) of the 1000×640 frame. */
 const COL_L = 196;
 const COL_R = 804;
-const PANES: [number, number][] = [
-  [204, 436],
-  [444, 796],
+/** Default boundary between the panes; a scene whose right view is wide and short can move it left. */
+const SPLIT = 440;
+const panesAt = (split: number): [number, number][] => [
+  [204, split - 4],
+  [split + 4, 796],
 ];
 const TOP = 52;
 const BOTTOM = 572;
@@ -87,7 +89,13 @@ function rows(wanted: number[], lo: number, hi: number, gap = 31): number[] {
   return ys;
 }
 
-export function dual(left: Pane, right: Pane): SceneComponent {
+export interface DualOptions {
+  /** x of the boundary between the panes (default 440; allowed 320–680). */
+  split?: number;
+}
+
+export function dual(left: Pane, right: Pane, opts: DualOptions = {}): SceneComponent {
+  const PANES = panesAt(Math.min(680, Math.max(320, opts.split ?? SPLIT)));
   function Dual({ t, reduced }: SceneProps) {
     const { nameOf } = useScene();
     // A side column is ~185 units wide: long names are set small so they never run off the frame.
