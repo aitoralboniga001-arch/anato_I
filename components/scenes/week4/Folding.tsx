@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, Label, Mark, Note, OnTop, clamp, lin, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, Label, Mark, Note, clamp, lin, seg, type Pt, type SceneProps } from '@/components/kit';
 import { computeFold } from './FoldSagittal';
 import { FoldXDrawing, foldXAnchors, foldXGeo, foldXScreen } from './FoldTransverse';
 
@@ -35,7 +35,7 @@ function SectionKey({ t, lam }: { t: number; lam: number }) {
   const x1 = Math.max(...xs);
   const y0 = Math.min(...ys);
   const y1 = Math.max(...ys);
-  const box = { x: 20, y: 486, w: 166, h: 100 };
+  const box = { x: 20, y: 468, w: 166, h: 100 };
   const k = Math.min(box.w / (x1 - x0), (box.h - 10) / (y1 - y0));
   const ox = box.x + (box.w - k * (x1 - x0)) / 2;
   const oy = box.y + 8;
@@ -51,17 +51,19 @@ function SectionKey({ t, lam }: { t: number; lam: number }) {
   const B: Pt = [b[0] + u[0] * ext, b[1] + u[1] * ext];
   return (
     <g pointerEvents="none">
-      <rect x={box.x - 8} y={box.y - 8} width={box.w + 16} height={box.h + 26} rx={9} fill="rgba(10,10,12,0.78)" stroke="rgba(232,238,252,0.12)" />
+      <rect x={box.x - 8} y={box.y - 8} width={box.w + 16} height={box.h + 44} rx={9} fill="rgba(10,10,12,0.78)" stroke="rgba(232,238,252,0.12)" />
       <path d={d(F.pieces.flat())} fill="none" stroke="#f2c14e" strokeWidth={1.1} opacity={0.75} />
       <path d={d(F.ntTop)} fill="none" stroke="#3a5fd9" strokeWidth={1.6} />
       <path d={d(F.ecto)} fill="none" stroke="#7aa7f5" strokeWidth={1.4} />
       <path d={`M${A[0].toFixed(1)},${A[1].toFixed(1)}L${B[0].toFixed(1)},${B[1].toFixed(1)}`} stroke="#0f0f11" strokeWidth={4.2} strokeLinecap="round" />
       <path d={`M${A[0].toFixed(1)},${A[1].toFixed(1)}L${B[0].toFixed(1)},${B[1].toFixed(1)}`} stroke="#ffb86b" strokeWidth={2} strokeLinecap="round" />
-      <OnTop>
-        <text x={box.x + box.w / 2} y={box.y + box.h + 9} textAnchor="middle" className="note note-dim" style={{ fontSize: 10.5 }}>
-          {lam > 0.5 ? 'Ebakia: zilbor-eskualdetik beherago' : 'Ebakia: erdiko hestearen mailan'}
-        </text>
-      </OnTop>
+      {/* Two Notes (they grow with the stage's label scale): one long line could not grow inside the inset. */}
+      <Note x={box.x + box.w / 2} y={box.y + box.h + 6} size={11.5}>
+        Ebakia:
+      </Note>
+      <Note x={box.x + box.w / 2} y={box.y + box.h + 22} size={11.5}>
+        {lam > 0.5 ? 'zilbor-eskualdetik beherago' : 'erdiko hestearen mailan'}
+      </Note>
     </g>
   );
 }

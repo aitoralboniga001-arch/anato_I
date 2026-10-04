@@ -127,15 +127,15 @@ const folliclePt: Pt = (() => {
 })();
 
 const TRUNK: Dest[] = [
-  { id: 'gongoil-errakideoak', group: 2, path: [SEC.crest, [16, -172], [32, -156], [42, -140]], at: SEC.drg, lx: 988, ly: 320 },
-  { id: 'glia-zelulak', group: 2, path: [SEC.crest, [18, -176], [40, -160], [56, -138]], at: [57, -124], lx: 988, ly: 277 },
-  { id: 'schwann-zelulak', group: 2, path: [[48, -113], [62, -88], [72, -58]], at: [70, -64], lx: 988, ly: 363 },
-  { id: 'gongoil-sinpatikoak', group: 2, path: [SEC.crest, [14, -170], [26, -150], [27, -112], [30, -92]], at: SEC.chain, lx: 988, ly: 406 },
-  { id: 'giltzurrun-gaineko-muina', group: 2, path: [[31, -76], [36, -50], [41, -26]], at: SEC.adrenal, lx: 988, ly: 449 },
-  { id: 'gongoil-parasinpatikoak', group: 2, path: [[4, -22], [4, 10], [6, 40], [16, 56]], at: [18, 60], lx: 988, ly: 535 },
-  { id: 'melanozitoak', group: 3, path: [SEC.crest, ...under(8, MEL_TH[1] - 3, 4), rim(MEL_TH[1], 0.965)], at: rim(MEL_TH[0], 0.965), lx: 988, ly: 234 },
-  { id: 'ile-folikuluak', group: 3, path: [SEC.crest, ...under(8, FOLL_TH - 4, 14), folliclePt], at: folliclePt, lx: 988, ly: 578 },
-  { id: 'azazkalak', group: 3, path: [SEC.crest, ...under(8, 84, 8), [104, 40], [124, 54]], at: SEC.limbTip, lx: 988, ly: 492 },
+  { id: 'gongoil-errakideoak', group: 2, path: [SEC.crest, [16, -172], [32, -156], [42, -140]], at: SEC.drg, lx: 988, ly: 330 },
+  { id: 'glia-zelulak', group: 2, path: [SEC.crest, [18, -176], [40, -160], [56, -138]], at: [57, -124], lx: 988, ly: 285 },
+  { id: 'schwann-zelulak', group: 2, path: [[48, -113], [62, -88], [72, -58]], at: [70, -64], lx: 988, ly: 375 },
+  { id: 'gongoil-sinpatikoak', group: 2, path: [SEC.crest, [14, -170], [26, -150], [27, -112], [30, -92]], at: SEC.chain, lx: 988, ly: 420 },
+  { id: 'giltzurrun-gaineko-muina', group: 2, path: [[31, -76], [36, -50], [41, -26]], at: SEC.adrenal, lx: 988, ly: 510 },
+  { id: 'gongoil-parasinpatikoak', group: 2, path: [[4, -22], [4, 10], [6, 40], [16, 56]], at: [18, 60], lx: 988, ly: 555 },
+  { id: 'melanozitoak', group: 3, path: [SEC.crest, ...under(8, MEL_TH[1] - 3, 4), rim(MEL_TH[1], 0.965)], at: rim(MEL_TH[0], 0.965), lx: 988, ly: 240 },
+  { id: 'ile-folikuluak', group: 3, path: [SEC.crest, ...under(8, FOLL_TH - 4, 14), folliclePt], at: folliclePt, lx: 988, ly: 600 },
+  { id: 'azazkalak', group: 3, path: [SEC.crest, ...under(8, 84, 8), [104, 40], [124, 54]], at: SEC.limbTip, lx: 988, ly: 465 },
 ];
 
 const ALL = [...HEAD, ...TRUNK];
@@ -488,7 +488,8 @@ function labels(t: number) {
         const w = groupOn(t, d.group) * seg(t, travel(d).b - 0.01, travel(d).b + 0.004);
         if (w <= 0.01) return null;
         const [ax, ay] = isHead(d) ? hp(d.at) : spx(d.at);
-        return <Label key={d.id} id={d.id} x={d.lx} y={d.ly} ax={ax} ay={ay} align={isHead(d) ? 'start' : 'end'} small show={w} />;
+        // Trunk names in full size (one ordered column, spaced so no leader crosses another); head names stay small to clear the face.
+        return <Label key={d.id} id={d.id} x={d.lx} y={d.ly} ax={ax} ay={ay} align={isHead(d) ? 'start' : 'end'} small={isHead(d)} show={w} />;
       })}
     </>
   );
