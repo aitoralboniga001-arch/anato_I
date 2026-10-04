@@ -2,6 +2,7 @@
 
 import { Destination, Flow, Label, Note, Part, clamp, lerp, rand, seg, zoom, type SceneProps } from '@/components/kit';
 import {
+  BASE,
   CellPaths,
   Island,
   K,
@@ -288,11 +289,14 @@ function VilliDrawing({ t, reduced, detail = false }: SceneProps & { detail?: bo
         <path d={pd(synTop)} fill="none" stroke={K.synEdge} strokeWidth={1.5} strokeLinejoin="round" />
       </Part>
 
+      {/* Opaque bases under the inner layers, so a dimmed layer never shows the green below. */}
+      <path d={close(cytoPts)} fill={BASE} pointerEvents="none" />
       <Part id="zitotrofoblastoa">
         <path d={close(cytoPts)} fill={K.cytoGround} />
         <CellPaths b={walls} />
       </Part>
 
+      <path d={close(mesoPts)} fill={BASE} pointerEvents="none" />
       <Part id="enbrioi-kanpoko-mesodermoa">
         <path d={close(mesoPts)} fill={K.meso} />
         <path d={close(mesoPts)} fill="url(#p-meso-extra)" />
@@ -514,11 +518,13 @@ function VillusSection({ cx, cy, s, seed }: { cx: number; cy: number; s: SecStat
         <circle cx={cx} cy={cy} r={R - 2} fill="none" stroke={K.synRim} strokeWidth={1.3} />
         <circle cx={cx} cy={cy} r={R} fill="none" stroke={K.synEdge} strokeWidth={1.5} />
       </Part>
+      <circle cx={cx} cy={cy} r={rin} fill={BASE} pointerEvents="none" />
       <Part id="zitotrofoblastoa">
         <circle cx={cx} cy={cy} r={rin} fill={K.cytoGround} />
         <CellPaths b={walls} />
         <CellPaths b={core} />
       </Part>
+      {rm > 0.5 && <circle cx={cx} cy={cy} r={rm} fill={BASE} pointerEvents="none" />}
       {rm > 0.5 && (
         <Part id="enbrioi-kanpoko-mesodermoa">
           <circle cx={cx} cy={cy} r={rm} fill={K.meso} />

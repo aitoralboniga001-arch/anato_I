@@ -2,6 +2,7 @@
 
 import { Flow, Part, clamp } from '@/components/kit';
 import {
+  BASE,
   CellPaths,
   K,
   VesselSet,
@@ -350,7 +351,7 @@ export function TreeTissue({ tree, ids, reduced, framed = true }: { tree: Tree; 
       </Part>
 
       {/* Opaque bases under the inner layers: a dimmed (context) layer then darkens instead of showing the green below. */}
-      <g fill="#1b2233" pointerEvents="none">
+      <g fill={BASE} pointerEvents="none">
         <path d={closeDown(tree.cytoTop)} />
         {[...tree.brCyto, ...tree.sections.map((s) => s.cyto)].map((p, i) => (
           <path key={i} d={pd(p, true)} />
@@ -372,7 +373,7 @@ export function TreeTissue({ tree, ids, reduced, framed = true }: { tree: Tree; 
         <CellPaths b={tree.cells.shell} />
       </Part>
 
-      <g fill="#1b2233" pointerEvents="none">
+      <g fill={BASE} pointerEvents="none">
         <path d={closeDown(tree.mesoTop)} />
         {[...tree.brMeso, ...tree.sections.map((s) => s.meso)].map((p, i) => (
           <path key={i} d={pd(p, true)} />

@@ -2,6 +2,7 @@
 
 import { Flow, Label, Note, Part, clamp, lerp, seg, type SceneProps } from '@/components/kit';
 import {
+  BASE,
   CellPaths,
   K,
   VesselSet,
@@ -320,6 +321,13 @@ function ShellDrawing({ t, reduced, detail = false, framed = true }: SceneProps 
         <path d={runs(offsetPoly(synTop, -2), (p) => p[1] > Y.roofB + 4).map((r) => pd(r)).join('')} fill="none" stroke={K.synRim} strokeWidth={1.2} />
       </Part>
 
+      {/* Opaque bases under the inner layers, so a dimmed layer never shows the green below. */}
+      <g fill={BASE} pointerEvents="none">
+        <path d={close(cytoTop)} />
+        {brCyto.map((p, i) => (
+          <path key={i} d={pd(p, true)} />
+        ))}
+      </g>
       <Part id="zitotrofoblastoa">
         <path d={close(cytoTop)} fill={K.cytoGround} />
         {brCyto.map((p, i) => (
@@ -337,6 +345,12 @@ function ShellDrawing({ t, reduced, detail = false, framed = true }: SceneProps 
         <CellPaths b={shell.b} />
       </Part>
 
+      <g fill={BASE} pointerEvents="none">
+        <path d={close(mesoTop)} />
+        {brMeso.map((p, i) => (
+          <path key={i} d={pd(p, true)} />
+        ))}
+      </g>
       <Part id="enbrioi-kanpoko-mesodermoa">
         <path d={close(mesoTop)} fill={K.meso} />
         {brMeso.map((p, i) => (

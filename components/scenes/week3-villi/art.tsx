@@ -46,6 +46,13 @@ export const K = {
   shadow: 'rgba(4,6,12,0.32)',
 } as const;
 
+/**
+ * Opaque neutral base drawn under an inner tissue layer (cytotrophoblast, mesoderm). A dimmed (context)
+ * layer is drawn at reduced opacity; over this base it darkens instead of showing the green layer below
+ * (which would turn salmon mesoderm khaki).
+ */
+export const BASE = '#1b2233';
+
 export function W3bDefs() {
   return (
     <defs>

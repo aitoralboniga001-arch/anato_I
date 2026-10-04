@@ -2,6 +2,7 @@
 
 import { Arrow, C, Flow, Label, Note, Part, clamp, easeInOut, lerp, mix, rand, seg, type SceneProps } from '@/components/kit';
 import {
+  BASE,
   CellPaths,
   Island,
   K,
@@ -519,6 +520,13 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
         <path d={runs(offsetPoly(SYN_TOP, -2), (p) => p[1] > Y.roofB + 4).map((r) => pd(r)).join('')} fill="none" stroke={K.synRim} strokeWidth={1.2} />
       </Part>
 
+      {/* Opaque bases under the inner layers, so a dimmed layer never shows the green below. */}
+      <g fill={BASE} pointerEvents="none">
+        <path d={closeDown(CYTO_TOP)} />
+        {BR_CYTO.map((p, i) => (
+          <path key={i} d={pd(p, true)} />
+        ))}
+      </g>
       <Part id="zitotrofoblastoa" quiet>
         <path d={closeDown(CYTO_TOP)} fill={K.cytoGround} />
         {BR_CYTO.map((p, i) => (
@@ -532,6 +540,12 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
         <CellPaths b={CELLS.shell} />
       </Part>
 
+      <g fill={BASE} pointerEvents="none">
+        <path d={closeDown(MESO_TOP)} />
+        {BR_MESO.map((p, i) => (
+          <path key={i} d={pd(p, true)} />
+        ))}
+      </g>
       <Part id="enbrioi-kanpoko-mesodermoa" quiet>
         <path d={closeDown(MESO_TOP)} fill={K.meso} />
         {BR_MESO.map((p, i) => (
@@ -878,6 +892,7 @@ export function BarrierClose({ t, reduced }: SceneProps) {
         <path d={pd(g0)} fill="none" stroke={K.synEdge} strokeWidth={2.4} />
       </Part>
 
+      <path d={between(1, 3)} fill={BASE} pointerEvents="none" />
       <Part id="zitotrofoblastoa">
         <path d={between(1, 2)} fill={K.cytoGround} />
         <CellPaths b={BARRIER.cyto} sw={1.2} />
