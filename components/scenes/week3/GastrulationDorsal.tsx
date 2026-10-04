@@ -1,9 +1,9 @@
 'use client';
 
-import { Arrow, C, FollowRing, Journey, Label, Mark, Note, Part, clamp, lerp, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Journey, Label, Mark, Note, Part, clamp, lerp, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
 import { discOutline, f1 } from './common';
 import { GB } from './GastrulationCells';
-import { Callout, columnY, frameAt, inFrame, type Key } from './gastroKit';
+import { Callout, LitCell, LitDefs, columnY, ellipsePath, frameAt, inFrame, type Key } from './gastroKit';
 import { DorsalDefs, Stellate } from './dorsalKit';
 
 /**
@@ -220,6 +220,7 @@ function Dorsal({ t, reduced, pane }: SceneProps & { pane?: boolean }) {
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <defs>
         <DorsalDefs />
+        <LitDefs />
         <clipPath id="w3g-disc">
           <path d={OUT_D} />
         </clipPath>
@@ -268,7 +269,9 @@ function Dorsal({ t, reduced, pane }: SceneProps & { pane?: boolean }) {
           {under.map(({ c, s }, i) => (
             <g key={`j${i}`} opacity={showCells}>
               <Journey pts={trail(c)} color={FATE_COLOR[c.fate]} head={14} width={2.6} u={u} route={Math.max(told(c.fate), tri) * 0.6} origin={false} r={7.5} />
-              <FollowRing x={s.pos[0]} y={s.pos[1]} r={s.r + 1.4} u={u} show={Math.max(told(c.fate), tri)} />
+              <LitCell d={ellipsePath(s.pos[0], s.pos[1], s.r, s.r)} color={s.color} fate={FATE_COLOR[c.fate]} w={u} show={Math.max(told(c.fate), tri)}>
+                <circle cx={f1(s.pos[0] + 0.8)} cy={f1(s.pos[1] + 0.8)} r={2} fill="rgba(20,20,50,0.6)" />
+              </LitCell>
             </g>
           ))}
         </g>
@@ -322,7 +325,9 @@ function Dorsal({ t, reduced, pane }: SceneProps & { pane?: boolean }) {
                 <circle cx={f1(s.pos[0] - s.r * 0.3)} cy={f1(s.pos[1] - s.r * 0.3)} r={s.r * 0.42} fill="rgba(255,255,255,0.32)" />
                 <circle cx={f1(s.pos[0] + 0.8)} cy={f1(s.pos[1] + 0.8)} r={2.1} fill="rgba(20,20,50,0.6)" />
               </Part>
-              <FollowRing x={s.pos[0]} y={s.pos[1]} r={s.r + 1.4} u={u} />
+              <LitCell d={ellipsePath(s.pos[0], s.pos[1], s.r, s.r)} color={s.color} fate={FATE_COLOR[c.fate]} w={u}>
+                <circle cx={f1(s.pos[0] + 0.8)} cy={f1(s.pos[1] + 0.8)} r={2.1} fill="rgba(20,20,50,0.6)" />
+              </LitCell>
             </g>
           ))}
         </g>

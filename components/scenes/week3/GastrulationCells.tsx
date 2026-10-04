@@ -1,8 +1,9 @@
 'use client';
 
-import { C, FollowRing, Journey, Label, Mark, Note, OnTop, Part, clamp, easeInOut, lerp, lin, mix, rand, seg, useScene, type Pt, type SceneProps } from '@/components/kit';
+import { C, Journey, Label, Mark, Note, OnTop, Part, clamp, easeInOut, lerp, lin, mix, rand, seg, useScene, type Pt, type SceneProps } from '@/components/kit';
+import type { ReactNode } from 'react';
 import { f1 } from './common';
-import { Callout, frameAt, type Key } from './gastroKit';
+import { Callout, LitCell, LitDefs, ellipsePath, frameAt, tint, type Key } from './gastroKit';
 
 /**
  * 15–16. egunak — gastrulation, cell by cell. A close-up transverse section through the primitive
@@ -365,6 +366,7 @@ export function GastrulationCells({ t, reduced, pane }: SceneProps & { pane?: bo
           <stop offset="0.38" stopColor="#fff" stopOpacity={0.04} />
           <stop offset="1" stopColor="#000" stopOpacity={0.24} />
         </linearGradient>
+        <LitDefs />
         <mask id="gc-fade" maskUnits="userSpaceOnUse" x={0} y={0} width={1000} height={640}>
           <rect x={MID - HALF} y={0} width={HALF * 2} height={640} fill="url(#gc-edge)" />
         </mask>
@@ -483,17 +485,48 @@ export function GastrulationCells({ t, reduced, pane }: SceneProps & { pane?: bo
             pts.push([x, y]);
             const col = FATE_COLOR[q.fate];
             const subj = q.fate === 'A' ? em.a : q.fate === 'B' ? em.b : em.epi;
-            // Outline that hugs the cell's own shape: a column in the sheet, a block in the row, a round mesenchymal cell.
+            // The followed cell is lit on its own outline: a column in the sheet, a block in the row, a stellate mesenchymal cell.
             const sc = surfaceCells.find((c) => c.key === `${q.s}:${q.k}`);
-            let outline: string;
-            if (sc) outline = sc.d;
-            else if (q.k < NA) {
-              const p = mover(q.k, q.s, t).settle;
-              const rw = lerp(10, WH / 2 - 1, p) + 1.5;
-              const rh = lerp(10, HYP_H / 2, p) + 1.5;
-              const rr = lerp(10, 5, p) + 1.5;
-              outline = `M${f1(x - rw + rr)},${f1(y - rh)} H${f1(x + rw - rr)} Q${f1(x + rw)},${f1(y - rh)} ${f1(x + rw)},${f1(y - rh + rr)} V${f1(y + rh - rr)} Q${f1(x + rw)},${f1(y + rh)} ${f1(x + rw - rr)},${f1(y + rh)} H${f1(x - rw + rr)} Q${f1(x - rw)},${f1(y + rh)} ${f1(x - rw)},${f1(y + rh - rr)} V${f1(y - rh + rr)} Q${f1(x - rw)},${f1(y - rh)} ${f1(x - rw + rr)},${f1(y - rh)} Z`;
-            } else outline = `M${f1(x - 11)},${f1(y)} a11,9.4 0 1,0 22,0 a11,9.4 0 1,0 -22,0 Z`;
+            const edge = clamp((HALF - 12 - Math.abs(x - MID)) / 36);
+            let lit: ReactNode;
+            if (sc) {
+              const now = ectoName ? mix(C.epiblast, '#7aa2ff', seg(t, GB.ecto, GB.ecto + 0.04)) : C.epiblast;
+              lit = (
+                <LitCell d={sc.d} color={now} fate={col} show={edge}>
+                  <ellipse cx={f1(sc.nx)} cy={f1(sc.ny)} rx={f1(sc.nr)} ry={5.5} fill="rgba(30,20,50,0.6)" />
+                </LitCell>
+              );
+            } else if (q.k < K) {
+              const m = mover(q.k, q.s, t);
+              const p = m.settle;
+              if (q.k < NA) {
+                const rw = lerp(10, WH / 2 - 1, p);
+                const rh = lerp(10, HYP_H / 2, p);
+                const rr = lerp(10, 5, p);
+                const d = `M${f1(x - rw + rr)},${f1(y - rh)} H${f1(x + rw - rr)} Q${f1(x + rw)},${f1(y - rh)} ${f1(x + rw)},${f1(y - rh + rr)} V${f1(y + rh - rr)} Q${f1(x + rw)},${f1(y + rh)} ${f1(x + rw - rr)},${f1(y + rh)} H${f1(x - rw + rr)} Q${f1(x - rw)},${f1(y + rh)} ${f1(x - rw)},${f1(y + rh - rr)} V${f1(y - rh + rr)} Q${f1(x - rw)},${f1(y - rh)} ${f1(x - rw + rr)},${f1(y - rh)} Z`;
+                lit = (
+                  <LitCell d={d} color={m.color} fate={col} show={edge}>
+                    <circle cx={f1(x)} cy={f1(y + 1)} r={4.4} fill="rgba(30,20,50,0.6)" />
+                  </LitCell>
+                );
+              } else {
+                // Same processes as its Stellate body (same seed), lit too.
+                const seed = q.k * 5 + q.s;
+                const L = 9 + 9 * clamp(p * 1.4);
+                const arms = Array.from({ length: 4 }, (_, i) => {
+                  const a = (i / 4) * Math.PI * 2 + rand(seed + i) * 0.9;
+                  return <line key={i} x1={f1(x)} y1={f1(y)} x2={f1(x + Math.cos(a) * L)} y2={f1(y + Math.sin(a) * L * 0.7)} stroke={tint(tint(m.color, col, 0.2), '#ffffff', 0.22)} strokeWidth={2.6} strokeLinecap="round" />;
+                });
+                lit = (
+                  <g opacity={edge}>
+                    {arms}
+                    <LitCell d={ellipsePath(x, y, 9, 9 * 0.82)} color={m.color} fate={col}>
+                      <circle cx={f1(x + 0.6)} cy={f1(y + 0.5)} r={3.6} fill="rgba(30,20,50,0.6)" />
+                    </LitCell>
+                  </g>
+                );
+              }
+            }
             // The whole route (and the origin ghost) while this fate is the step's subject, and all together in the summary.
             const told = q.fate === 'A' ? win(GB.invag, GB.meso) : q.fate === 'B' ? win(GB.meso, GB.ecto) : win(GB.ecto, GB.tri);
             // In the summary the fate streams carry the paths; the individual routes step back so the picture stays clean.
@@ -501,7 +534,7 @@ export function GastrulationCells({ t, reduced, pane }: SceneProps & { pane?: bo
             return (
               <g key={`${q.s}:${q.k}`} opacity={trackOn * Math.max(0.5, subj)}>
                 <Journey pts={pts} color={col} head={16} width={2.6} route={route} origin={route > 0.15} r={q.fate === 'C' ? 6 : 8} show={trailOn} />
-                <FollowRing d={outline} show={clamp((HALF - 12 - Math.abs(x - MID)) / 36)} />
+                {lit}
               </g>
             );
           })}
@@ -577,7 +610,11 @@ function Legend({ t }: { t: number }) {
   return <OnTop><g pointerEvents="none">
     <g opacity={show}>
       <rect x={196} y={584} width={608} height={30} rx={15} fill="rgba(12,12,16,0.86)" stroke="rgba(232,238,252,0.14)" />
-      <circle cx={X[0] + 6} cy={599} r={6.5} fill="#3a4660" stroke="#fff" strokeWidth={2} />
+      {/* The swatch is a lit cell, as in the scene: brighter body, inner glow, lit rim on its own edge. */}
+      <ellipse cx={X[0] + 6} cy={599} rx={7} ry={7} fill={mix(C.epiblast, '#ffffff', 0.2)} />
+      <ellipse cx={X[0] + 6} cy={599} rx={7} ry={7} fill="url(#gk-glow)" />
+      <circle cx={X[0] + 6.4} cy={599.6} r={2.6} fill="rgba(30,20,50,0.6)" />
+      <ellipse cx={X[0] + 6} cy={599} rx={7} ry={7} fill="none" stroke={mix('#7aa2ff', '#ffffff', 0.58)} strokeWidth={1.7} />
       <text x={X[0] + 19} y={599} dy="0.35em" fontSize={12} fontWeight={600} fill="#e8eefc">Jarraitutako zelula</text>
       {rows.map((r, i) => <g key={r.text} opacity={0.55 + 0.45 * r.active}>
         <circle cx={X[i + 1] + 6} cy={599} r={5} fill={r.color} stroke="rgba(6,8,14,0.6)" strokeWidth={1.2} />

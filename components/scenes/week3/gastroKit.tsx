@@ -1,6 +1,7 @@
 'use client';
 
-import { OnTop, clamp, easeInOut, useScene, zoom, type Pt } from '@/components/kit';
+import { OnTop, clamp, easeInOut, mix, useScene, zoom, type Pt } from '@/components/kit';
+import type { ReactNode } from 'react';
 import { f1 } from './common';
 
 /** Shared helpers of the gastrulation views: auto-zoom keyframes, label columns and the on-scene call-out chip. */
@@ -74,3 +75,43 @@ export function Callout({ x, y, text, show, color = '#e8eefc', to, align = 'midd
     </>
   );
 }
+
+/** kit `mix` takes hex only; scene colours are often already `rgb(...)` mixes. */
+export const toHex = (c: string) => {
+  const m = c.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  return m ? '#' + m.slice(1, 4).map((v) => Number(v).toString(16).padStart(2, '0')).join('') : c;
+};
+export const tint = (a: string, b: string, k: number) => mix(toHex(a), toHex(b), k);
+
+/** Gradient of the followed-cell light (render once per scene inside <defs>). */
+export function LitDefs() {
+  return (
+    <radialGradient id="gk-glow" cx="0.42" cy="0.38" r="0.62">
+      <stop offset="0" stopColor="#fff" stopOpacity={0.52} />
+      <stop offset="0.5" stopColor="#fff" stopOpacity={0.16} />
+      <stop offset="1" stopColor="#fff" stopOpacity={0} />
+    </radialGradient>
+  );
+}
+
+/**
+ * A followed cell marked by its own light, not by a shape around it: the cell's exact outline redrawn brighter and
+ * tinted toward its fate colour, a soft glow inside, and a lit membrane rim (fate tint) on that same outline.
+ * Children (the nucleus) are drawn over the glow so it still reads as a cell.
+ */
+export function LitCell({ d, color, fate, w = 1, show = 1, children }: { d: string; color: string; fate: string; w?: number; show?: number; children?: ReactNode }) {
+  if (show < 0.02) return null;
+  const body = tint(tint(color, fate, 0.2), '#ffffff', 0.1);
+  const rim = tint(fate, '#ffffff', 0.58);
+  return (
+    <g opacity={clamp(show)} pointerEvents="none">
+      <path d={d} fill={body} />
+      <path d={d} fill="url(#gk-glow)" />
+      {children}
+      <path d={d} fill="none" stroke={rim} strokeWidth={1.7 * w} strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Closed ellipse path (for LitCell). */
+export const ellipsePath = (x: number, y: number, rx: number, ry: number) => `M${f1(x - rx)},${f1(y)} a${f1(rx)},${f1(ry)} 0 1,0 ${f1(rx * 2)},0 a${f1(rx)},${f1(ry)} 0 1,0 ${f1(-rx * 2)},0 Z`;
