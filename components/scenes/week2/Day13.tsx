@@ -437,6 +437,8 @@ export function Day13Section(props: SceneProps) {
   const push = seg(t, W.bleed[0], W.bleed[0] + 0.03);
   const z = zoom(500, lerp(290, 455, push), lerp(0.88, 1.9, push), 500, lerp(312, 300, push));
   const L = makeL(z.at);
+  const far = 1 - outHalf(push);
+  const near = inHalf(push);
   // The chorionic plate's own step (named here; its window W.plaka), then back to the general note.
   const plateIn = seg(t, W.plaka[0], W.plaka[0] + 0.02);
   const plateOut = seg(t, 0.5, 0.52);
@@ -451,21 +453,33 @@ export function Day13Section(props: SceneProps) {
         <Day13Drawing {...props} />
         <Surface t={t} />
       </g>
-      {L('endometrio-estroma', 190, 50, [300, 60])}
-      {L('umetoki-guruina', 190, 100, [236, 250])}
-      {L('endometrio-epitelioa', 190, 150, [lerp(300, 400, push), surfaceAt(lerp(300, 400, push), BULGE13) - 4])}
-      {L('finkapen-pedikulua', 190, 250, k.stalk)}
-      {L('sinzitiotrofoblastoa', 190, 380, k.syn(150))}
-      {L('biloxka-primarioa', 190, 430, k.villus(1), k.villi)}
-      {L('zitotrofoblastoa', 190, 475, k.cyto(136))}
-      {L('korion-plaka', 190, 520, k.plate(158), k.plaka)}
-      {L('mutur-enbrionarioa', 810, 250, k.cyto(276))}
-      {L('korioia', 810, 315, polar(k.g, 345, k.g.Rc + 4), k.chorion)}
-      {L('korion-barrunbea', 810, 380, k.meso(8, 0.5))}
-      {L('amnios-barrunbea', 810, 430, k.amnios)}
-      {L('epiblastoa', 810, 475, k.epi)}
-      {L('bitelo-zaku-sekundarioa', 810, 520, k.yolk, k.secondary)}
-      {L('kiste-exozelomikoak', 810, 565, k.cyst(0), k.cysts)}
+      {/* The whole conceptus: names round it. They leave before the close-up's names arrive (no two on a spot). */}
+      {L('endometrio-estroma', 190, 50, [300, 60], far)}
+      {L('umetoki-guruina', 190, 100, [236, 250], far)}
+      {L('endometrio-epitelioa', 190, 150, [300, surfaceAt(300, BULGE13) - 4], far)}
+      {L('finkapen-pedikulua', 190, 250, k.stalk, far)}
+      {L('sinzitiotrofoblastoa', 190, 380, k.syn(150), far)}
+      {L('biloxka-primarioa', 190, 430, k.villus(1), k.villi * far)}
+      {L('zitotrofoblastoa', 190, 475, k.cyto(136), far)}
+      {L('korion-plaka', 190, 520, k.plate(158), k.plaka * far)}
+      {L('mutur-enbrionarioa', 810, 250, k.cyto(276), far)}
+      {L('korioia', 810, 315, polar(k.g, 345, k.g.Rc + 4), k.chorion * far)}
+      {L('korion-barrunbea', 810, 380, k.meso(8, 0.5), far)}
+      {L('amnios-barrunbea', 810, 430, k.amnios, far)}
+      {L('epiblastoa', 810, 475, k.epi, far)}
+      {L('bitelo-zaku-sekundarioa', 810, 520, k.yolk, k.secondary * far)}
+      {L('kiste-exozelomikoak', 810, 565, k.cyst(0), k.cysts * far)}
+      {/* Close-up of the implantation site: the wall's layers stacked in the left gutter in anatomical order
+          (inside → outside = top → bottom), anchored along one radius of the lower-left wall, so the leaders
+          fan out without crossing each other or the bleed. */}
+      {L('korion-plaka', 190, 190, k.plate(135), near, 'plate-near')}
+      {L('zitotrofoblastoa', 190, 240, k.cyto(128), near, 'cyto-near')}
+      {L('biloxka-primarioa', 190, 290, k.villus(VILLI_A.length - 1, 0.8), near * k.villi, 'villus-near')}
+      {L('sinzitiotrofoblastoa', 190, 340, k.syn(118), near, 'syn-near')}
+      {L('endometrio-epitelioa', 190, 390, [400, surfaceAt(400, BULGE13) - 4], near, 'epi-near')}
+      {/* Right: the cavity's name above the cyst's, so the cyst's longer leader passes under the cavity's (no crossing). */}
+      {L('korion-barrunbea', 810, 250, k.meso(60, 0.6), near, 'cavity-near')}
+      {L('kiste-exozelomikoak', 810, 300, k.cyst(1), near * k.cysts, 'cyst-near')}
       <Note x={500} y={585} tone="dim" show={baseNote}>
         Blastozistoa guztiz sartuta dago; umetokiaren paretan goragunea antzematen da
       </Note>
