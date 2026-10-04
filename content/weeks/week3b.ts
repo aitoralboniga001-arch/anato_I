@@ -310,7 +310,7 @@ export const stagesB: StageDef[] = [
     dayRange: [19, 28],
     title: 'Zirkulazio uteroplazentarioa eta karena muga',
     subtitle: 'Enbrioiaren zirkulazio-sistema propioa eta plazenta-hesia',
-    duration: 24,
+    duration: 28,
     source: { file: FILE, section: '4. Trofoblastoaren ondorengo garapena' },
     views: [
       {
@@ -336,8 +336,8 @@ export const stagesB: StageDef[] = [
       { at: 0.32, notes: ['w3/4/p8/s3'], text: 'Korion-plakako odol-hodiek biloxka tertziarioetako kapilarrekin kontaktatzen dute.', focus: ['enbrioi-kanpoko-hodiak', 'biloxka-kapilarrak'] },
       { at: 0.5, notes: ['w3/4/p8/s3-s5'], text: 'Zirkuitu jarraitu bakarra osatuta dago: enbrioia ↔ zilbor-hodiak ↔ korion-plaka ↔ biloxka tertziarioetako kapilarrak. Enbrioiaren zirkulazio-sistema propioa da.', focus: ['zilbor-hodiak', 'enbrioi-kanpoko-hodiak', 'biloxka-kapilarrak'] },
       { at: 0.65, notes: ['w3/4/p8/s6'], text: '4. astean bihotzak taupada egiten hasten du: sistema honen bitartez enbrioiaren odola benetan zirkulatzen hasten da biloxka tertziarioetako odol-hodietaraino.', focus: ['bihotz-hodia', 'zilbor-hodiak', 'enbrioi-kanpoko-hodiak', 'biloxka-kapilarrak'] },
-      { at: 0.76, notes: ['w3/4/p9/s4-s5', 'w3/4/p12/s1'], view: 'karena-muga', text: 'Karena mugan zehar, amaren odoletik (biloxka arteko espazioa) fetuaren odolera oxigenoa eta elikagaiak iragazten dira.', focus: ['karena-muga', 'biloxka-arteko-espazioa'] },
-      { at: 0.88, notes: ['w3/4/p9/s3-s5'], view: 'karena-muga', text: 'Alderantziz, fetuaren odoletik amarenera CO2 eta metabolitoak iragazten dira; bi odolak inoiz ez dira kontaktuan jartzen.', focus: ['karena-muga'] },
+      { at: 0.74, notes: ['w3/4/p9/s4-s5', 'w3/4/p12/s1'], view: 'karena-muga', text: 'Karena mugan zehar, amaren odoletik (biloxka arteko espazioa) fetuaren odolera oxigenoa eta elikagaiak iragazten dira.', focus: ['karena-muga', 'biloxka-arteko-espazioa'] },
+      { at: 0.9, notes: ['w3/4/p9/s3-s5'], view: 'karena-muga', text: 'Alderantziz, fetuaren odoletik amarenera CO2 eta metabolitoak iragazten dira; bi odolak inoiz ez dira kontaktuan jartzen.', focus: ['karena-muga'] },
     ],
     structures: [
       'zilbor-hodiak',

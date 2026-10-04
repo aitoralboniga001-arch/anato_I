@@ -199,7 +199,7 @@ function SacDrawing({ t, reduced, mode, phase = 0 }: SceneProps & { mode: Mode; 
   // In the circulation view every villus is simply a tertiary villus (vessels inside).
   const freeId = circ || t < 0.16 ? 'biloxka-tertziarioa' : 'biloxka-askea';
   const stemId = circ ? 'biloxka-tertziarioa' : 'biloxka-enborra';
-  const meheketa = mode === 'sac' ? seg(t, 0.34, 0.4) * (1 - seg(t, 0.62, 0.66)) : 0;
+  const meheketa = mode === 'sac' ? seg(t, 0.34, 0.4) * (1 - seg(t, 0.66, 0.7)) : 0;
   const villi = (L: Layers, wid: string, withFloats: boolean) => (
     <Part id={wid}>
       <path d={L.syn + (withFloats ? floatD(1) : '')} fill="url(#w3b-syn)" />
@@ -456,7 +456,7 @@ export function ChorionicSac({ t, reduced }: SceneProps) {
       <Label id="finkapen-pedikulua" x={190} y={112} ax={CX - 9} ay={CY - 108} />
       <Label id="biloxka-askea" x={810} y={240} ax={fv.x} ay={fv.y} show={Math.max(0.4, branch)} />
       <Label id="biloxka-arteko-espazioa" x={810} y={272} ax={ivs[0]} ay={ivs[1]} show={vis(t, 0.16)} />
-      <Label id="karena-mugaren-meheketa" x={810} y={304} ax={fv.x + 2} ay={fv.y + 4} show={seg(t, 0.34, 0.4) * (1 - seg(t, 0.62, 0.66))} small />
+      <Label id="karena-mugaren-meheketa" x={810} y={304} ax={fv.x + 2} ay={fv.y + 4} show={seg(t, 0.34, 0.4) * (1 - seg(t, 0.66, 0.7))} small />
       <Label id="amnios-barrunbea" x={810} y={346} ax={CX + 22} ay={CY - 40} />
       <Label id="bitelo-zaku-sekundarioa" x={810} y={378} ax={CX + 40} ay={CY + 36} />
       <Label id="korion-barrunbea" x={810} y={410} ax={A.cavity[0]} ay={A.cavity[1]} />
@@ -468,12 +468,12 @@ export function ChorionicSac({ t, reduced }: SceneProps) {
       <Note x={500} y={616} show={vis(t, 0.16, 0.34)} tone="accent">
         Biloxka askeek biloxka arteko espazioa betetzen dute
       </Note>
-      <Note x={500} y={616} show={vis(t, 0.34, 0.66)} tone="accent">
+      <Note x={500} y={616} show={vis(t, 0.34, 0.7)} tone="accent">
         Mehetzea: lehenik adarkadura txikiko biloxka askeetan, gero handiagoetan
       </Note>
       {/* Stem villi never thin: they take no part in the exchange. */}
-      <Mark id="biloxka-enborra" x={A.stem[0]} y={A.stem[1]} rx={22} color="#fbbf24" show={vis(t, 0.66)} />
-      <Note x={500} y={616} show={vis(t, 0.66)} tone="warn">
+      <Mark id="biloxka-enborra" x={A.stem[0]} y={A.stem[1]} rx={22} color="#fbbf24" show={vis(t, 0.7)} />
+      <Note x={500} y={616} show={vis(t, 0.7)} tone="warn">
         Enborrezko (aingura) biloxkak ez dira mehetzen: ez dute trukerik egiten
       </Note>
     </g>

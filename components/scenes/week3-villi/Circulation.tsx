@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Flow, Label, Note, Part, clamp, easeInOut, lerp, mix, rand, seg, type SceneProps } from '@/components/kit';
+import { Arrow, C, Flow, Label, Note, Part, clamp, easeInOut, lerp, mix, rand, seg, zoom, type SceneProps } from '@/components/kit';
 import {
   BASE,
   CellPaths,
@@ -51,9 +51,11 @@ export const W = {
   stalkPlate: [0.15, 0.28],
   platevillus: [0.32, 0.46],
   circuit: [0.5, 0.6],
-  heartbeat: [0.65, 0.72],
-  o2: [0.76, 0.84],
-  co2: [0.88, 0.97],
+  heartbeat: [0.65, 0.7],
+  /** Close-up only: push-in onto the barrier, then its four layers one by one (inside → out). */
+  barrier: [0.74, 0.815],
+  o2: [0.815, 0.86],
+  co2: [0.9, 0.96],
 } as const;
 
 const s = (t: number, w: readonly [number, number]) => seg(t, w[0], w[1]);
@@ -885,12 +887,14 @@ const BARRIER = (() => {
 const wrap = (y: number) => ((((y + 40) % 720) + 720) % 720) - 40;
 
 /** Molecules crossing the barrier: O2 (pairs) and nutrients (hexagons) → fetus, CO2 (triplets) → mother. */
-function molecules(k: number, dir: 1 | -1, n: number, yTop: number, seed: number) {
+function molecules(k: number, dir: 1 | -1, n: number, yTop: number, seed: number, squeeze = 1) {
+  // squeeze < 1 pulls the start and end points toward the barrier, so they stay in frame when pushed in.
+  const sq = (x: number) => 485 + (x - 485) * squeeze;
   return Array.from({ length: n }, (_, i) => {
     const p = clamp((k - (i / n) * 0.42) / 0.5);
     const e = easeInOut(p);
-    const xa = dir > 0 ? 270 + rand(seed + i) * 60 : 676 + rand(seed + i) * 70;
-    const xb = dir > 0 ? 652 + rand(seed + i * 3) * 100 : 262 + rand(seed + i * 3) * 80;
+    const xa = sq(dir > 0 ? 270 + rand(seed + i) * 60 : 676 + rand(seed + i) * 70);
+    const xb = sq(dir > 0 ? 652 + rand(seed + i * 3) * 100 : 262 + rand(seed + i * 3) * 80);
     const y0 = yTop + i * (150 / n) + rand(seed + i * 5) * 12;
     return { x: lerp(xa, xb, e), y: y0 + 8 * Math.sin(e * Math.PI * 3 + i), show: clamp(k * 6 - (i / n) * 2.5), i };
   });
@@ -905,12 +909,40 @@ export function BarrierClose({ t, reduced }: SceneProps) {
   const maternalDrift = t * 300;
   const fetalLumen = mix('#5a1f36', '#6e2640', pv);
   const [g0, g4] = [BND[0], BND[4]];
+  // Push-in onto the four-layer band, then its layers lit one by one from the capillary outwards.
+  const b0 = W.barrier[0];
+  const push = easeInOut(seg(t, b0, b0 + 0.02));
+  const sc = lerp(1, 1.5, push);
+  const z = zoom(485, 320, sc, lerp(485, 500, push), 320);
+  const rv = (i: number) => seg(t, b0 + 0.02 + i * 0.014, b0 + 0.032 + i * 0.014);
+  const done = seg(t, W.barrier[1], W.barrier[1] + 0.015);
+  const cur = (i: number) => rv(i) * (1 - (i < 3 ? rv(i + 1) : done));
+  const settle = (i: number) => rv(i) * (1 - seg(t, W.o2[1], W.o2[1] + 0.04));
+  const pre = 1 - seg(t, b0, b0 + 0.008);
+  // Content point at the height that lands on screen row Y (leaders stay level through the push-in).
+  const rowY = (Y: number) => 320 + (Y - 320) / sc;
+  const mid = (i: number, j: number, Y: number) => z.at((bx(i, rowY(Y)) + bx(j, rowY(Y))) / 2, rowY(Y));
+  const LAYERS: [number, number][] = [
+    [3, 4],
+    [2, 3],
+    [1, 2],
+    [0, 1],
+  ];
+  const aSyn = mid(0, 1, 226);
+  const aCyto = mid(1, 2, 290);
+  const aMeso = mid(2, 3, 372);
+  const aEndo = mid(3, 4, 262);
+  const aIvs = z.at(lerp(300, 340, push), rowY(lerp(172, 150, push)));
+  const aCap = z.at(lerp(712, bx(4, rowY(400)) + 34, push), rowY(400));
+  const aKar = z.at(bx(0, rowY(462)), rowY(462));
+  const squeeze = lerp(1, 0.7, push);
 
   return (
     <g>
       <W3bDefs />
       <BarrierDefs />
       <rect x={0} y={0} width={1000} height={640} fill="#101828" />
+      <g transform={z.transform}>
 
       {/* Maternal blood in the intervillous space. */}
       <Part id="biloxka-arteko-espazioa">
@@ -985,11 +1017,25 @@ export function BarrierClose({ t, reduced }: SceneProps) {
         <path d={pd(g0) + pd(g4)} fill="none" stroke="#fde68a" strokeWidth={9} opacity={0.12} />
         <path d={pd(g0) + pd(g4)} fill="none" stroke="#fde68a" strokeWidth={1.8} opacity={0.8} />
       </Part>
+      {/* The layer being named glows, outlined on its own boundaries; named layers keep a faint rim. */}
+      <g pointerEvents="none">
+        {LAYERS.map(([i, j], k) => {
+          const c = cur(k);
+          const o = Math.max(c, 0.35 * settle(k));
+          if (o < 0.01) return null;
+          return (
+            <g key={k}>
+              <path d={between(i, j)} fill="#fde68a" opacity={0.26 * c} />
+              <path d={pd(BND[i]) + pd(BND[j])} fill="none" stroke="#fff4c2" strokeWidth={2.2 / sc} opacity={o} />
+            </g>
+          );
+        })}
+      </g>
 
       {/* Exchange: molecules cross every layer, the bloods themselves never do. */}
       <g pointerEvents="none">
         {o2 > 0 &&
-          molecules(o2, 1, 9, 132, 11).map((m) =>
+          molecules(o2, 1, 9, lerp(132, 168, push), 11, squeeze).map((m) =>
             m.i % 3 === 2 ? (
               <path key={m.i} d={hex(m.x, m.y, 5.2)} fill="#fef3c7" stroke="#7a5a12" strokeWidth={1} opacity={m.show} />
             ) : (
@@ -1000,13 +1046,14 @@ export function BarrierClose({ t, reduced }: SceneProps) {
             ),
           )}
         {co2 > 0 &&
-          molecules(co2, -1, 8, 352, 23).map((m) => (
+          molecules(co2, -1, 8, lerp(352, 330, push), 23, squeeze).map((m) => (
             <g key={m.i} opacity={m.show} stroke="#123a66" strokeWidth={1}>
               <circle cx={m.x - 6.4} cy={m.y} r={3.6} fill="#93c5fd" />
               <circle cx={m.x} cy={m.y} r={4.2} fill="#3b82f6" />
               <circle cx={m.x + 6.4} cy={m.y} r={3.6} fill="#93c5fd" />
             </g>
           ))}
+      </g>
       </g>
       <Arrow from={[236, 104]} to={[748, 104]} bend={0} color="#fbbf24" show={o2} progress={o2} width={3.2} />
       <Arrow from={[748, 540]} to={[236, 540]} bend={0} color="#60a5fa" show={co2} progress={co2} width={3.2} />
@@ -1019,13 +1066,13 @@ export function BarrierClose({ t, reduced }: SceneProps) {
         <rect x={0} y={566} width={1000} height={74} fill="url(#w3c-fade-b)" />
       </g>
 
-      <Label id="biloxka-arteko-espazioa" x={190} y={150} ax={300} ay={172} />
-      <Label id="sinzitiotrofoblastoa" x={190} y={226} ax={(bx(0, 226) + bx(1, 226)) / 2} ay={226} />
-      <Label id="zitotrofoblastoa" x={190} y={278} ax={(bx(1, 290) + bx(2, 290)) / 2 + 4} ay={290} />
-      <Label id="enbrioi-kanpoko-mesodermoa" x={190} y={372} ax={(bx(2, 372) + bx(3, 372)) / 2} ay={372} text="Kanpoko mesodermoa" />
-      <Label id="karena-muga" x={190} y={462} ax={bx(0, 462)} ay={462} />
-      <Label id="endotelioa" x={810} y={262} ax={(bx(3, 262) + bx(4, 262)) / 2} ay={262} />
-      <Label id="biloxka-kapilarrak" x={810} y={400} ax={712} ay={400} />
+      <Label id="biloxka-arteko-espazioa" x={190} y={150} ax={aIvs[0]} ay={aIvs[1]} />
+      <Label id="sinzitiotrofoblastoa" x={190} y={226} ax={aSyn[0]} ay={aSyn[1]} text="4. Sinzitiotrofoblastoa" show={Math.max(pre, rv(3))} />
+      <Label id="zitotrofoblastoa" x={190} y={278} ax={aCyto[0] + 4} ay={aCyto[1]} text="3. Zitotrofoblastoa" show={Math.max(pre, rv(2))} />
+      <Label id="enbrioi-kanpoko-mesodermoa" x={190} y={372} ax={aMeso[0]} ay={aMeso[1]} text="2. Kanpoko mesodermoa" show={Math.max(pre, rv(1))} />
+      <Label id="karena-muga" x={190} y={462} ax={aKar[0]} ay={aKar[1]} show={Math.max(pre, done)} />
+      <Label id="endotelioa" x={810} y={262} ax={aEndo[0]} ay={aEndo[1]} text="1. Endotelioa" show={Math.max(pre, rv(0))} />
+      <Label id="biloxka-kapilarrak" x={810} y={400} ax={aCap[0]} ay={aCap[1]} />
       <Note x={500} y={76} show={o2}>
         O2 eta elikagaiak: amaren odoletik fetuarenera
       </Note>
@@ -1035,10 +1082,10 @@ export function BarrierClose({ t, reduced }: SceneProps) {
       <Note x={500} y={606} tone="warn" show={Math.max(o2, co2)}>
         Bi odolak ez dira inoiz nahasten: karena mugak beti bereizten ditu
       </Note>
-      <Note x={500} y={606} show={(1 - seg(t, W.heartbeat[0] - 0.04, W.heartbeat[0]))}>
+      <Note x={500} y={606} show={Math.max(1 - seg(t, W.heartbeat[0] - 0.04, W.heartbeat[0]), seg(t, b0, b0 + 0.02) * (1 - seg(t, W.o2[0] - 0.01, W.o2[0] + 0.01)))}>
         Karena muga: biloxka tertziarioen paretetan dauden zelula geruzak
       </Note>
-      <Note x={500} y={572} tone="accent" show={hb * (1 - seg(t, W.o2[0] - 0.02, W.o2[0] + 0.02))}>
+      <Note x={500} y={572} tone="accent" show={hb * (1 - seg(t, b0, b0 + 0.015))}>
         Bihotzak taupada egiten hasten du: fetuaren odola kapilarrean mugitzen da
       </Note>
     </g>

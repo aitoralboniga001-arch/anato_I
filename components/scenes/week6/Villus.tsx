@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Flow, Label, Mark, Note, Part, clamp, easeInOut, lerp, rand, seg, type SceneProps } from '@/components/kit';
+import { Arrow, C, Flow, Label, Mark, Note, Part, clamp, easeInOut, lerp, rand, seg, zoom, type SceneProps } from '@/components/kit';
 import { CellPaths, K, W3bDefs, cumLen, ellipseSub, fringe, fw, fx, newBatch, pd, pointAt, subPoly, wallCells, type P } from '@/components/scenes/week3-villi/art';
 import { TreeDefs, TreeTissue, TreeVessels, buildTree, type Tree } from '@/components/scenes/week3-villi/tree';
 
@@ -468,7 +468,7 @@ function CrossDefs() {
   );
 }
 
-/** Where to point at each layer (left side of the section, at height y). */
+/** Where to point at each layer in the whole section (left side, at height y). */
 function layerAnchors(thin: number) {
   const synTh = lerp(20, 9, thin);
   const cytoTh = lerp(24, 0, thin);
@@ -479,24 +479,163 @@ function layerAnchors(thin: number) {
   return { syn, cyto, core };
 }
 
+/* ---- The barrier over capillary A, pushed in on and named layer by layer -------------------- */
+
+/** Half-angle of the wedge of wall over the capillary that is lit as "the barrier". */
+const H = 0.18;
+const ZS = 2.3;
+/** Close-up: a point of maternal blood above the wall, top left (screen), for the intervillous space's name. */
+const IVS_NEAR: P = [270, 70];
+
+/** Barrier geometry over capillary A (same formulas as CrossSection). */
+function barrierGeo(thin: number) {
+  const synTh = lerp(20, 9, thin);
+  const cytoTh = lerp(24, 0, thin);
+  const c = CAPS[0];
+  const rad = lerp(c.rad0, c.rad1, thin);
+  const rr = lerp(R * c.r0, R - synTh - rad - 3, thin);
+  const p = at(c.a, rr);
+  const surf = at(c.a, R);
+  return { a: c.a, synTh, cytoTh, rad, rr, p, surf, inner: R - synTh - cytoTh, capOut: rr + rad + 3 };
+}
+type Geo = ReturnType<typeof barrierGeo>;
+
+/** Camera: from the whole section to the wall over capillary A. */
+function barrierCam(g: Geo, push: number) {
+  const f: P = [(g.surf[0] + g.p[0]) / 2, (g.surf[1] + g.p[1]) / 2];
+  return zoom(lerp(CX, f[0], push), lerp(320, f[1], push), lerp(1, ZS, push), lerp(CX, 470, push), lerp(320, 312, push));
+}
+
+const band = (a: number, r1: number, r2: number, h: number) => pd([...subArc(a, r2, h), ...subArc(a, r1, h).reverse()], true);
+const circ = (p: P, r: number) => `M${p[0] - r},${p[1]}a${r},${r} 0 1,0 ${2 * r},0a${r},${r} 0 1,0 ${-2 * r},0Z`;
+
+/** Layer k (1 endothelium, 2 connective tissue, 3 cytotrophoblast, 4 syncytium) as a lit shape, or null when gone. */
+function layerShape(g: Geo, k: number): string | null {
+  if (k === 1) return circ(g.p, g.rad + 1.2) + circ(g.p, g.rad * 0.72);
+  const [r1, r2] = k === 2 ? [g.capOut, g.inner] : k === 3 ? [g.inner, R - g.synTh] : [R - g.synTh, R + 1];
+  if (r2 - r1 < 2) return null;
+  return band(g.a, r1, r2, k === 2 ? H * 0.8 : H);
+}
+
+/** Inside the camera group: the layer being named glows; named layers keep a faint rim. */
+function LayerGlow({ g, cur, rim, sc }: { g: Geo; cur: (k: number) => number; rim: (k: number) => number; sc: number }) {
+  return (
+    <g pointerEvents="none">
+      {[1, 2, 3, 4].map((k) => {
+        const d = layerShape(g, k);
+        const c = cur(k);
+        const o = Math.max(c, 0.4 * rim(k));
+        if (!d || o < 0.01) return null;
+        return (
+          <g key={k}>
+            <path d={d} fill="#fde68a" fillRule="evenodd" opacity={0.3 * c} />
+            <path d={d} fill="none" stroke="#fff4c2" strokeWidth={2.2 / sc} opacity={o} />
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+/** Where each name points in the close-up (section coordinates): the lower-left face of each layer. */
+function barrierAnchors(g: Geo) {
+  const side = g.a - H * 0.62;
+  const u: P = [Math.cos(g.a), Math.sin(g.a)];
+  const ll: P = [u[1], -u[0]];
+  const d = Math.hypot(u[0] * 0.6 + ll[0], u[1] * 0.6 + ll[1]);
+  const e: P = [(u[0] * 0.6 + ll[0]) / d, (u[1] * 0.6 + ll[1]) / d];
+  return {
+    syn: at(side, R - g.synTh / 2),
+    cyto: at(side, R - g.synTh - Math.max(g.cytoTh, 1) / 2),
+    ct: at(g.a - H * 0.5, (g.inner + g.capOut) / 2),
+    endo: [g.p[0] + e[0] * g.rad * 0.86, g.p[1] + e[1] * g.rad * 0.86] as P,
+    kar: at(g.a + H * 0.9, R - g.synTh * 0.8),
+    cap: [g.p[0] + g.rad * 0.35, g.p[1] + g.rad * 0.2] as P,
+  };
+}
+
+/** Exchange across the wall (screen space): O2 into the capillary, CO2 back out. */
+function ExchangeArrows({ g, z, k }: { g: Geo; z: ReturnType<typeof zoom>; k: number }) {
+  if (k <= 0.01) return null;
+  const o0 = z.at(...at(g.a + 0.05, R + 46));
+  const o1 = z.at(...at(g.a + 0.05, g.capOut + 2));
+  const c0 = z.at(...at(g.a - 0.08, g.capOut + 2));
+  const c1 = z.at(...at(g.a - 0.08, R + 46));
+  const tO = z.at(...at(g.a + 0.17, R + 50));
+  const tC = z.at(...at(g.a - 0.21, R + 50));
+  return (
+    <g>
+      <Arrow from={o0} to={o1} bend={0} color="#fbbf24" show={k} progress={k} width={3.4} head={13} />
+      <Arrow from={c0} to={c1} bend={0} color="#60a5fa" show={k} progress={k} width={3.4} head={13} />
+      <Note x={tO[0]} y={tO[1]} show={k} tone="accent" size={13}>
+        O2
+      </Note>
+      <Note x={tC[0]} y={tC[1]} show={k} size={13}>
+        CO2
+      </Note>
+    </g>
+  );
+}
+
+/** Label rows top to bottom: each at its anchor's height, at least `gap` below the previous one; a
+ *  fading name (vis → 0) gives its room back smoothly. */
+function rows(ys: number[], vis: number[] = [], gap = 32) {
+  const out: number[] = [];
+  ys.forEach((y, i) => {
+    if (!i) return out.push(y);
+    const v = vis[i] ?? 1;
+    out.push(lerp(out[i - 1], Math.max(y, out[i - 1] + gap), v));
+  });
+  return out;
+}
+
 export function VillusCross({ t, reduced }: SceneProps) {
-  const cross = seg(t, 0.84, 0.97);
+  const g = barrierGeo(0);
+  const push = easeInOut(seg(t, 0.82, 0.845));
+  const z = barrierCam(g, push);
+  const sc = lerp(1, ZS, push);
+  const pre = 1 - seg(t, 0.82, 0.828);
+  // Inside → out, as the notes list them: endothelium, connective tissue, cytotrophoblast, syncytium.
+  const rv = (k: number) => seg(t, 0.845 + (k - 1) * 0.018, 0.86 + (k - 1) * 0.018);
+  const done = seg(t, 0.914, 0.925);
+  const cur = (k: number) => rv(k) * (1 - (k < 4 ? rv(k + 1) : done));
+  const exch = seg(t, 0.915, 0.935);
+  const mols = seg(t, 0.92, 0.99);
+  // Names: the whole section (before) → the wall over capillary A (after).
   const { syn, cyto, core } = layerAnchors(0);
   const cap = CAPS[0];
-  const capP = at(cap.a, R * cap.r0);
+  const A = barrierAnchors(g);
+  const s = (p: P) => z.at(p[0], p[1]);
+  const [aS, aC, aT, aE] = [s(A.syn), s(A.cyto), s(A.ct), s(A.endo)];
+  const [yS, yC, yT, yE] = rows([aS[1], aC[1], aT[1], aE[1]]);
+  const mixP = (p: P, q: P): P => [lerp(p[0], q[0], push), lerp(p[1], q[1], push)];
+  const pS = mixP(syn, aS);
+  const pC = mixP(cyto, aC);
+  const pT = mixP(core, aT);
+  // Whole section: the lower capillary's lining, so its name sits below the connective tissue's.
+  const capB = at(CAPS[1].a, R * CAPS[1].r0);
+  const pE = mixP([capB[0] - CAPS[1].rad0 + 1, capB[1] + 4], aE);
+  const ivsA: P = push > 0.5 ? IVS_NEAR : [760, 220];
+  const capL = mixP([capB[0] + 10, capB[1]], s(A.cap));
+  const kar = s(A.kar);
+  const karA = push > 0.5 ? kar : at(cap.a, R + 2);
   return (
     <g>
       <W3bDefs />
       <CrossDefs />
       <rect x={0} y={0} width={1000} height={640} fill="#101828" />
-      <CrossSection thin={0} o2={cross} co2={0} reduced={reduced} />
-      <Label id="sinzitiotrofoblastoa" x={190} y={170} ax={syn[0]} ay={syn[1]} text="4. Sinzitiotrofoblastoa" />
-      <Label id="zitotrofoblastoa" x={190} y={250} ax={cyto[0]} ay={cyto[1]} text="3. Zitotrofoblastoa" />
-      <Label id="ehun-konektiboa" x={190} y={330} ax={core[0]} ay={core[1]} text="2. Ehun konektiboa" />
-      <Label id="endotelioa" x={190} y={410} ax={capP[0] - cap.rad0 + 1} ay={capP[1] + 6} text="1. Endotelioa" />
-      <Label id="karena-muga" x={190} y={92} ax={at(cap.a, R + 2)[0]} ay={at(cap.a, R + 2)[1]} />
-      <Label id="biloxka-arteko-espazioa" x={810} y={250} ax={760} ay={220} />
-      <Label id="biloxka-kapilarrak" x={810} y={380} ax={at(CAPS[1].a, R * CAPS[1].r0)[0] + 10} ay={at(CAPS[1].a, R * CAPS[1].r0)[1]} />
+      <g transform={z.transform}>
+        <CrossSection thin={0} o2={mols} co2={mols} reduced={reduced} />
+        <LayerGlow g={g} cur={cur} rim={rv} sc={sc} />
+      </g>
+      <ExchangeArrows g={g} z={z} k={exch} />
+      <Label id="sinzitiotrofoblastoa" x={190} y={lerp(170, yS, push)} ax={pS[0]} ay={pS[1]} text="4. Sinzitiotrofoblastoa" show={Math.max(pre, rv(4))} />
+      <Label id="zitotrofoblastoa" x={190} y={lerp(250, yC, push)} ax={pC[0]} ay={pC[1]} text="3. Zitotrofoblastoa" show={Math.max(pre, rv(3))} />
+      <Label id="ehun-konektiboa" x={190} y={lerp(330, yT, push)} ax={pT[0]} ay={pT[1]} text="2. Ehun konektiboa" show={Math.max(pre, rv(2))} />
+      <Label id="endotelioa" x={190} y={lerp(410, yE, push)} ax={pE[0]} ay={pE[1]} text="1. Endotelioa" show={Math.max(pre, rv(1))} />
+      <Label id="karena-muga" x={push > 0.5 ? 810 : 190} y={push > 0.5 ? kar[1] : 92} ax={karA[0]} ay={karA[1]} show={Math.max(pre, done)} />
+      <Label id="biloxka-arteko-espazioa" x={push > 0.5 ? 190 : 810} y={push > 0.5 ? 70 : 250} ax={ivsA[0]} ay={ivsA[1]} show={Math.max(pre, done)} />
+      <Label id="biloxka-kapilarrak" x={810} y={lerp(380, Math.max(capL[1], kar[1] + 40), push)} ax={capL[0]} ay={capL[1]} />
       <Note x={500} y={600} tone="accent" show={seg(t, 0.82, 0.86)}>
         Karena muga (barrutik kanpora): endotelioa → ehun konektiboa → zitotrofoblastoa → sinzitiotrofoblastoa
       </Note>
@@ -508,28 +647,60 @@ export function VillusCross({ t, reduced }: SceneProps) {
 }
 
 export function VillusThinning({ t, reduced }: SceneProps) {
-  const thin = seg(t, 0.36, 0.6);
+  // The view opens (.5) on month 3: push-in, the four layers named inside → out, then the wall thins to two.
+  const push = easeInOut(seg(t, 0.5, 0.52));
+  const rv = (k: number) => seg(t, 0.52 + (k - 1) * 0.012, 0.532 + (k - 1) * 0.012);
+  const fourDone = seg(t, 0.568, 0.576);
+  const thin = seg(t, 0.578, 0.62);
+  const g = barrierGeo(thin);
+  // The camera stays on the month-3 wall: the capillary is seen moving up under the thinned surface.
+  const z = barrierCam(barrierGeo(0), push);
+  const sc = lerp(1, ZS, push);
+  const pre = 1 - seg(t, 0.5, 0.506);
+  const cur = (k: number) => rv(k) * (1 - (k < 4 ? rv(k + 1) : fourDone));
+  // The two layers that stay light up again once the others are gone.
+  const two = seg(t, 0.62, 0.632) * (1 - 0.5 * seg(t, 0.66, 0.67));
+  const curT = (k: number) => Math.max(cur(k), k === 1 || k === 4 ? two : 0);
+  const gone = seg(t, 0.584, 0.6);
+  const renum = seg(t, 0.604, 0.618);
+  const exch = seg(t, 0.632, 0.65);
+  const mols = seg(t, 0.636, 0.7);
+  const meheketa = seg(t, 0.578, 0.59) * (1 - seg(t, 0.63, 0.645));
   const { syn, cyto, core } = layerAnchors(thin);
-  const caps = CAPS[0];
-  const capR = lerp(caps.rad0, caps.rad1, thin);
-  const capP = at(caps.a, lerp(R * caps.r0, R - lerp(20, 9, thin) - capR - 3, thin));
+  const A = barrierAnchors(g);
+  const s = (p: P) => z.at(p[0], p[1]);
+  const [aS, aC, aT, aE] = [s(A.syn), s(A.cyto), s(A.ct), s(A.endo)];
+  const [yS, yC, yT, yE] = rows([aS[1], aC[1], aT[1], aE[1]], [1, clamp((1 - gone) * 3), clamp((1 - gone) * 3), 1]);
+  const mixP = (p: P, q: P): P => [lerp(p[0], q[0], push), lerp(p[1], q[1], push)];
+  const pS = mixP(syn, aS);
+  const pC = mixP(cyto, aC);
+  const pT = mixP(core, aT);
+  const capB = at(CAPS[1].a, lerp(R * CAPS[1].r0, R - lerp(20, 9, thin) - lerp(CAPS[1].rad0, CAPS[1].rad1, thin) - 3, thin));
+  const pE = mixP([capB[0] - lerp(CAPS[1].rad0, CAPS[1].rad1, thin) + 1, capB[1] + 4], aE);
   const wallTh = lerp(46, 12, thin);
-  const meheketa = seg(t, 0.34, 0.4);
-  const mk = at(caps.a, R - 14);
+  const mk = s(at(g.a, R - 14));
+  const kar = s(A.kar);
+  const karA = push > 0.5 ? kar : at(g.a, R + 2);
+  const ivsA: P = push > 0.5 ? IVS_NEAR : [770, 500];
+  const synShow = Math.max(pre, rv(4)) * Math.abs(1 - 2 * renum);
   return (
     <g>
       <W3bDefs />
       <CrossDefs />
       <rect x={0} y={0} width={1000} height={640} fill="#101828" />
-      <CrossSection thin={thin} o2={0} co2={0} reduced={reduced} />
-      <Mark id="karena-mugaren-meheketa" x={mk[0]} y={mk[1]} rx={34} show={meheketa} />
-      <Label id="sinzitiotrofoblastoa" x={190} y={170} ax={syn[0]} ay={syn[1]} />
-      <Label id="zitotrofoblastoa" x={190} y={250} ax={cyto[0]} ay={cyto[1]} show={1 - seg(t, 0.56, 0.6)} />
-      <Label id="ehun-konektiboa" x={190} y={330} ax={core[0]} ay={core[1]} />
-      <Label id="endotelioa" x={190} y={410} ax={capP[0] - capR + 1} ay={capP[1] + 4} />
-      <Label id="karena-muga" x={190} y={60} ax={at(caps.a, R + 2)[0]} ay={at(caps.a, R + 2)[1]} />
-      <Label id="karena-mugaren-meheketa" x={190} y={104} ax={mk[0] - 4} ay={mk[1] + 6} show={meheketa} small />
-      <Label id="biloxka-arteko-espazioa" x={810} y={470} ax={770} ay={500} />
+      <g transform={z.transform}>
+        <CrossSection thin={thin} o2={mols} co2={mols} reduced={reduced} />
+        <LayerGlow g={g} cur={curT} rim={(k) => rv(k) * (k === 2 || k === 3 ? 1 - gone : 1)} sc={sc} />
+      </g>
+      <ExchangeArrows g={g} z={z} k={exch} />
+      <Mark id="karena-mugaren-meheketa" x={mk[0]} y={mk[1]} rx={34 * sc} show={meheketa} />
+      <Label id="sinzitiotrofoblastoa" x={190} y={lerp(170, yS, push)} ax={pS[0]} ay={pS[1]} text={renum < 0.5 ? '4. Sinzitiotrofoblastoa' : '2. Sinzitiotrofoblastoa'} show={synShow} />
+      <Label id="zitotrofoblastoa" x={190} y={lerp(250, yC, push)} ax={pC[0]} ay={pC[1]} text="3. Zitotrofoblastoa" show={Math.max(pre, rv(3)) * (1 - gone)} />
+      <Label id="ehun-konektiboa" x={190} y={lerp(330, yT, push)} ax={pT[0]} ay={pT[1]} text="2. Ehun konektiboa" show={Math.max(pre, rv(2)) * (1 - gone)} />
+      <Label id="endotelioa" x={190} y={lerp(410, yE, push)} ax={pE[0]} ay={pE[1]} text="1. Endotelioa" show={Math.max(pre, rv(1))} />
+      <Label id="karena-muga" x={push > 0.5 ? 810 : 190} y={push > 0.5 ? kar[1] : 60} ax={karA[0]} ay={karA[1]} show={Math.max(pre, fourDone)} />
+      <Label id="karena-mugaren-meheketa" x={810} y={Math.max(kar[1] + 34, 240)} ax={mk[0] + 10} ay={mk[1] + 4} show={meheketa} small />
+      <Label id="biloxka-arteko-espazioa" x={push > 0.5 ? 190 : 810} y={push > 0.5 ? 70 : 470} ax={ivsA[0]} ay={ivsA[1]} show={Math.max(pre, fourDone)} />
       {/* Barrier thickness gauge. */}
       <g pointerEvents="none">
         <rect x={864} y={560 - wallTh} width={12} height={wallTh} rx={3} fill="#fde68a" opacity={0.85} />
@@ -538,10 +709,10 @@ export function VillusThinning({ t, reduced }: SceneProps) {
       <Note x={870} y={578} size={12}>
         Muga lodiera
       </Note>
-      <Note x={500} y={606} show={1 - seg(t, 0.5, 0.55)}>
+      <Note x={500} y={606} show={1 - seg(t, 0.58, 0.6)}>
         3. hilabetea: lau geruza
       </Note>
-      <Note x={500} y={606} tone="accent" show={seg(t, 0.56, 0.62)}>
+      <Note x={500} y={606} tone="accent" show={seg(t, 0.604, 0.622)}>
         4. hilabetetik aurrera: bi geruza (endotelioa + sinzitiotrofoblastoa)
       </Note>
     </g>
