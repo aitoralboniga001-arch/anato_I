@@ -445,8 +445,15 @@ export function PlacentaFunctions({ t, reduced }: SceneProps) {
         <rect x={MOM[0]} y={TOP} width={MOM[1] - MOM[0] + 8} height={BOT - TOP} rx={16} fill="url(#w3b-blood)" />
         <rect x={MOM[0]} y={TOP} width={MOM[1] - MOM[0] + 8} height={BOT - TOP} rx={16} fill="#1a0610" opacity={0.45} />
       </Part>
-      <rect x={FET[0] - 8} y={TOP} width={FET[1] - FET[0] + 8} height={BOT - TOP} rx={16} fill="#3a0f24" />
-      <rect x={FET[0] - 8} y={TOP} width={FET[1] - FET[0] + 8} height={BOT - TOP} rx={16} fill="#0c0612" opacity={0.4} />
+      {/* Fetal blood in a cool blue-violet (the umbilical-artery family), so ama | muga | fetua part at a glance */}
+      <defs>
+        <linearGradient id="pf-fetal" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#1f2768" />
+          <stop offset="1" stopColor="#161b4c" />
+        </linearGradient>
+      </defs>
+      <rect x={FET[0] - 8} y={TOP} width={FET[1] - FET[0] + 8} height={BOT - TOP} rx={16} fill="url(#pf-fetal)" />
+      <rect x={FET[0] - 8} y={TOP} width={FET[1] - FET[0] + 8} height={BOT - TOP} rx={16} fill="none" stroke="#5360d6" strokeOpacity={0.45} strokeWidth={1.2} />
       <Part id="karena-muga">
         <Part id="sinzitiotrofoblastoa">
           <rect x={BAR[0]} y={TOP} width={SYN1 - BAR[0]} height={BOT - TOP} fill="url(#w3b-syn)" />

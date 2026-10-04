@@ -269,8 +269,6 @@ export function MaternalFace({ cx, cy, uid }: { cx: number; cy: number; uid: str
   );
 }
 
-/** The centroid of the torn lobe on a maternal face at (cx, cy). */
-export const tornAt = (cx: number, cy: number): Pt => toDisc(cx, cy)(centroid(LOBES[3]));
 /** A lobe centre on a maternal face. */
 export const lobeAt = (cx: number, cy: number, i: number): Pt => toDisc(cx, cy)(centroid(LOBES[i]));
 
