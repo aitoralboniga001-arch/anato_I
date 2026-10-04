@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useId, useLayoutEffect, useRef, useState } from 'react';
 import type { ViewDef } from '@/lib/sim/types';
 import { PlaneGlyph } from './icons';
 
@@ -23,6 +23,7 @@ export function ViewSwitch({ views, current, onChoose }: { views: readonly ViewD
   const seg = useRef<HTMLDivElement>(null);
   const ghost = useRef<HTMLDivElement>(null);
   const [fit, setFit] = useState<Fit>('full');
+  const uid = useId();
   const labels = views.map((v) => v.label).join('|');
 
   useLayoutEffect(() => {
@@ -72,15 +73,21 @@ export function ViewSwitch({ views, current, onChoose }: { views: readonly ViewD
             aria-label={iconOnly ? v.label : undefined}
             className={on ? 'is-on' : ''}
             onClick={() => onChoose(v.id)}
-            title={iconOnly ? undefined : `${v.description} (${k + 1})`}
-            data-tip={iconOnly ? `${v.label} · ${k + 1}` : undefined}
-            data-tip-pos={iconOnly ? 'bottom' : undefined}
+            aria-describedby={`${uid}-${k}`}
+            data-tip={`${iconOnly ? `${v.label} · ` : ''}${v.description} (${k + 1})`}
+            data-tip-pos="bottom-end"
           >
             <PlaneGlyph plane={v.plane} size={18} />
             {!iconOnly && <span>{v.label}</span>}
           </button>
         );
       })}
+      {/* What each view shows, read with its tab (sighted users get it as the tab's tip). */}
+      {views.map((v, k) => (
+        <span key={v.id} id={`${uid}-${k}`} hidden>
+          {v.description}
+        </span>
+      ))}
       {/* Every name at full width, measured off-screen to decide whether they fit. */}
       <div ref={ghost} className="seg view-switch-ghost" aria-hidden>
         {views.map((v) => (

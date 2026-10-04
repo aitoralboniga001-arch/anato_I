@@ -46,6 +46,7 @@ export function Locator({
   orientation,
   viewKey,
   note,
+  view,
   hold,
 }: {
   plane: PlaneKind;
@@ -55,6 +56,8 @@ export function Locator({
   orientation?: Orientation;
   viewKey: string;
   note?: string;
+  /** What this view shows, in the view's own words (it used to sit over the scene). */
+  view?: string;
   hold?: boolean;
 }) {
   // 'auto': opened by itself the first time a plane is met; 'user': opened from the button.
@@ -112,7 +115,8 @@ export function Locator({
         className={`loc-btn${shown ? ' is-on' : ''}${absorb ? ' is-absorb' : ''}`}
         onClick={() => setOpen(shown ? false : 'user')}
         aria-expanded={shown}
-        title={`Non nago? ${info.name} · ${SHAPE_TEXT[shape]}`}
+        title={`Non nago? ${info.name} · ${SHAPE_TEXT[shape]}${view ? `
+${view}` : ''}`}
       >
         <Specimen plane={plane} week={week} day={day} level={level} flip={flip} />
         <span className="loc-txt">
@@ -131,6 +135,7 @@ export function Locator({
           <div>
             <p className="kicker">Non nago?</p>
             <h4>{info.name}</h4>
+            {view && <p className="loc-view">{view}</p>}
             <p>{info.text}</p>
             <p className="loc-where">
               Irudian: {SHAPE_TEXT[shape]}. {where} {note}

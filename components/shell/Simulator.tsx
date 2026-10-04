@@ -10,7 +10,7 @@ import { ageLabel, spanOf } from '@/lib/sim/age';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { StageDef, StructureCategory, StructureDef, WeekDef } from '@/lib/sim/types';
 import { Glossary } from './Glossary';
-import { IconBook, IconCalendar, IconNotes, IconClock, IconExpand, IconImage, IconLayers, IconMore, IconPlay, IconQuiz, IconTag, IconTarget, IconTree, PlaneGlyph } from './icons';
+import { IconBook, IconCalendar, IconNotes, IconClock, IconExpand, IconImage, IconLayers, IconMore, IconPlay, IconQuiz, IconTag, IconTarget, IconTree } from './icons';
 import { Popover } from './Popover';
 import { Wordmark, isWip } from './LandNav';
 import { AskCard, Player, TourCard, ideaOf } from './Player';
@@ -1588,7 +1588,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               )}
             </div>
             <div className="stage-side">
-              <Locator plane={view.plane} week={week.week} day={day} level={view.locator?.level} orientation={view.orientation} note={view.locator?.note} viewKey={`${stage.id}/${view.id}`} hold={helpOpen || questionsOpen || glossaryOpen || !!bridge} />
+              <Locator plane={view.plane} week={week.week} day={day} level={view.locator?.level} orientation={view.orientation} note={view.locator?.note} view={view.description} viewKey={`${stage.id}/${view.id}`} hold={helpOpen || questionsOpen || glossaryOpen || !!bridge} />
               {stage.views.length > 1 && <ViewSwitch views={stage.views} current={view.id} onChoose={chooseView} />}
             </div>
           </div>
@@ -1654,11 +1654,6 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                   {bridge && intro === null && <ViewBridge autoClose={!voice} key={bridge.to.key} from={bridge.from} to={bridge.to} small={!!bridge.small} onSmall={(v) => setBridge((b) => (b ? { ...b, small: v } : b))} onClose={() => { transport.cancel(); setBridge(null); }} />}
                   {tour && intro === null && structures.get(tour.items[tour.idx]) && (
                     <TourCard compact={voice} item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} onSkip={skipTour} onPick={onSelect} />
-                  )}
-                  {intro === null && (
-                    <p key={`${stage.id}/${view.id}`} className="view-desc">
-                      <PlaneGlyph plane={view.plane} size={14} /> {view.description}
-                    </p>
                   )}
                   {intro !== null && (
                     <div className="pv-card" key={`intro-${stage.id}`}>
