@@ -425,6 +425,10 @@ function anchors(t: number) {
   };
 }
 
+// Bottom notes share one line: the outgoing note is gone (first half of the ramp) before the next arrives (second half).
+const outHalf = (x: number) => Math.min(1, 2 * x);
+const inHalf = (x: number) => Math.max(0, 2 * x - 1);
+
 export function Day13Section(props: SceneProps) {
   const { t } = props;
   const k = anchors(t);
@@ -432,8 +436,12 @@ export function Day13Section(props: SceneProps) {
   const z = zoom(500, 290, 0.88, 500, 312);
   const L = makeL(z.at);
   // The chorionic plate's own step (named here; its window W.plaka), then back to the general note.
-  const plateNote = seg(t, W.plaka[0], W.plaka[0] + 0.02) * (1 - seg(t, 0.5, 0.52));
-  const bleedNote = seg(t, W.bleed[0], W.bleed[0] + 0.02);
+  const plateIn = seg(t, W.plaka[0], W.plaka[0] + 0.02);
+  const plateOut = seg(t, 0.5, 0.52);
+  const bleed = seg(t, W.bleed[0], W.bleed[0] + 0.02);
+  const plateNote = inHalf(plateIn) * (1 - outHalf(plateOut));
+  const bleedNote = inHalf(bleed);
+  const baseNote = Math.max(1 - outHalf(plateIn), inHalf(plateOut)) * (1 - outHalf(bleed));
   return (
     <g>
       <g transform={z.transform}>
@@ -456,7 +464,7 @@ export function Day13Section(props: SceneProps) {
       {L('epiblastoa', 810, 475, k.epi)}
       {L('bitelo-zaku-sekundarioa', 810, 520, k.yolk, k.secondary)}
       {L('kiste-exozelomikoak', 810, 565, k.cyst(0), k.cysts)}
-      <Note x={500} y={585} tone="dim" show={(1 - plateNote) * (1 - bleedNote)}>
+      <Note x={500} y={585} tone="dim" show={baseNote}>
         Blastozistoa guztiz sartuta dago; umetokiaren paretan goragunea antzematen da
       </Note>
       <Note x={500} y={585} tone="accent" show={plateNote}>
@@ -523,7 +531,7 @@ export function Day13Villi(props: SceneProps) {
       <Note x={500} y={600} tone="accent" show={k.villi * rest}>
         Zitotrofoblastoaren zelulak sinzitiotrofoblastoaren erdian sartzen dira: biloxka primarioak
       </Note>
-      <Note x={500} y={600} tone="accent" show={cut}>
+      <Note x={500} y={600} tone="accent" show={cutL}>
         Zeharkako mozketa: erdian zitotrofoblastoa (argia), kanpoan sinzitiotrofoblastoa (iluna)
       </Note>
     </g>
@@ -537,7 +545,9 @@ export function Day13Yolk(props: SceneProps) {
   // Wide enough to keep the connecting stalk (top) and the pinched-off cysts (bottom) in the picture.
   const z = zoom(cx - 10, cy + 12, 1.7, 500, 320);
   const L = makeL(z.at);
-  const liningNote = seg(t, W.lining[0], W.lining[0] + 0.01) * (1 - k.secondary);
+  const remnants = seg(t, 0.6, 0.62);
+  const liningNote = seg(t, W.lining[0], W.lining[0] + 0.01) * (1 - outHalf(k.secondary));
+  const secondaryNote = inHalf(k.secondary) * (1 - outHalf(remnants));
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#101828" />
@@ -558,10 +568,10 @@ export function Day13Yolk(props: SceneProps) {
       <Note x={500} y={585} tone="accent" show={liningNote}>
         Hipoblastoko zelulak ugaldu eta migratu egiten dira: Heuser-en mintzaren barruko aurpegia estaltzen dute
       </Note>
-      <Note x={500} y={585} tone="accent" show={k.secondary * (1 - seg(t, 0.6, 0.62))}>
+      <Note x={500} y={585} tone="accent" show={secondaryNote}>
         Hasierako bitelo zakua txikituz doa: bitelo zaku sekundarioa (behin betikoa) sortzen da
       </Note>
-      <Note x={500} y={585} tone="accent" show={seg(t, 0.6, 0.62)}>
+      <Note x={500} y={585} tone="accent" show={inHalf(remnants)}>
         Hasierako bitelo zakuaren hondarrak korion barrunbean: kiste exozelomikoak
       </Note>
     </g>
