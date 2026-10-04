@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Label, Mark, Note, Part, bezier, seg, lerp, lerpPt, smoothPath, tube, type Pt, type SceneProps } from '@/components/kit';
+import { C, Label, Mark, Note, Part, bezier, seg, lerp, lerpPt, smoothPath, tube, zoom, type Pt, type SceneProps } from '@/components/kit';
 import { K } from '@/components/scenes/week3-villi/art';
 import { FetusFigure, fetusGeom, placeFetus } from '@/components/scenes/week5/FetusFigure';
 import { CordRope } from './CordRope';
@@ -170,6 +170,11 @@ export function UterusSagittal({ t }: SceneProps) {
 
   const wallA = (a: number, d: number) => onE(sac, a, d);
 
+  // Camera: push in on the small chorionic sac for beats 1–5 (poles, chorion types, deciduae), then pull
+  // back out while the sac grows to fill the uterus (beat 6), so the whole organ is in view for B.
+  const push = seg(t, 0.01, 0.07) * (1 - k);
+  const z = zoom(lerp(500, 538, push), lerp(320, 226, push), lerp(1, 1.5, push), lerp(500, 515, push), lerp(320, 296, push));
+
   return (
     <g>
       <defs>
@@ -182,8 +187,9 @@ export function UterusSagittal({ t }: SceneProps) {
         </clipPath>
       </defs>
 
-      {/* Myometrium */}
-      <path d={outerD} fill="url(#p-muscle)" stroke="rgba(247,223,227,0.45)" strokeWidth={2} />
+      <g transform={z.transform}>
+        {/* Myometrium */}
+        <path d={outerD} fill="url(#p-muscle)" stroke="rgba(247,223,227,0.45)" strokeWidth={2} />
       {/* Decidua lining, then the (closing) uterine cavity */}
       <Part id="paretako-dezidua" quiet>
         <path d={decD} fill={DEC_TONE} stroke="rgba(60,15,30,0.5)" strokeWidth={1.2} />
@@ -268,26 +274,27 @@ export function UterusSagittal({ t }: SceneProps) {
       <Mark id="mutur-anenbrionarioa" x={wallA(wallMid + 180, caps + 2)[0]} y={wallA(wallMid + 180, caps + 2)[1]} rx={22} color="#7ad9a3" show={vis(t, 0.26, 0.4)} />
       <Mark id="biloxka-sekundarioa" x={wallA(165, villLen * 0.4)[0]} y={wallA(165, villLen * 0.4)[1]} rx={18} show={vis(t, 0, 0.12)} />
       <Mark id="karena" x={wallA(wallMid + 78, villLen * 0.7)[0]} y={wallA(wallMid + 78, villLen * 0.7)[1]} rx={24} color="#ff8a8a" show={vis(t, 0.56)} />
+      </g>
 
       {/* Labels — right gutter (as in figure A) */}
-      <Label id="mutur-enbrionarioa" x={810} y={110} ax={wallA(wallMid, villLen + basal)[0]} ay={wallA(wallMid, villLen + basal)[1]} show={vis(t, 0.12, 0.4)} small />
-      <Label id="dezidua-basala" x={810} y={155} ax={wallA(wallMid + 30, villLen + basal * 0.6)[0]} ay={wallA(wallMid + 30, villLen + basal * 0.6)[1]} show={vis(t, 0.4)} />
-      <Label id="korion-hostotsua" x={810} y={200} ax={wallA(wallMid + 60, villLen * 0.55)[0]} ay={wallA(wallMid + 60, villLen * 0.55)[1]} show={vis(t, 0.12)} />
-      <Label id="karena" x={810} y={245} ax={wallA(wallMid + 78, villLen * 0.7)[0]} ay={wallA(wallMid + 78, villLen * 0.7)[1]} show={vis(t, 0.56)} />
-      <Label id="amnios-barrunbea" x={810} y={375} ax={am.cx + am.rx * 0.45} ay={am.cy + am.ry * 0.72} show={vis(t, 0.1)} />
-      <Label id="zilborrestea" x={810} y={420} ax={cordMid[0] - (cordMid[0] - cordTop[0]) * 0.1} ay={(cordMid[1] + cordTop[1]) / 2} show={vis(t, 0.3)} />
-      <Label id="bitelo-zaku-sekundarioa" x={810} y={465} ax={yolk[0]} ay={yolk[1]} show={Math.min(yolkShow, vis(t, 0.05))} small />
-      <Label id="umetoki-barrunbea" x={810} y={510} ax={500} ay={lerp(390, 440, k)} show={Math.min(cavityShow, vis(t, 0))} />
+      <Label id="mutur-enbrionarioa" x={810} y={110} ax={z.at(wallA(wallMid, villLen + basal)[0], wallA(wallMid, villLen + basal)[1])[0]} ay={z.at(wallA(wallMid, villLen + basal)[0], wallA(wallMid, villLen + basal)[1])[1]} show={vis(t, 0.12, 0.4)} small />
+      <Label id="dezidua-basala" x={810} y={155} ax={z.at(wallA(wallMid + 30, villLen + basal * 0.6)[0], wallA(wallMid + 30, villLen + basal * 0.6)[1])[0]} ay={z.at(wallA(wallMid + 30, villLen + basal * 0.6)[0], wallA(wallMid + 30, villLen + basal * 0.6)[1])[1]} show={vis(t, 0.4)} />
+      <Label id="korion-hostotsua" x={810} y={200} ax={z.at(wallA(wallMid + 60, villLen * 0.55)[0], wallA(wallMid + 60, villLen * 0.55)[1])[0]} ay={z.at(wallA(wallMid + 60, villLen * 0.55)[0], wallA(wallMid + 60, villLen * 0.55)[1])[1]} show={vis(t, 0.12)} />
+      <Label id="karena" x={810} y={245} ax={z.at(wallA(wallMid + 78, villLen * 0.7)[0], wallA(wallMid + 78, villLen * 0.7)[1])[0]} ay={z.at(wallA(wallMid + 78, villLen * 0.7)[0], wallA(wallMid + 78, villLen * 0.7)[1])[1]} show={vis(t, 0.56)} />
+      <Label id="amnios-barrunbea" x={810} y={375} ax={z.at(am.cx + am.rx * 0.45, am.cy + am.ry * 0.72)[0]} ay={z.at(am.cx + am.rx * 0.45, am.cy + am.ry * 0.72)[1]} show={vis(t, 0.1)} />
+      <Label id="zilborrestea" x={810} y={420} ax={z.at(cordMid[0] - (cordMid[0] - cordTop[0]) * 0.1, (cordMid[1] + cordTop[1]) / 2)[0]} ay={z.at(cordMid[0] - (cordMid[0] - cordTop[0]) * 0.1, (cordMid[1] + cordTop[1]) / 2)[1]} show={vis(t, 0.3)} />
+      <Label id="bitelo-zaku-sekundarioa" x={810} y={465} ax={z.at(yolk[0], yolk[1])[0]} ay={z.at(yolk[0], yolk[1])[1]} show={Math.min(yolkShow, vis(t, 0.05))} small />
+      <Label id="umetoki-barrunbea" x={810} y={510} ax={z.at(500, lerp(390, 440, k))[0]} ay={z.at(500, lerp(390, 440, k))[1]} show={Math.min(cavityShow, vis(t, 0))} />
 
       {/* Labels — left gutter */}
-      <Label id="paretako-dezidua" x={190} y={150} ax={dec[15][0] + 9} ay={dec[15][1]} show={vis(t, 0.4)} align="end" />
-      <Label id="korion-barrunbea" x={190} y={210} ax={onE(sac, 200, -sac.rx * 0.1)[0]} ay={onE(sac, 200, -sac.rx * 0.1)[1]} show={vis(t, 0, 0.95)} align="end" />
-      <Label id="dezidua-kapsularra" x={190} y={270} ax={wallA(125, caps * 0.6)[0]} ay={wallA(125, caps * 0.6)[1]} show={Math.min(capsShow, vis(t, 0.4))} align="end" />
-      <Label id="biloxka-sekundarioa" x={190} y={330} ax={wallA(165, villLen * 0.4)[0]} ay={wallA(165, villLen * 0.4)[1]} show={vis(t, 0, 0.12)} align="end" />
-      <Label id="korion-leuna" x={190} y={330} ax={wallA(165, 0)[0]} ay={wallA(165, 0)[1]} show={vis(t, 0.26, 0.86)} align="end" />
-      <Label id="mutur-anenbrionarioa" x={190} y={390} ax={wallA(wallMid + 180, caps + 2)[0]} ay={wallA(wallMid + 180, caps + 2)[1]} show={vis(t, 0.26, 0.4)} align="end" small />
-      <Label id="amniosa" x={190} y={390} ax={onE(am, 175)[0]} ay={onE(am, 175)[1]} show={vis(t, 0.5, 0.86)} align="end" />
-      <Label id="mintz-amniokorionikoa" x={190} y={450} ax={wallA(150, -1)[0]} ay={wallA(150, -1)[1]} show={membraneShow} align="end" />
+      <Label id="paretako-dezidua" x={190} y={150} ax={z.at(dec[15][0] + 9, dec[15][1])[0]} ay={z.at(dec[15][0] + 9, dec[15][1])[1]} show={vis(t, 0.4)} align="end" />
+      <Label id="korion-barrunbea" x={190} y={210} ax={z.at(onE(sac, 200, -sac.rx * 0.1)[0], onE(sac, 200, -sac.rx * 0.1)[1])[0]} ay={z.at(onE(sac, 200, -sac.rx * 0.1)[0], onE(sac, 200, -sac.rx * 0.1)[1])[1]} show={vis(t, 0, 0.95)} align="end" />
+      <Label id="dezidua-kapsularra" x={190} y={270} ax={z.at(wallA(125, caps * 0.6)[0], wallA(125, caps * 0.6)[1])[0]} ay={z.at(wallA(125, caps * 0.6)[0], wallA(125, caps * 0.6)[1])[1]} show={Math.min(capsShow, vis(t, 0.4))} align="end" />
+      <Label id="biloxka-sekundarioa" x={190} y={330} ax={z.at(wallA(165, villLen * 0.4)[0], wallA(165, villLen * 0.4)[1])[0]} ay={z.at(wallA(165, villLen * 0.4)[0], wallA(165, villLen * 0.4)[1])[1]} show={vis(t, 0, 0.12)} align="end" />
+      <Label id="korion-leuna" x={190} y={330} ax={z.at(wallA(165, 0)[0], wallA(165, 0)[1])[0]} ay={z.at(wallA(165, 0)[0], wallA(165, 0)[1])[1]} show={vis(t, 0.26, 0.86)} align="end" />
+      <Label id="mutur-anenbrionarioa" x={190} y={390} ax={z.at(wallA(wallMid + 180, caps + 2)[0], wallA(wallMid + 180, caps + 2)[1])[0]} ay={z.at(wallA(wallMid + 180, caps + 2)[0], wallA(wallMid + 180, caps + 2)[1])[1]} show={vis(t, 0.26, 0.4)} align="end" small />
+      <Label id="amniosa" x={190} y={390} ax={z.at(onE(am, 175)[0], onE(am, 175)[1])[0]} ay={z.at(onE(am, 175)[0], onE(am, 175)[1])[1]} show={vis(t, 0.5, 0.86)} align="end" />
+      <Label id="mintz-amniokorionikoa" x={190} y={450} ax={z.at(wallA(150, -1)[0], wallA(150, -1)[1])[0]} ay={z.at(wallA(150, -1)[0], wallA(150, -1)[1])[1]} show={membraneShow} align="end" />
 
       <Note x={500} y={618} show={vis(t, 0, 0.12)}>Biloxkak blastozisto osoan zehar</Note>
       <Note x={500} y={618} tone="accent" show={vis(t, 0.12, 0.26)}>Mutur enbrionarioan biloxka trinkoak: korion hostotsua</Note>

@@ -1,6 +1,6 @@
 'use client';
 
-import { C, rand } from '@/components/kit';
+import { C, clamp, rand } from '@/components/kit';
 
 /**
  * Drawing kit for the week-3 villi scenes (local; ids prefixed `w3b-`). Everything is computed from
@@ -531,4 +531,38 @@ export function loopOf(f: Finger, ts: number, tc: number, y0: number, top: numbe
     cap.push([cx + rl * Math.cos(a), cy + rl * Math.sin(a)]);
   }
   return [...left, ...cap, ...right.reverse()];
+}
+
+/* ------------------------------------------------------------------ */
+/* Flow direction                                                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Direction chevrons along a route, creeping forward with `phase` (px). `fromEnd` spaces them from the
+ * route's end, so two routes that share their last stretch (the venous return) put theirs on the same
+ * spots; outgoing routes share their first stretch and are spaced from the start.
+ */
+export function chevrons(pts: P[], sp: number, phase: number, fromEnd: boolean) {
+  const L = cumLen(pts);
+  const total = L[L.length - 1];
+  const ph = ((phase % sp) + sp) % sp;
+  const out: { x: number; y: number; a: number; o: number }[] = [];
+  for (let k = 0; k * sp <= total + sp; k++) {
+    const s = fromEnd ? total - (k * sp + sp - ph) : k * sp + ph;
+    if (s < 4 || s > total - 4) continue;
+    const { p, a } = pointAt(pts, L, s);
+    out.push({ x: p[0], y: p[1], a: (a * 180) / Math.PI, o: clamp(Math.min(s, total - s) / 22) });
+  }
+  return out;
+}
+
+/** One arrowhead (a "›" pointing along +x before rotation), dark-rimmed so it reads on any tissue. */
+export function Chevron({ x, y, a, o, color, size = 1 }: { x: number; y: number; a: number; o: number; color: string; size?: number }) {
+  const d = `M${-3.2 * size},${-4.2 * size} L${2.6 * size},0 L${-3.2 * size},${4.2 * size}`;
+  return (
+    <g transform={`translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${a.toFixed(1)})`} opacity={o}>
+      <path d={d} fill="none" stroke="rgba(8,10,22,0.85)" strokeWidth={4.4 * size} strokeLinecap="round" strokeLinejoin="round" />
+      <path d={d} fill="none" stroke={color} strokeWidth={2.1 * size} strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
 }

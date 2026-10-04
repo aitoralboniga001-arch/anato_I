@@ -419,13 +419,108 @@ function labels(t: number, at: (x: number, y: number) => [number, number], close
   );
 }
 
+/* ---------- Progression tracker: primary → secondary → tertiary, one sequence ---------- */
+
+/** A tiny cross-section of a villus of type k (0 primary, 1 secondary, 2 tertiary): only the core differs. */
+function MiniSection({ x, y, r, k }: { x: number; y: number; r: number; k: 0 | 1 | 2 }) {
+  const rc = r * 0.56;
+  return (
+    <g>
+      <circle cx={x} cy={y} r={r} fill={K.synEdge} />
+      <circle cx={x} cy={y} r={r - 1.2} fill="url(#w3b-syn)" />
+      <circle cx={x} cy={y} r={r * 0.78} fill={K.cytoGround} stroke={K.cellEdge} strokeWidth={0.6} />
+      {k === 0 ? (
+        <g>
+          <circle cx={x} cy={y} r={rc} fill={K.cell} />
+          {[
+            [-0.45, -0.3],
+            [0.42, -0.36],
+            [0, 0.42],
+            [-0.05, -0.02],
+          ].map(([dx, dy], i) => (
+            <circle key={i} cx={x + dx * rc} cy={y + dy * rc} r={rc * 0.2} fill={K.cellNuc} />
+          ))}
+        </g>
+      ) : (
+        <circle cx={x} cy={y} r={rc} fill={K.meso} stroke={K.mesoEdge} strokeWidth={0.6} />
+      )}
+      {k === 2 &&
+        [
+          [-0.42, -0.25],
+          [0.4, -0.3],
+          [0.05, 0.45],
+        ].map(([dx, dy], i) => (
+          <g key={i}>
+            <circle cx={x + dx * rc} cy={y + dy * rc} r={rc * 0.3} fill={K.endo} />
+            <circle cx={x + dx * rc} cy={y + dy * rc} r={rc * 0.19} fill={K.lumen} />
+          </g>
+        ))}
+      <circle cx={x} cy={y} r={r} fill="url(#w3b-ball)" />
+    </g>
+  );
+}
+
+const TRACK = { y: 584, xs: [318, 490, 662], r: 12.5, names: ['Primarioa', 'Sekundarioa', 'Tertziarioa'] } as const;
+
+/**
+ * Persistent milestone strip under the drawing: the three villus types as mini cross-sections. Each one
+ * lights when the villus becomes that type; the joining line grows while the change is happening
+ * (mesoderm invading the core; blood islands → capillaries), so the three read as one progression.
+ */
+function Tracker({ t }: { t: number }) {
+  const { primary, secondary, tertiary } = typeShow(t);
+  const reached = [1, seg(t, 0.31, 0.37), seg(t, 0.7, 0.76)];
+  const current = [primary, secondary, tertiary];
+  const links = [seg(t, W.meso[0], 0.37), seg(t, W.islands[0], 0.76)];
+  const { y, xs, r } = TRACK;
+  return (
+    <g pointerEvents="none">
+      <rect x={xs[0] - r - 16} y={y - r - 5} width={xs[2] - xs[0] + r + 126} height={2 * r + 10} rx={r + 5} fill="rgba(9,13,24,0.78)" stroke="rgba(232,238,252,0.1)" />
+      {links.map((k, i) => {
+        const a = xs[i] + r + 98;
+        const b = xs[i + 1] - r - 6;
+        return (
+          <g key={i}>
+            <path d={`M${a},${y}H${b}`} stroke="rgba(232,238,252,0.18)" strokeWidth={2.4} strokeLinecap="round" />
+            {k > 0.001 && <path d={`M${a},${y}H${lerp(a, b, k)}`} stroke="#f0c48a" strokeWidth={2.4} strokeLinecap="round" />}
+            <path d={`M${b - 4},${y - 4} L${b},${y} L${b - 4},${y + 4}`} fill="none" stroke={k > 0.98 ? '#f0c48a' : 'rgba(232,238,252,0.3)'} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+        );
+      })}
+      {xs.map((x, i) => (
+        <g key={x} opacity={0.3 + 0.7 * reached[i]}>
+          {current[i] > 0.01 && <circle cx={x} cy={y} r={r + 3} fill="none" stroke="#f0c48a" strokeWidth={1.6} opacity={current[i]} />}
+          <MiniSection x={x} y={y} r={r} k={i as 0 | 1 | 2} />
+        </g>
+      ))}
+    </g>
+  );
+}
+
+function TrackerNames({ t }: { t: number }) {
+  const { primary, secondary, tertiary } = typeShow(t);
+  const reached = [1, seg(t, 0.31, 0.37), seg(t, 0.7, 0.76)];
+  const current = [primary, secondary, tertiary];
+  return (
+    <>
+      {TRACK.xs.map((x, i) => (
+        <Note key={x} x={x + TRACK.r + 7} y={TRACK.y} align="start" size={12} tone={current[i] > 0.5 ? 'accent' : 'dim'} show={Math.max(0.4, reached[i])}>
+          {TRACK.names[i]}
+        </Note>
+      ))}
+    </>
+  );
+}
+
 export function VilliLongitudinal(props: SceneProps) {
   const id = (x: number, y: number): [number, number] => [x, y];
   return (
     <g>
       <W3bDefs />
       <VilliDrawing {...props} />
+      <Tracker t={props.t} />
       {labels(props.t, id, false)}
+      <TrackerNames t={props.t} />
     </g>
   );
 }
@@ -436,7 +531,8 @@ function closeCam(t: number) {
   const c = g.v[0];
   const tipCam = c.apexSyn + 128;
   const frontCam = Math.max(tipCam, Math.min(430, c.front + 34));
-  return lerp(tipCam, frontCam, seg(t, 0.25, 0.29));
+  // Pan after beat 2's held frame (0.265) and before the mesoderm sets off (0.305).
+  return lerp(tipCam, frontCam, seg(t, 0.272, 0.304));
 }
 
 export function VilliTip(props: SceneProps) {
@@ -449,15 +545,17 @@ export function VilliTip(props: SceneProps) {
       <g transform={z.transform}>
         <VilliDrawing {...props} detail />
       </g>
+      <Tracker t={props.t} />
       {labels(props.t, z.at, { fy })}
+      <TrackerNames t={props.t} />
     </g>
   );
 }
 
 /* ---------- Transverse sections (Langman fig. 5-11, the notes' figure) ---------- */
 
-const SEC = { R: 92, ts: 17, tc: 20, y: 268 };
-const SLOTS = [290, 500, 710] as const;
+const SEC = { R: 106, ts: 19, tc: 23, y: 262 };
+const SLOTS = [278, 500, 722] as const;
 const LUMENS: [number, number, number, number, number][] = [
   // angle (deg), radius (fraction of the core), rx, ry, rotation
   [-128, 0.55, 9, 6.5, 30],
@@ -642,12 +740,12 @@ export function VilliTransverse({ t, reduced }: SceneProps) {
           {d}
         </Note>
       ))}
-      <Label id="sinzitiotrofoblastoa" x={190} y={186} ax={SLOTS[0] - (SEC.R - SEC.ts / 2) * 0.7071} ay={SEC.y - (SEC.R - SEC.ts / 2) * 0.7071} />
+      <Label id="sinzitiotrofoblastoa" x={190} y={162} ax={SLOTS[0] - (SEC.R - SEC.ts / 2) * 0.7071} ay={SEC.y - (SEC.R - SEC.ts / 2) * 0.7071} />
       <Label id="zitotrofoblastoa" x={190} y={350} ax={SLOTS[0] + Math.cos((140 * Math.PI) / 180) * (SEC.R - SEC.ts - SEC.tc / 2)} ay={SEC.y + Math.sin((140 * Math.PI) / 180) * (SEC.R - SEC.ts - SEC.tc / 2)} />
-      <Label id="enbrioi-kanpoko-mesodermoa" x={500} y={150} ax={SLOTS[1]} ay={SEC.y - 14} align="middle" show={firstLeft ? clamp((g.meso - 0.35) / 0.15) : 0} text="Kanpoko mesodermoa" />
+      <Label id="enbrioi-kanpoko-mesodermoa" x={500} y={134} ax={SLOTS[1]} ay={SEC.y - 14} align="middle" show={firstLeft ? clamp((g.meso - 0.35) / 0.15) : 0} text="Kanpoko mesodermoa" />
       <Label id="biloxka-kapilarrak" x={810} y={372} ax={lum(2)[0]} ay={lum(2)[1]} show={secondLeft ? capShow : 0} text="Biloxka kapilarrak" />
-      <Label id="lakuak" x={810} y={520} ax={770} ay={470} small show={lakuak} />
-      <Label id="biloxka-arteko-espazioa" x={810} y={546} ax={770} ay={490} small show={ivs} />
+      <Label id="lakuak" x={810} y={520} ax={792} ay={500} small show={lakuak} />
+      <Label id="biloxka-arteko-espazioa" x={810} y={546} ax={792} ay={512} small show={ivs} />
       <Note x={500} y={590} tone="accent" show={seg(t, 0.84, 0.9)}>
         Kanpoko bi geruzak berdinak dira hiruretan: erdigunea da aldatzen dena
       </Note>

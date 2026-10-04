@@ -4,10 +4,12 @@ import { Arrow, C, Flow, Label, Note, Part, clamp, easeInOut, lerp, mix, rand, s
 import {
   BASE,
   CellPaths,
+  Chevron,
   Island,
   K,
   VesselSet,
   W3bDefs,
+  chevrons,
   cumLen,
   ellipseSub,
   fingerOutline,
@@ -357,8 +359,18 @@ const ROUTES = NET.legs.map((lg, i) => {
   const L = cumLen(loop);
   const out = [...NET.pathA, NET.linkA[1], ...plateToLeg, ...lg.art, ...subPoly(loop, L, 0, 0.5)];
   const back = [...subPoly(loop, L, 0.5, 1), ...lg.ven, ...NET.plateV[i], NET.linkV[1], ...NET.pathV, ...NET.heart];
-  return { out: pd(out), back: pd(back) };
+  return { out: pd(out), back: pd(back), outPts: out, backPts: back };
 });
+
+/** Chevron colours: towards the villi (blue blood) and back to the embryo (red blood); maternal blood. */
+const CH_OUT = '#cfe0ff';
+const CH_BACK = '#ffd2d9';
+const CH_MAT = '#ffe1e6';
+
+/** Maternal blood leaving the open spiral artery into the intervillous space (two spreading streams). */
+const PLUME: P[][] = [-1, 1].map((sd) =>
+  bez(MOUTH, [MOUTH[0] + sd * 20, MOUTH[1] + 50], [MOUTH[0] + sd * 44, MOUTH[1] + 110], [MOUTH[0] + sd * 40, MOUTH[1] + 190], 24),
+);
 
 /** A soft light where two vessels have just joined (bright as they meet, settling, gone once the circuit is whole). */
 function joinGlow(t: number, at: number) {
@@ -408,6 +420,8 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
   const circuit = s(t, W.circuit);
   const hb = s(t, W.heartbeat);
   const beating = t >= W.heartbeat[0];
+  // Chevrons creep forward ~34 px per second of playback (24 s stage) once the heart beats.
+  const phase = Math.max(0, t - W.heartbeat[0]) * 24 * 34;
   const exchange = Math.max(s(t, W.o2), 0);
   const ka = clamp(hb * 1.7);
   const kv = clamp(hb * 1.7 - 0.7);
@@ -624,6 +638,15 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
           <Flow key={`o${i}`} d={r.out} n={9} dur={7.5} r={2} color="#9db8ff" />,
           <Flow key={`b${i}`} d={r.back} n={9} dur={7.5} r={2} color="#ff9aa8" />,
         ])}
+      {/* Direction of the embryo's blood once the heart beats: out along the blue vessels, back along the red. */}
+      {hb > 0.01 && (
+        <g pointerEvents="none" opacity={hb}>
+          {ROUTES.flatMap((r, i) => [
+            ...chevrons(r.outPts, 62, phase, false).map((c, k) => <Chevron key={`o${i}-${k}`} {...c} color={CH_OUT} />),
+            ...chevrons(r.backPts, 62, phase, true).map((c, k) => <Chevron key={`b${i}-${k}`} {...c} color={CH_BACK} />),
+          ])}
+        </g>
+      )}
 
       {/* Spiral artery opening through the shell. */}
       <Part id="arteria-espiralak">
@@ -633,6 +656,13 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
         <ellipse cx={MOUTH[0]} cy={MOUTH[1] + 1} rx={8} ry={3.6} fill="#f0566f" />
       </Part>
       {!reduced && <Flow d={pd(ARTERY)} n={4} dur={4.5} r={2} color="#ffc2cc" reduced={reduced} />}
+      {/* Maternal blood: down the spiral artery and out into the intervillous space (it never enters a villus). */}
+      <g pointerEvents="none" opacity={0.9}>
+        {chevrons(ARTERY.slice(Math.floor(ARTERY.length * 0.3)), 40, t * 24 * 20, false).map((c, k) => (
+          <Chevron key={`a${k}`} {...c} color={CH_MAT} size={0.85} />
+        ))}
+        {PLUME.flatMap((pl, i) => chevrons(pl, 58, 20 + t * 24 * 20, false).map((c, k) => <Chevron key={`p${i}-${k}`} {...c} color={CH_MAT} size={0.9} />))}
+      </g>
 
       {/* Roundness of the stem villi. */}
       <g pointerEvents="none">
@@ -758,6 +788,23 @@ export function CirculationOverview(props: SceneProps) {
       </Note>
       <Note x={752} y={232} align="start" show={s(t, W.co2)}>
         CO2
+      </Note>
+      {/* Key to the chevrons (the embryo's blood once it flows). */}
+      {s(t, W.heartbeat) > 0.01 && (
+        <g pointerEvents="none" opacity={s(t, W.heartbeat)}>
+          <path d="M804,528 H828" stroke={K.endo} strokeWidth={7} strokeLinecap="round" />
+          <path d="M804,528 H828" stroke={BLUE} strokeWidth={4} strokeLinecap="round" />
+          <Chevron x={817} y={528} a={0} o={1} color={CH_OUT} size={0.9} />
+          <path d="M804,554 H828" stroke={K.endo} strokeWidth={7} strokeLinecap="round" />
+          <path d="M804,554 H828" stroke={RED} strokeWidth={4} strokeLinecap="round" />
+          <Chevron x={815} y={554} a={180} o={1} color={CH_BACK} size={0.9} />
+        </g>
+      )}
+      <Note x={834} y={528} align="start" show={s(t, W.heartbeat)}>
+        Enbrioitik biloxketara
+      </Note>
+      <Note x={834} y={554} align="start" show={s(t, W.heartbeat)}>
+        Biloxketatik enbrioira
       </Note>
       <Note x={500} y={614} tone="accent" show={s(t, W.heartbeat) * (1 - seg(t, W.o2[0], W.o2[0] + 0.03))}>
         Bihotzak taupada egiten hasten du (4. astea): odola zirkulatzen hasten da

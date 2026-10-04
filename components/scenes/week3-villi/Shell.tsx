@@ -469,7 +469,7 @@ function PlumeDef() {
 
 /** Close-up of the left stem villus where it meets the decidua: the column breaking through and spreading. */
 export function ShellClose({ t, reduced }: SceneProps) {
-  const { g, shellShown } = shows(t);
+  const { g, shellShown, free } = shows(t);
   const tr = g.trunks[0];
   const cx = tr.x + 18;
   const cy = 150;
@@ -494,10 +494,13 @@ export function ShellClose({ t, reduced }: SceneProps) {
       <Label id="sinzitiotrofoblastoa" x={180} y={420} ax={at(fx(tr.f, ySyn) - fw(tr.f, ySyn, tr.ts / 2), ySyn)[0]} ay={at(fx(tr.f, ySyn) - fw(tr.f, ySyn, tr.ts / 2), ySyn)[1]} />
       <Label id="biloxka-enborra" x={180} y={520} ax={at(fx(tr.f, yE) - fw(tr.f, yE, 0) - 1, yE)[0]} ay={at(fx(tr.f, yE) - fw(tr.f, yE, 0) - 1, yE)[1]} text="Enborrezko biloxka" />
       <Label id="biloxka-arteko-espazioa" x={820} y={420} ax={at(440, 215)[0]} ay={at(440, 215)[1]} />
-      <Note x={500} y={612} tone="accent" show={seg(t, W.penetrate[0], W.penetrate[0] + 0.05) * (1 - seg(t, W.shell[0] - 0.01, W.shell[0] + 0.02))}>
+      {/* The free villi branching off this stem villus (beats 7–8). */}
+      <Label id="biloxka-askea" x={820} y={250} ax={at(...along(g.branches[1], 0.72))[0]} ay={at(...along(g.branches[1], 0.72))[1]} show={free(1)} />
+      {/* Caption hand-off: the first is gone before the second starts (never two captions on one spot). */}
+      <Note x={500} y={594} tone="accent" show={seg(t, W.penetrate[0], W.penetrate[0] + 0.05) * (1 - seg(t, W.shell[0] - 0.02, W.shell[0]))}>
         Zitotrofoblasto-zelulek sinzitioa zeharkatu eta dezidua basalera iristen dira
       </Note>
-      <Note x={500} y={612} tone="accent" show={seg(t, W.shell[0], W.shell[0] + 0.04) * (1 - seg(t, 0.5, 0.53))}>
+      <Note x={500} y={594} tone="accent" show={seg(t, W.shell[0], W.shell[0] + 0.03) * (1 - seg(t, 0.5, 0.53))}>
         Zutabeetako zelulak alboetara zabaldu eta elkartzen dira: kanpoko zorroa
       </Note>
     </g>

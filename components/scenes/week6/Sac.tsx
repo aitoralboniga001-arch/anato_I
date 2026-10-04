@@ -2,7 +2,7 @@
 
 import { C, Flow, Label, Mark, Note, Part, bezier, clamp, lerp, rand, seg, smoothPath, tube, type Pt, type SceneProps } from '@/components/kit';
 import type { Curve } from '@/lib/sim/geometry';
-import { CellPaths, K, W3bDefs, newBatch, pd, wallCells, type P } from '@/components/scenes/week3-villi/art';
+import { CellPaths, Chevron, K, W3bDefs, chevrons, newBatch, pd, wallCells, type P } from '@/components/scenes/week3-villi/art';
 
 /**
  * Topic 6 — the chorionic sac as a whole (stage `biloxka-askeak`), drawn with the week-3 villus
@@ -181,7 +181,7 @@ const SHELL = (() => {
 
 type Mode = 'sac' | 'circ';
 
-function SacDrawing({ t, reduced, mode }: SceneProps & { mode: Mode }) {
+function SacDrawing({ t, reduced, mode, phase = 0 }: SceneProps & { mode: Mode; phase?: number }) {
   const g1 = mode === 'circ' ? 1 : seg(t, 0, 0.1);
   const g2 = mode === 'circ' ? 1 : seg(t, 0.05, 0.15);
   const g3 = mode === 'circ' ? 1 : seg(t, 0.16, 0.3);
@@ -359,8 +359,49 @@ function SacDrawing({ t, reduced, mode }: SceneProps & { mode: Mode }) {
           )}
         </g>
       )}
+
+      {/* Direction of flow (readable in every still): maternal blood in through the spiral arteries and out
+          through the veins; in the circulation view, the fetal blood up the umbilical artery, round the plate
+          and back down the umbilical vein. */}
+      <g pointerEvents="none">
+        {artDeg.flatMap((d, i) => {
+          const pts = artPath(d, i) as P[];
+          const end = pts[pts.length - 1];
+          const dir = i ? 1 : -1;
+          const inn = polar(d + dir * 10, R3 + 22);
+          const jet: P[] = Array.from({ length: 13 }, (_, k) => {
+            const u = k / 12;
+            const c: P = [end[0] + dir * 6, end[1] + 40];
+            return [(1 - u) ** 2 * end[0] + 2 * (1 - u) * u * c[0] + u * u * inn[0], (1 - u) ** 2 * end[1] + 2 * (1 - u) * u * c[1] + u * u * inn[1]];
+          });
+          return [
+            ...chevrons(pts.slice(2), 34, phase * 0.6, false).map((c, k) => <Chevron key={`a${i}-${k}`} {...c} color="#ffe1e6" size={0.7} />),
+            ...chevrons(jet, 30, phase * 0.6 + 10, false).map((c, k) => <Chevron key={`j${i}-${k}`} {...c} color="#ffe1e6" size={0.75} />),
+          ];
+        })}
+        {chevrons(vein as P[], 30, phase * 0.6, false).map((c, k) => (
+          <Chevron key={`v${k}`} {...c} color="#d6deff" size={0.7} />
+        ))}
+        {circ &&
+          [
+            { pts: arcPts(RA, -90, 90, 60), c: '#cfe0ff' },
+            { pts: arcPts(RA, -90, -270, 60), c: '#cfe0ff' },
+            { pts: arcPts(RV, 90, -90, 60), c: '#ffd2d9' },
+            { pts: arcPts(RV, 90, 270, 60), c: '#ffd2d9' },
+            { pts: smoothPts([[CX - 4.4, CY - 64], [CX - 5.4, CY - 92], [CX - 2.4, CY - 110], [CX - 2.4, CY - RA]]), c: '#cfe0ff' },
+            { pts: smoothPts([[CX + 2.4, CY - RV], [CX + 2.4, CY - 110], [CX - 0.4, CY - 92], [CX + 0.4, CY - 64]]), c: '#ffd2d9' },
+          ].flatMap((r, i) => chevrons(r.pts, i < 4 ? 46 : 22, phase, false).map((c, k) => <Chevron key={`f${i}-${k}`} {...c} color={r.c} size={i < 4 ? 0.8 : 0.6} />))}
+      </g>
     </g>
   );
+}
+
+/** A polyline through a few points (linear, densified) for the chevron helper. */
+function smoothPts(p: Pt[]): P[] {
+  const out: P[] = [];
+  for (let i = 0; i < p.length - 1; i++) for (let k = 0; k < 6; k++) out.push([lerp(p[i][0], p[i + 1][0], k / 6), lerp(p[i][1], p[i + 1][1], k / 6)]);
+  out.push(p[p.length - 1] as P);
+  return out;
 }
 
 function SacDefs() {
@@ -404,7 +445,7 @@ export function ChorionicSac({ t, reduced }: SceneProps) {
     <g>
       <W3bDefs />
       <SacDefs />
-      <SacDrawing t={t} reduced={reduced} mode="sac" />
+      <SacDrawing t={t} reduced={reduced} mode="sac" phase={t * 34 * 30} />
       <Label id="arteria-espiralak" x={190} y={40} ax={A.art[0] - 6} ay={A.art[1]} text="Arteria kiribila" />
       <Label id="endometrio-zainak" x={190} y={72} ax={A.vein[0] - 6} ay={A.vein[1]} text="Itzulera benosoa" />
       <Label id="dezidua-basala" x={190} y={160} ax={A.basal[0]} ay={A.basal[1]} />
@@ -444,7 +485,6 @@ export function ChorionicSac({ t, reduced }: SceneProps) {
 /* ------------------------------------------------------------------ */
 
 export function SacCirculation({ t, reduced }: SceneProps) {
-  const sep = seg(t, 0.8, 0.86);
   const ivs = polar(-36, R1 - 14);
   const tv = stemTree(-18, 1, 1, 1)[0].c(0.4);
   const syn = polar(200, R1 - 6);
@@ -453,7 +493,7 @@ export function SacCirculation({ t, reduced }: SceneProps) {
     <g>
       <W3bDefs />
       <SacDefs />
-      <SacDrawing t={1} reduced={reduced} mode="circ" />
+      <SacDrawing t={1} reduced={reduced} mode="circ" phase={t * 34 * 30} />
       <Label id="finkapen-pedikulua" x={190} y={250} ax={CX - 10} ay={CY - 104} />
       <Label id="zilbor-hodiak" x={190} y={290} ax={CX - 4} ay={CY - 92} />
       <Label id="enbrioi-kanpoko-zirkulazioa" x={196} y={340} ax={plateV[0]} ay={plateV[1]} text="Enbrioi kanpoko zirkulazioa" small />
@@ -464,10 +504,11 @@ export function SacCirculation({ t, reduced }: SceneProps) {
       <Label id="amnios-barrunbea" x={810} y={346} ax={CX + 22} ay={CY - 40} />
       <Label id="bitelo-zaku-sekundarioa" x={810} y={378} ax={CX + 40} ay={CY + 36} />
       <Label id="korion-barrunbea" x={810} y={410} ax={A.cavity[0]} ay={A.cavity[1]} />
-      <Note x={500} y={616} show={1 - sep} tone="dim">
+      {/* Caption hand-off in two halves: never two captions on one spot. */}
+      <Note x={500} y={616} show={1 - seg(t, 0.8, 0.83)} tone="dim">
         Fetuaren odola: zilbor-hodiak → korion orriko odol-hodiak → biloxketako kapilarrak
       </Note>
-      <Note x={500} y={616} show={sep} tone="warn">
+      <Note x={500} y={616} show={seg(t, 0.83, 0.86)} tone="warn">
         Amaren eta fetuaren odolak ez dute inoiz kontakturik
       </Note>
     </g>
