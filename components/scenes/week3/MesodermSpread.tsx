@@ -335,10 +335,10 @@ const ss = (v: number) => {
  */
 function sagittalCamera(t: number, s: ReturnType<typeof sagittalDisc>['s'], pane?: boolean) {
   const mid = (x: number) => s.map(x, (s.base(x) + s.dEnd(x)) / 2);
-  const zb = pane ? 2.35 : 1.75;
-  const b = mid(X_BUCCO + (pane ? 38 : 70));
-  const c = mid(X_CLOACA - (pane ? 38 : 70));
-  const pr = mid((X_BUCCO + X_PRE) / 2 + (pane ? 30 : 60));
+  const zb = pane ? 2.6 : 2.1;
+  const b = mid(X_BUCCO + (pane ? 28 : 46));
+  const c = mid(X_CLOACA - (pane ? 28 : 46));
+  const pr = mid((X_BUCCO + X_PRE) / 2 + (pane ? 24 : 44));
   const W: Key = [0, 500, 318, 1];
   const keys: Key[] = [
     W,

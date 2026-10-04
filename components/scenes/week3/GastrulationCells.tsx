@@ -285,7 +285,14 @@ const STEPS: [number, string, string][] = [
   [GB.tri, 'Hiru orriko diskoa', '#e8eefc'],
 ];
 
-export function GastrulationCells({ t, reduced }: SceneProps) {
+/** The cell section for the dual view's right pane: names go to the right column, so free anchors sit on the right half. */
+export function GastrulationCellsPane(props: SceneProps) {
+  return GastrulationCells({ ...props, pane: true });
+}
+
+export function GastrulationCells({ t, reduced, pane }: SceneProps & { pane?: boolean }) {
+  /** Anchor side for names whose spot is free (either half shows the same tissue). */
+  const R = pane ? -1 : 1;
   const ctx = useScene();
   const em = emphasis(t);
   const ectoName = t >= GB.ecto;
@@ -466,6 +473,10 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
             const pts: Pt[] = [];
             for (let tt = GB.converge; tt < t; tt += 0.003) {
               const p = posOf(q.k, q.s, tt);
+              // Cells that go in: only the last stretch on the surface (the sheet's slide is told by the stream), so no
+              // trail runs sideways through the whole epiblast.
+              const onSurface = !(q.k < K && tt >= leaveAt(q.k, q.s));
+              if (q.fate !== 'C' && onSurface && Math.abs(p[0] - MID) > 64) continue;
               if (Math.abs(p[0] - MID) < HALF - 14) pts.push(p);
             }
             const [x, y] = posOf(q.k, q.s, t);
@@ -535,14 +546,14 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
         const currentMeso = bCells.at(-1)?.m;
         const hypoX = MID + (0.5 + hypPush[1]) * WH;
         return <>
-          {label('gastrulazioa', 192, 81, [MID - 8, EPI_BOT - 4], trackOn)}
+          {label('gastrulazioa', 192, 81, [MID - R * 8, EPI_BOT - 4], trackOn)}
           {/* Renamed names on the same spot hand over: the old one fades out first, then the new one fades in. */}
           {label('lerro-primitiboa', 790, 92, [MID + 3, EPI_TOP + 23], seg(t, GB.streak, GB.streak + 0.025) * (1 - seg(t, GB.groove, GB.groove + 0.012)))}
           {label('ildo-primitiboa', 790, 92, [MID + 3, EPI_TOP + 23], seg(t, GB.groove + 0.012, GB.groove + 0.03))}
-          {label('epiblastoa', 192, 170, [MID - 100, 218], 1 - seg(t, GB.ecto, GB.ecto + 0.012))}
-          {label('ektodermoa', 192, 170, [MID - 100, 218], seg(t, GB.ecto + 0.012, GB.ecto + 0.03))}
+          {label('epiblastoa', 192, 170, [MID - R * (pane ? 66 : 100), 218], 1 - seg(t, GB.ecto, GB.ecto + 0.012))}
+          {label('ektodermoa', 192, 170, [MID - R * (pane ? 66 : 100), 218], seg(t, GB.ecto + 0.012, GB.ecto + 0.03))}
           {label('mesodermo-intraenbrionarioa', 198, 368, currentMeso ? [currentMeso.x, currentMeso.y] : [MID, LANE_Y], currentMeso ? 1 : 0)}
-          {label('endodermoa', 192, 469, [MID - WH / 2, HYP_Y], seg(t, GB.endo + 0.015, GB.endo + 0.035))}
+          {label('endodermoa', 192, 469, [MID - R * (pane ? WH * 2.5 : WH / 2), HYP_Y], seg(t, GB.endo + 0.015, GB.endo + 0.035))}
           {label('hipoblastoa', 790, 506, [hypoX, HYP_Y], 1 - seg(t, GB.meso, GB.meso + 0.02))}
           {label('amnios-barrunbea', 790, 241, [MID + 85, EPI_TOP - 24])}
           {label('bitelo-zaku-sekundarioa', 790, 566, [MID + 85, HYP_Y + 35])}

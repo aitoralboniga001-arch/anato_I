@@ -385,18 +385,20 @@ export function DiscDrawing({ s, ids = {} }: { s: Disc; ids?: DiscIds }) {
   );
 }
 
-/** Outline over a membrane (bucco-pharyngeal / cloacal): ectoderm + endoderm fused, no mesoderm. */
-export function membranePath(s: Disc, xm: number) {
-  const xs = range(xm - 16, xm + 16, 12);
-  return poly([...xs.map((x) => s.map(x, s.top(x) - 2)), ...xs.reverse().map((x) => s.map(x, s.dEnd(x) + TEN + 2))]);
-}
-
 export function MembraneMark({ s, x }: { s: Disc; x: number }) {
-  // The membrane itself, lit: ectoderm and endoderm pressed together with nothing between (no pointer drawn round it).
+  // The membrane is its tissue: the ectoderm cell row lying directly on the endoderm row, with no mesoderm between
+  // (the disc's mesoderm already stops on either side). Its own cells are redrawn here so that lighting the part
+  // makes exactly these cells glow — no box or outline is drawn round them.
+  const a = x - 15;
+  const b = x + 15;
+  const xs = range(a, b, 12);
+  const ecto = { outer: xs.map((v) => s.map(v, s.top(v))), inner: xs.map((v) => s.map(v, s.base(v))) };
+  const endo = { outer: xs.map((v) => s.map(v, s.dEnd(v))), inner: xs.map((v) => s.map(v, s.dEnd(v) + TEN)) };
+  const seed = Math.round(Math.abs(x));
   return (
     <g>
-      <path d={membranePath(s, x)} fill="rgba(238,242,255,0.3)" />
-      <path d={membranePath(s, x)} fill="none" stroke="#eef2ff" strokeWidth={1.2} opacity={0.85} />
+      <Cells outer={endo.outer} inner={endo.inner} n={3} fill={C.endoderm} nucleus="rgba(90,60,10,0.7)" nk={0.45} seed={seed + 1} />
+      <Cells outer={ecto.outer} inner={ecto.inner} n={4} fill={C.ectoderm} pseudo seed={seed + 2} />
     </g>
   );
 }

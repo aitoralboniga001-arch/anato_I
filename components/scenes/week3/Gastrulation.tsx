@@ -3,7 +3,7 @@
 import { Arrow, C, Label, Mark, Note, Part, clamp, dual, lerp, mix, seg, type Pt, type SceneProps } from '@/components/kit';
 import { f1 } from './common';
 import { DiscDrawing, makeDisc } from './DiscSection';
-import { GB, GastrulationCells } from './GastrulationCells';
+import { GB, GastrulationCellsPane } from './GastrulationCells';
 import { Chips, GastrulationDorsalPane } from './GastrulationDorsal';
 export { GastrulationDorsal } from './GastrulationDorsal';
 import { columnY, frameAt, inFrame, type Key } from './gastroKit';
@@ -145,8 +145,13 @@ export function GastrulationTransverse({ t, reduced }: SceneProps) {
   );
 }
 
-/** Both at once: the disc from above and the cell-by-cell cross-section through the streak. */
+/**
+ * Both at once: the disc from above and the cell-by-cell cross-section through the streak. The section is
+ * wide and short, so the right pane gets most of the width (split 380) and shows the central part of it,
+ * where the cells go in, much larger; the tall disc keeps a narrower pane.
+ */
 export const GastrulationBoth = dual(
-  { scene: GastrulationDorsalPane, title: 'Goitik · goian kraneala', fx: 500, fy: 320, s: 0.68 },
-  { scene: GastrulationCells, title: 'Zeharkako mozketa · goian dortsala', fx: 500, fy: 300, s: 0.44 },
+  { scene: GastrulationDorsalPane, title: 'Goitik · goian kraneala', fx: 500, fy: 320, s: 0.54 },
+  { scene: GastrulationCellsPane, title: 'Zeharkako mozketa · goian dortsala', fx: 500, fy: 272, s: 0.74 },
+  { split: 380 },
 );
