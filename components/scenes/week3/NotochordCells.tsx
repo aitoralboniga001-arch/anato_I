@@ -1,9 +1,9 @@
 'use client';
 
-import { Arrow, C, Destination, FollowRing, Journey, Label, Note, OnTop, Part, clamp, lerp, lin, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Destination, Journey, Label, Note, OnTop, Part, clamp, lerp, lin, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
 import { useId } from 'react';
 import { f1 } from './common';
-import { Callout } from './gastroKit';
+import { Callout, LitCell, LitDefs, tint } from './gastroKit';
 
 /**
  * 16–18. egunak — notochord, cell by cell, in two linked panels.
@@ -253,7 +253,7 @@ function Strip({ t, reduced }: { t: number; reduced?: boolean }) {
         return (
           <g key={i}>
             <Journey pts={pts} color={C.notochord} head={14} width={2.4} route={route} r={7} show={follow} />
-            <FollowRing d={ellipseD(x, y, lerp(9, 6, plate) + 1.6, lerp(6.5, 5.5, plate) + 1.6)} show={follow} />
+            <LitCell d={ellipseD(x, y, lerp(9, 6, plate), lerp(6.5, 5.5, plate))} color={C.notochord} fate={C.notochord} show={follow} />
           </g>
         );
       })}
@@ -399,7 +399,16 @@ function Section({ t, reduced }: { t: number; reduced?: boolean }) {
       {followB > 0.02 && (
         <g>
           <Journey pts={bPath(t)} color={C.notochord} head={12} width={2.6} route={0} origin={false} show={followB} />
-          <FollowRing x={fb[0]} y={fb[1]} r={12.5} show={followB} />
+          {(() => {
+            // The followed cell itself, lit on its own outline (same size as the drawn cell).
+            const c = cells[FOLLOW_B];
+            const k = lerp(0.6, 1, c.o);
+            return (
+              <LitCell d={ellipseD(fb[0], fb[1], c.r * k, c.r * 0.86 * k)} color={C.notochord} fate={C.notochord} show={followB * c.o}>
+                <circle cx={f1(fb[0] + 0.5)} cy={f1(fb[1] + 0.5)} r={3.8} fill="rgba(20,6,40,0.6)" />
+              </LitCell>
+            );
+          })()}
         </g>
       )}
       {/* Arrival from the cord, perpendicular to this plane: a soft light where they come in. */}
@@ -444,7 +453,14 @@ function Legend() {
       <rect x={x - 12} y={y - 22} width={222} height={150} rx={12} fill="rgba(12,12,16,0.82)" stroke="rgba(232,238,252,0.14)" />
       {rows.map(([c, text], i) => (
         <g key={text} transform={`translate(${x} ${y + i * 22})`}>
-          {c === 'follow' ? <circle cx={6} cy={0} r={5.5} fill={C.notochord} stroke="#fff" strokeWidth={2} /> : <rect x={0} y={-6} width={12} height={12} rx={3} fill={c} />}
+          {c === 'follow' ? (
+            <g>
+              <circle cx={6} cy={0} r={6.5} fill={tint(C.notochord, '#ffffff', 0.1)} />
+              <circle cx={6} cy={0} r={6.5} fill="url(#gk-glow)" />
+              <circle cx={6.4} cy={0.5} r={2.4} fill="rgba(20,6,40,0.6)" />
+              <circle cx={6} cy={0} r={6.5} fill="none" stroke={tint(C.notochord, '#ffffff', 0.58)} strokeWidth={1.7} />
+            </g>
+          ) : <rect x={0} y={-6} width={12} height={12} rx={3} fill={c} />}
           <text x={20} y={0} dy="0.35em" fontSize={11} fill="#e8eefc">
             {text}
           </text>
@@ -465,6 +481,7 @@ export function NotochordCells({ t, reduced }: SceneProps) {
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <defs>
+        <LitDefs />
         <linearGradient id="nc-shine" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0" stopColor="#fff" stopOpacity={0.32} />
           <stop offset="0.45" stopColor="#fff" stopOpacity={0} />
