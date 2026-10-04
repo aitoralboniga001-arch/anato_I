@@ -930,7 +930,7 @@ export const week4: WeekDef = {
         {
           at: 0.18, notes: ['w4/2/p8/s1-s4', 'w4/2/p12/s1'], view: 'zeharkakoa', recall: ['azaleko-ektodermoa'],
           idea: 'Bide dortsolaterala: azaleko ektodermopean, epidermiserantz.',
-          text: 'Jarraitu laranja koloreko zelulei: hodi neuralaren alde dortsaletik alboetara doaz, azaleko ektodermopean. Epidermisera iritsita melanozitoak, ile-folikuluak eta azazkalak sortzen dituzte.',
+          text: 'Jarraitu bide laranjako zelulei: hodi neuralaren alde dortsaletik alboetara doaz, azaleko ektodermopean. Epidermisera iritsita melanozitoak, ile-folikuluak eta azazkalak sortzen dituzte.',
           key: 'Dortsolaterala → epidermisa → melanozitoak, ile-folikuluak eta azazkalak.',
           caution: 'Oharra: liburuetan (Langman, Moore) melanozitoak bakarrik datoz gandor neuraletik; ile-folikuluak eta azazkalak azaleko ektodermotik.',
           focus: ['gandor-neurala', 'azaleko-ektodermoa'],
@@ -938,7 +938,7 @@ export const week4: WeekDef = {
         {
           at: 0.3, notes: ['w4/2/p9/s1-s4'], view: 'zeharkakoa', recall: ['hodi-neurala', 'somitak'],
           idea: 'Bide bentrala: hodi neuralaren eta somiten artetik barrurantz.',
-          text: 'Jarraitu turkesa koloreko zelulei: hodi neuralaren alboetatik bentralera migratzen dute. Gongoil errakideoak nerbio espinalen atzeko sustraiekin lotuta daude; gongoil sinpatikoak sakonago kokatzen dira.',
+          text: 'Jarraitu bide turkesako zelulei: hodi neuralaren alboetatik bentralera migratzen dute. Gongoil errakideoak nerbio espinalen atzeko sustraiekin lotuta daude; gongoil sinpatikoak sakonago kokatzen dira.',
           key: 'Bi bide, jatorri bera: azalera dortsolateraletik; gongoiletara bentraletik.',
           focus: ['gandor-neurala', 'somitak'],
           ask: {

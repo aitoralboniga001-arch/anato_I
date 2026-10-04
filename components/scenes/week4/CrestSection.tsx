@@ -1,160 +1,354 @@
 'use client';
 
-import { Arrow, C, Cell, Destination, Journey, Label, Mark, Note, Part, lerp, seg, zoom, type Pt, type SceneProps } from '@/components/kit';
+import { C, Destination, Label, Mark, Note, Part, clamp, lerp, seg, type Pt, type SceneProps } from '@/components/kit';
+import type { ReactNode } from 'react';
+import { CrestCell, Route, along, spline } from './crestRoute';
+import { K, NS, NeuruDrawing, SX, TE, crestCells, neuruGeo, type NeuruGeo, type NeuruParams } from './NeuruSection';
+
+/**
+ * Stage `gandor-neurala`, transverse view — the same trunk section as the `neurulazioa` stage
+ * (NeuruSection: same tube, ectoderm, somites, notochord, aortae), magnified on its dorsal half.
+ * Beats: .00 the folds fuse and the crest cells at their rims go from epithelium to mesenchyme
+ * (tall packed cells → free cells with processes) and gather over the tube · .18 dorsolateral
+ * route, under the surface ectoderm, into the epidermis → melanocytes · .30 ventral route, past the
+ * medial side of the somite, → spinal (dorsal root) ganglion and, deeper, sympathetic ganglion by
+ * the aorta. Crest cells stay teal throughout; each route's line is in its destination's colour.
+ * Every change ends before the step's complete frame (next beat − 0.035).
+ */
 
 const GOLD = '#ffba72';
-const TEAL = '#5eead4';
+const TEAL = C.neuralCrest;
+const VTEAL = '#5eead4';
+const MELANIN = '#7a3f22';
 
-/** Original schematic: dorsal is up. Coordinates are local tissue units, magnified by zoom(). */
-function geometry(t: number) {
-  const close = seg(t, 0, 0.095);
-  const gap = lerp(18, 0, close);
-  const s = lerp(3.15, 2.65, seg(t, 0.18, 0.22));
-  const z = zoom(0, 61, s, 500, 320);
-  return { gap, close, z, u: 1 / s };
+/**
+ * Camera: close on the fold rims for the transition (the cells must be big enough to see them change
+ * shape and let go), then out to the dorsal half of the section for the two routes.
+ */
+function camera(t: number) {
+  const e = seg(t, 0.18, 0.2);
+  const s = lerp(2.35, 1.3, e);
+  const fy = lerp(178, 100, e);
+  const ty = lerp(300, 105, e);
+  const Z = (q: Pt): Pt => [500 + s * (q[0] - 500), ty + s * (q[1] - fy)];
+  return { view: `translate(500 ${ty.toFixed(2)}) scale(${s.toFixed(4)}) translate(-500 ${(-fy).toFixed(2)})`, ZX: (q: Pt): Pt => Z(SX(q)), U: 1 / s, wide: e };
 }
 
-/** Dorsolateral pathway: under the surface ectoderm, toward the epidermis (cell i, side sd). */
-const dorsalPos = (i: number, sd: number, t: number): Pt => [sd * lerp(26, 65 + i * 17, seg(t, 0.182 + i * 0.003, 0.235 + i * 0.005)), 8];
-/** Ventral pathway: between the neural tube and the somite, down to the ganglia. */
-function ventralPos(i: number, sd: number, t: number): Pt {
-  const u = seg(t, 0.305 + i * 0.01, 0.425 + i * 0.014);
-  return [sd * lerp(30, 45, Math.min(1, u * 3)), lerp(13, 66 + i * 26, u)];
-}
-const route = (pos: (t: number) => Pt, t0: number, t: number) => {
-  const pts: Pt[] = [];
-  for (let tt = t0; tt < t; tt += 0.004) pts.push(pos(tt));
-  pts.push(pos(t));
-  return pts;
-};
-function Melanocyte({ x, y }: { x: number; y: number }) {
-  return <g transform={`translate(${x} ${y})`}>
-    <path d="M0,0L-8,-3M0,0L-7,5M0,0L2,7M0,0L9,2M0,0L5,-5" fill="none" stroke={GOLD} strokeWidth={1.2} />
-    <ellipse rx={4.5} ry={3} fill="#8b482a" stroke={GOLD} strokeWidth={0.8} />
-  </g>;
+function params(t: number): NeuruParams {
+  return { plate: 1, groove: 1, folds: 1, close: lerp(0.8, 1, seg(t, 0, 0.05)), detach: seg(t, 0.05, 0.12), oval: seg(t, 0.05, 0.13), somite: 1 };
 }
 
-export function CrestSection({ t, reduced }: SceneProps) {
-  const { gap, close, z, u: unit } = geometry(t);
-  const emt = seg(t, 0.025, 0.13);
-  const dorsal = seg(t, 0.182, 0.247);
-  const ventral = seg(t, 0.31, 0.455);
+const part = (id: string, node: ReactNode, show = 1) => (
+  <Part id={id} show={show}>
+    {node}
+  </Part>
+);
+
+// Timing. Dorsolateral cell k (0..4); ventral cell j (0..4: three to the spinal ganglion, two deeper).
+const DL0 = 0.192;
+const V0 = 0.306;
+const dlStart = (k: number) => DL0 + 0.006 * k;
+const dlU = (k: number, t: number) => seg(t, dlStart(k), dlStart(k) + 0.036);
+const melK = (k: number, t: number) => seg(t, dlStart(k) + 0.033, dlStart(k) + 0.045);
+const vStart = (j: number) => V0 + 0.012 * j;
+const vU = (j: number, t: number) => seg(t, vStart(j), vStart(j) + 0.08);
+const DRG: Pt = [47, 6];
+const SYMP: Pt = [58, 90];
+const drgOn = (t: number) => seg(t, 0.39, 0.42);
+const sympOn = (t: number) => seg(t, 0.425, 0.452);
+const melX = (k: number) => 72 + 17 * k;
+
+/** The dorsolateral route (right side, disc space): under the ectoderm, then up into it. */
+function dlPath(g: NeuruGeo, from: Pt, xEnd: number): Pt[] {
+  const eu = g.ectoUnder;
+  const pts: Pt[] = [from, [28, eu(28) + 6], [52, eu(52) + 6]];
+  for (let x = 72; x < xEnd - 6; x += 18) pts.push([x, eu(x) + 5.5]);
+  pts.push([xEnd, eu(xEnd) + 3], [xEnd + 3, eu(xEnd) - 3]);
+  return spline(pts, 6);
+}
+/** The ventral route: down beside the tube, past the somite's medial edge; to the spinal ganglion or deeper. */
+function vPath(g: NeuruGeo, from: Pt, j: number): Pt[] {
+  const top = g.roofBasal;
+  const head: Pt[] = [from, [26, top + 10], [37, -26]];
+  if (j < 3) return spline([...head, [[46, -4], [42, 8], [51, 15]][j] as Pt], 8);
+  return spline([...head, [49, 2], [60, 34], [63, 58], [[54, 88], [62, 92]][j - 3] as Pt], 8);
+}
+
+function Melanocyte({ at, ang, grow }: { at: Pt; ang: number; grow: number }) {
+  const s = K;
+  const den = [
+    [-6, -5.5],
+    [-2, -7.5],
+    [3, -7],
+    [6.5, -3.5],
+  ];
+  return (
+    <g transform={`translate(${at[0].toFixed(1)} ${at[1].toFixed(1)}) rotate(${ang.toFixed(1)})`}>
+      {den.map(([x, y], i) => (
+        <path key={i} d={`M0,0Q${(x * 0.3 * s * grow).toFixed(1)},${(y * 0.7 * s * grow).toFixed(1)} ${(x * s * grow).toFixed(1)},${(y * s * grow).toFixed(1)}`} fill="none" stroke={GOLD} strokeWidth={1.2} strokeLinecap="round" opacity={0.95} />
+      ))}
+      <ellipse rx={3.6 * s} ry={2.6 * s} fill={MELANIN} stroke={GOLD} strokeWidth={0.9} />
+      {[[-1.8, 0.8], [1.6, -0.6], [0.4, 1.3], [-0.6, -1]].map(([x, y], i) => (
+        <circle key={i} cx={x * s} cy={y * s} r={0.5 * s} fill="#2a1206" />
+      ))}
+    </g>
+  );
+}
+
+function Ganglion({ c, rx, ry, n, show }: { c: Pt; rx: number; ry: number; n: number; show: number }) {
+  if (show <= 0.02) return null;
+  const P = SX(c);
+  return (
+    <g opacity={show}>
+      <ellipse cx={P[0]} cy={P[1]} rx={rx * K} ry={ry * K} fill={TEAL} fillOpacity={0.24} stroke={VTEAL} strokeWidth={1.1} />
+      {Array.from({ length: n }, (_, i) => {
+        const a = (i / n) * Math.PI * 2 + 0.4;
+        const r = n > 4 ? (i % 2 ? 0.58 : 0.3) : 0.42;
+        const x = P[0] + Math.cos(a) * rx * K * r;
+        const y = P[1] + Math.sin(a) * ry * K * r;
+        return (
+          <g key={i}>
+            <circle cx={x} cy={y} r={2.3 * K} fill="#1f9e8f" stroke={VTEAL} strokeWidth={0.6} />
+            <circle cx={x} cy={y} r={0.9 * K} fill="#0f4f49" />
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+type CellNow = { q: Pt; ang: number; mes: number; route: 'dl' | 'v'; sd: 1 | -1; k: number; u: number };
+
+export function CrestSection({ t }: SceneProps) {
+  const g = neuruGeo(params(t));
+  const { view, ZX, U, wide } = camera(t);
+  const tube = g.p.close > 0.9;
+  const appear = seg(t, 0.01, 0.04);
+  const gather = g.p.detach;
   // Weights of the three phases (EMT · dorsolateral · ventral), cross-faded right after each beat.
   const m1in = seg(t, 0.18, 0.195);
   const m2 = seg(t, 0.3, 0.315);
   const m = [1 - m1in, m1in * (1 - m2), m2];
-  const dimD = lerp(1, 0.28, m[2]);
-  const dimV = 1 - 0.78 * m[1];
-  const label = (id: string, x: number, y: number, p: Pt, show = 1) => {
-    const [ax, ay] = z.at(...p);
-    return <Label key={id} id={id} x={x} y={y} ax={ax} ay={ay} show={show} small />;
-  };
-  return <g>
-    <defs>
-      <clipPath id="w4-crest-section-crop"><rect x={218} y={76} width={564} height={476} rx={28} /></clipPath>
-      <linearGradient id="w4-crest-tissue" x2="0" y2="1"><stop stopColor="#15283b" /><stop offset="1" stopColor="#101821" /></linearGradient>
-    </defs>
-    <rect x={218} y={76} width={564} height={476} rx={28} fill="url(#w4-crest-tissue)" stroke="#28414b" />
-    <g clipPath="url(#w4-crest-section-crop)">
-      <g transform={z.transform}>
-        {/* A paired somite leaves a conspicuous corridor on each side of the tube. */}
-        <Part id="somitak" show={0.35 + 0.5 * m[2]}>
-          {[-1, 1].map(sd => <g key={sd}>
-            <ellipse cx={sd * 84} cy={64} rx={27} ry={35} fill={C.mesoIntra} fillOpacity={0.5} stroke="#f3a9a1" strokeWidth={0.8} />
-            {Array.from({ length: 16 }, (_, i) => {
-              const a = i * Math.PI / 8;
-              return <ellipse key={i} cx={sd * 84 + Math.cos(a) * 21} cy={64 + Math.sin(a) * 28} rx={2} ry={3} fill="#bf6c75" transform={`rotate(${i * 22.5} ${sd * 84 + Math.cos(a) * 21} ${64 + Math.sin(a) * 28})`} />;
+  // Sentences swap without overlapping: the old one leaves before the new one arrives.
+  const n1 = seg(t, 0.188, 0.198);
+  const n2 = seg(t, 0.308, 0.318);
+  const noteW = [1 - seg(t, 0.18, 0.187), n1 * (1 - seg(t, 0.3, 0.307)), n2];
+  const dimD = lerp(1, 0.45, m2);
+  const dimV = 1 - 0.5 * m[1];
+  const drg = drgOn(t);
+  const symp = sympOn(t);
+  // Contacts between the epithelial cells, lost during the transition.
+  const contact = 1 - seg(t, 0.045, 0.1);
+  const mesAll = seg(t, 0.055, 0.12);
+
+  // Where each cell gathers over the tube (w4a's crest layout, fully gathered).
+  const pooled = crestCells(g, appear, 1, 0, 10);
+  const mir = (q: Pt, sd: number): Pt => (sd > 0 ? q : [-q[0], q[1]]);
+  const cells: CellNow[] = pooled.map((c, n) => {
+    const idx = n % 10;
+    const sd = c.side;
+    // Before leaving, each cell is part of the fold-rim neuroepithelium: tall, apicobasal, two staggered rows.
+    const ia = NS - 1 - Math.round(idx * 1.6);
+    const depth = idx % 2 ? 0.68 : 0.32;
+    const aE: Pt = [lerp(g.ap[ia][0], g.bas[ia][0], depth), lerp(g.ap[ia][1], g.bas[ia][1], depth)];
+    const nAng = (Math.atan2(g.bas[ia][1] - g.ap[ia][1], g.bas[ia][0] - g.ap[ia][0]) * 180) / Math.PI;
+    const pool: Pt = [Math.abs(c.q[0]), c.q[1] + 1.5];
+    const b: Pt = [lerp(aE[0], pool[0], gather), lerp(aE[1], pool[1], gather)];
+    const dl = idx % 2 === 0;
+    const k = idx >> 1;
+    const u = dl ? dlU(k, t) : vU(k, t);
+    const path = dl ? dlPath(g, b, melX(k)) : vPath(g, b, k);
+    const { p, ang } = along(path, u);
+    const tall = sd > 0 ? nAng - 90 : 90 - nAng;
+    const restAng = mesAll < 0.5 ? tall * (1 - gather) : sd > 0 ? 0 : 180;
+    const moving = u > 0.005 && u < 0.995;
+    return { q: mir(u > 0 ? p : b, sd), ang: moving ? (sd > 0 ? ang : 180 - ang) : restAng, mes: moving ? 1 : mesAll, route: dl ? 'dl' : 'v', sd, k, u };
+  });
+
+  const midOf = (i: number, sd: number): Pt => mir([(g.ap[i][0] + g.bas[i][0]) / 2, (g.ap[i][1] + g.bas[i][1]) / 2], sd);
+  const foldAt = (sd: number) => midOf(NS - 6, sd);
+  const sides = [-1, 1] as const;
+
+  // The lead cell of each route draws the route ahead of the others.
+  const pool: Pt = [10, g.roofBasal - 6];
+  const dlMain = dlPath(g, pool, melX(4) + 8);
+  const vDrg = vPath(g, pool, 1);
+  const vSym = vPath(g, pool, 4);
+  const toScreen = (pts: Pt[], sd: number) => pts.map((q) => SX(mir(q, sd)));
+  const dlProg = seg(t, DL0, DL0 + 0.044);
+  const vProgA = seg(t, V0, V0 + 0.07);
+  const vProgB = seg(t, V0 + 0.02, V0 + 0.115);
+
+  const over = (
+    <g>
+      {/* The folds: lit where they meet and the crest cells leave them. */}
+      {sides.map((sd) => {
+        const f = SX(foldAt(sd));
+        return <Mark key={sd} id="tolesdura-neuralak" x={f[0]} y={f[1]} rx={22} show={0.9 * m[0]} />;
+      })}
+
+      {/* Where each route leads, softly lit while the cells travel. */}
+      {sides.map((sd) => {
+        const d = SX(mir(DRG, sd));
+        const s = SX(mir(SYMP, sd));
+        return (
+          <g key={sd}>
+            {[0, 1, 2, 3, 4].map((k) => {
+              const e = SX(mir([melX(k), g.ectoUnder(melX(k)) - 3], sd));
+              return <Destination key={k} x={e[0] - 6 * K} y={e[1] - 4 * K} w={12 * K} h={8 * K} color={GOLD} oval show={seg(t, 0.194, 0.205) * (1 - melK(k, t))} />;
             })}
-            <ellipse cx={sd * 84} cy={64} rx={9} ry={15} fill="#342634" />
-          </g>)}
-        </Part>
-        <Part id="azaleko-ektodermoa" show={0.48 + 0.52 * m[1]}>
-          {[-1, 1].map(sd => <g key={sd} transform={`scale(${sd} 1)`}>
-            <path d={`M${gap},-10H116V-2H${gap}Z`} fill={C.surfaceEcto} stroke="#a5c7f9" strokeWidth={0.7} />
-            <path d={`M${gap},-2Q${gap - 5},2 ${gap},14`} fill="none" stroke={C.surfaceEcto} strokeWidth={6} opacity={1 - close} />
-            {Array.from({ length: 18 }, (_, i) => <path key={i} d={`M${22 + i * 5},-10v8`} stroke="#244e81" strokeWidth={0.6} />)}
-          </g>)}
-        </Part>
-        <Part id="hodi-neurala" show={0.64}>
-          <path d={`M${-gap},19 C-39,18 -38,85 -20,96 Q0,113 20,96 C38,85 39,18 ${gap},19`}
-            fill="none" stroke={C.neural} strokeWidth={14} strokeLinecap="round" />
-          {Array.from({ length: 21 }, (_, i) => {
-            const a = (24 + i * 15.6) * Math.PI / 180;
-            return <path key={i} d={`M${Math.sin(a) * 22},${61 - Math.cos(a) * 34}L${Math.sin(a) * 33},${61 - Math.cos(a) * 45}`} stroke="#193c74" strokeWidth={0.7} />;
+            <Destination x={d[0] - 11 * K} y={d[1] - 16 * K} w={22 * K} h={32 * K} color={VTEAL} oval show={seg(t, 0.31, 0.33) * (1 - drg)} />
+            <Destination x={s[0] - 9 * K} y={s[1] - 8 * K} w={18 * K} h={16 * K} color={VTEAL} oval show={seg(t, 0.31, 0.33) * (1 - symp)} />
+          </g>
+        );
+      })}
+
+      {/* Ganglia form where the ventral cells settle; the spinal ganglion's root runs to the tube. */}
+      {part(
+        'gongoil-errakideoak',
+        <g>
+          {sides.map((sd) => {
+            const r0 = SX(mir([42, -9], sd));
+            const r1 = SX(mir([33, -22], sd));
+            return (
+              <g key={sd}>
+                <path d={`M${r0[0].toFixed(1)},${r0[1].toFixed(1)}L${r1[0].toFixed(1)},${r1[1].toFixed(1)}`} stroke={VTEAL} strokeWidth={1.8} strokeLinecap="round" opacity={0.8 * drg} />
+                <Ganglion c={mir(DRG, sd)} rx={9} ry={14} n={7} show={drg} />
+              </g>
+            );
           })}
-        </Part>
-        <Part id="notokorda" show={0.38}><ellipse cy={119} rx={10} ry={7} fill={C.notochord} stroke="#c4b5fd" strokeWidth={0.8} /></Part>
-        <Part id="aorta-dortsalak" show={0.3}>
-          {[-1, 1].map(sd => <ellipse key={sd} cx={sd * 30} cy={142} rx={9} ry={6} fill="#3f2033" stroke="#ec8290" strokeWidth={2} />)}
-        </Part>
-        {[-1, 1].map(sd => <g key={sd}>
-          <Mark id="tolesdura-neuralak" x={sd * (gap + 3)} y={17} rx={12} ry={13} show={0.85 * m[0]} color="#fbd68c" />
-          {/* Cells start IN the fold rim, lose their tall shape and separate into a dorsal pool. */}
-          <Part id="gandor-neurala">
-            {[0, 1, 2].map(i => <Cell key={i} x={sd * lerp(gap + 3 + i * 4, 13 + i * 9, emt)} y={lerp(17, 6 + i * 2, emt)} r={4} rx={lerp(2, 4.5, emt)} ry={lerp(7, 3.7, emt)} color={TEAL} nucleus="#155e59" />)}
-          </Part>
-          <g opacity={dimD}>
-            <Arrow from={[sd * 29, 8]} to={[sd * 100, 8]} bend={0} color={GOLD} width={1.3} head={4} progress={dorsal} flow={!reduced && dorsal > 0 && dorsal < 1} />
-            {/* Where they go: the epidermis just above, where they will be melanocytes. */}
-            <Destination x={sd > 0 ? 56 : -108} y={-8} w={52} h={15} color={GOLD} oval show={seg(t, 0.186, 0.2) * (1 - seg(t, 0.247, 0.258))} />
-            {[0, 1, 2].map(i => <Journey key={i} pts={route((tt) => dorsalPos(i, sd, tt), 0.182, t)} color={GOLD} head={10} width={2.2} u={unit} r={4.5} route={0.55} show={(1 - seg(t, 0.247, 0.258)) * (1 - m[0])} />)}
-            <Part id="gandor-neurala">
-              {[0, 1, 2].map(i => {
-                const [x, y] = dorsalPos(i, sd, t);
-                return <g key={i} opacity={(1 - seg(t, 0.247, 0.258)) * (1 - m[0])}>
-                  <Cell x={x} y={y} r={4} rx={5} ry={3.7} color={GOLD} nucleus="#874820" />
-                </g>;
-              })}
-            </Part>
-            <Part id="melanozitoak" show={seg(t, 0.247, 0.258)}>
-              {[65, 82, 99].map(x => <Melanocyte key={x} x={sd * x} y={-1} />)}
-            </Part>
-          </g>
-          <g opacity={dimV}>
-            <Arrow from={[sd * 41, 19]} to={[sd * 45, 120]} bend={0.025 * sd} color={TEAL} width={1.5} head={4} progress={ventral} flow={!reduced && ventral > 0 && ventral < 1} />
-            {/* Where they go: the spinal ganglion beside the tube and the sympathetic ganglion by the aorta. */}
-            <Destination x={sd * 45 - 8} y={56} w={16} h={26} color={TEAL} oval show={seg(t, 0.31, 0.33) * (1 - seg(t, 0.419, 0.442))} />
-            <Destination x={sd * 45 - 8} y={117} w={16} h={14} color={TEAL} oval show={seg(t, 0.31, 0.33) * (1 - seg(t, 0.444, 0.463))} />
-            {[0, 1, 2].map(i => <Journey key={i} pts={route((tt) => ventralPos(i, sd, tt), 0.3, t)} color={TEAL} head={10} width={2.2} u={unit} r={4.5} route={0.55} show={seg(t, 0.3, 0.314) * (1 - seg(t, 0.453, 0.461))} />)}
-            <Part id="gandor-neurala">
-              {[0, 1, 2].map(i => {
-                const [x, y] = ventralPos(i, sd, t);
-                return <g key={i} opacity={seg(t, 0.3, 0.314) * (1 - seg(t, 0.453, 0.461))}>
-                  <Cell x={x} y={y} r={4.5} rx={4} ry={5.6} color={TEAL} nucleus="#155e59" />
-                </g>;
-              })}
-            </Part>
-            <Part id="gongoil-errakideoak" show={seg(t, 0.419, 0.442)}>
-              <ellipse cx={sd * 45} cy={69} rx={7} ry={12} fill={TEAL} stroke="#12594f" strokeWidth={1} />
-              {[0, 1, 2].map(i => <circle key={i} cx={sd * 45} cy={63 + i * 6} r={1.5} fill="#155e59" />)}
-            </Part>
-            <Part id="gongoil-sinpatikoak" show={seg(t, 0.444, 0.463)}>
-              <ellipse cx={sd * 45} cy={124} rx={7} ry={6} fill={TEAL} stroke="#12594f" strokeWidth={1} />
-            </Part>
-          </g>
-        </g>)}
-      </g>
+        </g>,
+        drg,
+      )}
+      {part(
+        'gongoil-sinpatikoak',
+        <g>
+          {sides.map((sd) => (
+            <Ganglion key={sd} c={mir(SYMP, sd)} rx={7.5} ry={6} n={4} show={symp} />
+          ))}
+        </g>,
+        symp,
+      )}
+
+      {/* The two routes: persistent lines in the destination colour, each ending in an arrowhead. */}
+      {sides.map((sd) => (
+        <g key={sd}>
+          <Route pts={toScreen(dlMain, sd)} color={GOLD} progress={dlProg} width={2.6} u={U} head={10} show={dimD * (1 - 0.35 * m2)} />
+          <Route pts={toScreen(vDrg, sd)} color={VTEAL} progress={vProgA} width={2.6} u={U} head={10} show={dimV} />
+          <Route pts={toScreen(vSym, sd)} color={VTEAL} progress={vProgB} width={2.6} u={U} head={10} show={dimV} />
+        </g>
+      ))}
+
+      {/* Melanocytes: dorsolateral cells settled in the epidermis. */}
+      {part(
+        'melanozitoak',
+        <g opacity={dimD}>
+          {cells
+            .filter((c) => c.route === 'dl')
+            .map((c, i) => {
+              const w = melK(c.k, t);
+              if (w <= 0.02) return null;
+              const x = melX(c.k);
+              const eu = g.ectoUnder;
+              const ang = (Math.atan2(eu(x + 3) - eu(x - 3), 6) * 180) / Math.PI;
+              return (
+                <g key={i} opacity={w}>
+                  <Melanocyte at={SX(mir([x, eu(x) - 3], c.sd))} ang={c.sd > 0 ? ang : -ang} grow={0.4 + 0.6 * w} />
+                </g>
+              );
+            })}
+        </g>,
+        seg(t, dlStart(0) + 0.033, dlStart(0) + 0.045),
+      )}
+
+      {/* Contacts between neighbouring crest cells while they are still an epithelium. */}
+      {contact > 0.02 && appear > 0.02 && (
+        <g opacity={contact * appear} stroke="#d1fff6" strokeWidth={1.4 * U} strokeLinecap="round">
+          {sides.map((sd) => {
+            const row = cells.filter((c) => c.sd === sd).map((c) => SX(c.q));
+            return row.slice(1).map((q, i) => {
+              const p = row[i];
+              const mx = (p[0] + q[0]) / 2;
+              const my = (p[1] + q[1]) / 2;
+              const d = Math.hypot(q[0] - p[0], q[1] - p[1]);
+              if (d > 16) return null;
+              const nx = -(q[1] - p[1]) / (d || 1);
+              const ny = (q[0] - p[0]) / (d || 1);
+              return <path key={`${sd}${i}`} d={`M${(mx - nx * 3).toFixed(1)},${(my - ny * 3).toFixed(1)}L${(mx + nx * 3).toFixed(1)},${(my + ny * 3).toFixed(1)}`} />;
+            });
+          })}
+        </g>
+      )}
+
+      {/* Neural crest cells: tall epithelial cells in the fold rim → free mesenchymal cells → travellers. Always teal. */}
+      {appear > 0.01 &&
+        part(
+          'gandor-neurala',
+          <g>
+            {cells.map((c, i) => {
+              const [X, Y] = SX(c.q);
+              const gone = c.route === 'dl' ? melK(c.k, t) : 0;
+              if (gone > 0.98) return null;
+              const o = (c.route === 'dl' ? dimD : dimV) * (1 - gone);
+              return <CrestCell key={i} x={X} y={Y} ang={c.ang} mes={c.mes} s={K * lerp(0.62, 0.86, clamp(c.u * 6))} color={TEAL} opacity={o} />;
+            })}
+          </g>,
+          appear,
+        )}
     </g>
-    {label('tolesdura-neuralak', 204, 108, [-gap - 5, 19], m[0])}
-    {label('azaleko-ektodermoa', 204, 166, [-90, -6])}
-    {label('hodi-neurala', 204, 273, [-29, 63])}
-    {label('notokorda', 204, 507, [0, 119])}
-    {label('gandor-neurala', 790, 103, [lerp(gap + 7, 22, emt), lerp(17, 8, emt)])}
-    {label('somitak', 790, 284, [83, 62])}
-    {label('melanozitoak', 790, 232, [82, -1], seg(t, 0.247, 0.258) * dimD)}
-    {label('gongoil-errakideoak', 790, 387, [45, 69], seg(t, 0.419, 0.442))}
-    {label('gongoil-sinpatikoak', 790, 455, [45, 124], seg(t, 0.444, 0.463))}
-    {label('aorta-dortsalak', 790, 528, [30, 142], 0.7 * m[2])}
-    {[
-      ['01 · Ertzetik askatu', 'Trantsizio epitelio-mesenkimatikoa: zelulak bereizi eta migratzeko prest', 'Tolesdura neuralak → gandor neurala → migrazioa'],
-      ['02 · Azaleko ektodermopean', 'Bide dortsolaterala → epidermiseko melanozitoak', 'Epidermisean: melanozitoak, ile-folikuluak eta azazkalak'],
-      ['03 · Hodi neuralaren eta somiten artetik', 'Bide bentrala → gongoil errakideoak eta gongoil sinpatikoak', 'Enborreko ebaki eskematikoa; gainerako eratorriak hurrengo ikuspegian'],
-    ].map(([title, main, sub], i) => (
-      <g key={title}>
-        <Note x={500} y={57} tone="accent" size={16} show={m[i]}>{title}</Note>
-        <Note x={500} y={574} tone="accent" size={16} show={m[i]}>{main}</Note>
-        <Note x={500} y={602} tone="dim" size={15} show={m[i]}>{sub}</Note>
-      </g>
-    ))}
-  </g>;
+  );
+
+  // Labels (outside the magnified group): anchors mapped through the same magnification.
+  const pick = (route: 'dl' | 'v', k: number) => cells.find((c) => c.sd > 0 && c.route === route && c.k === k)?.q ?? pool;
+  // The name follows cells that are still crest cells: the rim / pool, a dorsolateral traveller while it
+  // travels, then the ventral stream (which waits in the pool until its own step).
+  const dlLast = cells.find((c) => c.sd > 0 && c.route === 'dl' && c.k === 4);
+  const travelling = dlLast && dlLast.u > 0.02 && dlLast.u < 0.9;
+  const crestA = [pick('dl', 0), travelling ? dlLast.q : pick('v', 1)].map(ZX);
+  const crest: Pt = [0, 1].map((i) => crestA[0][i] * m[0] + crestA[1][i] * (1 - m[0])) as Pt;
+  const crestV = ZX(along(vSym, 0.55).p);
+  const fold = ZX(foldAt(-1));
+  const ex = lerp(66, 118, wide);
+  const ecto = ZX([-ex, g.ectoUnder(ex) - TE / 2]);
+  const wall = ZX(midOf(NS >> 1, -1));
+  const noto = ZX([-6, g.noto[1] + 4]);
+  const mel = ZX([melX(3), g.ectoUnder(melX(3)) - 3]);
+  const drgA = ZX([DRG[0] + 5, DRG[1]]);
+  const sympA = ZX([SYMP[0] + 4, SYMP[1]]);
+  const som = ZX([128, g.somC[1] + 6]);
+  const ao = ZX([48, g.aorta[1] + 2]);
+  return (
+    <g>
+      <NeuruDrawing g={g} part={part} plateId="hodi-neurala" foldId="hodi-neurala" tube={tube} aortaShow={1} over={over} view={view} amnion={false} />
+      <Label id="tolesdura-neuralak" x={204} y={108} ax={fold[0]} ay={fold[1]} show={m[0]} small />
+      <Label id="azaleko-ektodermoa" x={204} y={166} ax={ecto[0]} ay={ecto[1]} small />
+      <Label id="hodi-neurala" x={204} y={240} ax={wall[0]} ay={wall[1]} small />
+      <Label id="notokorda" x={204} y={420} ax={noto[0]} ay={noto[1]} show={wide} small />
+      <Label id="gandor-neurala" x={796} y={103} ax={crest[0]} ay={crest[1]} show={appear * (1 - m2)} small />
+      <Label id="gandor-neurala" x={796} y={354} ax={crestV[0]} ay={crestV[1]} show={m2} small />
+      <Label id="melanozitoak" x={796} y={175} ax={mel[0]} ay={mel[1]} show={melK(3, t) * dimD} small />
+      <Label id="gongoil-errakideoak" x={796} y={262} ax={drgA[0]} ay={drgA[1]} show={drg} small />
+      <Label id="somitak" x={796} y={392} ax={som[0]} ay={som[1]} show={wide} small />
+      <Label id="gongoil-sinpatikoak" x={796} y={455} ax={sympA[0]} ay={sympA[1]} show={symp} small />
+      <Label id="aorta-dortsalak" x={796} y={528} ax={ao[0]} ay={ao[1]} show={0.7 * m[2]} small />
+      {[
+        ['01 · Ertzetik askatu', 'Trantsizio epitelio-mesenkimatikoa: loturak galdu eta zelula libre, migratzaile bihurtu', 'Tolesdura neuralen ertzak → gandor neurala → migrazioa'],
+        ['02 · Bide dortsolaterala (laranja)', 'Azaleko ektodermopean → epidermisa: melanozitoak', 'Apunteak: epidermisean melanozitoak, ile-folikuluak eta azazkalak'],
+        ['03 · Bide bentrala (turkesa)', 'Hodi neuralaren eta somiten artetik → gongoil errakideoak eta sinpatikoak', 'Enborreko ebaki eskematikoa; gainerako eratorriak hurrengo ikuspegian'],
+      ].map(([title, main, sub], i) => (
+        <g key={title}>
+          <Note x={500} y={57} tone="accent" size={16} show={noteW[i]}>
+            {title}
+          </Note>
+          <Note x={500} y={574} tone="accent" size={16} show={noteW[i]}>
+            {main}
+          </Note>
+          <Note x={500} y={602} tone="dim" size={15} show={noteW[i]}>
+            {sub}
+          </Note>
+        </g>
+      ))}
+    </g>
+  );
 }
+
