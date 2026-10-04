@@ -11898,3 +11898,19 @@ a.ln-chip:focus-visible {
     background: linear-gradient(var(--signal-soft), var(--signal-soft)), var(--surface-2);
   }
 }
+
+/* Home shelf: a long span ("28. egunetik jaiotzara") wraps inside its card instead of
+   widening the card's content past its border. */
+.tc-in {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.tc-k {
+  min-width: 0;
+}
+
+.tc-days {
+  overflow: visible;
+  white-space: normal;
+  text-wrap: balance;
+}

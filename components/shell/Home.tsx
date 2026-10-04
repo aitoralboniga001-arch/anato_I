@@ -124,6 +124,8 @@ function ReviewCta() {
 
 export function Home() {
   const [intro, setIntro] = useState(true);
+  // The page reveals as the opening lifts (not after it is gone), so the two cross-dissolve.
+  const [lifting, setLifting] = useState(false);
 
   const replay = () => {
     try {
@@ -131,12 +133,13 @@ export function Home() {
     } catch {}
     delete document.documentElement.dataset.intro;
     window.scrollTo({ top: 0 });
+    setLifting(false);
     setIntro(true);
   };
 
   return (
-    <div className={`landing${intro ? '' : ' is-ready'}`}>
-      {intro && <Intro onDone={() => setIntro(false)} />}
+    <div className={`landing${intro && !lifting ? '' : ' is-ready'}`}>
+      {intro && <Intro onDone={() => setIntro(false)} onOut={() => setLifting(true)} />}
       <LandNav />
 
       <section className="hero">
@@ -165,7 +168,7 @@ export function Home() {
           </p>
         </div>
         <div className="hero-visual rv">
-          <HeroFold playing={!intro} />
+          <HeroFold playing={!intro || lifting} />
         </div>
       </section>
 

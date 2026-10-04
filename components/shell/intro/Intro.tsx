@@ -20,9 +20,11 @@ const KEYS: [number, number][] = [
   [4.2, 5],
   [5.3, 6],
 ];
-const TITLE_AT = 5.5;
-const OUT_AT = 7.1;
-const END = 7.8;
+/** The blastocyst steps back first; the title only arrives once it has room (they never overlap). */
+const RECEDE_AT = 5.25;
+const TITLE_AT = 5.75;
+const OUT_AT = 7.25;
+const END = 8.0;
 
 const progressAt = (s: number) => {
   if (s <= KEYS[0][0]) return 0;
@@ -44,14 +46,22 @@ const smooth = (v: number) => {
  * Opening title sequence: the zygote cleaves into a blastocyst under dark-field light, then the
  * wordmark resolves and the overlay lifts off the landing page. Once per session; any key skips.
  */
-export function Intro({ onDone }: { onDone: () => void }) {
+export function Intro({ onDone, onOut }: { onDone: () => void; /** The overlay starts to lift: the page can begin its own reveal underneath (a cross-dissolve, not a gap). */ onOut?: () => void }) {
   const [s, setS] = useState(0);
   const [leaving, setLeaving] = useState(false);
   const done = useRef(false);
   const cb = useRef(onDone);
+  const outCb = useRef(onOut);
+  const outSent = useRef(false);
   useEffect(() => {
     cb.current = onDone;
+    outCb.current = onOut;
   });
+  const lift = useCallback(() => {
+    if (outSent.current) return;
+    outSent.current = true;
+    outCb.current?.();
+  }, []);
 
   const finish = useCallback(() => {
     if (done.current) return;
@@ -64,9 +74,10 @@ export function Intro({ onDone }: { onDone: () => void }) {
   }, []);
 
   const skip = useCallback(() => {
+    lift();
     setLeaving(true);
     window.setTimeout(finish, 520);
-  }, [finish]);
+  }, [finish, lift]);
 
   useEffect(() => {
     // Already seen this session (flag set before paint in the root layout), or reduced motion.
@@ -79,6 +90,7 @@ export function Intro({ onDone }: { onDone: () => void }) {
     const step = (now: number) => {
       const t = (now - t0) / 1000;
       setS(t);
+      if (t >= OUT_AT) lift();
       if (t >= END) finish();
       else raf = requestAnimationFrame(step);
     };
@@ -94,17 +106,20 @@ export function Intro({ onDone }: { onDone: () => void }) {
       cancelAnimationFrame(raf);
       window.removeEventListener('keydown', onKey);
     };
-  }, [finish, skip]);
+  }, [finish, skip, lift]);
 
   const p = progressAt(s);
   const f = cleavageFrame(p, s);
   const step = cleavageStep(p);
   const born = smooth((s - 0.3) / 0.8);
+  const recede = smooth((s - RECEDE_AT) / 1.0);
   const title = smooth((s - TITLE_AT) / 0.9);
+  const tagline = smooth((s - TITLE_AT - 0.35) / 0.8);
   const out = smooth((s - OUT_AT) / (END - OUT_AT));
-  // Slow push-in while dividing; the embryo recedes behind the title.
-  const scale = (0.94 + 0.08 * clamp(s / TITLE_AT)) * (1 - 0.52 * title);
-  const lift = -15 * title;
+  // Slow push-in while dividing; the embryo steps back above the title; on the way out the camera
+  // moves through the title into the page.
+  const scale = (0.94 + 0.08 * clamp(s / RECEDE_AT)) * (1 - 0.52 * recede);
+  const rise = -15 * recede;
 
   return (
     <div
@@ -116,26 +131,29 @@ export function Intro({ onDone }: { onDone: () => void }) {
     >
       <div className="intro-bars" style={{ ['--bar' as string]: `${(1 - out) * smooth(s / 0.5) * 7}vh` }} />
 
-      <div className="intro-stage" style={{ transform: `translateY(${lift}vh) scale(${scale})`, opacity: born * (1 - 0.55 * title) }}>
+      <div className="intro-stage" style={{ transform: `translateY(${rise}vh) scale(${scale})`, opacity: born * (1 - 0.55 * recede) }}>
         <svg viewBox="-215 -215 430 430" aria-hidden>
           <CleavageDefs id="in" />
           <CleavageArt f={f} id="in" polar={1 - clamp(p - 4)} />
         </svg>
       </div>
 
-      <div className="intro-title" style={{ opacity: title, transform: `translateY(${(1 - title) * 14}px)` }}>
-        <h1>
+      <div
+        className="intro-title"
+        style={{ opacity: title, transform: `translateY(${(1 - title) * 14}px) scale(${1 + 0.035 * out})`, filter: title < 1 ? `blur(${(1 - title) * 8}px)` : undefined }}
+      >
+        <h1 style={{ letterSpacing: `${-0.055 + 0.03 * (1 - title)}em` }}>
           Enbrio<span>Atlas</span>
         </h1>
-        <p>Giza garapena, zelulaz zelula</p>
+        <p style={{ opacity: tagline, transform: `translateY(${(1 - tagline) * 6}px)` }}>Giza garapena, zelulaz zelula</p>
       </div>
 
-      <div className="intro-hud" style={{ opacity: born * (1 - title) }}>
-        <span className="intro-rec" />
+      <div className="intro-hud" style={{ opacity: born * (1 - recede) }}>
+        <span className="rec intro-rec" />
         <span className="intro-tc">{step.day}</span>
         <span className="intro-step">{step.name}</span>
       </div>
-      <p className="intro-src" style={{ opacity: born * (1 - title) * 0.8 }}>
+      <p className="intro-src" style={{ opacity: born * (1 - recede) * 0.8 }}>
         1. gaia · Zigotoaren segmentazioa eta blastozistoaren eraketa
       </p>
 
