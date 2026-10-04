@@ -94,6 +94,12 @@ export function Segmentation({ t }: SceneProps) {
   const count = p < 1 ? 1 : 2 ** Math.min(5, k - 1 + (p - k > 0.6 ? 1 : 0));
   const mass = seg(t, 0.9, 0.97);
   const polar = 1 - seg(t, 0.62, 0.7);
+  // Seen as a solid ball: each blastomere a lit dome. The 8 cells first sit loose and round, then
+  // compact (they flatten against each other, the clefts close); the 16 that follow keep a bumpy
+  // surface, the mulberry of the morula ("masusta itxura").
+  const relief = lerp(0.6, 1, seg(t, 0.36, 0.5));
+  const press = seg(t, 0.5, 0.57);
+  const bumps = 12 * seg(t, 0.4, 0.5) - 9 * press + 6 * seg(t, 0.58, 0.66) - 2 * seg(t, 0.86, 0.93);
   // Anchors (engine units → screen), on the drawn cells.
   const at = (x: number, y: number): [number, number] => [CX + x * S, CY + y * S];
   const cen = (c: (typeof f.cells)[number]) => (c.shape ? at(c.shape.cx, c.shape.cy) : at(c.x, c.y));
@@ -113,6 +119,9 @@ export function Segmentation({ t }: SceneProps) {
         s={S}
         polar={polar}
         mass={mass}
+        relief={relief}
+        press={press}
+        bumps={bumps}
         parts={{ cell: (c) => (t >= 0.86 && c.fate ? (c.fate === 'enbrioblasto' ? 'enbrioblastoa' : 'trofoblastoa') : t < 0.1 ? 'zigotoa' : t >= 0.66 ? 'morula' : 'blastomeroak') }}
       />
 

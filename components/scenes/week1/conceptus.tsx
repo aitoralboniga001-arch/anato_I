@@ -36,6 +36,13 @@ export function ConceptusDefs({ id = 'w1c' }: { id?: string }) {
         <stop offset="0.75" stopColor="#000" stopOpacity="0.06" />
         <stop offset="1" stopColor="#000" stopOpacity="0.24" />
       </radialGradient>
+      {/* Per cell (its own bounding box): a dome lit from the top left, its far rim in shade. */}
+      <radialGradient id={`${id}-sph`} cx="36%" cy="32%" r="78%">
+        <stop offset="0" stopColor="#fff" stopOpacity="0.3" />
+        <stop offset="0.38" stopColor="#fff" stopOpacity="0.04" />
+        <stop offset="0.7" stopColor="#3a0f1c" stopOpacity="0.06" />
+        <stop offset="1" stopColor="#3a0f1c" stopOpacity="0.36" />
+      </radialGradient>
       <radialGradient id={`${id}-hl`}>
         <stop offset="0" stopColor="#fff" stopOpacity="0.6" />
         <stop offset="1" stopColor="#fff" stopOpacity="0" />
@@ -109,6 +116,15 @@ export interface ConceptusProps {
   /** Rotation of the whole conceptus (degrees). */
   rot?: number;
   /**
+   * Relief of the cell ball seen as a solid (the "masusta" of the morula), all 0 by default:
+   * `bumps` engine units by which the surface dips between neighbouring outer cells (each outer cell a
+   * dome), `relief` 0..1 shading of each cell as a sphere, `press` 0..1 compaction (the clefts between
+   * cells close: they flatten against each other).
+   */
+  bumps?: number;
+  relief?: number;
+  press?: number;
+  /**
    * Make its structures clickable/highlightable (zona, corona, polar bodies, blastocoel and each
    * cell with the id `cell` gives it). Leave out when a parent already wraps it in a <Part>.
    */
@@ -156,8 +172,76 @@ const PB: [number, number][] = [
   [-98, 6],
 ];
 
-export function Conceptus({ f, x, y, s = 1, corona = 0, polar = 0, mass = 0, id = 'w1c', tiny, rot = 0, parts }: ConceptusProps) {
+/**
+ * Surface relief: each outer cell's free surface bulges as a dome and dips into a notch where it meets
+ * its neighbours (a mulberry), by pulling outline points near the ball's surface towards the centre,
+ * most at the ends of the cell's free arc and not at all in its middle. Walls keep meeting their
+ * neighbour's (both are pulled alike near the shared corner). A dividing pair dips only as its furrow cuts.
+ */
+function domed(f: Frame, depth: number): Frame {
+  const reach = f.cells.map((c) => (c.shape ? Math.max(...c.shape.pts.map((q) => Math.hypot(q[0], q[1]))) : 0));
+  // Outer cells reach the ball's surface (less deep only in the polar bodies' pocket).
+  const rimR = Math.max(...reach);
+  const ident = (q: V2) => q;
+  /** The dome mapping of one cell (or of a pair not yet split, as one cell) from its outline points. */
+  const mapper = (pts: V2[], rmax: number, cx: number, cy: number): ((q: V2) => V2) => {
+    if (rmax < rimR - 10) return ident;
+    const ac = Math.atan2(cy, cx);
+    let lo = Infinity;
+    let hi = -Infinity;
+    for (const q of pts) {
+      if (Math.hypot(q[0], q[1]) < rmax - 3) continue;
+      let d = Math.atan2(q[1], q[0]) - ac;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      lo = Math.min(lo, d);
+      hi = Math.max(hi, d);
+    }
+    const span = hi - lo;
+    if (!(span > 0.05) || span > 3.4) return ident;
+    const band = Math.max(6, depth * 3);
+    return (q) => {
+      const r = Math.hypot(q[0], q[1]);
+      const g = Math.min(1, Math.max(0, (r - (rmax - band)) / band));
+      if (g <= 0) return q;
+      let d = Math.atan2(q[1], q[0]) - ac;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      const u = Math.min(1, Math.max(0, (d - lo) / span));
+      const w = (1 - Math.sin(Math.PI * u)) ** 1.15;
+      const k = (r - depth * w * g) / (r || 1);
+      return [q[0] * k, q[1] * k];
+    };
+  };
+  const own = f.cells.map((c, i) => (c.shape ? mapper(c.shape.pts, reach[i], c.shape.cx, c.shape.cy) : ident));
+  // A dividing pair: one dome over both while the parent still reads as one cell, its own per daughter
+  // as the furrow cuts (blended, so the surface notch deepens with the furrow).
+  const final = own.slice();
+  for (const dv of f.divs) {
+    const A = f.cells[dv.a].shape;
+    const B = f.cells[dv.b].shape;
+    if (!A || !B) continue;
+    const both = mapper([...A.pts, ...B.pts], Math.max(reach[dv.a], reach[dv.b]), (A.cx + B.cx) / 2, (A.cy + B.cy) / 2);
+    const k = dv.furrow;
+    for (const i of [dv.a, dv.b]) {
+      const m = own[i];
+      final[i] = (q) => {
+        const p = both(q);
+        const o = m(q);
+        return [p[0] + (o[0] - p[0]) * k, p[1] + (o[1] - p[1]) * k];
+      };
+    }
+  }
+  const cells = f.cells.map((c, i) => {
+    const sh = c.shape;
+    const map = final[i];
+    if (!sh || map === ident) return c;
+    return { ...c, shape: { ...sh, pts: sh.pts.map(map), runs: sh.runs.map((rn) => rn.map(map)), wall: sh.wall?.map(map) } };
+  });
+  return { ...f, cells };
+}
+
+export function Conceptus({ f: f0, x, y, s = 1, corona = 0, polar = 0, mass = 0, id = 'w1c', tiny, rot = 0, parts, bumps = 0, relief = 0, press = 0 }: ConceptusProps) {
   const on = !!parts;
+  const f = bumps > 0.05 && !tiny ? domed(f0, bumps) : f0;
   const zo = f.zonaO;
   const zr = f.zonaR;
   const every = tiny ? 3 : 1;
@@ -236,10 +320,33 @@ export function Conceptus({ f, x, y, s = 1, corona = 0, polar = 0, mass = 0, id 
         return (
           <P key={gid || 'cells'} on={on} id={gid}>
             <g>
+              {/* Compaction: the clefts between the cells close (a contact tone, not the dark gap). */}
+              {!tiny &&
+                press > 0.02 &&
+                idx.map((i) => {
+                  // A pair mid-cytokinesis keeps its own cleft open (it closes again as the new wall forms).
+                  const dv = inDiv.get(i);
+                  const o = press * (dv ? 1 - dv.furrow * (1 - dv.wall) : 1);
+                  return o > 0.02 ? <path key={`c${i}`} d={closed(f.cells[i].shape!.pts, 2)} fill="none" stroke={mix(fill(f.cells[i], mass), '#6a2236', 0.5)} strokeOpacity={o} strokeWidth={3.6 * press} strokeLinejoin="round" pointerEvents="none" /> : null;
+                })}
               {idx.map((i) => (
                 <path key={i} d={closed(f.cells[i].shape!.pts, every)} fill={fill(f.cells[i], mass)} />
               ))}
               {!tiny && <path d={all} fill={`url(#${id}-gran)`} pointerEvents="none" />}
+              {!tiny &&
+                relief > 0.02 &&
+                idx.map((i) => {
+                  // A pair not yet split is lit as one cell (one dome over both), each daughter as it separates.
+                  const dv = inDiv.get(i);
+                  const o = relief * (dv ? dv.furrow : 1);
+                  const pair = dv && dv.a === i && idx.includes(dv.b) ? relief * (1 - dv.furrow) : 0;
+                  return (
+                    <g key={`s${i}`} pointerEvents="none">
+                      {o > 0.02 && <path d={closed(f.cells[i].shape!.pts, 2)} fill={`url(#${id}-sph)`} opacity={o} />}
+                      {pair > 0.02 && <path d={closed(f.cells[i].shape!.pts, 2) + closed(f.cells[dv!.b].shape!.pts, 2)} fill={`url(#${id}-sph)`} opacity={pair} />}
+                    </g>
+                  );
+                })}
               <path d={all} fill={`url(#${id}-ball)`} pointerEvents="none" />
               {!tiny &&
                 idx.map((i) => {

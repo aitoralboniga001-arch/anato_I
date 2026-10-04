@@ -495,6 +495,41 @@ function Stamp({ n, time, x, y, align, show, now }: { n: number; time: string; x
   );
 }
 
+/** A piece of the endometrium inside the loupe: stroma with a gland, the epithelium facing the cavity at x = sx. */
+function LoupeWall({ sx, show }: { sx: number; show: number }) {
+  const x0 = LOUPE[0] - LR - 4;
+  const y0 = LOUPE[1] - LR - 4;
+  const h = 2 * LR + 8;
+  const cells = Array.from({ length: Math.ceil(h / 9) }, (_, i) => y0 + i * 9);
+  const gland = (y: number, ph: number) =>
+    `M${sx - 9},${y} ${Array.from({ length: 14 }, (_, i) => `L${(sx - 9 - i * 6).toFixed(1)},${(y + Math.sin(i * 1.3 + ph) * (2 + i * 0.35)).toFixed(1)}`).join(' ')}`;
+  return (
+    <g opacity={show} pointerEvents="none">
+      <Part id="endometrioa">
+        <rect x={x0} y={y0} width={Math.max(0, sx - 9 - x0)} height={h} fill={C.stroma} />
+        <rect x={x0} y={y0} width={Math.max(0, sx - 9 - x0)} height={h} fill="url(#p-stroma)" opacity={0.25} />
+        {[LOUPE[1] - 46, LOUPE[1] + 52].map((y, i) => (
+          <g key={i} fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <path d={gland(y, i * 2)} stroke="#b9566f" strokeWidth={6.5} opacity={0.35} />
+            <path d={gland(y, i * 2)} stroke="#fdf2f4" strokeWidth={4.6} />
+            <path d={gland(y, i * 2)} stroke="#d27f95" strokeWidth={1.6} />
+          </g>
+        ))}
+        <rect x={sx - 9} y={y0} width={9} height={h} fill={C.epithelium} />
+        <g stroke="rgba(110,30,55,0.5)" strokeWidth={0.7}>
+          {cells.map((y) => (
+            <line key={y} x1={sx - 9} y1={y} x2={sx} y2={y} />
+          ))}
+        </g>
+        {cells.map((y) => (
+          <ellipse key={`n${y}`} cx={sx - 5.5} cy={y + 4.5} rx={1.6} ry={2.4} fill="#8f3553" opacity={0.75} />
+        ))}
+        <line x1={sx + 0.4} y1={y0} x2={sx + 0.4} y2={y0 + h} stroke="rgba(255,255,255,0.45)" strokeWidth={0.8} />
+      </Part>
+    </g>
+  );
+}
+
 export function TractJourney({ t }: SceneProps) {
   const reach = seg(t, 0.08, 0.16) * (1 - seg(t, 0.32, 0.42));
   const rupture = seg(t, 0.13, 0.16);
@@ -532,6 +567,10 @@ export function TractJourney({ t }: SceneProps) {
   const tan2: Pt = [LOUPE[0] + Math.cos(ang - half) * LR, LOUPE[1] + Math.sin(ang - half) * LR];
   const tip: Pt = [pos[0] - (dx / L) * 14, pos[1] - (dy / L) * 14];
   const loupe = seg(t, 0.12, 0.16);
+  // In the loupe, the implantation itself (step .86): the wall comes in from the left (as in the
+  // figure, the conceptus attaches to the wall on its left) until it meets the embryonic pole.
+  const nest = seg(t, 0.86, 0.93);
+  const wallX = lerp(LOUPE[0] - LR - 6, LOUPE[0] + 18 - 138 * LS - 1, nest);
 
   const anat = vis(t, 0, 0.13);
   const tp = (u: number) => at(T, u);
@@ -611,8 +650,10 @@ export function TractJourney({ t }: SceneProps) {
                 <circle cx={LOUPE[0]} cy={LOUPE[1]} r={LR} fill="#f3e9c6" opacity={0.25} />
               </g>
             ) : null}
-            <Part id={st.id}>
-              <Conceptus f={f} x={LOUPE[0]} y={LOUPE[1]} s={LS} corona={corona} polar={polar} mass={mass} rot={rot} id="w1t" />
+            {/* Last step: the endometrium slides in and the blastocyst meets it embryonic pole first. */}
+            {nest > 0.01 && <LoupeWall sx={wallX} show={nest} />}
+            <Part id={nest > 0.5 ? 'habiratzea' : st.id}>
+              <Conceptus f={f} x={LOUPE[0] + 18 * nest} y={LOUPE[1]} s={LS} corona={corona} polar={polar} mass={mass} rot={rot} id="w1t" />
             </Part>
             <ellipse cx={LOUPE[0] - 31} cy={LOUPE[1] - 47} rx={52} ry={23} transform={`rotate(-28 ${LOUPE[0] - 31} ${LOUPE[1] - 47})`} fill="#fff" opacity={0.07} pointerEvents="none" />
           </g>
@@ -697,6 +738,27 @@ function Swelling({ T, u, show }: { T: Pt[]; u: number; show: number }) {
   );
 }
 
+/** Title of the ectopic step, top left: a heading (kicker rule, name, where), clickable as the concept. */
+function ViewHeading({ show }: { show: number }) {
+  if (show <= 0.02) return null;
+  const halo = { paintOrder: 'stroke', stroke: 'rgba(11,12,15,0.9)', strokeWidth: 4, strokeLinejoin: 'round' } as const;
+  return (
+    <OnTop>
+      <Part id="ezohiko-habiratzea">
+        <g opacity={show}>
+          <rect x={40} y={36} width={22} height={2.5} rx={1.25} fill="#fb7185" />
+          <text x={40} y={60} fontSize={19} fontWeight={700} letterSpacing="0.01em" fill="#ffe4e6" style={halo}>
+            Ezohiko habiratzea
+          </text>
+          <text x={40} y={79} fontSize={11.5} fontWeight={500} fill="#c9b8bc" style={halo}>
+            Umetokitik kanpo: tronpa, obulutegia, peritoneo-barrunbea
+          </text>
+        </g>
+      </Part>
+    </OnTop>
+  );
+}
+
 /**
  * 4.6 Ezohiko habiratze lekuak: normally the blastocyst implants in the endometrium; sometimes
  * outside the uterus — in the tube, the ovary or the peritoneal cavity (e.g. falling through
@@ -768,7 +830,8 @@ export function EctopicSites({ t: stageT }: SceneProps) {
       <Label id="istmoa" x={470} y={40} ax={ist[0]} ay={ist[1] - 22} show={s2} />
       <Label id="obulutegia" x={560} y={300} ax={ov[0] + 22} ay={ov[1]} align="start" show={s3} />
       <Label id="douglas-zokogunea" text="Peritoneo-barrunbea (Douglas-en zokogunea)" x={326} y={524} ax={douglas[0] + 14} ay={douglas[1] - 6} align="start" show={seg(t, 0.8, 0.84)} />
-      <Label id="ezohiko-habiratzea" x={40} y={40} align="start" show={seg(t, 0.28, 0.32)} />
+      {/* The step's subject as the view's heading (it has no single place: the sites are lit below it). */}
+      <ViewHeading show={seg(t, 0.28, 0.32)} />
 
       <Note x={410} y={618} show={vis(t, 0, 0.28)}>Normalean blastozistoa umetokiaren endometrioan habiratzen da</Note>
       <Note x={410} y={618} tone="warn" show={vis(t, 0.28, 0.62)}>Ezohikoa: umetokitik kanpo — tronpan edo obulutegian</Note>
