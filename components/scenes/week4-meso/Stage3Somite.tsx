@@ -1,7 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { C, FollowRing, Journey, Label, Note, Part, clamp, lerp, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { C, Journey, Label, Note, Part, clamp, lerp, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { LitCell, LitDefs, ellipsePath } from '@/components/scenes/week3/gastroKit';
 import { Cells } from '@/components/scenes/section/Section';
 import { AORTA, Aortae, NOTO, NeuralTube, Notochord, SOMITE, TE, TP, TUBE, TrunkSection, catmull, ellipsePts, f1, inPoly, off, placer, skinIn, trunkGeom, type Place, type Trunk } from './trunk';
 
@@ -434,6 +435,9 @@ function ScleroJourney({ c }: { c: Ctx }) {
   const v = vertebraR();
   return (
     <g>
+      <defs>
+        <LitDefs />
+      </defs>
       <g opacity={ghost * 0.13} pointerEvents="none">
         <path d={poly([...v.body.map((p) => M(p, 1)), ...v.body.slice().reverse().map((p) => M(p, -1))])} fill={CART} />
         {sides.map((sd) => (
@@ -447,7 +451,7 @@ function ScleroJourney({ c }: { c: Ctx }) {
         return (
           <g key={sd}>
             <Journey pts={pts} color={SCLERO} show={follow} r={2.4 * pl.k} head={10} />
-            <FollowRing x={x} y={y} r={2.4 * pl.k + 2.5} show={follow} />
+            <LitCell d={ellipsePath(x, y, 2.4 * pl.k, 2.4 * pl.k)} color={SCLERO} fate={SCLERO} show={follow} />
           </g>
         );
       })}
