@@ -300,14 +300,50 @@ interface CellsOpts {
   opacity?: number;
 }
 
-/** A sheet of cells between two matched screen polylines (outer[i] ↔ inner[i]). */
+/** Rotated ellipse as path data (so a whole layer's nuclei can share one <path>). `ax` = unit vector of the `ra` axis. */
+const ellipseD = (c: Pt, ax: Pt, ra: number, rb: number, deg: number) => {
+  const p: Pt = [c[0] + ax[0] * ra, c[1] + ax[1] * ra];
+  const q: Pt = [c[0] - ax[0] * ra, c[1] - ax[1] * ra];
+  const r = `${f1(ra)} ${f1(rb)} ${f1(deg)}`;
+  return `M${f1(p[0])},${f1(p[1])}A${r} 1 0 ${f1(q[0])},${f1(q[1])}A${r} 1 0 ${f1(p[0])},${f1(p[1])}Z`;
+};
+const circleD = (c: Pt, r: number) => `M${f1(c[0] - r)},${f1(c[1])}a${f1(r)} ${f1(r)} 0 1 0 ${f1(2 * r)},0a${f1(r)} ${f1(r)} 0 1 0 ${f1(-2 * r)},0Z`;
+const quadD = (a: Pt, b: Pt, c: Pt, d: Pt) => `M${f1(a[0])},${f1(a[1])}L${f1(b[0])},${f1(b[1])}L${f1(c[0])},${f1(c[1])}L${f1(d[0])},${f1(d[1])}Z`;
+/** The light comes from the top left of the screen (the same for every layer, whatever its orientation). */
+const LIGHT: Pt = [-Math.SQRT1_2, -Math.SQRT1_2];
+
+/**
+ * A sheet of cells between two matched screen polylines (outer[i] ↔ inner[i]).
+ *
+ * Material (same language as the week-2 tissues): each cell has a soft top-left light, a thin inner
+ * membrane rim and a nucleus with its envelope and nucleolus. The cell shape decides the epithelium's
+ * look: tall cells (or `pseudo`) get long nuclei — columnar / pseudostratified —, square cells round
+ * central nuclei — cuboidal —, and flat cells flattened nuclei — squamous.
+ *
+ * Rendering cost is constant per sheet (9 paths, however many cells): borders, rims, lights, nuclei and
+ * nucleoli are each one path with one subpath per cell — no per-cell elements, filters or gradients.
+ */
 export function Cells({ outer, inner, n, fill, edge = 'rgba(8,12,26,0.55)', nucleus = 'rgba(16,20,44,0.62)', nk = 0.5, pseudo, seed = 1, opacity = 1 }: CellsOpts & { outer: Pt[]; inner: Pt[]; n: number }) {
-  const cells: ReactNode[] = [];
   const base = `M${outer.map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}L${inner
     .slice()
     .reverse()
     .map((q) => `${f1(q[0])},${f1(q[1])}`)
     .join('L')}Z`;
+  // Rims and lights are decided for the whole sheet (from its typical cell size), never cell by cell,
+  // so a sheet never shows them on some cells and not on others.
+  const cellSize = (i: number) => {
+    const [o0, o1, i0, i1] = [resample(outer, i / n), resample(outer, (i + 1) / n), resample(inner, i / n), resample(inner, (i + 1) / n)];
+    const h = Math.hypot((i0[0] + i1[0] - o0[0] - o1[0]) / 2, (i0[1] + i1[1] - o0[1] - o1[1]) / 2);
+    return Math.min(h, (Math.hypot(o1[0] - o0[0], o1[1] - o0[1]) + Math.hypot(i1[0] - i0[0], i1[1] - i0[1])) / 2);
+  };
+  const probe = n > 0 ? Array.from({ length: Math.min(n, 9) }, (_, j) => cellSize(Math.floor(((j + 0.5) * n) / Math.min(n, 9)))).sort((a, b) => a - b) : [0];
+  // 0 on fine sheets (cells too small: rims would only grey the colour) → 1 on sheets of big cells.
+  const detail = clamp((probe[Math.floor(probe.length / 2)] - 6) / 6);
+  let borders = '';
+  let rims = '';
+  let lights = '';
+  let nuclei = '';
+  let nucleoli = '';
   for (let i = 0; i < n; i++) {
     const u0 = i / n;
     const u1 = (i + 1) / n;
@@ -315,28 +351,47 @@ export function Cells({ outer, inner, n, fill, edge = 'rgba(8,12,26,0.55)', nucl
     const o1 = resample(outer, u1);
     const i0 = resample(inner, u0);
     const i1 = resample(inner, u1);
+    // Lateral membranes: one line per boundary between neighbours (the sheet outline closes the rest).
+    if (i > 0) borders += `M${f1(o0[0])},${f1(o0[1])}L${f1(i0[0])},${f1(i0[1])}`;
     const om: Pt = [(o0[0] + o1[0]) / 2, (o0[1] + o1[1]) / 2];
     const im: Pt = [(i0[0] + i1[0]) / 2, (i0[1] + i1[1]) / 2];
     const h = Math.hypot(im[0] - om[0], im[1] - om[1]);
     const w = Math.hypot(o1[0] - o0[0], o1[1] - o0[1]) * 0.5 + Math.hypot(i1[0] - i0[0], i1[1] - i0[1]) * 0.5;
+    if (h < 0.4 || w < 0.4) continue;
+    const ax: Pt = [(im[0] - om[0]) / h, (im[1] - om[1]) / h];
+    const ang = (Math.atan2(ax[1], ax[0]) * 180) / Math.PI;
+    const mid: Pt = [(om[0] + im[0]) / 2, (om[1] + im[1]) / 2];
+    const small = Math.min(h, w);
+    // Inner membrane rim and top-left light, on sheets whose cells are big enough to carry them.
+    if (detail > 0.02 && small >= 2.5) {
+      const k = Math.min(0.9, small * 0.12) / small;
+      const ins = (q: Pt): Pt => [lerp(q[0], mid[0], k * 2), lerp(q[1], mid[1], k * 2)];
+      rims += quadD(ins(o0), ins(o1), ins(i1), ins(i0));
+      const lc: Pt = [mid[0] + LIGHT[0] * small * 0.16, mid[1] + LIGHT[1] * small * 0.16];
+      lights += ellipseD(lc, ax, h * 0.3, w * 0.28, ang);
+    }
+    // Nucleus: shape follows the cell (columnar / pseudostratified, cuboidal, squamous).
+    const squamous = !pseudo && w > 1.8 * h;
     const kk = pseudo ? 0.2 + 0.6 * rand(seed + i * 1.37) : nk;
     const c: Pt = [lerp(om[0], im[0], kk), lerp(om[1], im[1], kk)];
-    const ang = (Math.atan2(im[1] - om[1], im[0] - om[0]) * 180) / Math.PI;
-    const rA = Math.max(1.2, Math.min(h * (pseudo ? 0.16 : 0.28), 6));
-    const rW = Math.max(1, Math.min(w * 0.3, rA * (pseudo ? 0.75 : 1)));
-    cells.push(
-      <g key={i}>
-        <path d={`M${f1(o0[0])},${f1(o0[1])}L${f1(o1[0])},${f1(o1[1])}L${f1(i1[0])},${f1(i1[1])}L${f1(i0[0])},${f1(i0[1])}Z`} fill="none" stroke={edge} strokeWidth={0.7} />
-        <ellipse cx={f1(c[0])} cy={f1(c[1])} rx={f1(rA)} ry={f1(rW)} fill={nucleus} transform={`rotate(${f1(ang)} ${f1(c[0])} ${f1(c[1])})`} />
-      </g>,
-    );
+    const rA = Math.max(1.2, Math.min(h * (pseudo ? 0.16 : squamous ? 0.3 : 0.28), 6));
+    const rW = Math.max(1, Math.min(w * 0.3, rA * (pseudo ? 0.75 : squamous ? 2.4 : 1)));
+    nuclei += ellipseD(c, ax, rA, rW, ang);
+    const rn = Math.min(rA, rW) * 0.3;
+    if (rn >= 0.45) nucleoli += circleD([c[0] + LIGHT[0] * rn * 0.6, c[1] + LIGHT[1] * rn * 0.6], rn);
   }
   return (
     <g opacity={opacity}>
       <path d={base} fill={fill} />
       <path d={base} fill="url(#g-shade)" opacity={0.35} />
-      {cells}
-      <path d={base} fill="none" stroke={edge} strokeWidth={1} />
+      {lights && <path d={lights} fill="#ffffff" opacity={f1(0.08 * detail * 100) / 100} />}
+      {/* Inner membrane rim, bevelled: lit along the top-left edges, in shade along the bottom-right ones. */}
+      {rims && <path d={rims} fill="none" stroke="#000000" strokeOpacity={f1(0.24 * detail * 100) / 100} strokeWidth={0.7} strokeLinejoin="round" transform="translate(0.45 0.45)" />}
+      {rims && <path d={rims} fill="none" stroke="#ffffff" strokeOpacity={f1(0.18 * detail * 100) / 100} strokeWidth={0.5} strokeLinejoin="round" transform="translate(-0.3 -0.3)" />}
+      {borders && <path d={borders} fill="none" stroke={edge} strokeWidth={0.7} />}
+      <path d={nuclei} fill={nucleus} stroke={nucleus} strokeWidth={0.5} />
+      {nucleoli && <path d={nucleoli} fill="#000000" opacity={0.42} />}
+      <path d={base} fill="none" stroke={edge} strokeWidth={1.1} strokeLinejoin="round" />
     </g>
   );
 }
