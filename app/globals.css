@@ -11028,3 +11028,74 @@ a.ln-chip:focus-visible {
 .cap-side > .cap-more-btn {
   flex: 0 1 auto;
 }
+
+/* Laptop / tablet-landscape heights (e.g. 1024×768, 1280×720): every row around the specimen gives back
+   a few pixels so the stage gets them. The crumbs row steps aside (the stage rail at the left already
+   shows the notes' sections and the stage pips); the caption card keeps its type sizes. */
+@media (max-height: 820px) and (min-width: 821px) {
+  .stage {
+    gap: 8px;
+    padding-block: 10px;
+  }
+  .stage-bar .crumbs-row {
+    display: none;
+  }
+  .stage-bar .stage-title {
+    margin-top: 0;
+  }
+  .stage-heading .stage-title h2 {
+    -webkit-line-clamp: 1;
+  }
+  .stage-side .loc-btn {
+    height: 36px;
+  }
+  .stage-side > .seg {
+    padding: 2px;
+  }
+  .dock .cap {
+    padding-top: 11px;
+    padding-bottom: 10px;
+  }
+  .dock .transport {
+    padding-block: 5px;
+  }
+  /* The pixels saved above go to the caption first: a long step reads whole instead of scrolling
+     (the stage is still at least as tall as before on those steps). */
+  .dock .cap-body {
+    max-height: 30vh;
+  }
+  .cap-side .fresh {
+    gap: 4px;
+  }
+  .cap-side .fresh button {
+    padding: 2px 9px 2px 7px;
+    font-size: 12px;
+  }
+}
+
+/* "Berria" chips: once in, they keep no transform (a held identity transform made the caption scroll
+   by a few pixels in Chrome). */
+.fresh li,
+.cap .fresh li:not(.fresh-tag) {
+  animation-fill-mode: backwards;
+}
+
+/* Landing pages: the footer's last column ends clear of Kimu's corner button. */
+.land-foot {
+  padding-right: calc(var(--gutter) + 84px);
+}
+
+/* Kronologia, "Jada desagertu / eraldatu": what it became reads on its own line under the crossed-out
+   name (side by side, both broke into narrow three-line columns). */
+.kr-group.is-desagertua .ln-chip:has(em) {
+  display: grid;
+  grid-template-columns: 9px minmax(0, 1fr);
+  column-gap: 8px;
+  row-gap: 1px;
+  width: 100%;
+}
+
+.kr-group.is-desagertua .ln-chip:has(em) em {
+  grid-column: 2;
+  line-height: 1.35;
+}

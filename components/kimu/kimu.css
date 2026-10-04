@@ -801,3 +801,19 @@
     opacity: 0.9;
   }
 }
+
+/* Tablet / small-laptop widths: a smaller launcher in the corner covers less of the page under it. */
+@media (min-width: 701px) and (max-width: 1200px) {
+  .kimu-fab-wrap {
+    right: 16px;
+    bottom: 16px;
+  }
+  .kimu-fab {
+    width: 54px;
+    height: 54px;
+  }
+  .kimu-fab .kimu-face {
+    margin-top: 2px;
+    scale: 0.8;
+  }
+}

@@ -177,6 +177,16 @@
 .figure svg { display: block; width: 100%; height: 100%; visibility: hidden; }
 .figure[data-ready] svg { visibility: visible; animation: figure-in .25s ease-out; }
 .figure figcaption { margin-top: 6px; font-size: 12px; color: var(--text-3); line-height: 1.4; }
+/* Enlarge: the same drawing over the page, as big as the window allows. */
+.figure { position: relative; }
+.figureZoom { position: absolute; z-index: 1; top: 8px; right: 8px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line-2); background: color-mix(in srgb, var(--surface) 88%, transparent); color: var(--text-2); cursor: pointer; }
+.figureZoom:hover { color: var(--text); border-color: var(--line-3); }
+.figureZoom:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+.figure[data-big] { position: fixed; inset: 0; z-index: 90; display: grid; place-content: center; justify-items: center; max-width: none; margin: 0; padding: 24px; background: rgba(8, 8, 10, 0.86); animation: figure-in .2s ease-out; }
+.figure[data-big] a { width: min(calc(100vw - 48px), calc((100svh - 96px) * 1000 / 640)); }
+.figure[data-big] figcaption { margin-top: 10px; font-size: 13px; color: var(--text-2); }
+.figureHold { display: block; aspect-ratio: 1000 / 640; border: 1px solid var(--line); border-radius: 9px; background: var(--bg-1); }
+.figure[data-big] .figureZoom { position: fixed; top: 16px; right: 16px; width: 38px; height: 38px; }
 @keyframes figure-in { from { opacity: 0; } }
 
 /* "Ez nahastu": the notes' own warnings that set this structure against another, and the viewer's own mix-ups. */

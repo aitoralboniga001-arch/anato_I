@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react';
+import { createPortal } from 'react-dom';
 import { Defs } from '@/components/kit/Defs';
 import { LabelScaleContext, SceneContext, type SceneContextValue } from '@/components/kit/context';
 import { appearances, isSpace, nameOf } from '@/content/registry';
 import type { StageDef } from '@/lib/sim/types';
+import { IconClose, IconExpand } from './icons';
 import styles from './structure-atlas.module.css';
 
 interface Shot {
@@ -64,6 +66,8 @@ export function AtlasFigure({ id }: { id: string }) {
   const [shots] = useState(() => shotsOf(id));
   const [i, setI] = useState(0);
   const [pick, setPick] = useState<{ vb: Box; k: number } | null>(null);
+  // Enlarged over the page (the panel's drawing is small on a tablet); the same drawing, no new search.
+  const [big, setBig] = useState(false);
   const seen = useRef<{ i: number; size: number; box: Box }[]>([]);
   const svg = useRef<SVGSVGElement>(null);
   const mounted = useSyncExternalStore(subscribeNothing, () => true, () => false);
@@ -116,6 +120,18 @@ export function AtlasFigure({ id }: { id: string }) {
     return () => cancelAnimationFrame(r);
   }, [mounted, i]);
 
+  // Esc closes the enlarged figure before anything else on the page reacts to it.
+  useEffect(() => {
+    if (!big) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.stopImmediatePropagation();
+      setBig(false);
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [big]);
+
   if (!shot) return null;
   const view = shot.stage.views.find((v) => v.id === shot.view)!;
   const Scene = view.scene;
@@ -133,14 +149,19 @@ export function AtlasFigure({ id }: { id: string }) {
     onHover: noop,
   };
   const href = `/astea/${shot.week}?${new URLSearchParams({ etapa: shot.stage.id, ikuspegia: shot.view, egitura: id })}`;
-  return (
-    <figure className={styles.figure} data-ready={!!pick || undefined}>
+  const figure = (
+    <figure className={styles.figure} data-ready={!!pick || undefined} data-big={big || undefined} onClick={big ? (e) => e.target === e.currentTarget && setBig(false) : undefined}>
+      {pick && (
+        <button type="button" className={styles.figureZoom} onClick={() => setBig((v) => !v)} aria-pressed={big} aria-label={big ? 'Irudia txikitu' : 'Irudia handitu'} title={big ? 'Itxi (Esc)' : 'Handitu'}>
+          {big ? <IconClose size={16} /> : <IconExpand size={15} />}
+        </button>
+      )}
       <Link href={href} aria-label={`${nameOf(id)} simulagailuan ikusi: ${shot.stage.title}`}>
         <svg ref={svg} viewBox={pick ? pick.vb.map((v) => v.toFixed(0)).join(' ') : `0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="true">
           <Defs />
           {mounted && (
             <SceneContext.Provider value={ctx}>
-              <LabelScaleContext.Provider value={{ k: pick?.k ?? 1, left: false, right: false }}>
+              <LabelScaleContext.Provider value={{ k: big ? 1 : (pick?.k ?? 1), left: false, right: false }}>
                 <Scene t={shot.t} reduced />
               </LabelScaleContext.Provider>
             </SceneContext.Provider>
@@ -153,4 +174,16 @@ export function AtlasFigure({ id }: { id: string }) {
       </figcaption>
     </figure>
   );
+  // Enlarged, the figure moves to the page's top layer (the panel is a sticky box that would keep it
+  // under the page header); its place in the panel is held so nothing below jumps.
+  if (big)
+    return (
+      <>
+        <div className={styles.figure} aria-hidden>
+          <span className={styles.figureHold} />
+        </div>
+        {createPortal(figure, document.body)}
+      </>
+    );
+  return figure;
 }
