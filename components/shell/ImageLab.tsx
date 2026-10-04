@@ -181,6 +181,12 @@ function frame(rot: Rot, mirror: boolean) {
   return { vw, vh, turn, flip: mirror ? `translate(${W} 0) scale(-1 1)` : '' };
 }
 
+/** Width / height of a viewBox: the figure is drawn at exactly this shape, one clean printed card. */
+const aspectOf = (vb: string) => {
+  const [, , w, h] = vb.split(' ').map(Number);
+  return w > 0 && h > 0 ? (w / h).toFixed(4) : String(W / H);
+};
+
 interface Measured {
   code: string;
   target: string | null;
@@ -275,31 +281,49 @@ export function ImageLab() {
     const el = box.current;
     if (!item || !root || !el) return;
     if (fit?.key !== figKey) {
-      const parts = [...root.querySelectorAll<SVGGElement>('[data-part]')].filter((g) => Number(g.getAttribute('opacity') ?? 1) > 0.3);
       const ctm = root.getScreenCTM();
       const { vw, vh } = frame(item.rot, item.mirror);
-      if (!parts.length || !ctm) {
+      if (!ctm) {
         setFit({ key: figKey, vb: `0 0 ${vw} ${vh}` });
         return;
       }
+      // Frame on everything drawn, not only the named structures: membranes, cavities and walls
+      // that are not structures would otherwise be cut at the frame. Skipped: hidden or faded-out
+      // ink, defs, and backdrops that fill the whole frame.
       const inv = ctm.inverse();
+      const alpha = new Map<Element, number>();
+      const opacityOf = (el: Element | null): number => {
+        if (!el || el === root) return 1;
+        const known = alpha.get(el);
+        if (known !== undefined) return known;
+        const own = Number(el.getAttribute('opacity') ?? 1) * Number((el as SVGElement).style?.opacity || 1);
+        const a = (Number.isFinite(own) ? own : 1) * opacityOf(el.parentElement);
+        alpha.set(el, a);
+        return a;
+      };
       let x0 = Infinity,
         y0 = Infinity,
         x1 = -Infinity,
         y1 = -Infinity;
-      for (const g of parts) {
+      for (const g of root.querySelectorAll<SVGGraphicsElement>('path, circle, ellipse, rect, polygon, polyline, line, use, image')) {
+        if (g.closest('defs, clipPath, mask, pattern, marker, symbol')) continue;
         const r = g.getBoundingClientRect();
         if (!r.width && !r.height) continue;
-        for (const [cx, cy] of [
-          [r.left, r.top],
-          [r.right, r.bottom],
-        ]) {
-          const p = new DOMPoint(cx, cy).matrixTransform(inv);
-          x0 = Math.min(x0, p.x);
-          y0 = Math.min(y0, p.y);
-          x1 = Math.max(x1, p.x);
-          y1 = Math.max(y1, p.y);
-        }
+        if (opacityOf(g) < 0.12 || (g.checkVisibility && !g.checkVisibility({ visibilityProperty: true }))) continue;
+        const a = new DOMPoint(r.left, r.top).matrixTransform(inv);
+        const b = new DOMPoint(r.right, r.bottom).matrixTransform(inv);
+        const [gx0, gx1] = [Math.max(0, Math.min(a.x, b.x)), Math.min(vw, Math.max(a.x, b.x))];
+        const [gy0, gy1] = [Math.max(0, Math.min(a.y, b.y)), Math.min(vh, Math.max(a.y, b.y))];
+        if (gx1 <= gx0 || gy1 <= gy0) continue;
+        if (gx1 - gx0 >= 0.9 * vw && gy1 - gy0 >= 0.9 * vh) continue;
+        x0 = Math.min(x0, gx0);
+        y0 = Math.min(y0, gy0);
+        x1 = Math.max(x1, gx1);
+        y1 = Math.max(y1, gy1);
+      }
+      if (!Number.isFinite(x0)) {
+        setFit({ key: figKey, vb: `0 0 ${vw} ${vh}` });
+        return;
       }
       const pad = 0.08 * Math.max(x1 - x0, y1 - y0);
       x0 = Math.max(0, x0 - pad);
@@ -445,6 +469,7 @@ export function ImageLab() {
   };
 
   const f = item ? frame(item.rot, item.mirror) : frame(0, false);
+  const vb = fit?.key === figKey && !labels ? fit.vb : `0 0 ${f.vw} ${f.vh}`;
   const Scene = view?.scene;
   const ok = answered && picked === right;
 
@@ -564,7 +589,7 @@ export function ImageLab() {
             <div className="lab-main">
               <div className={`lab-fig${color ? '' : ' is-print'}${labels ? ' is-labelled' : ''}${item?.kind === 'seinalatu' && !answered ? ' is-pointing' : ''}`} ref={box} style={{ ['--lab-r' as string]: `${-(item?.rot ?? 0)}deg`, ['--lab-m' as string]: item?.mirror ? -1 : 1 }}>
                 {hydrated && item && Scene && (
-                  <svg ref={svg} viewBox={fit?.key === figKey && !labels ? fit.vb : `0 0 ${f.vw} ${f.vh}`} preserveAspectRatio="xMidYMid meet" className={`lab-svg${fit?.key === figKey ? '' : ' is-fitting'}`} role="img" aria-label="Azterketako irudia">
+                  <svg ref={svg} viewBox={vb} preserveAspectRatio="xMidYMid meet" className={`lab-svg${fit?.key === figKey ? '' : ' is-fitting'}`} style={{ ['--lab-ar' as string]: aspectOf(vb) }} role="img" aria-label="Azterketako irudia">
                     <Defs />
                     <SceneContext.Provider value={ctx}>
                       <g transform={f.turn}>

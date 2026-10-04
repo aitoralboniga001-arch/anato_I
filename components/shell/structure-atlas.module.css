@@ -47,7 +47,7 @@
 .resultHead button { min-height: 44px; padding: 0 6px; color: var(--focus); }
 .swatch { width: 9px; height: 9px; flex: 0 0 9px; border-radius: 50%; display: inline-block; }
 .skip { display: none; }
-.detail { min-width: 0; scroll-margin-top: 80px; position: sticky; top: 80px; max-height: calc(100svh - 100px); overflow: auto; padding: 0 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.detail { min-width: 0; scroll-margin-top: 80px; position: sticky; top: 80px; max-height: calc(100svh - 176px); overflow: auto; /* ends above Kimu's floating button */ padding: 0 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .detailHead { padding: 20px 0 26px; }
 .detailHead h2 { font-size: clamp(25px, 3vw, 34px); line-height: 1.2; margin: 10px 0 4px; letter-spacing: -.025em; overflow-wrap: anywhere; }
 .detailHead > p:not(.meta):not(.translation) { font-size: 16px; color: var(--text-2); line-height: 1.7; margin: 18px 0; }
@@ -123,6 +123,8 @@
 .lineage button:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 .lineage b { color: var(--text); font-weight: 650; }
 .study { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+/* The study actions stay in reach at the panel's foot while its figure and text scroll past. */
+.detail .study { position: sticky; bottom: 0; z-index: 1; margin-inline: -14px; padding: 10px 14px; background: linear-gradient(to bottom, transparent, var(--surface) 10px); }
 .studyBtn { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 12px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--text-2); font-size: 13px; font-weight: 600; }
 .studyBtn:hover { color: var(--text); border-color: var(--line-3); background: var(--surface-2); }
 .count { font: 600 11px/1 var(--font-mono); padding: 3px 6px; border-radius: 999px; background: var(--surface-3); color: var(--text-2); }
@@ -156,6 +158,7 @@
   .rootTree { margin-left: 0; padding-left: 0; }
   .treeChip { font-size: 15px; padding: 10px 9px; }
   .detail { grid-row: 1; position: static; max-height: none; overflow: visible; padding: 0 14px; }
+  .detail .study { position: static; margin-inline: 0; padding: 0; background: none; }
   .skip { display: flex; min-height: 44px; align-items: center; justify-content: space-between; font-size: 13px; color: var(--focus); }
   .detailHead { padding: 20px 0; }
   .map { padding: 18px 14px; }

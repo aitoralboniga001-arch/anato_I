@@ -16,6 +16,8 @@ interface QuestionsProps {
   onFind?: (concept: string) => void;
   /** Open on one structure's questions (from its passport). */
   concept?: string;
+  /** Open in review mode over every topic (Home's "Errepasatu"). */
+  review?: boolean;
 }
 
 type Mode = 'praktika' | 'errepasoa' | 'azterketa';
@@ -96,14 +98,14 @@ function build(mode: Mode, inScope: Q[], answers: Answers, seed: number): Q[] {
  * with the competence it trains. Practise (feedback after each answer), review (competences that were
  * missed or are due, re-tested with a different question) and a mock exam (20, no help until the end).
  */
-export function Questions({ week: startWeek, onClose, onGoto, onFind, concept }: QuestionsProps) {
+export function Questions({ week: startWeek, onClose, onGoto, onFind, concept, review }: QuestionsProps) {
   const answers = useAnswers();
   // The topic practised: the simulator's own at first, any other from the topic strip.
   const [week, setWeek] = useState(startWeek);
-  const [mode, setMode] = useState<Mode>('praktika');
-  const [scope, setScope] = useState<Scope>('gaia');
+  const [mode, setMode] = useState<Mode>(review && !concept ? 'errepasoa' : 'praktika');
+  const [scope, setScope] = useState<Scope>(review && !concept ? 'denak' : 'gaia');
   const [kind, setKind] = useState<Kind>('denak');
-  const [pool, setPool] = useState<Q[]>(() => build('praktika', select(week, 'gaia', 'denak', concept), answers, Math.floor(Math.random() * 1e6)));
+  const [pool, setPool] = useState<Q[]>(() => build(mode, select(week, scope, 'denak', concept), answers, Math.floor(Math.random() * 1e6)));
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [log, setLog] = useState<{ q: Q; picked: number }[]>([]);
@@ -179,7 +181,7 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept }:
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal quiz-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Azterketa-galderak">
-        <header className="drawer-head">
+        <header className="drawer-head qz-head">
           <div>
             <p className="eyebrow">Azterketa prestatu</p>
             <h2>Galderak</h2>
@@ -331,11 +333,6 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept }:
                 );
               })}
             </div>
-            {picked === null && (
-              <p className="qz-keys">
-                Teklak: <kbd>1</kbd>–<kbd>{q.options.length}</kbd> edo <kbd>A</kbd>–<kbd>{String.fromCharCode(64 + q.options.length)}</kbd> erantzuteko
-              </p>
-            )}
             {picked !== null && !exam && (
               <div className={`quiz-expl${picked === q.answer ? ' ok' : ' bad'}`}>
                 <strong>{picked === q.answer ? 'Zuzena!' : 'Ez da zuzena.'}</strong>
@@ -345,39 +342,57 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept }:
                   </p>
                 )}
                 <p className="qz-why">{q.why ? q.why[q.answer] : q.explanation}</p>
+                {where && (
+                  <p className="qz-where">
+                    Simulazioan: {q.week}. gaia · {where.stage.title}
+                    {where.step ? ` · ${where.step}. urratsa` : ''}
+                  </p>
+                )}
               </div>
             )}
-            {!exam && (
-              <div className="quiz-actions">
-                {picked !== null && picked !== q.answer && canFind(q.concept) && (
-                  <button className="btn" onClick={() => onFind!(q.concept!)} title="Gaitasun bera, beste formatu batean: aurkitu egitura irudian">
-                    Irudian aurkitu
+            {exam
+              ? picked === null && <KeyHint n={q.options.length} />
+              : (
+                <div className="quiz-actions">
+                  {picked === null ? (
+                    <KeyHint n={q.options.length} />
+                  ) : (
+                    <span className="qz-keys qz-keys-next">
+                      <kbd>Enter</kbd> hurrengoa
+                    </span>
+                  )}
+                  {picked !== null && picked !== q.answer && canFind(q.concept) && (
+                    <button className="btn" onClick={() => onFind!(q.concept!)} title="Gaitasun bera, beste formatu batean: aurkitu egitura irudian">
+                      Irudian aurkitu
+                    </button>
+                  )}
+                  {picked !== null && q.stageId && (
+                    <button className="btn qz-goto" onClick={() => onGoto(q.week, q.stageId!, q.concept)} title={where ? `${q.week}. gaia · ${where.stage.title}${where.step ? ` · ${where.step}. urratsa` : ''}` : undefined}>
+                      Simulazioan ikusi
+                      {where?.step && (
+                        <small aria-label={`${where.step}. urratsa ${where.steps}etik`}>
+                          {where.step}/{where.steps}
+                        </small>
+                      )}
+                    </button>
+                  )}
+                  <button className="btn primary" disabled={picked === null} onClick={next} aria-keyshortcuts="Enter">
+                    Hurrengoa →
                   </button>
-                )}
-                {picked !== null && (
-                  <span className="qz-keys qz-keys-next">
-                    <kbd>Enter</kbd> hurrengoa
-                  </span>
-                )}
-                {picked !== null && q.stageId && (
-                  <button className="btn qz-goto" onClick={() => onGoto(q.week, q.stageId!, q.concept)} title={where ? `${q.week}. gaia · ${where.stage.title}${where.step ? ` · ${where.step}. urratsa` : ''}` : undefined}>
-                    Simulazioan ikusi
-                    {where && (
-                      <small>
-                        {where.stage.title}
-                        {where.step ? ` · ${where.step}/${where.steps}` : ''}
-                      </small>
-                    )}
-                  </button>
-                )}
-                <button className="btn primary" disabled={picked === null} onClick={next} aria-keyshortcuts="Enter">
-                  Hurrengoa →
-                </button>
-              </div>
-            )}
+                </div>
+              )}
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+/** The answer keys, shown until the student answers. */
+function KeyHint({ n }: { n: number }) {
+  return (
+    <p className="qz-keys">
+      Teklak: <kbd>1</kbd>–<kbd>{n}</kbd> edo <kbd>A</kbd>–<kbd>{String.fromCharCode(64 + n)}</kbd> erantzuteko
+    </p>
   );
 }

@@ -234,6 +234,8 @@ function readDeepLink(week: WeekDef) {
     find: idx >= 0 && structures.has(params.get('aurkitu') ?? '') ? params.get('aurkitu') : null,
     /** Open the question bank on one structure (from the structure atlas). */
     questions: structures.has(params.get('galderak') ?? '') ? params.get('galderak') : null,
+    /** Open the question bank on what is due for review, every topic (from Home). */
+    review: params.get('galderak') === 'errepasoa',
   };
 }
 
@@ -366,6 +368,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   // "Irudian aurkitu": a structure to ask for in the find quiz once the scene is drawn.
   const [pendingFind, setPendingFind] = useState<string | null>(null);
   const [questionsConcept, setQuestionsConcept] = useState<string | undefined>(undefined);
+  const [questionsReview, setQuestionsReview] = useState(false);
 
   // Deep links are applied once per week, on the first client render (the server can't see the query).
   // The URL-sync effect below waits for this, so it can't rewrite the query before it has been read.
@@ -404,6 +407,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     if (link.find) setPendingFind(link.find);
     if (link.questions) {
       setQuestionsConcept(link.questions);
+      setQuestionsOpen(true);
+    } else if (link.review) {
+      setQuestionsReview(true);
       setQuestionsOpen(true);
     }
   }
@@ -496,7 +502,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     url.searchParams.set('ikuspegia', view.id);
     if (getPref('notes')) url.searchParams.set('apunteak', '1');
     else url.searchParams.delete('apunteak');
-    for (const k of ['egitura', 'une', 'jolastu', 'eraketa']) url.searchParams.delete(k);
+    for (const k of ['egitura', 'une', 'jolastu', 'eraketa', 'galderak']) url.searchParams.delete(k);
     window.history.replaceState(null, '', url);
     markVisited(week.week, stage.id);
   }, [linkedWeek, week.week, stage.id, view.id]);
@@ -1903,7 +1909,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         />
       )}
       {helpOpen && <Help welcome={firstVisit} onClose={() => setHelpOpen(false)} />}
-      {questionsOpen && <Questions week={week.week} concept={questionsConcept} onClose={() => setQuestionsOpen(false)} onGoto={(w, sid, c) => gotoWeekStage(w, sid, c)} onFind={findConcept} />}
+      {questionsOpen && <Questions week={week.week} concept={questionsConcept} review={questionsReview} onClose={() => { setQuestionsOpen(false); setQuestionsReview(false); }} onGoto={(w, sid, c) => gotoWeekStage(w, sid, c)} onFind={findConcept} />}
     </div>
   );
 }

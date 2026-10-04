@@ -6559,6 +6559,20 @@ button.ctx-bar[aria-expanded="true"] {
   }
 }
 
+/* The figure takes the shape of what it shows (fitted, turned or mirrored): nothing outside its frame
+   peeks in, and no backdrop edge draws a frame inside the frame. */
+.lab-fig:not(.is-private) {
+  container-type: size;
+  display: grid;
+  place-items: center;
+}
+
+.lab-fig:not(.is-private) .lab-svg {
+  width: min(100%, calc(100cqh * var(--lab-ar, 1.5625)));
+  height: min(100%, calc(100cqw / var(--lab-ar, 1.5625)));
+  overflow: hidden;
+}
+
 .lab-svg.is-fitting {
   opacity: 0;
 }
@@ -10718,6 +10732,98 @@ a.tc-in:hover .tc-go span {
   }
 }
 
+/* Exam trainer, round 2: one-line "Simulazioan ikusi", key hint and actions on one row, the stage named
+   in the feedback; on laptop-height screens the whole question fits without scrolling. */
+.qz-head .eyebrow {
+  margin: 0;
+}
+
+.qz-goto {
+  display: inline-flex;
+  height: 34px;
+  min-height: 0;
+  padding-block: 0;
+}
+
+.qz-goto small {
+  max-width: none;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--surface-3);
+  font: 600 11px/1.4 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.quiz-actions .qz-keys {
+  margin: 0 auto 0 0;
+}
+
+.qz-where {
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font: 500 11.5px/1.45 var(--font-mono);
+  color: var(--text-3);
+}
+
+@media (max-height: 860px) {
+  .qz-head {
+    padding: 12px 18px 10px 22px;
+  }
+  .qz-head h2 {
+    margin-top: 2px;
+    font-size: 18px;
+  }
+  .qz-bar {
+    padding-top: 10px;
+  }
+  .qz-kinds {
+    padding-top: 8px;
+  }
+  .qz-topics {
+    padding-top: 10px;
+  }
+  /* Topic tiles on one line: number (+ due), progress bar, mastered count. */
+  .qz-topic {
+    grid-template-columns: auto minmax(10px, 1fr) auto;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 9px;
+  }
+  .qz-topic.is-all {
+    display: flex;
+    justify-content: center;
+    padding-block: 6px;
+  }
+  .qz-topic-h {
+    gap: 5px;
+  }
+  .quiz-q {
+    padding: 14px 22px 16px;
+  }
+  .quiz-question {
+    margin: 8px 0 12px;
+    font-size: 17px;
+  }
+  .quiz-options {
+    gap: 6px;
+  }
+  .quiz-option {
+    padding: 9px 13px;
+  }
+  .quiz-expl {
+    margin-top: 10px;
+    padding: 10px 13px;
+  }
+  .quiz-expl .qz-why {
+    margin: 4px 0 0;
+  }
+  .quiz-actions {
+    margin-top: 12px;
+  }
+}
+
 /* ——— Study pages: compact headers, so the tool starts on the first screen ——— */
 .ln-hero {
   padding-top: 40px;
@@ -10876,4 +10982,49 @@ a.ln-chip:focus-visible {
   font-size: clamp(22px, 2.3vw, 30px);
   letter-spacing: -0.025em;
   line-height: 1.15;
+}
+
+/* Step card on tablet-landscape / small-laptop screens (e.g. 1024×768): the study notes get half the
+   card instead of a narrow margin, so the explanation and its notes both fit without scrolling. */
+@media (max-height: 820px) and (min-width: 821px) and (max-width: 1100px) {
+  .cap-text.cap-v2.has-side {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    column-gap: 18px;
+  }
+  .cap-side {
+    gap: 6px;
+    padding-left: 14px;
+  }
+  .dock .cap .cap-side .cap-note {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+}
+
+/* Home: the review that is due today, after "Jarraitu". */
+.cta-review small {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--signal-soft);
+  font: 600 12px/1.3 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--signal);
+}
+
+/* Study notes column: the "Berria" chips and "Sakondu" share the last line instead of stacking. */
+.cap-side {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 10px;
+}
+
+.cap-side > * {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.cap-side > .cap-extra,
+.cap-side > .cap-more-btn {
+  flex: 0 1 auto;
 }

@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { weeks } from '@/content/registry';
+import { POOL, compKey } from '@/content/pool';
+import { isDue, useAnswers } from './answers';
 import { Chronicle } from './Chronicle';
 import { HeroFold } from './HeroFold';
 import { StudyMap } from './StudyMap';
@@ -104,6 +106,22 @@ function ContinueCta() {
   );
 }
 
+/** Spaced review, surfaced: how many competences are due today, one click into the trainer's review. */
+function ReviewCta() {
+  const answers = useAnswers();
+  const last = useLastPlace();
+  const [now] = useState(() => Date.now());
+  const due = new Set(POOL.filter((q) => isDue(answers[q.id], now)).map((q) => compKey(q.comp, q.concept))).size;
+  if (!due) return null;
+  const week = last && weeks.some((w) => w.week === last.week) ? last.week : firstReady.week;
+  return (
+    <Link className="btn lg cta-review" href={`/astea/${week}?galderak=errepasoa`} title="Huts egindako edo berriro lantzeko garaia iritsi zaien gaitasunak, gai guztietan">
+      Errepasatu
+      <small>{due} gaitasun</small>
+    </Link>
+  );
+}
+
 export function Home() {
   const [intro, setIntro] = useState(true);
 
@@ -134,6 +152,7 @@ export function Home() {
           </p>
           <div className="hero-cta rv">
             <ContinueCta />
+            <ReviewCta />
             <Link className="link-arrow" href="#mapa">
               Gai osoa 20 segundotan <span aria-hidden>↓</span>
             </Link>
