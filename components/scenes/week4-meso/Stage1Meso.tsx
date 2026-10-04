@@ -1,199 +1,189 @@
 'use client';
 
-import { useId } from 'react';
-import { C, Label, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
-import { discOutlinePath } from '@/components/scenes/week3/common';
-import { bandPathT, midT } from './common';
-import { SectionDrawing, makeSection } from '@/components/scenes/section/Section';
+import { C, Label, Note, Part, lerp, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { CX, ConceptusSection, U_INT, U_PAR, W, Y0, conceptusAnchors, mesoTiming } from './conceptus';
 
 /**
- * `mesodermoa-banatzen` — ~day 17: the thin sheet of intraembryonic mesoderm next to the
- * notochord thickens into the paraxial mesoderm. The lateral mesoderm (still a single sheet,
- * continuous with the extraembryonic mesoderm at the disc edge) then develops small cavities
- * that coalesce into the intraembryonic coelom, splitting it into the somatic (paretako orria)
- * and splanchnic (errai orria) layers. ONLY LATER does a third population appear between the
- * paraxial and lateral mesoderm: the intermediate mesoderm (notes, w4 lines ~157-158: "Gerora...").
- * Kept as a shallow (constant foldK) transverse trough: real folding is week 4A's stage.
- *
- * Depth bands are contiguous across the whole thickness (ectoderm 0-14, mesoderm 14-90, endoderm
- * 90-110) so adjacent tissues always touch — no background gap between layers.
+ * `mesodermoa-banatzen` — ~days 17–20 (notes §3; Langman fig. 6-9 A–C). The thin sheet of
+ * intra-embryonic mesoderm beside the notochord thickens into the paraxial mesoderm; the lateral
+ * mesoderm, a single sheet continuous at the disc edge with the extra-embryonic mesoderm, develops
+ * small cavities that coalesce into the intra-embryonic coelom, splitting it into the parietal
+ * (somatic) and visceral (splanchnic) layers — continuous with the amnion's and the yolk sac's coats,
+ * the coelom opening into the chorionic cavity. ONLY LATER does the intermediate mesoderm appear
+ * between the paraxial and lateral mesoderm (notes: "Gerora…").
  */
-const FOLD = 0.22;
-const D = { ecto0: -16, ecto1: 14, meso0: 14, meso1: 90, endo0: 90, endo1: 112 };
 
-// Each change happens INSIDE its own step (week4b.ts beats: 0, .1, .24, .38, .5, .62, .74, .86):
-// the text announces it and the student watches it happen, instead of it being done already.
-function geometry(t: number) {
-  const paraxial = seg(t, 0.1, 0.18);
-  const lateral = seg(t, 0.24, 0.3);
-  const vacuoles = seg(t, 0.38, 0.44) * (1 - seg(t, 0.5, 0.56));
-  const coelom = seg(t, 0.5, 0.58);
-  const somato = seg(t, 0.62, 0.68);
-  const splanchno = seg(t, 0.74, 0.8);
-  const intermediate = seg(t, 0.86, 0.92);
-  return { paraxial, lateral, vacuoles, coelom, somato, splanchno, intermediate };
-}
-
-function mesoSection(t: number) {
-  const g = geometry(t);
-  const s = makeSection({
-    fold: 0,
-    neural: 0,
-    // .33 = paraxial block drawn, no vesicles yet; .48 = vesicles; .72 = one coelom.
-    meso: 0.1 + 0.23 * g.paraxial + 0.15 * seg(t, 0.38, 0.46) + 0.24 * g.coelom,
-    somite: 0,
-    crest: 0,
-    aorta: 0,
-    k: 1.15,
-    oy: 90,
-    ids: { ectoderm: 'ektodermoa', plate: 'ektodermoa' },
-  });
-  return { s, g };
-}
-
-function labels(t: number) {
-  const { s, g } = mesoSection(t);
-  const at = (x: number, d: number) => s.map(x, d);
-  const mid = (x: number) => (9 + s.dEndo(x)) / 2;
-  const cTop = 22;
-  const cBot = (x: number) => s.dEndo(x) - 13;
-  const extra = at(-380, -95);
-  const par = at(-98, mid(98));
-  const int = at(-169, mid(169));
-  const lat = g.coelom > 0.5 ? at(-196, mid(196)) : at(-330, mid(330));
-  const coel = at(330, (cTop + cBot(330)) / 2);
-  const pari = at(400, cTop - 4);
-  const visc = at(400, cBot(400) + 5);
-  const noto = s.at.notochord;
-  const ecto = at(250, 4.5);
-  const endo = at(250, s.dEndo(250) + 4.5);
-  return (
-    <>
-      <Label id="enbrioi-kanpoko-mesodermoa" x={190} y={110} ax={extra[0]} ay={extra[1]} small show={g.lateral} />
-      <Label id="mesodermo-intraenbrionarioa" x={190} y={250} ax={at(-250, mid(250))[0]} ay={at(-250, mid(250))[1]} show={1 - g.paraxial} />
-      <Label id="mesodermo-paraxiala" x={190} y={200} ax={par[0]} ay={par[1]} show={g.paraxial} />
-      <Label id="bitarteko-mesodermoa" x={190} y={240} ax={int[0]} ay={int[1]} show={g.intermediate} />
-      <Label id="notokorda" x={190} y={450} ax={noto[0] - 10} ay={noto[1]} />
-      <Label id="alboko-mesodermoa" x={190} y={490} ax={lat[0]} ay={lat[1]} show={g.lateral} />
-      <Label id="ektodermoa" x={810} y={205} ax={ecto[0]} ay={ecto[1]} small />
-      <Label id="paretako-orria" x={810} y={250} ax={pari[0]} ay={pari[1]} show={g.somato} />
-      <Label id="enbrioi-barruko-zeloma" x={810} y={450} ax={coel[0]} ay={coel[1]} show={Math.max(g.coelom, g.vacuoles)} />
-      <Label id="errai-orria" x={810} y={490} ax={visc[0]} ay={visc[1]} show={g.splanchno} />
-      <Label id="endodermoa" x={810} y={530} ax={endo[0]} ay={endo[1]} small />
-    </>
-  );
-}
-
+/** Transverse section of the whole conceptus (amnion above, yolk sac below). */
 export function MesoSplitSection({ t }: SceneProps) {
-  const { s, g } = mesoSection(t);
+  const m = mesoTiming(t);
+  const a = conceptusAnchors(m);
+  const extraOld = 1 - Math.min(1, Math.max(0, (t - 0.5) / 0.04));
+  const extraNew = Math.min(1, Math.max(0, (t - 0.53) / 0.05));
+  const cav = Math.max(m.coel, Math.min(1, m.ves * 3 - 0.36));
   return (
     <g>
-      <SectionDrawing s={s} show={{ intermediate: g.intermediate, parietal: g.somato, visceral: g.splanchno }} />
-      {labels(t)}
+      <ConceptusSection m={m} />
+
+      <Label id="amnios-barrunbea" x={190} y={112} ax={a.amnion[0]} ay={a.amnion[1]} small />
+      <Label id="enbrioi-kanpoko-mesodermoa" x={222} y={170} ax={a.amnionCoatL[0]} ay={a.amnionCoatL[1]} show={m.lat * extraOld} />
+      <Label id="somatopleura-kanpokoa" x={190} y={150} ax={a.amnionCoatL[0]} ay={a.amnionCoatL[1]} show={extraNew} small={m.somato < 0.5} />
+      <Label id="mesodermo-paraxiala" x={190} y={222} ax={a.paraxial[0]} ay={a.paraxial[1]} show={m.par} />
+      <Label id="bitarteko-mesodermoa" x={190} y={258} ax={a.intermediate[0]} ay={a.intermediate[1]} show={m.inter} />
+      <Label id="mesodermo-intraenbrionarioa" x={226} y={289} ax={a.sheet[0]} ay={a.sheet[1]} show={1 - m.lat} />
+      <Label id="alboko-mesodermoa" x={190} y={352} ax={a.lateral[0]} ay={a.lateral[1] + (m.coel > 0.5 ? -9 : 0)} show={m.lat} />
+      <Label id="notokorda" x={190} y={390} ax={a.notochord[0]} ay={a.notochord[1]} />
+      <Label id="esplaknopleura-kanpokoa" x={190} y={476} ax={a.yolkCoatL[0]} ay={a.yolkCoatL[1]} show={extraNew} small={m.splanchno < 0.5} />
+      <Label id="bitelo-zaku-sekundarioa" x={190} y={540} ax={a.yolk[0]} ay={a.yolk[1]} small />
+
+      <Label id="ektodermoa" x={810} y={196} ax={a.ectoderm[0]} ay={a.ectoderm[1]} small />
+      <Label id="paretako-orria" x={810} y={234} ax={a.parietal[0]} ay={a.parietal[1]} show={m.somato} />
+      <Label id="enbrioi-barruko-zeloma" x={810} y={272} ax={(m.coel > 0.2 ? a.coelom : a.vacuole)[0]} ay={(m.coel > 0.2 ? a.coelom : a.vacuole)[1]} show={cav} />
+      <Label id="errai-orria" x={810} y={310} ax={a.visceral[0]} ay={a.visceral[1]} show={m.splanchno} />
+      <Label id="endodermoa" x={810} y={348} ax={a.endoderm[0]} ay={a.endoderm[1]} small />
+      <Label id="korion-barrunbea" x={810} y={410} ax={a.chorion[0]} ay={a.chorion[1]} show={m.lat} small={m.coel < 0.5} />
     </g>
   );
 }
 
 /**
- * Dorsal view of the trilaminar disc (ectoderm lifted off): mediolateral zones as cranio-caudal
- * stripes either side of the notochord, differentiating from cranial to caudal, with the node and the
- * shrinking primitive streak caudally and the two membranes (no mesoderm) at the ends. Seen from
- * above, the intraembryonic coelom is the horseshoe inside the lateral mesoderm (round the cranial
- * end, opening to the extraembryonic coelom at the sides). The somatic/splanchnic split itself is
- * dorsoventral, so a schematic cross-section inset shows that stack with its own clickable Parts.
+ * Dorsal view of the trilaminar disc (ectoderm lifted off) with, under it and aligned to it, the
+ * transverse section at the marked level — the same zones in both, at the same width, so the
+ * stripes seen from above read straight down into the layers of the section.
  */
-const DD = { cx: 500, cy: 318, rxTop: 172, rxBot: 124, ryTop: 196, ryBot: 176 };
-const DISC_D = discOutlinePath(DD.cx, DD.cy, DD.rxTop, DD.rxBot, DD.ryTop, DD.ryBot);
-const Y_BPM = 146; // bucco-pharyngeal membrane
-const Y_PRE = 166; // prechordal plate
-const Y_NODE = 420;
-const Y_STREAK = 474;
-const Y_CLOACA = 482;
-const HORSESHOE = smoothPath(
-  [[392, 468], [384, 390], [394, 280], [428, 196], [500, 168], [572, 196], [606, 280], [616, 390], [608, 468]],
-  false,
-  0.5,
-);
-// Vacuoles that coalesce into the horseshoe (points along it, mirrored).
-const VACUOLES: Pt[] = [[390, 420], [388, 350], [398, 280], [418, 226], [452, 186], [500, 170]].flatMap(([x, y]): Pt[] => (x === 500 ? [[x, y]] : [[x, y], [1000 - x, y]]));
+const DD = { cx: 500, cy: 286, rxTop: 168, rxBot: 120, ryTop: 172, ryBot: 158 };
+/** Pear-shaped disc outline (broad cranial end). */
+function pearPts(n = 96): Pt[] {
+  return Array.from({ length: n }, (_, i) => {
+    const a = (i / n) * Math.PI * 2;
+    const c = Math.cos(a);
+    const s = Math.sin(a);
+    const top = s < 0;
+    const rx = top ? DD.rxTop : lerp(DD.rxTop, DD.rxBot, Math.min(1, s * 1.15));
+    const ry = top ? DD.ryTop : DD.ryBot;
+    return [DD.cx + rx * c, DD.cy + ry * s];
+  });
+}
+const PEAR = pearPts();
+const DISC_D = smoothPath(PEAR, true, 0.5);
+/** Half-width of the disc at height y (from the outline). */
+function rimAt(y: number) {
+  let best = 0;
+  for (let i = 0; i < PEAR.length; i++) {
+    const p = PEAR[i];
+    const q = PEAR[(i + 1) % PEAR.length];
+    if ((p[1] - y) * (q[1] - y) <= 0 && p[1] !== q[1]) {
+      const x = p[0] + ((y - p[1]) / (q[1] - p[1])) * (q[0] - p[0]);
+      best = Math.max(best, Math.abs(x - DD.cx));
+    }
+  }
+  return best;
+}
+const Y_BPM = 134; // buccopharyngeal membrane
+const Y_PRE = 152; // prechordal plate
+const Y_NODE = 384;
+const Y_STREAK = 432;
+const Y_CLOACA = 438;
+const Y_SEC = 292; // level of the transverse section shown underneath
+/** Scale of the dorsal view relative to the section, so the zones line up. */
+const KD = rimAt(Y_SEC) / W;
+const XP: [number, number] = [U_PAR[0] * KD, U_PAR[1] * KD];
+const XI: [number, number] = [U_INT[0] * KD, U_INT[1] * KD];
+
+const HORSE: Pt[] = (() => {
+  const pts: Pt[] = [];
+  // Right arm from the caudal end up, round the cranial end, down the left arm (offset inside the rim).
+  for (let i = 0; i <= 40; i++) {
+    const y = lerp(Y_NODE + 14, Y_BPM + 6, i / 40);
+    pts.push([DD.cx + rimAt(y) - 26 - 10 * Math.max(0, (y - 330) / 70), y]);
+  }
+  const yTop = DD.cy - DD.ryTop + 14;
+  for (let i = 1; i < 20; i++) {
+    const a = (i / 20) * Math.PI;
+    const rx = rimAt(Y_BPM + 6) - 26;
+    pts.push([DD.cx + rx * Math.cos(a), Y_BPM + 6 - (Y_BPM + 6 - yTop) * Math.sin(a)]);
+  }
+  return [...pts, ...pts.slice(0, 41).reverse().map((p): Pt => [2 * DD.cx - p[0], p[1]])];
+})();
+// The arms open to the chorionic cavity at the disc rim (caudolateral ends).
+const HORSE_D = smoothPath([[DD.cx + rimAt(Y_NODE + 26), Y_NODE + 26], ...HORSE, [DD.cx - rimAt(Y_NODE + 26), Y_NODE + 26]], false, 0.4);
 
 export function MesoSplitDorsal({ t }: SceneProps) {
-  const { paraxial, lateral, vacuoles, coelom, somato, splanchno, intermediate } = geometry(t);
-  const uid = useId().replace(/:/g, '');
-  // Differentiation front, cranial → caudal (stops at the node: caudal to it the streak still feeds mesoderm).
-  const front = lerp(Y_PRE + 40, Y_NODE + 20, seg(t, 0, 0.9));
-  const stripe = (x0: number, x1: number, fill: string, op = 0.95) => (
-    <>
-      <rect x={DD.cx + x0} y={Y_PRE + 4} width={x1 - x0} height={Y_NODE + 30 - Y_PRE} rx={(x1 - x0) / 2} fill={fill} opacity={op} />
-      <rect x={DD.cx - x1} y={Y_PRE + 4} width={x1 - x0} height={Y_NODE + 30 - Y_PRE} rx={(x1 - x0) / 2} fill={fill} opacity={op} />
-    </>
-  );
-  const insetX = 836;
-  const insetY = 392;
-  const insetW = 64;
-  const layer = (y: number, h: number, fill: string, stroke = 'none') => <rect x={insetX} y={y} width={insetW} height={h} rx={3} fill={fill} stroke={stroke} strokeWidth={1} />;
+  const m = mesoTiming(t);
+  const { par, lat, ves, coel, inter } = m;
+  const parEnd = lerp(Y_PRE + 40, Y_NODE - 4, par);
+  const intEnd = lerp(Y_PRE + 70, Y_NODE - 26, inter);
+  const stripe = (x0: number, x1: number, y0: number, y1: number) => {
+    const r = (x1 - x0) / 2;
+    const h = Math.max(0, y1 - y0);
+    return [1, -1].map((sd) => {
+      const x = sd > 0 ? DD.cx + x0 : DD.cx - x1;
+      return `M${x},${y0 + r}A${r},${r} 0 0 1 ${x + 2 * r},${y0 + r}V${y0 + r + Math.max(0, h - 2 * r)}A${r},${r} 0 0 1 ${x},${y0 + r + Math.max(0, h - 2 * r)}Z`;
+    }).join('');
+  };
+  const parD = par > 0.01 ? stripe(XP[0], XP[1], Y_PRE + 18, parEnd) : '';
+  const intD = inter > 0.01 ? stripe(XI[0], XI[1], Y_PRE + 58, intEnd) : '';
+  const axisD = `M${DD.cx - XP[0]},${Y_PRE}H${DD.cx + XP[0]}V${Y_NODE}H${DD.cx - XP[0]}Z`;
+  // Vacuoles along the horseshoe (round-capped dashes) that lengthen into one continuous cavity.
+  const dash = lerp(0.1, 6, ves) + 26 * coel;
+  const gap = lerp(15, 9, ves) * (1 - coel);
+  const wC = lerp(4, 8, ves) + 5 * coel;
+  const insetY = 538;
+  const zs = 0.7;
+  const inset = `translate(${DD.cx} ${insetY}) scale(${zs}) translate(${-CX} ${-(Y0 + 40)})`;
+  const sheetId = t < 0.24 ? 'mesodermo-intraenbrionarioa' : 'alboko-mesodermoa';
+  const at = (x: number, y: number): Pt => [DD.cx + (x - CX) * zs, insetY + (y - (Y0 + 40)) * zs];
   return (
     <g>
       <defs>
-        <clipPath id={`${uid}-disc`}>
+        <pattern id="w4b-dots" width="17" height="15" patternUnits="userSpaceOnUse">
+          <ellipse cx="4" cy="4" rx="1.9" ry="1.4" fill="rgba(90,10,24,0.55)" />
+          <ellipse cx="12" cy="9" rx="1.7" ry="1.3" fill="rgba(90,10,24,0.5)" />
+          <ellipse cx="6" cy="12.5" rx="1.5" ry="1.2" fill="rgba(90,10,24,0.45)" />
+        </pattern>
+        <pattern id="w4b-dots-dense" width="11" height="10" patternUnits="userSpaceOnUse">
+          <ellipse cx="3" cy="3" rx="1.7" ry="1.3" fill="rgba(70,4,16,0.6)" />
+          <ellipse cx="8.5" cy="7" rx="1.6" ry="1.2" fill="rgba(70,4,16,0.55)" />
+        </pattern>
+        <clipPath id="w4b-disc">
           <path d={DISC_D} />
         </clipPath>
-        <linearGradient id={`${uid}-front`} gradientUnits="userSpaceOnUse" x1={0} y1={front - 28} x2={0} y2={front + 28}>
-          <stop offset="0" stopColor="#fff" />
-          <stop offset="1" stopColor="#000" />
-        </linearGradient>
-        <mask id={`${uid}-grow`} maskUnits="userSpaceOnUse" x={0} y={0} width={1000} height={640}>
-          <rect x={0} y={0} width={1000} height={640} fill={`url(#${uid}-front)`} />
-        </mask>
+        <clipPath id="w4b-inset">
+          <rect x={258} y={478} width={484} height={118} rx={12} />
+        </clipPath>
       </defs>
 
-      {/* Disc rim (the amnion's attachment), then the thin intraembryonic mesoderm sheet seen from above */}
-      <path d={DISC_D} fill="#171a26" stroke="#5b8def" strokeOpacity={0.55} strokeWidth={2} />
-      <g clipPath={`url(#${uid}-disc)`}>
-        {/* Stays under everything: caudal to the differentiation front the sheet is still undivided. */}
-        <Part id="mesodermo-intraenbrionarioa" quiet={lateral > 0.5}>
-          <path d={DISC_D} fill={C.mesoIntra} opacity={0.42} />
+      <path d={DISC_D} fill="#141826" />
+      <g clipPath="url(#w4b-disc)">
+        {/* Whole sheet (later the lateral mesoderm) — the axis and the stripes are cut out so lighting one lights only it. */}
+        <Part id={sheetId}>
+          <path d={`${DISC_D}${axisD}${parD}${intD}`} fillRule="evenodd" fill={C.mesoIntra} opacity={0.62} />
+          <path d={`${DISC_D}${axisD}${parD}${intD}`} fillRule="evenodd" fill={C.mesoLateral} opacity={0.6 * lat} />
+          <path d={`${DISC_D}${axisD}${parD}${intD}`} fillRule="evenodd" fill="url(#w4b-dots)" />
         </Part>
-        {/* Lateral mesoderm: everything beside the axis, round the cranial end (cardiogenic area) to the rim */}
-        {lateral > 0.02 && (
-          <Part id="alboko-mesodermoa" show={lateral}>
-            <g mask={`url(#${uid}-grow)`}>
-              <path d={DISC_D} fill={C.mesoLateral} opacity={0.8} />
-            </g>
+        {parD && (
+          <Part id="mesodermo-paraxiala" show={Math.min(1, par * 3)}>
+            <path d={parD} fill={C.mesoParaxial} />
+            <path d={parD} fill="url(#g-shade)" opacity={0.5} />
+            <path d={parD} fill="url(#w4b-dots-dense)" />
           </Part>
         )}
-        {intermediate > 0.02 && (
-          <Part id="bitarteko-mesodermoa" show={intermediate}>
-            <g mask={`url(#${uid}-grow)`}>{stripe(40, 58, C.mesoIntermediate)}</g>
+        {intD && (
+          <Part id="bitarteko-mesodermoa" show={Math.min(1, inter * 3)}>
+            <path d={intD} fill={C.mesoIntermediate} />
+            <path d={intD} fill="url(#w4b-dots-dense)" />
           </Part>
         )}
-        {paraxial > 0.02 && (
-          <Part id="mesodermo-paraxiala" show={paraxial}>
-            <g mask={`url(#${uid}-grow)`}>{stripe(8, 40, C.mesoParaxial)}</g>
+        {(ves > 0.01 || coel > 0.01) && (
+          <Part id="enbrioi-barruko-zeloma">
+            <path d={HORSE_D} fill="none" stroke="rgba(255,170,170,0.5)" strokeWidth={wC + 2.4} strokeLinecap="round" strokeDasharray={`${dash.toFixed(1)} ${gap.toFixed(1)}`} />
+            <path d={HORSE_D} fill="none" stroke="#1b0d22" strokeWidth={wC} strokeLinecap="round" strokeDasharray={`${dash.toFixed(1)} ${gap.toFixed(1)}`} />
           </Part>
         )}
-
-        {/* Intraembryonic coelom: vacuoles in the lateral mesoderm that fuse into a horseshoe */}
-        {vacuoles > 0.02 && (
-          <g opacity={vacuoles}>
-            {VACUOLES.map(([x, y], i) => (
-              <ellipse key={i} cx={x} cy={y} rx={3 + 5 * vacuoles} ry={2.5 + 4 * vacuoles} fill="#56202e" stroke="#ffb3b3" strokeOpacity={0.6} strokeWidth={1} />
-            ))}
-          </g>
-        )}
-        {coelom > 0.02 && (
-          <Part id="enbrioi-barruko-zeloma" show={coelom}>
-            <path d={HORSESHOE} fill="none" stroke="#ffb3b3" strokeOpacity={0.6} strokeWidth={6 + 11 * coelom} strokeLinecap="round" />
-            <path d={HORSESHOE} fill="none" stroke="#56202e" strokeWidth={3 + 11 * coelom} strokeLinecap="round" />
-          </Part>
-        )}
-
-        {/* Axis: membranes (no mesoderm), prechordal plate, notochord, node and the regressing streak */}
-        <ellipse cx={DD.cx} cy={Y_BPM} rx={17} ry={9} fill="#171a26" />
-        <ellipse cx={DD.cx} cy={Y_BPM} rx={13} ry={6} fill="rgba(223,230,247,0.45)" stroke="#dfe6f7" strokeWidth={1} />
-        <ellipse cx={DD.cx} cy={Y_CLOACA} rx={13} ry={7} fill="#171a26" />
-        <ellipse cx={DD.cx} cy={Y_CLOACA} rx={10} ry={5} fill="rgba(223,230,247,0.45)" stroke="#dfe6f7" strokeWidth={1} />
-        <ellipse cx={DD.cx} cy={Y_PRE} rx={11} ry={6} fill={C.prechordal} stroke="#f5b8e2" strokeWidth={1} />
+        {/* Axis: membranes (no mesoderm), prechordal plate, notochord, node and the regressing streak. */}
+        <path d={axisD} fill="#20121c" />
+        <ellipse cx={DD.cx} cy={Y_BPM} rx={15} ry={8} fill="rgba(223,230,247,0.4)" stroke="#dfe6f7" strokeWidth={1} />
+        <ellipse cx={DD.cx} cy={Y_CLOACA} rx={10} ry={6} fill="rgba(223,230,247,0.4)" stroke="#dfe6f7" strokeWidth={1} />
+        <ellipse cx={DD.cx} cy={Y_PRE} rx={10} ry={6} fill={C.prechordal} stroke="#f5b8e2" strokeWidth={1} />
         <Part id="notokorda">
           <rect x={DD.cx - 5} y={Y_PRE + 5} width={10} height={Y_NODE - Y_PRE - 8} rx={5} fill={C.notochord} stroke="#d8b4fe" strokeWidth={1} />
         </Part>
@@ -203,52 +193,46 @@ export function MesoSplitDorsal({ t }: SceneProps) {
           stroke="#93a7d9"
           strokeWidth={1.2}
         />
-        <ellipse cx={DD.cx} cy={Y_NODE} rx={10} ry={8} fill={C.ectoderm} stroke="#dbe4ff" strokeWidth={1.2} />
-        <ellipse cx={DD.cx} cy={Y_NODE} rx={4} ry={3} fill="#02040a" />
+        <ellipse cx={DD.cx} cy={Y_NODE} rx={9} ry={7} fill={C.ectoderm} stroke="#dbe4ff" strokeWidth={1.2} />
+        <ellipse cx={DD.cx} cy={Y_NODE} rx={3.6} ry={2.8} fill="#02040a" />
+        {/* Level of the section shown below. */}
+        <path d={`M${DD.cx - 200},${Y_SEC}H${DD.cx + 200}`} stroke="rgba(232,238,252,0.55)" strokeWidth={1.2} />
       </g>
-      <path d={DISC_D} fill="none" stroke="#5b8def" strokeOpacity={0.55} strokeWidth={2} />
+      <path d={DISC_D} fill="none" stroke="#5b8def" strokeOpacity={0.6} strokeWidth={2} />
+      <path d={`M${DD.cx - rimAt(Y_SEC) - 14},${Y_SEC}H${DD.cx - rimAt(Y_SEC) - 2}M${DD.cx + rimAt(Y_SEC) + 2},${Y_SEC}H${DD.cx + rimAt(Y_SEC) + 14}`} stroke="rgba(232,238,252,0.7)" strokeWidth={2} strokeLinecap="round" />
+      {/* Guides from the cut down to the section: the zones keep their width. */}
+      {[-1, 1].map((sd) => (
+        <path key={sd} d={`M${DD.cx + sd * (rimAt(Y_SEC) + 8)},${Y_SEC + 6}V476`} stroke="rgba(232,238,252,0.12)" strokeWidth={1} />
+      ))}
 
-      <Note x={500} y={100} tone="dim">
+      {/* The section at that level, at the same width as the disc there. */}
+      <rect x={258} y={478} width={484} height={118} rx={12} fill="#0b0b0e" stroke="rgba(232,238,252,0.14)" />
+      <g clipPath="url(#w4b-inset)">
+        <g transform={inset}>
+          <ConceptusSection m={m} lite />
+        </g>
+      </g>
+
+      <Note x={500} y={110} tone="dim">
         Kraneala
       </Note>
-      <Note x={500} y={532} tone="dim">
-        Kaudala
+      <Note x={DD.cx + rimAt(Y_SEC) + 22} y={Y_SEC} align="start" tone="dim" size={11.5}>
+        Mozketaren maila ↓
       </Note>
-      <Label id="mesodermo-intraenbrionarioa" x={190} y={250} ax={DD.cx - 90} ay={300} show={1 - lateral} />
-      <Label id="mesodermo-paraxiala" x={190} y={200} ax={DD.cx - 24} ay={250} show={paraxial} />
-      <Label id="bitarteko-mesodermoa" x={190} y={250} ax={DD.cx - 49} ay={290} show={intermediate} />
-      <Label id="alboko-mesodermoa" x={190} y={420} ax={DD.cx - 120} ay={Math.min(front - 10, 330)} show={lateral} />
-      <Label id="notokorda" x={190} y={470} ax={DD.cx - 4} ay={380} />
-      <Label id="enbrioi-barruko-zeloma" x={790} y={250} ax={604} ay={262} show={Math.max(coelom, vacuoles)} />
+      <Note x={270} y={490} align="start" tone="dim" size={11}>
+        Zeharkako mozketa
+      </Note>
 
-      {/* Cross-section inset: the true dorsoventral stack of the lateral mesoderm once the coelom forms. */}
-      <g opacity={coelom}>
-        <rect x={insetX - 118} y={insetY - 48} width={insetW + 140} height={150} rx={10} fill="#141416" stroke="#3a3a40" strokeWidth={1} />
-        <text x={insetX - 118 + (insetW + 140) / 2} y={insetY - 28} textAnchor="middle" fontSize={11} letterSpacing="0.06em" fill="#8a97b3">
-          ZEHARKAKO MOZKETA
-        </text>
-        {layer(insetY - 12, 10, C.ectoderm)}
-        <Part id="paretako-orria" show={coelom}>{layer(insetY + 2, 16, C.mesoLateral)}</Part>
-        <Part id="enbrioi-barruko-zeloma" show={coelom}>{layer(insetY + 20, 14, '#56202e', 'rgba(255,179,179,0.6)')}</Part>
-        <Part id="errai-orria" show={coelom}>{layer(insetY + 36, 16, C.mesoLateral)}</Part>
-        {layer(insetY + 56, 10, C.endoderm)}
-        {(
-          [
-            ['Ektodermoa', insetY - 7, '#8fb0f5', 1],
-            ['Paretako orria', insetY + 10, '#efece6', 0.35 + 0.65 * somato],
-            ['Zeloma', insetY + 27, '#ffb3b3', 1],
-            ['Errai orria', insetY + 44, '#efece6', 0.35 + 0.65 * splanchno],
-            ['Endodermoa', insetY + 61, '#f2d58a', 1],
-          ] as const
-        ).map(([txt, y, fill, o]) => (
-          <text key={txt} x={insetX - 10} y={y} dy="0.35em" textAnchor="end" fontSize={11.5} fontWeight={600} fill={fill} opacity={o}>
-            {txt}
-          </text>
-        ))}
-        <text x={insetX + insetW / 2} y={insetY + 84} textAnchor="middle" fontSize={10} fill="#6b7280">
-          dortsala ↑
-        </text>
-      </g>
+      <Label id="mesodermo-paraxiala" x={190} y={190} ax={DD.cx - (XP[0] + XP[1]) / 2} ay={Math.min(232, parEnd - 8)} show={par} />
+      <Label id="bitarteko-mesodermoa" x={190} y={232} ax={DD.cx - (XI[0] + XI[1]) / 2} ay={Math.min(268, intEnd - 8)} show={inter} />
+      <Label id="mesodermo-intraenbrionarioa" x={318} y={336} ax={DD.cx - 96} ay={340} show={1 - lat} />
+      <Label id="alboko-mesodermoa" x={190} y={380} ax={DD.cx - 112} ay={360} show={lat} />
+      <Label id="notokorda" x={190} y={430} ax={DD.cx - 4} ay={366} />
+      <Label id="enbrioi-barruko-zeloma" x={810} y={250} ax={HORSE[12][0]} ay={HORSE[12][1]} show={Math.max(coel, Math.min(1, ves * 3 - 0.4))} />
+      <Label id="ektodermoa" x={810} y={466} ax={at(CX + 150, Y0 + 6)[0]} ay={at(CX + 150, Y0 + 6)[1]} small />
+      <Label id="endodermoa" x={810} y={578} ax={at(CX + 150, Y0 + 73)[0]} ay={at(CX + 150, Y0 + 73)[1]} small />
+      <Label id="paretako-orria" x={810} y={500} ax={at(CX + 200, Y0 + 19)[0]} ay={at(CX + 200, Y0 + 19)[1]} show={m.somato} small />
+      <Label id="errai-orria" x={810} y={540} ax={at(CX + 200, Y0 + 60)[0]} ay={at(CX + 200, Y0 + 60)[1]} show={m.splanchno} small />
     </g>
   );
 }

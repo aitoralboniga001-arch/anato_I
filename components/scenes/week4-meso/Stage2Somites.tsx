@@ -1,267 +1,419 @@
 'use client';
 
-import { C, Label, Note, Part, fade, lerp, lin, seg, smoothPath, zoom, type SceneProps } from '@/components/kit';
-import { SOMITE_REGIONS, TOTAL_SOMITES, buildSomites } from './common';
+import type { ReactNode } from 'react';
+import { C, Label, Note, OnTop, Part, clamp, lerp, lin, rand, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
+import { SOMITE_REGIONS, TOTAL_SOMITES } from './common';
 
 /**
- * `somitak` — somitomeres appear first, cranially (they never fully segment into somites); from
- * ~day 20 true somites bud off the paraxial mesoderm craniocaudally, ~3 pairs/day until the end
- * of week 5 (~day 35): 42-44 pairs total (4 occipital, 8 cervical, 12 thoracic, 5 lumbar, 5
- * sacral, 8-10 coccygeal). The first occipital pair and the last 5-7 coccygeal pairs normally
- * regress. Somite count is used clinically to estimate embryonic age (day ≈ 20 + (count-1)/3).
+ * `somitak` — notes §3.1 (Langman fig. 6-3/6-4, 6-11). Cranially the paraxial mesoderm forms
+ * somitomeres, which never become true somites; from the occipital level down it segments into
+ * somites: the first (occipital) pair on day 20, then ~3 pairs a day craniocaudally until the end of
+ * week 5 — 42–44 pairs (4 occipital, 8 cervical, 12 thoracic, 5 lumbar, 5 sacral, 8–10 coccygeal).
+ * The first occipital and the last 5–7 coccygeal pairs regress. Somite count gives the embryo's age.
+ *
+ * How it is shown: the embryo lengthens as it segments (the tail bud moves caudally with the
+ * unsegmented paraxial mesoderm in front of it). In that unsegmented strip a wave travels
+ * cranially; when it reaches the front, a cleft cuts across the strip and a block pinches off, then
+ * rounds up into an epithelial ball (the somite). The camera pulls back as the embryo grows.
  */
-const Y_TOP = 130;
-const Y_BOT = 520;
-const SOM_Y_TOP = Y_TOP + 62; // leaves room above for the (permanent, cranial) somitomeres
-const SOMITES = buildSomites(SOM_Y_TOP, Y_BOT - 24); // the last (coccygeal) pairs stay inside the tail's rounded end
 
-/**
- * day(t), following the beats: somitomeres only before the first pair (step 1, ≈19.6) · first pair
- * on day 20 (step 2) · ~3 pairs/day from step 3 until all 44 by the totals step's complete frame (day 35).
- */
-function dayFor(t: number) {
-  return 19.6 + 0.4 * seg(t, 0.12, 0.16) + 0.4 * lin(t, 0.16, 0.26) + 14.6 * lin(t, 0.3, 0.84);
-}
-function countFor(day: number) {
-  return Math.max(0, Math.min(TOTAL_SOMITES, Math.round(1 + 3 * (day - 20))));
-}
-/** t at which somite index i (0-based) first appears: inverts countFor(dayFor(t)) (monotonic). */
-function appearT(index: number) {
-  const need = 20 + (index - 0.5) / 3;
-  let lo = 0;
-  let hi = 1;
-  for (let k = 0; k < 24; k++) {
-    const mid = (lo + hi) / 2;
-    if (dayFor(mid) >= need) hi = mid;
-    else lo = mid;
-  }
-  return hi;
-}
+const N = TOTAL_SOMITES;
+const P = 8.9; // somite pitch (scene units)
+const Y_S0 = 188; // centre of the first (occipital) somite
+const GX = 19.5; // somite centre, distance from the midline
+const SW = 16; // somite width
+const Y_HEAD = 58;
+const PSM_LEN = 6.2; // unsegmented paraxial mesoderm ahead of the tail bud, in somite lengths
 
-/** Fade of a new pair: about one budding interval, so the unsegmented block and the pair hand over smoothly. */
-const BUD_FADE = 0.012;
+/** Pairs formed (real-valued; the fraction is the progress of the next one) — follows the beats 0 · .12 · .3 · … · .84. */
+function pairsAt(t: number) {
+  return Math.min(N, lin(t, 0.12, 0.2) + 0.6 * lin(t, 0.2, 0.3) + 42.4 * lin(t, 0.3, 0.84));
+}
+/** Day from the pair count (notes: 1st pair on day 20, then ~3 pairs/day). */
+const dayOf = (f: number) => 20 + (Math.max(f, 0) - 1) / 3;
+const yS = (i: number) => Y_S0 + i * P;
+/** Pairs per unit of t (to hide the clock wave when segmentation runs too fast to follow). */
+const rateAt = (t: number) => (pairsAt(t + 0.002) - pairsAt(t - 0.002)) / 0.004;
 
-const REGION_STARTS = (() => {
+const REGION_COL = ['#e2414b', '#ec6a6f', '#d93340', '#ee7b62', '#cf5068', '#ad5172'];
+const REGION_NAME = ['okzipital', 'zerbikal', 'toraziko', 'lunbar', 'sakro', 'kokzigeo'];
+const REGIONS = (() => {
   let idx = 0;
-  return SOMITE_REGIONS.map((r) => {
+  return SOMITE_REGIONS.map((r, k) => {
     const start = idx;
     idx += r.n;
-    return { ...r, start };
+    return { start, n: r.n, color: REGION_COL[k], name: REGION_NAME[k], label: k === 5 ? '8-10' : String(r.n) };
   });
 })();
+const regionOf = (i: number) => REGIONS.findIndex((r) => i >= r.start && i < r.start + r.n);
+/** The first occipital and the last 6 coccygeal pairs regress. */
+const transient = (i: number) => i === 0 || i >= N - 6;
 
-/** Closed outline symmetric about x = 500 from a half-width profile over [y0, y1] (round at both tips). */
-function profileD(y0: number, y1: number, hw: (y: number) => number, n = 72) {
-  const ys = Array.from({ length: n + 1 }, (_, i) => lerp(y0, y1, (1 - Math.cos((Math.PI * i) / n)) / 2));
-  return smoothPath([...ys.map((y): [number, number] => [500 - hw(y), y]), ...[...ys].reverse().slice(1, -1).map((y): [number, number] => [500 + hw(y), y])], true, 0.5);
-}
-const capR = (d: number, r: number) => (d >= r ? 1 : Math.sqrt(Math.max(0, 1 - ((r - d) / r) ** 2)));
-
-/** Dorsal silhouette of the embryo: broad cranial end, tapering towards the tail, round at both ends. */
-function BodyOutline({ t }: { t: number }) {
-  const grow = seg(t, 0, 0.1);
-  const halfW = lerp(48, 74, grow);
-  const y0 = Y_TOP - 16;
-  const y1 = Y_BOT + 12;
-  const hw = (y: number) => {
-    const v = Math.max(0, (y - Y_TOP) / (Y_BOT - Y_TOP));
-    const w = lerp(halfW, Math.max(halfW * 0.6, 40), v ** 1.6);
-    return w * capR(y - y0, halfW * 0.9) * capR(y1 - y, 34);
-  };
-  return <path d={profileD(y0, y1, hw)} fill="#182238" stroke="#3a3a40" strokeWidth={1.4} opacity={0.9} />;
-}
-
-/** Cranial (permanent) somitomeres: sit ABOVE (cranial to) the first true somite, never overlapping it. */
-function Somitomeres({ t: _t }: { t: number }) {
-  // Already-present cranial anatomy at this stage's start (the beat-0 focus) — always fully shown,
-  // not faded in, since a fade starting at t=0 would leave it invisible at the exact beat it stars in.
-  void _t;
-  const show = 1;
-  const pts = Array.from({ length: 5 }, (_, i) => Y_TOP + 8 + i * 9);
-  const gap = 20;
-  return (
-    <Part id="somitomeroak" show={show}>
-      {pts.map((y, i) => (
-        <g key={i}>
-          <ellipse cx={500 - gap} cy={y} rx={9} ry={4} fill={C.mesoParaxial} opacity={0.65} />
-          <ellipse cx={500 + gap} cy={y} rx={9} ry={4} fill={C.mesoParaxial} opacity={0.65} />
-        </g>
-      ))}
-    </Part>
-  );
-}
-
-function SomitePairs({ t, scale = 1, onlyFrom = 0, onlyTo = TOTAL_SOMITES, fadeLen = BUD_FADE }: { t: number; scale?: number; onlyFrom?: number; onlyTo?: number; fadeLen?: number }) {
-  const day = dayFor(t);
-  const count = countFor(day);
-  const disappear = seg(t, 0.88, 0.93);
-  const gap = 22 * scale; // >= 22: keeps the neural tube (width 14, centred on x=500) visible between pairs
-  const rx = 10 * scale; // <= 12
-  const ry = 7 * scale;
-  return (
-    <Part id="somitak" quiet>
-      {SOMITES.filter((s) => s.index >= onlyFrom && s.index < onlyTo).map((s) => {
-        const a = fade(t, appearT(s.index), Infinity, fadeLen);
-        const show = s.index < count ? a * (s.transient ? 1 - disappear : 1) : 0;
-        if (show <= 0.02) return null;
-        return (
-          <g key={s.index} opacity={show}>
-            <ellipse cx={500 - gap} cy={s.y} rx={rx} ry={ry} fill={s.color} stroke="rgba(10,14,28,0.5)" strokeWidth={0.8} />
-            <ellipse cx={500 + gap} cy={s.y} rx={rx} ry={ry} fill={s.color} stroke="rgba(10,14,28,0.5)" strokeWidth={0.8} />
-          </g>
-        );
-      })}
-    </Part>
-  );
-}
-
-/**
- * Unsegmented paraxial mesoderm: caudal to the newest pair, down to the tail. The newest pair's slot
- * stays filled by the block (fading out) while the pair fades in on top of it — it pinches off, no gap.
- */
-function paraxialTail(t: number, fadeLen: number) {
-  const count = countFor(dayFor(t));
-  if (count <= 0) return { top: SOMITES[0].y - 7, slot: null as null | { y: number; o: number } };
-  const i = Math.min(TOTAL_SOMITES - 1, count - 1);
-  return { top: SOMITES[i].y + 7, slot: { y: SOMITES[i].y - 7, o: 1 - fade(t, appearT(i), Infinity, fadeLen) } };
-}
-/** Top of the block including the (fading) slot of the newest pair, for labels. */
-function paraxialTop(t: number, fadeLen: number) {
-  const { top, slot } = paraxialTail(t, fadeLen);
-  return slot ? lerp(top, slot.y, slot.o) : top;
-}
-const PARAX_BOT = Y_BOT - 16;
-
-/** Rect path with separate top / bottom corner radii (so stacked pieces join without notches). */
-const rrect = (x: number, y: number, w: number, h: number, rt: number, rb: number) => {
-  const a = Math.min(rt, h / 2, w / 2);
-  const b = Math.min(rb, h / 2, w / 2);
-  return `M${x},${y + a} Q${x},${y} ${x + a},${y} L${x + w - a},${y} Q${x + w},${y} ${x + w},${y + a} L${x + w},${y + h - b} Q${x + w},${y + h} ${x + w - b},${y + h} L${x + b},${y + h} Q${x},${y + h} ${x},${y + h - b} Z`;
+const ss = (v: number) => {
+  const k = clamp(v);
+  return k * k * (3 - 2 * k);
 };
+const f1 = (v: number) => v.toFixed(1);
 
-function ParaxialTail({ t, fadeLen, opacity }: { t: number; fadeLen: number; opacity: number }) {
-  const { top, slot } = paraxialTail(t, fadeLen);
-  const h = PARAX_BOT - top;
-  const slotOn = !!slot && slot.o > 0.01;
-  if (h <= 1 && !slotOn) return null;
-  return (
-    <Part id="mesodermo-paraxiala" quiet>
-      {[-1, 1].map((sd) => (
-        <g key={sd} fill={C.mesoParaxial}>
-          {h > 1 && <path d={rrect(500 + sd * 22 - 10, top, 20, h, slotOn ? 0 : 6, 6)} opacity={opacity} />}
-          {slotOn && <path d={rrect(500 + sd * 22 - 10, slot.y, 20, top - slot.y, 5, h > 1 ? 0 : 5)} opacity={opacity * slot.o} />}
-        </g>
-      ))}
-    </Part>
-  );
+function stateAt(t: number) {
+  const f = pairsAt(t);
+  const n = Math.floor(f + 1e-9);
+  const phase = f - n;
+  const tailFill = ss((f - 34) / 10);
+  const yTail = Y_S0 + P * (Math.min(f, N) + lerp(PSM_LEN, 1.4, tailFill)) + 4;
+  const clock = clamp((36 - rateAt(t)) / 18) * (n < N ? 1 : 0);
+  const regress = seg(t, 0.88, 0.935);
+  return { f, n, phase, yTail, clock, regress, day: dayOf(f) };
+}
+type St = ReturnType<typeof stateAt>;
+
+/** Closed outline symmetric about x = 500 from a half-width profile over [y0, y1]. */
+function profileD(y0: number, y1: number, hw: (y: number) => number, n = 80) {
+  const ys = Array.from({ length: n + 1 }, (_, i) => lerp(y0, y1, (1 - Math.cos((Math.PI * i) / n)) / 2));
+  return smoothPath([...ys.map((y): Pt => [500 - hw(y), y]), ...[...ys].reverse().slice(1, -1).map((y): Pt => [500 + hw(y), y])], true, 0.5);
+}
+const cap = (d: number, r: number) => (d >= r ? 1 : Math.sqrt(Math.max(0, 1 - ((r - d) / r) ** 2)));
+
+function bodyHW(st: St) {
+  const y1 = st.yTail + 8;
+  return {
+    y0: Y_HEAD - 6,
+    y1,
+    hw: (y: number) => {
+      const head = 46 * Math.exp(-(((y - 104) / 56) ** 2));
+      const trunk = 37 - 6 * ss((y - (y1 - 120)) / 120);
+      const w = Math.max(head, trunk);
+      return w * cap(y - (Y_HEAD - 6), 40) * cap(y1 - y, 16);
+    },
+  };
 }
 
-function NeuralAxis({ t }: { t: number }) {
-  const grow = seg(t, 0, 0.1);
-  return (
-    <Part id="hodi-neurala" quiet>
-      {(() => {
-        const y0 = Y_TOP - 4;
-        const y1 = y0 + lerp(30, Y_BOT - Y_TOP, grow);
-        // Tapering tube (the brain end a little broader), rounded at both ends.
-        const hw = (y: number) => lerp(9, 6, Math.max(0, (y - Y_TOP) / (Y_BOT - Y_TOP))) * capR(y - y0, 8) * capR(y1 - y, 6);
-        return (
-          <>
-            <path d={profileD(y0, y1, hw, 60)} fill={C.neural} opacity={0.7} />
-            <path d={profileD(y0 + 4, y1 - 3, (y) => hw(y) * 0.28, 60)} fill="#1b2f7a" opacity={0.5} />
-          </>
-        );
-      })()}
-    </Part>
-  );
-}
-
-export function SomiteDorsal({ t }: SceneProps) {
-  const day = dayFor(t);
-  const count = countFor(day);
-  const disappear = seg(t, 0.88, 0.93);
-  const regressed = disappear > 0.15 ? Math.round(7 * disappear) : 0;
-  // The body is a tall strip: magnify it so it fills the frame (labels keep their own size).
-  const z = zoom(500, 325, 1.2, 500, 325);
-  const at = (x: number, y: number) => z.at(x, y);
-  const tailTop = paraxialTop(t, BUD_FADE);
+function Body({ st }: { st: St }) {
+  const b = bodyHW(st);
   return (
     <g>
-      <g transform={z.transform}>
-        <BodyOutline t={t} />
-        <NeuralAxis t={t} />
-        <Somitomeres t={t} />
-        <ParaxialTail t={t} fadeLen={BUD_FADE} opacity={0.35} />
-        <SomitePairs t={t} />
-      </g>
-      <Note x={500} y={at(500, Y_TOP - 26)[1] + 4} tone="dim">Kraneala</Note>
-      <Note x={500} y={at(500, Y_BOT + 30)[1]} tone="dim">Kaudala</Note>
-      <g fontSize={15} fontWeight={700} fill="#e8eefc">
-        <text x={700} y={78}>
-          {Math.round(day)}. eguna · {count} / {TOTAL_SOMITES} bikote
-        </text>
-        {regressed > 0 && (
-          <text x={700} y={100} fontSize={12} fontWeight={400} fill="#ffb3b3">
-            −{regressed}: 1. okzipitala + azken kokzigeoak
-          </text>
-        )}
-      </g>
-      <Label id="somitomeroak" x={190} y={150} ax={at(478, Y_TOP + 22)[0]} ay={at(478, Y_TOP + 22)[1]} show={1} />
-      <Label id="somitak" x={190} y={280} ax={at(478, SOM_Y_TOP + 10)[0]} ay={at(478, SOM_Y_TOP + 10)[1]} show={fade(t, appearT(0), Infinity, 0.05)} />
-      <Label id="hodi-neurala" x={810} y={200} ax={500} ay={at(500, Y_TOP + 90)[1]} small />
-      <Label id="mesodermo-paraxiala" x={190} y={470} ax={at(478, lerp(tailTop, PARAX_BOT, 0.5))[0]} ay={at(478, lerp(tailTop, PARAX_BOT, 0.5))[1]} show={Math.max(0, Math.min(1, (PARAX_BOT - tailTop - 4) / 30))} small />
-      {REGION_STARTS.map((r) => {
-        const show = fade(t, appearT(r.start), Infinity, 0.05);
-        const y0 = SOMITES[r.start]?.y ?? SOM_Y_TOP;
-        const y1 = SOMITES[Math.min(r.start + r.n - 1, TOTAL_SOMITES - 1)]?.y ?? Y_BOT;
-        return (
-          <Note key={r.id} x={at(640, 0)[0]} y={at(0, (y0 + y1) / 2)[1]} tone="dim" size={13} show={show}>
-            {`${r.n} ${r.id}`}
-          </Note>
-        );
-      })}
+      <path d={profileD(b.y0, b.y1, b.hw)} fill="url(#w4b-body)" stroke="rgba(150,180,240,0.38)" strokeWidth={1.2} />
+      <path d={profileD(b.y0 + 3, b.y1 - 3, (y) => Math.max(0, b.hw(y) - 3))} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={2} />
     </g>
   );
 }
 
-/** Close-up on the caudal growth front: newest somites budding off the unsegmented paraxial mesoderm. */
-export function SomiteBud({ t }: SceneProps) {
-  const day = dayFor(t);
-  const count = countFor(day);
-  const frontIndex = Math.max(0, Math.min(TOTAL_SOMITES - 1, count - 1));
-  // The camera follows a continuous budding front (not the discrete newest pair), so it glides instead of stepping per pair.
-  const f = Math.max(0, Math.min(TOTAL_SOMITES - 4, 3 * (day - 20)));
-  const i0 = Math.floor(f);
-  const camY = lerp(SOMITES[i0].y, SOMITES[Math.min(TOTAL_SOMITES - 1, i0 + 1)].y, f - i0);
-  const z = zoom(500, camY, 2.2, 500, 340);
-  const gap = 22;
-  const rx = 10;
-  const ry = 7;
-  const paraxTop = paraxialTop(t, BUD_FADE);
-  const paraxH = Math.max(0, PARAX_BOT - paraxTop);
-  // The next pair takes shape inside the block before it pinches off (a faint outline, stronger as its time nears).
-  const nextIndex = count;
-  const forming = nextIndex < TOTAL_SOMITES ? Math.max(0, Math.min(1, 3 * (day - 20) - (nextIndex - 1.5))) : 0;
-  const nextY = nextIndex < TOTAL_SOMITES ? SOMITES[nextIndex].y : 0;
-  const paraxAt = z.at(500 - gap, paraxTop + Math.min(36, paraxH / 2));
+function NeuralTube({ st }: { st: St }) {
+  const y0 = Y_HEAD + 6;
+  const y1 = st.yTail - 6;
+  const hw = (y: number) => {
+    const brain = 25 * Math.exp(-(((y - 92) / 30) ** 2)) + 17 * Math.exp(-(((y - 140) / 26) ** 2));
+    return Math.max(brain, lerp(7.2, 4.6, ss((y - 300) / 260))) * cap(y - y0, 14) * cap(y1 - y, 6);
+  };
+  return (
+    <Part id="hodi-neurala" quiet>
+      <path d={profileD(y0, y1, hw)} fill={C.neural} stroke="#1e3a8a" strokeWidth={0.8} />
+      <path d={profileD(y0 + 6, y1 - 4, (y) => hw(y) * 0.26)} fill="#14204d" opacity={0.75} />
+      <path d={profileD(y0 + 2, y1 - 2, (y) => hw(y) * 0.8)} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={1} />
+    </Part>
+  );
+}
+
+/**
+ * Cranial somitomeres: the paraxial mesoderm beside the hindbrain only gathers into loose whorls —
+ * a continuous strip with soft bulges and no clefts (never cut into true somites).
+ */
+function Somitomeres({ detail }: { detail?: boolean }) {
+  const y0 = Y_S0 - 13 - 6 * 9.4 - 6;
+  const y1 = Y_S0 - 6;
+  const strip = (sd: number) => {
+    const ys = Array.from({ length: 57 }, (_, j) => lerp(y0, y1, j / 56));
+    const bulge = (y: number) => 1.6 * Math.cos(((y - (Y_S0 - 13)) / 9.4) * Math.PI * 2);
+    const tip = (y: number) => cap(y - y0, 5) * cap(y1 - y, 3);
+    const outer = ys.map((y): Pt => [500 + sd * (GX + (SW / 2 + 1 + bulge(y)) * tip(y)), y]);
+    const inner = ys.map((y): Pt => [500 + sd * (GX - (SW / 2 - 0.5 + bulge(y) * 0.5) * tip(y)), y]);
+    return smoothPath([...outer, ...inner.reverse()], true, 0.3);
+  };
+  return (
+    <Part id="somitomeroak">
+      {[-1, 1].map((sd) => (
+        <g key={sd}>
+          <path d={strip(sd)} fill={C.mesoParaxial} opacity={0.38} />
+          {Array.from({ length: 7 }, (_, i) => {
+            const y = Y_S0 - 13 - (6 - i) * 9.4;
+            return <ellipse key={i} cx={500 + sd * GX} cy={y} rx={4.2} ry={2.6} fill="url(#w4b-whorl)" />;
+          })}
+          {detail &&
+            Array.from({ length: 60 }, (_, j) => {
+              const y = y0 + 3 + j * ((y1 - y0 - 6) / 60);
+              return <circle key={`d${j}`} cx={f1(500 + sd * (GX + (rand(j * 3.3 + sd) - 0.5) * SW * 0.75))} cy={f1(y)} r={0.75} fill="rgba(80,6,18,0.55)" />;
+            })}
+        </g>
+      ))}
+    </Part>
+  );
+}
+
+/** One somite (or the block about to become one): `r` = epithelialisation (block → rounded epithelial ball). */
+function Somite({ x, y, i, r, detail, o }: { x: number; y: number; i: number; r: number; detail?: boolean; o: number }) {
+  const k = lerp(1, 0.78, ss((i - 30) / 14));
+  const w = SW * k * lerp(1, 0.94, r);
+  const h = (P - 1.25) * lerp(1, 0.97, r) * (0.9 + 0.1 * k);
+  const rx = lerp(1.4, Math.min(w, h) * 0.5, r);
+  const col = REGION_COL[Math.max(0, regionOf(i))];
+  const cells: ReactNode[] = [];
+  if (detail) {
+    // Radial epithelial cells round a small lumen (somitocoel) — appear as the block rounds up.
+    const nC = 12;
+    for (let j = 0; j < nC; j++) {
+      const a = (j / nC) * Math.PI * 2;
+      const ca = Math.cos(a);
+      const sa = Math.sin(a);
+      cells.push(
+        <g key={j} opacity={f1(r)}>
+          <path d={`M${f1(x + ca * w * 0.16)},${f1(y + sa * h * 0.16)}L${f1(x + ca * w * 0.5)},${f1(y + sa * h * 0.5)}`} stroke="rgba(70,6,16,0.45)" strokeWidth={0.35} />
+          <ellipse cx={f1(x + Math.cos(a + 0.26) * w * 0.36)} cy={f1(y + Math.sin(a + 0.26) * h * 0.36)} rx={0.85} ry={0.6} fill="rgba(70,6,16,0.75)" />
+        </g>,
+      );
+    }
+    // Before it rounds up it is loose mesenchyme, like the strip it came from.
+    for (let j = 0; j < 7; j++)
+      cells.push(<circle key={`m${j}`} cx={f1(x + (rand(i * 7.3 + j) - 0.5) * w * 0.8)} cy={f1(y + (rand(i * 3.1 + j * 1.9) - 0.5) * h * 0.7)} r={0.8} fill="rgba(80,6,18,0.7)" opacity={f1(1 - r)} />);
+  }
+  return (
+    <g opacity={f1(o)}>
+      <rect x={f1(x - w / 2)} y={f1(y - h / 2)} width={f1(w)} height={f1(h)} rx={f1(rx)} fill={col} stroke="rgba(40,4,12,0.55)" strokeWidth={0.55} />
+      <rect x={f1(x - w / 2)} y={f1(y - h / 2)} width={f1(w)} height={f1(h)} rx={f1(rx)} fill="url(#g-cell)" opacity={0.75} />
+      {detail && r > 0.05 && <ellipse cx={f1(x)} cy={f1(y)} rx={f1(w * 0.13 * r)} ry={f1(h * 0.14 * r)} fill="#3a0812" opacity={0.8} />}
+      {cells}
+    </g>
+  );
+}
+
+function SomitePairs({ st, detail, from = 0, to = N }: { st: St; detail?: boolean; from?: number; to?: number }) {
+  const out: ReactNode[] = [];
+  for (let i = Math.max(0, from); i < Math.min(st.n, to); i++) {
+    const age = st.f - (i + 1);
+    const r = ss(age / 1.4);
+    const gone = transient(i) ? st.regress : 0;
+    const o = 1 - 0.8 * gone;
+    for (const sd of [-1, 1]) out.push(<Somite key={`${i}${sd}`} x={500 + sd * GX} y={yS(i)} i={i} r={r} detail={detail} o={o} />);
+  }
+  return (
+    <Part id="somitak" quiet>
+      {out}
+    </Part>
+  );
+}
+
+/** Unsegmented paraxial mesoderm: from the somite being cut off down to the tail bud, with the clock wave and the forming cleft. */
+function Unsegmented({ st, detail }: { st: St; detail?: boolean }) {
+  if (st.n >= N) return null;
+  const top = yS(st.n) - (P - 1.25) / 2;
+  const bot = st.yTail - 10;
+  if (bot <= top + 2) return null;
+  const cleftY = yS(st.n) + P / 2;
+  const cleft = ss((st.phase - 0.55) / 0.45);
+  // The wave runs from the tail bud to the forming boundary within each period.
+  const wk = ss(st.phase / 0.85);
+  const wy = lerp(bot - 6, cleftY + 1, wk);
+  const wOp = Math.sin(Math.PI * Math.min(1, st.phase / 0.92)) * st.clock;
+  const strip = (sd: number) => {
+    const xIn = 500 + sd * (GX - SW / 2);
+    const xOut = 500 + sd * (GX + SW / 2);
+    const taper = (y: number) => 1 - 0.45 * ss((y - (bot - 26)) / 26);
+    const ys = Array.from({ length: 24 }, (_, j) => lerp(top, bot, j / 23));
+    const mid = 500 + sd * GX;
+    const outer = ys.map((y): Pt => [mid + (xOut - mid) * taper(y), y]);
+    const inner = ys.map((y): Pt => [mid + (xIn - mid) * taper(y), y]);
+    return smoothPath([...outer, ...inner.reverse()], true, 0.25);
+  };
+  const dots: ReactNode[] = [];
+  if (detail)
+    for (let j = 0; j < 420; j++) {
+      const y = Y_S0 - 6 + j * 1.45;
+      if (y < top + 1 || y > bot - 2) continue;
+      for (const sd of [-1, 1]) {
+        const x = 500 + sd * (GX + (rand(j * 2.7 + sd) - 0.5) * SW * 0.8);
+        dots.push(<circle key={`${j}${sd}`} cx={f1(x)} cy={f1(y)} r={0.8} fill="rgba(80,6,18,0.7)" />);
+      }
+    }
+  return (
+    <Part id="mesodermo-paraxiala">
+      {[-1, 1].map((sd) => (
+        <g key={sd}>
+          <path d={strip(sd)} fill={C.mesoParaxial} opacity={0.62} />
+          <path d={strip(sd)} fill="url(#g-shade)" opacity={0.4} />
+          {wOp > 0.02 && (
+            <ellipse cx={500 + sd * GX} cy={f1(wy)} rx={SW * 0.5} ry={f1(lerp(9, 3.4, wk))} fill="url(#w4b-wave)" opacity={f1(wOp)} />
+          )}
+          {/* The cleft cuts in from both edges of the strip until the block is free. */}
+          {cleft > 0.01 && (
+            <>
+              <rect x={f1(500 + sd * GX + (sd > 0 ? SW / 2 - (SW / 2) * cleft : -SW / 2))} y={f1(cleftY - 0.9)} width={f1((SW / 2) * cleft)} height={1.8} rx={0.9} fill="#0d0f1c" />
+              <rect x={f1(500 + sd * GX + (sd > 0 ? -SW / 2 : SW / 2 - (SW / 2) * cleft))} y={f1(cleftY - 0.9)} width={f1((SW / 2) * cleft)} height={1.8} rx={0.9} fill="#0d0f1c" />
+            </>
+          )}
+        </g>
+      ))}
+      {dots}
+    </Part>
+  );
+}
+
+function Defs() {
+  return (
+    <defs>
+      <linearGradient id="w4b-body" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#24324f" />
+        <stop offset="1" stopColor="#141c30" />
+      </linearGradient>
+      <radialGradient id="w4b-whorl">
+        <stop offset="0" stopColor="#ff9a9a" stopOpacity={0.35} />
+        <stop offset="1" stopColor="#ff9a9a" stopOpacity={0} />
+      </radialGradient>
+      <radialGradient id="w4b-wave">
+        <stop offset="0" stopColor="#fff1c9" stopOpacity={0.95} />
+        <stop offset="0.6" stopColor="#ffd28a" stopOpacity={0.45} />
+        <stop offset="1" stopColor="#ffd28a" stopOpacity={0} />
+      </radialGradient>
+    </defs>
+  );
+}
+
+/** Live day / pair counter (top left) and, at the age step, the rule that turns one into the other. */
+function Counter({ st, t }: { st: St; t: number }) {
+  const pairs = Math.max(0, Math.min(N, st.n));
+  const lost = st.regress > 0.15 ? Math.round(7 * st.regress) : 0;
+  const rule = seg(t, 0.95, 0.985);
+  return (
+    <OnTop>
+      <g pointerEvents="none">
+        <rect x={22} y={44} width={168} height={rule > 0.02 ? 104 : 78} rx={10} fill="rgba(12,14,22,0.88)" stroke="rgba(232,238,252,0.16)" />
+        <text x={36} y={64} fontSize={10.5} letterSpacing="0.08em" fill="#8a97b3">
+          EGUNA
+        </text>
+        <text x={36} y={92} fontSize={26} fontWeight={700} fill="#e8eefc">
+          {st.f < 1 ? '19' : String(Math.floor(st.day + 1e-6))}
+        </text>
+        <text x={98} y={64} fontSize={10.5} letterSpacing="0.08em" fill="#8a97b3">
+          BIKOTEAK
+        </text>
+        <text x={98} y={92} fontSize={26} fontWeight={700} fill="#ffb4b4">
+          {String(pairs)}
+          <tspan fontSize={13} fill="#8a97b3" fontWeight={500}>{` / ${N}`}</tspan>
+        </text>
+        {lost > 0 && (
+          <text x={36} y={112} fontSize={11.5} fill="#ffb3b3">
+            {`−${lost}: 1. okzipitala + azken kokzigeoak`}
+          </text>
+        )}
+        {rule > 0.02 && (
+          <text x={36} y={136} fontSize={11.5} fontWeight={600} fill="#ffd28a" opacity={rule}>
+            Adina ≈ 20 + (bikoteak − 1) / 3
+          </text>
+        )}
+      </g>
+    </OnTop>
+  );
+}
+
+/** Region brackets beside the body: each grows as its somites form. */
+function Regions({ st, at, k }: { st: St; at: (x: number, y: number) => Pt; k: number }) {
+  return (
+    <>
+      {REGIONS.map((r, j) => {
+        if (st.n <= r.start) return null;
+        const last = Math.min(st.n, r.start + r.n) - 1;
+        const [x, y0] = at(500 + 44, yS(r.start) - P * 0.42);
+        const [, y1] = at(500 + 44, yS(last) + P * 0.42);
+        const show = clamp((st.f - r.start - 0.6) * 2);
+        return (
+          <g key={j} opacity={f1(show)} pointerEvents="none">
+            <path d={`M${f1(x)},${f1(y0)}h${f1(4 * k)}V${f1(y1)}h${f1(-4 * k)}`} fill="none" stroke={r.color} strokeWidth={1.6} strokeLinejoin="round" />
+          </g>
+        );
+      })}
+      {REGIONS.map((r, j) => {
+        if (st.n <= r.start) return null;
+        const last = Math.min(st.n, r.start + r.n) - 1;
+        const [x, ym] = at(500 + 44, (yS(r.start) + yS(last)) / 2);
+        return (
+          <Note key={`n${j}`} x={x + 4 * k + 8} y={ym} align="start" tone="dim" size={12} show={clamp((st.f - r.start - 0.6) * 2)}>
+            {`${r.label} ${r.name}`}
+          </Note>
+        );
+      })}
+    </>
+  );
+}
+
+export function SomiteDorsal({ t }: SceneProps) {
+  const st = stateAt(t);
+  const b = bodyHW(st);
+  const len = b.y1 - b.y0;
+  const s = Math.min(1.75, 520 / len);
+  const z = zoom(500, (b.y0 + b.y1) / 2, s, 500, 330);
+  const at = z.at;
+  const psmMid = lerp(yS(Math.min(st.n, N - 1)), st.yTail - 10, 0.5);
+  const psmShow = st.n < N ? clamp((st.yTail - 10 - yS(st.n)) / 20) : 0;
+  const newest = Math.max(0, Math.min(st.n, N) - 1);
+  const somAt = at(500 - GX - 4, yS(Math.min(newest, 4)));
   return (
     <g>
-      <rect x={0} y={0} width={1000} height={640} fill="#101828" />
+      <Defs />
       <g transform={z.transform}>
-        <BodyOutline t={t} />
-        <NeuralAxis t={t} />
-        <Somitomeres t={t} />
-        <ParaxialTail t={t} fadeLen={BUD_FADE} opacity={0.55} />
-        {forming > 0.02 && count > 0 &&
-          [-1, 1].map((sd) => (
-            <ellipse key={sd} cx={500 + sd * gap} cy={nextY} rx={rx - 1} ry={ry - 1} fill="none" stroke="rgba(10,14,28,0.7)" strokeWidth={0.9} strokeDasharray="2 2" opacity={forming} />
-          ))}
-        <SomitePairs t={t} scale={1} onlyFrom={Math.max(0, frontIndex - 7)} onlyTo={Math.min(TOTAL_SOMITES, frontIndex + 1)} fadeLen={BUD_FADE} />
+        <Body st={st} />
+        <Somitomeres />
+        <Unsegmented st={st} />
+        <SomitePairs st={st} />
+        <NeuralTube st={st} />
       </g>
-      <Label id="somitak" x={190} y={220} ax={z.at(500 - gap, camY - 14)[0]} ay={z.at(500 - gap, camY - 14)[1]} show={seg(t, appearT(0), appearT(0) + 0.03)} />
-      <Label id="mesodermo-paraxiala" x={190} y={440} ax={paraxAt[0]} ay={paraxAt[1]} show={Math.max(0, Math.min(1, (paraxH - 4) / 24))} />
-      <Label id="somitomeroak" x={810} y={140} ax={z.at(478, Y_TOP + 22)[0]} ay={z.at(478, Y_TOP + 22)[1]} show={1 - seg(t, appearT(3), appearT(5))} small />
-      <Note x={500} y={90} tone="accent">Hazkuntza-gunea: bikote berriak egunero (~3/egun)</Note>
+      <Regions st={st} at={at} k={s} />
+      <Counter st={st} t={t} />
+      <Note x={500} y={at(500, Y_HEAD - 20)[1]} tone="dim">
+        Kraneala
+      </Note>
+      <Note x={500} y={Math.min(598, at(500, b.y1 + 14)[1])} tone="dim">
+        Kaudala
+      </Note>
+      <Label id="somitomeroak" x={190} y={190} ax={at(500 - GX - 6, Y_S0 - 40)[0]} ay={at(500 - GX - 6, Y_S0 - 40)[1]} />
+      <Label id="somitak" x={190} y={270} ax={somAt[0]} ay={somAt[1]} show={clamp(st.f * 2 - 1.2)} />
+      <Label id="mesodermo-paraxiala" x={190} y={430} ax={at(500 - GX, psmMid)[0]} ay={at(500 - GX, psmMid)[1]} show={psmShow} small={st.f > 3} />
+      <Label id="hodi-neurala" x={810} y={250} ax={at(503, Y_S0 + 60)[0]} ay={at(503, Y_S0 + 60)[1]} small />
+    </g>
+  );
+}
+
+/** Close-up on the caudal growth zone: the clock wave, the cleft and the new somite rounding up. */
+export function SomiteBud({ t }: SceneProps) {
+  const st = stateAt(t);
+  const front = Math.min(yS(Math.min(st.f, N - 0.5)) + P * 0.5, yS(N - 1));
+  const camY = front - P * 0.4;
+  const s = 3.1;
+  const z = zoom(500, camY, s, 470, 330);
+  const at = z.at;
+  const lo = Math.floor((camY - 330 / s - Y_S0) / P) - 1;
+  const hi = Math.ceil((camY + 330 / s - Y_S0) / P) + 1;
+  const newest = Math.min(st.n, N) - 1;
+  const nAt = newest >= 0 ? at(500 - GX - SW / 2 + 2, yS(newest)) : at(500 - GX, Y_S0);
+  const psmY = lerp(Math.max(yS(Math.min(st.n, N - 1)), camY - 20), Math.min(st.yTail - 12, camY + 90), 0.45);
+  const psmShow = st.n < N ? 1 : 0;
+  const cranial = clamp((Y_S0 + 40 - (camY - 330 / s)) / 30);
+  return (
+    <g>
+      <rect x={0} y={0} width={1000} height={640} fill="#0e1322" />
+      <Defs />
+      <g transform={z.transform}>
+        <Body st={st} />
+        {cranial > 0.02 && <Somitomeres detail />}
+        <Unsegmented st={st} detail />
+        <SomitePairs st={st} detail from={lo} to={hi} />
+        <NeuralTube st={st} />
+      </g>
+      <Counter st={st} t={t} />
+      <Note x={500} y={52} tone="accent" size={13}>
+        Hazkuntza-gunea: uhin bakoitzak somita-bikote berri bat mozten du (~8 orduro)
+      </Note>
+      <Label id="somitak" x={190} y={250} ax={nAt[0]} ay={nAt[1]} show={clamp(st.f * 2 - 1.2)} />
+      <Label id="mesodermo-paraxiala" x={190} y={430} ax={at(500 - GX - 4, psmY)[0]} ay={at(500 - GX - 4, psmY)[1]} show={psmShow * clamp((st.yTail - 12 - yS(st.n)) / 10)} />
+      <Label id="somitomeroak" x={190} y={170} ax={at(500 - GX - 8, Y_S0 - 22)[0]} ay={at(500 - GX - 8, Y_S0 - 22)[1]} show={cranial * (at(500, Y_S0 - 22)[1] > 40 ? 1 : 0)} small={st.f > 1} />
+      <Label id="hodi-neurala" x={810} y={300} ax={at(503, camY + 6)[0]} ay={at(503, camY + 6)[1]} small />
     </g>
   );
 }
