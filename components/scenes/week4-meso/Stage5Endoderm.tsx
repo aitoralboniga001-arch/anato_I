@@ -40,7 +40,7 @@ const ENDO_EDGE = '#b8891f';
 const LUMEN = '#2a2110';
 const SPL = '#c8505f'; // splanchnic mesoderm coat (errai orria)
 const SPL_EDGE = 'rgba(120,20,40,0.55)';
-const BODY = '#3a1d2b';
+const BODY = '#3c262d'; // intra-embryonic mesoderm: red family, kept low so the gut reads first
 const BODY_EDGE = C.surfaceEcto;
 const EXTRA = C.mesoExtra;
 const AMNION_LINE = 'rgba(143,180,247,0.85)';
@@ -92,9 +92,9 @@ const offAt = (sp: Sm[], u: number, d: number): Pt => {
 const range = (u0: number, u1: number, n: number) => Array.from({ length: n + 1 }, (_, i) => lerp(u0, u1, i / n));
 
 /** Closed outline of a tube between u0 and u1 with half-width hw(u); round caps where asked. */
-function tubeD(sp: Sm[], u0: number, u1: number, hw: (u: number) => number, n = 40, cap0 = false, cap1 = false): string {
+function tubeD(sp: Sm[], u0: number, u1: number, hw: (u: number) => number, n = 40, cap0 = false, cap1 = false, dors?: (u: number) => number): string {
   const us = range(u0, u1, n);
-  const L = us.map((u) => offAt(sp, u, hw(u)));
+  const L = us.map((u) => offAt(sp, u, hw(u) + (dors ? dors(u) : 0)));
   const R = us.map((u) => offAt(sp, u, -hw(u)));
   // Round cap: from one side round the tip to the other; dir 1 = forwards (end), -1 = backwards (start).
   const cap = (u: number, dir: 1 | -1): Pt[] => {
@@ -213,15 +213,25 @@ function thyroPath(g: number): Pt[] {
   return [o, offAt(GS, U.thy + 0.006, -10 - 16 * tip), offAt(GS, U.thy + 0.02 * tip, -14 - 26 * tip), offAt(GS, U.thy + 0.045 * tip, -16 - 32 * tip)];
 }
 
-/** Pharyngeal pouches seen through the plane (they are lateral): four lobes off the pharynx, 1st biggest. */
-function pouchLobes(g: number) {
-  const us = [0.22, 0.42, 0.6, 0.76].map((k) => lerp(0.04, U.pharEnd - 0.01, k));
-  return us.map((u, i) => {
-    const s = at(GS, u);
-    const r = lerp(2, [9, 8, 7, 5.5][i], g);
-    const d = gutHW(u, { ...timing(0), phar: 1 } as Tm) + r * 0.55;
-    return { c: [s.p[0] + s.n[0] * d, s.p[1] + s.n[1] * d] as Pt, r, n: s.n };
-  });
+/**
+ * Pharyngeal pouches: outpocketings of the pharyngeal endoderm (they are lateral; drawn here off the roof of the
+ * pharynx, as in a sagittal-ish view). `pouchOut(u, g)` is how far the wall bulges at u, so the coat, the endoderm and
+ * the lumen of the pharynx all carry the pouches and stay continuous with them.
+ */
+const GUT_LEN = (() => {
+  let l = 0;
+  for (let i = 1; i < GS.length; i++) l += Math.hypot(GS[i].p[0] - GS[i - 1].p[0], GS[i].p[1] - GS[i - 1].p[1]);
+  return l;
+})();
+const POUCHES = [0.25, 0.45, 0.63, 0.79].map((k, i) => ({ u: lerp(0.03, U.pharEnd, k), w: [10.5, 10, 9, 7.5][i] / GUT_LEN, d: [22, 19, 15, 11][i] }));
+function pouchOut(u: number, g: number) {
+  if (g <= 0.001) return 0;
+  let o = 0;
+  for (const q of POUCHES) {
+    const x = (u - q.u) / q.w;
+    if (Math.abs(x) < 1) o += q.d * g * (1 - x * x) ** 0.55;
+  }
+  return o;
 }
 
 /** Vitelline duct and yolk sac (outside the body, below the umbilical ring). */
@@ -310,26 +320,29 @@ function Heart() {
     true,
     0.6,
   );
+  // S-shaped looped heart tube: outflow (cranial, towards the arches) → ventricular loop → atrial end (caudal, dorsal).
   const tube = smoothPath(
     [
-      [384, 352],
-      [420, 336],
-      [462, 352],
-      [452, 384],
-      [412, 396],
-      [400, 416],
-      [440, 420],
+      [474, 336],
+      [440, 330],
+      [406, 344],
+      [400, 370],
+      [430, 384],
+      [462, 396],
+      [462, 418],
+      [430, 426],
+      [396, 420],
     ],
     false,
-    0.6,
+    0.55,
   );
   return (
     <g>
       <path d={cav} fill="#1c0f18" stroke="rgba(255,122,122,0.35)" strokeWidth={1.4} />
       <Part id="bihotz-hodia" quiet>
-        <path d={tube} fill="none" stroke="#7a1626" strokeWidth={17} strokeLinecap="round" />
-        <path d={tube} fill="none" stroke="#c43a4a" strokeWidth={13} strokeLinecap="round" />
-        <path d={tube} fill="none" stroke="#5a0f1c" strokeWidth={4} strokeLinecap="round" opacity={0.7} />
+        <path d={tube} fill="none" stroke="#5e1020" strokeWidth={24} strokeLinecap="round" strokeLinejoin="round" />
+        <path d={tube} fill="none" stroke="#93303c" strokeWidth={20} strokeLinecap="round" strokeLinejoin="round" />
+        <path d={tube} fill="none" stroke="#d8606c" strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" opacity={0.5} transform="translate(-2.5 -3)" />
       </Part>
     </g>
   );
@@ -338,6 +351,8 @@ function Heart() {
 /** The gut and everything that buds from it, drawn in three passes (coat, endoderm, lumen) so branches merge cleanly. */
 function Gut({ tm }: { tm: Tm }) {
   const hw = (u: number) => gutHW(u, tm);
+  const po = (u: number) => pouchOut(u, tm.pouches);
+  const NG = 240;
   const vitW = lerp(15, 5.5, tm.vit);
   const vit = spine(vitPath(), 8);
   const vhw = (u: number) => lerp(vitW + 3, vitW, clamp(u / 0.15));
@@ -349,7 +364,6 @@ function Gut({ tm }: { tm: Tm }) {
   const thw = () => 2.6;
   const respOn = tm.resp > 0.01;
   const thyOn = tm.thyro > 0.01;
-  const lobes = pouchLobes(tm.pouches);
   const rTip = at(rp, 1);
   const tTip = at(tp, 1);
   const bud = lerp(3, 7, tm.resp);
@@ -369,7 +383,7 @@ function Gut({ tm }: { tm: Tm }) {
       {/* 1 · splanchnic mesoderm coat (errai orria) */}
       <Part id="errai-orria">
         <g fill={SPL} stroke={SPL_EDGE} strokeWidth={1}>
-          <path d={tubeD(GS, 0, 1, (u) => hw(u) + EN + SP, 90)} />
+          <path d={tubeD(GS, 0, 1, (u) => hw(u) + EN + SP, NG, false, false, po)} />
           <path d={tubeD(vit, 0, 0.32, (u) => vhw(u) + EN + SP * 0.8, 12)} />
           {respOn && <path d={tubeD(rp, 0, 1, (u) => rhw(u) + EN + 5, 14, false, true)} opacity={clamp(tm.resp * 3)} />}
         </g>
@@ -377,19 +391,17 @@ function Gut({ tm }: { tm: Tm }) {
       {/* 2 · endoderm */}
       {seg3.map((s) => (
         <Part key={s.id} id={s.id}>
-          <path d={tubeD(GS, s.u0, s.u1, (u) => hw(u) + EN, 40)} fill={ENDO} stroke={ENDO_EDGE} strokeWidth={0.8} />
+          <path d={tubeD(GS, s.u0, s.u1, (u) => hw(u) + EN, Math.round(NG * (s.u1 - s.u0)) + 8, false, false, po)} fill={ENDO} stroke={ENDO_EDGE} strokeWidth={0.8} />
         </Part>
       ))}
       <Part id="hodi-onfalomesenterikoa">
         <path d={tubeD(vit, 0.03, 1, (u) => vhw(u) + EN, 26)} fill={ENDO} stroke={ENDO_EDGE} strokeWidth={0.8} />
       </Part>
       {tm.pouches > 0.01 && (
-        <Part id="faringe-poltsak" show={tm.pouches}>
-          {lobes.map((l, i) => (
-            <g key={i}>
-              <circle cx={f1(l.c[0])} cy={f1(l.c[1])} r={f1(l.r + EN)} fill="#f7d98a" stroke={ENDO_EDGE} strokeWidth={0.8} opacity={0.85} />
-              <circle cx={f1(l.c[0])} cy={f1(l.c[1])} r={f1(l.r)} fill="#4a3a18" opacity={0.85} />
-            </g>
+        <Part id="faringe-poltsak" show={clamp(tm.pouches * 2.5)}>
+          {/* each pouch body: the bulging endodermal wall (its lumen is the pharynx's, drawn in pass 3) */}
+          {POUCHES.map((q, i) => (
+            <path key={i} d={tubeD(GS, q.u - q.w * 1.15, q.u + q.w * 1.15, (u) => hw(u) - 2, 20, false, false, (u) => po(u) + EN + 2)} fill={ENDO} stroke={ENDO_EDGE} strokeWidth={0.8} />
           ))}
         </Part>
       )}
@@ -417,13 +429,13 @@ function Gut({ tm }: { tm: Tm }) {
         <path d={tubeD(all, 0.02, 1, (u) => ahw(u) - 0.6, 30)} fill={LUMEN} />
       </Part>
       {/* 3 · lumen, tinted by region once the three parts are named */}
-      <path d={tubeD(GS, 0.004, 0.996, hw, 90)} fill={LUMEN} />
+      <path d={tubeD(GS, 0.004, 0.996, hw, NG, false, false, po)} fill={LUMEN} />
       <path d={tubeD(vit, 0, 0.995, vhw, 26)} fill={LUMEN} />
       {tm.parts > 0.01 &&
-        seg3.map((s) => <path key={s.id} d={tubeD(GS, Math.max(0.004, s.u0), Math.min(0.996, s.u1), hw, 40)} fill={s.tint} opacity={tm.parts} />)}
+        seg3.map((s) => <path key={s.id} d={tubeD(GS, Math.max(0.004, s.u0), Math.min(0.996, s.u1), hw, Math.round(NG * (s.u1 - s.u0)) + 8, false, false, po)} fill={s.tint} opacity={tm.parts} />)}
       {tm.phar > 0.01 && (
         <Part id="faringe-hestea" show={tm.phar}>
-          <path d={tubeD(GS, 0.004, U.pharEnd, hw, 30)} fill="rgba(255,214,120,0.22)" stroke="#fde68a" strokeWidth={1.4} />
+          <path d={tubeD(GS, 0.004, U.pharEnd, hw, 90, false, false, po)} fill="rgba(255,214,120,0.22)" stroke="#fde68a" strokeWidth={1.4} />
         </Part>
       )}
     </g>
@@ -444,8 +456,8 @@ function YolkSac({ tm }: { tm: Tm }) {
   );
 }
 
-/** Close-up window (steps 3–6), clear of the name columns. */
-const WIN = { x0: 204, y0: 40, x1: 796, y1: 588 };
+/** While the camera is in, names whose anchor leaves the drawing area between the name columns are hidden. */
+const WIN = { x0: 198, y0: 8, x1: 802, y1: 632 };
 
 function camera(tm: Tm) {
   const s = lerp(1, 1.62, tm.zoom);
@@ -481,25 +493,18 @@ export function GutSagittal({ t }: SceneProps) {
   const pit = proctoPit(tm);
   void zoomed;
   const A = (p: Pt) => cam.at(p);
-  // While the camera is in, a name shows only if its anchor is inside the close-up window.
+  // While the camera is in, a name shows only if its anchor is inside the drawing area.
   const inWin = (q: Pt) => (tm.zoom < 0.01 ? 1 : clamp(Math.min(q[0] - WIN.x0, WIN.x1 - q[0], q[1] - WIN.y0, WIN.y1 - q[1]) / 14));
   const L = (id: string, x: number, y: number, p: Pt, show = 1, small = false) => {
     const q = A(p);
     return <Label key={id} id={id} x={x} y={y} ax={q[0]} ay={q[1]} show={show * inWin(q)} small={small} />;
   };
-  const lobes = pouchLobes(tm.pouches);
+  const p2 = POUCHES[1];
   const rp = respPath(tm.resp);
   const tp = thyroPath(tm.thyro);
 
   return (
     <g>
-      <defs>
-        <clipPath id="w4b-gut-win">
-          <rect x={f1(lerp(-10, WIN.x0, tm.zoom))} y={f1(lerp(-10, WIN.y0, tm.zoom))} width={f1(lerp(1020, WIN.x1 - WIN.x0, tm.zoom))} height={f1(lerp(660, WIN.y1 - WIN.y0, tm.zoom))} rx={f1(18 * tm.zoom)} />
-        </clipPath>
-      </defs>
-      {tm.zoom > 0.01 && <rect x={WIN.x0} y={WIN.y0} width={WIN.x1 - WIN.x0} height={WIN.y1 - WIN.y0} rx={18} fill="#0b0a10" stroke="rgba(200,210,240,0.22)" strokeWidth={1.2} opacity={tm.zoom} />}
-      <g clipPath="url(#w4b-gut-win)">
       <g transform={cam.transform}>
         {/* Amniotic cavity round the body and cord (amnion = the thin outer line). */}
         <Part id="amnios-barrunbea" quiet>
@@ -518,7 +523,7 @@ export function GutSagittal({ t }: SceneProps) {
         <YolkSac tm={tm} />
         {/* Body */}
         <path d={body} fill={BODY} />
-        <path d={body} fill="url(#p-meso-intra)" opacity={0.18} />
+        <path d={body} fill="url(#p-meso-intra)" opacity={0.07} />
         <path d={body} fill="none" stroke={BODY_EDGE} strokeWidth={3.2} />
         <Heart />
         <Part id="hodi-neurala">
@@ -547,7 +552,6 @@ export function GutSagittal({ t }: SceneProps) {
           <path d={memb(g1, gutHW(1, tm) + EN)} stroke={C.ectoderm} strokeWidth={3.4} strokeLinecap="round" />
         </Part>
       </g>
-      </g>
 
       <Note x={500} y={612} tone="warn" size={12}>
         KONTUZ: mukosa bakarrik da endodermikoa; gainerako geruzak errai orritik datoz.
@@ -555,7 +559,7 @@ export function GutSagittal({ t }: SceneProps) {
 
       {L('hodi-neurala', 190, 96, offAt(N, 0.3, hwN(0.3) * 0.6))}
       {L('notokorda', 190, 136, offAt(N, 0.33, -(hwN(0.33) + 6.5)), 1, true)}
-      {L('faringe-poltsak', 190, 176, lobes[1].c, tm.pouches)}
+      {L('faringe-poltsak', 190, 176, offAt(GS, p2.u, gutHW(p2.u, tm) + pouchOut(p2.u, tm.pouches) + EN * 0.5), tm.pouches)}
       {L('faringe-hestea', 190, 216, at(GS, U.pharEnd * 0.5).p, tm.phar)}
       {L('hodi-tiroglosoa', 190, 256, tp[tp.length - 1], tm.thyro)}
       {L('mintz-bukofaringeoa', 190, 290, at(GS, 0).p)}
