@@ -35,6 +35,7 @@ export const readVisited = (week: number): string[] => {
 };
 
 export const markVisited = (week: number, stageId: string) => {
+  writeLast(week, stageId);
   if (readVisited(week).includes(stageId)) return;
   const all = read();
   const list = [...(all[week] ?? []), stageId];
@@ -58,6 +59,42 @@ export const useVisited = (week: number) =>
   );
 
 let allCache: Store | null = null;
+
+// Where the student last was (topic + stage), for the home page's "Jarraitu".
+const LAST_KEY = 'enbrioatlas:last';
+export interface LastPlace {
+  week: number;
+  stage: string;
+}
+let lastCache: LastPlace | null | undefined;
+const readLast = (): LastPlace | null => {
+  if (lastCache === undefined) {
+    try {
+      const v = JSON.parse(window.localStorage.getItem(LAST_KEY) ?? 'null') as LastPlace | null;
+      lastCache = v && typeof v.week === 'number' && typeof v.stage === 'string' ? v : null;
+    } catch {
+      lastCache = null;
+    }
+  }
+  return lastCache;
+};
+function writeLast(week: number, stage: string) {
+  const cur = readLast();
+  if (cur?.week === week && cur.stage === stage) return;
+  lastCache = { week, stage };
+  try {
+    window.localStorage.setItem(LAST_KEY, JSON.stringify(lastCache));
+  } catch {}
+  listeners.forEach((l) => l());
+}
+
+/** The last stage opened in the simulator; null on the server, during hydration and before any visit. */
+export const useLastPlace = () =>
+  useSyncExternalStore(
+    subscribe,
+    readLast,
+    () => null,
+  );
 const EMPTY: Store = {};
 
 /** Visited stages of every topic at once (the home page's study route). */

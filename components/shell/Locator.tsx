@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Orientation, PlaneKind } from '@/lib/sim/types';
 import { SHAPE_TEXT, Specimen, shapeFor } from './Specimen';
 import { flipOf } from './ViewBridge';
@@ -57,29 +57,42 @@ export function Locator({
   note?: string;
   hold?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
-  const auto = useRef(false);
+  // 'auto': opened by itself the first time a plane is met; 'user': opened from the button.
+  const [open, setOpen] = useState<false | 'auto' | 'user'>(false);
+  // The card folds back into the thumbnail: a short glow on the button says where it went.
+  const [absorb, setAbsorb] = useState(0);
   const shape = shapeFor(week, day, plane);
   const flip = flipOf(orientation);
   const info = PLANE_TEXT[plane];
 
   // First time a plane is met: explain it once (the [?] brings it back any time), but not over
-  // another window (the welcome, a question…): it waits for it to close.
+  // another window (the welcome, a question, the view-change card…): it waits for it to close.
   useEffect(() => {
     if (hold || !['sagitala', 'zeharkakoa', 'koronala', 'dortsala'].includes(plane) || readSeen().includes(plane)) return;
-    auto.current = true;
     const on = window.setTimeout(() => {
       markSeen(plane);
-      setOpen(true);
+      setOpen('auto');
     }, 400);
-    const off = window.setTimeout(() => {
-      if (auto.current) setOpen(false);
-    }, 9400);
-    return () => {
-      window.clearTimeout(on);
-      window.clearTimeout(off);
-    };
+    return () => window.clearTimeout(on);
   }, [plane, hold]);
+
+  // The automatic card folds away by itself after a while.
+  useEffect(() => {
+    if (open !== 'auto') return;
+    const off = window.setTimeout(() => {
+      setOpen(false);
+      setAbsorb((n) => n + 1);
+    }, 8000);
+    return () => window.clearTimeout(off);
+  }, [open]);
+  // When another window takes the stage (a question, the view-change card…), an open card gives way;
+  // the student can still open it again over that window on purpose.
+  const [wasHeld, setWasHeld] = useState(hold);
+  if (wasHeld !== hold) {
+    setWasHeld(hold);
+    if (hold && open) setOpen(false);
+  }
+  const shown = !!open;
 
   const where =
     plane === 'zeharkakoa' || plane === 'xehetasuna'
@@ -95,13 +108,10 @@ export function Locator({
   return (
     <div className="loc">
       <button
-        key={viewKey}
-        className={`loc-btn${open ? ' is-on' : ''}`}
-        onClick={() => {
-          auto.current = false;
-          setOpen((v) => !v);
-        }}
-        aria-expanded={open}
+        key={absorb ? `${viewKey}/${absorb}` : viewKey}
+        className={`loc-btn${shown ? ' is-on' : ''}${absorb ? ' is-absorb' : ''}`}
+        onClick={() => setOpen(shown ? false : 'user')}
+        aria-expanded={shown}
         title={`Non nago? ${info.name} · ${SHAPE_TEXT[shape]}`}
       >
         <Specimen plane={plane} week={week} day={day} level={level} flip={flip} />
@@ -113,7 +123,7 @@ export function Locator({
           ?
         </span>
       </button>
-      {open && (
+      {shown && (
         <div className="loc-card" role="dialog" aria-label="Non nago?">
           <div className="loc-big">
             <Specimen plane={plane} week={week} day={day} level={level} flip={flip} big />
@@ -130,7 +140,13 @@ export function Locator({
               <Link className="link-quiet" href="/astea/1?etapa=terminoak">
                 Planoak eta ardatzak (1. gaia) →
               </Link>
-              <button className="btn small ghost" onClick={() => setOpen(false)}>
+              <button
+                className="btn small ghost"
+                onClick={() => {
+                  setOpen(false);
+                  setAbsorb((n) => n + 1);
+                }}
+              >
                 Ulertuta
               </button>
             </div>

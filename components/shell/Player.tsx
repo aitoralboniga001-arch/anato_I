@@ -42,6 +42,7 @@ interface PlayerProps {
   waitSeconds: number | null;
   /** Structures introduced by the current step (only filled in guided mode). */
   fresh: StructureDef[];
+  /** The same for every step of the stage (guided mode), so the caption can reserve its tallest height. */
   mode: PlayMode;
   onMode: (m: PlayMode) => void;
   onVoice: (v: boolean) => void;
@@ -213,6 +214,23 @@ function Caption({
   );
 }
 
+/** The "BERRIA" chips of a step: its new structures, easing in one after the other. */
+function FreshList({ items, onPick, k }: { items: StructureDef[]; onPick: (id: string) => void; k: string }) {
+  return (
+    <ul className="fresh" key={k}>
+      <li className="fresh-tag">Berria</li>
+      {items.map((s, i) => (
+        <li key={s.id} style={{ animationDelay: `${0.25 + i * 0.2}s` }}>
+          <button onClick={() => onPick(s.id)} title={`${s.definition} — klik fitxa irekitzeko`}>
+            <i style={{ background: s.color ?? categoryColor[s.category] }} />
+            {s.name}
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 const VOICE_STATE: Record<AudioSnapshot['status'], string> = {
   idle: 'Prest',
   loading: 'Prestatzen…',
@@ -286,6 +304,7 @@ export function Player(p: PlayerProps) {
   const atEnd = p.t >= 1;
   const allTerms = useMemo(() => termsOf([...p.stage.structures, ...p.stage.beats.flatMap((b) => b.focus ?? [])]), [p.stage]);
   const terms = p.noTerms ? NO_TERMS : allTerms;
+  // The caption keeps the stage's tallest height (no jump between steps); narrated mode stays compact.
 
   const tAt = (clientX: number) => {
     const r = bar.current!.getBoundingClientRect();
@@ -324,32 +343,16 @@ export function Player(p: PlayerProps) {
               terms={terms}
               onPick={p.onPick}
               onTermHover={p.onTermHover}
-              extra={
-                p.fresh.length > 0 && (
-                  <ul className="fresh" key={`f-${p.stage.id}-${p.activeBeat}`}>
-                    <li className="fresh-tag">Berria</li>
-                    {p.fresh.map((s, k) => (
-                      <li key={s.id} style={{ animationDelay: `${0.25 + k * 0.2}s` }}>
-                        <button onClick={() => p.onPick(s.id)} title={`${s.definition} — klik fitxa irekitzeko`}>
-                          <i
-                            style={{
-                              background: s.color ?? categoryColor[s.category],
-                            }}
-                          />
-                          {s.name}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )
-              }
+              extra={p.fresh.length > 0 && <FreshList items={p.fresh} onPick={p.onPick} k={`f-${p.stage.id}-${p.activeBeat}`} />}
             />
           ))}
         </div>
         <div className="cap-nav">
           <span className="cap-nav-l">
             Urratsa{' '}
-            <b>{pad(p.activeBeat + 1)}</b>
+            <b key={p.activeBeat} className="cap-tick">
+              {pad(p.activeBeat + 1)}
+            </b>
             <i>/{pad(n)}</i>
           </span>
           <button className="icon-btn" onClick={() => p.onBeat(-1)} aria-label="Aurreko urratsa" data-tip="Aurreko urratsa · ←" data-tip-pos="top">

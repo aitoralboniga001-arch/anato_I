@@ -25,6 +25,7 @@ import { ViewBridge, needsBridge, type ViewSnap } from './ViewBridge';
 import { IconRail, Outline, StageInfo } from './SidePanel';
 import { Viewport } from './Viewport';
 import { ViewSwitch } from './ViewSwitch';
+import { WeekNav } from './WeekNav';
 import { KimuFace } from '@/components/kimu/KimuFace';
 import { registerKimuHost, setKimuHere, toggleKimu, useKimuOpen } from '@/components/kimu/store';
 import { NarrationTransport, type AudioSnapshot } from './narrate';
@@ -80,6 +81,7 @@ const freshAt = (stage: StageDef, k: number, week: number): StructureDef[] => {
   stage.beats[k]?.recall?.forEach((id) => seen.add(id));
   return (stage.beats[k]?.focus ?? []).filter((id) => !seen.has(id) && structures.has(id) && !formedBefore(id, week, stage)).map((id) => structures.get(id)!);
 };
+
 
 /**
  * The stage as the caption shows it: a step that focuses on something formed in an earlier WEEK
@@ -426,7 +428,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   }
   const [pickedView, setPickedView] = useState('');
   /** The view-change card (see ViewBridge), set when the simulation itself moves to another view. */
-  const [bridge, setBridge] = useState<{ from: ViewSnap; to: ViewSnap } | null>(null);
+  const [bridge, setBridge] = useState<{ from: ViewSnap; to: ViewSnap; small?: boolean } | null>(null);
   const chooseView = (id: string) => {
     transport.cancel();
     if (formation) { setFormation(null); setPlaying(false); }
@@ -872,6 +874,13 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     if (voice) return;
     transport.cancel();
     speaking.current = false;
+  };
+  const openStage = (i: number) => {
+    if (playing) startIntro();
+    else endIntro();
+    clearTour();
+    place({ i, t: 0 });
+    setSelected(null);
   };
   const gotoStage = (delta: number) => {
     // While playing, a new stage opens with its quick preview.
@@ -1384,14 +1393,14 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   }, [sceneKey, mounted]);
   // Guided playback waits while the bridge is up.
   useEffect(() => {
-    bridgeHold.current = !!bridge && guided;
+    // Folded into its chip, the card no longer holds the playback.
+    bridgeHold.current = !!bridge && !bridge.small && guided;
   }, [bridge, guided]);
 
   const nextStage = week.stages[pos.i + 1];
   const prevWeek = weeks[weeks.indexOf(week) - 1];
   const prevStage = week.stages[pos.i - 1] ?? prevWeek?.stages[prevWeek.stages.length - 1];
   const sceneT = intro !== null ? easeInOut(Math.min(1, intro)) : pos.t;
-  const pad = (n: number) => String(n).padStart(2, '0');
 
   return (
     <div ref={appRef} className={`app${focusMode ? ' is-focus' : ''}${voice ? ' is-narrated' : ''}`}>
@@ -1408,20 +1417,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         <span className="tb-weeks-l" aria-hidden>
           Gaia
         </span>
-        <nav className="tb-weeks" aria-label="Gaiak">
-          {weeks.map((w) => (
-            <Link
-              key={w.week}
-              href={`/astea/${w.week}`}
-              className={`tb-week${w.week === week.week ? ' is-on' : ''}${isWip(w) ? ' is-wip' : ''}`}
-              title={`${w.week}. gaia — ${w.title} (${spanOf(w).long})${isWip(w) ? ' · prestatzen' : ''}`}
-              aria-current={w.week === week.week ? 'page' : undefined}
-            >
-              <span className="tb-week-n">{pad(w.week)}</span>
-              <span className="tb-week-d">{spanOf(w).short}</span>
-            </Link>
-          ))}
-        </nav>
+        <WeekNav current={week} stageId={stage.id} />
         <div className="tb-tools">
           <button className={`tool tool-main kimu-tool mobile-tool-hidden${kimuOpen ? ' is-on' : ''}`} onClick={toggleKimu} aria-label="Galdetu Kimuri" aria-expanded={kimuOpen} data-tip="Galdetu Kimuri: lekura eramango zaitu · K" data-tip-pos="bottom">
             <KimuFace size={26} mood="happy" still /> <span>Galdetu Kimuri</span>
@@ -1522,23 +1518,38 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           week={week}
           current={pos.i}
           visited={visited}
-          onStage={(i) => {
-            if (playing) startIntro();
-            else endIntro();
-            clearTour();
-            place({ i, t: 0 });
-            setSelected(null);
-          }}
+          onStage={openStage}
         />
 
         <main className={`stage${formation ? ' has-formation' : ''}${find && print ? ' is-print' : ''}`}>
           <div className="stage-bar">
             <div className="stage-heading">
               {/* Where this stage sits in the notes: topic › heading, numbered as the notes number it. */}
-              <p className="kicker crumbs" title={[notesAt?.parent && sectionLabel(notesAt.parent), notesAt?.section.covers].filter(Boolean).join(' · ') || undefined}>
-                <span>{week.week}. gaia</span>
-                {notesAt && <span className="crumb-sec">{sectionLabel(notesAt.section)}</span>}
-              </p>
+              <div className="crumbs-row">
+                <p className="kicker crumbs" title={[notesAt?.parent && sectionLabel(notesAt.parent), notesAt?.section.covers].filter(Boolean).join(' · ') || undefined}>
+                  <span>{week.week}. gaia</span>
+                  {notesAt && <span className="crumb-sec">{sectionLabel(notesAt.section)}</span>}
+                </p>
+                {/* Where this stage sits among the topic's stages: a counter and one pip per stage. */}
+                {week.stages.length > 1 && (
+                  <nav className="stage-map" aria-label="Gaiaren etapak">
+                    <span className="stage-map-n">
+                      Etapa <b>{pos.i + 1}</b>/{week.stages.length}
+                    </span>
+                    {week.stages.map((s, i) => (
+                      <button
+                        key={s.id}
+                        className={`stage-pip${i === pos.i ? ' is-cur' : visited.includes(s.id) ? ' is-done' : ''}`}
+                        onClick={() => i !== pos.i && openStage(i)}
+                        aria-label={`Etapa ${i + 1}/${week.stages.length}: ${s.title}`}
+                        aria-current={i === pos.i ? 'step' : undefined}
+                        data-tip={`${s.title} · ${s.day}`}
+                        data-tip-pos="bottom"
+                      />
+                    ))}
+                  </nav>
+                )}
+              </div>
               <div className="stage-title">
                 <h2 title={stage.title}>{stage.title}</h2>
                 <button className="day-chip" onClick={() => setNowOpen((v) => !v)} aria-expanded={nowOpen} title={`${weekOfDay(day)}. astea · ${periodOf(day).name} — zer dago orain, zer den berria, zer desagertu den`}>
@@ -1624,7 +1635,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       </button>
                     </div>
                   )}
-                  {bridge && intro === null && <ViewBridge autoClose={!voice} key={bridge.to.key} from={bridge.from} to={bridge.to} onClose={() => { transport.cancel(); setBridge(null); }} />}
+                  {bridge && intro === null && <ViewBridge autoClose={!voice} key={bridge.to.key} from={bridge.from} to={bridge.to} small={!!bridge.small} onSmall={(v) => setBridge((b) => (b ? { ...b, small: v } : b))} onClose={() => { transport.cancel(); setBridge(null); }} />}
                   {tour && intro === null && structures.get(tour.items[tour.idx]) && (
                     <TourCard compact={voice} item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} onSkip={skipTour} onPick={onSelect} />
                   )}

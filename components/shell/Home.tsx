@@ -9,7 +9,8 @@ import { StudyMap } from './StudyMap';
 import { INTRO_KEY, Intro } from './intro/Intro';
 import { LandFoot, LandNav, firstReady, isWip } from './LandNav';
 import { IconPlay } from './icons';
-import { useVisited } from './progress';
+import { useLastPlace, useVisited } from './progress';
+import { Specimen } from './Specimen';
 import { spanOf } from '@/lib/sim/age';
 
 const stageCount = weeks.reduce((n, w) => n + w.stages.filter((s) => !s.views.every((v) => v.description === 'Prestatzen')).length, 0);
@@ -17,48 +18,89 @@ const viewCount = weeks.reduce((n, w) => n + w.stages.reduce((m, s) => m + s.vie
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-function TocRow({ w }: { w: (typeof weeks)[number] }) {
+// The object each topic is about, as the light 3-D sketch the simulator's "Non nago?" uses.
+const SKETCH_DAY: Record<number, number> = { 1: 4, 2: 10, 3: 17, 4: 24, 5: 40, 6: 80 };
+
+/** One topic on the home shelf: its object, span, title, progress and the next step. */
+function TopicCard({ w }: { w: (typeof weeks)[number] }) {
   const visited = useVisited(w.week);
   const days = spanOf(w).long;
+  const sketch = (
+    <span className="tc-fig" aria-hidden>
+      <Specimen plane="eskema" week={w.week} day={SKETCH_DAY[w.week] ?? w.dayRange[0]} className="tc-svg" />
+    </span>
+  );
+  const head = (
+    <>
+      <span className="tc-k">
+        <span className="tc-n">{pad(w.week)}</span>
+        <span className="tc-days">{days}</span>
+      </span>
+      <b className="tc-t">{w.title}</b>
+      <small className="tc-sub">{w.subtitle}</small>
+    </>
+  );
   if (isWip(w))
     return (
-      <li className="toc-row is-wip">
-        <span className="toc-n">{pad(w.week)}</span>
-        <span className="toc-main">
-          <b>{w.title}</b>
-          <small>{w.subtitle}</small>
+      <li className="tc is-wip">
+        <span className="tc-in">
+          {sketch}
+          {head}
+          <span className="tc-foot">
+            <span className="tc-state">Prestatzen</span>
+          </span>
         </span>
-        <span className="toc-days">{days}</span>
-        <span className="toc-state">Prestatzen</span>
       </li>
     );
   const done = w.stages.filter((s) => visited.includes(s.id)).length;
   const next = w.stages.find((s) => !visited.includes(s.id)) ?? w.stages[0];
   const href = done > 0 && done < w.stages.length ? `/astea/${w.week}?etapa=${next.id}` : `/astea/${w.week}`;
   return (
-    <li>
-      <Link href={href} className="toc-row">
-        <span className="toc-n">{pad(w.week)}</span>
-        <span className="toc-main">
-          <b>{w.title}</b>
-          <small>{w.subtitle}</small>
-        </span>
-        <span className="toc-days">{days}</span>
-        <span className="toc-prog" aria-label={`${done}/${w.stages.length} etapa ikusita`}>
-          <span className="toc-ticks">
-            {w.stages.map((s) => (
-              <i key={s.id} className={visited.includes(s.id) ? 'is-on' : ''} />
-            ))}
+    <li className="tc">
+      <Link href={href} className="tc-in">
+        {sketch}
+        {head}
+        <span className="tc-foot">
+          <span className="tc-prog" aria-label={`${done}/${w.stages.length} etapa ikusita`}>
+            <span className="toc-ticks">
+              {w.stages.map((s) => (
+                <i key={s.id} className={visited.includes(s.id) ? 'is-on' : ''} />
+              ))}
+            </span>
+            <small>
+              {done}/{w.stages.length}
+            </small>
           </span>
-          <small>
-            {done}/{w.stages.length}
-          </small>
-        </span>
-        <span className="toc-go">
-          {done === 0 ? 'Hasi' : done < w.stages.length ? 'Jarraitu' : 'Berrikusi'} <span aria-hidden>→</span>
+          <span className="tc-go">
+            {done === 0 ? 'Hasi' : done < w.stages.length ? 'Jarraitu' : 'Berrikusi'} <span aria-hidden>→</span>
+          </span>
         </span>
       </Link>
     </li>
+  );
+}
+
+/** The first screen's main action: back to where the student left off, or the very beginning. */
+function ContinueCta() {
+  const last = useLastPlace();
+  const w = last ? weeks.find((x) => x.week === last.week) : undefined;
+  const st = w?.stages.find((s) => s.id === last?.stage);
+  if (!w || !st)
+    return (
+      <Link className="btn btn-light lg" href={`/astea/${firstReady.week}`}>
+        <IconPlay size={14} /> Hasi simulagailua
+      </Link>
+    );
+  return (
+    <Link className="btn btn-light lg cta-continue" href={`/astea/${w.week}?etapa=${st.id}`}>
+      <IconPlay size={14} />
+      <span className="cta-continue-t">
+        Jarraitu
+        <small>
+          {w.week}. gaia · {st.title}
+        </small>
+      </span>
+    </Link>
   );
 }
 
@@ -91,9 +133,7 @@ export function Home() {
             Ernalkuntzatik enbrioiaren tolespenetara, prozesu bakoitza animatuta eta zure apunteetako izen guztiekin, euskaraz. Eten, atzera egin, mozketa aldatu eta egitura bakoitza klikatu.
           </p>
           <div className="hero-cta rv">
-            <Link className="btn btn-light lg" href={`/astea/${firstReady.week}`}>
-              <IconPlay size={14} /> Hasi simulagailua
-            </Link>
+            <ContinueCta />
             <Link className="link-arrow" href="#mapa">
               Gai osoa 20 segundotan <span aria-hidden>↓</span>
             </Link>
@@ -110,22 +150,18 @@ export function Home() {
         </div>
       </section>
 
-      <StudyMap />
-
-      <Chronicle />
-
-      <section id="gaiak" className="land-section">
-        <header className="section-head">
-          <p className="kicker">Gaiak</p>
-          <h2>Aukeratu nondik hasi</h2>
-          <p>Gai bakoitza etapatan banatuta dago, garapenaren ordenan. Ikusitako etapak nabigatzaile honetan gordetzen dira.</p>
+      <section id="gaiak" className="shelf" aria-labelledby="shelf-h">
+        <header className="shelf-head">
+          <p className="kicker" id="shelf-h">
+            Gaiak · aukeratu nondik hasi
+          </p>
+          <p className="shelf-note">Garapenaren ordenan, etapatan banatuta. Ikusitako etapak nabigatzaile honetan gordetzen dira.</p>
         </header>
-        <ol className="toc">
+        <ol className="shelf-row">
           {weeks.map((w) => (
-            <TocRow key={w.week} w={w} />
+            <TopicCard key={w.week} w={w} />
           ))}
         </ol>
-
         <div className="keys" aria-label="Laster-teklak">
           <span>
             <kbd>Zuriunea</kbd> erreproduzitu / pausatu
@@ -144,6 +180,11 @@ export function Home() {
           </span>
         </div>
       </section>
+
+      <StudyMap />
+
+      <Chronicle />
+
 
       <LandFoot>
         <button className="link-quiet" onClick={replay}>
