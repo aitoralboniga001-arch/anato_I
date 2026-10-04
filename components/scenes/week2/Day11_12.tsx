@@ -2,7 +2,7 @@
 
 import { C, CellBand, Flow, Label, Mark, Note, Part, ellipseArc, lerp, lin, mix, rand, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
 import { SINUSOIDS, fibrinPlug, sinusoidPath } from './Day9';
-import { ARTERIES, CYTO, GLANDS, HYPO_BOTTOM, INNER, R, StromaFill, TrapBand, VESSELS, W2, bandAround, conceptusAt, discGeometry, f1, lensPath, stalkBridge, synTh9, toCyto } from './common';
+import { ARTERIES, Backing, CYTO, GLANDS, HYPO_BOTTOM, INNER, R, StromaFill, TrapBand, VESSELS, W2, bandAround, conceptusAt, discGeometry, f1, inHalf, lensPath, outHalf, stalkBridge, synTh9, toCyto } from './common';
 import { CellRing, Epithelium, Gland, SinusoidShape, SpiralArtery, SynFill, Vessel, W2Defs, radialPath } from './materials';
 
 /**
@@ -13,7 +13,8 @@ import { CellRing, Epithelium, Gland, SinusoidShape, SpiralArtery, SynFill, Vess
  *   .16-.25 sinzitioa sinusoideetaraino sartu eta haien pareta urratzen du (odola kanaletan sartzen da)
  *   .26-.38 amaren odola laku sare osoan zehar hedatzen da: hasierako zirkulazio uteroplazentarioa
  *   .42-.50 bitelo zakuaren paretako zelulak ugaldu eta zitoraino betetzen dute: enbrioi kanpoko mesodermoa
- *   .42-.64 konzeptua hazten da (zitoa zelula-zatiketaz) · .54-.64 mesodermoan hutsuneak ireki, handitu eta fusionatzen dira
+ *   .42-.605 konzeptua hazten da (zitoa zelula-zatiketaz) · .54-.605 mesodermoan hutsuneak ireki (banan-banan),
+ *   handitu eta fusionatzen dira — urratsaren amaierako irudirako (.605) korion barrunbea osatuta
  *   .82-.88 desidua erreakzioa habiratze-gunearen inguruan · .92-.965 endometrio osora hedatzen da
  */
 export const W = {
@@ -22,7 +23,7 @@ export const W = {
   erosion: [0.16, 0.28],
   circulation: [0.26, 0.4],
   mesoGrow: [0.42, 0.68],
-  cavitate: [0.54, 0.64],
+  cavitate: [0.54, 0.605],
   decidua: [0.82, 0.88],
   cells: [0.83, 0.875],
   spread: [0.92, 0.965],
@@ -67,7 +68,8 @@ function geometry(t: number) {
   const Rc = lerp(R, RC_END, grow);
   const { cyC, cy, D } = conceptusAt(Rc);
   const core = discGeometry(W2.cx, cy);
-  const cav = s(t, W.cavitate);
+  // Linear: the phases of the cavitation (appear, enlarge, merge) get even shares of the step.
+  const cav = lin(t, W.cavitate[0], W.cavitate[1]);
   return {
     ...core,
     cyC,
@@ -507,17 +509,22 @@ function Day1112Drawing({ t, reduced, slab = 'm-slab' }: SceneProps & { slab?: s
   const STALK_A = 260;
   const stalk = stalkBridge(cx, cy, STALK_A, INNER + bandTh(STALK_A) / 2, innerB(STALK_A), outerB(STALK_A), outer(STALK_A) - bandTh(STALK_A) / 2, 22, 14);
   // The solid tissue stays between the spaces until they have merged; only then are the two layers left.
-  const genericShow = thickness > 3 ? 1 - seg(cav, 0.7, 0.9) : 0;
-  const layerShow = seg(cav, 0.7, 0.9);
-  const cavityShow = seg(cav, 0.72, 0.9);
+  const genericShow = thickness > 3 ? 1 - seg(cav, 0.84, 0.97) : 0;
+  const layerShow = seg(cav, 0.84, 0.97);
+  const cavityShow = seg(cav, 0.86, 0.98);
   const mesoOuter = (a: number) => INNER + width(a) * front * (1 + 0.1 * (1 - front) * Math.sin(rad(a) * 7 + 1.3));
   // Small spaces open at scattered points of the mesoderm (organic, lens-shaped), grow and merge into
-  // one cavity; the connecting stalk never hollows. Staggered so the viewer sees them appear one by one.
-  const merge = seg(cav, 0.45, 0.85);
-  const spaces = SPACES.map(([a, fr, delay, rr], i) => {
-    const open = seg(cav, 0.04 + delay, 0.3 + delay);
-    if (open <= 0.01) return null;
-    const wHalf = lerp(lerp(2, 7, open) * (0.7 + 0.5 * rr), SPACE_W, merge);
+  // one cavity; the connecting stalk never hollows. Three readable phases: they appear one by one
+  // (cav 0–.31), all enlarge (.2–.52), then merge (.46–.9) — the cavity is whole before the step's held frame.
+  const merge = seg(cav, 0.46, 0.9);
+  const enlarge = seg(cav, 0.2, 0.52);
+  const spaces = SPACES.map(([a, fr, delay, rr0], i) => {
+    const appear = seg(cav, 0.01 + delay, 0.15 + delay);
+    if (appear <= 0.01) return null;
+    // Round little lenses from the start (never hair-thin slits), then swelling.
+    const open = appear * lerp(0.55, 1, enlarge);
+    const rr = Math.max(rr0, 0.7);
+    const wHalf = lerp(lerp(2.5, 9, open) * (0.7 + 0.5 * rr0), SPACE_W, merge);
     const prof = lerp(0.5, 0.04, merge);
     const mid = (b: number) => lerp(INNER, outR(g, b), fr);
     const half = (b: number) => Math.max(0, Math.min(width(b) * fr, width(b) * (1 - fr)) - 4);
@@ -539,6 +546,7 @@ function Day1112Drawing({ t, reduced, slab = 'm-slab' }: SceneProps & { slab?: s
   return (
     <g>
       <ShellMaternal g={g} t={t} slab={slab} />
+      <Backing d={syncytioOuter(g, t)} />
 
       {/* Inside the shell: fluid first (what the mesoderm has not reached yet), then the embryo complex. */}
       <circle cx={cx} cy={g.cyC} r={Rc - CYTO + 0.5} fill="#1b2437" pointerEvents="none" />
@@ -789,9 +797,9 @@ function anchors(t: number) {
     decidua: s(t, W.decidua),
     spread: s(t, W.spread),
     cells: s(t, W.cells),
-    generic: g.thickness > 3 ? 1 - seg(g.cav, 0.7, 0.9) : 0,
-    layer: seg(g.cav, 0.7, 0.9),
-    cavity: seg(g.cav, 0.35, 0.6),
+    generic: g.thickness > 3 ? 1 - seg(g.cav, 0.84, 0.97) : 0,
+    layer: seg(g.cav, 0.84, 0.97),
+    cavity: seg(g.cav, 0.6, 0.85),
     syn: (a: number) => synAt(g, a, 0.5),
     /** Centre of lacuna j (CHAIN index). */
     lacuna: (j: number) => lacunaCentre(g, j),
@@ -802,6 +810,11 @@ function anchors(t: number) {
     cyto: (a: number) => polar(g, a, g.Rc - CYTO / 2),
     /** A point in the mesoderm: fraction f of the way from the embryo complex to the cyto (+ offset px). */
     meso: (a: number, f: number, off = 0) => polarE(g, a, lerp(INNER, outR(g, a), f) + off),
+    /** The mesoderm's name: mid-tissue while it is solid, then on the outer sheet the cavity leaves (never in the cavity). */
+    mesoName: (a: number) => {
+      const l = seg(g.cav, 0.5, 0.9);
+      return polarE(g, a, lerp(lerp(INNER, outR(g, a), 0.5), outR(g, a) - 5, l));
+    },
     amnios: [cx - 22, (cy - INNER + epiTop) / 2 + 2] as Pt,
     epi: [cx + 38, (epiTop + discY) / 2] as Pt,
     yolk: [cx - 14, cy + 60] as Pt,
@@ -828,6 +841,12 @@ export function Day1112Section(props: SceneProps) {
   const k = anchors(t);
   const L = makeL((x, y) => [x, y]);
   const M = makeM((x, y) => [x, y]);
+  const nIn = seg(t, W.network[0] + 0.02, W.network[0] + 0.04);
+  const cIn = seg(t, 0.18, 0.2);
+  const back = seg(t, 0.42, 0.44);
+  const baseNote = Math.max(1 - outHalf(nIn), inHalf(back));
+  const networkNote = inHalf(nIn) * (1 - outHalf(cIn));
+  const circNote = inHalf(cIn) * (1 - outHalf(back));
   return (
     <g>
       <EndometriumBack decidua={k.decidua} spread={k.spread} bulge={BULGE} />
@@ -850,14 +869,21 @@ export function Day1112Section(props: SceneProps) {
       {L('mutur-enbrionarioa', 810, 250, k.cyto(276))}
       {L('sinusoideak', 810, 315, k.sinusoid(4), seg(t, 0.14, 0.18))}
       {/* Still named while it hollows out (step "Hasieran ehun betea da…"), then its two sheets take over. */}
-      {L('enbrioi-kanpoko-mesodermoa', 778, 380, k.meso(300, 0.5), Math.max(k.generic, seg(t, 0.42, 0.46) * (1 - seg(t, 0.62, 0.64))))}
+      {L('enbrioi-kanpoko-mesodermoa', 778, 380, k.mesoName(300), Math.max(k.generic, seg(t, 0.42, 0.46) * (1 - seg(t, 0.62, 0.64))))}
       {L('korion-barrunbea', 810, 430, k.meso(12, 0.5), k.cavity)}
       {L('finkapen-pedikulua', 810, 470, k.stalk, k.layer)}
       {L('amnios-barrunbea', 810, 515, k.amnios)}
       {L('epiblastoa', 810, 560, k.epi)}
       {L('hasierako-bitelo-zakua', 810, 598, k.yolk)}
-      <Note x={500} y={585} tone="dim" show={1}>
+      {/* One caption line, handed over (never two at once): implantation site → lacunar network → maternal blood in it → back. */}
+      <Note x={500} y={585} tone="dim" show={baseNote}>
         Endometrioaren paretan goragune bat antzematen da: habiratze-gunea
+      </Note>
+      <Note x={500} y={585} tone="accent" show={networkNote}>
+        Lakuak handitu eta haien artean komunikatzen hasten dira: laku sarea
+      </Note>
+      <Note x={500} y={585} tone="warn" show={circNote}>
+        Sinusoideak urratuta: amaren odola laku sarean zirkulatzen hasten da
       </Note>
     </g>
   );
@@ -961,7 +987,7 @@ export function Day1112Meso(props: SceneProps) {
         <Day1112Drawing {...props} />
       </g>
       {L('zitotrofoblastoa', 180, 90, k.cyto(200))}
-      {L('enbrioi-kanpoko-mesodermoa', 776, 335, k.meso(338, 0.5), Math.max(k.generic, seg(t, 0.42, 0.46) * (1 - seg(t, 0.62, 0.64))))}
+      {L('enbrioi-kanpoko-mesodermoa', 776, 335, k.mesoName(338), Math.max(k.generic, seg(t, 0.42, 0.46) * (1 - seg(t, 0.62, 0.64))))}
       {L('somatopleura-kanpokoa', 188, 210, k.meso(212, 1, -5), k.layer)}
       {L('korion-barrunbea', 180, 400, k.meso(215, 0.5), k.cavity)}
       {L('esplaknopleura-kanpokoa', 780, 400, k.meso(22, 0, 4), k.layer)}

@@ -19,7 +19,7 @@ import {
   type Pt,
   type SceneProps,
 } from '@/components/kit';
-import { CYTO, Endometrium, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, discGeometry, f1, lensPath, synTh8, synTh9 } from './common';
+import { Backing, CYTO, Endometrium, HYPO_BOTTOM, INNER, R, TrapBand, VESSELS, W2, discGeometry, f1, inHalf, lensPath, outHalf, synTh8, synTh9 } from './common';
 import { CellRing, LacunaFill, SinusoidShape, SynFill } from './materials';
 
 /**
@@ -93,14 +93,15 @@ const polar = (g: Geo, a: number, r: number): Pt => [g.cx + r * Math.cos(rad(a))
 /** Point inside the syncytium at angle `a`, `frac` of the way from the cytotrophoblast to the surface. */
 const synAt = (g: Geo, a: number, frac: number): Pt => polar(g, a, R + frac * synTh(norm(a), g.cover));
 
-function syncytioPath(g: Geo) {
+function syncytioOuter(g: Geo) {
   const pts: Pt[] = [];
   for (let i = 0; i < 120; i++) {
     const a = 90 + i * 3;
     pts.push(polar(g, a, R + synTh(a, g.cover)));
   }
-  return `${smoothPath(pts, true)}${ellipseD(g.cx, g.cy, R - 0.5, R - 0.5)}`;
+  return smoothPath(pts, true);
 }
+const syncytioPath = (g: Geo) => `${syncytioOuter(g)}${ellipseD(g.cx, g.cy, R - 0.5, R - 0.5)}`;
 
 /** Lacunae: mostly at the embryonic pole, separated by syncytial trabeculae. */
 const LACUNAE = [188, 212, 236, 259, 282, 305, 328, 352];
@@ -285,6 +286,7 @@ function Day9Drawing({ t, reduced }: SceneProps) {
         ))}
       </Part>
 
+      <Backing d={syncytioOuter(g)} circle={[cx, cy, R]} />
       {/* Cavity background (not interactive), then the cavity that is renamed when Heuser's membrane closes. */}
       <circle cx={cx} cy={cy} r={INNER} fill="#1b2437" pointerEvents="none" />
       <Part id="blastozelea" show={1 - rename}>
@@ -454,8 +456,8 @@ export function Day9Section(props: SceneProps) {
       {L('zitotrofoblastoa', 190, 345, k.cyto(184))}
       {L('bakuolak', 190, 385, k.syn(166), k.vac)}
       {L('heuser-mintza', 190, 425, k.heuser(150), seg(k.spread, 0.5, 0.62))}
-      {L('blastozelea', 190, 462, [cx - 30, cy + 30], 1 - k.rename)}
-      {L('hasierako-bitelo-zakua', 190, 462, k.yolk, k.rename)}
+      {L('blastozelea', 190, 462, [cx - 30, cy + 30], 1 - outHalf(k.rename))}
+      {L('hasierako-bitelo-zakua', 190, 462, k.yolk, inHalf(k.rename))}
       {L('endometrio-epitelioa', 190, 505, [300, W2.surfaceY - 8])}
       {L('fibrina-koagulua', 190, 548, k.fibrinPt(-70), seg(k.fib, 0.3, 0.7))}
       {L('mutur-enbrionarioa', 810, 250, k.cyto(276))}
@@ -478,7 +480,7 @@ export function Day9Lacunae(props: SceneProps) {
   const L = makeL(z.at);
   const sL = SINUSOIDS[2];
   const sR = SINUSOIDS[3];
-  const vacShow = k.vac * (1 - seg(k.merge, 0.4, 0.8));
+  const vacShow = k.vac * (1 - outHalf(seg(k.merge, 0.4, 0.8)));
   // The camera follows the sinking blastocyst: the capillaries come into the picture just after t = 0.
   const vesselsIn = seg(t, 0.03, 0.06);
   return (
@@ -489,15 +491,15 @@ export function Day9Lacunae(props: SceneProps) {
       </g>
       <PeriodBadge x={112} y={572} show={s(t, W.period)} />
       {L('endometrio-estroma', 180, 64, [cx - 110, cy - 250])}
-      {L('amaren-odol-hodiak', 180, 180, [sL.x, sL.y], (1 - k.sinOn) * vesselsIn, 'vessel-l')}
-      {L('sinusoideak', 180, 180, [sL.x, sL.y], k.sinOn)}
+      {L('amaren-odol-hodiak', 180, 180, [sL.x, sL.y], (1 - outHalf(k.sinOn)) * vesselsIn, 'vessel-l')}
+      {L('sinusoideak', 180, 180, [sL.x, sL.y], inHalf(k.sinOn))}
       {L('bakuolak', 180, 250, synAt(k.g, 236, 0.64), vacShow, 'bakuolak-early')}
-      {L('bakuolak', 180, 250, synAt(k.g, 247, 0.86), k.vac * seg(k.merge, 0.4, 0.8))}
+      {L('bakuolak', 180, 250, synAt(k.g, 247, 0.86), k.vac * inHalf(seg(k.merge, 0.4, 0.8)))}
       {L('lakuak', 180, 300, k.lacuna(236), seg(k.merge, 0, 0.35))}
       {L('sinzitiotrofoblastoa', 180, 350, k.syn(224))}
       {L('zitotrofoblastoa', 180, 420, k.cyto(242))}
-      {L('amaren-odol-hodiak', 800, 330, [sR.x, sR.y], (1 - k.sinOn) * vesselsIn, 'vessel-r')}
-      {L('sinusoideak', 800, 330, [sR.x, sR.y], k.sinOn, 'sinus-r')}
+      {L('amaren-odol-hodiak', 800, 330, [sR.x, sR.y], (1 - outHalf(k.sinOn)) * vesselsIn, 'vessel-r')}
+      {L('sinusoideak', 800, 330, [sR.x, sR.y], inHalf(k.sinOn), 'sinus-r')}
       {L('lakuak', 800, 375, k.lacuna(305), seg(k.merge, 0, 0.35), 'lakuak-r')}
       {L('amnioblastoak', 800, 420, k.amnioblast)}
       {L('amnios-barrunbea', 800, 470, k.cavity)}
@@ -529,8 +531,8 @@ export function Day9Heuser(props: SceneProps) {
       <Arrow from={pt(344, 88)} to={pt(68, 88)} bend={-0.39} color={HEUSER} show={arrowShow} progress={arrowP} />
       {L('zitotrofoblastoa', 180, 200, k.cyto(192))}
       {L('heuser-mintza', 180, 290, k.heuser(Math.max(160, k.heuserAngleL + 6)), seg(k.spread, 0.2, 0.32))}
-      {L('blastozelea', 180, 360, [cx - 30, cy + 40], 1 - k.rename)}
-      {L('hasierako-bitelo-zakua', 180, 360, [cx - 30, cy + 40], k.rename)}
+      {L('blastozelea', 180, 360, [cx - 30, cy + 40], 1 - outHalf(k.rename))}
+      {L('hasierako-bitelo-zakua', 180, 360, [cx - 30, cy + 40], inHalf(k.rename))}
       {L('sinzitiotrofoblastoa', 180, 420, k.syn(140))}
       {L('endometrio-epitelioa', 180, 470, [cx - GAP - 26, W2.surfaceY - 8])}
       {L('fibrina-koagulua', 180, 530, k.fibrinPt(-80), seg(k.fib, 0.3, 0.7))}

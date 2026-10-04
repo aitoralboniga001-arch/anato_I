@@ -1,7 +1,7 @@
 'use client';
 
 import { C, Cell, CellBand, Label, Note, Part, ellipseArc, lerp, lin, seg, zoom, type Pt, type SceneProps } from '@/components/kit';
-import { CYTO, HYPO_BOTTOM, INNER, TrapBand, W2, arcAround, bandAround, conceptusAt, discGeometry, f1, lensPath, stalkBridge, toCyto } from './common';
+import { Backing, CYTO, HYPO_BOTTOM, INNER, TrapBand, W2, arcAround, bandAround, conceptusAt, discGeometry, f1, inHalf, lensPath, outHalf, stalkBridge, toCyto } from './common';
 import {
   BULGE,
   EndometriumBack,
@@ -202,6 +202,7 @@ function Day13Drawing({ t, reduced, slab = 'm-slab', villiView = false }: SceneP
       <g opacity={villiView ? 0.45 : 1}>
         <ShellMaternal g={g} t={T12} slab={slab} />
       </g>
+      <Backing d={syncytioOuter(g, T12)} />
 
       {/* Chorionic cavity: one space round amnion + yolk sac, interrupted only by the connecting stalk. */}
       <Part id="korion-barrunbea">
@@ -368,9 +369,10 @@ function Surface({ t, slab = 'm-slab' }: { t: number; slab?: string }) {
       {bleed > 0.01 && (
         <Part id="endometrio-epitelioa">
           {/* Blood seeping out at the implantation site (more blood reaches the lacunae): a thin trickle and a small pool. */}
-          <path d={tube([[W2.cx - 4, y0 - 10], [W2.cx - 2, y0 + 4], [W2.cx + 3, y0 + 4 + 22 * bleed]], (u) => 3.2 - 1.4 * u)} fill="url(#w2-p-rbc)" />
-          <ellipse cx={W2.cx + 6} cy={f1(y0 + 34)} rx={f1(26 * bleed)} ry={f1(6 * bleed)} fill="url(#w2-p-rbc)" opacity={seg(bleed, 0.3, 1)} />
-          <ellipse cx={W2.cx + 6} cy={f1(y0 + 34)} rx={f1(26 * bleed)} ry={f1(6 * bleed)} fill="url(#w2-g-blood)" opacity={seg(bleed, 0.3, 1)} />
+          {/* The trickle runs down into the pool (one continuous stream, the pool spreading where it lands). */}
+          <path d={tube([[W2.cx - 4, y0 - 10], [W2.cx - 2, y0 + 4], [W2.cx + 2, y0 + 4 + 26 * seg(bleed, 0, 0.5)]], (u) => 3.4 - 1.2 * u)} fill="url(#w2-p-rbc)" />
+          <ellipse cx={W2.cx + 3} cy={f1(y0 + 31)} rx={f1(26 * seg(bleed, 0.35, 1))} ry={f1(6 * seg(bleed, 0.35, 1))} fill="url(#w2-p-rbc)" />
+          <ellipse cx={W2.cx + 3} cy={f1(y0 + 31)} rx={f1(26 * seg(bleed, 0.35, 1))} ry={f1(6 * seg(bleed, 0.35, 1))} fill="url(#w2-g-blood)" />
         </Part>
       )}
     </>
@@ -425,15 +427,15 @@ function anchors(t: number) {
   };
 }
 
-// Bottom notes share one line: the outgoing note is gone (first half of the ramp) before the next arrives (second half).
-const outHalf = (x: number) => Math.min(1, 2 * x);
-const inHalf = (x: number) => Math.max(0, 2 * x - 1);
+// Bottom notes share one line: the outgoing note is gone (first half of the ramp) before the next arrives (second half) — outHalf / inHalf.
 
 export function Day13Section(props: SceneProps) {
   const { t } = props;
   const k = anchors(t);
   // Pulled back a little: on day 13 the whole conceptus (shell, lacunae, sinusoids) fits in the picture, as in Langman 4-6.
-  const z = zoom(500, 290, 0.88, 500, 312);
+  // For the last step the camera closes in on the implantation site, where the small bleed reaches the lumen.
+  const push = seg(t, W.bleed[0], W.bleed[0] + 0.03);
+  const z = zoom(500, lerp(290, 455, push), lerp(0.88, 1.9, push), 500, lerp(312, 300, push));
   const L = makeL(z.at);
   // The chorionic plate's own step (named here; its window W.plaka), then back to the general note.
   const plateIn = seg(t, W.plaka[0], W.plaka[0] + 0.02);
@@ -451,7 +453,7 @@ export function Day13Section(props: SceneProps) {
       </g>
       {L('endometrio-estroma', 190, 50, [300, 60])}
       {L('umetoki-guruina', 190, 100, [236, 250])}
-      {L('endometrio-epitelioa', 190, 150, [300, surfaceAt(300, BULGE13) - 4])}
+      {L('endometrio-epitelioa', 190, 150, [lerp(300, 400, push), surfaceAt(lerp(300, 400, push), BULGE13) - 4])}
       {L('finkapen-pedikulua', 190, 250, k.stalk)}
       {L('sinzitiotrofoblastoa', 190, 380, k.syn(150))}
       {L('biloxka-primarioa', 190, 430, k.villus(1), k.villi)}

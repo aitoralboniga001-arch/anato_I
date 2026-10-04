@@ -508,7 +508,8 @@ export const week2: WeekDef = {
           idea: 'Bi geruzak elkarren gainean: bi orriko ernetze diskoa.',
           text: 'Egitura laua da, bi zelula-orriz osatua. Hortik sortuko dira enbrioiaren organo guztiak: bigarren asteko prozesurik garrantzitsuena da.',
           key: '2. astea = «bikoen astea»: bi trofoblasto, bi orri, bi barrunbe.',
-          focus: ['bi-orriko-diskoa'],
+          // The disc IS its two layers: they light up with it.
+          focus: ['bi-orriko-diskoa', 'epiblastoa', 'hipoblastoa'],
           view: 'diskoa',
         },
         {

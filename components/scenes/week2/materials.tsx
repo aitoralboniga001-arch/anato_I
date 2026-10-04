@@ -88,7 +88,8 @@ export function W2Defs() {
       </pattern>
       {/* Oedema: clear fluid pooling between the stromal cells. */}
       <pattern id="w2-p-oedema" width="58" height="50" patternUnits="userSpaceOnUse" patternTransform="rotate(-11)">
-        <g fill="#fff8fa" opacity="0.6">
+        {/* Pale pink pools with a faint rim: they read as fluid between the cells, not as white paint. */}
+        <g fill="#fdeef2" stroke="#d99aab" strokeWidth="0.6" strokeOpacity="0.55" opacity="0.5">
           <path d="M4 14 q8 -7 17 -2 q3 6 -4 9 q-9 2 -13 -7z" />
           <path d="M34 4 q9 -2 14 4 q-2 7 -10 6 q-6 -3 -4 -10z" />
           <path d="M28 32 q10 -5 18 1 q0 8 -9 9 q-9 -1 -9 -10z" />

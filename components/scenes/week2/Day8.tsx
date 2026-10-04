@@ -1,7 +1,7 @@
 'use client';
 
 import { C, Arrow, CellBand, Journey, Label, Note, Part, ellipseArc, lerp, lin, mix, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
-import { CYTO, EPI_TOP, Endometrium, INNER, R, TrapBand, W2, chord, discGeometry, f1, lensPath, synTh8, type DiscGeo } from './common';
+import { Backing, CYTO, EPI_TOP, Endometrium, INNER, R, TrapBand, W2, chord, discGeometry, f1, lensPath, synTh8, type DiscGeo } from './common';
 import { CellRing, SynFill } from './materials';
 
 /**
@@ -299,6 +299,7 @@ function Day8Drawing({ t }: SceneProps) {
   return (
     <g>
       <Endometrium gap={gap} secretion={endo} oedema={endo} vesselScale={lerp(1, 1.5, endo)} />
+      <Backing d={syncytioPath(cx, cy, grow)} circle={[cx, cy, R]} />
 
       <Part id="blastozelea">
         <circle cx={cx} cy={cy} r={INNER} fill="#1b2437" />

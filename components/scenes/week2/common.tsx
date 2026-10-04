@@ -34,6 +34,21 @@ interface EndometriumProps {
   children?: React.ReactNode;
 }
 
+/**
+ * Opaque, non-interactive backing under a conceptus (outline `d` and/or a disc). Dimmed context tissue is
+ * drawn translucent; without this the stroma's cells and oedema pools would show through the syncytium
+ * and the cavities as a double image. With it, dimmed tissue simply recedes as a darker solid shape.
+ */
+export const BACKING = '#111a22';
+export function Backing({ d, circle }: { d?: string; circle?: [number, number, number] }) {
+  return (
+    <g pointerEvents="none" fill={BACKING}>
+      {d && <path d={d} />}
+      {circle && <circle cx={circle[0]} cy={circle[1]} r={circle[2]} />}
+    </g>
+  );
+}
+
 /** Secretory (corkscrew) glands opening on the surface, clear of the implantation site. */
 export const GLANDS: Pt[][] = [
   glandPath([262, 486], 250, 2),
@@ -234,6 +249,13 @@ export const circlePath = (cx: number, cy: number, r: number, sweep = 1) =>
 export const chord = (dy: number) => Math.sqrt(Math.max(0, INNER * INNER - dy * dy));
 
 export const f1 = (v: number) => v.toFixed(1);
+
+/**
+ * Hand-offs on one spot (two names or notes in the same place): the outgoing one is gone in the first
+ * half of the ramp, the incoming one arrives in the second half — never two half-faded texts on top.
+ */
+export const outHalf = (x: number) => Math.min(1, 2 * x);
+export const inHalf = (x: number) => Math.max(0, 2 * x - 1);
 
 /** Disc landmarks for a blastocyst centred at (cx, cy). */
 export function discGeometry(cx: number, cy: number) {
