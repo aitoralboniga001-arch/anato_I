@@ -221,6 +221,24 @@ export function EarlyEmbryo({ day, beat = 0, counted = -1, legGrow = 1 }: EarlyO
   const cordW = g.cord[4];
   const cordAng = (Math.atan2(g.cordTip[1] - g.cordRoot[1], g.cordTip[0] - g.cordRoot[0]) * 180) / Math.PI;
 
+  // Cord geometry (local frame: along the cord from root x0 to the cut end x0 + L).
+  const cord = (() => {
+    const L = Math.hypot(g.cordTip[0] - g.cordRoot[0], g.cordTip[1] - g.cordRoot[1]);
+    const x0 = g.cordRoot[0];
+    const y0 = g.cordRoot[1];
+    const w0 = cordW * 1.12;
+    const w1 = cordW * 0.92;
+    // How far the drawn tube runs on into the body, behind the belly wall.
+    const inset = cordW * 2.2 + 24;
+    const upper = `C${x0 + L * 0.4},${y0 - w0 * 0.98} ${x0 + L * 0.7},${y0 - w1 * 1.04} ${x0 + L},${y0 - w1}`;
+    const tube = `M${x0 - 6},${y0 - w0} ${upper} L${x0 + L},${y0 + w1} C${x0 + L * 0.7},${y0 + w1 * 1.04} ${x0 + L * 0.4},${y0 + w0} ${x0 - 6},${y0 + w0} Z`;
+    // Flaring a little toward the body, as the cord does where it joins the umbilical ring.
+    const tubeIn = `M${x0 - inset},${y0 - w0 * 1.22} C${x0 - inset * 0.4},${y0 - w0 * 1.15} ${x0},${y0 - w0 * 1.02} ${x0 + L * 0.2},${y0 - w0} ${upper} L${x0 + L},${y0 + w1} C${x0 + L * 0.7},${y0 + w1 * 1.04} ${x0 + L * 0.4},${y0 + w0} ${x0 + L * 0.2},${y0 + w0} C${x0},${y0 + w0 * 1.02} ${x0 - inset * 0.4},${y0 + w0 * 1.15} ${x0 - inset},${y0 + w0 * 1.22} Z`;
+    // The cord points to the left (≈190°): mirror its local frame so its lit side stays on top (light from the upper left).
+    const flip = Math.cos((cordAng * Math.PI) / 180) < 0 ? ` translate(0 ${2 * y0}) scale(1 -1)` : '';
+    return { L, x0, y0, w0, w1, inset, tube, tubeIn, rot: `rotate(${cordAng} ${x0} ${y0})${flip}` };
+  })();
+
   // The neck in one piece: the arches sit on its side, the head rests on the heart prominence (no gaps).
   const neck = hull([
     ...[0, 60, 120, 180, 240, 300].map((a) => onEll(g.hind, a, 0.7)),
@@ -253,11 +271,30 @@ export function EarlyEmbryo({ day, beat = 0, counted = -1, legGrow = 1 }: EarlyO
           <stop offset="0.45" stopColor="#e9a191" />
           <stop offset="1" stopColor="#c56f62" />
         </linearGradient>
-        <radialGradient id="w5e-bud" cx="0.35" cy="0.3" r="0.8">
-          <stop offset="0" stopColor="#fff2ec" stopOpacity="0.85" />
-          <stop offset="1" stopColor="#f2b8a8" stopOpacity="0.15" />
+        {/* Limb bud: a raised mound lit from the upper left, deepening toward its lower rim. */}
+        <radialGradient id="w5e-bud" cx="0.36" cy="0.3" r="0.78">
+          <stop offset="0" stopColor="#fde6dc" />
+          <stop offset="0.42" stopColor="#f8cdbf" />
+          <stop offset="0.82" stopColor="#e9a291" />
+          <stop offset="1" stopColor="#d4826f" />
         </radialGradient>
+        <radialGradient id="w5e-budsh">
+          <stop offset="0.55" stopColor="#7a2e28" stopOpacity="0.34" />
+          <stop offset="1" stopColor="#7a2e28" stopOpacity="0" />
+        </radialGradient>
+        {/* Shade on the cord where it leaves the body wall (the wall overhangs its root). */}
+        <linearGradient id="w5e-cordocc" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#6e2a24" stopOpacity="0.5" />
+          <stop offset="1" stopColor="#6e2a24" stopOpacity="0" />
+        </linearGradient>
       </defs>
+      {/* Umbilical cord, drawn under the body so it grows out of the belly wall: its root runs on into
+          the body (hidden by it) and the wall's own edge is the junction, shaded on the cord. */}
+      <g transform={cord.rot} pointerEvents="none">
+        <path d={cord.tubeIn} fill="url(#w5e-cord)" stroke="#8f3f37" strokeWidth={1.2} strokeOpacity={0.7} />
+        <path d={`M${cord.x0 + 4},${cord.y0 - cord.w0 * 0.45} C${cord.x0 + cord.L * 0.45},${cord.y0 - cord.w0 * 0.55} ${cord.x0 + cord.L * 0.75},${cord.y0 - cord.w1 * 0.5} ${cord.x0 + cord.L - 4},${cord.y0 - cord.w1 * 0.55}`} fill="none" stroke="#fff4ee" strokeWidth={2.4} strokeLinecap="round" opacity={0.5} />
+        <rect x={cord.x0 - cord.inset} y={cord.y0 - cord.w0 - 2} width={cord.inset + cord.L * 0.3} height={cord.w0 * 2 + 4} fill="url(#w5e-cordocc)" />
+      </g>
       {/* Silhouette: one lit surface */}
       <g filter="url(#w5e-sculpt)" fill="url(#w5e-skin)">
         <path d={smoothPath([...g.spine, ...[...g.inner].reverse()], true, 0.5)} />
@@ -349,28 +386,18 @@ export function EarlyEmbryo({ day, beat = 0, counted = -1, legGrow = 1 }: EarlyO
         </Part>
       )}
       <Part id="goiko-gorputz-adarraren-hasikina">
-        {ell([g.arm[0], g.arm[1], g.arm[2] * 0.86, g.arm[3] * 0.88, g.arm[4]], { fill: 'url(#w5e-bud)' })}
+        <Bud e={[g.arm[0], g.arm[1], g.arm[2] * 0.95, g.arm[3] * 0.95, g.arm[4]]} />
       </Part>
       {legGrow > 0.02 && (
         <Part id="beheko-gorputz-adarraren-hasikina" show={Math.min(1, 0.4 + legGrow)}>
-          {ell([leg[0], leg[1], leg[2] * 0.86, leg[3] * 0.86, 0], { fill: 'url(#w5e-bud)' })}
+          <Bud e={[leg[0], leg[1], leg[2] * 0.95, leg[3] * 0.95, 0]} />
         </Part>
       )}
       {(() => {
-        // Cut umbilical cord: a tapering, lit tube ending in a pale cut face (the face is the part).
-        const L = Math.hypot(g.cordTip[0] - g.cordRoot[0], g.cordTip[1] - g.cordRoot[1]);
-        const x0 = g.cordRoot[0];
-        const y0 = g.cordRoot[1];
-        const w0 = cordW * 1.12;
-        const w1 = cordW * 0.92;
-        const rot = `rotate(${cordAng} ${x0} ${y0})`;
-        const tube = `M${x0 - 6},${y0 - w0} C${x0 + L * 0.4},${y0 - w0 * 0.98} ${x0 + L * 0.7},${y0 - w1 * 1.04} ${x0 + L},${y0 - w1} L${x0 + L},${y0 + w1} C${x0 + L * 0.7},${y0 + w1 * 1.04} ${x0 + L * 0.4},${y0 + w0} ${x0 - 6},${y0 + w0} Z`;
+        // Cut umbilical cord: the tube is drawn under the body (above); the part is its visible length and the pale cut face.
+        const { L, x0, y0, w1, rot, tube } = cord;
         return (
           <>
-            <g transform={rot} pointerEvents="none">
-              <path d={tube} fill="url(#w5e-cord)" stroke="#8f3f37" strokeWidth={1.2} strokeOpacity={0.7} />
-              <path d={`M${x0 + 4},${y0 - w0 * 0.45} C${x0 + L * 0.45},${y0 - w0 * 0.55} ${x0 + L * 0.75},${y0 - w1 * 0.5} ${x0 + L - 4},${y0 - w1 * 0.55}`} fill="none" stroke="#fff4ee" strokeWidth={2.4} strokeLinecap="round" opacity={0.5} />
-            </g>
             <Part id="zilborrestea">
               <g transform={rot}>
                 <path d={tube} fill="rgba(255,255,255,0.001)" />
@@ -423,6 +450,28 @@ export function EarlyEmbryo({ day, beat = 0, counted = -1, legGrow = 1 }: EarlyO
 }
 
 const lerpPt2 = (a: Pt, b: Pt, k: number): Pt => [lerp(a[0], b[0], k), lerp(a[1], b[1], k)];
+
+/**
+ * A limb bud as a raised mound on the body wall (not a flat disc): a soft cast shadow toward the lower
+ * right, a lit dome, a fine rim, and a crest of light along its upper-left edge.
+ */
+function Bud({ e }: { e: readonly number[] }) {
+  const [cx, cy, rx, ry, rot] = e;
+  const tr = `rotate(${rot} ${cx} ${cy})`;
+  const arc = (a0: number, a1: number, f: number) => {
+    const p = (a: number): Pt => [cx + Math.cos((a * Math.PI) / 180) * rx * f, cy + Math.sin((a * Math.PI) / 180) * ry * f];
+    const [p0, p1] = [p(a0), p(a1)];
+    return `M${p0[0]},${p0[1]} A${rx * f},${ry * f} 0 0 1 ${p1[0]},${p1[1]}`;
+  };
+  return (
+    <g transform={tr}>
+      <ellipse cx={cx + rx * 0.2} cy={cy + ry * 0.24} rx={rx * 1.28} ry={ry * 1.22} fill="url(#w5e-budsh)" />
+      <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="url(#w5e-bud)" stroke="#a5503f" strokeWidth={1.1} strokeOpacity={0.4} />
+      <path d={arc(-195, -70, 0.8)} fill="none" stroke="#fffaf6" strokeWidth={Math.max(1.4, rx * 0.09)} strokeLinecap="round" opacity={0.5} />
+      <path d={arc(20, 140, 0.9)} fill="none" stroke="#a5503f" strokeWidth={Math.max(1.4, rx * 0.1)} strokeLinecap="round" opacity={0.3} />
+    </g>
+  );
+}
 
 /** Somite `i` (0-based) of `day`, for counters and labels. */
 export function somiteAt(day: number, i: number): Pt {

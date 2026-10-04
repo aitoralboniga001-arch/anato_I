@@ -194,7 +194,9 @@ export function UmbilicalHernia({ t }: SceneProps) {
       })()}
 
       <Label id="zilbor-ernia-fisiologikoa" x={250} y={120} ax={bulge.p[0] + bulge.n[0] * halfW(bulgeU) * 1.2} ay={bulge.p[1] + bulge.n[1] * halfW(bulgeU) * 1.2} show={seg(out, 0.5, 0.8)} />
-      <Label id="heste-lakioak" x={250} y={190} ax={loopC[0]} ay={loopC[1]} />
+      {/* Below the hernia's name, nearly level with the loops: the two leaders fan out (one up to the bulge's
+          rim, one across to the loops) instead of running side by side and crossing. */}
+      <Label id="heste-lakioak" x={250} y={300} ax={loopC[0]} ay={loopC[1]} />
       <Label id="zilborrestea" x={470} y={560} ax={at(0.66).p[0]} ay={at(0.66).p[1] + 14} />
       <Label id="barrunbe-abdominala" x={820} y={262} ax={C[0] + rx * 0.62} ay={C[1] - ry * 0.3} />
       <Label id="erdiko-hestea" x={820} y={440} ax={S1[0] + rx * 0.2} ay={S1[1] + 9} />
