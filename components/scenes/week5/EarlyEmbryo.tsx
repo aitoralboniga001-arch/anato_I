@@ -38,8 +38,8 @@ interface Key {
 
 const K28: Key = {
   box: { x: 1395, y: 205, s: 0.522 },
-  spine: [[1330, 208], [1450, 215], [1550, 240], [1625, 290], [1680, 370], [1718, 470], [1730, 590], [1722, 710], [1690, 820], [1640, 920], [1575, 1010], [1480, 1080], [1360, 1120], [1250, 1122], [1170, 1080], [1140, 1010], [1150, 935], [1195, 868], [1250, 832], [1300, 815]],
-  inner: [[1300, 330], [1330, 430], [1370, 540], [1390, 660], [1370, 760], [1340, 800], [1300, 815]],
+  spine: [[1330, 208], [1450, 215], [1550, 240], [1625, 290], [1680, 370], [1718, 470], [1730, 590], [1722, 710], [1690, 820], [1640, 920], [1575, 1010], [1480, 1080], [1360, 1120], [1250, 1122], [1170, 1080], [1140, 1010], [1150, 935], [1195, 868], [1250, 832], [1296, 814]],
+  inner: [[1300, 330], [1330, 430], [1370, 540], [1390, 660], [1370, 760], [1340, 800], [1306, 818]],
   cran: [1195, 385, 140, 165, -28],
   hind: [1340, 320, 120, 110, 0],
   face: [1195, 552, 92, 58, 12],
@@ -59,8 +59,8 @@ const K28: Key = {
 
 const K32: Key = {
   box: { x: 1302, y: 185, s: 0.542 },
-  spine: [[1250, 192], [1370, 188], [1480, 208], [1570, 255], [1635, 335], [1668, 450], [1674, 580], [1658, 715], [1612, 840], [1540, 945], [1440, 1030], [1320, 1068], [1200, 1058], [1100, 1015], [1040, 950], [1012, 870], [1015, 790], [1030, 735], [1042, 700]],
-  inner: [[1240, 330], [1280, 440], [1320, 560], [1330, 690], [1290, 762], [1200, 772], [1120, 778], [1078, 792], [1062, 760], [1058, 715], [1042, 700]],
+  spine: [[1250, 192], [1370, 188], [1480, 208], [1570, 255], [1635, 335], [1668, 450], [1674, 580], [1658, 715], [1612, 840], [1540, 945], [1440, 1030], [1320, 1068], [1200, 1058], [1100, 1015], [1040, 950], [1012, 870], [1015, 790], [1030, 735], [1040, 712]],
+  inner: [[1240, 330], [1280, 440], [1320, 560], [1330, 690], [1290, 762], [1200, 772], [1120, 778], [1078, 792], [1062, 760], [1058, 728], [1052, 710]],
   cran: [1085, 405, 158, 212, -14],
   hind: [1265, 300, 110, 105, 0],
   face: [1165, 598, 80, 66, 28],
@@ -151,21 +151,66 @@ function bar(a: Pt, b: Pt, wa: number, wb = wa) {
   return smoothPath(pts, true, 0.4);
 }
 
-const ORANGE = '#e5866c';
 const RIM = '#c9634f';
 const PALE = '#fbd9cf';
+const COUNT = '#ffc98a';
 
-export function EarlyEmbryo({ day, beat = 0 }: { day: number; beat?: number }) {
+/** Convex hull (monotone chain), used to fill the neck between head, arches and heart in one piece. */
+function hull(pts: Pt[]): Pt[] {
+  const p = [...pts].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o: Pt, a: Pt, b: Pt) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lo: Pt[] = [];
+  for (const q of p) {
+    while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop();
+    lo.push(q);
+  }
+  const up: Pt[] = [];
+  for (const q of [...p].reverse()) {
+    while (up.length >= 2 && cross(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop();
+    up.push(q);
+  }
+  return [...lo.slice(0, -1), ...up.slice(0, -1)];
+}
+
+/** Points on an ellipse (cx, cy, rx, ry, rot), `f` = fraction of the radius. */
+const onEll = (e: readonly number[], deg: number, f = 1): Pt => {
+  const a = (deg * Math.PI) / 180;
+  const r = ((e[4] ?? 0) * Math.PI) / 180;
+  const x = Math.cos(a) * e[2] * f;
+  const y = Math.sin(a) * e[3] * f;
+  return [e[0] + x * Math.cos(r) - y * Math.sin(r), e[1] + x * Math.sin(r) + y * Math.cos(r)];
+};
+
+export interface EarlyOpts {
+  day: number;
+  /** Heartbeat phase (-1..1). */
+  beat?: number;
+  /** Somites counted so far (warm), for the "count the somites" step; -1 = none. */
+  counted?: number;
+  /** Lower limb bud size (0..1): it appears 2–3 days after the upper one. */
+  legGrow?: number;
+}
+
+/** Heart prominence split into its two visible bulges: the left ventricle below, the left atrium above. */
+export function heartLobes(heart: readonly number[], atrium: Pt) {
+  const vent: Ell = [heart[0] - heart[2] * 0.12, heart[1] + heart[3] * 0.24, heart[2] * 0.74, heart[3] * 0.62, heart[4] ?? 0];
+  const atr: Ell = [atrium[0], atrium[1], heart[2] * 0.42, heart[3] * 0.34, -25];
+  return { vent, atr };
+}
+
+export function EarlyEmbryo({ day, beat = 0, counted = -1, legGrow = 1 }: EarlyOpts) {
   const g = earlyGeom(day);
   const { S } = g;
   const nSom = Math.round(g.somites[0]);
-  const heart: Ell = [g.heart[0], g.heart[1], g.heart[2] * (1 + 0.03 * beat), g.heart[3] * (1 + 0.03 * beat), g.heart[4]];
+  const heart: Ell = [g.heart[0], g.heart[1], g.heart[2] * (1 + 0.025 * beat), g.heart[3] * (1 + 0.025 * beat), g.heart[4]];
   const lensPlate = 1 - ramp(day, 30, 31.5);
   const lensPit = ramp(day, 30, 31.5);
   const nasal = ramp(day, 30.5, 32);
   const sinus = ramp(day, 29, 32);
   const otic = 1 - ramp(day, 29.5, 31);
   const atrium = 1 - ramp(day, 30, 31.5);
+  const { vent, atr } = heartLobes(heart, g.atrium);
+  const leg: Ell = [g.leg[0], g.leg[1], g.leg[2] * lerp(0.45, 1, legGrow), g.leg[3] * lerp(0.45, 1, legGrow), 0];
 
   // Somites: beads along the whole dorsal edge, from the neck to the tail.
   const somites = Array.from({ length: nSom }, (_, i) => {
@@ -174,13 +219,49 @@ export function EarlyEmbryo({ day, beat = 0 }: { day: number; beat?: number }) {
     return { c: s.p, a: (Math.atan2(s.t[1], s.t[0]) * 180) / Math.PI, r: lerp(12.5, 4.5, u * u) };
   });
   const cordW = g.cord[4];
+  const cordAng = (Math.atan2(g.cordTip[1] - g.cordRoot[1], g.cordTip[0] - g.cordRoot[0]) * 180) / Math.PI;
+
+  // The neck in one piece: the arches sit on its side, the head rests on the heart prominence (no gaps).
+  const neck = hull([
+    ...[0, 60, 120, 180, 240, 300].map((a) => onEll(g.hind, a, 0.7)),
+    ...g.bars.map((b) => b.top),
+    ...g.bars.map((b) => lerpPt2(b.top, b.bot, 0.62)),
+    ...[200, 250, 300].map((a) => onEll(heart, a, 0.7)),
+    onEll(g.face, -30, 0.6),
+    onEll(g.cran, 30, 0.7),
+  ]);
+  // Stomodeum: the slit between the frontonasal prominence and the first (mandibular) arch.
+  const b0 = g.bars[0];
+  const mouthA: Pt = [b0.bot[0] - b0.w * 0.6, b0.bot[1] - b0.w * 0.2];
+  const mouthC: Pt = onEll(g.face, -10, 0.85);
 
   return (
     <g>
-      <SkinDefs id="w5e" cx={470} cy={260} r={430} red={0.35} />
+      <SkinDefs id="w5e" cx={455} cy={180} r={470} red={0.3} />
+      <defs>
+        <radialGradient id="w5e-vent" cx="0.38" cy="0.36" r="0.75">
+          <stop offset="0" stopColor="#f08f84" stopOpacity="0.15" />
+          <stop offset="0.6" stopColor="#c8505a" stopOpacity="0.42" />
+          <stop offset="1" stopColor="#9c3040" stopOpacity="0.55" />
+        </radialGradient>
+        <radialGradient id="w5e-atr" cx="0.4" cy="0.35" r="0.75">
+          <stop offset="0" stopColor="#fff1ea" stopOpacity="0.7" />
+          <stop offset="1" stopColor="#d9707a" stopOpacity="0.35" />
+        </radialGradient>
+        <linearGradient id="w5e-cord" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#f6c6b8" />
+          <stop offset="0.45" stopColor="#e9a191" />
+          <stop offset="1" stopColor="#c56f62" />
+        </linearGradient>
+        <radialGradient id="w5e-bud" cx="0.35" cy="0.3" r="0.8">
+          <stop offset="0" stopColor="#fff2ec" stopOpacity="0.85" />
+          <stop offset="1" stopColor="#f2b8a8" stopOpacity="0.15" />
+        </radialGradient>
+      </defs>
       {/* Silhouette: one lit surface */}
       <g filter="url(#w5e-sculpt)" fill="url(#w5e-skin)">
-        <path d={smoothPath([...g.spine, ...[...g.inner].reverse().slice(1)], true, 0.5)} />
+        <path d={smoothPath([...g.spine, ...[...g.inner].reverse()], true, 0.5)} />
+        <path d={smoothPath(neck, true, 0.35)} />
         {ell(g.hind)}
         {ell(g.cran)}
         {ell(g.face)}
@@ -188,67 +269,69 @@ export function EarlyEmbryo({ day, beat = 0 }: { day: number; beat?: number }) {
         {g.bars.map((b, i) => (
           <path key={i} d={bar(b.top, b.bot, b.w / 2, b.w / 2.4)} />
         ))}
-        <path d={bar(g.cordRoot, g.cordTip, cordW * 1.1, cordW)} />
         {ell(g.arm)}
-        {ell(g.leg)}
+        {ell(leg)}
       </g>
 
-      {/* Langman's flat relief: darker dorsal rim, pale beads, pale buds */}
+      {/* Relief on the surface: darker dorsal rim, pale mesonephric ridge */}
       <g pointerEvents="none">
-        <path d={smoothPath(Array.from({ length: 40 }, (_, i) => spineAt(S, 0.03 + (0.95 * i) / 39, 5).p), false)} fill="none" stroke={RIM} strokeWidth={7} strokeLinecap="round" opacity={0.5} />
-        <path d={smoothPath(g.meso, false)} fill="none" stroke={PALE} strokeWidth={lerp(16, 22, ramp(day, 28, 32))} strokeLinecap="round" opacity={0.55} />
-      </g>
-      {/* Contours of the prominences, as in the course drawing */}
-      <g fill="none" stroke={RIM} strokeLinecap="round" pointerEvents="none">
-        {ell(heart, { strokeWidth: 1.6, opacity: 0.55 })}
-        {ell(g.arm, { strokeWidth: 1.3, opacity: 0.5 })}
-        {ell(g.leg, { strokeWidth: 1.3, opacity: 0.5 })}
-        {g.bars.map((b, i) => (
-          <path key={i} d={bar(b.top, b.bot, b.w / 2, b.w / 2.4)} strokeWidth={1.2} opacity={0.45} />
-        ))}
-        {(() => {
-          // Stomodeum: the notch between the face and the first arch.
-          const b = g.bars[0];
-          const f = g.face;
-          const a: Pt = [b.bot[0] - b.w * 0.55, b.bot[1] - b.w * 0.3];
-          const c: Pt = [f[0] + f[2] * 0.75, f[1] - f[3] * 0.55];
-          return <path d={`M${a[0]},${a[1]} Q${(a[0] + c[0]) / 2 - 6},${(a[1] + c[1]) / 2 + 4} ${c[0]},${c[1]}`} stroke={SKIN.ink} strokeWidth={2.4} opacity={0.6} />;
-        })()}
+        <path d={smoothPath(Array.from({ length: 40 }, (_, i) => spineAt(S, 0.03 + (0.95 * i) / 39, 5).p), false)} fill="none" stroke={RIM} strokeWidth={7} strokeLinecap="round" opacity={0.42} />
+        <path d={smoothPath(g.meso, false)} fill="none" stroke={PALE} strokeWidth={lerp(16, 22, ramp(day, 28, 32))} strokeLinecap="round" opacity={0.5} />
+        {/* Stomodeum */}
+        <path d={`M${mouthA[0]},${mouthA[1]} Q${(mouthA[0] + mouthC[0]) / 2 - 4},${(mouthA[1] + mouthC[1]) / 2 + 5} ${mouthC[0]},${mouthC[1]}`} fill="none" stroke={SKIN.ink} strokeWidth={2.6} strokeLinecap="round" opacity={0.55} />
       </g>
       <Part id="mesonefros-gandorra">
         <path d={smoothPath(g.meso, false)} fill="none" stroke="rgba(255,255,255,0.001)" strokeWidth={18} />
       </Part>
       <Part id="somitak">
-        {somites.map((s, i) => (
-          <rect key={i} x={s.c[0] - s.r * 0.75} y={s.c[1] - s.r} width={s.r * 1.5} height={s.r * 2} rx={s.r * 0.65} transform={`rotate(${s.a + 90} ${s.c[0]} ${s.c[1]})`} fill={PALE} stroke={ORANGE} strokeWidth={1.2} opacity={0.92} />
-        ))}
+        {somites.map((s, i) => {
+          const c = counted >= 0 && i < counted;
+          return (
+            <rect
+              key={i}
+              x={s.c[0] - s.r * 0.75}
+              y={s.c[1] - s.r}
+              width={s.r * 1.5}
+              height={s.r * 2}
+              rx={s.r * 0.65}
+              transform={`rotate(${s.a + 90} ${s.c[0]} ${s.c[1]})`}
+              fill={c ? COUNT : PALE}
+              stroke={c ? '#e0803a' : '#e5866c'}
+              strokeWidth={c ? 1.5 : 1.1}
+              opacity={0.92}
+            />
+          );
+        })}
       </Part>
       <Part id="bihotz-goragunea">
+        {/* The heart shows through the thin body wall: a dark-red ventricle below, the atrium above. */}
         {ell(heart, { fill: 'url(#w5e-heart)' })}
-        <path
-          d={`M${heart[0] - heart[2] * 0.85},${heart[1] - heart[3] * 0.1} Q${heart[0]},${heart[1] + heart[3] * 0.25} ${heart[0] + heart[2] * 0.8},${heart[1] - heart[3] * 0.25}`}
-          fill="none"
-          stroke={RIM}
-          strokeWidth={1.6}
-          opacity={0.55}
-        />
+      </Part>
+      <Part id="ezkerreko-bentrikulua">
+        {ell(vent, { fill: 'url(#w5e-vent)' })}
+        <path d={`M${onEll(vent, 200)[0]},${onEll(vent, 200)[1]} Q${vent[0]},${vent[1] - vent[3] * 1.15} ${onEll(vent, -20)[0]},${onEll(vent, -20)[1]}`} fill="none" stroke={RIM} strokeWidth={1.5} opacity={0.5} />
       </Part>
       {atrium > 0.02 && (
         <Part id="ezkerreko-aurikula" show={atrium}>
-          <ellipse cx={g.atrium[0]} cy={g.atrium[1]} rx={12} ry={10} fill="#fff4ee" opacity={0.75} />
+          {ell(atr, { fill: 'url(#w5e-atr)' })}
         </Part>
       )}
       <Part id="faringe-arkuak">
         {g.bars.map((b, i) => (
-          <path key={i} d={bar(b.top, b.bot, b.w / 2 - 3, b.w / 2.4 - 3)} fill={PALE} opacity={0.55} />
+          <g key={i}>
+            {/* Each arch is a rounded ridge: shadow on its caudal flank, pale crest, rim light cranially. */}
+            <path d={bar([b.top[0] + 3, b.top[1] + 2], [b.bot[0] + 3, b.bot[1] + 1], b.w / 2 - 1, b.w / 2.4 - 1)} fill="#9b4d45" opacity={0.35} />
+            <path d={bar(b.top, b.bot, b.w / 2 - 2.5, b.w / 2.4 - 2.5)} fill={PALE} opacity={0.8} />
+            <path d={`M${b.top[0] - b.w * 0.22},${b.top[1] + 5} L${b.bot[0] - b.w * 0.18},${b.bot[1] - 5}`} stroke="#fff8f4" strokeWidth={2.4} strokeLinecap="round" opacity={0.7} />
+          </g>
         ))}
       </Part>
       <Part id="arrialdura-brankialak">
         {g.bars.slice(0, -1).map((b, i) => {
           const n = g.bars[i + 1];
-          const t: Pt = [(b.top[0] + n.top[0]) / 2, (b.top[1] + n.top[1]) / 2 + 10];
-          const u: Pt = [(b.bot[0] + n.bot[0]) / 2 + 2, (Math.min(b.bot[1], n.bot[1]) + t[1]) / 2 + 8];
-          return <path key={i} d={`M${t[0]},${t[1]} Q${t[0] + 3},${(t[1] + u[1]) / 2} ${u[0]},${u[1]}`} fill="none" stroke={SKIN.ink} strokeWidth={2} strokeLinecap="round" opacity={0.6} />;
+          const t: Pt = [(b.top[0] + n.top[0]) / 2, (b.top[1] + n.top[1]) / 2 + 8];
+          const u: Pt = [(b.bot[0] + n.bot[0]) / 2 + 2, (Math.min(b.bot[1], n.bot[1]) + t[1]) / 2 + 10];
+          return <path key={i} d={`M${t[0]},${t[1]} Q${t[0] + 3},${(t[1] + u[1]) / 2} ${u[0]},${u[1]}`} fill="none" stroke={SKIN.ink} strokeWidth={2.4} strokeLinecap="round" opacity={0.62} />;
         })}
       </Part>
       {sinus > 0.02 && (
@@ -256,43 +339,77 @@ export function EarlyEmbryo({ day, beat = 0 }: { day: number; beat?: number }) {
           {(() => {
             const b = g.bars[g.bars.length - 1];
             const c: Pt = [b.top[0] + 16, b.top[1] + g.archLen[3] * 0.5];
-            return <path d={`M${c[0] - 4},${c[1] - 16} q12,16 0,32`} fill="none" stroke={SKIN.ink} strokeWidth={3} strokeLinecap="round" opacity={0.55} />;
+            return (
+              <>
+                <ellipse cx={c[0] + 2} cy={c[1]} rx={7} ry={17} fill={SKIN.ink} opacity={0.18} />
+                <path d={`M${c[0] - 4},${c[1] - 16} q12,16 0,32`} fill="none" stroke={SKIN.ink} strokeWidth={3} strokeLinecap="round" opacity={0.55} />
+              </>
+            );
           })()}
         </Part>
       )}
       <Part id="goiko-gorputz-adarraren-hasikina">
-        {ell([g.arm[0], g.arm[1], g.arm[2] * 0.8, g.arm[3] * 0.82, g.arm[4]], { fill: PALE, opacity: 0.7 })}
+        {ell([g.arm[0], g.arm[1], g.arm[2] * 0.86, g.arm[3] * 0.88, g.arm[4]], { fill: 'url(#w5e-bud)' })}
       </Part>
-      <Part id="beheko-gorputz-adarraren-hasikina">
-        {ell([g.leg[0], g.leg[1], g.leg[2] * 0.8, g.leg[3] * 0.8, 0], { fill: PALE, opacity: 0.7 })}
-      </Part>
-      <Part id="zilborrestea">
-        <ellipse cx={g.cordTip[0]} cy={g.cordTip[1]} rx={cordW * 0.35} ry={cordW * 0.95} transform={`rotate(${(Math.atan2(g.cordTip[1] - g.cordRoot[1], g.cordTip[0] - g.cordRoot[0]) * 180) / Math.PI} ${g.cordTip[0]} ${g.cordTip[1]})`} fill={ORANGE} stroke={RIM} strokeWidth={1.2} opacity={0.85} />
-      </Part>
+      {legGrow > 0.02 && (
+        <Part id="beheko-gorputz-adarraren-hasikina" show={Math.min(1, 0.4 + legGrow)}>
+          {ell([leg[0], leg[1], leg[2] * 0.86, leg[3] * 0.86, 0], { fill: 'url(#w5e-bud)' })}
+        </Part>
+      )}
+      {(() => {
+        // Cut umbilical cord: a tapering, lit tube ending in a pale cut face (the face is the part).
+        const L = Math.hypot(g.cordTip[0] - g.cordRoot[0], g.cordTip[1] - g.cordRoot[1]);
+        const x0 = g.cordRoot[0];
+        const y0 = g.cordRoot[1];
+        const w0 = cordW * 1.12;
+        const w1 = cordW * 0.92;
+        const rot = `rotate(${cordAng} ${x0} ${y0})`;
+        const tube = `M${x0 - 6},${y0 - w0} C${x0 + L * 0.4},${y0 - w0 * 0.98} ${x0 + L * 0.7},${y0 - w1 * 1.04} ${x0 + L},${y0 - w1} L${x0 + L},${y0 + w1} C${x0 + L * 0.7},${y0 + w1 * 1.04} ${x0 + L * 0.4},${y0 + w0} ${x0 - 6},${y0 + w0} Z`;
+        return (
+          <>
+            <g transform={rot} pointerEvents="none">
+              <path d={tube} fill="url(#w5e-cord)" stroke="#8f3f37" strokeWidth={1.2} strokeOpacity={0.7} />
+              <path d={`M${x0 + 4},${y0 - w0 * 0.45} C${x0 + L * 0.45},${y0 - w0 * 0.55} ${x0 + L * 0.75},${y0 - w1 * 0.5} ${x0 + L - 4},${y0 - w1 * 0.55}`} fill="none" stroke="#fff4ee" strokeWidth={2.4} strokeLinecap="round" opacity={0.5} />
+            </g>
+            <Part id="zilborrestea">
+              <g transform={rot}>
+                <path d={tube} fill="rgba(255,255,255,0.001)" />
+                <ellipse cx={x0 + L} cy={y0} rx={w1 * 0.38} ry={w1} fill="#f7cdbf" stroke="#8f3f37" strokeWidth={1.2} />
+                <ellipse cx={x0 + L + 1} cy={y0} rx={w1 * 0.24} ry={w1 * 0.7} fill="#efb3a3" />
+              </g>
+            </Part>
+          </>
+        );
+      })()}
       <Part id="goragune-kaudala">
-        <circle cx={g.tail[0]} cy={g.tail[1]} r={6} fill="rgba(255,255,255,0.001)" />
+        <circle cx={g.tail[0]} cy={g.tail[1]} r={8} fill="rgba(255,255,255,0.001)" />
       </Part>
 
-      {/* Head: lens placode → lens pit, nasal placode, otic placode */}
+      {/* Head: lens placode → lens pit, nasal placode, otic placode (thickenings of the surface ectoderm) */}
       {lensPlate > 0.02 && (
         <Part id="kristalinoaren-plaka" show={lensPlate}>
-          <circle cx={g.eye[0]} cy={g.eye[1]} r={9} fill={PALE} stroke={RIM} strokeWidth={1.2} />
+          <circle cx={g.eye[0]} cy={g.eye[1]} r={10} fill={PALE} stroke={RIM} strokeWidth={1.2} />
+          <circle cx={g.eye[0] - 2.5} cy={g.eye[1] - 2.5} r={4} fill="#fff" opacity={0.5} />
         </Part>
       )}
       {lensPit > 0.02 && (
         <Part id="kristalinoaren-hobitxoa" show={lensPit}>
-          <circle cx={g.eye[0]} cy={g.eye[1]} r={10} fill={PALE} stroke={RIM} strokeWidth={1.2} />
-          <circle cx={g.eye[0] + 1} cy={g.eye[1] + 1} r={4.5} fill={RIM} />
+          <circle cx={g.eye[0]} cy={g.eye[1]} r={10.5} fill={PALE} stroke={RIM} strokeWidth={1.2} />
+          {/* The placode sinks in: a pit opening, darker toward its lower rim */}
+          <circle cx={g.eye[0] + 1} cy={g.eye[1] + 1} r={lerp(1.5, 5, lensPit)} fill={RIM} />
+          <circle cx={g.eye[0]} cy={g.eye[1]} r={lerp(1, 2.6, lensPit)} fill={SKIN.ink} opacity={0.7} />
         </Part>
       )}
       {nasal > 0.02 && (
         <Part id="sudur-plaka" show={nasal}>
-          <ellipse cx={g.nose[0]} cy={g.nose[1]} rx={8} ry={11} transform={`rotate(25 ${g.nose[0]} ${g.nose[1]})`} fill={PALE} stroke={RIM} strokeWidth={1.1} />
+          <ellipse cx={g.nose[0]} cy={g.nose[1]} rx={8.5} ry={11.5} transform={`rotate(25 ${g.nose[0]} ${g.nose[1]})`} fill={PALE} stroke={RIM} strokeWidth={1.1} />
+          <ellipse cx={g.nose[0] - 2} cy={g.nose[1] - 3} rx={3} ry={4.5} transform={`rotate(25 ${g.nose[0]} ${g.nose[1]})`} fill="#fff" opacity={0.45} />
         </Part>
       )}
       {otic > 0.02 && (
         <Part id="entzumen-plaka" show={otic}>
-          <ellipse cx={g.ear[0]} cy={g.ear[1]} rx={9} ry={8} fill={PALE} stroke={RIM} strokeWidth={1} opacity={0.85} />
+          <ellipse cx={g.ear[0]} cy={g.ear[1]} rx={9.5} ry={8.5} fill={PALE} stroke={RIM} strokeWidth={1} opacity={0.9} />
+          <circle cx={g.ear[0] - 2.5} cy={g.ear[1] - 2} r={3.2} fill="#fff" opacity={0.5} />
         </Part>
       )}
       <Part id="laugarren-bentrikulua" show={win(day, 29, 36, 2)}>
@@ -303,6 +420,16 @@ export function EarlyEmbryo({ day, beat = 0 }: { day: number; beat?: number }) {
       </Part>
     </g>
   );
+}
+
+const lerpPt2 = (a: Pt, b: Pt, k: number): Pt => [lerp(a[0], b[0], k), lerp(a[1], b[1], k)];
+
+/** Somite `i` (0-based) of `day`, for counters and labels. */
+export function somiteAt(day: number, i: number): Pt {
+  const g = earlyGeom(day);
+  const n = Math.round(g.somites[0]);
+  const u = 0.06 + (0.9 * i) / Math.max(1, n - 1);
+  return spineAt(g.S, u, lerp(21, 8, u)).p;
 }
 
 export type EarlyGeom = ReturnType<typeof earlyGeom>;

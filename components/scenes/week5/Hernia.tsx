@@ -98,9 +98,15 @@ export function UmbilicalHernia({ t }: SceneProps) {
           <stop offset="0" stopColor="#3b1d20" />
           <stop offset="1" stopColor="#220f13" />
         </radialGradient>
-        <radialGradient id="hn-liver" cx="0.4" cy="0.35" r="0.75">
-          <stop offset="0" stopColor="#9b4440" />
+        <radialGradient id="hn-liver" cx="0.38" cy="0.3" r="0.8">
+          <stop offset="0" stopColor="#b8524b" />
+          <stop offset="0.7" stopColor="#7e2d2a" />
           <stop offset="1" stopColor="#5c201f" />
+        </radialGradient>
+        <radialGradient id="hn-glow">
+          <stop offset="0" stopColor="#ffb86b" stopOpacity="0.32" />
+          <stop offset="0.6" stopColor="#ffb86b" stopOpacity="0.16" />
+          <stop offset="1" stopColor="#ffb86b" stopOpacity="0" />
         </radialGradient>
       </defs>
 
@@ -128,12 +134,19 @@ export function UmbilicalHernia({ t }: SceneProps) {
         <Part id="zilbor-ernia-fisiologikoa" show={out}>
           {/* Extension of the cavity into the proximal cord, holding the loops. */}
           <path d={coelomD} fill="#2c1418" />
-          <ellipse cx={bulge.p[0]} cy={bulge.p[1]} rx={halfW(bulgeU) * 1.9} ry={halfW(bulgeU) * 1.3} transform={`rotate(${(Math.atan2(bulge.n[1], bulge.n[0]) * 180) / Math.PI + 90} ${bulge.p[0]} ${bulge.p[1]})`} fill="none" stroke="#ffb86b" strokeWidth={1.5} strokeDasharray="5 5" opacity={0.85} />
+          {/* A soft pool of light on the bulge of the cord (no drawn ring). */}
+          <ellipse cx={bulge.p[0]} cy={bulge.p[1]} rx={halfW(bulgeU) * 2.1} ry={halfW(bulgeU) * 1.45} transform={`rotate(${(Math.atan2(bulge.n[1], bulge.n[0]) * 180) / Math.PI + 90} ${bulge.p[0]} ${bulge.p[1]})`} fill="url(#hn-glow)" pointerEvents="none" />
         </Part>
       )}
 
       {/* Liver: fills much of the small cavity, which is why the loops go out. */}
-      <ellipse cx={C[0] - rx * 0.12} cy={C[1] - ry * 0.46} rx={rx * 0.66} ry={ry * 0.4} fill="url(#hn-liver)" stroke="#c9786b" strokeOpacity={0.45} strokeWidth={1.2} />
+      <g pointerEvents="none">
+        <ellipse cx={C[0] - rx * 0.12} cy={C[1] - ry * 0.46} rx={rx * 0.66} ry={ry * 0.4} fill="url(#hn-liver)" stroke="#e29a8a" strokeOpacity={0.55} strokeWidth={1.4} />
+        <path d={`M${C[0] - rx * 0.6},${C[1] - ry * 0.55} Q${C[0] - rx * 0.2},${C[1] - ry * 0.8} ${C[0] + rx * 0.3},${C[1] - ry * 0.66}`} fill="none" stroke="#f3b8aa" strokeWidth={2} strokeLinecap="round" opacity={0.35} />
+        <text x={C[0] - rx * 0.12} y={C[1] - ry * 0.42} textAnchor="middle" fill="#f3c9bd" fontSize={12} letterSpacing="0.1em" opacity={0.75} style={{ textTransform: 'uppercase' }}>
+          gibela
+        </text>
+      </g>
       <Part id="heste-lakioak">
         <g fill="none" strokeLinecap="round" strokeLinejoin="round">
           <path d={gut} stroke="#5e2622" strokeWidth={17} />
@@ -162,6 +175,28 @@ export function UmbilicalHernia({ t }: SceneProps) {
       <Note x={610} y={36} tone="accent" show={seg(t, 0.78, 0.82)}>
         12. astea: barrunbea handiagoa, goragunea desagertu da
       </Note>
+      {/* Weeks 6 → 12: when the loops are out in the cord. */}
+      <g pointerEvents="none">
+        {(() => {
+          const wx = (w: number) => 620 + ((w - 5) / 8) * 260;
+          const now = Math.min(13, Math.max(5, dayOf(D3, t) / 7));
+          return (
+            <>
+              <text x={620} y={548} fill="#8b867d" fontSize={11} letterSpacing="0.12em" style={{ textTransform: 'uppercase' }}>
+                Lakioak zilborrestean
+              </text>
+              <path d={`M${wx(5)},566 H${wx(13)}`} stroke="#3b3833" strokeWidth={4} strokeLinecap="round" />
+              <path d={`M${wx(6)},566 H${wx(12)}`} stroke="#ffb86b" strokeWidth={8} strokeLinecap="round" opacity={0.45} />
+              {[6, 8, 10, 12].map((w) => (
+                <text key={w} x={wx(w)} y={588} textAnchor="middle" fill={w === 6 || w === 12 ? '#ffd7a8' : '#8b867d'} fontSize={11} fontWeight={w === 6 || w === 12 ? 650 : 500} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {w}
+                </text>
+              ))}
+              <circle cx={wx(now)} cy={566} r={6.5} fill="#ffb86b" stroke="#1b1916" strokeWidth={2} />
+            </>
+          );
+        })()}
+      </g>
       <AgeHud value={week} unit=". astea" caption="Adina" />
     </g>
   );

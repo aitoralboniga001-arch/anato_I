@@ -1,5 +1,6 @@
 import type { WeekDef } from '@/lib/sim/types';
-import { Embryo28to32, Embryo42to56 } from '@/components/scenes/week5/Embryo';
+import { Embryo42to56 } from '@/components/scenes/week5/Embryo56';
+import { Embryo28to32 } from '@/components/scenes/week5/Embryo28';
 import { LimbDevelopment } from '@/components/scenes/week5/Limbs';
 import { Fetus3rdMonth, Fetus4to5, Fetus6to9, FetusLineup } from '@/components/scenes/week5/Fetus';
 import { HeadProportions } from '@/components/scenes/week5/Proportions';

@@ -39,7 +39,7 @@ const P_LEN: Panel = {
   range: (r) => r.len,
   color: LEN_C,
   title: 'Luzera zefalokaudala · cm',
-  fmt: (v) => `${v}`,
+  fmt: (v) => (v === 40 ? '40 cm' : `${v}`),
 };
 const P_WT: Panel = {
   top: 344,
@@ -77,16 +77,13 @@ function Chart({ p, upTo, id, dim }: { p: Panel; upTo: number; id: string; dim: 
       {/* grid */}
       {p.ticks.map((v) => (
         <g key={v}>
-          <line x1={X0} x2={X1} y1={yOf(p, v)} y2={yOf(p, v)} stroke="rgba(255,255,255,0.06)" />
-          <text x={X0 - 10} y={yOf(p, v)} dy="0.35em" textAnchor="end" fill="#7c7870" fontSize={10.5} style={{ fontVariantNumeric: 'tabular-nums' }}>
+          <line x1={X0} x2={X1} y1={yOf(p, v)} y2={yOf(p, v)} stroke="rgba(255,255,255,0.07)" />
+          <text x={X0 - 10} y={yOf(p, v)} dy="0.35em" textAnchor="end" fill="#8b867d" fontSize={12} style={{ fontVariantNumeric: 'tabular-nums' }}>
             {p.fmt(v)}
           </text>
         </g>
       ))}
       <line x1={X0} x2={X1} y1={p.bottom} y2={p.bottom} stroke="rgba(255,255,255,0.22)" />
-      <text x={X0} y={p.top - 14} fill="#b4afa6" fontSize={11} letterSpacing="0.12em" style={{ textTransform: 'uppercase' }}>
-        {p.title}
-      </text>
 
       {/* table rows: min–max range of each band */}
       {ROWS.map((r) => {
@@ -101,16 +98,16 @@ function Chart({ p, upTo, id, dim }: { p: Panel; upTo: number; id: string; dim: 
             height={Math.max(4, yOf(p, lo) - yOf(p, hi) + 6)}
             rx={4}
             fill={p.color}
-            opacity={inFocus ? 0.14 : 0.06}
+            opacity={inFocus ? 0.16 : 0.06}
           />
         );
       })}
 
       {/* the whole course, faint; the part reached so far, solid with an area fill */}
-      <polyline points={full.join(' ')} fill="none" stroke={p.color} strokeOpacity={0.22} strokeWidth={1.5} strokeDasharray="3 5" />
+      <polyline points={full.join(' ')} fill="none" stroke={p.color} strokeOpacity={0.2} strokeWidth={1.6} strokeLinejoin="round" />
       <Part id={id}>
         <path d={`M${xw(W0)},${p.bottom} L${done.join(' L')} L${done[done.length - 1].split(',')[0]},${p.bottom}Z`} fill={`url(#${gid})`} />
-        <polyline points={done.join(' ')} fill="none" stroke={p.color} strokeWidth={2.6} strokeLinejoin="round" strokeLinecap="round" />
+        <polyline points={done.join(' ')} fill="none" stroke={p.color} strokeWidth={3} strokeLinejoin="round" strokeLinecap="round" />
       </Part>
     </g>
   );
@@ -125,22 +122,28 @@ function Cursor({ w }: { w: number }) {
   const kg = row.wt[0] >= 1000;
   const wtText = kg ? `${fmtWeight(row.wt[0])[0]}–${fmtWeight(row.wt[1])[0]} kg` : `${row.wt[0]}–${row.wt[1]} g`;
   const tag = (y: number, text: string, color: string) => {
-    const right = x < X1 - 120;
+    const right = x < X1 - 140;
+    const w = text.length * 8.6 + 18;
+    const bx = right ? x + 12 : x - 12 - w;
     return (
       <g>
-        <circle cx={x} cy={y} r={5.5} fill="#0c1220" stroke={color} strokeWidth={2.4} />
-        {/* The value sits above every line (the labels' leaders cross this corner of the chart). */}
+        {/* The current value: a lit point and a pill read-out above every line. */}
+        <circle cx={x} cy={y} r={14} fill={color} opacity={0.18} />
+        <circle cx={x} cy={y} r={6} fill="#0c1220" stroke={color} strokeWidth={2.8} />
         <OnTop>
-          <text x={x + (right ? 12 : -12)} y={y - 12} textAnchor={right ? 'start' : 'end'} fill="#f1eee8" fontSize={15} fontWeight={600} paintOrder="stroke" stroke="rgba(10,11,14,0.85)" strokeWidth={4} strokeLinejoin="round" pointerEvents="none" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {text}
-          </text>
+          <g pointerEvents="none">
+            <rect x={bx} y={y - 36} width={w} height={24} rx={12} fill="rgba(12,14,20,0.92)" stroke={color} strokeOpacity={0.55} />
+            <text x={bx + w / 2} y={y - 24} dy="0.35em" textAnchor="middle" fill="#f6f2ea" fontSize={15} fontWeight={650} style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {text}
+            </text>
+          </g>
         </OnTop>
       </g>
     );
   };
   return (
     <g pointerEvents="none">
-      <line x1={x} x2={x} y1={P_LEN.top - 4} y2={P_WT.bottom} stroke="rgba(255,255,255,0.28)" strokeDasharray="2 4" />
+      <line x1={x} x2={x} y1={P_LEN.top - 4} y2={P_WT.bottom} stroke="rgba(255,255,255,0.22)" strokeWidth={1.2} />
       {tag(yOf(P_LEN, len), `${row.len[0]}–${row.len[1]} cm`, LEN_C)}
       {tag(yOf(P_WT, wt), wtText, WT_C)}
     </g>
@@ -154,7 +157,7 @@ function WeekAxis({ w }: { w: number }) {
       {ticks.map((k) => (
         <g key={k}>
           <line x1={xw(k)} x2={xw(k)} y1={P_WT.bottom} y2={P_WT.bottom + 5} stroke="rgba(255,255,255,0.3)" />
-          <text x={xw(k)} y={P_WT.bottom + 20} textAnchor="middle" fill={Math.abs(k - w) < 0.5 ? '#f1eee8' : '#7c7870'} fontSize={10.5} style={{ fontVariantNumeric: 'tabular-nums' }}>
+          <text x={xw(k)} y={P_WT.bottom + 21} textAnchor="middle" fill={Math.abs(k - w) < 0.5 ? '#f1eee8' : '#8b867d'} fontSize={12} fontWeight={Math.abs(k - w) < 0.5 ? 650 : 500} style={{ fontVariantNumeric: 'tabular-nums' }}>
             {k}
           </text>
         </g>
@@ -205,12 +208,12 @@ export function GrowthChartLength({ t }: SceneProps) {
       <Chart p={P_WT} upTo={w} id="fetuaren-pisua" dim={[13, 20]} />
       <WeekAxis w={w} />
       <Cursor w={w} />
-      <Label id="luzera-zefalokaudala" x={150} y={150} ax={xw(12)} ay={yOf(P_LEN, 8)} align="start" />
-      <Label id="fetuaren-pisua" x={150} y={410} ax={xw(15)} ay={yOf(P_WT, 150)} align="start" />
-      <Note x={xw(29)} y={yOf(P_LEN, 36) - 2} tone="accent" show={callout}>
-        Testua: ~15 cm, jaioberriaren luzeraren ia erdia
+      <Label id="luzera-zefalokaudala" x={X0 - 4} y={P_LEN.top - 24} align="start" />
+      <Label id="fetuaren-pisua" x={X0 - 4} y={P_WT.top - 24} align="start" />
+      <Note x={xw(20) + 16} y={yOf(P_LEN, TEXT_W20.len) + 24} align="start" tone="accent" size={13.5} show={callout}>
+        Testua: ~15 cm · jaioberriaren luzeraren ia erdia
       </Note>
-      <Note x={xw(29)} y={yOf(P_WT, 3000) - 2} tone="accent" show={callout}>
+      <Note x={xw(20) + 16} y={yOf(P_WT, TEXT_W20.wt) - 52} align="start" tone="accent" size={13.5} show={callout}>
         Testua: pisua, ordea, ~500 g baino ez
       </Note>
       {/* The written values (what counts) marked on top of the table's band. */}
@@ -234,15 +237,16 @@ export function GrowthChartWeight({ t }: SceneProps) {
       <Focus a={21} b={38} text="6.–9. hilabeteak" />
       {last2 > 0.02 && (
         <Part id="gantz-metaketa" show={last2}>
-          <rect x={xw(30.5)} y={P_WT.top - 6} width={xw(38.5) - xw(30.5)} height={P_WT.bottom - P_WT.top + 6} rx={8} fill="rgba(255,184,107,0.08)" stroke="rgba(255,184,107,0.35)" strokeDasharray="4 5" />
+          <rect x={xw(30.5)} y={P_WT.top - 6} width={xw(38.5) - xw(30.5)} height={P_WT.bottom - P_WT.top + 6} rx={8} fill="rgba(255,184,107,0.1)" />
+          <path d={`M${xw(30.5)},${P_WT.bottom} L${xw(30.5)},${P_WT.top - 6}`} stroke="rgba(255,184,107,0.45)" strokeWidth={1.2} />
         </Part>
       )}
       <Chart p={P_LEN} upTo={w} id="luzera-zefalokaudala" dim={[21, 38]} />
       <Chart p={P_WT} upTo={w} id="fetuaren-pisua" dim={[21, 38]} />
       <WeekAxis w={w} />
       <Cursor w={w} />
-      <Label id="luzera-zefalokaudala" x={150} y={150} ax={xw(14)} ay={yOf(P_LEN, 11)} align="start" />
-      <Label id="fetuaren-pisua" x={150} y={410} ax={xw(24)} ay={yOf(P_WT, 820)} align="start" />
+      <Label id="luzera-zefalokaudala" x={X0 - 4} y={P_LEN.top - 24} align="start" />
+      <Label id="fetuaren-pisua" x={X0 - 4} y={P_WT.top - 24} align="start" />
       <Label id="gantz-metaketa" text="Azken bi hilabeteak: gantza" x={440} y={372} ax={xw(31)} ay={yOf(P_WT, 1800)} show={last2} />
       <Note x={xw(20)} y={yOf(P_LEN, 36) - 2} tone="accent" show={birth}>
         Jaiotzean: 3–3,4 kg · ~36 cm · vertex–orpo 40–50 cm

@@ -236,6 +236,9 @@ export interface LimbGeom {
   rays: [Pt, Pt][];
   grooves: [Pt, Pt][];
   joints: { prox: Pt; mid: Pt; dist: Pt; palm: Pt; tip: Pt };
+  /** Plate radius and the direction the plate points (degrees), for marks drawn on its rim. */
+  plateR: number;
+  axis: number;
   /** Opacity helpers: rays visible, grooves visible, fingers free. */
   rayA: number;
   grooveA: number;
@@ -282,11 +285,14 @@ export function limbGeom(L: LimbPose): LimbGeom {
   const right = chain.map(([p, a, w]) => polar(p, a + 90, w)).reverse();
   const [pe, ae, we] = chain[chain.length - 1];
   const cap = [-50, 0, 50].map((d) => polar(pe, ae + d, we * (d === 0 ? 1.05 : 0.95)));
-  const body = smoothPath([...left, ...cap, ...right], true, 0.5);
+  // The root end is rounded too, so no flat edge can show where the limb melts into the trunk.
+  const [ps, as, ws] = chain[0];
+  const cap0 = [135, 180, 225].map((d) => polar(ps, as + d, ws * 0.95));
+  const body = smoothPath([...left, ...cap, ...right, ...cap0], true, 0.5);
 
   // Hand/foot plate: a paddle whose distal rim grows digits as `notch` deepens.
   const flat = ramp(dev, 1.4, 2.2);
-  const ext = plateR * 0.9 * ramp(dev, 2.6, 4);
+  const ext = plateR * (L.toes ? 0.9 : 1.05) * ramp(dev, 2.6, 4);
   const notch = ramp(dev, 2.9, 4);
   const pts: Pt[] = [];
   const M = 72;
@@ -297,7 +303,8 @@ export function limbGeom(L: LimbPose): LimbGeom {
     // Proximal half narrows into the wrist so plate and forearm read as one piece.
     const c = Math.cos((th * Math.PI) / 180);
     const aspect = lerp(1, c * c * 0.8 + (1 - c * c) * 1.14, flat);
-    const rr = plateR * aspect * lerp(1, 1.08, flat) * (Math.abs(th) > 75 ? lerp(1, 0.62, Math.min(1, (Math.abs(th) - 75) / 60)) : 1);
+    // Once the digits are free the palm slims, so fingers and palm read in proportion.
+    const rr = plateR * lerp(1, 0.86, notch) * aspect * lerp(1, 1.08, flat) * (Math.abs(th) > 75 ? lerp(1, 0.62, Math.min(1, (Math.abs(th) - 75) / 60)) : 1);
     // The rim scallops between the rays, then recedes into a palm as the digits take over.
     const r = rr + (Math.abs(th) > 90 ? 0 : ext * (1 - notch) * lerp(1, bump, 0.6) * Math.min(1, (90 - Math.abs(th)) / 25));
     pts.push(polar(palm, a2 + th, r));
@@ -308,15 +315,19 @@ export function limbGeom(L: LimbPose): LimbGeom {
     return [polar(palm, a2 + m, plateR * 0.7), polar(palm, a2 + m, plateR * 0.98 + ext * 0.2 * (1 - notch))];
   });
   const reach = L.toes ? 0.5 : 1;
+  // Digits leave the distal rim side by side and run almost parallel (a hand, not a flower): each
+  // starts on the rim of the palm and points along the limb axis, fanning only slightly.
   const digits: [Pt, Pt][] = RAYS.map((r, i) => {
     const a = polar(palm, a2 + r * 0.85, plateR * 0.5);
-    const b = polar(palm, a2 + r * 1.05, plateR + ext * reach * (i === 0 ? 0.75 : i === 4 ? 0.85 : 1));
+    const rim = polar(palm, a2 + r * 0.9, plateR * 0.92);
+    const len = plateR * 0.08 + ext * reach * (i === 0 ? 0.7 : i === 4 ? 0.8 : 1);
+    const b = polar(rim, a2 + r * 0.38, len);
     const k = 0.35 + 0.65 * notch;
     return [a, [lerp(a[0], b[0], k), lerp(a[1], b[1], k)]];
   });
   // Each ray stays inside its limb: within the plate's rim while it still covers the ray, then within its
   // digit (the toes, 1–2 days behind, are shorter than the rays would otherwise reach).
-  const digitW = plateR * (L.toes ? 0.42 : 0.36);
+  const digitW = plateR * (L.toes ? 0.4 : 0.31);
   const rays: [Pt, Pt][] = RAYS.map((r, i) => {
     const tip = digits[i][1];
     const inDigit = Math.hypot(tip[0] - palm[0], tip[1] - palm[1]) - digitW * 0.25;
@@ -332,7 +343,9 @@ export function limbGeom(L: LimbPose): LimbGeom {
     rays,
     grooves,
     joints: { prox: P0, mid: P1, dist: P2, palm, tip: polar(palm, a2, plateR + ext) },
-    rayA: ramp(dev, 1.9, 2.4) * (1 - 0.6 * notch),
+    plateR,
+    axis: a2,
+    rayA: ramp(dev, 1.9, 2.4) * (1 - 0.85 * notch),
     grooveA: ramp(dev, 2.3, 2.9) * (1 - notch) ** 2,
   };
 }

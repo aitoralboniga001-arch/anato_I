@@ -1,12 +1,11 @@
 'use client';
 
-import { Label, Mark, Note, Part, ellipsePts, lerp, lerpPt, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
-import { EarlyEmbryo, earlyGeom } from './EarlyEmbryo';
-import { AgeHud, PlateMask, SKIN, SkinDefs, atDay, limbGeom, polar, ramp, sampleSpine, spineAt, trunkPath, win, type LimbPose, type Num } from './skin';
+import { Part, ellipsePts, lerp, smoothPath, type Pt } from '@/components/kit';
+import { PlateMask, SKIN, SkinDefs, atDay, limbGeom, polar, ramp, sampleSpine, spineAt, trunkPath, win, type LimbPose, type Num } from './skin';
 
 /**
- * Topic 5 — the embryo seen from its left side between days 28 and 56 (course figures:
- * 28., 32., 42., 48. and 56. eguna). One parametric body is interpolated between keyframes,
+ * The older parametric embryo/fetus body (days 28–266), kept for the week-1 planes figure
+ * (`Planes.tsx` draws it on day 33). Topic 5's own scenes use Embryo28.tsx and Embryo56.tsx. One parametric body is interpolated between keyframes,
  * so every change (head growth, face, limb segmentation) is a continuous morph.
  * Face to the left (ventral), back to the right (dorsal).
  */
@@ -605,7 +604,7 @@ export function EmbryoFigure({ day, kick = 0 }: { day: number; kick?: number }) 
             />
           </Part>
           <Part id="zilbor-ernia-fisiologikoa" show={hernia}>
-            <ellipse cx={herniaC[0]} cy={herniaC[1]} rx={cord[3] * 0.4} ry={cordR * (1.12 + 0.75 * hernia)} transform={`rotate(${cordAng} ${herniaC[0]} ${herniaC[1]})`} fill="none" stroke="#ffb86b" strokeWidth={1.4} strokeDasharray="4 4" opacity={0.8} />
+            <ellipse cx={herniaC[0]} cy={herniaC[1]} rx={cord[3] * 0.4} ry={cordR * (1.12 + 0.75 * hernia)} transform={`rotate(${cordAng} ${herniaC[0]} ${herniaC[1]})`} fill="#ffb86b" opacity={0.16} />
           </Part>
         </>
       )}
@@ -713,179 +712,6 @@ export function EmbryoFigure({ day, kick = 0 }: { day: number; kick?: number }) 
           </g>
         </Part>
       )}
-    </g>
-  );
-}
-
-
-const day28to32 = (t: number) => (t < 0.62 ? 28 : t < 0.74 ? lerp(28, 32, seg(t, 0.62, 0.74)) : 32);
-const day42to56 = (t: number) => {
-  if (t < 0.13) return lerp(36, 42, seg(t, 0, 0.13));
-  if (t < 0.44) return 42;
-  if (t < 0.5) return lerp(42, 48, seg(t, 0.44, 0.5));
-  if (t < 0.72) return 48;
-  if (t < 0.78) return lerp(48, 56, seg(t, 0.72, 0.78));
-  return 56;
-};
-
-/** Fade in at `a`, out at `b` (stage time). */
-const vis = (t: number, a: number, b = 2) => Math.min(seg(t, a, a + 0.03), 1 - seg(t, b - 0.03, b));
-
-export function Embryo28to32({ t }: SceneProps) {
-  const day = day28to32(t);
-  const g = earlyGeom(day);
-  const { S, cran, heart } = g;
-  const beat = Math.sin(t * 160);
-  const vertex = polar(cran, -100, Math.max(cran[2], cran[3]) * 0.98);
-  const rump = spineAt(S, 0.72, 0).p;
-  const crl = vis(t, 0.25, 0.48);
-  const b0 = g.bars[0];
-  const b1 = g.bars[1];
-  const archC = lerpPt(b0.top, b0.bot, 0.5);
-  const groove: Pt = [(b0.top[0] + b1.top[0]) / 2 + 1, lerp(b0.top[1], b0.bot[1], 0.45)];
-  const bl = g.bars[g.bars.length - 1];
-  const sinus: Pt = [bl.top[0] + 18, bl.top[1] + g.archLen[3] * 0.5];
-  const heartTop = g.atrium;
-  const meso = g.meso[2];
-  const som = spineAt(S, 0.6, 16).p;
-  const mesen = polar(cran, -150, cran[2] * 0.75);
-  return (
-    <g>
-      <EarlyEmbryo day={day} beat={beat} />
-
-      {crl > 0.02 && (
-        <Part id="luzera-zefalokaudala" show={crl}>
-          <path d={`M${vertex[0]},${vertex[1]} L${rump[0]},${rump[1]}`} stroke="#ffb86b" strokeWidth={2} strokeDasharray="7 6" fill="none" />
-          <circle cx={vertex[0]} cy={vertex[1]} r={5} fill="#ffb86b" />
-          <circle cx={rump[0]} cy={rump[1]} r={5} fill="#ffb86b" />
-        </Part>
-      )}
-
-      <Part id="ezkerreko-bentrikulua" show={vis(t, 0.48, 0.74)}>
-        <ellipse cx={heart[0]} cy={heart[1] + heart[3] * 0.4} rx={heart[2] * 0.5} ry={heart[3] * 0.38} fill="rgba(255,184,107,0.12)" stroke="#ffb86b" strokeWidth={1.4} strokeDasharray="4 4" />
-      </Part>
-
-      {/* Left gutter */}
-      <Label id="mesentzefaloa" x={290} y={100} ax={mesen[0]} ay={mesen[1]} show={vis(t, 0.37)} />
-      <Label id="kristalinoaren-plaka" x={290} y={165} ax={g.eye[0] - 8} ay={g.eye[1]} show={vis(t, 0.37, 0.7)} />
-      <Label id="kristalinoaren-hobitxoa" x={290} y={165} ax={g.eye[0] - 8} ay={g.eye[1]} show={vis(t, 0.74)} />
-      <Label id="sudur-plaka" x={290} y={225} ax={g.nose[0] - 6} ay={g.nose[1]} show={vis(t, 0.74)} />
-      <Label id="bihotz-goragunea" x={290} y={345} ax={heart[0] - heart[2] * 0.3} ay={heart[1] + heart[3] * 0.2} show={vis(t, 0.48)} />
-      <Label id="ezkerreko-bentrikulua" x={290} y={390} ax={heart[0]} ay={heart[1] + heart[3] * 0.4} show={vis(t, 0.48, 0.74)} />
-      <Label id="zilborrestea" x={290} y={440} ax={g.cordTip[0]} ay={g.cordTip[1]} show={vis(t, 0.6)} />
-      <Label id="goragune-kaudala" x={290} y={492} ax={g.tail[0]} ay={g.tail[1]} show={vis(t, 0.6)} />
-      <Label id="beheko-gorputz-adarraren-hasikina" x={300} y={540} ax={g.leg[0]} ay={g.leg[1]} show={vis(t, 0.6)} />
-
-      {/* Right gutter */}
-      <Label id="laugarren-bentrikulua" x={770} y={60} ax={g.v4[0]} ay={g.v4[1]} show={vis(t, 0.86)} />
-      <Label id="entzumen-plaka" x={770} y={105} ax={g.ear[0] + 8} ay={g.ear[1]} show={vis(t, 0.37, 0.7)} />
-      <Label id="faringe-arkuak" x={770} y={150} ax={archC[0]} ay={archC[1]} />
-      <Label id="arrialdura-brankialak" x={770} y={195} ax={groove[0]} ay={groove[1]} show={vis(t, 0.86)} />
-      <Label id="lepoko-sinua" x={770} y={240} ax={sinus[0]} ay={sinus[1]} show={vis(t, 0.86)} />
-      <Label id="ezkerreko-aurikula" x={770} y={285} ax={heartTop[0]} ay={heartTop[1]} show={vis(t, 0.48, 0.74)} />
-      <Label id="goiko-gorputz-adarraren-hasikina" x={770} y={372} ax={g.arm[0]} ay={g.arm[1]} show={vis(t, 0.48)} />
-      <Label id="mesonefros-gandorra" x={770} y={440} ax={meso[0]} ay={meso[1]} show={vis(t, 0.86)} />
-      <Label id="somitak" x={770} y={520} ax={som[0]} ay={som[1]} />
-      <Label id="luzera-zefalokaudala" x={770} y={585} ax={lerp(vertex[0], rump[0], 0.55)} ay={lerp(vertex[1], rump[1], 0.55)} show={crl} />
-
-      <Note x={40} y={536} align="start" tone="accent" show={vis(t, 0.13, 0.37)}>
-        28 somita bikote inguru
-      </Note>
-      <AgeHud value={Math.round(day)} unit=". eguna" caption="Enbrioiaren adina" />
-    </g>
-  );
-}
-
-export function Embryo42to56({ t }: SceneProps) {
-  const day = day42to56(t);
-  const { b, arm, leg, cordEnd } = embryoGeom(day);
-  // Each group of names arrives with the step that talks about it (week5.ts beats .13 face, .23 ear
-  // swellings, .32 hand/foot plates, .5 second constriction, .6 auricle/neck/liver, .78 day 56) and
-  // stays until the step that replaces it — so a step's own labels are on screen at its done frame.
-  const face42 = vis(t, 0.13, 0.5);
-  const ear42 = vis(t, 0.23, 0.6);
-  const limb42 = vis(t, 0.32, 0.5);
-  const limb48 = vis(t, 0.5, 0.78);
-  const ear48 = vis(t, 0.6, 0.78);
-  const d56 = vis(t, 0.78);
-  const eye = b.eye;
-  const ear = b.ear;
-  const hand = arm.joints.palm;
-  const foot = leg.joints.palm;
-  const cran = b.cran;
-  const plex = polar(cran, -140, cran[2] * 0.82);
-  return (
-    <g>
-      <EmbryoFigure day={day} />
-
-      {/* 42. eguna */}
-      <Label id="betazala" x={250} y={185} ax={eye[0]} ay={eye[1] - 12} show={vis(t, 0.13)} />
-      <Label id="begia" text="Begi pigmentatua" x={250} y={228} ax={eye[0] - 10} ay={eye[1]} show={face42} />
-      <Label id="ildo-nasolakrimala" x={250} y={272} ax={(eye[0] + b.nose[0]) / 2 - 4} ay={(eye[1] + b.nose[1]) / 2 + 6} show={face42} />
-      <Label id="sudur-hobia" x={250} y={345} ax={b.nose[0] - 4} ay={b.nose[1] + 2} show={face42} />
-      <Label id="bihotz-goragunea" x={250} y={400} ax={b.heart[0] - b.heart[2] * 0.6} ay={b.heart[1]} show={face42} />
-      <Label id="oin-plaka" x={250} y={530} ax={foot[0]} ay={foot[1]} show={limb42} />
-      <Label id="belarriaren-goraguneak" x={770} y={170} ax={ear[0] + 14} ay={ear[1] - 6} show={ear42} />
-      <Label id="kanpoko-entzumenbidea" text="Kanpoko belarri meatoa" x={770} y={215} ax={ear[0] + 3} ay={ear[1] + 2} show={ear42} />
-      <Label id="esku-plaka" x={770} y={372} ax={hand[0] + 10} ay={hand[1] - 10} show={limb42} />
-      <Label id="hatzetako-izpiak" x={770} y={420} ax={arm.rays[4][1][0]} ay={arm.rays[4][1][1]} show={limb42} />
-
-      {/* 48. eguna */}
-      <Label id="begia" x={250} y={228} ax={eye[0] - 10} ay={eye[1]} show={vis(t, 0.5)} />
-      <Label id="hatzetako-izpiak" x={250} y={360} ax={arm.rays[1][1][0]} ay={arm.rays[1][1][1]} show={limb48} />
-      <Label id="izpiarteko-ildoak" x={250} y={392} ax={arm.grooves[1][1][0]} ay={arm.grooves[1][1][1]} show={limb48} />
-      <Label id="gibelaren-goragunea" x={250} y={424} ax={b.liver[0] - b.liver[2] * 0.4} ay={b.liver[1] + 6} show={ear48} />
-      <Label id="hatzetako-izpiak" text="Behatzetako izpiak" x={770} y={560} ax={leg.rays[2][1][0]} ay={leg.rays[2][1][1]} show={limb48} />
-      <Label id="lepoko-tolestura" x={770} y={130} ax={b.spine[0][0] + 50} ay={b.spine[0][1] + 20} show={ear48} />
-      <Label id="kanpoko-entzumenbidea" x={770} y={180} ax={ear[0] + 3} ay={ear[1] + 2} show={ear48} />
-      <Label id="belarriaren-pabiloia" x={770} y={235} ax={ear[0] + 20} ay={ear[1]} show={vis(t, 0.6)} />
-      <Label id="eskumuturra" x={770} y={400} ax={arm.joints.dist[0]} ay={arm.joints.dist[1]} show={limb48} />
-      <Label id="zilborrestea" x={250} y={462} ax={cordEnd[0] - 6} ay={cordEnd[1]} show={vis(t, 0.13)} />
-
-      {/* 56. eguna */}
-      <Label id="sare-baskularra" x={250} y={80} ax={plex[0]} ay={plex[1]} show={d56} />
-      <Label id="sudurra" x={250} y={275} ax={b.nose[0] - 2} ay={b.nose[1]} show={d56} />
-      <Label id="ahoa" x={250} y={318} ax={b.mouth[0] - 12} ay={b.mouth[1]} show={d56} />
-      <Label id="beheko-maxilarra" x={250} y={352} ax={b.mouth[0] + 4} ay={b.mouth[1] + 18} show={d56} />
-      <Label id="eskumuturra" x={250} y={405} ax={arm.joints.dist[0]} ay={arm.joints.dist[1]} show={d56} />
-      <Label id="behatzak" x={250} y={500} ax={leg.rays[1][1][0]} ay={leg.rays[1][1][1]} show={d56} />
-      <Label id="oinzola" x={250} y={538} ax={foot[0]} ay={foot[1] + 6} show={d56} />
-      <Label id="sorbalda" x={770} y={290} ax={arm.joints.prox[0] + 6} ay={arm.joints.prox[1] + 4} show={d56} />
-      <Label id="besoa" x={770} y={350} ax={lerp(arm.joints.prox[0], arm.joints.mid[0], 0.6)} ay={lerp(arm.joints.prox[1], arm.joints.mid[1], 0.6)} show={d56} />
-      <Label id="ukondoa" x={770} y={410} ax={arm.joints.mid[0]} ay={arm.joints.mid[1]} show={d56} />
-      <Label id="belauna" x={770} y={540} ax={leg.joints.mid[0]} ay={leg.joints.mid[1]} show={d56} />
-
-      {/* Parts to point at on the figure: dashed marks over the shoulder, the sole and the toes */}
-      <Part id="sorbalda" show={d56}>
-        <circle cx={arm.joints.prox[0]} cy={arm.joints.prox[1]} r={18} fill="rgba(255,184,107,0.12)" stroke="#ffb86b" strokeWidth={1.4} strokeDasharray="4 4" />
-      </Part>
-      <Part id="oinzola" show={d56}>
-        <ellipse cx={foot[0]} cy={foot[1] + 4} rx={20} ry={13} fill="rgba(255,184,107,0.12)" stroke="#ffb86b" strokeWidth={1.4} strokeDasharray="4 4" />
-      </Part>
-      <Part id="behatzak" show={d56}>
-        {/* One dashed arc just outside the toe tips — per-toe circles overlapped into a blotch */}
-        <path
-          d={smoothPath(
-            leg.rays.map(([, b]): Pt => {
-              const dx = b[0] - foot[0];
-              const dy = b[1] - foot[1];
-              const d = Math.hypot(dx, dy) || 1;
-              return [b[0] + (dx / d) * 7, b[1] + (dy / d) * 7];
-            }),
-            false,
-            0.9,
-          )}
-          fill="none"
-          stroke="#ffb86b"
-          strokeWidth={1.6}
-          strokeDasharray="4 4"
-          strokeLinecap="round"
-        />
-      </Part>
-      <Mark id="eskumuturra" x={arm.joints.dist[0]} y={arm.joints.dist[1]} rx={10} show={d56} />
-      <Mark id="ukondoa" x={arm.joints.mid[0]} y={arm.joints.mid[1]} rx={10} show={d56} />
-      <Mark id="belauna" x={leg.joints.mid[0]} y={leg.joints.mid[1]} rx={10} show={d56} />
-      <AgeHud value={Math.round(day)} unit=". eguna" caption="Enbrioiaren adina" />
     </g>
   );
 }

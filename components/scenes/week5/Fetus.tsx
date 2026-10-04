@@ -84,9 +84,14 @@ function CrlLine({ a, b, show }: { a: Pt; b: Pt; show: number }) {
   if (show < 0.02) return null;
   return (
     <Part id="luzera-zefalokaudala" show={show}>
-      <path d={`M${a[0]},${a[1]} L${b[0]},${b[1]}`} stroke="#ffb86b" strokeWidth={2} strokeDasharray="7 6" />
-      <circle cx={a[0]} cy={a[1]} r={4.5} fill="#ffb86b" />
-      <circle cx={b[0]} cy={b[1]} r={4.5} fill="#ffb86b" />
+      {/* A measuring line with a dark casing and end caps (vertex → rump). */}
+      <path d={`M${a[0]},${a[1]} L${b[0]},${b[1]}`} stroke="#2b0f0c" strokeWidth={5} strokeLinecap="round" opacity={0.45} />
+      <path d={`M${a[0]},${a[1]} L${b[0]},${b[1]}`} stroke="#ffb86b" strokeWidth={2.4} strokeLinecap="round" />
+      {[a, b].map((p, i) => {
+        const ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
+        const n: Pt = [-Math.sin(ang) * 9, Math.cos(ang) * 9];
+        return <path key={i} d={`M${p[0] - n[0]},${p[1] - n[1]} L${p[0] + n[0]},${p[1] + n[1]}`} stroke="#ffb86b" strokeWidth={2.6} strokeLinecap="round" />;
+      })}
     </Part>
   );
 }
@@ -151,6 +156,11 @@ export function Fetus3rdMonth({ t }: SceneProps) {
             <stop offset="0.5" stopColor="#ffb86b" stopOpacity={0.24} />
             <stop offset="1" stopColor="#ffb86b" stopOpacity={0} />
           </radialGradient>
+          <radialGradient id="w5f3-oss-bone">
+            <stop offset="0" stopColor="#fffaf0" stopOpacity={0.9} />
+            <stop offset="0.7" stopColor="#fbecd6" stopOpacity={0.55} />
+            <stop offset="1" stopColor="#f6e3c8" stopOpacity={0} />
+          </radialGradient>
           <circle className="mark-light" cx={skull[0]} cy={skull[1]} r={34} fill="url(#w5f3-oss-light)" />
           <circle className="mark-light" cx={femur[0]} cy={femur[1]} r={26} fill="url(#w5f3-oss-light)" />
           <g transform={Pl.transform}>
@@ -160,7 +170,7 @@ export function Fetus3rdMonth({ t }: SceneProps) {
               [-0.62, 0.05, 0.22],
             ].map(([dx, dy, r], i) => {
               const c = g.turn([g.Hc[0] + dx * g.R, g.Hc[1] + dy * g.R]);
-              return <circle key={i} cx={c[0]} cy={c[1]} r={r * g.R} fill="#fff6e8" opacity={0.45} stroke="#f6e3c8" strokeWidth={0.4} strokeDasharray="1 0.8" />;
+              return <circle key={i} cx={c[0]} cy={c[1]} r={r * g.R} fill="url(#w5f3-oss-bone)" opacity={0.75} />;
             })}
             {[
               [g.leg.a, g.leg.j],
@@ -189,7 +199,7 @@ export function Fetus3rdMonth({ t }: SceneProps) {
       <Label id="belarriaren-pabiloia" x={790} y={230} ax={x(g.ear)[0] - 6} ay={x(g.ear)[1]} show={vis(t, 0.16)} />
       <Label id="besoa" x={790} y={330} ax={arm[0]} ay={arm[1]} show={vis(t, 0.32, 0.46)} />
       <Label id="izterra" x={790} y={420} ax={femur[0]} ay={femur[1]} show={vis(t, 0.32, 0.46)} />
-      <Label id="hezurtzapen-zentroak" x={790} y={420} ax={femur[0]} ay={femur[1]} show={oss} />
+      <Label id="hezurtzapen-zentroak" x={735} y={420} ax={femur[0]} ay={femur[1]} show={oss} />
       <Label id="hezurtzapen-zentroak" text="Garezurreko hezurrak" x={790} y={120} ax={skull[0]} ay={skull[1]} show={oss} />
       <Label id="zilbor-ernia-fisiologikoa" x={230} y={390} ax={loops[0] + 8} ay={loops[1]} show={vis(t, 0.6, 0.86)} />
       <Label id="heste-lakioak" x={230} y={440} ax={loops[0] + 4} ay={loops[1] + 6} show={vis(t, 0.6, 0.76)} />
@@ -258,7 +268,7 @@ export function Fetus6to9({ t }: SceneProps) {
       <Mark id="vernix-caseosa" x={vern[0]} y={vern[1]} rx={18} ry={28} color="#e8eefc" show={vis(t, 0.72)} />
       <Mark id="lanugoa" x={hair[0]} y={hair[1]} rx={20} color="#c4b5fd" show={vis(t, 0, 0.16)} />
 
-      <Label id="gantz-metaketa" text="Larruazala ximurra eta gorrixka" x={770} y={440} ax={flank[0]} ay={flank[1]} show={vis(t, 0.16, 0.3)} />
+      <Label id="gantz-metaketa" text="Larruazala ximurra eta gorrixka" x={715} y={440} ax={flank[0]} ay={flank[1]} show={vis(t, 0.16, 0.3)} />
       <Label id="gantz-metaketa" x={790} y={470} ax={fatP[0]} ay={fatP[1]} show={Math.max(vis(t, 0, 0.16), vis(t, 0.58))} />
       <Label id="vernix-caseosa" x={790} y={300} ax={vern[0]} ay={vern[1]} show={vis(t, 0.72)} />
       <Label id="lanugoa" x={790} y={150} ax={hair[0]} ay={hair[1]} show={vis(t, 0, 0.16)} />
