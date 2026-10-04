@@ -1,99 +1,272 @@
 'use client';
 
-import { C, Flow, Label, Note, Part, clamp, lerp, seg, zoom, type SceneProps } from '@/components/kit';
-import { V, VilliDefs, f1, filletD, fingerD, loopD, place } from './common';
+import { Destination, Flow, Label, Note, Part, clamp, lerp, rand, seg, zoom, type SceneProps } from '@/components/kit';
+import {
+  CellPaths,
+  Island,
+  K,
+  VesselSet,
+  W3bDefs,
+  fingerOutline,
+  fingerShape,
+  fringe,
+  fw,
+  fx,
+  islandStates,
+  layerTop,
+  newBatch,
+  offsetPoly,
+  pd,
+  planVessel,
+  roundCell,
+  vesselSegments,
+  wallCells,
+  type CellBatch,
+  type Finger,
+  type P,
+} from './art';
 
 /**
- * Stage `biloxkak` — primary → secondary → tertiary villus (day 13 → end of week 3).
- * Windows (shared by every view and by the beats in content/weeks/week3b.ts):
- *   .00–.30 primary villus: cytotrophoblast core covered by syncytium, it lengthens (.08–.26)
- *   .30–.48 extra-embryonic mesoderm of the chorionic plate grows into the core → secondary villus
- *   .55–.63 blood islands (angioblast clusters) differentiate in the mesoderm core
- *   .67–.78 they join into capillaries, continuous with the chorionic-plate vessels → tertiary villus
- *   (each window starts at its beat and ends before the step's complete frame)
- *   .82–1   comparison: only the core changes
+ * Stage `biloxkak` — primary → secondary → tertiary villus (day 13 → end of week 3), after Langman
+ * fig. 5-11 / 5-13 and the notes' figure. Windows (shared by every view and the beats in week3b.ts):
+ *   .000–.070 primary villi: a core of cytotrophoblast cells covered by syncytium
+ *   .075–.250 the cytotrophoblast cells proliferate (mitoses) and the villi lengthen
+ *   .305–.430 extra-embryonic mesoderm of the chorionic plate invades the core, pushing the core cells
+ *             aside into a single wall layer → secondary villus
+ *   .565–.630 angioblast clusters ("blood islands") condense in the mesoderm core (and in the plate)
+ *   .675–.800 each island hollows and elongates; the pieces join into a capillary loop continuous with
+ *             the chorionic-plate vessel → tertiary villus (no flow yet: the heart beats in week 4)
+ *   .840–1    comparison of the three transverse sections: only the core changes
+ * Each window starts at its beat and ends before the beat's held frame (next beat − 0.035).
  */
 export const W = {
-  grow: [0.08, 0.26],
-  meso: [0.3, 0.46],
-  islands: [0.55, 0.63],
-  vessels: [0.67, 0.78],
+  grow: [0.075, 0.25],
+  meso: [0.305, 0.43],
+  islands: [0.565, 0.63],
+  vessels: [0.675, 0.8],
 } as const;
 
-const PLATE = { syn: 470, cyto: 484, meso: 498, bottom: 560 };
-const ROOF = { synTop: 95, synBottom: 125 };
-const BASE = { syn: 478, cyto: 490, meso: 504, vessel: 528 };
+const PLATE = { syn: 470, cyto: 481, meso: 494, vessel: 528, bottom: 560 };
+const ROOF = { top: 92, bottom: 124 };
+const FIL = { syn: 10, cyto: 20, meso: 30 };
 
-const VILLI = [
-  { x: 500, len0: 228, len1: 300, hw: 46, ts: 12, tc: 11 },
-  { x: 290, len0: 150, len1: 214, hw: 32, ts: 9, tc: 8 },
-  { x: 710, len0: 160, len1: 226, hw: 32, ts: 9, tc: 8 },
-];
+const DEF = [
+  { x: 500, len0: 226, len1: 306, hw: 48, ts: 9, tc: 11, sway: 7, lam: 62, ph: 0.5, nIsl: 6, seed: 1 },
+  { x: 300, len0: 148, len1: 220, hw: 35, ts: 8, tc: 10, sway: 6, lam: 50, ph: 2.2, nIsl: 4, seed: 2 },
+  { x: 700, len0: 160, len1: 234, hw: 35, ts: 8, tc: 10, sway: 6, lam: 54, ph: 4.1, nIsl: 4, seed: 3 },
+] as const;
+
+const typeShow = (t: number) => {
+  const toSecondary = seg(t, 0.31, 0.37);
+  const toTertiary = seg(t, 0.7, 0.76);
+  return { primary: 1 - toSecondary, secondary: toSecondary * (1 - toTertiary), tertiary: toTertiary };
+};
+const spaceShow = (t: number) => {
+  const ivs = seg(t, 0.7, 0.78);
+  return { ivs, lakuak: 1 - ivs };
+};
 
 function geometry(t: number) {
   const grow = seg(t, W.grow[0], W.grow[1]);
   const meso = seg(t, W.meso[0], W.meso[1]);
   const islands = seg(t, W.islands[0], W.islands[1]);
-  const vessels = seg(t, W.vessels[0], W.vessels[1]);
-  const villi = VILLI.map((v) => {
-    const len = lerp(v.len0, v.len1, grow);
-    const synTip = BASE.syn - len;
-    const cytoLen = BASE.cyto - (synTip + v.ts);
-    const mesoHw = v.hw - v.ts - v.tc;
-    const mesoFull = BASE.meso - (synTip + v.ts + v.tc);
-    const mesoLen = mesoFull * meso;
-    const mesoTip = BASE.meso - mesoLen;
-    const half = mesoHw * 0.48;
-    const loopLen = BASE.vessel - (synTip + v.ts + v.tc + 7);
-    return { ...v, len, synTip, cytoLen, mesoHw, mesoLen, mesoTip, half, loopLen };
+  const vessels = seg(t, W.vessels[0], W.vessels[1], (k) => k);
+  const v = DEF.map((d) => {
+    const len = lerp(d.len0, d.len1, grow);
+    const f: Finger = { x: d.x, base: PLATE.syn, len, hw: d.hw, sway: d.sway, lam: d.lam, ph: d.ph };
+    const apexSyn = PLATE.syn - len;
+    const apexCyto = apexSyn + d.ts;
+    const apexCore = apexCyto + d.tc;
+    const front = lerp(PLATE.meso + 3, apexCore, meso);
+    return { ...d, f, len, apexSyn, apexCyto, apexCore, front };
   });
-  return { grow, meso, islands, vessels, villi };
+  return { grow, meso, islands, vessels, v };
 }
 type Geo = ReturnType<typeof geometry>;
+type Vil = Geo['v'][number];
 
-/** Blood-island positions (local offsets along the capillary path of each villus). */
-function islandPts(v: Geo['villi'][number]) {
-  return [0.3, 0.55, 0.8].map((k, i) => {
-    const side = i % 2 === 0 ? -1 : 1;
-    return [v.x + side * v.half, BASE.vessel - v.loopLen * k] as [number, number];
-  });
+/** Capillary loop of a villus core: up near one wall, round the tip, down the other, into the plate vessel. */
+function loopPts(x: Vil): P[] {
+  const d = x.ts + x.tc;
+  const off = (y: number) => fw(x.f, Math.min(y, PLATE.meso), d) * 0.46;
+  const top = x.apexCore + 6;
+  const rl = off(top + 12);
+  const cy = top + rl;
+  const left: P[] = [];
+  const right: P[] = [];
+  const n = Math.ceil((PLATE.vessel - cy) / 6);
+  for (let i = 0; i <= n; i++) {
+    const y = PLATE.vessel - ((PLATE.vessel - cy) * i) / n;
+    left.push([fx(x.f, y) - off(y), y]);
+    right.push([fx(x.f, y) + off(y), y]);
+  }
+  const cx = fx(x.f, cy);
+  const cap: P[] = [];
+  for (let i = 1; i < 12; i++) {
+    const a = Math.PI + (Math.PI * i) / 12;
+    cap.push([cx + rl * Math.cos(a), cy + rl * Math.sin(a)]);
+  }
+  return [...left, ...cap, ...right.reverse()];
 }
 
-const dash = (p: number) => ({ pathLength: 1, strokeDasharray: '1 1', strokeDashoffset: f1(1 - p) });
+const PLATE_VESSEL: P[] = Array.from({ length: 61 }, (_, i) => {
+  const x = 196 + i * 10.2;
+  return [x, PLATE.vessel + 2.2 * Math.sin(x / 37)];
+});
 
-function VilliDrawing({ t, reduced }: SceneProps) {
+/** Vessel plans use the final villus length (vessels only form once growth is over). */
+const FINAL = geometry(1);
+const LOOPS = FINAL.v.map((x) => planVessel(loopPts(x), x.nIsl, x.seed));
+const PLATE_PLAN = planVessel(PLATE_VESSEL, 8, 9);
+
+/* ---------- Cells of the cytotrophoblast ---------- */
+
+/** Wall cells (one row inside the syncytium) of every villus and of the plate band between them. */
+function wallBatch(g: Geo, detail: boolean): CellBatch {
+  const b = newBatch();
+  const sp = 11.5;
+  const xs: [number, number][] = [];
+  for (const x of g.v) {
+    const s = fingerShape(x.f, x.ts, PLATE.cyto, FIL.cyto, x.apexCyto);
+    if (!s) continue;
+    wallCells(b, s.left, x.tc, sp, { detail });
+    wallCells(b, s.right, x.tc, sp, { flip: true, detail });
+    wallCells(b, [s.left[s.left.length - 1], ...s.cap, s.right[s.right.length - 1]], x.tc, sp, { fit: true, detail });
+    xs.push([s.left[0][0], s.right[0][0]]);
+  }
+  xs.sort((p, q) => p[0] - q[0]);
+  let from = 150;
+  for (const [a, z] of xs) {
+    if (a - from > 6) wallCells(b, [[from, PLATE.cyto], [a, PLATE.cyto]], PLATE.meso - PLATE.cyto, sp, { detail });
+    from = z;
+  }
+  wallCells(b, [[from, PLATE.cyto], [850, PLATE.cyto]], PLATE.meso - PLATE.cyto, sp, { detail });
+  return b;
+}
+
+/** Interior half-width of a villus core (inside the wall cells) at height y, rounded at the tip. */
+function coreHalf(x: Vil, y: number) {
+  const d = x.ts + x.tc;
+  const rc = fw(x.f, x.apexCore + 10, d);
+  const cy = x.apexCore + rc;
+  if (y >= cy) return fw(x.f, y, d);
+  if (y <= x.apexCore) return 0;
+  return Math.sqrt(Math.max(0, rc * rc - (cy - y) * (cy - y)));
+}
+
+/**
+ * Core cells of the primary villus. They proliferate (mitoses) while the villus lengthens; new rows
+ * bud at the tip. When the mesoderm arrives, the cells it reaches are pushed aside to the wall row.
+ */
+function coreBatch(g: Geo, t: number, detail: boolean): CellBatch {
+  const b = newBatch();
+  const r = 4.9;
+  const row = 10.2;
+  const dividing = t > W.grow[0] && t < W.grow[1] + 0.01;
+  for (const x of g.v) {
+    if (x.front <= x.apexCore + 1) continue;
+    for (let j = 0; j < 40; j++) {
+      const y = PLATE.meso - 5 - j * row;
+      if (y < x.apexCore + 2) break;
+      const half = coreHalf(x, y);
+      const wi = half - r - 0.6;
+      const appear = clamp((half - 3) / 7);
+      if (appear <= 0.02) continue;
+      const ncol = wi > 0 ? Math.floor((2 * wi) / 9.8) + 1 : 1;
+      const step = ncol > 1 ? (2 * wi) / (ncol - 1) : 0;
+      const cx0 = fx(x.f, y);
+      for (let c = 0; c < ncol; c++) {
+        const seed = x.seed * 1000 + j * 31 + c * 7;
+        const jx = (rand(seed) - 0.5) * 1.6;
+        const jy = (rand(seed + 1) - 0.5) * 1.6;
+        let px = cx0 + (ncol > 1 ? -wi + c * step : 0) + jx + (j % 2 ? 1.2 : -1.2);
+        let rr = r * appear;
+        // The invading mesoderm front pushes the cells it reaches out to the wall row.
+        const k = clamp((y - x.front + 3) / 18);
+        if (k > 0) {
+          const side = px >= cx0 ? 1 : -1;
+          const target = cx0 + side * (half + 1);
+          px = lerp(px, target, k);
+          rr *= 1 - k;
+        }
+        if (rr < 0.6) continue;
+        const near = (x.apexSyn + x.len * 0.0 - y) / x.len;
+        const mit = dividing && near > -0.62 && rand(seed + Math.floor(t * 95 + rand(seed + 5) * 9) * 1.37) < 0.075 ? 1 : 0;
+        roundCell(b, px, y + jy, rr, detail, mit);
+      }
+    }
+  }
+  return b;
+}
+
+/** Spindle-shaped mesoderm cells leading the invasion, just ahead of the front. */
+function leaders(g: Geo) {
+  const on = clamp(g.meso / 0.08) * clamp((1 - g.meso) / 0.1);
+  if (on <= 0.02) return null;
+  return g.v.flatMap((x) =>
+    [0, 1, 2].map((i) => {
+      const y = x.front - 4 - i * 7.5;
+      if (y < x.apexCore + 3) return null;
+      const px = fx(x.f, y) + (i - 1) * fw(x.f, y, x.ts + x.tc) * 0.45;
+      return (
+        <g key={`${x.seed}-${i}`} opacity={on}>
+          <ellipse cx={px} cy={y} rx={2.3} ry={5.4} fill={K.meso} stroke={K.mesoEdge} strokeWidth={0.7} transform={`rotate(${(i - 1) * 14} ${px} ${y})`} />
+          <ellipse cx={px} cy={y} rx={1.1} ry={2.2} fill="#a8492f" transform={`rotate(${(i - 1) * 14} ${px} ${y})`} />
+        </g>
+      );
+    }),
+  );
+}
+
+/* ---------- The longitudinal drawing (also used, zoomed, by the close-up) ---------- */
+
+function VilliDrawing({ t, reduced, detail = false }: SceneProps & { detail?: boolean }) {
   const g = geometry(t);
-  const { villi, meso, islands, vessels } = g;
-  const islandShow = islands * (1 - seg(t, 0.72, 0.8));
-  const primary = 1 - seg(t, 0.3, 0.38);
-  const secondary = seg(t, 0.3, 0.38) * (1 - seg(t, 0.67, 0.75));
-  const tertiary = seg(t, 0.67, 0.75);
-  const ivsShow = seg(t, 0.68, 0.78);
-  const lakunaShow = 1 - ivsShow;
-  const c = villi[0];
+  const { primary, secondary, tertiary } = typeShow(t);
+  const { ivs, lakuak } = spaceShow(t);
+  const synTop = layerTop(g.v.map((x) => ({ f: x.f, apex: x.apexSyn, d: 0 })), PLATE.syn, FIL.syn);
+  const cytoPts = layerTop(g.v.map((x) => ({ f: x.f, apex: x.apexCyto, d: x.ts })), PLATE.cyto, FIL.cyto);
+  const mesoPts = layerTop(g.v.map((x) => ({ f: x.f, apex: x.front, d: x.ts + x.tc })), PLATE.meso, FIL.meso);
+  const close = (pts: P[]) => pd([...pts, [1040, PLATE.bottom], [-40, PLATE.bottom]], true);
+  const fingers = g.v.map((x) => fingerShape(x.f, 0, PLATE.syn, FIL.syn, x.apexSyn)).filter((s) => !!s);
+  const walls = wallBatch(g, detail);
+  const core = coreBatch(g, t, detail);
+  const vesselOn = g.vessels > 0.001;
+  const islandOn = g.islands > 0.001;
+
   return (
     <g mask="url(#m-slab)">
       <Part id="dezidua-basala">
-        <rect x={0} y={0} width={1000} height={ROOF.synTop + 1} fill="url(#p-decidua)" />
+        <rect x={0} y={0} width={1000} height={ROOF.top + 1} fill="url(#p-decidua)" />
+        <rect x={0} y={0} width={1000} height={ROOF.top + 1} fill="url(#w3b-vshade)" />
+        {[260, 430, 610, 760].map((x, i) => (
+          <path key={i} d={`M${x},6 q${7 + i * 2},14 -2,26 q-10,12 3,26 q9,10 -1,24`} fill="none" stroke="#9e1f39" strokeWidth={3.2} strokeLinecap="round" opacity={0.55} />
+        ))}
       </Part>
 
-      <Part id="lakuak" show={lakunaShow}>
-        <rect x={0} y={ROOF.synBottom - 1} width={1000} height={PLATE.syn - ROOF.synBottom + 2} fill="url(#w3v-mblood)" opacity={0.92} />
+      <Part id="lakuak" show={lakuak}>
+        <rect x={0} y={ROOF.bottom - 1} width={1000} height={PLATE.syn - ROOF.bottom + 14} fill="url(#w3b-blood)" />
       </Part>
-      <Part id="biloxka-arteko-espazioa" show={ivsShow}>
-        <rect x={0} y={ROOF.synBottom - 1} width={1000} height={PLATE.syn - ROOF.synBottom + 2} fill="url(#w3v-mblood)" opacity={0.92} />
+      <Part id="biloxka-arteko-espazioa" show={ivs}>
+        <rect x={0} y={ROOF.bottom - 1} width={1000} height={PLATE.syn - ROOF.bottom + 14} fill="url(#w3b-blood)" />
       </Part>
-      {[
-        'M398,140 C380,250 420,360 396,462',
-        'M604,462 C620,360 588,250 606,140',
-        'M222,150 C238,280 214,380 230,462',
-        'M778,462 C764,340 790,250 772,150',
-      ].map((d, i) => (
-        <Flow key={i} d={d} n={5} dur={7 + i} r={2.4} color="#ff6b81" reduced={reduced} />
-      ))}
+      <rect x={0} y={ROOF.bottom} width={1000} height={PLATE.syn - ROOF.bottom} fill="url(#w3b-vshade)" pointerEvents="none" />
+      {!reduced &&
+        ['M394,132 C380,250 410,360 392,462', 'M606,462 C620,360 590,250 608,132', 'M226,140 C236,280 214,380 230,462', 'M776,462 C766,340 790,250 772,140'].map((d, i) => (
+          <Flow key={i} d={d} n={5} dur={8 + i} r={2.4} color="#e8566d" reduced={reduced} />
+        ))}
 
-      {/* Central villus outline: one clickable id per villus type, cross-fading with the core change. A rim
-          drawn under the villus, so only its outer edge shows. */}
+      {/* Syncytial roof (faces the decidua): its blood-facing surface carries microvilli too. */}
+      <Part id="sinzitiotrofoblastoa">
+        <rect x={0} y={ROOF.top} width={1000} height={ROOF.bottom - ROOF.top} fill="url(#w3b-syn)" />
+        <path d={fringe([[1000, ROOF.bottom], [0, ROOF.bottom]], 4.5, 3)} stroke={K.fringe} strokeWidth={0.9} />
+        <path d={`M0,${ROOF.bottom}H1000`} stroke={K.synEdge} strokeWidth={1.4} />
+      </Part>
+
+      {/* Soft shadow of the villi on the blood behind them (depth). */}
+      <path d={close(synTop)} transform="translate(6 8)" fill={K.shadow} pointerEvents="none" />
+
+      {/* The villus type: outlined around every villus (the outline lights with the step). */}
       {(
         [
           ['biloxka-primarioa', primary],
@@ -102,138 +275,142 @@ function VilliDrawing({ t, reduced }: SceneProps) {
         ] as const
       ).map(([id, s]) => (
         <Part key={id} id={id} show={s}>
-          <path transform={place(c.x, BASE.syn)} d={fingerD(c.len, c.hw)} fill="none" stroke="#e8eefc" strokeWidth={4.5} opacity={0.6} />
+          {fingers.map((f, i) => (
+            <path key={i} d={pd(fingerOutline(f!))} fill="none" stroke="#eef3ff" strokeWidth={4} opacity={0.34} strokeLinejoin="round" />
+          ))}
         </Part>
       ))}
 
-      {/* Each layer: the villi's outlines (double width), then the plate band and fillets, then the villi's
-          fills — villi and plate read as one tissue, with no seams or feet where they meet. */}
       <Part id="sinzitiotrofoblastoa">
-        <rect x={0} y={ROOF.synTop} width={1000} height={ROOF.synBottom - ROOF.synTop} fill="url(#p-syncytio)" />
-        {villi.map((v, i) => (
-          <path key={i} transform={place(v.x, BASE.syn)} d={fingerD(v.len, v.hw)} fill="none" stroke={C.syncytioDeep} strokeWidth={2.4} />
-        ))}
-        <rect x={0} y={PLATE.syn} width={1000} height={PLATE.cyto - PLATE.syn + 1} fill="url(#p-syncytio)" />
-        {villi.map((v, i) => (
-          <g key={i}>
-            <path d={filletD(v.x, v.hw, PLATE.syn, 12)} fill="url(#p-syncytio)" />
-            <path transform={place(v.x, BASE.syn)} d={fingerD(v.len, v.hw)} fill="url(#p-syncytio)" />
-          </g>
-        ))}
+        <path d={close(synTop)} fill="url(#w3b-syn)" />
+        <path d={fringe(synTop, 4.4, 3.2)} stroke={K.fringe} strokeWidth={0.9} />
+        <path d={pd(offsetPoly(synTop, -2))} fill="none" stroke={K.synRim} strokeWidth={1.3} />
+        <path d={pd(synTop)} fill="none" stroke={K.synEdge} strokeWidth={1.5} strokeLinejoin="round" />
       </Part>
 
       <Part id="zitotrofoblastoa">
-        {villi.map((v, i) => (
-          <path key={i} transform={place(v.x, BASE.cyto)} d={fingerD(v.cytoLen, v.hw - v.ts, 6)} fill="none" stroke="rgba(22,80,45,0.6)" strokeWidth={2} />
+        <path d={close(cytoPts)} fill={K.cytoGround} />
+        <CellPaths b={walls} />
+      </Part>
+
+      <Part id="enbrioi-kanpoko-mesodermoa">
+        <path d={close(mesoPts)} fill={K.meso} />
+        <path d={close(mesoPts)} fill="url(#p-meso-extra)" />
+        <path d={pd(mesoPts)} fill="none" stroke={K.mesoEdge} strokeWidth={1.1} strokeLinejoin="round" />
+        {leaders(g)}
+      </Part>
+
+      {/* Core cells of the primary villus (drawn over the advancing mesoderm, so the push is visible). */}
+      {core.body.length > 0 && (
+        <Part id="zitotrofoblastoa">
+          <CellPaths b={core} />
+        </Part>
+      )}
+
+      <Part id="korion-barrunbea" quiet>
+        <rect x={0} y={PLATE.bottom} width={1000} height={640 - PLATE.bottom} fill="#121a2c" />
+        <rect x={0} y={PLATE.bottom} width={1000} height={640 - PLATE.bottom} fill="url(#g-shade)" opacity={0.35} />
+        <path d={`M0,${PLATE.bottom}H1000`} stroke="#cf6f52" strokeWidth={1} opacity={0.7} />
+      </Part>
+
+      {/* Vessels of the chorionic plate (same process, in the plate mesoderm). */}
+      <Part id="enbrioi-kanpoko-hodiak" show={vesselOn || islandOn ? 1 : 0}>
+        {islandStates(PLATE_PLAN, g.islands, g.vessels).map(({ p, appear, gone, k }) => (
+          <Island key={k} x={p[0]} y={p[1]} s={appear * (1 - gone)} seed={90 + k * 7} scale={1.4} />
         ))}
-        <rect x={0} y={PLATE.cyto} width={1000} height={PLATE.meso - PLATE.cyto + 1} fill="url(#w3v-cyto)" />
-        {villi.map((v, i) => (
-          <g key={i}>
-            <path d={filletD(v.x, v.hw - v.ts, PLATE.cyto, 8)} fill="url(#w3v-cyto)" />
-            <path transform={place(v.x, BASE.cyto)} d={fingerD(v.cytoLen, v.hw - v.ts, 6)} fill="url(#w3v-cyto)" />
+        <VesselSet segs={vesselSegments(PLATE_PLAN, g.vessels)} w={9} detail={detail} />
+      </Part>
+
+      <Part id="biloxka-kapilarrak" show={vesselOn || islandOn ? 1 : 0}>
+        {LOOPS.map((plan, vi) => (
+          <g key={vi}>
+            {islandStates(plan, g.islands, g.vessels).map(({ p, appear, gone, k }) => (
+              <Island key={k} x={p[0]} y={p[1]} s={appear * (1 - gone)} seed={vi * 50 + k * 7} scale={vi === 0 ? 1.5 : 1.3} />
+            ))}
+            <VesselSet segs={vesselSegments(plan, g.vessels)} w={vi === 0 ? 9 : 7.6} detail={detail} />
           </g>
         ))}
       </Part>
 
-      <Part id="enbrioi-kanpoko-mesodermoa">
-        {meso > 0.01 &&
-          villi.map((v, i) => <path key={i} transform={place(v.x, BASE.meso)} d={fingerD(v.mesoLen, v.mesoHw, 5)} fill="none" stroke="#d9785a" strokeWidth={1.6} />)}
-        <rect x={0} y={PLATE.meso} width={1000} height={PLATE.bottom - PLATE.meso} fill={C.mesoExtra} />
-        {meso > 0.01 &&
-          villi.map((v, i) => (
-            <g key={i}>
-              <path d={filletD(v.x, v.mesoHw, PLATE.meso, Math.min(6, Math.max(0, v.mesoLen - (BASE.meso - PLATE.meso))))} fill={C.mesoExtra} />
-              <path transform={place(v.x, BASE.meso)} d={fingerD(v.mesoLen, v.mesoHw, 5)} fill={C.mesoExtra} />
-            </g>
-          ))}
-        <rect x={0} y={PLATE.meso} width={1000} height={PLATE.bottom - PLATE.meso} fill="url(#p-meso-extra)" />
-        {meso > 0.01 && villi.map((v, i) => <path key={i} transform={place(v.x, BASE.meso)} d={fingerD(v.mesoLen, v.mesoHw, 5)} fill="url(#p-meso-extra)" />)}
-      </Part>
+      {/* Roundness of each villus and depth of the plate (light from the top left). */}
+      <g pointerEvents="none">
+        {fingers.map((f, i) => (
+          <path key={i} d={pd(fingerOutline(f!), true)} fill="url(#w3b-cyl)" />
+        ))}
+        <rect x={0} y={PLATE.syn} width={1000} height={PLATE.bottom - PLATE.syn} fill="url(#w3b-vshade)" opacity={0.6} />
+      </g>
 
-      <Part id="korion-barrunbea" quiet>
-        <rect x={0} y={PLATE.bottom} width={1000} height={640 - PLATE.bottom} fill="#131a2b" />
-        <rect x={0} y={PLATE.bottom} width={1000} height={640 - PLATE.bottom} fill="url(#g-shade)" opacity={0.35} />
-      </Part>
-
-      <Part id="enbrioi-kanpoko-hodiak" show={vessels > 0 ? 1 : 0}>
-        <path d={`M200,${BASE.vessel} L800,${BASE.vessel}`} fill="none" stroke={V.endothelium} strokeWidth={9} strokeLinecap="round" {...dash(vessels)} />
-        <path d={`M200,${BASE.vessel} L800,${BASE.vessel}`} fill="none" stroke={V.fetal} strokeWidth={5.5} strokeLinecap="round" {...dash(vessels)} />
-      </Part>
-
-      <Part id="biloxka-kapilarrak" show={Math.max(islandShow, vessels > 0 ? 1 : 0)}>
-        {vessels > 0 &&
-          villi.map((v, i) => (
-            <g key={i} transform={place(v.x, BASE.vessel)}>
-              <path d={loopD(v.loopLen, v.half)} fill="none" stroke={V.endothelium} strokeWidth={7} {...dash(vessels)} />
-              <path d={loopD(v.loopLen, v.half)} fill="none" stroke={V.fetal} strokeWidth={4} {...dash(vessels)} />
-            </g>
-          ))}
-        {islandShow > 0.01 &&
-          villi.flatMap((v, i) =>
-            islandPts(v).map(([x, y], j) => (
-              <g key={`${i}-${j}`} opacity={islandShow}>
-                <circle cx={x} cy={y} r={lerp(2, 5.5, islands)} fill={V.endothelium} />
-                <circle cx={x - 1.6} cy={y - 1} r={1.8 * islands} fill={V.fetal} />
-                <circle cx={x + 1.8} cy={y + 1.2} r={1.8 * islands} fill={V.fetal} />
-              </g>
-            )),
-          )}
-      </Part>
-
-      {/* Chorionic plate bracket (the plate = extra-embryonic mesoderm + cyto + syncytio). */}
       <Part id="korion-plaka">
-        <path d={`M232,${PLATE.syn} h-8 v${PLATE.bottom - PLATE.syn} h8`} fill="none" stroke="#e8eefc" strokeWidth={2} opacity={0.85} />
+        <path d={`M233,${PLATE.syn + 1} h-7 v${PLATE.bottom - PLATE.syn - 2} h7`} fill="none" stroke="#eef3ff" strokeWidth={1.8} opacity={0.85} strokeLinejoin="round" />
       </Part>
     </g>
   );
 }
 
-function labels(t: number, at: (x: number, y: number) => [number, number], closeUp: boolean) {
+/* ---------- Labels ---------- */
+
+function labels(t: number, at: (x: number, y: number) => [number, number], close: false | { fy: number }) {
   const g = geometry(t);
-  const [c, l, r] = g.villi;
-  const primary = 1 - seg(t, 0.3, 0.38);
-  const secondary = seg(t, 0.3, 0.38) * (1 - seg(t, 0.67, 0.75));
-  const tertiary = seg(t, 0.67, 0.75);
-  const vessels = clamp((g.vessels - 0.02) / 0.08);
-  const ivsShow = seg(t, 0.68, 0.78);
-  const lakunaShow = 1 - ivsShow;
-  const L = (id: string, x: number, y: number, p: [number, number], show = 1, text?: string) => {
+  const [c, l, r] = g.v;
+  const { primary, secondary, tertiary } = typeShow(t);
+  const { ivs, lakuak } = spaceShow(t);
+  const capShow = Math.max(g.islands, g.vessels > 0 ? 1 : 0);
+  const L = (key: string, id: string, x: number, y: number, p: [number, number], show = 1, text?: string) => {
     const [ax, ay] = at(p[0], p[1]);
-    return <Label key={id} id={id} x={x} y={y} ax={ax} ay={ay} show={show} text={text} />;
+    return <Label key={key} id={id} x={x} y={y} ax={ax} ay={ay} show={show} text={text} />;
   };
-  if (closeUp) {
-    // Zoomed on the tip of the central villus.
-    const v = c;
+  const isl = (plan: (typeof LOOPS)[number], k: number) => islandStates(plan, 1, 0)[k].p;
+  const outline = (x: Vil, y: number): [number, number] => [fx(x.f, y) - fw(x.f, y, 0) - 1, y];
+  if (close) {
+    const fy = close.fy;
+    const yIn = (y: number) => clamp(y, fy - 120, fy + 120);
+    const ySyn = yIn(fy - 40);
+    const yCyto = yIn(fy + 12);
+    const yType = yIn(fy + 82);
+    // The mesoderm: in the plate while the camera is down there, then at the advancing front.
+    const plateM: [number, number] = [c.x + 64, 522];
+    const coreY = clamp(c.front + 22, c.apexCore + 14, PLATE.syn - 6);
+    const coreM: [number, number] = [fx(c.f, coreY), coreY];
+    const mAnchor: [number, number] = g.meso > 0.02 ? coreM : plateM;
+    const mScreen = at(mAnchor[0], mAnchor[1]);
+    const mShow = clamp((600 - mScreen[1]) / 30) * clamp((mScreen[1] - 40) / 30);
     return (
       <>
-        {L('lakuak', 180, 110, [v.x - v.hw - 40, v.synTip + 30], lakunaShow)}
-        {L('biloxka-arteko-espazioa', 180, 110, [v.x - v.hw - 40, v.synTip + 30], ivsShow)}
-        {L('sinzitiotrofoblastoa', 180, 190, [v.x - v.hw + 5, v.synTip + 90])}
-        {L('zitotrofoblastoa', 180, 280, [v.x - v.hw + v.ts + 4, v.synTip + 60])}
-        {L('biloxka-primarioa', 180, 470, [v.x - v.hw - 3, 420], primary)}
-        {L('biloxka-sekundarioa', 180, 500, [v.x - v.hw - 3, 420], secondary)}
-        {L('biloxka-tertziarioa', 180, 530, [v.x - v.hw - 3, 420], tertiary)}
-        {L('enbrioi-kanpoko-mesodermoa', 820, 300, [v.x + v.mesoHw * 0.7, Math.max(v.mesoTip + 16, 330)], clamp(g.meso / 0.05) * clamp((420 - v.mesoTip) / 40), 'Kanpoko mesodermoa')}
-        {L('biloxka-kapilarrak', 820, 400, [v.x + v.half, BASE.vessel - v.loopLen * 0.55], Math.max(vessels, g.islands * (1 - seg(t, 0.72, 0.8))), 'Biloxka kapilarrak')}
+        {L('lk', 'lakuak', 180, 92, [c.x - c.hw - 34, Math.max(c.apexSyn + 46, fy - 110)], lakuak)}
+        {L('ivs', 'biloxka-arteko-espazioa', 180, 122, [c.x - c.hw - 34, Math.max(c.apexSyn + 46, fy - 110)], ivs)}
+        {L('sy', 'sinzitiotrofoblastoa', 180, 200, [fx(c.f, ySyn) - fw(c.f, ySyn, c.ts * 0.5), ySyn])}
+        {L('cy', 'zitotrofoblastoa', 180, 290, [fx(c.f, yCyto) - fw(c.f, yCyto, c.ts + c.tc * 0.5), yCyto])}
+        {L('b1', 'biloxka-primarioa', 180, 470, outline(c, yType), primary)}
+        {L('b2', 'biloxka-sekundarioa', 180, 500, outline(c, yType), secondary)}
+        {L('b3', 'biloxka-tertziarioa', 180, 530, outline(c, yType), tertiary)}
+        {L('me', 'enbrioi-kanpoko-mesodermoa', 820, 300, mAnchor, mShow, 'Kanpoko mesodermoa')}
+        {L('ka', 'biloxka-kapilarrak', 820, 400, isl(LOOPS[0], 3), capShow, 'Biloxka kapilarrak')}
       </>
     );
   }
-  const mesoMid = (v: typeof r) => (BASE.meso + v.mesoTip) / 2;
+  // Mesoderm: first in the chorionic plate (its source), then in the core of the right villus, behind the front.
+  const plateM: [number, number] = [r.x + 46, 522];
+  const coreY = r.front + (PLATE.syn - r.front) * 0.35;
+  const coreM: [number, number] = [fx(r.f, coreY), coreY];
+  const k = seg(g.meso, 0.12, 0.32);
+  const mAnchor: [number, number] = [lerp(plateM[0], coreM[0], k), lerp(plateM[1], coreM[1], k)];
+  const yType = 330;
+  const yCyto = 400;
   return (
     <>
-      {L('dezidua-basala', 190, 58, [262, 58])}
-      {L('sinzitiotrofoblastoa', 190, 110, [250, 110])}
-      {L('biloxka-primarioa', 190, 165, [c.x - c.hw - 3, 330], primary)}
-      {L('biloxka-sekundarioa', 190, 195, [c.x - c.hw - 3, 330], secondary)}
-      {L('biloxka-tertziarioa', 190, 225, [c.x - c.hw - 3, 330], tertiary)}
-      {L('zitotrofoblastoa', 190, 400, [l.x - l.hw + l.ts + 4, 400])}
-      {L('korion-plaka', 190, 510, [224, 510])}
-      {L('korion-barrunbea', 190, 590, [262, 590])}
-      {L('lakuak', 810, 260, [772, 260], lakunaShow)}
-      {L('biloxka-arteko-espazioa', 810, 260, [772, 260], ivsShow)}
-      {L('enbrioi-kanpoko-mesodermoa', 810, 330, [r.x, mesoMid(r)], clamp((g.meso - 0.2) / 0.12), 'Kanpoko mesodermoa')}
-      {L('biloxka-kapilarrak', 810, 400, [r.x + r.half, BASE.vessel - r.loopLen * 0.55], Math.max(vessels, g.islands * (1 - seg(t, 0.72, 0.8))), 'Biloxka kapilarrak')}
-      {L('enbrioi-kanpoko-hodiak', 810, 528, [Math.max(250, Math.min(752, 200 + 600 * g.vessels - 6)), BASE.vessel], vessels, 'Enbrioi kanpoko hodiak')}
+      {L('dz', 'dezidua-basala', 190, 52, [262, 52])}
+      {L('sy', 'sinzitiotrofoblastoa', 190, 108, [250, 108])}
+      {L('b1', 'biloxka-primarioa', 190, 165, outline(c, yType), primary)}
+      {L('b2', 'biloxka-sekundarioa', 190, 195, outline(c, yType), secondary)}
+      {L('b3', 'biloxka-tertziarioa', 190, 225, outline(c, yType), tertiary)}
+      {L('cy', 'zitotrofoblastoa', 190, 400, [fx(l.f, yCyto) - fw(l.f, yCyto, l.ts + l.tc * 0.5), yCyto])}
+      {L('kp', 'korion-plaka', 190, 515, [226, 515])}
+      {L('kb', 'korion-barrunbea', 190, 598, [262, 598])}
+      {L('lk', 'lakuak', 810, 236, [778, 250], lakuak)}
+      {L('ivs', 'biloxka-arteko-espazioa', 810, 264, [778, 270], ivs)}
+      {L('me', 'enbrioi-kanpoko-mesodermoa', 810, 330, mAnchor, 1, 'Kanpoko mesodermoa')}
+      {L('ka', 'biloxka-kapilarrak', 810, 400, isl(LOOPS[2], 2), capShow, 'Biloxka kapilarrak')}
+      {L('eh', 'enbrioi-kanpoko-hodiak', 810, 532, islandStates(PLATE_PLAN, 1, 0)[7].p, capShow, 'Enbrioi kanpoko hodiak')}
     </>
   );
 }
@@ -242,130 +419,232 @@ export function VilliLongitudinal(props: SceneProps) {
   const id = (x: number, y: number): [number, number] => [x, y];
   return (
     <g>
-      <VilliDefs />
+      <W3bDefs />
       <VilliDrawing {...props} />
       {labels(props.t, id, false)}
     </g>
   );
 }
 
+/** Close-up camera: on the tip of the central villus, panning down to follow the mesoderm front up. */
+function closeCam(t: number) {
+  const g = geometry(t);
+  const c = g.v[0];
+  const tipCam = c.apexSyn + 128;
+  const frontCam = Math.max(tipCam, Math.min(430, c.front + 34));
+  return lerp(tipCam, frontCam, seg(t, 0.25, 0.29));
+}
+
 export function VilliTip(props: SceneProps) {
-  const z = zoom(500, 300, 2, 500, 330);
+  const fy = closeCam(props.t);
+  const z = zoom(500, fy, 2.3, 500, 330);
   return (
     <g>
-      <VilliDefs />
+      <W3bDefs />
       <rect x={0} y={0} width={1000} height={640} fill="#101828" />
       <g transform={z.transform}>
-        <VilliDrawing {...props} />
+        <VilliDrawing {...props} detail />
       </g>
-      {labels(props.t, z.at, true)}
+      {labels(props.t, z.at, { fy })}
     </g>
   );
 }
 
-/* ---------- Transverse sections (like the notes' figure) ---------- */
+/* ---------- Transverse sections (Langman fig. 5-11, the notes' figure) ---------- */
 
-const SEC_R = 82;
-const SEC_Y = 300;
+const SEC = { R: 92, ts: 17, tc: 20, y: 268 };
+const SLOTS = [290, 500, 710] as const;
+const LUMENS: [number, number, number, number, number][] = [
+  // angle (deg), radius (fraction of the core), rx, ry, rotation
+  [-128, 0.55, 9, 6.5, 30],
+  [-38, 0.6, 7, 9.5, -20],
+  [36, 0.5, 10, 7, 15],
+  [118, 0.58, 7.5, 6, -35],
+  [196, 0.5, 6.5, 8.5, 10],
+];
+const HEX: [number, number][] = (() => {
+  const out: [number, number][] = [];
+  const s = 10.6;
+  for (let j = -6; j <= 6; j++)
+    for (let i = -6; i <= 6; i++) {
+      const x = (i + (j % 2 ? 0.5 : 0)) * s;
+      const y = j * s * 0.88;
+      if (Math.hypot(x, y) < SEC.R - SEC.ts - SEC.tc - 5) out.push([x, y]);
+    }
+  return out;
+})();
 
-function Section({ cx, kind, t }: { cx: number; kind: 0 | 1 | 2; t: number }) {
-  const g = geometry(t);
-  const coreR = SEC_R - 14;
-  const mesoR = SEC_R - 27;
-  const mesoGrow = kind === 0 ? 0 : kind === 1 ? g.meso : 1;
-  const islands = kind === 2 ? g.islands * (1 - seg(t, 0.72, 0.8)) : 0;
-  const vessels = kind === 2 ? g.vessels : 0;
-  const fringe = Array.from({ length: 60 }, (_, i) => {
-    const a = (i / 60) * Math.PI * 2;
-    return `M${f1(cx + SEC_R * Math.cos(a))},${f1(SEC_Y + SEC_R * Math.sin(a))} l${f1(4 * Math.cos(a))},${f1(4 * Math.sin(a))}`;
-  }).join('');
-  const lumens: [number, number, number, number][] = [
-    [cx - 22, SEC_Y - 16, 9, 6],
-    [cx + 20, SEC_Y - 20, 7, 10],
-    [cx - 16, SEC_Y + 22, 7, 6],
-    [cx + 22, SEC_Y + 18, 10, 7],
-  ];
+interface SecState {
+  meso: number;
+  islands: number;
+  vessels: number;
+}
+
+function VillusSection({ cx, cy, s, seed }: { cx: number; cy: number; s: SecState; seed: number }) {
+  const { R, ts, tc } = SEC;
+  const rin = R - ts;
+  const rc = rin - tc;
+  const rm = rc * s.meso;
+  const ring: P[] = Array.from({ length: 73 }, (_, i) => {
+    const a = (i / 72) * Math.PI * 2;
+    return [cx + rin * Math.cos(a), cy + rin * Math.sin(a)];
+  });
+  const outer: P[] = Array.from({ length: 97 }, (_, i) => {
+    const a = (i / 96) * Math.PI * 2;
+    return [cx + R * Math.cos(a), cy + R * Math.sin(a)];
+  });
+  const walls = newBatch();
+  wallCells(walls, ring, tc, 15.5, { fit: true });
+  const core = newBatch();
+  HEX.forEach(([hx, hy], i) => {
+    const d = Math.hypot(hx, hy);
+    const a = d > 0.5 ? Math.atan2(hy, hx) : rand(seed + i) * Math.PI * 2;
+    const k = clamp((rm + 7 - d) / 14);
+    const dist = lerp(d, rc - 3, k);
+    const r = 5 * (1 - k);
+    roundCell(core, cx + Math.cos(a) * dist + (rand(seed + i * 3) - 0.5) * 1.4, cy + Math.sin(a) * dist + (rand(seed + i * 5) - 0.5) * 1.4, r);
+  });
+  const annulus = `${pd(outer, true)}${pd([...ring].reverse(), true)}`;
   return (
     <g>
+      <circle cx={cx + 5} cy={cy + 7} r={R} fill={K.shadow} pointerEvents="none" />
       <Part id="sinzitiotrofoblastoa">
-        <path d={fringe} stroke={C.syncytioDeep} strokeWidth={1} />
-        <circle cx={cx} cy={SEC_Y} r={SEC_R} fill="url(#p-syncytio)" stroke={C.syncytioDeep} strokeWidth={1.4} />
+        <path d={fringe(outer, 4.2, 3.6)} stroke={K.fringe} strokeWidth={1} />
+        <path d={annulus} fill="url(#w3b-syn)" fillRule="evenodd" />
+        <circle cx={cx} cy={cy} r={R - 2} fill="none" stroke={K.synRim} strokeWidth={1.3} />
+        <circle cx={cx} cy={cy} r={R} fill="none" stroke={K.synEdge} strokeWidth={1.5} />
       </Part>
       <Part id="zitotrofoblastoa">
-        <circle cx={cx} cy={SEC_Y} r={coreR} fill="url(#w3v-cyto)" stroke="rgba(22,80,45,0.6)" />
+        <circle cx={cx} cy={cy} r={rin} fill={K.cytoGround} />
+        <CellPaths b={walls} />
+        <CellPaths b={core} />
       </Part>
-      {mesoGrow > 0.01 && (
+      {rm > 0.5 && (
         <Part id="enbrioi-kanpoko-mesodermoa">
-          <circle cx={cx} cy={SEC_Y} r={mesoR * mesoGrow} fill={C.mesoExtra} />
-          <circle cx={cx} cy={SEC_Y} r={mesoR * mesoGrow} fill="url(#p-meso-extra)" stroke="#d9785a" strokeWidth={0.8} />
+          <circle cx={cx} cy={cy} r={rm} fill={K.meso} />
+          <circle cx={cx} cy={cy} r={rm} fill="url(#p-meso-extra)" stroke={K.mesoEdge} strokeWidth={1} />
         </Part>
       )}
-      {kind === 2 && (islands > 0.01 || vessels > 0.01) && (
+      {(s.islands > 0.01 || s.vessels > 0.01) && (
         <Part id="biloxka-kapilarrak">
-          {lumens.map(([x, y, rx, ry], i) => (
-            <g key={i}>
-              <g opacity={islands}>
-                <circle cx={x} cy={y} r={5} fill={V.endothelium} />
-                <circle cx={x - 1.5} cy={y} r={1.8} fill={V.fetal} />
-                <circle cx={x + 1.8} cy={y + 1} r={1.8} fill={V.fetal} />
+          {LUMENS.map(([deg, fr, rx, ry, rot], i) => {
+            const a = (deg * Math.PI) / 180;
+            const x = cx + Math.cos(a) * rc * fr;
+            const y = cy + Math.sin(a) * rc * fr;
+            const v = clamp((s.vessels - i * 0.06) / 0.5);
+            return (
+              <g key={i}>
+                <Island x={x} y={y} s={s.islands * (1 - v)} seed={seed + i * 11} scale={1.15} />
+                {v > 0.01 && (
+                  <g transform={`rotate(${rot} ${x} ${y})`}>
+                    <ellipse cx={x} cy={y} rx={lerp(3, rx, v) + 3} ry={lerp(3, ry, v) + 3} fill={K.endo} stroke="#7a2d43" strokeWidth={0.8} />
+                    <ellipse cx={x} cy={y} rx={lerp(2, rx, v)} ry={lerp(2, ry, v)} fill={K.lumen} />
+                    <ellipse cx={x - rx * 0.3} cy={y} rx={2.1 * v} ry={1.4 * v} fill={K.rbc} stroke={K.rbcEdge} strokeWidth={0.4} />
+                    <ellipse cx={x + rx * 0.35} cy={y + ry * 0.2} rx={2 * v} ry={1.3 * v} fill={K.rbc} stroke={K.rbcEdge} strokeWidth={0.4} />
+                  </g>
+                )}
               </g>
-              <g opacity={vessels}>
-                <ellipse cx={x} cy={y} rx={lerp(4, rx, vessels) + 2} ry={lerp(4, ry, vessels) + 2} fill={V.endothelium} />
-                <ellipse cx={x} cy={y} rx={lerp(3, rx, vessels)} ry={lerp(3, ry, vessels)} fill={V.fetal} />
-              </g>
-            </g>
-          ))}
+            );
+          })}
         </Part>
       )}
+      <circle cx={cx} cy={cy} r={R} fill="url(#w3b-ball)" pointerEvents="none" />
     </g>
   );
+}
+
+/** Which section stands in each slot: the live villus moves on (primary → secondary → tertiary), leaving a snapshot behind. */
+function slots(t: number) {
+  const g = geometry(t);
+  const toSecond = seg(t, W.meso[0], W.meso[0] + 0.035);
+  const toThird = seg(t, W.islands[0], W.islands[0] + 0.035);
+  const liveX = lerp(lerp(SLOTS[0], SLOTS[1], toSecond), SLOTS[2], toThird);
+  const live: SecState = { meso: g.meso, islands: g.islands, vessels: g.vessels };
+  return { g, liveX, live, firstLeft: toSecond > 0.001, secondLeft: toThird > 0.001 };
 }
 
 export function VilliTransverse({ t, reduced }: SceneProps) {
-  const g = geometry(t);
-  // The third section appears with the blood islands (a secondary villus turning tertiary); its name waits for the vessels.
-  const show = [1, seg(t, W.meso[0], W.meso[0] + 0.08), seg(t, W.islands[0], W.islands[0] + 0.06)];
-  const named = [1, show[1], seg(t, W.vessels[0], W.vessels[0] + 0.08)];
-  const xs = [300, 500, 700];
-  const ids = ['biloxka-primarioa', 'biloxka-sekundarioa', 'biloxka-tertziarioa'];
+  const { g, liveX, live, firstLeft, secondLeft } = slots(t);
+  const { ivs, lakuak } = spaceShow(t);
+  const named = [1, seg(g.meso, 0.45, 0.7), seg(t, W.vessels[0], W.vessels[0] + 0.06)];
+  const ids = ['biloxka-primarioa', 'biloxka-sekundarioa', 'biloxka-tertziarioa'] as const;
   const days = ['13. eguna', '3. astearen hasiera–erdia', '3. astearen amaiera'];
-  const vessel = clamp((g.vessels - 0.02) / 0.08);
-  const ivsShow = seg(t, 0.68, 0.78);
-  const lakunaShow = 1 - ivsShow;
+  // A section is "of" a type in its slot; the live one carries the current type's outline.
+  const typeAt = [SLOTS[0], firstLeft ? SLOTS[1] : -1, secondLeft ? SLOTS[2] : -1];
+  const ghost = [0, 1 - seg(t, W.meso[0], W.meso[0] + 0.03), 1 - seg(t, W.islands[0], W.islands[0] + 0.03)];
+  const tl = { y: 448, x0: SLOTS[0], x1: SLOTS[2] };
+  const head = liveX;
+  const reached = [1, named[1], named[2]];
+  const capShow = Math.max(g.islands, g.vessels > 0 ? 1 : 0);
+  const lum = (i: number): [number, number] => {
+    const [deg, fr] = LUMENS[i];
+    const a = (deg * Math.PI) / 180;
+    return [SLOTS[2] + Math.cos(a) * (SEC.R - SEC.ts - SEC.tc) * fr, SEC.y + Math.sin(a) * (SEC.R - SEC.ts - SEC.tc) * fr];
+  };
   return (
     <g>
-      <VilliDefs />
-      <Part id="lakuak" quiet show={lakunaShow}>
-        <rect x={200} y={170} width={600} height={260} rx={40} fill="url(#w3v-mblood)" opacity={0.28} />
-      </Part>
-      <Part id="biloxka-arteko-espazioa" quiet show={ivsShow}>
-        <rect x={200} y={170} width={600} height={260} rx={40} fill="url(#w3v-mblood)" opacity={0.28} />
-      </Part>
-      {!reduced && <Flow d="M215,300 C300,180 700,180 785,300" n={8} dur={10} r={2.2} color="#ff6b81" />}
-      {xs.map((x, i) => (
-        <g key={i} opacity={show[i]}>
-          <Section cx={x} kind={i as 0 | 1 | 2} t={t} />
-        </g>
-      ))}
-      {ids.map((id, i) => (
-        <Part key={id} id={id} show={named[i]}>
-          <circle cx={xs[i]} cy={SEC_Y} r={SEC_R + 8} fill="none" stroke="#e8eefc" strokeWidth={1} strokeDasharray="3 5" opacity={0.6} />
+      <W3bDefs />
+      <g mask="url(#m-slab-wide)">
+        <Part id="lakuak" quiet show={lakuak}>
+          <rect x={0} y={0} width={1000} height={640} fill="url(#w3b-blood)" opacity={0.62} />
         </Part>
+        <Part id="biloxka-arteko-espazioa" quiet show={ivs}>
+          <rect x={0} y={0} width={1000} height={640} fill="url(#w3b-blood)" opacity={0.62} />
+        </Part>
+        <rect x={0} y={0} width={1000} height={640} fill="url(#w3b-field)" pointerEvents="none" />
+        
+      </g>
+      {!reduced && (
+        <>
+          <Flow d="M190,160 C320,140 680,180 810,150" n={7} dur={11} r={2.2} color="#e8566d" />
+          <Flow d="M810,384 C680,404 320,370 190,392" n={7} dur={12} r={2.2} color="#e8566d" />
+        </>
+      )}
+
+      {/* Slots still to come: a faint ghost of the section that will stand there. */}
+      {[1, 2].map((i) => (
+        <Destination key={i} x={SLOTS[i] - SEC.R} y={SEC.y - SEC.R} w={SEC.R * 2} h={SEC.R * 2} oval color="#8fd5a6" show={ghost[i] * 0.22} />
       ))}
+
+      {/* Snapshots left behind, then the live villus on top. */}
+      {firstLeft && <VillusSection cx={SLOTS[0]} cy={SEC.y} s={{ meso: 0, islands: 0, vessels: 0 }} seed={11} />}
+      {secondLeft && <VillusSection cx={SLOTS[1]} cy={SEC.y} s={{ meso: 1, islands: 0, vessels: 0 }} seed={23} />}
+      {ids.map((id, i) =>
+        typeAt[i] >= 0 || i === 0 ? (
+          <Part key={id} id={id} show={named[i]}>
+            <circle cx={i === 0 ? SLOTS[0] : typeAt[i]} cy={SEC.y} r={SEC.R + 1.2} fill="none" stroke="#eef3ff" strokeWidth={3.6} opacity={0.3} />
+          </Part>
+        ) : null,
+      )}
+      <VillusSection cx={liveX} cy={SEC.y} s={live} seed={37} />
+
+      {/* Timeline under the sections: milestones fill as each stage is reached. */}
+      <g pointerEvents="none">
+        <path d={`M${tl.x0},${tl.y}H${tl.x1}`} stroke="rgba(232,238,252,0.22)" strokeWidth={3} strokeLinecap="round" />
+        <path d={`M${tl.x0},${tl.y}H${head}`} stroke="#f0c48a" strokeWidth={3} strokeLinecap="round" />
+        {SLOTS.map((x, i) => (
+          <circle key={x} cx={x} cy={tl.y} r={6} fill={reached[i] > 0.5 ? '#f0c48a' : '#1a2132'} stroke="#f0c48a" strokeWidth={1.6} opacity={0.5 + 0.5 * Math.max(reached[i], i === 0 ? 1 : 0)} />
+        ))}
+        <circle cx={head} cy={tl.y} r={3} fill="#fff" />
+      </g>
+
       {ids.map((id, i) => (
-        <Label key={id} id={id} x={xs[i]} y={SEC_Y + SEC_R + 36} align="middle" show={named[i]} />
+        <Label key={id} id={id} x={SLOTS[i]} y={SEC.y + SEC.R + 30} align="middle" show={named[i]} />
       ))}
       {days.map((d, i) => (
-        <Note key={d} x={xs[i]} y={SEC_Y + SEC_R + 60} show={named[i]}>
+        <Note key={d} x={SLOTS[i]} y={tl.y + 24} show={Math.max(0.35, named[i])}>
           {d}
         </Note>
       ))}
-      <Label id="sinzitiotrofoblastoa" x={190} y={200} ax={300 - (SEC_R - 6) * 0.7071} ay={SEC_Y - (SEC_R - 6) * 0.7071} />
-      <Label id="zitotrofoblastoa" x={190} y={410} ax={280} ay={SEC_Y + 24} />
-      <Label id="enbrioi-kanpoko-mesodermoa" x={500} y={150} ax={500} ay={SEC_Y - 20} align="middle" show={clamp((g.meso - 0.4) / 0.1) * show[1]} text="Kanpoko mesodermoa" />
-      <Label id="biloxka-kapilarrak" x={810} y={400} ax={722} ay={SEC_Y + 18} show={Math.max(vessel, g.islands) * show[2]} text="Biloxka kapilarrak" />
-      <Label id="lakuak" x={810} y={500} ax={770} ay={400} small show={lakunaShow} />
-      <Label id="biloxka-arteko-espazioa" x={810} y={500} ax={770} ay={400} small show={ivsShow} />
+      <Label id="sinzitiotrofoblastoa" x={190} y={186} ax={SLOTS[0] - (SEC.R - SEC.ts / 2) * 0.7071} ay={SEC.y - (SEC.R - SEC.ts / 2) * 0.7071} />
+      <Label id="zitotrofoblastoa" x={190} y={350} ax={SLOTS[0] + Math.cos((140 * Math.PI) / 180) * (SEC.R - SEC.ts - SEC.tc / 2)} ay={SEC.y + Math.sin((140 * Math.PI) / 180) * (SEC.R - SEC.ts - SEC.tc / 2)} />
+      <Label id="enbrioi-kanpoko-mesodermoa" x={500} y={150} ax={SLOTS[1]} ay={SEC.y - 14} align="middle" show={firstLeft ? clamp((g.meso - 0.35) / 0.15) : 0} text="Kanpoko mesodermoa" />
+      <Label id="biloxka-kapilarrak" x={810} y={372} ax={lum(2)[0]} ay={lum(2)[1]} show={secondLeft ? capShow : 0} text="Biloxka kapilarrak" />
+      <Label id="lakuak" x={810} y={520} ax={770} ay={470} small show={lakuak} />
+      <Label id="biloxka-arteko-espazioa" x={810} y={546} ax={770} ay={490} small show={ivs} />
+      <Note x={500} y={590} tone="accent" show={seg(t, 0.84, 0.9)}>
+        Kanpoko bi geruzak berdinak dira hiruretan: erdigunea da aldatzen dena
+      </Note>
     </g>
   );
 }

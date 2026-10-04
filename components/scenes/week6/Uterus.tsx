@@ -1,6 +1,7 @@
 'use client';
 
-import { C, Label, Mark, Note, Part, seg, lerp, lerpPt, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { C, Label, Mark, Note, Part, bezier, seg, lerp, lerpPt, smoothPath, tube, type Pt, type SceneProps } from '@/components/kit';
+import { K } from '@/components/scenes/week3-villi/art';
 import { FetusFigure, fetusGeom, placeFetus } from '@/components/scenes/week5/FetusFigure';
 import { CordRope } from './CordRope';
 
@@ -63,23 +64,43 @@ function band(e: Ell, d0: number, d1: number, a0: number, a1: number, taper = 0,
 const ellPath = (e: Ell) =>
   `M${f1(e.cx - e.rx)},${f1(e.cy)}a${f1(e.rx)},${f1(e.ry)} 0 1 0 ${f1(2 * e.rx)},0a${f1(e.rx)},${f1(e.ry)} 0 1 0 ${f1(-2 * e.rx)},0Z`;
 
-/** A villous tree rooted on the chorion at angle a, growing outward `len` px, with two side branches. */
-function villus(e: Ell, a: number, len: number, seed: number) {
-  const base = onE(e, a, 0);
+/**
+ * A villous tree rooted on the chorion at angle a, growing outward `len` px, with two side branches —
+ * drawn in the villus tissue of weeks 3–6: syncytial rim, mesoderm core, a capillary inside.
+ */
+function villus(e: Ell, a: number, len: number, seed: number, hw: number) {
+  const base = onE(e, a, -1);
   const tip = onE(e, a + Math.sin(seed * 3.1) * 3, len);
   const mid = onE(e, a + Math.sin(seed * 1.7) * 4, len * 0.5);
-  const b1 = onE(e, a + 5 + Math.sin(seed) * 2, len * 0.78);
-  const b2 = onE(e, a - 5 - Math.cos(seed) * 2, len * 0.62);
-  const m1 = onE(e, a, len * 0.42);
-  const m2 = onE(e, a, len * 0.3);
-  return `M${f1(base[0])},${f1(base[1])}Q${f1(mid[0])},${f1(mid[1])} ${f1(tip[0])},${f1(tip[1])}M${f1(m1[0])},${f1(m1[1])}L${f1(b1[0])},${f1(b1[1])}M${f1(m2[0])},${f1(m2[1])}L${f1(b2[0])},${f1(b2[1])}`;
+  const trunk = bezier(tip, [lerp(tip[0], mid[0], 0.6), lerp(tip[1], mid[1], 0.6)], [lerp(mid[0], base[0], 0.4), lerp(mid[1], base[1], 0.4)], base);
+  const twig = (u: number, da: number, l: number) => {
+    const q = trunk(u);
+    const end = onE(e, a + da, l);
+    return bezier(end, [lerp(end[0], q.x, 0.4), lerp(end[1], q.y, 0.4)], [lerp(end[0], q.x, 0.75), lerp(end[1], q.y, 0.75)], [q.x, q.y]);
+  };
+  const parts = [
+    { c: trunk, w: (u: number) => hw * (0.78 + 0.22 * u) + hw * 0.6 * Math.max(0, (u - 0.85) / 0.15) ** 2 },
+    { c: twig(0.32, 5 + Math.sin(seed) * 2, len * 0.8), w: (u: number) => hw * (0.62 + 0.18 * u) },
+    { c: twig(0.55, -5 - Math.cos(seed) * 2, len * 0.6), w: (u: number) => hw * (0.62 + 0.18 * u) },
+  ];
+  let syn = '';
+  let meso = '';
+  let cap = '';
+  for (const q of parts) {
+    syn += tube(q.c, q.w, 0, 1, 12, true).d;
+    meso += tube(q.c, (u) => Math.max(0.3, q.w(u) - Math.max(0.7, hw * 0.34)), 0, 1, 12, true).d;
+    const pts: Pt[] = Array.from({ length: 9 }, (_, i) => {
+      const s = q.c(0.08 + (0.92 * i) / 8);
+      return [s.x, s.y];
+    });
+    cap += 'M' + pts.map((p) => `${f1(p[0])},${f1(p[1])}`).join('L');
+  }
+  return { syn, meso, cap };
 }
 
 const DEC_TONE = '#d59ab4'; // paretako dezidua
 const BASAL_TONE = '#e48aac'; // dezidua basala (trinkoa)
 const CAPS_TONE = '#c8a2ba'; // dezidua kapsularra
-const VILLUS = '#7d1838';
-const PLATE = '#5a1026';
 
 export function UterusSagittal({ t }: SceneProps) {
   // A → B growth happens in its own step (chorionic cavity enlarging); the amnion fills it in the next one.
@@ -90,7 +111,7 @@ export function UterusSagittal({ t }: SceneProps) {
   const decD = smoothPath(dec, true, 0.5);
 
   // Chorionic sac: embedded upper-right in A, filling the cavity in B (placenta upper-right).
-  const sac: Ell = { cx: lerp(546, 488, k), cy: lerp(218, 290, k), rx: lerp(52, 138, k), ry: lerp(52, 152, k) };
+  const sac: Ell = { cx: lerp(538, 488, k), cy: lerp(226, 290, k), rx: lerp(70, 138, k), ry: lerp(70, 152, k) };
   const wallMid = lerp(-55, -70, k); // centre of the embryonic pole (towards the wall)
   const w0 = wallMid - lerp(92, 100, k);
   const w1 = wallMid + lerp(92, 88, k);
@@ -126,17 +147,24 @@ export function UterusSagittal({ t }: SceneProps) {
   const membraneShow = vis(t, 0.86, 2);
 
   // villi: dense on the embryonic pole, sparse/regressing elsewhere
-  const villi: { d: string; w: number; o: number }[] = [];
-  const nW = Math.round(lerp(14, 30, k));
+  const hwV = lerp(2.2, 3.4, k);
+  const dense = { syn: '', meso: '', cap: '' };
+  const sparse = { syn: '', meso: '', cap: '' };
+  const nW = Math.round(lerp(14, 26, k));
   for (let i = 0; i <= nW; i++) {
     const a = w0 + ((w1 - w0) * i) / nW;
     const edge = Math.min(1, (i + 0.5) / 2.5, (nW - i + 0.5) / 2.5);
-    villi.push({ d: villus(sac, a, villLen * (0.7 + 0.3 * edge) * (0.92 + 0.08 * Math.sin(i * 2.3 + t * 12)), i), w: lerp(2, 3.4, k), o: 1 });
+    const v = villus(sac, a, villLen * (0.7 + 0.3 * edge) * (0.9 + 0.1 * Math.sin(i * 2.3)), i, hwV);
+    dense.syn += v.syn;
+    dense.meso += v.meso;
+    dense.cap += v.cap;
   }
   if (leunaVilli > 0.02) {
     for (let i = 1; i < 12; i++) {
       const a = w1 + ((360 - (w1 - w0)) * i) / 12;
-      villi.push({ d: villus(sac, a, 11 * leunaVilli, i + 40), w: 1.6, o: leunaVilli });
+      const v = villus(sac, a, 12 * leunaVilli, i + 40, 1.9 * Math.max(0.5, leunaVilli));
+      sparse.syn += v.syn;
+      sparse.meso += v.meso;
     }
   }
 
@@ -145,6 +173,10 @@ export function UterusSagittal({ t }: SceneProps) {
   return (
     <g>
       <defs>
+        <radialGradient id="w6ut-ivs" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stopColor="#ff8aa0" stopOpacity="0.18" />
+          <stop offset="1" stopColor="#000" stopOpacity="0.2" />
+        </radialGradient>
         <clipPath id="w6ut-dec">
           <path d={decD} />
         </clipPath>
@@ -176,20 +208,25 @@ export function UterusSagittal({ t }: SceneProps) {
         </Part>
         {/* Korion hostotsua (+ basala = karena): villi bathing in maternal blood */}
         <Part id="korion-hostotsua">
-          <path d={band(sac, 0, villLen + 1, w0, w1, 0.1)} fill="#8e2036" opacity={0.85} />
-          {villi.map((v, i) => (
-            <path key={i} d={v.d} stroke={VILLUS} strokeWidth={v.w} fill="none" strokeLinecap="round" opacity={v.o} />
-          ))}
-          {villi.slice(0, nW + 1).map((v, i) => (
-            <path key={`h${i}`} d={v.d} stroke="#f39bbb" strokeWidth={v.w * 0.35} fill="none" strokeLinecap="round" opacity={0.6} />
-          ))}
+          {/* maternal blood round the villi (the intervillous space under the basal decidua) */}
+          <path d={band(sac, 0, villLen + 1, w0, w1, 0.1)} fill={K.blood} />
+          <path d={band(sac, 0, villLen + 1, w0, w1, 0.1)} fill="url(#w6ut-ivs)" />
+          <path d={dense.syn} fill={C.syncytio} stroke={K.synEdge} strokeWidth={0.6} />
+          <path d={dense.meso} fill={K.meso} />
+          <path d={dense.cap} fill="none" stroke="#c2334d" strokeWidth={lerp(0.7, 1.1, k)} strokeLinecap="round" opacity={0.9 * seg(t, 0.08, 0.16)} />
+          {/* chorionic plate under the villi: mesoderm, its villous face lined by trophoblast */}
+          <path d={band(sac, -3.5, 1, w0, w1)} fill={K.meso} />
+          <path d={band(sac, 0, 1.2, w0, w1)} fill={C.syncytio} />
         </Part>
-        {/* Korion leuna: smooth chorion on the abembryonic side */}
+        {/* Korion leuna: smooth chorion on the abembryonic side, its villi regressing */}
         <Part id="korion-leuna">
-          <path d={band(sac, -2, 1.5, w1, w0 + 360)} fill="#b04a70" />
+          <g opacity={leunaVilli}>
+            <path d={sparse.syn} fill={C.syncytio} stroke={K.synEdge} strokeWidth={0.5} />
+            <path d={sparse.meso} fill={K.meso} />
+          </g>
+          <path d={band(sac, -2.5, 1.5, w1 - 2, w0 + 362)} fill={K.meso} />
+          <path d={band(sac, 0.3, 1.5, w1 - 2, w0 + 362)} fill={C.syncytio} />
         </Part>
-        {/* Chorionic plate */}
-        <path d={band(sac, -3, 1, w0, w1)} fill={PLATE} />
 
         <Part id="korion-barrunbea" quiet>
           <path d={ellPath({ ...sac, rx: sac.rx - 2, ry: sac.ry - 2 })} fill="#241a2a" />
@@ -233,24 +270,24 @@ export function UterusSagittal({ t }: SceneProps) {
       <Mark id="karena" x={wallA(wallMid + 78, villLen * 0.7)[0]} y={wallA(wallMid + 78, villLen * 0.7)[1]} rx={24} color="#ff8a8a" show={vis(t, 0.56)} />
 
       {/* Labels — right gutter (as in figure A) */}
-      <Label id="mutur-enbrionarioa" x={770} y={110} ax={wallA(wallMid, villLen + basal)[0]} ay={wallA(wallMid, villLen + basal)[1]} show={vis(t, 0.12, 0.4)} small />
-      <Label id="dezidua-basala" x={770} y={155} ax={wallA(wallMid + 30, villLen + basal * 0.6)[0]} ay={wallA(wallMid + 30, villLen + basal * 0.6)[1]} show={vis(t, 0.4)} />
-      <Label id="korion-hostotsua" x={770} y={200} ax={wallA(wallMid + 60, villLen * 0.55)[0]} ay={wallA(wallMid + 60, villLen * 0.55)[1]} show={vis(t, 0.12)} />
-      <Label id="karena" x={770} y={245} ax={wallA(wallMid + 78, villLen * 0.7)[0]} ay={wallA(wallMid + 78, villLen * 0.7)[1]} show={vis(t, 0.56)} />
-      <Label id="amnios-barrunbea" x={770} y={375} ax={am.cx + am.rx * 0.45} ay={am.cy + am.ry * 0.72} show={vis(t, 0.1)} />
-      <Label id="zilborrestea" x={770} y={420} ax={cordMid[0] - (cordMid[0] - cordTop[0]) * 0.1} ay={(cordMid[1] + cordTop[1]) / 2} show={vis(t, 0.3)} />
-      <Label id="bitelo-zaku-sekundarioa" x={770} y={465} ax={yolk[0]} ay={yolk[1]} show={Math.min(yolkShow, vis(t, 0.05))} small />
-      <Label id="umetoki-barrunbea" x={770} y={510} ax={500} ay={lerp(390, 440, k)} show={Math.min(cavityShow, vis(t, 0))} />
+      <Label id="mutur-enbrionarioa" x={810} y={110} ax={wallA(wallMid, villLen + basal)[0]} ay={wallA(wallMid, villLen + basal)[1]} show={vis(t, 0.12, 0.4)} small />
+      <Label id="dezidua-basala" x={810} y={155} ax={wallA(wallMid + 30, villLen + basal * 0.6)[0]} ay={wallA(wallMid + 30, villLen + basal * 0.6)[1]} show={vis(t, 0.4)} />
+      <Label id="korion-hostotsua" x={810} y={200} ax={wallA(wallMid + 60, villLen * 0.55)[0]} ay={wallA(wallMid + 60, villLen * 0.55)[1]} show={vis(t, 0.12)} />
+      <Label id="karena" x={810} y={245} ax={wallA(wallMid + 78, villLen * 0.7)[0]} ay={wallA(wallMid + 78, villLen * 0.7)[1]} show={vis(t, 0.56)} />
+      <Label id="amnios-barrunbea" x={810} y={375} ax={am.cx + am.rx * 0.45} ay={am.cy + am.ry * 0.72} show={vis(t, 0.1)} />
+      <Label id="zilborrestea" x={810} y={420} ax={cordMid[0] - (cordMid[0] - cordTop[0]) * 0.1} ay={(cordMid[1] + cordTop[1]) / 2} show={vis(t, 0.3)} />
+      <Label id="bitelo-zaku-sekundarioa" x={810} y={465} ax={yolk[0]} ay={yolk[1]} show={Math.min(yolkShow, vis(t, 0.05))} small />
+      <Label id="umetoki-barrunbea" x={810} y={510} ax={500} ay={lerp(390, 440, k)} show={Math.min(cavityShow, vis(t, 0))} />
 
       {/* Labels — left gutter */}
-      <Label id="paretako-dezidua" x={240} y={150} ax={dec[15][0] + 9} ay={dec[15][1]} show={vis(t, 0.4)} align="end" />
-      <Label id="korion-barrunbea" x={240} y={210} ax={onE(sac, 200, -sac.rx * 0.1)[0]} ay={onE(sac, 200, -sac.rx * 0.1)[1]} show={vis(t, 0, 0.95)} align="end" />
-      <Label id="dezidua-kapsularra" x={240} y={270} ax={wallA(125, caps * 0.6)[0]} ay={wallA(125, caps * 0.6)[1]} show={Math.min(capsShow, vis(t, 0.4))} align="end" />
-      <Label id="biloxka-sekundarioa" x={240} y={330} ax={wallA(165, villLen * 0.4)[0]} ay={wallA(165, villLen * 0.4)[1]} show={vis(t, 0, 0.12)} align="end" />
-      <Label id="korion-leuna" x={240} y={330} ax={wallA(165, 0)[0]} ay={wallA(165, 0)[1]} show={vis(t, 0.26, 0.86)} align="end" />
-      <Label id="mutur-anenbrionarioa" x={240} y={390} ax={wallA(wallMid + 180, caps + 2)[0]} ay={wallA(wallMid + 180, caps + 2)[1]} show={vis(t, 0.26, 0.4)} align="end" small />
-      <Label id="amniosa" x={240} y={390} ax={onE(am, 175)[0]} ay={onE(am, 175)[1]} show={vis(t, 0.5, 0.86)} align="end" />
-      <Label id="mintz-amniokorionikoa" x={240} y={450} ax={wallA(150, -1)[0]} ay={wallA(150, -1)[1]} show={membraneShow} align="end" />
+      <Label id="paretako-dezidua" x={190} y={150} ax={dec[15][0] + 9} ay={dec[15][1]} show={vis(t, 0.4)} align="end" />
+      <Label id="korion-barrunbea" x={190} y={210} ax={onE(sac, 200, -sac.rx * 0.1)[0]} ay={onE(sac, 200, -sac.rx * 0.1)[1]} show={vis(t, 0, 0.95)} align="end" />
+      <Label id="dezidua-kapsularra" x={190} y={270} ax={wallA(125, caps * 0.6)[0]} ay={wallA(125, caps * 0.6)[1]} show={Math.min(capsShow, vis(t, 0.4))} align="end" />
+      <Label id="biloxka-sekundarioa" x={190} y={330} ax={wallA(165, villLen * 0.4)[0]} ay={wallA(165, villLen * 0.4)[1]} show={vis(t, 0, 0.12)} align="end" />
+      <Label id="korion-leuna" x={190} y={330} ax={wallA(165, 0)[0]} ay={wallA(165, 0)[1]} show={vis(t, 0.26, 0.86)} align="end" />
+      <Label id="mutur-anenbrionarioa" x={190} y={390} ax={wallA(wallMid + 180, caps + 2)[0]} ay={wallA(wallMid + 180, caps + 2)[1]} show={vis(t, 0.26, 0.4)} align="end" small />
+      <Label id="amniosa" x={190} y={390} ax={onE(am, 175)[0]} ay={onE(am, 175)[1]} show={vis(t, 0.5, 0.86)} align="end" />
+      <Label id="mintz-amniokorionikoa" x={190} y={450} ax={wallA(150, -1)[0]} ay={wallA(150, -1)[1]} show={membraneShow} align="end" />
 
       <Note x={500} y={618} show={vis(t, 0, 0.12)}>Biloxkak blastozisto osoan zehar</Note>
       <Note x={500} y={618} tone="accent" show={vis(t, 0.12, 0.26)}>Mutur enbrionarioan biloxka trinkoak: korion hostotsua</Note>
