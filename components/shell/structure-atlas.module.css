@@ -203,3 +203,32 @@
 .review button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 7px 11px; border: 1px solid var(--line-2); border-radius: 7px; background: var(--bg-1); font-size: 14px; }
 .review button:hover { border-color: var(--line-3); background: var(--surface-2); }
 .review button[aria-pressed='true'] { border-color: var(--focus); }
+
+/* View toggle: cards (each structure drawn) or the development schemes. */
+.viewToggle { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line-2); border-radius: 9px; background: var(--bg-1); align-self: center; }
+.viewToggle button { min-height: 32px; padding: 0 14px; border-radius: 6px; font-size: 13px; color: var(--text-3); }
+.viewToggle button:hover { color: var(--text); }
+.viewToggle button[aria-pressed="true"] { background: var(--surface-3); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
+
+/* Cards: the structure as drawn, its name, definition and first appearance. */
+.cardList { min-width: 0; display: grid; gap: 28px; }
+.cardSection > header { margin-bottom: 14px; }
+.cardSection > header h2 { font-size: 21px; line-height: 1.3; letter-spacing: -.02em; margin: 6px 0 0; }
+.cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 12px; }
+.cards > li { min-width: 0; content-visibility: auto; contain-intrinsic-size: auto 330px; }
+.card { display: grid; grid-template-rows: auto 1fr; width: 100%; height: 100%; padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); text-align: left; color: var(--text-2); transition: border-color .15s, box-shadow .15s, translate .18s var(--ease); }
+.card:hover { border-color: var(--line-3); box-shadow: var(--shadow-2); translate: 0 -2px; }
+.card[aria-pressed="true"] { border-color: var(--signal); box-shadow: 0 0 0 1px var(--signal); }
+.card:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+.mini { display: block; aspect-ratio: 1000 / 640; background: radial-gradient(110% 90% at 50% 40%, #17171b 0%, #111114 60%, #0b0b0d 100%); border-bottom: 1px solid var(--line); }
+.mini svg { display: block; width: 100%; height: 100%; opacity: 0; transition: opacity .25s ease-out; }
+.mini[data-ready] svg { opacity: 1; }
+.cardBody { display: grid; align-content: start; gap: 4px; padding: 10px 12px 12px; min-width: 0; }
+.cardMeta { display: flex; align-items: center; gap: 6px; font: var(--eyebrow); letter-spacing: var(--eyebrow-track); text-transform: uppercase; color: var(--text-4); min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.cardName { font-size: 15px; font-weight: 600; line-height: 1.3; letter-spacing: -.01em; color: var(--text); }
+.cardEs { font-size: 12px; color: var(--text-4); margin-top: -2px; }
+.cardDef { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; font-size: 13px; line-height: 1.5; color: var(--text-3); }
+.cardFirst { margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 11.5px; line-height: 1.4; color: var(--text-3); }
+.cardFirst em { font-style: normal; font: var(--eyebrow); letter-spacing: var(--eyebrow-track); text-transform: uppercase; color: var(--text-4); margin-right: 4px; }
+.hasDetail .cards { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+@media (prefers-reduced-motion: reduce) { .card, .mini svg { transition: none; } .card:hover { translate: none; } }

@@ -57,7 +57,7 @@ function Tree({ nodes }: { nodes: N[] }) {
 
 export function Lineage() {
   return (
-    <div className="landing">
+    <div className="landing ln-page">
       <LandNav />
       <section className="ln-hero">
         <p className="eyebrow">Leinuak</p>

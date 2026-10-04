@@ -1,16 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { COMPETENCES, KEY_IDS, POOL, compKey, competenceLabel, sourceLabel, type Competence, type PoolQuestion } from '@/content/pool';
 import { firstSeenOf } from '@/content/chronology';
-import { nameOf } from '@/content/registry';
+import { getWeek, nameOf, weeks } from '@/content/registry';
 import { IconCheck, IconClose } from './icons';
 import { competenceLevel, isDue, recordAnswer, useAnswers, type Answers } from './answers';
 
 interface QuestionsProps {
   week: number;
   onClose: () => void;
-  onGoto: (week: number, stageId: string) => void;
+  /** Open the stage at the step about `concept` (lit), or at its end when there is none. */
+  onGoto: (week: number, stageId: string, concept?: string) => void;
   /** Re-test the same concept as an image: find it in the simulator (Aurkitu). */
   onFind?: (concept: string) => void;
   /** Open on one structure's questions (from its passport). */
@@ -33,6 +34,26 @@ const hash = (s: string, seed: number) => {
 };
 
 const lastTry = (answers: Answers, id: string) => answers[id]?.hist?.at(-1)?.[0] ?? 0;
+
+/** Where "Simulazioan ikusi" lands: the stage, and the step that focuses the question's structure. */
+export function stepOf(week: number, stageId: string, concept?: string) {
+  const stage = getWeek(week)?.stages.find((s) => s.id === stageId);
+  if (!stage) return null;
+  const k = concept ? stage.beats.findIndex((b) => b.focus?.includes(concept)) : -1;
+  return { stage, step: k >= 0 ? k + 1 : null, steps: stage.beats.length };
+}
+
+/** Per topic: competences mastered, competences due for review, questions answered. */
+function topicStats(answers: Answers, now: number) {
+  return weeks.map((w) => {
+    const qs = POOL.filter((q) => q.week === w.week);
+    const keys = [...new Set(qs.map((q) => compKey(q.comp, q.concept)))];
+    const mastered = keys.filter((k) => competenceLevel(answers, KEY_IDS.get(k) ?? []) === 'menderatuta').length;
+    const due = new Set(qs.filter((q) => isDue(answers[q.id], now)).map((q) => compKey(q.comp, q.concept))).size;
+    const tried = qs.filter((q) => answers[q.id]).length;
+    return { week: w.week, title: w.title, keys: keys.length, mastered, due, tried, total: qs.length };
+  });
+}
 
 function select(week: number, scope: Scope, kind: Kind, concept?: string) {
   return POOL.filter((q) => (concept ? q.concept === concept : scope === 'denak' || q.week === week) && (kind === 'denak' || q.comp === kind));
@@ -75,8 +96,10 @@ function build(mode: Mode, inScope: Q[], answers: Answers, seed: number): Q[] {
  * with the competence it trains. Practise (feedback after each answer), review (competences that were
  * missed or are due, re-tested with a different question) and a mock exam (20, no help until the end).
  */
-export function Questions({ week, onClose, onGoto, onFind, concept }: QuestionsProps) {
+export function Questions({ week: startWeek, onClose, onGoto, onFind, concept }: QuestionsProps) {
   const answers = useAnswers();
+  // The topic practised: the simulator's own at first, any other from the topic strip.
+  const [week, setWeek] = useState(startWeek);
   const [mode, setMode] = useState<Mode>('praktika');
   const [scope, setScope] = useState<Scope>('gaia');
   const [kind, setKind] = useState<Kind>('denak');
@@ -87,12 +110,13 @@ export function Questions({ week, onClose, onGoto, onFind, concept }: QuestionsP
   const [now] = useState(() => Date.now());
   const [only, setOnly] = useState(concept);
 
-  const reset = (m: Mode, s: Scope, k: Kind, c = only) => {
+  const reset = (m: Mode, s: Scope, k: Kind, c = only, w = week) => {
     setMode(m);
     setScope(s);
     setKind(k);
     setOnly(c);
-    setPool(build(m, select(week, s, k, c), answers, Math.floor(Math.random() * 1e6)));
+    setWeek(w);
+    setPool(build(m, select(w, s, k, c), answers, Math.floor(Math.random() * 1e6)));
     setI(0);
     setPicked(null);
     setLog([]);
@@ -107,6 +131,12 @@ export function Questions({ week, onClose, onGoto, onFind, concept }: QuestionsP
   const exam = mode === 'azterketa';
   const ok = log.filter((l) => l.picked === l.q.answer).length;
   const canFind = (c?: string) => !!c && !!onFind && !!firstSeenOf(c);
+  const stats = useMemo(() => topicStats(answers, now), [answers, now]);
+  const missed = log.filter((l) => l.picked !== l.q.answer).length;
+  const next = () => {
+    setI((x) => x + 1);
+    setPicked(null);
+  };
 
   const choose = (k: number) => {
     setPicked(k);
@@ -119,6 +149,32 @@ export function Questions({ week, onClose, onGoto, onFind, concept }: QuestionsP
       }, 350);
     }
   };
+
+  // Keyboard: 1–4 or A–D answer, Enter (or →) goes on; the simulator's own keys wait meanwhile.
+  const onKey = useEffectEvent((e: KeyboardEvent) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const tag = (e.target as HTMLElement)?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (!q || finished) return;
+    const key = e.key.toLowerCase();
+    const n = /^[1-9]$/.test(key) ? Number(key) - 1 : /^[a-i]$/.test(key) ? key.charCodeAt(0) - 97 : -1;
+    if (picked === null && n >= 0 && n < q.options.length) {
+      e.preventDefault();
+      choose(n);
+    } else if (picked !== null && !exam && (e.key === 'Enter' || e.key === 'ArrowRight')) {
+      // Enter on a focused button keeps its own meaning.
+      if (e.key === 'Enter' && (e.target as HTMLElement)?.closest?.('button, a')) return;
+      e.preventDefault();
+      next();
+    }
+  });
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => onKey(e);
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+
+  const where = q?.stageId ? stepOf(q.week, q.stageId, q.concept) : null;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -138,14 +194,7 @@ export function Questions({ week, onClose, onGoto, onFind, concept }: QuestionsP
               </button>
             </div>
           ) : (
-            <div className="seg-toggle">
-              <button className={scope === 'gaia' ? 'is-on' : ''} onClick={() => reset(mode, 'gaia', kind)}>
-                {week}. gaia
-              </button>
-              <button className={scope === 'denak' ? 'is-on' : ''} onClick={() => reset(mode, 'denak', kind)}>
-                Gai guztiak
-              </button>
-            </div>
+            <p className="qz-scope">{scope === 'denak' ? 'Gai guztiak' : `${week}. gaia · ${getWeek(week)?.title ?? ''}`}</p>
           )}
           <button className="icon-btn" onClick={onClose} aria-label="Itxi">
             <IconClose />
@@ -176,6 +225,34 @@ export function Questions({ week, onClose, onGoto, onFind, concept }: QuestionsP
           ))}
         </div>
 
+        {!only && (
+          <nav className="qz-topics" aria-label="Gaiak: aurrerapena">
+            {stats.map((t) => (
+              <button
+                key={t.week}
+                className={`qz-topic${scope === 'gaia' && week === t.week ? ' is-on' : ''}`}
+                onClick={() => reset(mode, 'gaia', kind, undefined, t.week)}
+                aria-pressed={scope === 'gaia' && week === t.week}
+                aria-label={`${t.week}. gaia: ${t.title} · ${t.mastered}/${t.keys} gaitasun menderatuta${t.due ? ` · ${t.due} errepasatzeko` : ''}`}
+                data-tip={`${t.title} · ${t.tried}/${t.total} galdera erantzunda`}
+                data-tip-pos="bottom"
+              >
+                <span className="qz-topic-h">
+                  <b>{String(t.week).padStart(2, '0')}</b>
+                  {t.due > 0 && <i className="qz-topic-due">{t.due}</i>}
+                </span>
+                <span className="qz-topic-bar" style={{ '--p': t.keys ? t.mastered / t.keys : 0, '--q': t.total ? t.tried / t.total : 0 } as React.CSSProperties} aria-hidden />
+                <small>
+                  {t.mastered}/{t.keys}
+                </small>
+              </button>
+            ))}
+            <button className={`qz-topic is-all${scope === 'denak' ? ' is-on' : ''}`} onClick={() => reset(mode, 'denak', kind)} aria-pressed={scope === 'denak'}>
+              Gai guztiak
+            </button>
+          </nav>
+        )}
+
         {pool.length === 0 ? (
           <p className="muted pad">{mode === 'errepasoa' ? 'Ez dago errepasatzeko gaitasunik orain. Ondo!' : 'Ez dago mota honetako galderarik hemen.'}</p>
         ) : finished ? (
@@ -183,6 +260,7 @@ export function Questions({ week, onClose, onGoto, onFind, concept }: QuestionsP
             <p className="quiz-score">
               {ok}/{log.length}
             </p>
+            <span className="quiz-score-bar" style={{ '--p': log.length ? ok / log.length : 0 } as React.CSSProperties} aria-hidden />
             <p>{ok / Math.max(1, log.length) >= 0.8 ? 'Bikain! Jarraitu horrela.' : 'Errepasatu hutsegiteak: azalpenak behean dituzu.'}</p>
             {log.some((l) => l.picked !== l.q.answer) && (
               <ol className="qz-review">
@@ -200,7 +278,7 @@ export function Questions({ week, onClose, onGoto, onFind, concept }: QuestionsP
                       <p className="qz-review-ok">Zuzena: {rq.options[rq.answer]}</p>
                       <span className="qz-review-go">
                         {rq.stageId && (
-                          <button className="link-quiet" onClick={() => onGoto(rq.week, rq.stageId!)}>
+                          <button className="link-quiet" onClick={() => onGoto(rq.week, rq.stageId!, rq.concept)}>
                             Simulazioan ikusi <span aria-hidden>→</span>
                           </button>
                         )}
@@ -214,9 +292,16 @@ export function Questions({ week, onClose, onGoto, onFind, concept }: QuestionsP
                   ))}
               </ol>
             )}
-            <button className="btn primary" onClick={() => reset(mode, scope, kind)}>
-              Berriro hasi
-            </button>
+            <div className="quiz-done-actions">
+              {missed > 0 && mode !== 'errepasoa' && (
+                <button className="btn primary" onClick={() => reset('errepasoa', scope, kind)}>
+                  Errepasatu hutsak <small>{missed}</small>
+                </button>
+              )}
+              <button className={`btn${missed > 0 && mode !== 'errepasoa' ? '' : ' primary'}`} onClick={() => reset(mode, scope, kind)}>
+                Berriro hasi
+              </button>
+            </div>
           </div>
         ) : (
           <div className="quiz-q">
@@ -239,13 +324,18 @@ export function Questions({ week, onClose, onGoto, onFind, concept }: QuestionsP
               {q.options.map((o, k) => {
                 const state = picked === null ? '' : exam ? (k === picked ? ' is-picked' : ' is-faded') : k === q.answer ? ' is-right' : k === picked ? ' is-wrong' : ' is-faded';
                 return (
-                  <button key={k} className={`quiz-option${state}`} disabled={picked !== null} onClick={() => choose(k)}>
+                  <button key={k} className={`quiz-option${state}`} disabled={picked !== null} onClick={() => choose(k)} aria-keyshortcuts={`${k + 1} ${String.fromCharCode(65 + k)}`}>
                     <span className="opt-letter">{String.fromCharCode(65 + k)}</span>
                     {o}
                   </button>
                 );
               })}
             </div>
+            {picked === null && (
+              <p className="qz-keys">
+                Teklak: <kbd>1</kbd>–<kbd>{q.options.length}</kbd> edo <kbd>A</kbd>–<kbd>{String.fromCharCode(64 + q.options.length)}</kbd> erantzuteko
+              </p>
+            )}
             {picked !== null && !exam && (
               <div className={`quiz-expl${picked === q.answer ? ' ok' : ' bad'}`}>
                 <strong>{picked === q.answer ? 'Zuzena!' : 'Ez da zuzena.'}</strong>
@@ -264,19 +354,23 @@ export function Questions({ week, onClose, onGoto, onFind, concept }: QuestionsP
                     Irudian aurkitu
                   </button>
                 )}
+                {picked !== null && (
+                  <span className="qz-keys qz-keys-next">
+                    <kbd>Enter</kbd> hurrengoa
+                  </span>
+                )}
                 {picked !== null && q.stageId && (
-                  <button className="btn" onClick={() => onGoto(q.week, q.stageId!)}>
+                  <button className="btn qz-goto" onClick={() => onGoto(q.week, q.stageId!, q.concept)} title={where ? `${q.week}. gaia · ${where.stage.title}${where.step ? ` · ${where.step}. urratsa` : ''}` : undefined}>
                     Simulazioan ikusi
+                    {where && (
+                      <small>
+                        {where.stage.title}
+                        {where.step ? ` · ${where.step}/${where.steps}` : ''}
+                      </small>
+                    )}
                   </button>
                 )}
-                <button
-                  className="btn primary"
-                  disabled={picked === null}
-                  onClick={() => {
-                    setI((x) => x + 1);
-                    setPicked(null);
-                  }}
-                >
+                <button className="btn primary" disabled={picked === null} onClick={next} aria-keyshortcuts="Enter">
                   Hurrengoa →
                 </button>
               </div>

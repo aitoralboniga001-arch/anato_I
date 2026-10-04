@@ -171,9 +171,27 @@ export function Timeline() {
           </div>
         </div>
 
+        {/* Key dates as markers under the ruler: each jumps the ruler to its day. */}
+        <div className="kr-marks" role="group" aria-label="Gako-datak">
+          {MILESTONES.filter((m) => m.weight === 'gakoa').map((m) => (
+            <button
+              key={`${m.day}-${m.short}`}
+              className={`kr-mark${lastMilestone === m ? ' is-on' : ''}`}
+              style={{ left: `${dayToX(m.day) * 100}%` }}
+              onClick={() => setDay(m.day)}
+              aria-label={`${dayLabel(m.day, m.to)}: ${m.short}`}
+              data-tip={`${dayLabel(m.day, m.to)} · ${m.short}`}
+              data-tip-pos="bottom"
+            />
+          ))}
+        </div>
+
         {lastMilestone && (
           <p className="kr-last">
             <span>{dayLabel(lastMilestone.day, lastMilestone.to)}</span> {lastMilestone.text}
+            <Link className="kr-last-go" href={`/astea/${lastMilestone.week}?etapa=${lastMilestone.stage}`}>
+              Simulagailuan ikusi <span aria-hidden>→</span>
+            </Link>
           </p>
         )}
 

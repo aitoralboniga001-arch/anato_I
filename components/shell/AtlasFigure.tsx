@@ -19,7 +19,7 @@ interface Shot {
  * Frames that may show the structure, best first: late in each step that focuses it (where its tour
  * would hold), in that step's own view and then the others; then every view near the stage's end.
  */
-function shotsOf(id: string): Shot[] {
+export function shotsOf(id: string): Shot[] {
   const out: Shot[] = [];
   for (const { week, stage } of appearances.get(id) ?? []) {
     const ids = stage.views.map((v) => v.id);
@@ -39,11 +39,11 @@ const noop = () => {};
 const W = 1000;
 const H = 640;
 
-type Box = [number, number, number, number];
+export type Box = [number, number, number, number];
 const area = (b: Box) => (b[2] - b[0]) * (b[3] - b[1]);
 
 /** Frame around a box: padded, in the scene's proportions, never closer than half the frame (the surroundings explain it). */
-function frameAround([x0, y0, x1, y1]: Box): Box {
+export function frameAround([x0, y0, x1, y1]: Box): Box {
   const pad = 40;
   let w = Math.max(x1 - x0 + 2 * pad, W / 2);
   let h = Math.max(y1 - y0 + 2 * pad, H / 2);

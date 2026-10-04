@@ -968,17 +968,25 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   };
 
   const gotoWeekStage = (w: number, stageId: string, structureId?: string) => {
+    // With a structure: the step that shows it (late in the step, where its tour would hold), lit.
+    const target = getWeek(w)?.stages.find((s) => s.id === stageId);
+    const k = structureId && target ? target.beats.findIndex((b) => b.focus?.includes(structureId)) : -1;
+    const t = target && k >= 0 ? (target.beats[k].tourAt ?? target.beats[k].at + ((target.beats[k + 1]?.at ?? 1) - target.beats[k].at) * 0.75) : 1;
     if (w === week.week) {
       const idx = week.stages.findIndex((s) => s.id === stageId);
       if (idx >= 0) {
+        endIntro();
         clearTour();
-        place({ i: idx, t: 1 });
+        setPlaying(false);
+        place({ i: idx, t });
+        if (structureId && structures.has(structureId)) pick(structureId);
       }
       setQuestionsOpen(false);
       return;
     }
     const q = new URLSearchParams({ etapa: stageId });
     if (structureId) q.set('egitura', structureId);
+    if (k >= 0) q.set('une', t.toFixed(3));
     router.push(`/astea/${w}?${q.toString()}`);
   };
 
@@ -1305,6 +1313,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     const tag = (e.target as HTMLElement)?.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    // The question window has its own keys (1–4, Enter): only Escape reaches the simulator.
+    if (questionsOpen && e.key !== 'Escape') return;
     if (e.key === ' ') {
       e.preventDefault();
       togglePlay();
@@ -1893,7 +1903,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         />
       )}
       {helpOpen && <Help welcome={firstVisit} onClose={() => setHelpOpen(false)} />}
-      {questionsOpen && <Questions week={week.week} concept={questionsConcept} onClose={() => setQuestionsOpen(false)} onGoto={(w, sid) => gotoWeekStage(w, sid)} onFind={findConcept} />}
+      {questionsOpen && <Questions week={week.week} concept={questionsConcept} onClose={() => setQuestionsOpen(false)} onGoto={(w, sid, c) => gotoWeekStage(w, sid, c)} onFind={findConcept} />}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { atlasConfusions, atlasDerivatives, atlasHref, atlasOrigins, atlasPath, 
 import { POOL } from '@/content/pool';
 import { isDue, isMastered, useAnswers, type Answers } from './answers';
 import { AtlasFigure } from './AtlasFigure';
+import { AtlasCards } from './AtlasCards';
 import { categoryColor } from '@/lib/sim/palette';
 import type { StructureDef } from '@/lib/sim/types';
 import { LandFoot, LandNav } from './LandNav';
@@ -162,6 +163,8 @@ export function StructureAtlas() {
   const requestedTopic = Number(searchParams.get('gaia'));
   const topic = requestedTopic >= 1 && requestedTopic <= 6 && Number.isInteger(requestedTopic) ? requestedTopic : 0;
   const results = matches(query, topic);
+  // Two ways to browse: cards (each structure with its drawing) or the development schemes.
+  const schemesView = searchParams.get('ikusi') === 'eskemak';
   const requestedId = searchParams.get('egitura') ?? '';
   const selected = results.find((structure) => structure.id === requestedId);
   const returnTarget = useRef<HTMLElement | null>(null);
@@ -176,7 +179,7 @@ export function StructureAtlas() {
         detail?.scrollIntoView({ block: 'start', behavior: 'instant' });
       } else {
         // Show where it sits in the schemes: its own chip (not a grey copy), if it is off screen.
-        const nodes = [...document.querySelectorAll<HTMLElement>('#atlas-eskemak [data-atlas-node]')].filter((node) => node.dataset.atlasNode === selected.id);
+        const nodes = [...document.querySelectorAll<HTMLElement>('#atlas-zerrenda [data-atlas-node]')].filter((node) => node.dataset.atlasNode === selected.id);
         const node = nodes.find((n) => n.dataset.context === undefined) ?? nodes[0];
         const r = node?.getBoundingClientRect();
         if (node && r && (r.top < 80 || r.bottom > window.innerHeight)) node.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -190,8 +193,11 @@ export function StructureAtlas() {
     }
   }, [selected]);
 
-  function update(next: { id?: string; query?: string; topic?: number }, replace = false) {
+  function update(next: { id?: string; query?: string; topic?: number; schemes?: boolean }, replace = false) {
     const params = new URLSearchParams(searchParams.toString());
+    if (next.schemes !== undefined) {
+      if (next.schemes) params.set('ikusi', 'eskemak'); else params.delete('ikusi');
+    }
     if (next.id !== undefined) {
       if (next.id) params.set('egitura', next.id); else params.delete('egitura');
     }
@@ -315,6 +321,10 @@ export function StructureAtlas() {
               </div>
             </div>
             <div className={styles.filterFoot}>
+            <div className={styles.viewToggle} role="group" aria-label="Nola ikusi">
+              <button type="button" aria-pressed={!schemesView} onClick={() => update({ schemes: false }, true)}>Txartelak</button>
+              <button type="button" aria-pressed={schemesView} onClick={() => update({ schemes: true }, true)}>Eskemak</button>
+            </div>
             <div className={styles.resultHead}>
               <p role="status">{results.length} / {catalogue.length} egitura</p>
               {(query || topic > 0) && <button type="button" onClick={() => filter('', 0)}>Garbitu</button>}
@@ -330,9 +340,10 @@ export function StructureAtlas() {
           </li>)}</ul>
         </section>}
         <div className={`${styles.layout} ${selected ? styles.hasDetail : ''}`}>
-          <div className={styles.schemes} id="atlas-eskemak">
+          <div className={schemesView ? styles.schemes : styles.cardList} id="atlas-zerrenda">
             {selected && <a href="#egitura-xehetasuna" className={styles.skip}>Hautatutako egiturara <span aria-hidden="true">↓</span></a>}
-            {results.length ? weeks.filter((week) => !topic || week.week === topic).map((week) => {
+            {results.length && !schemesView ? <AtlasCards items={results} topic={topic} selectedId={selected?.id} onChoose={choose} />
+            : results.length ? weeks.filter((week) => !topic || week.week === topic).map((week) => {
               const targets = results.filter((structure) => atlasTopics(structure.id).includes(week.week));
               return targets.length ? <TopicScheme key={week.week} topic={week} targets={targets} selectedId={selected?.id} onChoose={choose} searching={!!query} onPath={onPath} /> : null;
             }) : <p className={styles.empty}>Ez da egiturarik aurkitu. Saiatu beste izen batekin edo garbitu iragazkiak.</p>}
