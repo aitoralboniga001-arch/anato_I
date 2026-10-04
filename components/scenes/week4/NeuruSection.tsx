@@ -317,18 +317,37 @@ export function NeuruDrawing({ g, part, plateId, foldId, tube, aortaShow, under,
           </g>,
         )}
 
-        {/* dorsal aortae (paired, on the splanchnic mesoderm above the endoderm) */}
+        {/* dorsal aortae (paired, on the splanchnic mesoderm above the endoderm): small vessels, a blood-filled
+            lumen inside a thin endothelial wall; a dark lumen base stays outside the Part so a dimmed aorta still reads as a vessel */}
+        {aortaShow > 0.02 && (
+          <g opacity={aortaShow}>
+            {sides.map((sd) => {
+              const c = SX(sd > 0 ? aorta : mirror(aorta));
+              return <circle key={sd} cx={c[0]} cy={c[1]} r={9 * K} fill="#3a0c14" />;
+            })}
+          </g>
+        )}
         {aortaShow > 0.02 &&
           part(
             'aorta-dortsalak',
             <g>
               {sides.map((sd) => {
                 const c = SX(sd > 0 ? aorta : mirror(aorta));
+                const R = 9 * K;
                 return (
                   <g key={sd}>
-                    <circle cx={c[0]} cy={c[1]} r={9 * K} fill="#7f1d1d" stroke="#fca5a5" strokeWidth={1.4} />
-                    <circle cx={c[0] - 2} cy={c[1] + 1} r={2} fill="#f87171" />
-                    <circle cx={c[0] + 3} cy={c[1] - 2} r={1.8} fill="#f87171" />
+                    <circle cx={c[0]} cy={c[1]} r={R} fill="#cf8a90" />
+                    <circle cx={c[0]} cy={c[1]} r={R - 1.6} fill="#a51d2d" />
+                    {Array.from({ length: 6 }, (_, i) => {
+                      const a = (i / 6) * Math.PI * 2 + 0.3;
+                      const x = c[0] + Math.cos(a) * (R - 1.9);
+                      const y = c[1] + Math.sin(a) * (R - 1.9);
+                      return <ellipse key={i} cx={f1(x)} cy={f1(y)} rx={2.4} ry={1.1} fill="#cf8a90" transform={`rotate(${f1((a * 180) / Math.PI + 90)} ${f1(x)} ${f1(y)})`} />;
+                    })}
+                    {[[-3.5, 1.5, 20], [2.5, -3, -30], [3, 3.5, 70], [-1, -1, 0]].map(([dx, dy, r], i) => (
+                      <ellipse key={i} cx={f1(c[0] + dx)} cy={f1(c[1] + dy)} rx={2.7} ry={1.7} fill="#ef5b6c" stroke="#7a1020" strokeWidth={0.4} transform={`rotate(${r} ${f1(c[0] + dx)} ${f1(c[1] + dy)})`} />
+                    ))}
+                    <path d={`M${f1(c[0] - R * 0.55)},${f1(c[1] - R * 0.6)}A${f1(R * 0.8)},${f1(R * 0.8)} 0 0 1 ${f1(c[0] + R * 0.35)},${f1(c[1] - R * 0.75)}`} fill="none" stroke="#fff" strokeOpacity={0.18} strokeWidth={1.2} strokeLinecap="round" />
                   </g>
                 );
               })}
@@ -365,6 +384,11 @@ export function NeuruDrawing({ g, part, plateId, foldId, tube, aortaShow, under,
             ss((p.groove - 0.03) / 0.2),
           )}
 
+        {/* Opaque navy base under the neuroepithelium, outside its Part: when the tube is not in focus it dims
+            toward dark ectoderm-blue (never toward the red mesenchyme, which made it read violet like the notochord). */}
+        <path d={pathOf([...neural.outer, ...neural.inner.slice().reverse()], true)} fill="#1b2c6a" />
+        {tube && <path d={pathOf(Lp(grooveP), true)} fill="#0a1024" />}
+
         {/* neuroepithelium: plate (middle) + folds (lateral stretches), or the closed tube with its canal */}
         {tube ? (
           part(
@@ -386,6 +410,13 @@ export function NeuruDrawing({ g, part, plateId, foldId, tube, aortaShow, under,
               </g>,
             )}
           </>
+        )}
+
+        {/* same navy base under the surface ectoderm */}
+        {p.detach > 0.001 ? (
+          <path d={pathOf([...ectoFull.outer, ...ectoFull.inner.slice().reverse()], true)} fill="#22356f" />
+        ) : (
+          [ectoR, ectoL].map((e, i) => <path key={i} d={pathOf([...e.outer, ...e.inner.slice().reverse()], true)} fill="#22356f" />)
         )}
 
         {/* surface ectoderm (cuboidal), continuous with the neuroepithelium at the junction until it separates */}
