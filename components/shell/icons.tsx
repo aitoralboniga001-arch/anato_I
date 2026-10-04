@@ -118,10 +118,18 @@ export const IconList = ({ size }: P) => (
     <path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" />
   </svg>
 );
+/** Exam questions: an answer sheet with a ticked line (not a "?", which is the help key). */
 export const IconQuiz = ({ size }: P) => (
   <svg {...base(size)}>
-    <rect x="3.5" y="3.5" width="17" height="17" rx="4" />
-    <path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.6M12 16.8v.2" />
+    <rect x="4.5" y="3" width="15" height="18" rx="3" />
+    <path d="M8 8.5l1.6 1.6L12.5 7M14.5 9h2M8 14.5h8.5M8 17.5h5.5" />
+  </svg>
+);
+/** Help: a "?" in a circle. */
+export const IconHelp = ({ size }: P) => (
+  <svg {...base(size)}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M9.6 9.6a2.4 2.4 0 1 1 3.3 2.2c-.6.3-.9.8-.9 1.4v.5M12 16.4v.2" />
   </svg>
 );
 export const IconClose = ({ size }: P) => (
@@ -218,6 +226,12 @@ export const IconInfo = ({ size }: P) => (
 export const IconExpand = ({ size }: P) => (
   <svg {...base(size)}>
     <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+  </svg>
+);
+/** Leave full screen: the expand corners turned inward. */
+export const IconShrink = ({ size }: P) => (
+  <svg {...base(size)}>
+    <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
   </svg>
 );
 /** Chronology: a clock face. */

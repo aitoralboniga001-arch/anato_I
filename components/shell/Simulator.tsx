@@ -10,7 +10,7 @@ import { ageLabel, spanOf } from '@/lib/sim/age';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { StageDef, StructureCategory, StructureDef, WeekDef } from '@/lib/sim/types';
 import { Glossary } from './Glossary';
-import { IconBook, IconCalendar, IconNotes, IconClock, IconExpand, IconImage, IconLayers, IconMore, IconPlay, IconQuiz, IconTag, IconTarget, IconTree } from './icons';
+import { IconBook, IconCalendar, IconNotes, IconClock, IconExpand, IconHelp, IconImage, IconLayers, IconMore, IconPlay, IconQuiz, IconShrink, IconTag, IconTarget, IconTree } from './icons';
 import { Popover } from './Popover';
 import { Wordmark, isWip } from './LandNav';
 import { AskCard, Player, TourCard, ideaOf } from './Player';
@@ -199,6 +199,23 @@ function useMidScreen() {
   return useSyncExternalStore(
     subscribeMidScreen,
     () => window.matchMedia(MID_SCREEN).matches,
+    () => false,
+  );
+}
+
+/** Screens where the explanation column is a drawer (it shows only while `panelOpen`). */
+const NARROW_SCREEN = '(max-width: 1320px)';
+
+const subscribeNarrowScreen = (cb: () => void) => {
+  const m = window.matchMedia(NARROW_SCREEN);
+  m.addEventListener('change', cb);
+  return () => m.removeEventListener('change', cb);
+};
+
+function useNarrowScreen() {
+  return useSyncExternalStore(
+    subscribeNarrowScreen,
+    () => window.matchMedia(NARROW_SCREEN).matches,
     () => false,
   );
 }
@@ -403,7 +420,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       }
       setBack(readBack(week.week, sid));
     }
-    if (link.structure) setSelected(link.structure);
+    if (link.structure) {
+      setSelected(link.structure);
+      // Where the column is a drawer, the structure's card is inside it: open it, or the link shows nothing.
+      if (window.matchMedia(NARROW_SCREEN).matches) setPanelOpen(true);
+    }
     if (link.find) setPendingFind(link.find);
     if (link.questions) {
       setQuestionsConcept(link.questions);
@@ -841,11 +862,15 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     const el = appRef.current;
     if (el?.requestFullscreen && !document.fullscreenElement) void el.requestFullscreen().catch(() => {});
   };
-  /** An explanation is starting: go full screen if accepted before, else offer it (unless turned off). */
+  /**
+   * An explanation is starting: go full screen if accepted before, else offer it (unless turned off).
+   * The stage preview carries the offer in its own header, so only a start without a preview (quick
+   * replay) shows the separate card: never two cards over the specimen at once.
+   */
   const offerFull = () => {
     if (focusMode) return;
     if (fsAccepted()) enterFull();
-    else if (getPref('fsAsk')) setFsOffer(true);
+    else if (getPref('fsAsk') && quick) setFsOffer(true);
   };
   const togglePlay = () => {
     const continuingNarration = voice && !!transport.key;
@@ -1107,7 +1132,13 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   };
 
   /** The explanation panel: a column on wide screens (remembered), a drawer on narrow ones. */
-  const narrow = () => focusMode || window.matchMedia('(max-width: 1320px)').matches;
+  const narrow = () => focusMode || window.matchMedia(NARROW_SCREEN).matches;
+  // What the right column shows right now (the switch in the top bar says exactly this): on a drawer
+  // screen only while the drawer is open, whatever the wide-screen preference says.
+  const drawer = useNarrowScreen() || focusMode;
+  const columnShown = drawer ? panelOpen : infoOpen || notesOpen || panelOpen;
+  const summaryShown = columnShown && !notesOpen;
+  const notesShown = columnShown && notesOpen;
   const openPanel = () => {
     if (narrow()) setPanelOpen(true);
     else if (!infoOpen) setPref('panel', true);
@@ -1143,6 +1174,12 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     else setPref('panel', !infoOpen);
   };
   const toggleNotes = () => {
+    // Notes chosen but the drawer is shut: bring them back instead of switching them off.
+    if (notesOpen && narrow() && !panelOpen) {
+      setSelected(null);
+      setPanelOpen(true);
+      return;
+    }
     const next = !notesOpen;
     setPref('notes', next);
     setSelected(null);
@@ -1414,6 +1451,13 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   }, [bridge, guided]);
 
   const nextStage = week.stages[pos.i + 1];
+  // The topic's last stage ends on the next topic (or, after the last one, on the questions): no dead end.
+  const nextTopic = nextStage ? undefined : weeks.find((w) => w.week > week.week && !isWip(w));
+  const finish = nextStage
+    ? undefined
+    : nextTopic
+      ? { label: 'Hurrengo gaia', tip: `Hurrengo gaia: ${nextTopic.week}. ${nextTopic.title}`, onClick: () => router.push(`/astea/${nextTopic.week}`) }
+      : { label: 'Galderak', tip: 'Gaiak amaituta: frogatu zure burua azterketa-motako galderekin', onClick: () => { setQuestionsConcept(undefined); setQuestionsOpen(true); } };
   const prevWeek = weeks[weeks.indexOf(week) - 1];
   const prevStage = week.stages[pos.i - 1] ?? prevWeek?.stages[prevWeek.stages.length - 1];
   const sceneT = intro !== null ? easeInOut(Math.min(1, intro)) : pos.t;
@@ -1435,10 +1479,13 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         </span>
         <WeekNav current={week} stageId={stage.id} />
         <div className="tb-tools">
+          {/* Ask (Kimu) · test yourself (Aurkitu, Galderak) · what the right column shows · more · help. */}
           <button className={`tool tool-main kimu-tool mobile-tool-hidden${kimuOpen ? ' is-on' : ''}`} onClick={toggleKimu} aria-label="Galdetu Kimuri" aria-expanded={kimuOpen} data-tip="Galdetu Kimuri: lekura eramango zaitu · K" data-tip-pos="bottom">
-            <KimuFace size={26} mood="happy" still /> <span>Galdetu Kimuri</span>
+            <KimuFace size={26} mood="happy" still /> <span className="tb-l">Galdetu Kimuri</span>
+            <span className="tb-s" aria-hidden>Kimu</span>
           </button>
-          <button className={`tool tool-main mobile-tool-hidden${find ? ' is-on' : ''}`} aria-label="Aurkitu" onClick={() => (find ? setFind(null) : startFind())} data-tip="Irudian galdetzen zaizun egitura klikatu" data-tip-pos="bottom">
+          <span className="tb-sep mobile-tool-hidden" aria-hidden />
+          <button className={`tool tool-main mobile-tool-hidden${find ? ' is-on' : ''}`} aria-label={find ? 'Aurkitu amaitu' : 'Aurkitu'} aria-pressed={!!find} onClick={() => (find ? setFind(null) : startFind())} data-tip={find ? 'Aurkitzeko jokoa amaitu · Esc' : 'Frogatu: irudian galdetzen zaizun egitura klikatu'} data-tip-pos="bottom">
             <IconTarget size={16} /> <span>Aurkitu</span>
           </button>
           <button
@@ -1448,11 +1495,21 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               setQuestionsConcept(undefined);
               setQuestionsOpen(true);
             }}
-            data-tip="Azterketa-motako galderak, azalpenarekin"
+            data-tip="Frogatu: azterketa-motako galderak, azalpenarekin"
             data-tip-pos="bottom"
           >
             <IconQuiz size={16} /> <span>Galderak</span>
           </button>
+          <span className="tb-sep mobile-tool-hidden" aria-hidden />
+          {/* The right column shows the stage summary or the original notes (or nothing): one switch. */}
+          <div className="tb-panels" role="group" aria-label="Eskuineko zutabea">
+            <button className={`tool mobile-tool-hidden${summaryShown ? ' is-on' : ''}`} aria-label="Laburpena" onClick={togglePanel} data-tip={summaryShown ? 'Laburpena ezkutatu · ]' : 'Etaparen laburpena: gakoak, datak eta egiturak · ]'} data-tip-pos="bottom" aria-pressed={summaryShown}>
+              <IconRail open={summaryShown} side="right" /> <span>Laburpena</span>
+            </button>
+            <button className={`tool mobile-notes${notesShown ? ' is-on' : ''}`} aria-label="Apunteak" onClick={toggleNotes} aria-pressed={notesShown} data-tip={notesShown ? 'Apunteak ezkutatu · N' : 'Jatorrizko apunteak, simulazioarekin batera · N'} data-tip-pos="bottom-end">
+              <IconNotes size={16} /> <span>Apunteak</span>
+            </button>
+          </div>
           <Popover
             trigger={({ open, toggle }) => (
               <button className={`tool${open ? ' is-on' : ''}`} aria-label="Tresnak" onClick={toggle} aria-expanded={open} aria-haspopup="menu" data-tip="Glosarioa, kronologia, leinuak, irudiak…" data-tip-pos="bottom">
@@ -1469,7 +1526,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                   <IconTarget size={16} /> {find ? 'Aurkitu amaitu' : 'Aurkitu'}
                 </button>
                 <button className="mobile-menu-item" role="menuitem" onClick={() => { close(); togglePanel(); }}>
-                  <IconRail open={(infoOpen || panelOpen) && !notesOpen} side="right" /> Laburpena
+                  <IconRail open={summaryShown} side="right" /> Laburpena
                 </button>
                 <button className="mobile-menu-item" role="menuitem" onClick={() => { close(); toggleOutline(); }}>
                   <IconRail open={outlineShown} side="left" /> Aurkibidea
@@ -1510,19 +1567,13 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                     setHelpOpen(true);
                   }}
                 >
-                  <span className="menu-q" aria-hidden>
-                    ?
-                  </span>{' '}
-                  Laguntza <kbd>?</kbd>
+                  <IconHelp size={16} /> Laguntza <kbd>?</kbd>
                 </button>
               </div>
             )}
           </Popover>
-          <button className={`tool mobile-tool-hidden${(panelOpen || infoOpen) && !notesOpen ? ' is-on' : ''}`} aria-label="Laburpena" onClick={togglePanel} data-tip="Laburpena, datak eta egiturak erakutsi / ezkutatu · ]" data-tip-pos="bottom" aria-expanded={(panelOpen || infoOpen) && !notesOpen}>
-            <IconRail open={(infoOpen || panelOpen) && !notesOpen} side="right" /> <span>Laburpena</span>
-          </button>
-          <button className={`tool mobile-notes${notesOpen ? ' is-on' : ''}`} aria-label="Apunteak" onClick={toggleNotes} aria-pressed={notesOpen} data-tip="Jatorrizko apunteak, simulazioarekin batera · N" data-tip-pos="bottom-end">
-            <IconNotes size={16} /> <span>Apunteak</span>
+          <button className="tool tool-icon tb-help mobile-tool-hidden" aria-label="Laguntza" onClick={() => setHelpOpen(true)} data-tip="Laguntza: botoi bakoitzak zer egiten duen, teklak eta koloreak · ?" data-tip-pos="bottom-end">
+            <IconHelp size={17} />
           </button>
         </div>
       </header>
@@ -1588,7 +1639,20 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               )}
             </div>
             <div className="stage-side">
-              <Locator plane={view.plane} week={week.week} day={day} level={view.locator?.level} orientation={view.orientation} note={view.locator?.note} view={view.description} viewKey={`${stage.id}/${view.id}`} hold={helpOpen || questionsOpen || glossaryOpen || !!bridge} />
+              {/* Its first-time explanation waits while anything else holds the eye (playback and its preview,
+                  the find quiz, the day card, Kimu, a window), so two cards never cover the specimen at once. */}
+              <Locator
+                plane={view.plane}
+                week={week.week}
+                day={day}
+                level={view.locator?.level}
+                orientation={view.orientation}
+                note={view.locator?.note}
+                view={view.description}
+                viewKey={`${stage.id}/${view.id}`}
+                hold={(drawer && panelOpen) || helpOpen || questionsOpen || glossaryOpen || !!bridge || playing || intro !== null || !!find || nowOpen || kimuOpen || !!formation}
+                onOpen={() => setNowOpen(false)}
+              />
               {stage.views.length > 1 && <ViewSwitch views={stage.views} current={view.id} onChoose={chooseView} />}
             </div>
           </div>
@@ -1642,12 +1706,13 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                     </p>
                   )}
                   {focusMode && (
-                    <div className="focus-exit">
-                      <button className={`btn small ghost${panelOpen ? ' is-on' : ''}`} onClick={togglePanel} data-tip="Laburpena eta datak erakutsi · ]" data-tip-pos="bottom">
-                        Laburpena <kbd>]</kbd>
+                    // Under the scene tools, in the strip the scenes keep clear of names (a bottom corner covered labels).
+                    <div className="focus-exit" role="group" aria-label="Foku modua">
+                      <button className={`icon-btn${panelOpen ? ' is-on' : ''}`} onClick={togglePanel} aria-label="Laburpena" aria-pressed={panelOpen} data-tip={panelOpen ? 'Laburpena ezkutatu · ]' : 'Laburpena eta datak erakutsi · ]'} data-tip-pos="left">
+                        <IconRail open={panelOpen} side="right" />
                       </button>
-                      <button className="btn small ghost" onClick={() => setFocusMode(false)} data-tip="Aurkibidea eta tresnak berriro erakutsi" data-tip-pos="bottom">
-                        Irten <kbd>F</kbd>
+                      <button className="icon-btn" onClick={() => setFocusMode(false)} aria-label="Irten foku modutik" data-tip="Irten: aurkibidea eta tresnak berriro · F" data-tip-pos="left">
+                        <IconShrink />
                       </button>
                     </div>
                   )}
@@ -1659,11 +1724,18 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                     <div className="pv-card" key={`intro-${stage.id}`}>
                       <div className="pv-top">
                         <span className="pv-kicker">Aurrebista · {stage.day}</span>
-                        {intro < 1 && (
-                          <button className="btn small ghost" onClick={endIntro}>
-                            Saltatu <span aria-hidden>→</span>
-                          </button>
-                        )}
+                        <span className="pv-actions">
+                          {!focusMode && (
+                            <button className="icon-btn pv-fs" onClick={enterFull} aria-label="Pantaila osoa" data-tip="Pantaila osoan ikusi (azalpena amaitzean berez irtengo da)" data-tip-pos="bottom-end">
+                              <IconExpand size={15} />
+                            </button>
+                          )}
+                          {intro < 1 && (
+                            <button className="btn small ghost" onClick={endIntro}>
+                              Saltatu <span aria-hidden>→</span>
+                            </button>
+                          )}
+                        </span>
                       </div>
                       {notesAt && (
                         <p className="pv-prev pv-notes">
@@ -1783,7 +1855,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 
           {formation && (
             <section className="formation-card" aria-label="Kimuren eraketa" data-formation={formation.structure} data-complete={pos.t >= formation.end}>
-              <div>
+              <span className="formation-face" aria-hidden>
+                <KimuFace size={30} mood="happy" still />
+              </span>
+              <div className="formation-text">
                 <p className="kicker">Kimu · {pos.t >= formation.end ? 'Amaituta — zure erritmoan jarraitu' : playing ? 'Eraketa ikusten' : 'Pausatuta'}</p>
                 <strong>{nameOf(formation.structure)}</strong>
                 <p>{stage.beats[formation.beat].idea ?? stage.beats[formation.beat].text}</p>
@@ -1793,7 +1868,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                   place({ i: pos.i, t: formation.start });
                   setFormation(formation); setSelected(null); setPlaying(true);
                 }}>Errepikatu</button>
-                <button className="btn small" onClick={() => {
+                <button className={`btn small${pos.t >= formation.end ? ' primary' : ''}`} onClick={() => {
                   setFormation(null); setSelected(null); setPlaying(false);
                   endIntro(); clearTour();
                   if (activeBeat + 1 < stage.beats.length) gotoBeat(activeBeat + 1);
@@ -1834,6 +1909,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             onVoice={(v) => { transport.cancel(); setVoiceStarted(true); setPref('voice', v); if (v) { setPlayMode('gidatua'); setPref('panel', false); setPanelOpen(false); setSelected(null); endIntro(); place({ i: pos.i, t: beat.at + .000001 }); setPlaying(true); } }}
             onContinue={continueHold}
             onNextStage={continueNext}
+            finish={finish}
             onPick={onSelect}
             onTermHover={(id) => setHovered(id && inScene(id) ? id : null)}
             noTerms={!!find}

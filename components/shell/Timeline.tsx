@@ -77,7 +77,7 @@ export function Timeline() {
 
   return (
     <div className="landing">
-      <LandNav />
+      <LandNav current="kronologia" />
       <section className="ln-hero kr-hero">
         <p className="eyebrow">Kronologia</p>
         <h1>Zer dago orain?</h1>
@@ -109,16 +109,16 @@ export function Timeline() {
             </p>
           </div>
           <div className="kr-steps" role="group" aria-label="Eguna aldatu">
-            <button className="btn small ghost" onClick={() => nudge(-7)} aria-label="Aste bat atzera">
+            <button className="btn small ghost" onClick={() => nudge(-7)} aria-label="Aste bat atzera" data-tip="Aste bat atzera" data-tip-pos="top">
               −7
             </button>
-            <button className="btn small ghost" onClick={() => nudge(-1)} aria-label="Egun bat atzera">
+            <button className="btn small ghost" onClick={() => nudge(-1)} aria-label="Egun bat atzera" data-tip="Egun bat atzera" data-tip-pos="top">
               −1
             </button>
-            <button className="btn small ghost" onClick={() => nudge(1)} aria-label="Egun bat aurrera">
+            <button className="btn small ghost" onClick={() => nudge(1)} aria-label="Egun bat aurrera" data-tip="Egun bat aurrera" data-tip-pos="top">
               +1
             </button>
-            <button className="btn small ghost" onClick={() => nudge(7)} aria-label="Aste bat aurrera">
+            <button className="btn small ghost" onClick={() => nudge(7)} aria-label="Aste bat aurrera" data-tip="Aste bat aurrera" data-tip-pos="top">
               +7
             </button>
           </div>

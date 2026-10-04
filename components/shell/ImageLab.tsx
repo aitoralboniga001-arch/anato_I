@@ -532,7 +532,7 @@ export function ImageLab() {
 
   return (
     <div className="landing">
-      <LandNav />
+      <LandNav current="irudiak" />
       <section className="ln-hero lab-hero">
         <p className="eyebrow">Irudi-laborategia</p>
         <h1>Irudiak irakurtzen</h1>
@@ -581,8 +581,8 @@ export function ImageLab() {
                   </button>
                 ))}
               </div>
-              <span className="lab-score" title="Saio honetan">
-                {score.ok}/{score.n}
+              <span className="lab-score" title="Saio honetan zuzen erantzundakoak / erantzundakoak">
+                {score.ok}/{score.n} <small>zuzen</small>
               </span>
             </div>
 

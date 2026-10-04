@@ -48,6 +48,8 @@ interface PlayerProps {
   onVoice: (v: boolean) => void;
   onContinue: () => void;
   onNextStage: () => void;
+  /** After the topic's last stage: where the study goes next (the next topic, or the questions). */
+  finish?: { label: string; tip: string; onClick: () => void };
   onPick: (id: string) => void;
   /** Guided micro-question shown in place of the caption at the end of a step. */
   ask?: ReactNode;
@@ -347,6 +349,8 @@ export function Player(p: PlayerProps) {
             />
           ))}
         </div>
+        {/* Step pager: one Next key whose state says what happens next (read and go on, the countdown,
+            the next stage), always in the same place and size, so the caption never reflows. */}
         <div className="cap-nav">
           <span className="cap-nav-l">
             Urratsa{' '}
@@ -355,32 +359,45 @@ export function Player(p: PlayerProps) {
             </b>
             <i>/{pad(n)}</i>
           </span>
-          <button className="icon-btn" onClick={() => p.onBeat(-1)} aria-label="Aurreko urratsa" data-tip="Aurreko urratsa · ←" data-tip-pos="top">
-            <IconPrev />
-          </button>
-          {p.waiting && !p.ask && (
-            p.guided ? (
-              <button className="btn cap-wait cap-wait-guided" onClick={p.onContinue} title="Sakatu hurrengo urratsa ikusteko">
+          <div className="cap-nav-row">
+            <button className="icon-btn" onClick={() => p.onBeat(-1)} aria-label="Aurreko urratsa" data-tip="Aurreko urratsa · ←" data-tip-pos="top">
+              <IconPrev />
+            </button>
+            {atEnd && p.nextTitle ? (
+              <button className="cap-next is-stage" onClick={p.onNextStage} data-tip={`Hurrengo etapa: ${p.nextTitle} · Shift + →`} data-tip-pos="top-end">
+                <span>Hurrengo etapa</span>
+                <IconNext size={15} />
+              </button>
+            ) : atEnd && p.finish ? (
+              <button className="cap-next is-stage" onClick={p.finish.onClick} data-tip={p.finish.tip} data-tip-pos="top-end">
+                <span>{p.finish.label}</span>
+                <IconNext size={15} />
+              </button>
+            ) : p.waiting && !p.ask && p.guided ? (
+              <button className="cap-next is-wait" onClick={p.onContinue} aria-label="Jarraitu: hurrengo urratsa" data-tip="Urratsa ikusita: sakatu hurrengora pasatzeko · →" data-tip-pos="top-end">
                 <span className="cap-wait-dot" aria-hidden />
-                <span><b>Jarraitu</b><small>Sakatu hurrengo urratsa ikusteko</small></span>
-                <span aria-hidden>→</span>
+                <span>Jarraitu</span>
+                <IconNext size={15} />
+              </button>
+            ) : p.waiting && !p.ask ? (
+              <button
+                className="cap-next is-timed"
+                onClick={p.onContinue}
+                aria-label={`Hurrengo urratsa (${p.waitSeconds ?? 1} s barru)`}
+                data-tip="Berez aurreratzen da; sakatu orain aurreratzeko · →"
+                data-tip-pos="top-end"
+              >
+                <span>Hurrengoa</span>
+                <em>{p.waitSeconds ?? 1} s</em>
+                <IconNext size={15} />
               </button>
             ) : (
-              <div className="cap-wait-timed">
-                <span>Hurrengo pausoa {p.waitSeconds ?? 1} s barru</span>
-                <button className="btn small ghost" onClick={p.onContinue} title="Hurrengo pausora berehala aurreratu">Aurreratu orain <span aria-hidden>→</span></button>
-              </div>
-            )
-          )}
-          {atEnd && p.nextTitle ? (
-            <button className="btn btn-light" onClick={p.onNextStage} title={p.nextTitle}>
-              Hurrengo etapa <span aria-hidden>→</span>
-            </button>
-          ) : (
-            <button className="icon-btn" onClick={() => p.onBeat(1)} aria-label="Hurrengo urratsa" data-tip="Hurrengo urratsa · →" data-tip-pos="top">
-              <IconNext />
-            </button>
-          )}
+              <button className="cap-next" onClick={() => p.onBeat(1)} disabled={atEnd && !p.nextTitle} aria-label="Hurrengo urratsa" data-tip="Hurrengo urratsa · →" data-tip-pos="top-end">
+                <span>Hurrengoa</span>
+                <IconNext size={15} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -462,7 +479,8 @@ export function Player(p: PlayerProps) {
 
         {!p.voice && p.voiceConfigured !== false && (
           <button className="voice-cta tp-voice" onClick={() => p.onVoice(true)} aria-label="Ahotsarekin ikasi" data-tip="Urrats bakoitza ahoz azaldu, irudiari begira" data-tip-pos="top">
-            <IconVoice size={15} /> <span>Ahotsarekin ikasi</span>
+            <IconVoice size={15} /> <span className="tp-voice-l">Ahotsarekin ikasi</span>
+            <span className="tp-voice-s" aria-hidden>Ahotsa</span>
           </button>
         )}
 
@@ -536,14 +554,15 @@ export function Player(p: PlayerProps) {
           </button>
           <button
             className="btn mobile-study-next"
-            disabled={!!p.ask || (atEnd && !p.nextTitle)}
+            disabled={!!p.ask || (atEnd && !p.nextTitle && !p.finish)}
             onClick={() => {
               if (atEnd && p.nextTitle) p.onNextStage();
+              else if (atEnd && p.finish) p.finish.onClick();
               else if (p.guided && p.waiting) p.onContinue();
               else p.onBeat(1);
             }}
           >
-            {atEnd && p.nextTitle ? 'Hurrengo etapa' : 'Jarraitu'} <IconNext size={15} />
+            {atEnd && p.nextTitle ? 'Hurrengo etapa' : atEnd && p.finish ? p.finish.label : 'Jarraitu'} <IconNext size={15} />
           </button>
         </div>
       </nav>

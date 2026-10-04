@@ -19,18 +19,22 @@ export function Wordmark({ size = 22 }: { size?: number }) {
   );
 }
 
-export function LandNav() {
+type Section = 'kronologia' | 'irudiak' | 'leinuak' | 'egiturak';
+
+/** The site bar; `current` marks the page you are on (aria-current), so the bar also says where you are. */
+export function LandNav({ current }: { current?: Section }) {
+  const here = (s: Section) => (s === current ? ('page' as const) : undefined);
   return (
     <header className={`land-nav ${atlasStyles.nav}`}>
       <Link href="/" aria-label="EnbrioAtlas — hasiera">
         <Wordmark />
       </Link>
       <nav>
-        <Link href="/kronologia">Kronologia</Link>
+        <Link href="/kronologia" aria-current={here('kronologia')}>Kronologia</Link>
         <Link href="/#gaiak">Gaiak</Link>
-        <Link href="/irudiak">Irudiak</Link>
-        <Link href="/leinuak">Leinuak</Link>
-        <Link href="/egiturak" className={atlasStyles.entry}>Egiturak</Link>
+        <Link href="/irudiak" aria-current={here('irudiak')}>Irudiak</Link>
+        <Link href="/leinuak" aria-current={here('leinuak')}>Leinuak</Link>
+        <Link href="/egiturak" className={atlasStyles.entry} aria-current={here('egiturak')}>Egiturak</Link>
         <Link href={`/astea/${firstReady.week}`} className="btn btn-light small">
           Ireki simulagailua
         </Link>

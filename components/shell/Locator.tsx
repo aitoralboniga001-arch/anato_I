@@ -48,6 +48,7 @@ export function Locator({
   note,
   view,
   hold,
+  onOpen,
 }: {
   plane: PlaneKind;
   week: number;
@@ -59,6 +60,8 @@ export function Locator({
   /** What this view shows, in the view's own words (it used to sit over the scene). */
   view?: string;
   hold?: boolean;
+  /** The student opened the card: other cards in the same place give way. */
+  onOpen?: () => void;
 }) {
   // 'auto': opened by itself the first time a plane is met; 'user': opened from the button.
   const [open, setOpen] = useState<false | 'auto' | 'user'>(false);
@@ -113,8 +116,12 @@ export function Locator({
       <button
         key={absorb ? `${viewKey}/${absorb}` : viewKey}
         className={`loc-btn${shown ? ' is-on' : ''}${absorb ? ' is-absorb' : ''}`}
-        onClick={() => setOpen(shown ? false : 'user')}
+        onClick={() => {
+          if (!shown) onOpen?.();
+          setOpen(shown ? false : 'user');
+        }}
         aria-expanded={shown}
+        aria-label={`Non nago? ${info.name}`}
         title={`Non nago? ${info.name} · ${SHAPE_TEXT[shape]}${view ? `
 ${view}` : ''}`}
       >
@@ -124,6 +131,10 @@ ${view}` : ''}`}
           <b>{info.name}</b>
         </span>
         <span className="loc-q" aria-hidden>
+          ?
+        </span>
+        {/* The thumbnail alone does not say it opens an explanation: a small "?" badge on its corner. */}
+        <span className="loc-badge" aria-hidden>
           ?
         </span>
       </button>
@@ -146,7 +157,7 @@ ${view}` : ''}`}
                 Planoak eta ardatzak (1. gaia) →
               </Link>
               <button
-                className="btn small ghost"
+                className="btn small"
                 onClick={() => {
                   setOpen(false);
                   setAbsorb((n) => n + 1);

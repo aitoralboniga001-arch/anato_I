@@ -157,7 +157,8 @@ export function Outline(p: OutlineProps) {
           {groups.map(({ sec, items }) => (
             <li key={sec.n + sec.title} className={`rail-sec${items.includes(current) ? ' is-cur' : ''}${sec.depth ? ' is-sub' : ''}`}>
               <button className="rail-n" onClick={() => onStage(items[0])} title={sectionLabel(sec)}>
-                {sec.n}
+                {/* A range ("3.2–3.3") breaks after its dash, as in the open list, instead of spilling out of the rail. */}
+                {sec.n.replace('–', '–​')}
               </button>
               <span className="rail-dots">
                 {items.map((i) => {

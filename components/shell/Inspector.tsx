@@ -144,14 +144,15 @@ export function Inspector({ id, week, onClose, onSelect, onGoto, onReplay, onPra
         </button>
       </div>
       <div className="info-scroll">
+        {/* The colour key sits on the category line, so the name lines up with the text under it. */}
         <div className="insp-head">
-          <span className="insp-swatch" style={{ background: color }} />
-          <div>
-            <p className="kicker">{categoryLabel[s.category]}</p>
-            <h2 className="insp-name">{s.name}</h2>
-            {s.es && <p className="insp-es">{s.es}</p>}
-            {s.aka?.length ? <p className="insp-alt">Beste izenak: {s.aka.join(' · ')}</p> : null}
-          </div>
+          <p className="kicker insp-cat">
+            <span className="insp-swatch" style={{ background: color }} />
+            {categoryLabel[s.category]}
+          </p>
+          <h2 className="insp-name">{s.name}</h2>
+          {s.es && <p className="insp-es">{s.es}</p>}
+          {s.aka?.length ? <p className="insp-alt">Beste izenak: {s.aka.join(' · ')}</p> : null}
         </div>
 
         {recall && (

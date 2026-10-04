@@ -295,7 +295,7 @@ export function StructureAtlas() {
 
   return (
     <div className="landing">
-      <LandNav />
+      <LandNav current="egiturak" />
       <main className={styles.main}>
         <header className={styles.hero}>
           <p className="eyebrow">1.–6. gaiak · Egituren atlasa</p>

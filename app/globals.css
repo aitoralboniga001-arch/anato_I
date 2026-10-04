@@ -7773,20 +7773,6 @@ button.lm-chip:hover {
   color: var(--text-4);
 }
 
-.menu-q {
-  display: inline-grid;
-  place-items: center;
-  flex: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 1.6px solid var(--text-3);
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--text-3);
-}
-
 /* Top bar: brand, topics, the two ways to practise, one menu */
 .topbar {
   gap: 22px;
@@ -11114,4 +11100,801 @@ a.ln-chip:focus-visible {
   max-width: 320px;
   white-space: normal;
   line-height: 1.4;
+}
+
+/* ————————————————————————————————————————————————————————————————
+   One system — the study screen's controls and floating cards share one recipe, so nothing reads
+   as an add-on: one card surface, edge, radius and shadow; buttons by role (primary = light,
+   secondary = surface, dismiss = ghost); the card's edge says what kind it is (amber = orientation,
+   focus amber = the find quiz, neutral = everything else). Only one card covers the specimen at a
+   time: the top bar and its menus sit above the workspace, windows above both.
+   ———————————————————————————————————————————————————————————————— */
+
+:root {
+  --card-bg: var(--glass-strong);
+  --card-radius: 14px;
+  --card-shadow: var(--shadow-3);
+}
+
+/* Stacking: everything drawn in the workspace (coachmarks, the day card) stays under the top bar's
+   menus; modals and Kimu (fixed, higher) stay above both. */
+.workspace {
+  isolation: isolate;
+}
+
+/* ——— Floating cards: one surface ——— */
+.pv-card,
+.viewport .tour,
+.fs-offer,
+.find-bar,
+.loc-card,
+.viewport .bridge,
+.now-card,
+.pop-panel {
+  border-radius: var(--card-radius);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: none;
+}
+
+.pv-card,
+.viewport .tour,
+.fs-offer,
+.now-card,
+.pop-panel {
+  border-color: var(--line-2);
+}
+
+.pv-kicker,
+.tour-kicker {
+  font: var(--eyebrow);
+  letter-spacing: var(--eyebrow-track);
+}
+
+/* The preview carries the full-screen offer in its header (no second card over the specimen). */
+.pv-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: -6px;
+}
+
+.pv-fs {
+  width: 30px;
+  height: 30px;
+  color: var(--text-3);
+}
+
+/* ——— Top bar: ask · test yourself · what the right column shows · more · help ——— */
+.tb-sep {
+  flex: none;
+  width: 1px;
+  height: 20px;
+  margin: 0 6px;
+  background: var(--line-2);
+}
+
+/* The right column's two views, as one switch drawn like the topic tabs. */
+.tb-panels {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.tb-panels > .tool {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 7px;
+  color: var(--text-2);
+}
+
+.tb-panels > .tool:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.tb-panels > .tool.is-on {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.tb-panels > .tool.is-on svg {
+  color: var(--signal);
+}
+
+.tb-tools .pop {
+  margin-left: 2px;
+}
+
+.tb-help {
+  color: var(--text-2);
+}
+
+.tb-help svg {
+  color: var(--text-3);
+}
+
+.tb-help:hover svg {
+  color: var(--text);
+}
+
+/* Kimu's long name gives way to its short one before any other label is dropped. */
+.kimu-tool .tb-s {
+  display: none;
+}
+
+@media (min-width: 821px) and (max-width: 1180px) {
+  .topbar {
+    gap: 14px;
+  }
+  .topbar .tb-weeks-l {
+    display: none;
+  }
+  .tool-main.kimu-tool span.tb-l {
+    display: none;
+  }
+  .tool-main.kimu-tool span.tb-s {
+    display: inline;
+  }
+  /* Tablets have no hover tooltips: the test tools and the menu keep their names. */
+  .tb-tools .tool-main span,
+  .tb-tools .pop .tool span {
+    display: inline;
+  }
+  .tool-main {
+    padding: 0 12px 0 10px;
+  }
+}
+
+/* Narrower still: the column switch keeps its icons (its names are in the tooltips and in Help). */
+@media (min-width: 821px) and (max-width: 1100px) {
+  .tb-panels > .tool {
+    width: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+  .tb-panels > .tool span {
+    display: none;
+  }
+}
+
+@media (min-width: 821px) and (max-width: 960px) {
+  .tb-tools .pop .tool span {
+    display: none;
+  }
+  .tb-sep {
+    margin: 0 2px;
+  }
+}
+
+/* Portrait tablets: Kimu keeps only its face (it is the one control that is recognisable without words). */
+@media (min-width: 821px) and (max-width: 900px) {
+  .topbar {
+    gap: 10px;
+  }
+  .tb-sep {
+    display: none;
+  }
+  .tool-main.kimu-tool span.tb-s {
+    display: none;
+  }
+  .tool-main.kimu-tool {
+    padding: 0 8px;
+  }
+}
+
+/* Phone layout: the switch dissolves into the bar's full-width buttons (Apunteak stays, Laburpena hides). */
+@media (max-width: 820px) {
+  .tb-panels {
+    display: contents;
+  }
+  .tb-panels > .mobile-notes {
+    order: 1;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+/* ——— Step pager: a fixed footprint; the Next key changes state, never size ——— */
+@media (min-width: 821px) {
+  .dock .cap-nav {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+  }
+}
+
+.cap-nav-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cap-nav-row > .icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+
+.cap-nav-row > .icon-btn:hover {
+  background: var(--surface-3);
+  border-color: var(--line-3);
+  color: var(--text);
+}
+
+.cap-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 150px;
+  height: 34px;
+  padding: 0 11px 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-2);
+  background: var(--surface-2);
+  color: var(--text);
+  font: 600 13px/1 var(--font-ui);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.2s;
+}
+
+.cap-next svg {
+  flex: none;
+  color: var(--text-3);
+}
+
+.cap-next:hover:not(:disabled) {
+  background: var(--surface-3);
+  border-color: var(--line-3);
+}
+
+.cap-next:hover:not(:disabled) svg {
+  color: var(--text);
+}
+
+/* Guided: the step has been seen — the key lights up and asks to go on. */
+.cap-next.is-wait {
+  border-color: var(--signal);
+  background: var(--signal);
+  color: #170a05;
+  box-shadow: 0 10px 26px -12px rgba(255, 106, 61, 0.85);
+  animation: next-ready 0.45s var(--ease) both;
+}
+
+.cap-next.is-wait:hover:not(:disabled) {
+  border-color: #ff805b;
+  background: #ff805b;
+}
+
+.cap-next.is-wait svg,
+.cap-next.is-wait:hover:not(:disabled) svg {
+  color: currentColor;
+}
+
+.cap-next.is-wait .cap-wait-dot {
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+}
+
+@keyframes next-ready {
+  from {
+    box-shadow: 0 0 0 0 rgba(255, 106, 61, 0.55);
+  }
+}
+
+/* Normal mode: the step moves on by itself; the key shows how soon and goes now on click. */
+.cap-next.is-timed em {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.07);
+  font: 600 11px/1.2 var(--font-mono);
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+/* End of the stage: the next stage is the one primary action. */
+.cap-next.is-stage {
+  border-color: var(--text);
+  background: var(--text);
+  color: #0b0b0c;
+}
+
+.cap-next.is-stage:hover:not(:disabled) {
+  border-color: #fff;
+  background: #fff;
+}
+
+.cap-next.is-stage svg,
+.cap-next.is-stage:hover:not(:disabled) svg {
+  color: currentColor;
+}
+
+:where(.cap-next):active:not(:disabled) {
+  scale: 0.97;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cap-next.is-wait {
+    animation: none;
+  }
+  :where(.cap-next):active:not(:disabled) {
+    scale: none;
+  }
+}
+
+/* Voice key: on narrow docks it keeps a short name instead of a bare speaker (which read as "mute"). */
+.tp-voice-s {
+  display: none;
+}
+
+@container dock (max-width: 1000px) {
+  .transport > .tp-voice {
+    width: auto;
+    padding: 0 12px 0 10px;
+  }
+  .transport > .tp-voice > span.tp-voice-s {
+    display: inline;
+  }
+}
+
+/* ——— "Non nago?": the thumbnail says it opens an explanation; its card stays on screen ——— */
+.loc-btn {
+  position: relative;
+}
+
+.loc-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 1px solid var(--plane-edge);
+  background: var(--surface-3);
+  box-shadow: 0 0 0 2px var(--bg);
+  color: var(--plane);
+  font: 700 10.5px/1 var(--font-ui);
+  pointer-events: none;
+}
+
+.loc-btn.is-on .loc-badge {
+  display: none;
+}
+
+@media (max-width: 820px) {
+  .loc-card {
+    left: 0;
+    right: auto;
+  }
+}
+
+/* ——— Help: the welcome's list keeps the sheet's margins; tabs; a map of every control ——— */
+.help-welcome .help-steps {
+  padding: 18px 24px 20px;
+  overflow-y: auto;
+}
+
+.help-tabs {
+  flex: none;
+  padding: 0 24px;
+}
+
+.help-grid.is-one {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.help-controls {
+  columns: 2;
+  column-gap: 36px;
+  padding: 20px 24px 8px;
+  overflow-y: auto;
+}
+
+.help-controls section {
+  break-inside: avoid;
+  margin-bottom: 20px;
+}
+
+.help-controls h3 {
+  margin: 0 0 10px;
+  font: var(--eyebrow);
+  letter-spacing: var(--eyebrow-track);
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+.help-controls dl {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.help-controls dt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.help-controls dt b {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.help-controls dt kbd {
+  margin-left: auto;
+}
+
+.help-controls dd {
+  margin: 3px 0 0 38px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.hc-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--line-2);
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+
+.hc-icon:has(.hc-next) {
+  margin-right: -2px;
+  padding: 0 7px;
+}
+
+.hc-pips {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.hc-pips i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  border: 1px solid var(--line-3);
+}
+
+.hc-pips i.is-on {
+  width: 10px;
+  border-radius: 3px;
+  border-color: var(--signal);
+  background: var(--signal);
+}
+
+.hc-q {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--plane-edge);
+  color: var(--plane);
+  font: 700 10px/1 var(--font-ui);
+}
+
+.hc-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font: 600 11px/1 var(--font-ui);
+  color: var(--text);
+}
+
+@media (max-width: 820px) {
+  .help-controls {
+    columns: 1;
+  }
+}
+
+/* ——— Folded index rail, tidied: every heading is the same width, its stages sit on a short track that
+   fills as they are visited, and the current heading gets the open list's soft highlight (no border). ——— */
+.outline.is-rail .rail {
+  gap: 6px;
+  padding: 2px 0 16px;
+}
+
+.outline.is-rail .rail-sec {
+  width: 40px;
+  gap: 1px;
+  padding: 6px 0 5px;
+  border-radius: 12px;
+}
+
+.outline.is-rail .rail-sec.is-cur {
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.outline.is-rail .rail-sec .rail-n {
+  min-width: 0;
+  width: 36px;
+  height: auto;
+  min-height: 20px;
+  padding: 2px 0;
+  border-radius: 6px;
+  font: 500 11px / 1.15 var(--font-mono);
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: var(--text-3);
+}
+
+.outline.is-rail .rail-sec.is-sub .rail-n {
+  font-size: 10.5px;
+  color: var(--text-4);
+}
+
+.outline.is-rail .rail-sec.is-cur .rail-n {
+  font-weight: 600;
+  color: var(--signal);
+}
+
+.outline.is-rail .rail-dot {
+  position: relative;
+  width: 36px;
+  height: 18px;
+}
+
+.outline.is-rail .rail-dot::before {
+  width: 7px;
+  height: 7px;
+}
+
+.outline.is-rail .rail-dot.is-cur::before {
+  width: 8px;
+  height: 8px;
+}
+
+/* The track between two stages of one heading; it lights once the stage above is done. */
+.outline.is-rail .rail-dot + .rail-dot::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  width: 1.5px;
+  height: 6px;
+  margin-left: -0.75px;
+  border-radius: 1px;
+  background: var(--line-3);
+}
+
+.outline.is-rail .rail-dot.is-done + .rail-dot::after {
+  background: var(--text-4);
+}
+
+/* "Zer dago orain?" is taller than the stage on most screens: its footer stays pinned at the bottom
+   (the full-chronology link is always in reach) and the groups fade under it, so the card reads as
+   scrollable instead of cut mid-chip. */
+.now-card footer {
+  position: sticky;
+  z-index: 1;
+  bottom: -14px;
+  margin: 22px -16px -14px;
+  padding: 10px 16px 12px;
+  border-top: 1px solid var(--line);
+  background: var(--card-bg);
+}
+
+.now-card footer::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 22px;
+  margin-bottom: 1px;
+  background: linear-gradient(to bottom, transparent, var(--card-bg));
+  pointer-events: none;
+}
+
+/* Kimu's formation replay: a card of the same family as the viewport and the dock (not a flat strip
+   between them), signed with Kimu's face; once the replay ends, «Jarraitu» is the obvious next step. */
+.formation-card {
+  gap: var(--space-4);
+  padding: 12px 14px 12px 16px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(27, 27, 31, 0.9), var(--surface));
+  box-shadow: 0 18px 44px -26px rgba(0, 0, 0, 0.9);
+}
+
+.formation-face {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+
+.formation-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.formation-card .kicker {
+  font: var(--eyebrow);
+  letter-spacing: var(--eyebrow-track);
+  color: var(--text-3);
+}
+
+.formation-card[data-complete="true"] .kicker {
+  color: var(--signal);
+}
+
+@media (max-width: 900px) {
+  .formation-face {
+    display: none;
+  }
+}
+
+/* Focus mode: «Laburpena» and «Irten» are a third group of the scene's tool column, under the zoom
+   group, in the strip the scenes keep clear of names (in the bottom-right corner they covered labels).
+   They stay fully lit: this is the way back out. */
+@media (min-width: 821px) {
+  .app.is-focus .viewport .focus-exit {
+    top: 198px;
+    right: 10px;
+    bottom: auto;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 12px;
+    background: var(--glass);
+    border: 1px solid var(--edge);
+    box-shadow: var(--shadow-2);
+  }
+  .app.is-focus .viewport:has(.zoom-level) .focus-exit {
+    top: 230px;
+  }
+  .app.is-focus .viewport .focus-exit .icon-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    color: var(--text-2);
+  }
+  .app.is-focus .viewport .focus-exit .icon-btn:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.07);
+  }
+  .app.is-focus .viewport .focus-exit .icon-btn.is-on {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Site bar: the page you are on is marked (bright, with a short signal underline), as the simulator's
+   topic tabs are. */
+.land-nav nav a[aria-current="page"] {
+  position: relative;
+  color: var(--text);
+}
+
+.land-nav nav a[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -21px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--signal);
+}
+
+/* Image lab: the exercise kind and the topic are two separate choices (a hairline between them), and the
+   session score says what it counts. */
+.lab-controls .qz-kinds + .qz-kinds {
+  padding-left: 14px;
+  border-left: 1px solid var(--line-2);
+}
+
+.lab-score small {
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  color: var(--text-4);
+}
+
+/* One control shape: the 34px controls (top bar, step pager, transport) share the same height and a
+   10px corner, so a row of them reads as one set. */
+@media (min-width: 821px) {
+  .tb-tools > .pop > .tool {
+    height: 34px;
+    border-radius: 10px;
+  }
+}
+
+.cap-nav-row > .icon-btn,
+.cap-next {
+  border-radius: 10px;
+}
+
+.dock .tp-stage {
+  height: 34px;
+  border-radius: 10px;
+}
+
+/* Structure card heading: the colour key leads the category line; the name is flush with the text. */
+.insp-head {
+  display: block;
+  padding-top: 8px;
+}
+
+.insp-cat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.insp-head .insp-swatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  margin: 0;
+  border-radius: 3px;
+}
+
+/* Chronology: the day steps are one segmented control (as the simulator's switches), not loose text. */
+.kr-steps {
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.kr-steps .btn {
+  min-width: 46px;
+  height: 30px;
+  border-radius: 7px;
+  color: var(--text-2);
+}
+
+.kr-steps .btn:hover {
+  color: var(--text);
+  background: var(--surface-3);
+}
+
+.kr-steps .btn:nth-child(2) {
+  margin-right: 5px;
+}
+
+.kr-steps .btn:nth-child(3) {
+  margin-left: 5px;
+}
+
+/* Question topics, one-line tiles (laptop heights): the "to review" count rides the tile's corner, so
+   number, bar and score fit even in the narrowest tile (inline, "0/106" ran out of it). */
+@media (max-height: 860px) {
+  .qz-topic {
+    position: relative;
+  }
+  .qz-topic-due {
+    position: absolute;
+    top: -7px;
+    right: -5px;
+    border: 1px solid rgba(255, 106, 61, 0.4);
+    background: linear-gradient(var(--signal-soft), var(--signal-soft)), var(--surface-2);
+  }
 }

@@ -147,7 +147,7 @@ export function ViewBridge({ from, to, onClose, autoClose = true, small = false,
         )}
         <div className="bridge-foot">
           <span className="bridge-timer" aria-hidden />
-          <button className="btn small primary" onClick={onClose}>
+          <button className="btn small" onClick={onClose}>
             Ulertuta
           </button>
         </div>
