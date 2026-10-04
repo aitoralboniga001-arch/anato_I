@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Label, Note, Part, lerp, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { C, Label, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { CX, ConceptusSection, U_INT, U_PAR, W, Y0, conceptusAnchors, mesoTiming } from './conceptus';
 
 /**
@@ -18,7 +18,7 @@ export function MesoSplitSection({ t }: SceneProps) {
   const m = mesoTiming(t);
   const a = conceptusAnchors(m);
   const extraOld = 1 - Math.min(1, Math.max(0, (t - 0.5) / 0.04));
-  const extraNew = Math.min(1, Math.max(0, (t - 0.53) / 0.05));
+  const extraNew = Math.min(1, Math.max(0, (t - 0.54) / 0.04));
   const cav = Math.max(m.coel, Math.min(1, m.ves * 3 - 0.36));
   return (
     <g>
@@ -84,6 +84,9 @@ const Y_NODE = 384;
 const Y_STREAK = 432;
 const Y_CLOACA = 438;
 const Y_SEC = 292; // level of the transverse section shown underneath
+/** Top of the disc: the fixed point when the disc steps back for the section (steps 6–8). */
+const DY = 112;
+const f2 = (v: number) => v.toFixed(1);
 /** Scale of the dorsal view relative to the section, so the zones line up. */
 const KD = rimAt(Y_SEC) / W;
 const XP: [number, number] = [U_PAR[0] * KD, U_PAR[1] * KD];
@@ -127,9 +130,17 @@ export function MesoSplitDorsal({ t }: SceneProps) {
   const dash = lerp(0.1, 6, ves) + 26 * coel;
   const gap = lerp(15, 9, ves) * (1 - coel);
   const wC = lerp(4, 8, ves) + 5 * coel;
-  const insetY = 538;
-  const zs = 0.7;
-  const inset = `translate(${DD.cx} ${insetY}) scale(${zs}) translate(${-CX} ${-(Y0 + 40)})`;
+  // Steps 6–8 (the two layers, then the intermediate strip) are about the section: the disc steps back
+  // and up, and the section under it grows until its layers are big enough to read.
+  const grow = seg(t, 0.6, 0.66);
+  const ks = lerp(1, 0.76, grow);
+  const D = (x: number, y: number): Pt => [DD.cx + (x - DD.cx) * ks, DY + (y - DY) * ks];
+  const discT = `translate(${DD.cx} ${DY}) scale(${ks.toFixed(4)}) translate(${-DD.cx} ${-DY})`;
+  const box = { x: lerp(258, 200, grow), y: lerp(478, 384, grow), w: lerp(484, 600, grow), h: lerp(118, 214, grow) };
+  const insetY = box.y + box.h / 2;
+  const zs = lerp(0.7, 1.24, grow);
+  const inset = `translate(${DD.cx} ${insetY.toFixed(2)}) scale(${zs.toFixed(4)}) translate(${-CX} ${-(Y0 + 40)})`;
+  const clipId = `w4b-inset-${Math.round(grow * 1000)}`;
   const sheetId = t < 0.24 ? 'mesodermo-intraenbrionarioa' : 'alboko-mesodermoa';
   const at = (x: number, y: number): Pt => [DD.cx + (x - CX) * zs, insetY + (y - (Y0 + 40)) * zs];
   return (
@@ -147,11 +158,12 @@ export function MesoSplitDorsal({ t }: SceneProps) {
         <clipPath id="w4b-disc">
           <path d={DISC_D} />
         </clipPath>
-        <clipPath id="w4b-inset">
-          <rect x={258} y={478} width={484} height={118} rx={12} />
+        <clipPath id={clipId}>
+          <rect x={box.x} y={box.y} width={box.w} height={box.h} rx={12} />
         </clipPath>
       </defs>
 
+      <g transform={discT}>
       <path d={DISC_D} fill="#141826" />
       <g clipPath="url(#w4b-disc)">
         {/* Whole sheet (later the lateral mesoderm) — the axis and the stripes are cut out so lighting one lights only it. */}
@@ -200,39 +212,54 @@ export function MesoSplitDorsal({ t }: SceneProps) {
       </g>
       <path d={DISC_D} fill="none" stroke="#5b8def" strokeOpacity={0.6} strokeWidth={2} />
       <path d={`M${DD.cx - rimAt(Y_SEC) - 14},${Y_SEC}H${DD.cx - rimAt(Y_SEC) - 2}M${DD.cx + rimAt(Y_SEC) + 2},${Y_SEC}H${DD.cx + rimAt(Y_SEC) + 14}`} stroke="rgba(232,238,252,0.7)" strokeWidth={2} strokeLinecap="round" />
+      </g>
       {/* Guides from the cut down to the section: the zones keep their width. */}
-      {[-1, 1].map((sd) => (
-        <path key={sd} d={`M${DD.cx + sd * (rimAt(Y_SEC) + 8)},${Y_SEC + 6}V476`} stroke="rgba(232,238,252,0.12)" strokeWidth={1} />
-      ))}
+      {[-1, 1].map((sd) => {
+        const [gx, gy] = D(DD.cx + sd * (rimAt(Y_SEC) + 8), Y_SEC + 6);
+        return <path key={sd} d={`M${f2(gx)},${f2(gy)}L${f2(DD.cx + sd * (box.w / 2 - 14))},${f2(box.y - 2)}`} stroke="rgba(232,238,252,0.12)" strokeWidth={1} />;
+      })}
 
       {/* The section at that level, at the same width as the disc there. */}
-      <rect x={258} y={478} width={484} height={118} rx={12} fill="#0b0b0e" stroke="rgba(232,238,252,0.14)" />
-      <g clipPath="url(#w4b-inset)">
+      <rect x={box.x} y={box.y} width={box.w} height={box.h} rx={12} fill="#0b0b0e" stroke="rgba(232,238,252,0.14)" />
+      <g clipPath={`url(#${clipId})`}>
         <g transform={inset}>
-          <ConceptusSection m={m} lite />
+          <ConceptusSection m={m} lite={grow < 0.5} />
         </g>
       </g>
 
       <Note x={500} y={110} tone="dim">
         Kraneala
       </Note>
-      <Note x={DD.cx + rimAt(Y_SEC) + 22} y={Y_SEC} align="start" tone="dim" size={11.5}>
+      <Note x={D(DD.cx + rimAt(Y_SEC) + 22, Y_SEC)[0]} y={D(DD.cx + rimAt(Y_SEC) + 22, Y_SEC)[1]} align="start" tone="dim" size={11.5}>
         Mozketaren maila ↓
       </Note>
-      <Note x={270} y={490} align="start" tone="dim" size={11}>
+      <Note x={box.x + 12} y={box.y + 12} align="start" tone="dim" size={lerp(11, 12, grow)}>
         Zeharkako mozketa
       </Note>
 
-      <Label id="mesodermo-paraxiala" x={190} y={190} ax={DD.cx - (XP[0] + XP[1]) / 2} ay={Math.min(232, parEnd - 8)} show={par} />
-      <Label id="bitarteko-mesodermoa" x={190} y={232} ax={DD.cx - (XI[0] + XI[1]) / 2} ay={Math.min(268, intEnd - 8)} show={inter} />
-      <Label id="mesodermo-intraenbrionarioa" x={318} y={336} ax={DD.cx - 96} ay={340} show={1 - lat} />
-      <Label id="alboko-mesodermoa" x={190} y={380} ax={DD.cx - 112} ay={360} show={lat} />
-      <Label id="notokorda" x={190} y={430} ax={DD.cx - 4} ay={366} />
-      <Label id="enbrioi-barruko-zeloma" x={810} y={250} ax={HORSE[12][0]} ay={HORSE[12][1]} show={Math.max(coel, Math.min(1, ves * 3 - 0.4))} />
-      <Label id="ektodermoa" x={810} y={466} ax={at(CX + 150, Y0 + 6)[0]} ay={at(CX + 150, Y0 + 6)[1]} small />
-      <Label id="endodermoa" x={810} y={578} ax={at(CX + 150, Y0 + 73)[0]} ay={at(CX + 150, Y0 + 73)[1]} small />
-      <Label id="paretako-orria" x={810} y={500} ax={at(CX + 200, Y0 + 19)[0]} ay={at(CX + 200, Y0 + 19)[1]} show={m.somato} small />
-      <Label id="errai-orria" x={810} y={540} ax={at(CX + 200, Y0 + 60)[0]} ay={at(CX + 200, Y0 + 60)[1]} show={m.splanchno} small />
+      {(() => {
+        const aPar = D(DD.cx - (XP[0] + XP[1]) / 2, Math.min(232, parEnd - 8));
+        const aInt = D(DD.cx - (XI[0] + XI[1]) / 2, Math.min(268, intEnd - 8));
+        const aSheet = D(DD.cx - 96, 340);
+        const aLat = D(DD.cx - 112, 360);
+        const aNoto = D(DD.cx - 4, 366);
+        const aCoel = D(HORSE[12][0], HORSE[12][1]);
+        const L = (id: string, x: number, y: number, a: Pt, show = 1, small = false) => <Label key={id} id={id} x={x} y={y} ax={a[0]} ay={a[1]} show={show} small={small} />;
+        return (
+          <>
+            {L('mesodermo-paraxiala', 190, 190, aPar, par)}
+            {L('bitarteko-mesodermoa', 190, 232, aInt, inter)}
+            {L('mesodermo-intraenbrionarioa', 318, 336, aSheet, 1 - lat)}
+            {L('alboko-mesodermoa', 190, lerp(380, 296, grow), aLat, lat)}
+            {L('notokorda', 190, lerp(430, 340, grow), aNoto)}
+            {L('enbrioi-barruko-zeloma', 810, lerp(330, 292, grow), aCoel, Math.max(coel, Math.min(1, ves * 3 - 0.4)))}
+            {L('ektodermoa', 810, lerp(466, 410, grow), at(CX + 150, Y0 + 6), 1, true)}
+            {L('paretako-orria', 810, lerp(500, 452, grow), at(CX + 200, Y0 + 19), m.somato, grow < 0.5)}
+            {L('errai-orria', 810, lerp(540, 506, grow), at(CX + 200, Y0 + 60), m.splanchno, grow < 0.5)}
+            {L('endodermoa', 810, lerp(578, 552, grow), at(CX + 150, Y0 + 73), 1, true)}
+          </>
+        );
+      })()}
     </g>
   );
 }

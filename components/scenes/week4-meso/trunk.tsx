@@ -205,7 +205,7 @@ export function trunkGeom(e: number) {
   const A1: Pt = [H[0] + hA * Math.cos(thH), H[1] + hA * Math.sin(thH)];
   const A2: Pt = [lerp(228, 330, e), -YA];
   const A3: Pt = [0, -YA];
-  for (let i = 1; i <= 48; i++) sp.push(bez(H, A1, A2, A3, i / 48));
+  for (let i = 1; i <= 96; i++) sp.push(bez(H, A1, A2, A3, i / 96));
   const nS = normalsOf(sp, 1);
   const S: Spine[] = sp.map((p, i) => {
     const k = i <= iTip ? 0 : i >= iAm ? 1 : (i - iTip) / (iAm - iTip);
@@ -390,7 +390,10 @@ export function TrunkSection({ g, pl, detail = 1, ids = {}, mid, over, gut }: Tr
   const mesShow = ss((g.e - 0.25) / 0.4);
 
   const bandS = (i0: number, i1: number, d0: (s: Spine) => number, d1: (s: Spine) => number, cell: number) => {
-    const len = Math.abs(i1 - i0) * 2.2;
+    // True arclength: the amnion's samples are far apart once it balloons round the folded body, and an
+    // estimate from the sample count gave it too few points (a faceted outline).
+    let len = 0;
+    for (let i = Math.min(i0, i1) + 1; i <= Math.max(i0, i1); i++) len += Math.hypot(S[i].p[0] - S[i - 1].p[0], S[i].p[1] - S[i - 1].p[1]);
     const n = nOf(len, cell);
     const b = band(S, i0, i1, d0, d1, Math.max(8, n * 2));
     return { b, n };

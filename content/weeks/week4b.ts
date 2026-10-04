@@ -687,6 +687,7 @@ export const stagesB: StageDef[] = [
       'peritoneo-barrunbea',
       'notokorda',
       'mesodermo-paraxiala',
+      'hodi-neurala',
       'ektodermoa',
       'endodermoa',
     ],

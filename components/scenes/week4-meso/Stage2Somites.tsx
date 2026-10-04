@@ -150,8 +150,8 @@ function Somitomeres({ detail }: { detail?: boolean }) {
 }
 
 /** One somite (or the block about to become one): `r` = epithelialisation (block → rounded epithelial ball). */
-function Somite({ x, y, i, r, detail, o }: { x: number; y: number; i: number; r: number; detail?: boolean; o: number }) {
-  const k = lerp(1, 0.78, ss((i - 30) / 14));
+function Somite({ x, y, i, r, detail, o, ghost = 0 }: { x: number; y: number; i: number; r: number; detail?: boolean; o: number; ghost?: number }) {
+  const k = lerp(1, 0.78, ss((i - 30) / 14)) * lerp(1, 0.62, ghost);
   const w = SW * k * lerp(1, 0.94, r);
   const h = (P - 1.25) * lerp(1, 0.97, r) * (0.9 + 0.1 * k);
   const rx = lerp(1.4, Math.min(w, h) * 0.5, r);
@@ -177,8 +177,8 @@ function Somite({ x, y, i, r, detail, o }: { x: number; y: number; i: number; r:
   }
   return (
     <g opacity={f1(o)}>
-      <rect x={f1(x - w / 2)} y={f1(y - h / 2)} width={f1(w)} height={f1(h)} rx={f1(rx)} fill={col} stroke="rgba(40,4,12,0.55)" strokeWidth={0.55} />
-      <rect x={f1(x - w / 2)} y={f1(y - h / 2)} width={f1(w)} height={f1(h)} rx={f1(rx)} fill="url(#g-cell)" opacity={0.75} />
+      <rect x={f1(x - w / 2)} y={f1(y - h / 2)} width={f1(w)} height={f1(h)} rx={f1(rx)} fill={col} fillOpacity={f1(1 - 0.86 * ghost)} stroke={ghost > 0.02 ? '#ffb4b4' : 'rgba(40,4,12,0.55)'} strokeOpacity={ghost > 0.02 ? f1(0.75 * ghost) : 1} strokeWidth={0.55} />
+      <rect x={f1(x - w / 2)} y={f1(y - h / 2)} width={f1(w)} height={f1(h)} rx={f1(rx)} fill="url(#g-cell)" opacity={f1(0.75 * (1 - ghost))} />
       {detail && r > 0.05 && <ellipse cx={f1(x)} cy={f1(y)} rx={f1(w * 0.13 * r)} ry={f1(h * 0.14 * r)} fill="#3a0812" opacity={0.8} />}
       {cells}
     </g>
@@ -191,8 +191,7 @@ function SomitePairs({ st, detail, from = 0, to = N }: { st: St; detail?: boolea
     const age = st.f - (i + 1);
     const r = ss(age / 1.4);
     const gone = transient(i) ? st.regress : 0;
-    const o = 1 - 0.8 * gone;
-    for (const sd of [-1, 1]) out.push(<Somite key={`${i}${sd}`} x={500 + sd * GX} y={yS(i)} i={i} r={r} detail={detail} o={o} />);
+    for (const sd of [-1, 1]) out.push(<Somite key={`${i}${sd}`} x={500 + sd * GX} y={yS(i)} i={i} r={r} detail={detail} o={1} ghost={gone} />);
   }
   return (
     <Part id="somitak" quiet>
@@ -300,7 +299,7 @@ function Counter({ st, t }: { st: St; t: number }) {
         </text>
         {lost > 0 && (
           <text x={36} y={112} fontSize={11.5} fill="#ffb3b3">
-            {`−${lost}: 1. okzipitala + azken kokzigeoak`}
+            {`−${lost} bikote desagertzen dira`}
           </text>
         )}
         {rule > 0.02 && (
@@ -313,58 +312,78 @@ function Counter({ st, t }: { st: St; t: number }) {
   );
 }
 
-/** Region brackets beside the body: each grows as its somites form. */
-function Regions({ st, at, k }: { st: St; at: (x: number, y: number) => Pt; k: number }) {
+/**
+ * Region ruler beside the body: a bracket in the region's colour that grows as its somites form, and
+ * the count + name (the exam numbers) level with the middle of the region.
+ */
+function Regions({ st, at, x0, regress = 0 }: { st: St; at: (x: number, y: number) => Pt; x0: number; regress?: number }) {
   return (
     <>
       {REGIONS.map((r, j) => {
         if (st.n <= r.start) return null;
         const last = Math.min(st.n, r.start + r.n) - 1;
-        const [x, y0] = at(500 + 44, yS(r.start) - P * 0.42);
-        const [, y1] = at(500 + 44, yS(last) + P * 0.42);
+        const [, y0] = at(500, yS(r.start) - P * 0.4);
+        const [, y1] = at(500, yS(last) + P * 0.4);
         const show = clamp((st.f - r.start - 0.6) * 2);
         return (
           <g key={j} opacity={f1(show)} pointerEvents="none">
-            <path d={`M${f1(x)},${f1(y0)}h${f1(4 * k)}V${f1(y1)}h${f1(-4 * k)}`} fill="none" stroke={r.color} strokeWidth={1.6} strokeLinejoin="round" />
+            <path d={`M${f1(x0)},${f1(y0 + 1)}h5V${f1(y1 - 1)}h-5`} fill="none" stroke={r.color} strokeWidth={2.4} strokeLinejoin="round" strokeLinecap="round" />
+            <rect x={f1(x0 + 5)} y={f1(y0 + 1)} width={3} height={f1(Math.max(0, y1 - y0 - 2))} rx={1.5} fill={r.color} opacity={0.35} />
           </g>
         );
       })}
       {REGIONS.map((r, j) => {
         if (st.n <= r.start) return null;
         const last = Math.min(st.n, r.start + r.n) - 1;
-        const [x, ym] = at(500 + 44, (yS(r.start) + yS(last)) / 2);
+        const [, ym] = at(500, (yS(r.start) + yS(last)) / 2);
+        const show = clamp((st.f - r.start - 0.6) * 2);
         return (
-          <Note key={`n${j}`} x={x + 4 * k + 8} y={ym} align="start" tone="dim" size={12} show={clamp((st.f - r.start - 0.6) * 2)}>
-            {`${r.label} ${r.name}`}
-          </Note>
+          <g key={`n${j}`}>
+            <Note x={x0 + 16} y={ym} align="start" tone="accent" size={13.5} show={show}>
+              {`${r.label} ${r.name}`}
+            </Note>
+            {/* Which pairs regress: written under their own region's count, clear of every leader. */}
+            {(j === 0 || j === REGIONS.length - 1) && (
+              <Note x={x0 + 16} y={ym + 17} align="start" tone="warn" size={12} show={regress}>
+                {j === 0 ? '1. okzipitala desagertzen da' : 'azken 5-7 kokzigeoak desagertzen dira'}
+              </Note>
+            )}
+          </g>
         );
       })}
     </>
   );
 }
 
+/** The overview is stretched sideways (schematic) so the somite pairs stay legible once all 44 exist. */
+const KX = 1.6;
+
 export function SomiteDorsal({ t }: SceneProps) {
   const st = stateAt(t);
   const b = bodyHW(st);
   const len = b.y1 - b.y0;
   const s = Math.min(1.75, 520 / len);
-  const z = zoom(500, (b.y0 + b.y1) / 2, s, 500, 330);
-  const at = z.at;
+  const cy = (b.y0 + b.y1) / 2;
+  const TY = 330;
+  const transform = `translate(500 ${TY}) scale(${(s * KX).toFixed(4)} ${s.toFixed(4)}) translate(-500 ${f1(-cy)})`;
+  const at = (x: number, y: number): Pt => [500 + (x - 500) * s * KX, TY + (y - cy) * s];
   const psmMid = lerp(yS(Math.min(st.n, N - 1)), st.yTail - 10, 0.5);
   const psmShow = st.n < N ? clamp((st.yTail - 10 - yS(st.n)) / 20) : 0;
   const newest = Math.max(0, Math.min(st.n, N) - 1);
   const somAt = at(500 - GX - 4, yS(Math.min(newest, 4)));
+  const rulerX = at(500 + 44, 0)[0];
+  const tubeAt = at(500, Math.max(Y_S0 + 8, Math.min(yS(14), st.yTail - 30)));
   return (
     <g>
       <Defs />
-      <g transform={z.transform}>
+      <g transform={transform}>
         <Body st={st} />
         <Somitomeres />
         <Unsegmented st={st} />
         <SomitePairs st={st} />
         <NeuralTube st={st} />
       </g>
-      <Regions st={st} at={at} k={s} />
+      <Regions st={st} at={at} x0={rulerX} regress={st.regress} />
       <Counter st={st} t={t} />
       <Note x={500} y={at(500, Y_HEAD - 20)[1]} tone="dim">
         Kraneala
@@ -372,10 +391,10 @@ export function SomiteDorsal({ t }: SceneProps) {
       <Note x={500} y={Math.min(598, at(500, b.y1 + 14)[1])} tone="dim">
         Kaudala
       </Note>
-      <Label id="somitomeroak" x={190} y={190} ax={at(500 - GX - 6, Y_S0 - 40)[0]} ay={at(500 - GX - 6, Y_S0 - 40)[1]} />
+      <Label id="somitomeroak" x={190} y={162} ax={at(500 - GX - 6, Y_S0 - 40)[0]} ay={at(500 - GX - 6, Y_S0 - 40)[1]} />
       <Label id="somitak" x={190} y={270} ax={somAt[0]} ay={somAt[1]} show={clamp(st.f * 2 - 1.2)} />
       <Label id="mesodermo-paraxiala" x={190} y={430} ax={at(500 - GX, psmMid)[0]} ay={at(500 - GX, psmMid)[1]} show={psmShow} small={st.f > 3} />
-      <Label id="hodi-neurala" x={810} y={250} ax={at(503, Y_S0 + 60)[0]} ay={at(503, Y_S0 + 60)[1]} small />
+      <Label id="hodi-neurala" x={190} y={350} ax={tubeAt[0]} ay={tubeAt[1]} small />
     </g>
   );
 }
@@ -407,8 +426,15 @@ export function SomiteBud({ t }: SceneProps) {
         <NeuralTube st={st} />
       </g>
       <Counter st={st} t={t} />
-      <Note x={500} y={52} tone="accent" size={13}>
-        Hazkuntza-gunea: uhin bakoitzak somita-bikote berri bat mozten du (~8 orduro)
+      {/* Caption in the free space beside the body (not across it). */}
+      <Note x={644} y={528} align="start" tone="accent" size={13}>
+        Hazkuntza-gunea: uhin bakoitzak
+      </Note>
+      <Note x={644} y={548} align="start" tone="accent" size={13}>
+        somita-bikote berri bat mozten du
+      </Note>
+      <Note x={644} y={568} align="start" tone="dim" size={12}>
+        (~8 orduro)
       </Note>
       <Label id="somitak" x={190} y={250} ax={nAt[0]} ay={nAt[1]} show={clamp(st.f * 2 - 1.2)} />
       <Label id="mesodermo-paraxiala" x={190} y={430} ax={at(500 - GX - 4, psmY)[0]} ay={at(500 - GX - 4, psmY)[1]} show={psmShow * clamp((st.yTail - 12 - yS(st.n)) / 10)} />

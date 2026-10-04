@@ -266,109 +266,210 @@ function CavityMap({ show }: { show: number }) {
   );
 }
 
+
 // ---------------------------------------------------------------- craniocaudal (dorsal view)
 
-const Y0 = 84; // first (occipital) somite
-const PITCH = 19.5;
-const NS = 26;
+const Y0 = 100; // top of the first (occipital) somite
+const PITCH = 19;
+const NS = 24;
 const NEPH = [4, 14]; // somite indices with a nephrotome (neck + upper thorax)
-const SEC = 20; // level of the transverse section (somite index)
+const SEC = 19; // level of the transverse section (somite index)
+const CXL = 500;
+/** Columns (distance from the midline): neural tube · somites · intermediate · lateral plate. */
+const XT = 12;
+const XS: [number, number] = [21, 53];
+const XI: [number, number] = [61, 83];
+const XL0 = 91;
+const BODY_BG = '#2c1522';
+
+/** Beat 0: one cleft per somite boundary cuts the intermediate strip, craniocaudally. */
+const cleftAt = (t: number, j: number) => seg(t, 0.008 + j * 0.007, 0.03 + j * 0.007);
 
 export function IntermediateLongitudinal({ t }: SceneProps) {
   const cord = seg(t, 0.14, 0.22);
   const uro = seg(t, 0.42, 0.5);
   const yOf = (i: number) => Y0 + i * PITCH;
-  const yEnd = yOf(NS) + 10;
-  const cx = 500;
-  const half = (y: number) => 128 - 26 * clamp((y - 470) / 140) ** 2;
-  const body: Pt[] = [];
-  for (let y = Y0 - 20; y <= yEnd + 30; y += 10) body.push([cx + half(y), y]);
-  // Rounded cranial end (the head lies above the frame of this schematic).
-  const cap: Pt[] = Array.from({ length: 9 }, (_, i) => {
+  const yEnd = yOf(NS) + 4;
+  const yTail = yEnd + 30;
+  const half = (y: number) => 152 - 44 * clamp((y - 420) / 190) ** 2;
+  // Body: broad trunk, rounded caudal end, and the cranial end (head region) above the somites.
+  const right: Pt[] = [];
+  for (let y = Y0 - 34; y <= yEnd; y += 8) right.push([CXL + half(y), y]);
+  const tail: Pt[] = Array.from({ length: 9 }, (_, i) => {
     const a = (Math.PI * (i + 1)) / 10;
-    return [cx + half(Y0) * Math.cos(a), Y0 - 20 - 26 * Math.sin(a)];
+    return [CXL + half(yEnd) * Math.cos(a), yEnd + (yTail - yEnd) * Math.sin(a)];
   });
-  const bodyD = smoothPath([...body.slice().reverse(), ...cap, ...body.map((p): Pt => [2 * cx - p[0], p[1]])], true, 0.3);
-  const cordTop = yOf(NEPH[1]) - 2;
-  const nepY = (i: number) => yOf(i) + 3;
-  const xi = [56, 72];
+  const head: Pt[] = Array.from({ length: 11 }, (_, i) => {
+    const a = (Math.PI * (i + 1)) / 12;
+    return [CXL - half(Y0) * Math.cos(a), Y0 - 34 - 30 * Math.sin(a)];
+  });
+  const left = right.slice().reverse().map((p): Pt => [2 * CXL - p[0], p[1]]);
+  const bodyD = smoothPath([...right, ...tail, ...left, ...head], true, 0.3);
+  const yNeph0 = yOf(NEPH[0]) - 2;
+  const yCord0 = yOf(NEPH[1]) - 2;
+  const nN = NEPH[1] - NEPH[0];
+  // The boundary below nephrotome j (the last one frees the cord).
+  const cuts = Array.from({ length: nN }, (_, j) => cleftAt(t, j + 1));
+  // Neural tube: a column with the hindbrain swelling at the cranial end.
+  const tubeHW = (y: number) => XT + 8 * Math.exp(-(((y - (Y0 - 30)) / 22) ** 2));
+  const tubeR: Pt[] = [];
+  for (let y = Y0 - 56; y <= yEnd + 14; y += 6) tubeR.push([CXL + tubeHW(y), y]);
+  const tubeD = smoothPath([...tubeR, ...tubeR.slice().reverse().map((p): Pt => [2 * CXL - p[0], p[1]])], true, 0.3);
+  const stripX = (sd: 1 | -1) => (sd > 0 ? CXL + XI[0] : CXL - XI[1]);
+  const wI = XI[1] - XI[0];
+  const cordGrow = 1.5 * cord;
+  const cordTop = yCord0 - 1 + 3.3 * cuts[nN - 1];
   return (
     <g>
-      <path d={bodyD} fill="#2a1420" stroke="rgba(122,167,245,0.55)" strokeWidth={3} />
-      <Note x={cx} y={Y0 - 52} tone="dim">
-        Ikuspegi dortsala (ektodermoa kenduta)
-      </Note>
+      <defs>
+        <linearGradient id="w4b-ll-body" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#22101a" />
+          <stop offset="0.5" stopColor="#341926" />
+          <stop offset="1" stopColor="#22101a" />
+        </linearGradient>
+        <pattern id="w4b-ll-cells" width="7" height="7" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1.05" fill="rgba(90,20,8,0.55)" />
+          <circle cx="5.5" cy="5" r="0.95" fill="rgba(90,20,8,0.5)" />
+        </pattern>
+      </defs>
+      <path d={bodyD} fill="url(#w4b-ll-body)" stroke="rgba(122,167,245,0.55)" strokeWidth={2.4} />
 
       {/* Lateral plate: outermost, continuous. */}
       <Part id="alboko-mesodermoa">
-        {sides.map((sd) => (
-          <path key={sd} d={`M${cx + sd * 80},${Y0 - 22} L${cx + sd * 112},${Y0 - 22} L${cx + sd * (half(yEnd) - 12)},${yEnd} L${cx + sd * 80},${yEnd} Z`} fill={C.mesoLateral} opacity={0.5} />
-        ))}
+        {sides.map((sd) => {
+          const pts: Pt[] = [];
+          for (let y = Y0 - 18; y <= yEnd; y += 8) pts.push([CXL + sd * XL0, y]);
+          for (let y = yEnd; y >= Y0 - 18; y -= 8) pts.push([CXL + sd * (half(y) - 12), y]);
+          return <path key={sd} d={smoothPath(pts, true, 0.2)} fill={C.mesoLateral} opacity={0.55} />;
+        })}
       </Part>
 
-      {/* Neural tube in the midline, somites beside it. */}
-      <rect x={cx - 11} y={Y0 - 40} width={22} height={yEnd - Y0 + 44} rx={11} fill={C.neural} opacity={0.6} />
+      {/* Neural tube in the midline. */}
+      <Part id="hodi-neurala" quiet>
+        <path d={tubeD} fill={C.neural} opacity={0.8} />
+        <path d={`M${CXL},${Y0 - 50}V${yEnd + 8}`} stroke="#14204d" strokeWidth={3} strokeLinecap="round" opacity={0.7} />
+      </Part>
+
+      {/* Somites beside it; each one glows briefly as its nephrotome is cut off — one per somite. */}
       <Part id="mesodermo-paraxiala">
         {sides.map((sd) =>
-          Array.from({ length: NS }, (_, i) => (
-            <rect key={`${sd}${i}`} x={sd > 0 ? cx + 20 : cx - 48} y={f1(yOf(i))} width={28} height={PITCH - 4} rx={5} fill={C.mesoParaxial} stroke="rgba(80,6,16,0.6)" strokeWidth={1} />
-          )),
-        )}
-      </Part>
-
-      {/* Intermediate mesoderm: nephrotomes (segmented, one per somite) cranially … */}
-      <Part id="nefrotomak">
-        {sides.map((sd) =>
-          Array.from({ length: NEPH[1] - NEPH[0] }, (_, j) => {
-            const i = NEPH[0] + j;
-            return <rect key={`${sd}${i}`} x={sd > 0 ? cx + xi[0] : cx - xi[1]} y={f1(nepY(i))} width={xi[1] - xi[0]} height={PITCH - 9} rx={4} fill={C.mesoIntermediate} stroke="rgba(110,20,10,0.6)" strokeWidth={1} />;
+          Array.from({ length: NS }, (_, i) => {
+            const j = i - NEPH[0];
+            const pulse = j >= 0 && j < nN ? Math.sin(Math.PI * cleftAt(t, j + 1)) : 0;
+            const x = sd > 0 ? CXL + XS[0] : CXL - XS[1];
+            return (
+              <g key={`${sd}${i}`}>
+                <rect x={x} y={f1(yOf(i))} width={XS[1] - XS[0]} height={PITCH - 4} rx={5} fill={C.mesoParaxial} stroke="rgba(80,6,16,0.7)" strokeWidth={1} />
+                <rect x={x} y={f1(yOf(i))} width={XS[1] - XS[0]} height={PITCH - 4} rx={5} fill="url(#g-cell)" opacity={0.6} />
+                {pulse > 0.02 && <rect x={x - 1} y={f1(yOf(i) - 1)} width={XS[1] - XS[0] + 2} height={PITCH - 2} rx={6} fill="none" stroke="#ffe1c2" strokeWidth={1.6} opacity={f1(pulse)} />}
+              </g>
+            );
           }),
         )}
       </Part>
-      {/* … and a continuous nephrogenic cord below. */}
-      <Part id="kordoi-nefrogenoa" show={lerp(0.35, 1, cord)}>
+
+      {/* Intermediate mesoderm, cranial part: clefts at every somite boundary cut it into nephrotomes. */}
+      <Part id="nefrotomak">
+        {sides.map((sd) => {
+          // The clefts are real holes (a mask), so each nephrotome is lit and outlined on its own.
+          const mid = `w4b-neph-${sd > 0 ? 'r' : 'l'}-${Math.round(t * 1e4)}`;
+          const x0 = stripX(sd);
+          return (
+            <g key={sd}>
+              <mask id={mid} maskUnits="userSpaceOnUse" x={x0 - 6} y={yNeph0 - 6} width={wI + 12} height={yCord0 - yNeph0 + 14}>
+                <rect x={x0 - 6} y={yNeph0 - 6} width={wI + 12} height={yCord0 - yNeph0 + 14} fill="#fff" />
+                {cuts.map((c, j) => {
+                  if (c <= 0.01) return null;
+                  const yb = yOf(NEPH[0] + j + 1) - 2;
+                  const h = lerp(1.4, 4.6, c);
+                  if (c > 0.97) return <rect key={j} x={x0 - 4} y={f1(yb - h / 2)} width={wI + 8} height={f1(h)} fill="#000" />;
+                  const w = 3 + (wI / 2 - 2.5) * c;
+                  return (
+                    <g key={j}>
+                      <rect x={f1(x0 - 3)} y={f1(yb - h / 2)} width={f1(w)} height={f1(h)} rx={f1(h / 2)} fill="#000" />
+                      <rect x={f1(x0 + wI + 3 - w)} y={f1(yb - h / 2)} width={f1(w)} height={f1(h)} rx={f1(h / 2)} fill="#000" />
+                    </g>
+                  );
+                })}
+              </mask>
+              <g mask={`url(#${mid})`}>
+                <rect x={x0} y={yNeph0} width={wI} height={yCord0 - yNeph0 + 1} rx={6} fill={C.mesoIntermediate} />
+                <rect x={x0} y={yNeph0} width={wI} height={yCord0 - yNeph0 + 1} rx={6} fill="url(#w4b-ll-cells)" />
+                <rect x={x0 + 1} y={yNeph0 + 1} width={wI - 2} height={yCord0 - yNeph0 - 1} rx={5} fill="none" stroke="rgba(255,214,190,0.35)" strokeWidth={1} />
+              </g>
+            </g>
+          );
+        })}
+      </Part>
+      {/* … and below: a continuous, unsegmented mass, the nephrogenic cord. */}
+      <Part id={t < 0.14 ? 'bitarteko-mesodermoa' : 'kordoi-nefrogenoa'}>
         {sides.map((sd) => (
-          <rect key={sd} x={sd > 0 ? cx + xi[0] - 1 : cx - xi[1] - 1} y={cordTop} width={xi[1] - xi[0] + 2} height={yEnd - cordTop - 6} rx={8} fill={C.mesoIntermediate} stroke="rgba(110,20,10,0.6)" strokeWidth={1} />
+          <g key={sd}>
+            <rect x={f1(stripX(sd) - cordGrow)} y={f1(cordTop)} width={f1(wI + 2 * cordGrow)} height={f1(yEnd - 4 - cordTop)} rx={9} fill={C.mesoIntermediate} />
+            <rect x={f1(stripX(sd) - cordGrow)} y={f1(cordTop)} width={f1(wI + 2 * cordGrow)} height={f1(yEnd - 4 - cordTop)} rx={9} fill="url(#w4b-ll-cells)" />
+          </g>
         ))}
       </Part>
       {uro > 0.01 && (
         <Part id="giltzurruna" show={uro}>
           {sides.map((sd) =>
-            Array.from({ length: 8 }, (_, j) => <ellipse key={`${sd}${j}`} cx={cx + sd * (xi[0] + xi[1]) * 0.5} cy={f1(cordTop + 26 + j * 24)} rx={5} ry={6.5} fill={KIDNEY} stroke="#9a4a22" strokeWidth={0.9} />),
+            Array.from({ length: 8 }, (_, j) => {
+              const x = CXL + sd * (XI[0] + XI[1]) * 0.5;
+              const y = yCord0 + 30 + j * 22;
+              return (
+                <g key={`${sd}${j}`}>
+                  <ellipse cx={x} cy={f1(y)} rx={6} ry={7} fill={KIDNEY} stroke="#9a4a22" strokeWidth={0.9} />
+                  <ellipse cx={x} cy={f1(y)} rx={2.2} ry={2.8} fill="#3a1408" />
+                </g>
+              );
+            }),
           )}
         </Part>
       )}
       {uro > 0.01 && (
         <Part id="gonadak" show={uro}>
           {sides.map((sd) => (
-            <rect key={sd} x={sd > 0 ? cx + 49 : cx - 54} y={yOf(SEC) - 34} width={5} height={78} rx={2.5} fill={GONAD} />
+            <rect key={sd} x={sd > 0 ? CXL + XI[0] - 7 : CXL - XI[0] + 1} y={yOf(SEC) - 40} width={6} height={86} rx={3} fill={GONAD} />
           ))}
         </Part>
       )}
 
       {/* Level of the transverse section. */}
-      <path d={`M${cx - 150},${yOf(SEC) + 8} H${cx + 150}`} stroke="#e8eefc" strokeWidth={1.4} opacity={0.7} />
-      <Note x={cx + 156} y={yOf(SEC) + 12} align="start" tone="dim" size={11}>
+      <path d={`M${CXL - 166},${yOf(SEC) + 7} H${CXL + 166}`} stroke="#e8eefc" strokeWidth={1.4} opacity={0.7} />
+      <Note x={CXL + 172} y={yOf(SEC) + 7} align="start" tone="dim" size={12}>
         Zeharkako mozketa
       </Note>
 
       {/* Level brackets. */}
-      <path d={`M${cx - 140},${nepY(NEPH[0])} h-6 V${nepY(NEPH[1] - 1) + PITCH - 9} h6`} fill="none" stroke="#8a97b3" strokeWidth={1.2} />
-      <Note x={cx - 152} y={(nepY(NEPH[0]) + nepY(NEPH[1] - 1)) / 2 + 4} align="end" tone="dim" size={11.5}>
+      <path d={`M${CXL - 168},${yNeph0} h-7 V${yCord0 - 3} h7`} fill="none" stroke="#c9b2a6" strokeWidth={1.6} strokeLinejoin="round" />
+      <Note x={CXL - 184} y={(yNeph0 + yCord0) / 2 - 9} align="end" tone="accent" size={13}>
         Lepoa / goiko toraxa
       </Note>
-      <path d={`M${cx - 140},${cordTop} h-6 V${yEnd - 6} h6`} fill="none" stroke="#8a97b3" strokeWidth={1.2} opacity={lerp(0.4, 1, cord)} />
-      <Note x={cx - 152} y={(cordTop + yEnd) / 2 + 30} align="end" tone="dim" size={11.5} show={lerp(0.4, 1, cord)}>
+      <Note x={CXL - 184} y={(yNeph0 + yCord0) / 2 + 9} align="end" tone="dim" size={11.5}>
+        segmentatuta
+      </Note>
+      <path d={`M${CXL - 168},${yCord0 + 3} h-7 V${yEnd - 4} h7`} fill="none" stroke="#c9b2a6" strokeWidth={1.6} strokeLinejoin="round" opacity={lerp(0.35, 1, cord)} />
+      <Note x={CXL - 184} y={(yCord0 + yEnd) / 2 - 34} align="end" tone="accent" size={13} show={lerp(0.35, 1, cord)}>
         Beheragoko atala
       </Note>
+      <Note x={CXL - 184} y={(yCord0 + yEnd) / 2 - 16} align="end" tone="dim" size={11.5} show={lerp(0.35, 1, cord)}>
+        masa jarraia
+      </Note>
+      <Note x={190} y={48} align="end" tone="dim" size={11.5}>
+        Ikuspegi dortsala
+      </Note>
+      <Note x={190} y={64} align="end" tone="dim" size={11.5}>
+        (ektodermoa kenduta)
+      </Note>
 
-      <Label id="nefrotomak" x={190} y={200} ax={cx - xi[1]} ay={nepY(7) + 5} />
-      <Label id="kordoi-nefrogenoa" x={810} y={400} ax={cx + xi[1] + 1} ay={cordTop + 120} show={cord} />
-      <Label id="mesodermo-paraxiala" x={810} y={150} ax={cx + 48} ay={yOf(5) + 7} small />
-      <Label id="alboko-mesodermoa" x={810} y={250} ax={cx + 104} ay={yOf(9)} small />
-      <Label id="giltzurruna" x={810} y={530} ax={cx + (xi[0] + xi[1]) * 0.5 + 5} ay={cordTop + 26 + 5 * 24} show={uro} small />
-      <Label id="gonadak" x={190} y={420} ax={cx - 54} ay={yOf(SEC) - 16} show={uro} small />
+      <Label id="nefrotomak" x={190} y={196} ax={CXL - XI[1] + 4} ay={yOf(NEPH[0] + 2) + 7} />
+      <Label id="gonadak" x={190} y={540} ax={CXL - XI[0] + 4} ay={yOf(SEC) + 22} show={uro} small />
+      <Label id="hodi-neurala" x={810} y={250} ax={CXL + 4} ay={yOf(6)} small />
+      <Label id="mesodermo-paraxiala" x={810} y={290} ax={CXL + XS[1] - 6} ay={yOf(9) + 8} small />
+      <Label id="alboko-mesodermoa" x={810} y={330} ax={CXL + half(yOf(11)) - 22} ay={yOf(11)} small />
+      <Label id="bitarteko-mesodermoa" x={810} y={370} ax={CXL + XI[1] - 4} ay={yCord0 + 60} show={1 - seg(t, 0.13, 0.15)} small />
+      <Label id="kordoi-nefrogenoa" x={810} y={410} ax={CXL + XI[1] + cordGrow - 2} ay={yCord0 + 100} show={seg(t, 0.14, 0.17)} />
+      <Label id="giltzurruna" x={810} y={500} ax={CXL + (XI[0] + XI[1]) * 0.5 + 5} ay={yCord0 + 30 + 5 * 22} show={uro} small />
     </g>
   );
 }
-

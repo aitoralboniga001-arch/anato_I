@@ -648,7 +648,7 @@ export function SomiteContext({ t }: SceneProps) {
       {L('aorta-dortsalak', 190, 440, 1, true, mir('aorta-dortsalak'))}
       {L('somitak', 810, 96, tm.uniform)}
       {L('dermatomiotoma', 810, 136, seg(t, SB.dermomyo, SB.dermomyo + 0.06) * (1 - seg(t, SB.dermato, SB.dermato + 0.03)))}
-      {L('dermatoma', 810, 136, seg(t, SB.dermato + 0.02, SB.dermato + 0.06))}
+      {L('dermatoma', 810, 136, seg(t, SB.dermato + 0.03, SB.dermato + 0.06))}
       {L('miotoma', 810, 176, tm.my)}
       {L('esklerotoma', 810, 236, tm.sc)}
       {L('bitarteko-mesodermoa', 810, 320, 1, true)}
@@ -671,10 +671,10 @@ export function SomiteClose({ t }: SceneProps) {
   return (
     <g>
       {drawing}
-      <Note x={dml[0] + 12} y={dml[1] + 108} tone="dim" size={11} show={tm.dt * (1 - tm.fa)}>
+      <Note x={dml[0] + 12} y={dml[1] + 108} tone="dim" size={12} show={tm.dt * (1 - tm.fa)}>
         Ertz dortsomediala
       </Note>
-      <Note x={vll[0] - 24} y={vll[1] + 58} tone="dim" size={11} show={tm.dt * (1 - tm.fa)}>
+      <Note x={vll[0] - 24} y={vll[1] + 58} tone="dim" size={12} show={tm.dt * (1 - tm.fa)}>
         Ertz bentrolaterala
       </Note>
       {L('hodi-neurala', 190, 170)}
@@ -685,7 +685,7 @@ export function SomiteClose({ t }: SceneProps) {
       {L('ektodermoa', 810, 96, 1, true)}
       {L('somitak', 810, 150, tm.uniform)}
       {L('dermatomiotoma', 810, 150, seg(t, SB.dermomyo, SB.dermomyo + 0.06) * (1 - seg(t, SB.dermato, SB.dermato + 0.03)))}
-      {L('dermatoma', 810, 150, seg(t, SB.dermato + 0.02, SB.dermato + 0.06))}
+      {L('dermatoma', 810, 150, seg(t, SB.dermato + 0.03, SB.dermato + 0.06))}
       {L('miotoma', 810, 200, tm.my)}
       {L('paretako-orria', 810, 290, tm.mo)}
       {L('saihetsak', 810, 400, tm.fa, true)}

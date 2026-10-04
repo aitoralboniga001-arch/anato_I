@@ -29,6 +29,7 @@ function timing(t: number) {
     ends: seg(t, 0.9, 0.96),
     // Camera: in on the pharynx for steps 3–6 (t .24–.62), back out for the midgut.
     zoom: seg(t, 0.24, 0.31) * (1 - seg(t, 0.62, 0.68)),
+    t,
   };
 }
 type Tm = ReturnType<typeof timing>;
@@ -37,6 +38,9 @@ type Tm = ReturnType<typeof timing>;
 
 const ENDO = C.endoderm;
 const ENDO_EDGE = '#b8891f';
+/** Tympanic cavity (1st pouch): a pale filled cavity, never a ring. */
+const EAR = 'rgba(253,226,150,0.62)';
+const EAR_EDGE = 'rgba(253,226,150,0.3)';
 const LUMEN = '#2a2110';
 const SPL = '#c8505f'; // splanchnic mesoderm coat (errai orria)
 const SPL_EDGE = 'rgba(120,20,40,0.55)';
@@ -45,7 +49,7 @@ const BODY_EDGE = C.surfaceEcto;
 const EXTRA = C.mesoExtra;
 const AMNION_LINE = 'rgba(143,180,247,0.85)';
 const AMNION_FILL = '#16223f';
-const REGION = { fore: 'rgba(255,170,90,0.30)', mid: 'rgba(255,226,120,0.26)', hind: 'rgba(190,220,110,0.26)' };
+const REGION = { fore: 'rgba(255,170,90,0.42)', mid: 'rgba(255,232,130,0.4)', hind: 'rgba(190,220,110,0.4)' };
 
 // ---------------------------------------------------------------- spine helpers
 
@@ -373,10 +377,16 @@ function Gut({ tm }: { tm: Tm }) {
 
   // Region slices of the endoderm (for the three names and their focus).
   const seg3 = [
-    { id: 'aurreko-hestea', u0: 0, u1: U.foreEnd, tint: REGION.fore },
-    { id: 'erdiko-hestea', u0: U.foreEnd, u1: U.midEnd, tint: REGION.mid },
-    { id: 'atzeko-hestea', u0: U.midEnd, u1: 1, tint: REGION.hind },
+    { id: 'aurreko-hestea', u0: 0, u1: U.foreEnd, tint: REGION.fore, k: seg(tm.t, 0.12, 0.15) },
+    { id: 'erdiko-hestea', u0: U.foreEnd, u1: U.midEnd, tint: REGION.mid, k: seg(tm.t, 0.14, 0.17) },
+    { id: 'atzeko-hestea', u0: U.midEnd, u1: 1, tint: REGION.hind, k: seg(tm.t, 0.16, 0.19) },
   ];
+  // The two borders between the parts (where the gut opens to the vitelline duct), drawn across the tube.
+  const border = (u: number) => {
+    const q = at(GS, u);
+    const r = hw(u) + EN + SP + 3;
+    return `M${f1(q.p[0] - q.n[0] * r)},${f1(q.p[1] - q.n[1] * r)}L${f1(q.p[0] + q.n[0] * r)},${f1(q.p[1] + q.n[1] * r)}`;
+  };
 
   return (
     <g>
@@ -432,7 +442,9 @@ function Gut({ tm }: { tm: Tm }) {
       <path d={tubeD(GS, 0.004, 0.996, hw, NG, false, false, po)} fill={LUMEN} />
       <path d={tubeD(vit, 0, 0.995, vhw, 26)} fill={LUMEN} />
       {tm.parts > 0.01 &&
-        seg3.map((s) => <path key={s.id} d={tubeD(GS, Math.max(0.004, s.u0), Math.min(0.996, s.u1), hw, Math.round(NG * (s.u1 - s.u0)) + 8, false, false, po)} fill={s.tint} opacity={tm.parts} />)}
+        seg3.map((s) => <path key={s.id} d={tubeD(GS, Math.max(0.004, s.u0), Math.min(0.996, s.u1), hw, Math.round(NG * (s.u1 - s.u0)) + 8, false, false, po)} fill={s.tint} opacity={f1(s.k)} />)}
+      {tm.parts > 0.01 &&
+        [U.foreEnd, U.midEnd].map((u, i) => <path key={i} d={border(u)} stroke="#fff1c2" strokeWidth={2} strokeLinecap="round" opacity={f1(0.85 * seg(tm.t, 0.15 + 0.02 * i, 0.18 + 0.02 * i))} pointerEvents="none" />)}
       {tm.phar > 0.01 && (
         <Part id="faringe-hestea" show={tm.phar}>
           <path d={tubeD(GS, 0.004, U.pharEnd, hw, 90, false, false, po)} fill="rgba(255,214,120,0.22)" stroke="#fde68a" strokeWidth={1.4} />
@@ -705,7 +717,7 @@ export function PharynxClose({ t }: SceneProps) {
       {fateOn > 0.01 && (
         <g opacity={fateOn}>
           {/* 1: tubotympanic recess widening into the tympanic cavity */}
-          <ellipse cx={f1(tipX(1, 0) - 8)} cy={POUCH_Y[0] - 3} rx={15} ry={12} fill="rgba(253,230,138,0.18)" stroke="#fde68a" strokeWidth={2} />
+          <ellipse cx={f1(tipX(1, 0) - 8)} cy={POUCH_Y[0] - 3} rx={15} ry={12} fill={EAR} stroke={EAR_EDGE} strokeWidth={1.2} />
           {/* 2: palatine tonsil (lymphoid tissue round the shallow pouch) */}
           <circle cx={f1(PX + lumenHalf(POUCH_Y[1]) + POUCH_D[1] * 0.5)} cy={POUCH_Y[1]} r={11} fill="#e58fb0" opacity={0.85} />
           {/* 3: inferior parathyroid (dorsal) + thymus (ventral, elongating caudally) */}
@@ -759,19 +771,40 @@ export function PharynxClose({ t }: SceneProps) {
           {i + 1}
         </text>
       ))}
-      <Note x={PX - 120} y={72} tone="dim" size={11}>
+      <Note x={PX - 120} y={72} tone="dim" size={12}>
         Garatzen: poltsak (horiz) eta arrailak (urdinez)
       </Note>
-      <Note x={PX + 150} y={72} tone="dim" size={11} show={fateOn}>
+      <Note x={PX + 150} y={72} tone="dim" size={12} show={fateOn}>
         Eratorriak (geroago)
       </Note>
+      {/* Each derivative sits level with its pouch: a faint leader from the pouch, a swatch in the colour the
+          derivative has inside the pouch, then the name — so the exam list reads straight off the drawing. */}
+      {derived.map((d, i) => {
+        const y = POUCH_Y[i];
+        const x0 = tipX(1, i) + (i === 0 ? 10 : 6);
+        const sw = [
+          <ellipse key="a" cx={698} cy={y - 7} rx={6.5} ry={5.2} fill={EAR} stroke={EAR_EDGE} strokeWidth={1} />,
+          <circle key="b" cx={698} cy={y} r={6} fill="#e58fb0" />,
+          <g key="c">
+            <rect x={692} y={y - 13} width={12} height={8} rx={4} fill="#b9445a" />
+            <circle cx={698} cy={y + 6} r={4.5} fill="#f3e07a" stroke="#8a6b10" strokeWidth={1} />
+          </g>,
+          <circle key="d" cx={698} cy={y} r={5} fill="#f3e07a" stroke="#8a6b10" strokeWidth={1} />,
+        ][i];
+        return (
+          <g key={i} opacity={fateOn} pointerEvents="none">
+            <path d={`M${f1(x0)},${y}H688`} stroke="rgba(253,230,138,0.4)" strokeWidth={1.1} />
+            {sw}
+          </g>
+        );
+      })}
       {derived.map((d, i) => (
-        <g key={i} opacity={fateOn}>
-          <Note x={704} y={POUCH_Y[i] - (d.sub ? 7 : 0)} align="start" tone="accent" size={11}>
+        <g key={`t${i}`}>
+          <Note x={712} y={POUCH_Y[i] - (d.sub ? 7 : 0)} align="start" tone="accent" size={12.5} show={fateOn}>
             {d.head}
           </Note>
           {d.sub && (
-            <Note x={704} y={POUCH_Y[i] + 8} align="start" tone="dim" size={10.5}>
+            <Note x={712} y={POUCH_Y[i] + 9} align="start" tone="dim" size={11.5} show={fateOn}>
               {d.sub}
             </Note>
           )}
