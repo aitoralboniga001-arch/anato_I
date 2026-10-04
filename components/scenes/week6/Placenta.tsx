@@ -243,6 +243,8 @@ export function PlacentaCirculation({ t, reduced }: SceneProps) {
 const FCY = 322;
 /** The uterus inset (beat .6): the placenta covers 20–30 % of the uterine wall. */
 const UT: Pt = [500, 150];
+const UTS = 1.45;
+const utAt = (p: Pt): Pt => [UT[0] + (p[0] - UT[0]) * UTS, UT[1] + (p[1] - UT[1]) * UTS];
 
 export function PlacentaFaces({ t }: SceneProps) {
   const uid = useId().replace(/:/g, '');
@@ -299,7 +301,9 @@ export function PlacentaFaces({ t }: SceneProps) {
       <Note x={lx + RX + 18} y={552} align="start" show={dims} tone="accent">3–4 cm lodiera (erdian)</Note>
       <Note x={lx - RX - 18} y={FCY + TH / 2} align="end" show={dims} tone="accent">500–600 g</Note>
 
-      {/* The uterus with the placenta on its wall: 20–30 % of the surface, ever thicker */}
+      {/* The uterus with the placenta on its wall: 20–30 % of the surface, ever thicker. Drawn large: it fits
+          between the two faces (its neck runs down the gap between them). */}
+      <g transform={`translate(${UT[0]} ${UT[1]}) scale(${UTS}) translate(${-UT[0]} ${-UT[1]})`}>
       <g opacity={ut}>
         <path d={`M${UT[0] - 60},${UT[1] - 6} C${UT[0] - 62},${UT[1] - 80} ${UT[0] + 62},${UT[1] - 80} ${UT[0] + 60},${UT[1] - 6} C${UT[0] + 58},${UT[1] + 40} ${UT[0] + 22},${UT[1] + 62} ${UT[0] + 12},${UT[1] + 84} L${UT[0] - 12},${UT[1] + 84} C${UT[0] - 22},${UT[1] + 62} ${UT[0] - 58},${UT[1] + 40} ${UT[0] - 60},${UT[1] - 6} Z`} fill="url(#p-muscle)" stroke="#4a1a20" strokeWidth={1.4} />
         <ellipse cx={UT[0]} cy={UT[1]} rx={46} ry={52} fill="#121a2e" />
@@ -309,10 +313,11 @@ export function PlacentaFaces({ t }: SceneProps) {
         <path d={arc(-2)} fill="none" stroke="#7c1f36" strokeWidth={lerp(8, 13, thick) + 2.4} strokeLinecap="round" />
         <path d={arc(-2)} fill="none" stroke="#c2415f" strokeWidth={lerp(8, 13, thick)} strokeLinecap="round" />
       </Part>
-      <Note x={UT[0] + 72} y={UT[1] - 40} align="start" show={ut} tone="accent">%20–30</Note>
+      </g>
+      <Note x={UT[0] + 72 * UTS} y={UT[1] - 40 * UTS} align="start" show={ut} tone="accent">%20–30</Note>
 
       <Label id="karena-aterminoa" x={812} y={250} ax={lx + RX * 0.7} ay={FCY + 10} show={vis(t, 0, 0.28)} />
-      <Label id="karena" x={190} y={120} ax={uw(-1.9, 2)[0]} ay={uw(-1.9, 2)[1]} show={ut} />
+      <Label id="karena" x={190} y={120} ax={utAt(uw(-1.9, 2))[0]} ay={utAt(uw(-1.9, 2))[1]} show={ut} />
       <Label id="zilborrestea" x={190} y={78} ax={ins[0] + 4} ay={ins[1] - 120} show={vis(t, 0.2)} />
       <Label id="fetuaren-aurpegia" x={190} y={180} ax={lx - RX * 0.62} ay={FCY - RY * 0.5} show={vis(t, 0.2)} />
       <Label id="korion-plaka" x={190} y={232} ax={lx - RX * 0.4} ay={FCY + RY * 0.12} show={vis(t, 0.2)} text="Orri korionikoa" />

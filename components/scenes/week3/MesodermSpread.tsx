@@ -4,6 +4,7 @@ import { Arrow, C, Journey, Label, Mark, Note, Part, clamp, dual, lerp, rand, se
 import { discOutline, f1 } from './common';
 import { DorsalDefs, Stellate } from './dorsalKit';
 import { CellCluster, DiscDrawing, MembraneMark, makeDisc } from './DiscSection';
+import { frameAt, inFrame, type Key } from './gastroKit';
 
 /**
  * Intra-embryonic mesoderm spreads cranially and laterally from the streak until it is
@@ -327,37 +328,75 @@ const ss = (v: number) => {
   return c * c * (3 - 2 * c);
 };
 
+/**
+ * Camera of the sagittal section: the membranes and the prechordal plate are a few cells at the disc's tips,
+ * so each of their steps pushes in on its tip (cranial, caudal, cranial again) and the "no vessels" step pulls
+ * back to show both membranes at once. In the tall dual pane the close-ups are tighter (they fill its height).
+ */
+function sagittalCamera(t: number, s: ReturnType<typeof sagittalDisc>['s'], pane?: boolean) {
+  const mid = (x: number) => s.map(x, (s.base(x) + s.dEnd(x)) / 2);
+  const zb = pane ? 2.35 : 1.75;
+  const b = mid(X_BUCCO + (pane ? 38 : 70));
+  const c = mid(X_CLOACA - (pane ? 38 : 70));
+  const pr = mid((X_BUCCO + X_PRE) / 2 + (pane ? 30 : 60));
+  const W: Key = [0, 500, 318, 1];
+  const keys: Key[] = [
+    W,
+    [0.585, 500, 318, 1],
+    [0.625, b[0], b[1], zb],
+    [0.665, b[0], b[1], zb],
+    [0.7, c[0], c[1], zb],
+    [0.765, c[0], c[1], zb],
+    [0.8, 500, 318, 1],
+    [0.845, 500, 318, 1],
+    [0.885, pr[0], pr[1], zb],
+    [1, pr[0], pr[1], zb],
+  ];
+  const z = frameAt(t, keys);
+  // The frame point that sits at the centre must be the one the dual centres (500, 318), not frameAt's 320.
+  return { ...z, transform: `translate(0 -2) ${z.transform}`, at: (x: number, y: number): Pt => { const q = z.at(x, y); return [q[0], q[1] - 2]; } };
+}
+
 function Sagittal({ t, pane }: SceneProps & { pane?: boolean }) {
   const { s, g } = sagittalDisc(t);
+  const z = sagittalCamera(t, s, pane);
   const mid = (x: number) => s.map(x, (s.base(x) + s.dEnd(x)) / 2);
   const pre = mid(X_PRE);
-  const L = (id: string, x: number, y: number, p: Pt, show = 1, small = false) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} small={small} />;
+  // Anchors follow the camera; a name whose structure is out of the close-up is not set.
+  const L = (id: string, x: number, y: number, p: Pt, show = 1, small = false) => {
+    const q = z.at(p[0], p[1]);
+    return <Label key={id} id={id} x={x} y={y} ax={q[0]} ay={q[1]} show={show * inFrame(q, 40)} small={small} />;
+  };
   // In the dual pane all names sit in the right column: anchors that can be anywhere go on the caudal (right) side.
   const exL: Pt = [s.p.cx + (pane ? 1 : -1) * (s.rx + 8 * s.k) * Math.cos(0.55), s.cyA - (s.p.amnionH * s.k + 8 * s.k) * Math.sin(0.55)];
+  // Free anchors (ectoderm, endoderm, mesoderm) stay on whatever part of the disc is in view.
+  const near = (fallback: number) => (z.s > 1.2 ? (z.fx < 500 ? X_BUCCO + 60 : X_CLOACA - 60) : fallback);
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
-      <DiscDrawing s={s} ids={{ epiblast: 'ektodermoa' }} />
-      <Arrow from={mid(40)} to={mid(lerp(20, -150, g.growth))} bend={0} color={C.mesoIntra} width={2.4} head={8} show={g.growth * (1 - seg(t, 0.46, 0.52))} />
-      <Part id="mintz-bukofaringeoa" show={g.bucco}>
-        <MembraneMark s={s} x={X_BUCCO} />
-      </Part>
-      <Part id="kloaka-mintza" show={g.cloaca}>
-        <MembraneMark s={s} x={X_CLOACA} />
-      </Part>
-      <Part id="plaka-prekordala" show={g.prechordal}>
-        <CellCluster s={s} x={X_PRE} color={C.prechordal} />
-      </Part>
+      <g transform={z.transform}>
+        <DiscDrawing s={s} ids={{ epiblast: 'ektodermoa' }} />
+        <Arrow from={mid(40)} to={mid(lerp(20, -150, g.growth))} bend={0} color={C.mesoIntra} width={2.4} head={8} show={g.growth * (1 - seg(t, 0.46, 0.52))} />
+        <Part id="mintz-bukofaringeoa" show={g.bucco}>
+          <MembraneMark s={s} x={X_BUCCO} />
+        </Part>
+        <Part id="kloaka-mintza" show={g.cloaca}>
+          <MembraneMark s={s} x={X_CLOACA} />
+        </Part>
+        <Part id="plaka-prekordala" show={g.prechordal}>
+          <CellCluster s={s} x={X_PRE} color={C.prechordal} />
+        </Part>
+      </g>
       <Note x={500} y={606} show={g.noVessels} tone="warn" size={11}>
         Mintzetan ez dago mesodermorik → ez dago odol-hodirik; geroago zulatu egingo dira (ahoa eta uzkia)
       </Note>
 
       {L('enbrioi-kanpoko-mesodermoa', 200, 130, exL, 1, true)}
-      {L('ektodermoa', 190, 175, pane ? s.map(150, s.top(150) + 10) : s.at.epiblast)}
+      {L('ektodermoa', 190, 175, pane ? s.map(near(150), s.top(near(150)) + 10) : s.map(near(-s.W * 0.55), s.top(near(-s.W * 0.55)) + 8))}
       {L('mintz-bukofaringeoa', 190, 215, s.map(X_BUCCO, s.top(X_BUCCO) + 6), g.bucco)}
       {L('plaka-prekordala', 190, 250, pre, g.prechordal)}
-      {L('mesodermo-intraenbrionarioa', 198, 430, mid(pane ? 110 : lerp(120, -150, g.growth)), g.growth, true)}
-      {L('endodermoa', 190, 470, s.map(150, s.dEnd(150) + 6))}
+      {L('mesodermo-intraenbrionarioa', 198, 430, mid(z.s > 1.2 ? near(0) : pane ? 110 : lerp(120, -150, g.growth)), g.growth, true)}
+      {L('endodermoa', 190, 470, s.map(near(150), s.dEnd(near(150)) + 6))}
       {L('kloaka-mintza', 810, 430, s.map(X_CLOACA, s.dEnd(X_CLOACA) + 8), g.cloaca)}
     </g>
   );

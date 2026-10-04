@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Flow, Label, Mark, Note, Part, lerp, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Flow, Label, Mark, Note, OnTop, Part, lerp, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { fetusGeom, FetusFigure, placeFetus } from '@/components/scenes/week5/FetusFigure';
 import { useId } from 'react';
 import { CordRope } from './CordRope';
@@ -121,6 +121,81 @@ const VOL_MARKS = [
   { lo: 200, hi: 500, text: '30. a: 200–500 ml', at: 0.33 },
   { lo: 800, hi: 1000, text: '37.–38. a: 800–1000 ml', at: 0.39 },
 ];
+/* ---------------------------------------------------------------------------------------------- */
+/* Swallowing cycle (degluzioa): routed arrows with numbered chips, drawn (not only animated)       */
+/* ---------------------------------------------------------------------------------------------- */
+
+/** Catmull-Rom samples through `pts`, pushed `side` units to the left of the direction of travel. */
+function besides(pts: Pt[], side: number, per = 10): Pt[] {
+  const out: Pt[] = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
+    for (let j = 0; j < per; j++) {
+      const u = j / per;
+      const u2 = u * u;
+      const u3 = u2 * u;
+      const c = (a: number, b: number, d: number, e: number) => 0.5 * (2 * b + (-a + d) * u + (2 * a - 5 * b + 4 * d - e) * u2 + (-a + 3 * b - 3 * d + e) * u3);
+      out.push([c(p0[0], p1[0], p2[0], p3[0]), c(p0[1], p1[1], p2[1], p3[1])]);
+    }
+  }
+  out.push(pts[pts.length - 1]);
+  return out.map((q, i) => {
+    const a = out[Math.max(0, i - 1)];
+    const b = out[Math.min(out.length - 1, i + 1)];
+    const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+    return [q[0] + ((b[1] - a[1]) / l) * side, q[1] - ((b[0] - a[0]) / l) * side];
+  });
+}
+
+function upTo(pts: Pt[], p: number): Pt[] {
+  if (p >= 1) return pts;
+  const n = Math.max(2, Math.round(pts.length * Math.max(0, p)));
+  return pts.slice(0, n);
+}
+
+/** A routed arrow: dark casing, the colour, a head, and moving dashes when motion is allowed. */
+function Route({ pts, p, color, show, reduced }: { pts: Pt[]; p: number; color: string; show: number; reduced?: boolean }) {
+  if (show <= 0.02 || p <= 0.02) return null;
+  const q = upTo(pts, p);
+  const d = `M${q.map((v) => `${f1(v[0])},${f1(v[1])}`).join('L')}`;
+  const e = q[q.length - 1];
+  const b = q[Math.max(0, q.length - 3)];
+  const a = Math.atan2(e[1] - b[1], e[0] - b[0]);
+  const h = 11;
+  const tip = `M${f1(e[0] + Math.cos(a) * 5)},${f1(e[1] + Math.sin(a) * 5)} L${f1(e[0] - Math.cos(a - 0.5) * h)},${f1(e[1] - Math.sin(a - 0.5) * h)} L${f1(e[0] - Math.cos(a + 0.5) * h)},${f1(e[1] - Math.sin(a + 0.5) * h)}Z`;
+  return (
+    <g opacity={show} pointerEvents="none" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path d={d} stroke="rgba(6,10,20,0.8)" strokeWidth={6.4} />
+      <path d={tip} fill="rgba(6,10,20,0.8)" stroke="rgba(6,10,20,0.8)" strokeWidth={3.4} />
+      <path d={d} stroke={color} strokeWidth={3} />
+      <path d={tip} fill={color} />
+      {!reduced && <path d={d} stroke="rgba(255,255,255,0.7)" strokeWidth={1.2} strokeDasharray="2 11" className="dash-flow" />}
+    </g>
+  );
+}
+
+function Chip({ at, n, text, show }: { at: Pt; n: number; text: string; show: number }) {
+  if (show <= 0.02) return null;
+  const w = text.length * 6.3 + 30;
+  return (
+    <OnTop>
+      <g opacity={show} pointerEvents="none">
+        <rect x={f1(at[0] - w / 2)} y={f1(at[1] - 11)} width={f1(w)} height={22} rx={11} fill="rgba(8,14,26,0.92)" stroke="#8ecae6" strokeOpacity={0.7} />
+        <circle cx={f1(at[0] - w / 2 + 11)} cy={f1(at[1])} r={7.5} fill="#8ecae6" />
+        <text x={f1(at[0] - w / 2 + 11)} y={f1(at[1])} dy="0.35em" textAnchor="middle" fontSize={10} fontWeight={800} fill="#0b1626">
+          {n}
+        </text>
+        <text x={f1(at[0] - w / 2 + 23)} y={f1(at[1])} dy="0.35em" fontSize={11.5} fontWeight={650} fill="#dceefa">
+          {text}
+        </text>
+      </g>
+    </OnTop>
+  );
+}
+
 function volumeAt(t: number) {
   const a = seg(t, 0.3, 0.35);
   const b = seg(t, 0.355, 0.405);
@@ -180,6 +255,12 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
     [[plC[0] - 14, plC[1] + 22], [plC[0] - 70, plC[1] + 70]],
     [[mouth[0] - 6, mouth[1] + 4], [mouth[0] - 46, mouth[1] - 10]],
   ];
+
+  // Swallowing cycle routes (the cord route runs beside the rope, on its outer side).
+  const swallowIn = besides([[mouth[0] - 26, mouth[1] - 68], [mouth[0] - 18, mouth[1] - 34], [mouth[0] - 5, mouth[1] - 6]], 0, 6);
+  const swallowCord = besides(cordPts.slice(0, -1), -15, 8);
+  const swallowOut = besides([[hip[0] + 2, hip[1] + 14], [hip[0] - 14, hip[1] + 38], [hip[0] - 44, hip[1] + 58]], 0, 6);
+  const chipCord: Pt = [cordPts[3][0] + 92, cordPts[3][1] + 4];
 
   return (
     <g>
@@ -256,6 +337,18 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
           <Flow d={cordD} n={3} dur={3.6} r={2.2} color="#8ecae6" />
           <Flow d={`M${PLACENTA_C[0] - 20},${PLACENTA_C[1] + 20} Q${cavC[0] - 100},${cavC[1] - 120} ${mouth[0] - 40},${mouth[1] - 60}`} n={2} dur={5} r={2} color="#5fa8cc" />
         </g>
+      )}
+      {/* The cycle, drawn: 1 fluid swallowed at the mouth; 2 from the gut into the blood, along the cord to the
+          placenta; 3 through the kidneys back out as urine into the cavity. */}
+      {swallowA > 0.02 && (
+        <>
+          <Route pts={swallowIn} p={seg(t, 0.585, 0.612)} color="#8ecae6" show={swallowA} reduced={reduced} />
+          <Route pts={swallowCord} p={seg(t, 0.612, 0.642)} color="#8ecae6" show={swallowA} reduced={reduced} />
+          <Route pts={swallowOut} p={seg(t, 0.642, 0.665)} color="#8ecae6" show={swallowA} reduced={reduced} />
+          <Chip at={[swallowIn[0][0] - 4, swallowIn[0][1] - 16]} n={1} text="irentsi" show={swallowA * seg(t, 0.59, 0.61)} />
+          <Chip at={chipCord} n={2} text="odolera → karenara" show={swallowA * seg(t, 0.62, 0.64)} />
+          <Chip at={[swallowOut[swallowOut.length - 1][0] - 30, swallowOut[swallowOut.length - 1][1] + 24]} n={3} text="giltzurrunak → gernua" show={swallowA * seg(t, 0.648, 0.665)} />
+        </>
       )}
       <Mark id="degluzioa" x={mouth[0]} y={mouth[1]} rx={14} show={swallowA} />
 

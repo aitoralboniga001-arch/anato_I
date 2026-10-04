@@ -1,10 +1,11 @@
 'use client';
 
-import { Arrow, C, Label, Note, Part, bezier, lerp, rand, seg, tube, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, clamp, Note, Part, bezier, lerp, rand, seg, tube, type Pt, type SceneProps } from '@/components/kit';
 import { discOutline, discOutlinePath, f1 } from './common';
 import { DorsalDefs } from './dorsalKit';
 import { useId } from 'react';
 import { DiscDrawing, MembraneMark, makeDisc } from './DiscSection';
+import { frameAt, inFrame } from './gastroKit';
 import { Cells } from '@/components/scenes/section/Section';
 
 /**
@@ -308,65 +309,89 @@ export function AllantoisSagittal({ t }: SceneProps) {
   const allPart = allLine.slice(0, nAll);
   const [nx, ny] = s.map(node, s.top(node));
   const mid = (x: number) => s.map(x, (s.base(x) + s.dEnd(x)) / 2);
-  const L = (id: string, x: number, y: number, p: Pt, show = 1, small = false) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} small={small} />;
+  // Camera: the allantois and the cloacal membrane are small and sit together at the caudal end, so their
+  // step pushes in there (yolk-sac wall, allantois, stalk root, membrane in one close-up); the next step
+  // (thinner stalk, larger cavity) pulls back out to the whole conceptus.
+  const memb = s.map(W - 22, s.dEnd(W - 22));
+  const fa = allLine[15];
+  const F: Pt = [(memb[0] + fa[0]) / 2 + 10, (memb[1] + fa[1]) / 2 - 6];
+  const z = frameAt(t, [
+    [0, 500, 320, 1],
+    [0.7, 500, 320, 1],
+    [0.755, F[0], F[1], 2],
+    [0.845, F[0], F[1], 2],
+    [0.885, 500, 320, 1],
+    [1, 500, 320, 1],
+  ]);
+  const close = z.s > 1.25;
+  // Names set inside the picture (not in a gutter) step aside while the camera is close, so none lands on the allantois.
+  const far = 1 - clamp((z.s - 1) / 0.5);
+  // Anchors follow the camera; a name whose structure has left the close-up is not set.
+  const L = (id: string, x: number, y: number, p: Pt, show = 1, small = false) => {
+    const q = z.at(p[0], p[1]);
+    return <Label key={id} id={id} x={x} y={y} ax={q[0]} ay={q[1]} show={show * inFrame(q, 36)} small={small} />;
+  };
+  const yolkNear: P2 = [s.p.cx + s.rx * Math.cos(0.75), s.cyY + s.p.yolkH * K * Math.sin(0.75) - 10];
   const xs = Array.from({ length: 41 }, (_, i) => lerp(-W, W, i / 40));
   const outline = pathD([...xs.map((x) => s.map(x, s.top(x) - 1.5)), ...xs.slice().reverse().map((x) => s.map(x, s.dEnd(x) + 11.5))]) + 'Z';
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
-      <Part id="korion-barrunbea" quiet>
-        <path d={pathD(ring(0))} fill="#141c30" />
-      </Part>
-      <Part id="finkapen-pedikulua">
-        <path d={ST.d} fill={C.mesoExtra} />
-        {STALK_NUCLEI.map((c, i) => {
-          const q = stalk(c.u);
-          const w = stalkW(c.u);
-          return <ellipse key={i} cx={f1(q.x + q.nx * w * c.v)} cy={f1(q.y + q.ny * w * c.v)} rx={2.6} ry={1.9} transform={`rotate(${f1(q.angle)} ${f1(q.x + q.nx * w * c.v)} ${f1(q.y + q.ny * w * c.v)})`} fill="rgba(150,70,50,0.6)" />;
-        })}
-        <g fill="none" stroke="#c96b45" strokeWidth={1.2}>
-          <path d={ST.left} />
-          <path d={ST.right} />
-        </g>
-      </Part>
-      <Part id="korion-plaka">
-        <Cells outer={ring(0)} inner={ring(9)} n={90} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={71} />
-        <Cells outer={ring(9)} inner={ring(19)} n={120} fill="#d7bd86" nucleus="rgba(90,60,20,0.6)" seed={72} />
-      </Part>
-
-      <DiscDrawing s={s} ids={{ epiblast: 'ektodermoa' }} />
-
-      {g.bud > 0.01 && (
-        <Part id="alantoidea" show={g.bud}>
-          {/* Blind, rounded tip (a diverticulum, not a cut tube). */}
-          <circle cx={f1(allPart[allPart.length - 1][0])} cy={f1(allPart[allPart.length - 1][1])} r={12} fill={C.endoderm} stroke="rgba(90,60,10,0.45)" strokeWidth={0.8} />
-          <path d={pathD([...offset(allPart, 7), ...offset(allPart, -7).reverse()]) + 'Z'} fill="#3a3218" />
-          <circle cx={f1(allPart[allPart.length - 1][0])} cy={f1(allPart[allPart.length - 1][1])} r={6.5} fill="#3a3218" />
-          <Cells outer={offset(allPart, 12)} inner={offset(allPart, 6)} n={Math.max(2, nAll)} fill={C.endoderm} nucleus="rgba(90,60,10,0.7)" seed={73} />
-          <Cells outer={offset(allPart, -12)} inner={offset(allPart, -6)} n={Math.max(2, nAll)} fill={C.endoderm} nucleus="rgba(90,60,10,0.7)" seed={74} />
+      <g transform={z.transform}>
+        <Part id="korion-barrunbea" quiet>
+          <path d={pathD(ring(0))} fill="#141c30" />
         </Part>
-      )}
-      <Part id="kloaka-mintza" show={g.cloaca}>
-        <MembraneMark s={s} x={W - 22} />
-      </Part>
-      <Part id="nodo-primitiboa">
-        {/* The node: thickened, raised ectoderm round the pit, lit from above (no ring drawn round it). */}
-        <defs>
-          <radialGradient id="w3al-node" cx="50%" cy="28%" r="68%">
-            <stop offset="0" stopColor="#dbe6ff" stopOpacity={0.62} />
-            <stop offset="0.7" stopColor="#8fb0f5" stopOpacity={0.2} />
-            <stop offset="1" stopColor="#8fb0f5" stopOpacity={0} />
-          </radialGradient>
-        </defs>
-        <ellipse cx={nx} cy={ny + 7 * K} rx={19 * K} ry={14 * K} fill="url(#w3al-node)" />
-        <path d={`M${f1(nx - 17 * K)},${f1(ny - 1)} Q${f1(nx)},${f1(ny - 12 * K)} ${f1(nx + 17 * K)},${f1(ny - 1)}`} fill="none" stroke="#d6e2ff" strokeWidth={1.5} strokeLinecap="round" opacity={0.85} />
-      </Part>
-      <Part id="hiru-orriko-diskoa" show={0.9}>
-        {/* The disc's outline as a solid casing (light line on a dark one), not a dashed pointer. */}
-        <path d={outline} fill="none" stroke="#0b1020" strokeWidth={3} opacity={0.6} />
-        <path d={outline} fill="none" stroke="#f3f6ff" strokeWidth={1.1} opacity={0.6} />
-      </Part>
-      <Arrow from={mid(-W * 0.2)} to={mid(-W * 0.2 - 110)} bend={0} color="#fde68a" width={1.8} head={7} show={g.grow * (1 - seg(t, 0.69, 0.72))} />
+        <Part id="finkapen-pedikulua">
+          <path d={ST.d} fill={C.mesoExtra} />
+          {STALK_NUCLEI.map((c, i) => {
+            const q = stalk(c.u);
+            const w = stalkW(c.u);
+            return <ellipse key={i} cx={f1(q.x + q.nx * w * c.v)} cy={f1(q.y + q.ny * w * c.v)} rx={2.6} ry={1.9} transform={`rotate(${f1(q.angle)} ${f1(q.x + q.nx * w * c.v)} ${f1(q.y + q.ny * w * c.v)})`} fill="rgba(150,70,50,0.6)" />;
+          })}
+          <g fill="none" stroke="#c96b45" strokeWidth={1.2}>
+            <path d={ST.left} />
+            <path d={ST.right} />
+          </g>
+        </Part>
+        <Part id="korion-plaka">
+          <Cells outer={ring(0)} inner={ring(9)} n={90} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={71} />
+          <Cells outer={ring(9)} inner={ring(19)} n={120} fill="#d7bd86" nucleus="rgba(90,60,20,0.6)" seed={72} />
+        </Part>
+
+        <DiscDrawing s={s} ids={{ epiblast: 'ektodermoa' }} />
+
+        {g.bud > 0.01 && (
+          <Part id="alantoidea" show={g.bud}>
+            {/* Blind, rounded tip (a diverticulum, not a cut tube). */}
+            <circle cx={f1(allPart[allPart.length - 1][0])} cy={f1(allPart[allPart.length - 1][1])} r={12} fill={C.endoderm} stroke="rgba(90,60,10,0.45)" strokeWidth={0.8} />
+            <path d={pathD([...offset(allPart, 7), ...offset(allPart, -7).reverse()]) + 'Z'} fill="#3a3218" />
+            <circle cx={f1(allPart[allPart.length - 1][0])} cy={f1(allPart[allPart.length - 1][1])} r={6.5} fill="#3a3218" />
+            <Cells outer={offset(allPart, 12)} inner={offset(allPart, 6)} n={Math.max(2, nAll)} fill={C.endoderm} nucleus="rgba(90,60,10,0.7)" seed={73} />
+            <Cells outer={offset(allPart, -12)} inner={offset(allPart, -6)} n={Math.max(2, nAll)} fill={C.endoderm} nucleus="rgba(90,60,10,0.7)" seed={74} />
+          </Part>
+        )}
+        <Part id="kloaka-mintza" show={g.cloaca}>
+          <MembraneMark s={s} x={W - 22} />
+        </Part>
+        <Part id="nodo-primitiboa">
+          {/* The node: thickened, raised ectoderm round the pit, lit from above (no ring drawn round it). */}
+          <defs>
+            <radialGradient id="w3al-node" cx="50%" cy="28%" r="68%">
+              <stop offset="0" stopColor="#dbe6ff" stopOpacity={0.62} />
+              <stop offset="0.7" stopColor="#8fb0f5" stopOpacity={0.2} />
+              <stop offset="1" stopColor="#8fb0f5" stopOpacity={0} />
+            </radialGradient>
+          </defs>
+          <ellipse cx={nx} cy={ny + 7 * K} rx={19 * K} ry={14 * K} fill="url(#w3al-node)" />
+          <path d={`M${f1(nx - 17 * K)},${f1(ny - 1)} Q${f1(nx)},${f1(ny - 12 * K)} ${f1(nx + 17 * K)},${f1(ny - 1)}`} fill="none" stroke="#d6e2ff" strokeWidth={1.5} strokeLinecap="round" opacity={0.85} />
+        </Part>
+        <Part id="hiru-orriko-diskoa" show={0.9}>
+          {/* The disc's outline as a solid casing (light line on a dark one), not a dashed pointer. */}
+          <path d={outline} fill="none" stroke="#0b1020" strokeWidth={3} opacity={0.6} />
+          <path d={outline} fill="none" stroke="#f3f6ff" strokeWidth={1.1} opacity={0.6} />
+        </Part>
+        <Arrow from={mid(-W * 0.2)} to={mid(-W * 0.2 - 110)} bend={0} color="#fde68a" width={1.8} head={7} show={g.grow * (1 - seg(t, 0.69, 0.72))} />
+      </g>
 
       <Note x={500} y={606} show={g.polarity} tone="accent" size={11}>
         Polaritatea finkatuta: kraneo-kaudala, dortso-bentrala eta ezker-eskuina
@@ -374,11 +399,11 @@ export function AllantoisSagittal({ t }: SceneProps) {
 
       {L('korion-plaka', 300, 60, onChorion(-122), 1, true)}
       {L('korion-barrunbea', 300, 100, [190, 190], 1, true)}
-      {L('nodo-primitiboa', 470, 140, [nx, ny + 2])}
-      {L('amnios-barrunbea', 470, 178, s.at.amnion)}
-      {L('finkapen-pedikulua', 760, 110, stalkLine[18])}
+      {L('nodo-primitiboa', 470, 140, [nx, ny + 2], far)}
+      {L('amnios-barrunbea', 470, 178, s.at.amnion, far)}
+      {L('finkapen-pedikulua', 760, 110, stalkLine[close ? 9 : 18])}
       {L('hiru-orriko-diskoa', 190, 270, s.map(-W * 0.6, 4))}
-      {L('bitelo-zaku-sekundarioa', 190, 470, s.at.yolk)}
+      {L('bitelo-zaku-sekundarioa', 190, 470, close ? yolkNear : s.at.yolk)}
       {L('ildo-primitiboa', 810, 400, s.at.groove)}
       {L('kloaka-mintza', 810, 440, s.map(W - 22, s.dEnd(W - 22) + 8), g.cloaca)}
       {L('alantoidea', 810, 480, allPart[Math.min(allPart.length - 1, 10)], g.bud)}

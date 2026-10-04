@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, FollowRing, Journey, Label, Mark, Note, OnTop, Part, clamp, easeInOut, lerp, lin, mix, rand, seg, useScene, type Pt, type SceneProps } from '@/components/kit';
+import { C, FollowRing, Journey, Label, Mark, Note, OnTop, Part, clamp, easeInOut, lerp, lin, mix, rand, seg, useScene, type Pt, type SceneProps } from '@/components/kit';
 import { f1 } from './common';
 import { Callout, frameAt, type Key } from './gastroKit';
 
@@ -115,6 +115,74 @@ function mover(k: number, s: number, t: number): Mover {
 
 const bez = (a: Pt, c: Pt, b: Pt, u: number): Pt => [(1 - u) ** 2 * a[0] + 2 * (1 - u) * u * c[0] + u * u * b[0], (1 - u) ** 2 * a[1] + 2 * (1 - u) * u * c[1] + u * u * b[1]];
 
+/* ------------------------------------------------------------ the fate streams */
+
+const cubic = (a: Pt, b: Pt, c: Pt, d: Pt, n = 22): Pt[] =>
+  Array.from({ length: n + 1 }, (_, i) => {
+    const u = i / n;
+    const v = 1 - u;
+    return [v * v * v * a[0] + 3 * v * v * u * b[0] + 3 * v * u * u * c[0] + u * u * u * d[0], v * v * v * a[1] + 3 * v * v * u * b[1] + 3 * v * u * u * c[1] + u * u * u * d[1]];
+  });
+
+/** First fraction `p` (by length) of a polyline. */
+function partOf(pts: Pt[], p: number): Pt[] {
+  if (p >= 1) return pts;
+  const seglen = pts.slice(1).map((q, i) => Math.hypot(q[0] - pts[i][0], q[1] - pts[i][1]));
+  let left = seglen.reduce((a, b) => a + b, 0) * Math.max(0, p);
+  const out: Pt[] = [pts[0]];
+  for (let i = 0; i < seglen.length; i++) {
+    if (left >= seglen[i]) {
+      out.push(pts[i + 1]);
+      left -= seglen[i];
+    } else {
+      const k = seglen[i] ? left / seglen[i] : 0;
+      out.push([lerp(pts[i][0], pts[i + 1][0], k), lerp(pts[i][1], pts[i + 1][1], k)]);
+      break;
+    }
+  }
+  return out;
+}
+
+/**
+ * The paths the cells take, as one branching stream (Langman fig. 5.3 arrows, joined up): along the
+ * epiblast into the groove (blue), then either down to the hypoblast row (yellow) or out between the
+ * layers (red). Each branch grows along its length when its step is told and stays, quieter, afterwards.
+ */
+const STREAM = (s: number) => ({
+  in: cubic([MID + s * 200, 171], [MID + s * 110, 168], [MID + s * 30, 168], [MID + s * 8, 201]),
+  endo: cubic([MID + s * 5, 279], [MID + s * 6, 296], [MID + s * 9, 308], [MID + s * 13, 325], 12),
+  row: cubic([MID + s * 18, HYP_Y + 30], [MID + s * 60, HYP_Y + 30], [MID + s * 100, HYP_Y + 30], [MID + s * 138, HYP_Y + 30], 8),
+  hyp: cubic([MID + s * 150, HYP_Y + 30], [MID + s * 160, HYP_Y + 30], [MID + s * 170, HYP_Y + 30], [MID + s * 182, HYP_Y + 30], 4),
+  meso: cubic([MID + s * 6, 279], [MID + s * 10, LANE_Y + 2], [MID + s * 40, LANE_Y], [MID + s * 176, LANE_Y], 26),
+});
+
+function Stream({ pts, p, color, w = 4, show = 1, flow }: { pts: Pt[]; p: number; color: string; w?: number; show?: number; flow?: boolean }) {
+  if (show <= 0.02 || p <= 0.02) return null;
+  const q = partOf(pts, p);
+  if (q.length < 2) return null;
+  const d = `M${q.map((v) => `${f1(v[0])},${f1(v[1])}`).join('L')}`;
+  const e = q[q.length - 1];
+  const b = q[Math.max(0, q.length - 3)];
+  const ang = Math.atan2(e[1] - b[1], e[0] - b[0]);
+  const hd = w * 3.1;
+  const tipAt = (len: number, a: number): Pt => [e[0] + Math.cos(ang) * len - Math.cos(ang + a) * hd, e[1] + Math.sin(ang) * len - Math.sin(ang + a) * hd];
+  const t0 = tipAt(hd * 0.55, 0.5);
+  const t1 = tipAt(hd * 0.55, -0.5);
+  const tipEnd: Pt = [e[0] + Math.cos(ang) * hd * 0.55, e[1] + Math.sin(ang) * hd * 0.55];
+  const tip = `M${f1(tipEnd[0])},${f1(tipEnd[1])} L${f1(t0[0])},${f1(t0[1])} L${f1(t1[0])},${f1(t1[1])}Z`;
+  return (
+    <g opacity={show} pointerEvents="none" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {/* A soft band of the fate's colour under a crisp, cased core: reads on dark ground and at pane scale. */}
+      <path d={d} stroke={color} strokeWidth={w * 3.4} opacity={0.16} />
+      <path d={d} stroke="rgba(6,8,14,0.72)" strokeWidth={w + 3.2} />
+      <path d={tip} fill="rgba(6,8,14,0.72)" stroke="rgba(6,8,14,0.72)" strokeWidth={3.2} />
+      <path d={d} stroke={color} strokeWidth={w} />
+      <path d={tip} fill={color} />
+      {flow && <path d={d} stroke="rgba(255,255,255,0.55)" strokeWidth={w * 0.36} strokeDasharray="2 11" className="dash-flow" />}
+    </g>
+  );
+}
+
 type Fate = 'A' | 'B' | 'C';
 const FATE_COLOR: Record<Fate, string> = { A: C.endoderm, B: C.mesoIntra, C: C.ectoderm };
 
@@ -194,6 +262,16 @@ function emphasis(t: number) {
   };
 }
 
+/** Step call-outs under the section: [from, to, text, colour]. */
+const CALLOUTS: [number, number, string, string][] = [
+  [GB.converge, GB.invag, 'Epiblastoko zelulak → ildo primitibora', C.epiblast],
+  [GB.invag, GB.endo, 'Inbaginazioa: zelula geruzatik askatzen da', '#e8eefc'],
+  [GB.endo, GB.meso, 'Endodermoa txertatu → hipoblastoa alboetara baztertu', C.endoderm],
+  [GB.meso, GB.ecto, 'Mesodermoa: goiko eta beheko geruzen ARTEAN', C.mesoIntra],
+  [GB.ecto, GB.tri, 'Ektodermoa: SARTU GABE, azalean geratu', C.ectoderm],
+  [GB.tri, 2, 'Hiru geruzak epiblastotik; hipoblastoa ordezkatua', '#e8eefc'],
+];
+
 const STEPS: [number, string, string][] = [
   [0, 'Bi orriko diskoa', C.epiblast],
   [GB.streak, 'Lerro primitiboa', '#dbe4ff'],
@@ -246,13 +324,21 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
   const step = STEPS[stepIdx];
 
   const conv = seg(t, GB.converge, GB.converge + 0.03) * (1 - seg(t, GB.invag + 0.03, GB.invag + 0.06));
-  const invagOn = seg(t, GB.invag, GB.invag + 0.02) * (1 - seg(t, GB.endo + 0.02, GB.endo + 0.05));
-  const endoOn = seg(t, GB.endo + 0.02, GB.endo + 0.05) * (1 - seg(t, GB.meso - 0.01, GB.meso + 0.02));
-  const mesoOn = seg(t, GB.meso + 0.02, GB.meso + 0.05) * (1 - seg(t, GB.ecto - 0.01, GB.ecto + 0.02));
-  const ectoOn = seg(t, GB.ecto + 0.01, GB.ecto + 0.04) * (1 - seg(t, GB.tri - 0.01, GB.tri + 0.02));
   const triOn = seg(t, GB.tri, GB.tri + 0.03);
   const trailOn = trackOn;
   const win = (a: number, b: number) => seg(t, a, a + 0.03) * (1 - seg(t, b, b + 0.03));
+
+  // Fate streams: grow when their step is told, stay quieter afterwards, all bright again in the summary.
+  const quiet = (told: number) => Math.max(0.42 + 0.58 * told, triOn);
+  const sIn = seg(t, GB.converge, GB.converge + 0.05);
+  const sEndo = seg(t, GB.invag + 0.005, GB.invag + 0.04);
+  const sRow = seg(t, GB.endo + 0.01, GB.endo + 0.06);
+  const sMeso = seg(t, GB.meso, GB.meso + 0.055);
+  const ectoQuiet = 1 - 0.3 * win(GB.ecto, GB.tri);
+  const stIn = quiet(win(GB.converge, GB.endo)) * ectoQuiet;
+  const stEndo = quiet(win(GB.invag, GB.meso)) * ectoQuiet;
+  const stHyp = win(GB.endo, GB.meso);
+  const stMeso = quiet(win(GB.meso, GB.ecto)) * ectoQuiet;
 
   const z = frameAt(t, CELL_KEYS);
   const A = (x: number, y: number) => z.at(x, y);
@@ -309,6 +395,20 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
             )}
           </g>
         </Part>
+
+        {/* The fate streams, under the cells (they mark the way the cells go, never cover them). */}
+        {[-1, 1].map((s) => {
+          const st = STREAM(s);
+          return (
+            <g key={`st${s}`}>
+              <Stream pts={st.in} p={sIn} color={C.epiblast} w={4.2} show={stIn} flow={!reduced} />
+              <Stream pts={st.endo} p={sEndo} color={C.endoderm} w={4.2} show={stEndo} flow={!reduced} />
+              <Stream pts={st.row} p={sRow} color={C.endoderm} w={3.4} show={stEndo} flow={!reduced} />
+              <Stream pts={st.hyp} p={sRow} color={HYP_COLOR} w={3} show={stHyp} />
+              <Stream pts={st.meso} p={sMeso} color={C.mesoIntra} w={4.2} show={stMeso} flow={!reduced} />
+            </g>
+          );
+        })}
 
         {/* Endoderm: first cells in, diving then inserting into the row. */}
         <Part id="endodermoa" show={aCells.length ? 1 : 0}>
@@ -385,7 +485,8 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
             } else outline = `M${f1(x - 11)},${f1(y)} a11,9.4 0 1,0 22,0 a11,9.4 0 1,0 -22,0 Z`;
             // The whole route (and the origin ghost) while this fate is the step's subject, and all together in the summary.
             const told = q.fate === 'A' ? win(GB.invag, GB.meso) : q.fate === 'B' ? win(GB.meso, GB.ecto) : win(GB.ecto, GB.tri);
-            const route = Math.max(told, triOn) * 0.6;
+            // In the summary the fate streams carry the paths; the individual routes step back so the picture stays clean.
+            const route = Math.max(told * 0.6, triOn * 0.22);
             return (
               <g key={`${q.s}:${q.k}`} opacity={trackOn * Math.max(0.5, subj)}>
                 <Journey pts={pts} color={col} head={16} width={2.6} route={route} origin={route > 0.15} r={q.fate === 'C' ? 6 : 8} show={trailOn} />
@@ -396,39 +497,14 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
         </g>
       )}
 
-      {/* Movement arrows for the step being told. */}
-      <g pointerEvents="none">
-        {conv > 0.02 && (
-          <g opacity={conv}>
-            <Arrow from={[MID - 185, 160]} to={[MID - 40, 170]} bend={0.08} color={C.epiblast} width={2.4} flow={!reduced} />
-            <Arrow from={[MID + 185, 160]} to={[MID + 40, 170]} bend={-0.08} color={C.epiblast} width={2.4} flow={!reduced} />
-          </g>
-        )}
-        {invagOn > 0.02 && <Arrow from={[MID + 30, 150]} to={[MID + 30, 300]} bend={-0.25} color="#e8eefc" width={2.4} flow={!reduced} show={invagOn} />}
-        {endoOn > 0.02 && (
-          <g opacity={endoOn}>
-            <Arrow from={[MID - 150, HYP_Y + 34]} to={[MID - 185, HYP_Y + 34]} bend={0} color={HYP_COLOR} width={2.2} flow={!reduced} />
-            <Arrow from={[MID + 150, HYP_Y + 34]} to={[MID + 185, HYP_Y + 34]} bend={0} color={HYP_COLOR} width={2.2} flow={!reduced} />
-          </g>
-        )}
-        {mesoOn > 0.02 && (
-          <g opacity={mesoOn}>
-            <Arrow from={[MID - 40, LANE_Y]} to={[MID - 170, LANE_Y]} bend={0} color={C.mesoIntra} width={2.2} flow={!reduced} />
-            <Arrow from={[MID + 40, LANE_Y]} to={[MID + 170, LANE_Y]} bend={0} color={C.mesoIntra} width={2.2} flow={!reduced} />
-          </g>
-        )}
-      </g>
-
       {/* The process ring marks where it happens while the cells converge, then steps aside so the followed cells stay clear (it returns whenever gastrulation is the subject). */}
       <Mark id="gastrulazioa" x={MID} y={276} rx={40} ry={82} show={Math.max(conv, ['gastrulazioa'].some((id) => ctx.focus.includes(id) || ctx.selected === id || ctx.hovered === id || ctx.spotlight === id) ? trackOn : 0)} />
       </g>
 
-      <Callout x={500} y={565} text="Epiblastoko zelulak → ildo primitibora" show={t >= GB.converge && t < GB.invag ? conv : 0} color={C.epiblast} />
-      <Callout x={500} y={565} text="Inbaginazioa: zelula geruzatik askatzen da" show={t >= GB.invag && t < GB.endo ? invagOn : 0} />
-      <Callout x={500} y={565} text="Endodermoa txertatu → hipoblastoa alboetara baztertu" show={t >= GB.endo && t < GB.meso ? endoOn : 0} color={C.endoderm} />
-      <Callout x={500} y={565} text="Mesodermoa: goiko eta beheko geruzen ARTEAN" show={t >= GB.meso && t < GB.ecto ? mesoOn : 0} color={C.mesoIntra} />
-      <Callout x={500} y={565} text="Ektodermoa: SARTU GABE, azalean geratu" show={t >= GB.ecto && t < GB.tri ? ectoOn : 0} color={C.ectoderm} />
-      <Callout x={500} y={565} text="Hiru geruzak epiblastotik; hipoblastoa ordezkatua" show={triOn} />
+      {/* One call-out per step on the same spot: the outgoing one is gone before the incoming one fades in. */}
+      {CALLOUTS.map(([a, b, text, color]) => (
+        <Callout key={text} x={500} y={565} text={text} show={seg(t, a + 0.02, a + 0.045) * (1 - seg(t, b, b + 0.018))} color={color} />
+      ))}
 
       {/* A bracket is a real, clickable representation of the three-layer disc. */}
       <Mark id="hiru-orriko-diskoa" show={triOn}>
@@ -460,8 +536,11 @@ export function GastrulationCells({ t, reduced }: SceneProps) {
         const hypoX = MID + (0.5 + hypPush[1]) * WH;
         return <>
           {label('gastrulazioa', 192, 81, [MID - 8, EPI_BOT - 4], trackOn)}
-          {label(t < GB.groove ? 'lerro-primitiboa' : 'ildo-primitiboa', 790, 92, [MID + 3, EPI_TOP + 23], seg(t, GB.streak, GB.streak + 0.025))}
-          {label(ectoName ? 'ektodermoa' : 'epiblastoa', 192, 170, [MID - 100, 218])}
+          {/* Renamed names on the same spot hand over: the old one fades out first, then the new one fades in. */}
+          {label('lerro-primitiboa', 790, 92, [MID + 3, EPI_TOP + 23], seg(t, GB.streak, GB.streak + 0.025) * (1 - seg(t, GB.groove, GB.groove + 0.012)))}
+          {label('ildo-primitiboa', 790, 92, [MID + 3, EPI_TOP + 23], seg(t, GB.groove + 0.012, GB.groove + 0.03))}
+          {label('epiblastoa', 192, 170, [MID - 100, 218], 1 - seg(t, GB.ecto, GB.ecto + 0.012))}
+          {label('ektodermoa', 192, 170, [MID - 100, 218], seg(t, GB.ecto + 0.012, GB.ecto + 0.03))}
           {label('mesodermo-intraenbrionarioa', 198, 368, currentMeso ? [currentMeso.x, currentMeso.y] : [MID, LANE_Y], currentMeso ? 1 : 0)}
           {label('endodermoa', 192, 469, [MID - WH / 2, HYP_Y], seg(t, GB.endo + 0.015, GB.endo + 0.035))}
           {label('hipoblastoa', 790, 506, [hypoX, HYP_Y], 1 - seg(t, GB.meso, GB.meso + 0.02))}
