@@ -271,6 +271,15 @@ interface Ctx {
   pl: Place;
   M: (p: Pt, sd?: 1 | -1) => Pt;
   close: boolean;
+  /** Other names for the same tissue (topic 8 calls the migrating sclerotome "mesenkima"). */
+  ids?: SomiteIds;
+}
+
+export interface SomiteIds {
+  /** The sclerotome once it has formed. */
+  sclero?: string;
+  /** The dorsal plate the somite leaves, once the sclerotome has formed (before the dermomyotome step). */
+  plate?: string;
 }
 
 const sides = [1, -1] as const;
@@ -314,8 +323,14 @@ function SomiteWalls({ c }: { c: Ctx }) {
             <g key={sd}>
               {epiOp > 0.01 && <path d={smoothPath(lumen.map((p) => M(p, sd)), true, 0.4)} fill="#3a0c16" opacity={epiOp} />}
               {epiOp > 0.01 && <Cells outer={sclA.map((a) => M(outerE(a), sd))} inner={sclA.map((a) => M(innerE(a), sd))} n={n(15)} {...RED} seed={31 + sd} opacity={epiOp} />}
-              {plateCells(sd)}
             </g>
+          ))}
+        </Part>
+      )}
+      {somite && (
+        <Part id={c.ids?.plate && tm.sc > 0.5 ? c.ids.plate : 'somitak'}>
+          {sides.map((sd) => (
+            <g key={sd}>{plateCells(sd)}</g>
           ))}
         </Part>
       )}
@@ -411,7 +426,7 @@ function SCellShape({ p, r, o, col = SCLERO, seed }: { p: Pt; r: number; o: numb
 function Sclerotome({ c }: { c: Ctx }) {
   const { tm, M, pl, t } = c;
   const r = Math.max(2, 1.9 * pl.k);
-  const id = t < SB.sclero ? 'somitak' : 'esklerotoma';
+  const id = t < SB.sclero ? 'somitak' : (c.ids?.sclero ?? 'esklerotoma');
   const fade = 1 - 0.55 * tm.fa;
   return (
     <Part id={id}>
@@ -562,11 +577,11 @@ function Intermediate({ c }: { c: Ctx }) {
   );
 }
 
-function scene(t: number, pl: Place, close: boolean) {
+function scene(t: number, pl: Place, close: boolean, sids?: SomiteIds) {
   const tm = timing(t);
   const g = trunkGeom(E6);
   const M = placer(pl);
-  const c: Ctx = { t, tm, g, pl, M, close };
+  const c: Ctx = { t, tm, g, pl, M, close, ids: sids };
   const ids = close ? {} : { parietal: 'alboko-mesodermoa', visceral: 'alboko-mesodermoa' };
   return {
     c,
@@ -630,6 +645,17 @@ function anchors(c: Ctx): Record<string, Pt> {
 }
 
 const CTX: Place = { k: 1.16, ox: 500, oy: 190 };
+
+/** The close-up drawing and its label anchors, for other topics that retell the somite (topic 8: bone origins). */
+export function somiteClose(t: number, sids?: SomiteIds) {
+  const { c, drawing } = scene(t, CLOSE, true, sids);
+  return { drawing, anchors: anchors(c), tm: c.tm, M: c.M, rib: ribLine(c.g).map((p) => c.M(p)) };
+}
+/** The same for the two-sided context view. */
+export function somiteContext(t: number, sids?: SomiteIds) {
+  const { c, drawing } = scene(t, CTX, false, sids);
+  return { drawing, anchors: anchors(c), tm: c.tm, M: c.M, rib: ribLine(c.g).map((p) => c.M(p)), ox: CTX.ox };
+}
 const CLOSE: Place = { k: 3.4, ox: 270, oy: 40 };
 
 /** Wide context: the somite pair within the whole transverse section. */

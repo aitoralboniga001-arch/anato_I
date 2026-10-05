@@ -73,6 +73,71 @@ relation('finkapen-pedikulua', 'wharton-gelatina', 'origin', `${topic6}#wharton-
 relation('wharton-gelatina', 'behin-betiko-zilbor-hestea', 'composition', `${topic6}#behin-betiko-zilbor-hestea.definition`);
 relation('zilbor-hodiak', 'behin-betiko-zilbor-hestea', 'composition', `${topic6}#behin-betiko-zilbor-hestea.definition`, 'Bi arteria eta zain bat.');
 
+// 7. gaia: gorputzaren barrunbeak eta diafragma.
+const topic7 = 'content/weeks/week7-structures.ts';
+relation('enbrioi-barruko-zeloma', 'hasierako-perikardio-barrunbea', 'transformation', `${topic7}#septum-transversum.fate`, 'Septum transversumaren gainean.');
+relation('hasierako-perikardio-barrunbea', 'pleura-barrunbea', 'transformation', `${topic7}#hasierako-perikardio-barrunbea.fate`);
+relation('hasierako-perikardio-barrunbea', 'perikardio-barrunbea', 'transformation', `${topic7}#hasierako-perikardio-barrunbea.fate`);
+relation('paretako-orria', 'paretako-peritoneoa', 'origin', `${topic7}#paretako-peritoneoa.origin`);
+relation('errai-orria', 'errai-peritoneoa', 'origin', `${topic7}#errai-peritoneoa.origin`);
+relation('errai-orria', 'errai-pleura', 'origin', `${topic7}#errai-pleura.origin`, 'Birika hastapenek bultzatuta.');
+relation('paretako-orria', 'perikardio-serosoa', 'origin', `${topic7}#perikardio-serosoa.origin`, 'Somatopleura.');
+relation('mintz-pleuroperikardikoak', 'perikardio-fibrosoa', 'origin', `${topic7}#perikardio-fibrosoa.origin`, 'Mintzen erdiko mesenkimatik.');
+relation('arnas-hastapena', 'hodi-laringotrakeala', 'development', `${topic7}#hodi-laringotrakeala.origin`);
+relation('hodi-laringotrakeala', 'birika-hastapenak', 'development', `${topic7}#hodi-laringotrakeala.fate`, 'Erpinetik bi hastapen.');
+relation('birika-hastapenak', 'birikak', 'transformation', `${topic7}#birikak.origin`);
+relation('mioblastoak', 'miozitoak', 'transformation', `${topic7}#miozitoak.origin`);
+relation('lepoko-nerbio-espinalak', 'nerbio-frenikoa', 'composition', `${topic7}#lepoko-nerbio-espinalak.fate`, 'C3, C4 eta C5.');
+relation('septum-transversum', 'zentro-tendinosoa', 'origin', `${topic7}#zentro-tendinosoa.origin`);
+relation('hestegorri-inguruko-mesenkima', 'gerriko-atala', 'origin', `${topic7}#gerriko-atala.origin`);
+for (const id of ['septum-transversum', 'mintz-pleuroperitonealak', 'hestegorri-inguruko-mesenkima', 'gorputz-paretako-mesodermoa'])
+  relation(id, 'diafragma', 'composition', `${topic7}#diafragma.origin`);
+
+// 8. gaia: hezur sistema.
+const topic8 = 'content/weeks/week8-structures.ts';
+relation('esklerotoma', 'mesenkima', 'transformation', `${topic8}#mesenkima.origin`);
+relation('mesenkima', 'fibroblastoak', 'origin', `${topic8}#fibroblastoak.origin`);
+relation('mesenkima', 'kondroblastoak', 'origin', `${topic8}#kondroblastoak.origin`);
+relation('mesenkima', 'osteoblastoak', 'origin', `${topic8}#osteoblastoak.origin`);
+relation('kondroblastoak', 'kartilago-eredua', 'origin', `${topic8}#kartilago-eredua.origin`);
+relation('kartilago-eredua', 'hezurtzapen-zentroak', 'development', `${topic8}#kartilago-eredua.fate`);
+relation('esklerotoma-okzipitalak', 'kartilago-parakordalak', 'origin', `${topic8}#kartilago-parakordalak.origin`);
+relation('kartilago-parakordalak', 'okzipitalaren-oinaldea', 'origin', `${topic8}#okzipitalaren-oinaldea.origin`);
+relation('hipofisi-kartilagoak', 'esfenoidesaren-gorputza', 'origin', `${topic8}#esfenoidesaren-gorputza.origin`);
+relation('trenkada-kranialak', 'etmoidesa', 'origin', `${topic8}#etmoidesa.origin`);
+relation('kapsula-periotikoa', 'harkaitza', 'origin', `${topic8}#harkaitza.origin`);
+relation('hego-tenporala', 'esfenoidesaren-hego-handia', 'origin', `${topic8}#esfenoidesaren-hego-handia.origin`);
+relation('begizulo-hegoa', 'esfenoidesaren-hego-txikia', 'origin', `${topic8}#esfenoidesaren-hego-txikia.origin`);
+relation('barra-pterigopalatino-karratua', 'ingudea', 'origin', `${topic8}#ingudea.origin`);
+relation('meckel-kartilagoa', 'mailua', 'origin', `${topic8}#mailua.origin`);
+relation('meckel-kartilagoa', 'beheko-maxilarra', 'development', `${topic8}#meckel-kartilagoa.fate`);
+relation('reichert-kartilagoa', 'ointokia', 'origin', `${topic8}#ointokia.origin`);
+relation('reichert-kartilagoa', 'apofisi-estiloidea', 'origin', `${topic8}#apofisi-estiloidea.origin`);
+relation('prozesu-maxilarra', 'goiko-maxilarra', 'origin', `${topic8}#goiko-maxilarra.origin`);
+relation('prozesu-maxilarra', 'hezur-malarra', 'origin', `${topic8}#hezur-malarra.origin`);
+relation('prozesu-maxilarra', 'tenporalaren-ezkata', 'origin', `${topic8}#tenporalaren-ezkata.origin`);
+relation('barail-prozesua', 'meckel-kartilagoa', 'origin', `${topic8}#meckel-kartilagoa.origin`);
+relation('hioide-arkua', 'reichert-kartilagoa', 'origin', `${topic8}#reichert-kartilagoa.origin`);
+relation('notokorda', 'gune-pulposoa', 'origin', `${topic8}#gune-pulposoa.origin`);
+relation('esklerotoma-segmentuak', 'orno-gorputza', 'origin', `${topic8}#orno-gorputza.origin`);
+relation('segmentu-arteko-mesenkima', 'ornoarteko-diskoa', 'origin', `${topic8}#ornoarteko-diskoa.origin`);
+relation('gune-pulposoa', 'ornoarteko-diskoa', 'composition', `${topic8}#ornoarteko-diskoa.origin`);
+relation('eraztun-fibrosoa', 'ornoarteko-diskoa', 'composition', `${topic8}#ornoarteko-diskoa.origin`);
+relation('esklerotoma', 'saihets-hezurra', 'origin', `${topic8}#saihets-hezurra.origin`);
+relation('paretako-orria', 'saihets-kartilagoa', 'origin', `${topic8}#saihets-kartilagoa.origin`);
+relation('paretako-orria', 'esternoi-barrak', 'origin', `${topic8}#esternoi-barrak.origin`);
+relation('esternoi-barrak', 'esternoia', 'origin', `${topic8}#esternoi-barrak.fate`);
+relation('kirtena', 'esternoia', 'composition', `${topic8}#kirtena.fate`);
+relation('esternoiaren-gorputza', 'esternoia', 'composition', `${topic8}#esternoiaren-gorputza.fate`);
+relation('apofisi-xifoidea', 'esternoia', 'composition', `${topic8}#apofisi-xifoidea.fate`);
+relation('paretako-orria', 'gorputz-adarren-mesenkima', 'origin', `${topic8}#gorputz-adarren-mesenkima.origin`);
+relation('gorputz-adarren-mesenkima', 'humeroa', 'origin', `${topic8}#humeroa.origin`);
+relation('gorputz-adarren-mesenkima', 'erradioa', 'origin', `${topic8}#erradioa.origin`);
+relation('gorputz-adarren-mesenkima', 'ulna', 'origin', `${topic8}#ulna.origin`);
+relation('gorputz-adarren-mesenkima', 'femurra', 'origin', `${topic8}#femurra.origin`);
+relation('gorputz-adarren-mesenkima', 'tibia', 'origin', `${topic8}#tibia.origin`);
+relation('gorputz-adarren-mesenkima', 'peroneoa', 'origin', `${topic8}#peroneoa.origin`);
+
 /** Reuse the existing learning trees without upgrading their edges to cell ancestry. */
 const legacy: AtlasRelation[] = [];
 function walk(node: LNode) {

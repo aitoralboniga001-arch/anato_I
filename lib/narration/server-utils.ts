@@ -45,7 +45,7 @@ export function parseNarrationRequest(value: unknown): NarrationRequest {
   if (!isRecord(value)) throw bad();
   const allowed = ['week', 'stage', 'kind', 'beat', 'structure', 'view', 'segment'];
   if (Object.keys(value).some(k => !allowed.includes(k))) throw bad();
-  if (!Number.isInteger(value.week) || Number(value.week) < 1 || Number(value.week) > 6 || !isId(value.stage)) throw bad();
+  if (!Number.isInteger(value.week) || Number(value.week) < 1 || Number(value.week) > 8 || !isId(value.stage)) throw bad();
   if (typeof value.kind !== 'string' || !['intro', 'beat', 'structure', 'bridge'].includes(value.kind)) throw bad();
   if (value.segment !== undefined && !isIndex(value.segment)) throw bad();
   if (value.beat !== undefined && !isIndex(value.beat)) throw bad();

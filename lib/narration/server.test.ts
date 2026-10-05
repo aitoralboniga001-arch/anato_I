@@ -28,14 +28,14 @@ describe('public browser origin boundary', () => {
 });
 
 describe('canonical narration boundary', () => {
-  it('accepts canonical identifiers for all six topics', () => {
-    for (let week = 1; week <= 6; week++) expect(parseNarrationRequest({ week, stage: 'etapa-1', kind: 'beat', beat: 0, segment: 1 })).toMatchObject({ week });
+  it('accepts canonical identifiers for all eight topics', () => {
+    for (let week = 1; week <= 8; week++) expect(parseNarrationRequest({ week, stage: 'etapa-1', kind: 'beat', beat: 0, segment: 1 })).toMatchObject({ week });
   });
 
   it.each([
     { week: 1, stage: 'etapa', kind: 'intro', text: 'Arbitrary paid synthesis' },
     { week: 1, stage: 'etapa', kind: 'intro', model: 'other' },
-    { week: 7, stage: 'etapa', kind: 'intro' },
+    { week: 9, stage: 'etapa', kind: 'intro' },
     { week: '1', stage: 'etapa', kind: 'intro' },
     { week: 1, stage: '../etapa', kind: 'intro' },
     { week: 1, stage: 'etapa', kind: 'beat', beat: -1 },

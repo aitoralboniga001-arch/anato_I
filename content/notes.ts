@@ -79,6 +79,29 @@ export const NOTES: Record<number, NotesSection[]> = {
     { n: '4', title: 'Zilbor-hestearen eraketa eta garapena', depth: 0, stages: ['zilbor-hestea'] },
     { n: '5', title: 'Likido amniotikoa', depth: 0, stages: ['likido-amniotikoa'] },
   ],
+  7: [
+    { n: '1', title: 'Garapenaren 3. astea', depth: 0, stages: ['zeloma'] },
+    { n: '2', title: 'Septum Transversumaren eraketa', depth: 0, stages: ['septum-transversum'] },
+    { n: '2.1', title: 'Peritoneo barrunbea', depth: 1, stages: ['peritoneo-barrunbea'] },
+    { n: '2.2', title: 'Hasierako perikardio barrunbea (behin-betiko perikardio barrunbeak eta pleura barrunbeak)', depth: 1, stages: ['pleura-perikardioa'] },
+    { n: '3', title: 'Diafragmaren eraketa', depth: 0, stages: ['diafragma-eraketa'] },
+    { n: '3.1', title: 'Diafragmaren atalen eraketa', depth: 1, stages: ['diafragma-heldua'] },
+    { n: '4', title: 'Gogoratu beharrekoa', depth: 0, stages: [], note: 'Laburpena: "Diafragmaren atalak" etaparen azken urratsean erakusten da.' },
+    { n: '5', title: 'Gaiaren beste irudi batzuk', depth: 0, stages: [], note: 'Irudiak: simulazioaren ikuspegietan erabilita.' },
+  ],
+  8: [
+    { n: '1', title: 'Hezur-sistema eta eratorriak', depth: 0, stages: ['jatorriak'] },
+    { n: '2', title: 'Hezurtzapen motak', depth: 0, stages: ['hezurtzapena'] },
+    { n: '3', title: 'Burezurra / Kraneoa', depth: 0, stages: [], note: 'Burezurra: neurokraneoa eta errai kraneoa azpiataletan erakusten dira.' },
+    { n: '3.1', title: 'Neurokraneoa', depth: 1, stages: ['buru-ganga', 'kondrokraneoa'], covers: '3.1.1 Mintzezko zatia/buru-ganga · 3.1.2 Kondrokraneoa edo neurokraneo kartilaginotsua' },
+    { n: '3.2', title: 'Errai kraneoa', depth: 1, stages: ['errai-kraneoa'] },
+    { n: '4', title: 'Gorputz-adarretako hezurrak', depth: 0, stages: ['gorputz-adarrak', 'hezur-luzeak'] },
+    { n: '5', title: 'Bizkarrezurraren eraketa', depth: 0, stages: [] },
+    { n: '5.1', title: 'Ornoak', depth: 1, stages: ['ornoa'], covers: '5.3 Orno zuloa edo orno bertebrala' },
+    { n: '5.2', title: 'Ornoak eta diskoak', depth: 1, stages: ['bizkarrezurra'], covers: '5.2.1 Mesenkima zutabearen garapena' },
+    { n: '5.3', title: 'Orno zuloa edo orno bertebrala', depth: 1, stages: [], note: 'Orno zuloa: "Ornoa" etapan erakusten da.' },
+    { n: '5.4', title: 'Bizkarrezurraren ornoekin lotuta dauden saihetsen eraketa', depth: 1, stages: ['saihetsak'] },
+  ],
 };
 
 /** The notes section a stage belongs to, and its parent heading when it is a sub-heading. */

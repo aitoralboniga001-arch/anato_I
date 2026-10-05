@@ -1,4 +1,4 @@
-"""Extract the six ORIGINAL PDFs. No spelling, punctuation or content corrections.
+"""Extract the eight ORIGINAL PDFs. No spelling, punctuation or content corrections.
 
 Requires PyMuPDF. --check is read-only and compares both the PDF text and the
 committed TypeScript, including emphasis and ids. Only audited furniture goes.
@@ -23,6 +23,8 @@ FILES = [
     '4. Enbriologia_Garapenaren laugarren astea (ZUZENDUTA).pdf',
     '5. GAIA_Enbrioi eta fetuaren ezaugarri nagusiak (zuzenduta).pdf',
     '6. Enbriologia 3. hilabetetik jaiotzara arte_ fetua eta karena (ZUZENDUTA).docx.pdf',
+    '7.GAIA_Gorputzaren barrunbeak (ZUZENDUTA).pdf',
+    '8. GAIA_ HEZUR SISTEMA (zuzendu gabe).docx.pdf',
 ]
 
 
@@ -133,6 +135,9 @@ def extract(path, week):
         text = line['text']
         number = re.match(r'^(\d+(?:\.\d+)*)(?:\.|\s|(?=[A-Z]))', re.sub(r'(?<=\d)\s+(?=\.\d)', '', text))
         heading = bool(number and line['size'] >= 13.5 and line['bold'] > .55)
+        # Week 8 numbers its third-level and last subsections (3.1.1, 5.2.1, 5.4) at body size.
+        small_sub = bool(number and '.' in number.group(1) and 11.5 <= line['size'] < 13.5 and line['bold'] > .4)
+        heading = heading or small_sub
         # Week 4's small TOC is unbolded; its body headings are 16/14 pt.
         kind = 'p'
         if 'AURKIBIDEA' in text:
@@ -145,8 +150,8 @@ def extract(path, week):
         elif line['size'] >= 20 and line['bold'] > .7:
             kind = 'title'
         elif heading:
-            # "28. EGUNETIK AURRERA" is a day heading inside section 1.
-            if int(number.group(1).split('.')[0]) <= 9:
+            # "28. EGUNETIK AURRERA" and week 8's "5. astea" are headings inside a section.
+            if int(number.group(1).split('.')[0]) <= 9 and not re.match(r'^\d+\.\s*astea', text, re.I):
                 section = number.group(1)
                 kind = 'h2' if '.' in section else 'h1'
             else:

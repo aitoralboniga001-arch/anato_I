@@ -7,7 +7,7 @@ import { competenceLevel, isDue, useAnswers } from './answers';
 import { useVisitedAll } from './progress';
 
 /**
- * The whole subject on one screen: six phases, each as a chain of steps that can be read in a few
+ * The whole subject on one screen: eight phases, each as a chain of steps that can be read in a few
  * seconds (the 20-second test); the sentence behind each chain is its tooltip.
  */
 const MAP: { days: string; title: string; chain: string[]; idea: string; href: string }[] = [
@@ -52,6 +52,20 @@ const MAP: { days: string; title: string; chain: string[]; idea: string; href: s
     chain: ['Fetu-aroa: hazi eta heldu', 'Korion hostotsua + dezidua basala → karena', 'Zilbor-hestea', 'Likido amniotikoa'],
     idea: 'Fetu-aroa: hazkundea eta heltzea. Karena (korion hostotsua + dezidua basala), zilbor-hestea eta likido amniotikoa.',
     href: '/astea/6',
+  },
+  {
+    days: '3.–6. asteak',
+    title: 'Gorputzaren barrunbeak',
+    chain: ['Zeloma (paretako + errai orria)', 'Septum transversuma (C3–C5)', 'Pleura · perikardio · peritoneo', 'Diafragma (4 osagai)'],
+    idea: 'Zeloma tolespenekin gorputz barruan geratzen da; septumak bitan banatzen du; mintz pleuroperikardikoek eta pleuroperitonealek barrunbeak bereizten dituzte; diafragma lau osagaitik.',
+    href: '/astea/7',
+  },
+  {
+    days: '4.–12. asteak',
+    title: 'Hezur sistema',
+    chain: ['Mesenkima (3 jatorri)', 'Mintzezko / endokondrala', 'Burezurra · ornoak · saihetsak · adarrak', 'Zentro primarioak (12. astea)'],
+    idea: 'Hezurrak hiru jatorritatik datoz (mesodermo paraxiala, paretako orria, gandor neurala); mesenkima zuzenean hezurtzen da (mintzezkoa) edo kartilago-eredua sortzen du (endokondrala); gorputz-adarretako hezur luzeetan zentro primarioak 12. astean.',
+    href: '/astea/8',
   },
 ];
 

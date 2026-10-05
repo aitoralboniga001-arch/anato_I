@@ -85,6 +85,22 @@ const MENTION_ONLY: Record<string, string> = {
   '6/zilbor-hestea/8/alantoidea': '"ixten dira": urrats honetan',
   '6/zilbor-hestea/8/heste-lakioak': 'abdomenera itzultzen dira: zilbor-hestetik kanpo',
   '6/zilbor-hestea/8/hodi-onfalomesenterikoa': '"desagertzen dira": urrats honetan',
+  '7/pleura-perikardioa/1/perikardio-barrunbea': '"hortik sortzen dira": geroago (7. urratsean marraztuta)',
+  '7/pleura-perikardioa/1/pleura-barrunbea': '"hortik sortzen dira": geroago (7. urratsean marraztuta)',
+  '7/pleura-perikardioa/1/birikak': '"birikentzat": geroago; orain hasierako perikardio barrunbea bakarrik',
+  '7/pleura-perikardioa/3/pleura-barrunbea': '"hasten dira": birika hastapenek bultzatutako hasierako perikardio barrunbearen atze-aldeak',
+  '7/pleura-perikardioa/7/errai-orria': 'errai orria hemen errai pleura bezala marraztuta eta izendatuta',
+  '7/pleura-perikardioa/8/mintz-pleuroperikardikoak': 'urrats honetan perikardio fibroso bihurtzen dira (izena aldatzen da)',
+  '7/pleura-perikardioa/9/errai-orria': 'errai orria hemen errai pleura bezala marraztuta eta izendatuta',
+  '7/diafragma-eraketa/5/hasierako-perikardio-barrunbea': 'mozketa-planoaren gainean: erretenek lotzen dute (jaitsiera ikuspegian marraztuta)',
+  '7/diafragma-eraketa/5/peritoneo-barrunbea': 'mozketa-planoaren azpian: erretenek lotzen dute (jaitsiera ikuspegian marraztuta)',
+  '7/diafragma-eraketa/6/peritoneo-barrunbea': 'mozketa-planoaren azpian: mintzek komunikazioa ixten dute',
+  '8/jatorriak/4/esklerotoma': 'esklerotoma zelulak mesenkima bihurtzen dira: urratsean izena aldatzen da (mesenkima izendatuta)',
+  '8/errai-kraneoa/11/gandor-neurala': 'jatorria kolorez: turkesa = gandor neurala (kolore-giltzan izendatuta)',
+  '8/bizkarrezurra/5/esklerotoma': '"esklerotoma segmentu": segmentuak izendatuta (esklerotoma-segmentuak)',
+  '8/bizkarrezurra/7/esklerotoma': '"esklerotoma segmentu baten" erdiak: segmentuak aurreko urratsetan izendatuta',
+  '8/saihetsak/2/saihets-hezurra': 'urrats honetan zelulak bidean; hezurra hurrengo urratsean sortzen da (1. eta 3. urratsetan marraztuta)',
+  '8/ornoa/9/esklerotoma': 'orno gorputzen jatorria gogorarazten du (esklerotoma "Goitik" ikuspegian eta "Bizkarrezurra" urratsean marraztuta)',
 };
 
 /** Ids drawn only inside a figure part (no part of their own), named by a label on the spot. */

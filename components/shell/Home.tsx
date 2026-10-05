@@ -21,7 +21,7 @@ const viewCount = weeks.reduce((n, w) => n + w.stages.reduce((m, s) => m + s.vie
 const pad = (n: number) => String(n).padStart(2, '0');
 
 // The object each topic is about, as the light 3-D sketch the simulator's "Non nago?" uses.
-const SKETCH_DAY: Record<number, number> = { 1: 4, 2: 10, 3: 17, 4: 24, 5: 40, 6: 80 };
+const SKETCH_DAY: Record<number, number> = { 1: 4, 2: 10, 3: 17, 4: 24, 5: 40, 6: 80, 7: 35, 8: 56 };
 
 /** One topic on the home shelf: its object, span, title, progress and the next step. */
 function TopicCard({ w }: { w: (typeof weeks)[number] }) {

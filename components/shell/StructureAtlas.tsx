@@ -161,7 +161,7 @@ export function StructureAtlas() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') ?? '';
   const requestedTopic = Number(searchParams.get('gaia'));
-  const topic = requestedTopic >= 1 && requestedTopic <= 6 && Number.isInteger(requestedTopic) ? requestedTopic : 0;
+  const topic = requestedTopic >= 1 && requestedTopic <= 8 && Number.isInteger(requestedTopic) ? requestedTopic : 0;
   const results = matches(query, topic);
   // Two ways to browse: cards (each structure with its drawing) or the development schemes.
   const schemesView = searchParams.get('ikusi') === 'eskemak';

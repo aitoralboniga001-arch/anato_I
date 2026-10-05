@@ -6,6 +6,8 @@ import { w3 } from './w3';
 import { w4 } from './w4';
 import { w5 } from './w5';
 import { w6 } from './w6';
+import { w7 } from './w7';
+import { w8 } from './w8';
 
 export interface NotesPart { text: string; b?: boolean; i?: boolean }
 export interface NotesSentence { id: string; parts: NotesPart[] }
@@ -16,7 +18,7 @@ export interface NotesBlock {
   sentences: NotesSentence[];
 }
 export interface NotesAnchor { week: number; stageId: string; beat: number }
-const documents: Record<number, NotesBlock[]> = { 1: w1, 2: w2, 3: w3, 4: w4, 5: w5, 6: w6 };
+const documents: Record<number, NotesBlock[]> = { 1: w1, 2: w2, 3: w3, 4: w4, 5: w5, 6: w6, 7: w7, 8: w8 };
 export const notesOf = (week: number): NotesBlock[] => documents[week] ?? [];
 export const sentenceText = (s: NotesSentence) => s.parts.map(p => p.text).join('');
 export const blockText = (b: NotesBlock) => b.sentences.map(sentenceText).join('');
@@ -70,5 +72,8 @@ export const NOTES_EXCEPTIONS: Record<string, { sections?: string[]; reason: str
   '3/alantoidea-eta-hazkundea/6': { sections: ['0'], reason: 'Korion barrunbea eta finkapen pedikulua hasierako egoeraren atalean deskribatzen dira; 19-20 eguneko xehetasuna ez dago PDFan.' },
   '4/tolespenak': { sections: ['3.3', '4'], reason: 'Tolespenen mekanika eta ondorioak alboko mesodermoaren eta endodermoaren ataletan zehazten dira.' },
   '5/iraupena/3': { sections: ['1'], reason: 'Enbrioi-aroaren muga 1. atalaren izenburuan ere azaltzen da.' },
+  '7/septum-transversum/0': { sections: ['1'], reason: 'Abiapuntua: 1. atalaren azken esaldia (zeloma toraxetik abdomenera), septuma agertu aurretik.' },
+  '7/diafragma-heldua/6': { sections: ['4'], reason: '4. atala (Gogoratu beharrekoa) gaiaren laburpena da: azken urratsean erakusten da.' },
+  '8/buru-ganga/0': { sections: ['3'], reason: 'Burezurraren sarrera (3. atala): neurokraneoa eta errai kraneoa bereizi aurretik, buru-gangaren etapa irekitzen du.' },
   '5/hirugarren-hilabetea/0': { sections: ['2'], reason: 'Fetu-aroaren heltzea 2. ataleko sarreran azaltzen da.' },
 };

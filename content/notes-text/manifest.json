@@ -530,5 +530,165 @@
         "text": "10"
       }
     ]
+  },
+  "7": {
+    "file": "7.GAIA_Gorputzaren barrunbeak (ZUZENDUTA).pdf",
+    "pages": 8,
+    "characters": 14910,
+    "sha256": "ff4d7aa44e043142f49bf2e045890f4cce02b53438d3205b73089d21e0ced7d8",
+    "removed": [
+      {
+        "page": 1,
+        "text": "1"
+      },
+      {
+        "page": 2,
+        "text": "2"
+      },
+      {
+        "page": 3,
+        "text": "3"
+      },
+      {
+        "page": 4,
+        "text": "4"
+      },
+      {
+        "page": 5,
+        "text": "5"
+      },
+      {
+        "page": 6,
+        "text": "6"
+      },
+      {
+        "page": 7,
+        "text": "7"
+      },
+      {
+        "page": 8,
+        "text": "8"
+      }
+    ]
+  },
+  "8": {
+    "file": "8. GAIA_ HEZUR SISTEMA (zuzendu gabe).docx.pdf",
+    "pages": 14,
+    "characters": 23059,
+    "sha256": "048370ce48acf90b2487d95eede57f5cd6fd78018410f286fb1ca70140a96359",
+    "removed": [
+      {
+        "page": 1,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 1,
+        "text": "1"
+      },
+      {
+        "page": 2,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 2,
+        "text": "2"
+      },
+      {
+        "page": 3,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 3,
+        "text": "3"
+      },
+      {
+        "page": 4,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 4,
+        "text": "4"
+      },
+      {
+        "page": 5,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 5,
+        "text": "5"
+      },
+      {
+        "page": 6,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 6,
+        "text": "6"
+      },
+      {
+        "page": 7,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 7,
+        "text": "7"
+      },
+      {
+        "page": 8,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 8,
+        "text": "8"
+      },
+      {
+        "page": 9,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 9,
+        "text": "9"
+      },
+      {
+        "page": 10,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 10,
+        "text": "10"
+      },
+      {
+        "page": 11,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 11,
+        "text": "11"
+      },
+      {
+        "page": 12,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 12,
+        "text": "12"
+      },
+      {
+        "page": 13,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 13,
+        "text": "13"
+      },
+      {
+        "page": 14,
+        "text": "RAFAEL SARRIA GARCIA GIZA ANATOMIA I 31 TALDEA"
+      },
+      {
+        "page": 14,
+        "text": "14"
+      }
+    ]
   }
 }

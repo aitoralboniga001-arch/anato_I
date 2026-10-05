@@ -36,6 +36,8 @@ export function shapeFor(week: number, day: number, plane: PlaneKind): SpecimenS
   if (week === 3) return 'diskoa';
   if (week === 4) return 'tolesten';
   if (week === 5) return day < 57 ? 'c' : 'fetua';
+  if (week === 7) return 'c';
+  if (week === 8) return day < 57 ? 'c' : 'fetua';
   return 'karena';
 }
 

@@ -6,7 +6,7 @@ import { createHash } from 'node:crypto';
 import { blockText, expandNotes, firstAnchorInSection, NOTES_EXCEPTIONS, notesOf, sectionMatches, sentence, sentenceAnchors } from '@/content/notes-text';
 
 describe('original notes and reviewed alignment', () => {
-  const lengths = [17921, 10991, 17577, 23697, 13010, 18297];
+  const lengths = [17921, 10991, 17577, 23697, 13010, 18297, 14910, 23059];
   const hashes = [
     'f8abeb46de6a656b112e6b89b9c99802bab9a7af8affd6c63ed4ac2a6e0524db',
     'fd368f4eb7b398bec5c5275cd244233a86f4f5e099f796bbf42328b3ac32994c',
@@ -14,9 +14,11 @@ describe('original notes and reviewed alignment', () => {
     '87cdeecd4f3886bf3372b8acc920b229a29850a39b48b205fe59d7f2ceb21b28',
     '4854deb7f05ef579b31896d81de6007cfda719875d8a2843d8dbd2b9174c05dd',
     '22cbeeff3550f3b502b61bbeec542930188777fde34fe7f28312142656565e59',
+    'ff4d7aa44e043142f49bf2e045890f4cce02b53438d3205b73089d21e0ced7d8',
+    '048370ce48acf90b2487d95eede57f5cd6fd78018410f286fb1ca70140a96359',
   ];
 
-  it('pins the complete original text of each of the six PDFs', () => {
+  it('pins the complete original text of each of the eight PDFs', () => {
     for (const w of weeks) {
       const text = notesOf(w.week).map(blockText).join(' ');
       expect(text.length, `w${w.week}`).toBe(lengths[w.week - 1]);
@@ -46,7 +48,7 @@ describe('original notes and reviewed alignment', () => {
       }
       for (const id of refs) expect(sentence(id), `${key}: ${id}`).toBeDefined();
     });
-    expect(count).toBe(306);
+    expect(count).toBe(432);
     expect(unmapped).toBe(1);
   });
 
