@@ -1,7 +1,8 @@
 'use client';
 
+import { useId } from 'react';
 import { Arrow, Label, Note, Part, lerp, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
-import { Defs8, MesCell, Q, f1, inPoly, mirror, spline, vis } from './common';
+import { Defs8, MesCell, Q, f1, inPoly, mirror, sm, spline, vis } from './common';
 
 /**
  * 8:bizkarrezurra — apunteen 5.2 eta 5.2.1 (mesenkima zutabea, birsegmentazioa, diskoa, makurdurak) eta 10. irudia.
@@ -135,7 +136,7 @@ export function ColumnSection({ t }: SceneProps) {
         </g>
       ))}
 
-      <Note x={500} y={30} size={12.5} tone="accent">
+      <Note x={250} y={30} size={12.5} tone="accent">
         Zeharkako ebakidura · 4. astea
       </Note>
       <Note x={500} y={612} tone="accent" show={vis(t, 0, BZ_T.migrate)}>
@@ -325,7 +326,7 @@ export function ColumnCoronal({ t }: SceneProps) {
         <Arrow key={k} from={[500 + HW + 26, YC(k) + 20]} to={[500 + HW + 26, YB(k + 1) + 24]} bend={0} color="#fff3c4" width={2.6} show={vis(t, BZ_T.fuse, BZ_T.disc)} />
       ))}
 
-      <Note x={500} y={22} size={12} tone="accent">
+      <Note x={250} y={22} size={12} tone="accent">
         Ebakidura koronala notokordaren mailan
       </Note>
       <Note x={500} y={612} tone="accent" show={vis(t, BZ_T.segments, BZ_T.arrive)}>
@@ -410,11 +411,16 @@ const DEPTH = (i: number) => {
 };
 
 export function Curvatures({ t }: SceneProps) {
+  const cid = useId().replace(/:/g, '');
   const curl = seg(t, BZ_T.kypho, BZ_T.kypho + 0.03);
   const head = seg(t, BZ_T.lordo + 0.005, BZ_T.lordo + 0.03);
   const walk = seg(t, BZ_T.lordo + 0.04, BZ_T.lordo + 0.065);
   const kappa = mixC(mixC(mixC(FETUS, [0.0035, 0.0035, 0.0035, 0.0035], 1 - curl), HEAD_UP, head), WALK, walk);
-  const P = spinePts(kappa);
+  // The pose: the baby lies on its belly to lift its head (neck lordosis), then stands up to walk (lumbar lordosis).
+  const lie = sm(head) * (1 - sm(walk));
+  const th = (-Math.PI / 2 + 0.42) * lie;
+  const [rc, rs] = [Math.cos(th), Math.sin(th)];
+  const P = spinePts(kappa).map(([x, y]): Pt => [500 + (x - 500) * rc - (y - 352) * rs, 352 + (x - 500) * rs + (y - 352) * rc]);
   const tan = (i: number): Pt => {
     const a = P[Math.max(0, i - 1)];
     const b = P[Math.min(P.length - 1, i + 1)];
@@ -440,7 +446,7 @@ export function Curvatures({ t }: SceneProps) {
       .filter((v) => v.r === r)
       .map((v, i) => (
         <g key={i} transform={`translate(${f1(v.m[0])},${f1(v.m[1])}) rotate(${f1(v.ang - 90)})`}>
-          <rect x={-v.w / 2} y={-5.4} width={v.w} height={10.8} rx={3} fill={colour(r)} stroke="#6b5a35" strokeWidth={1.2} />
+          <rect x={-v.w / 2} y={-4.4} width={v.w} height={8.8} rx={3} fill={colour(r)} stroke="#6b5a35" strokeWidth={1.2} />
           {r !== 3 && <path d={`M${v.w / 2 - 2},0L${v.w / 2 + 13},5`} stroke={colour(r)} strokeWidth={4} strokeLinecap="round" />}
         </g>
       ));
@@ -457,6 +463,12 @@ export function Curvatures({ t }: SceneProps) {
     const p = along(mid(r), d);
     return { ax: p[0], ay: p[1] };
   };
+  const ground = Math.max(...trunk.map((q) => q[1])) + 2;
+  // Intervertebral discs between the bodies.
+  const discs = verts.slice(0, -1).map((v, i) => {
+    const n = verts[i + 1];
+    return { m: [(v.m[0] + n.m[0]) / 2, (v.m[1] + n.m[1]) / 2] as Pt, ang: (v.ang + n.ang) / 2, w: Math.min(v.w, n.w) - 4, r: v.r };
+  });
   const pose = [
     { text: 'Fetua: makurdura bakarra (C itxura)', on: 1 - head },
     { text: 'Haurra burua altxatzen', on: head * (1 - walk) },
@@ -466,8 +478,21 @@ export function Curvatures({ t }: SceneProps) {
     <g>
       <Defs8 />
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
-      <path d={smoothPath(trunk, true, 0.2)} fill="#2a2430" stroke={Q.greyEdge} strokeWidth={2} />
-      <circle cx={headC[0]} cy={headC[1]} r={50} fill="#2a2430" stroke={Q.greyEdge} strokeWidth={2} />
+      <defs>
+        <radialGradient id={`w8-curv-body${cid}`} cx="40%" cy="35%" r="75%">
+          <stop offset="0" stopColor="#4a3f52" />
+          <stop offset="1" stopColor="#221c28" />
+        </radialGradient>
+      </defs>
+      {/* The floor the baby lies on. */}
+      <path d={`M150,${f1(ground)}H850`} stroke="#5b5360" strokeWidth={2} opacity={lie} />
+      <path d={smoothPath(trunk, true, 0.2)} fill={`url(#w8-curv-body${cid})`} stroke={Q.greyEdge} strokeWidth={2} />
+      <circle cx={headC[0]} cy={headC[1]} r={50} fill={`url(#w8-curv-body${cid})`} stroke={Q.greyEdge} strokeWidth={2} />
+      {discs.map((d, i) => (
+        <g key={i} transform={`translate(${f1(d.m[0])},${f1(d.m[1])}) rotate(${f1(d.ang - 90)})`}>
+          <rect x={-d.w / 2} y={-2.4} width={d.w} height={4.8} rx={2} fill={Q.suture} opacity={0.75} />
+        </g>
+      ))}
       <Part id="zifosia" show={kyLit > 0.01 ? 1 : 0}>
         {piece(1)}
         {piece(3)}
@@ -482,11 +507,11 @@ export function Curvatures({ t }: SceneProps) {
       {walk > 0.01 ? <Part id="lordosia">{piece(2)}</Part> : piece(2)}
 
       {pose.map((p) => (
-        <Note key={p.text} x={500} y={56} size={12.5} show={p.on}>
+        <Note key={p.text} x={260} y={50} size={12.5} show={p.on}>
           {p.text}
         </Note>
       ))}
-      <Note x={500} y={28} size={12.5} tone="accent">
+      <Note x={260} y={28} size={12.5} tone="accent">
         Bizkarrezurra alboetatik (ezkerrean aurrea, eskuinean atzea)
       </Note>
       <Note x={500} y={612} tone="accent" show={vis(t, BZ_T.kypho, BZ_T.lordo)}>

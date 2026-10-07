@@ -92,8 +92,6 @@ const MENTION_ONLY: Record<string, string> = {
   '7/pleura-perikardioa/7/errai-orria': 'errai orria hemen errai pleura bezala marraztuta eta izendatuta',
   '7/pleura-perikardioa/8/mintz-pleuroperikardikoak': 'urrats honetan perikardio fibroso bihurtzen dira (izena aldatzen da)',
   '7/pleura-perikardioa/9/errai-orria': 'errai orria hemen errai pleura bezala marraztuta eta izendatuta',
-  '7/diafragma-eraketa/5/hasierako-perikardio-barrunbea': 'mozketa-planoaren gainean: erretenek lotzen dute (jaitsiera ikuspegian marraztuta)',
-  '7/diafragma-eraketa/5/peritoneo-barrunbea': 'mozketa-planoaren azpian: erretenek lotzen dute (jaitsiera ikuspegian marraztuta)',
   '7/diafragma-eraketa/6/peritoneo-barrunbea': 'mozketa-planoaren azpian: mintzek komunikazioa ixten dute',
   '8/jatorriak/4/esklerotoma': 'esklerotoma zelulak mesenkima bihurtzen dira: urratsean izena aldatzen da (mesenkima izendatuta)',
   '8/errai-kraneoa/11/gandor-neurala': 'jatorria kolorez: turkesa = gandor neurala (kolore-giltzan izendatuta)',

@@ -14,6 +14,12 @@ const MINOR_TICKS = [84];
 const tickLabel = (d: number) => (d === 266 ? 'jaiotza' : d <= 56 ? String(d) : `${d / 7}. a.`);
 
 const GROUPS = PRESENCE_GROUPS;
+const EMPTY: Record<string, string> = {
+  berria: 'Azken egunetan ez da egitura berririk agertu.',
+  badago: 'Oraindik ez dago egiturarik.',
+  desagertua: 'Oraindik ez da ezer desagertu edo eraldatu.',
+  'oraindik-ez': 'Dena agertu da jada.',
+};
 
 const subscribeNothing = () => () => {};
 
@@ -222,7 +228,7 @@ export function Timeline() {
                     })}
                   </div>
                 ) : (
-                  <p className="muted">—</p>
+                  <p className="kr-empty">{EMPTY[g.key]}</p>
                 )}
               </section>
             );

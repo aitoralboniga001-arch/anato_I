@@ -230,7 +230,14 @@ export function DiaphragmBelow({ t }: SceneProps) {
 
 // ——— Sagittal profile ———
 
-const TORSO = spline([[370, 30], [630, 30], [706, 110], [724, 300], [708, 520], [650, 606], [372, 608], [306, 524], [288, 300], [306, 110]], 8, true);
+// Trunk in profile: chest in front (sternum), the abdominal wall bulging below the xiphoid, the back behind.
+const TORSO = spline(
+  [[372, 24], [632, 24], [702, 96], [718, 210], [714, 330], [698, 440], [704, 530], [670, 604], [372, 610], [314, 560], [298, 470], [310, 386], [322, 336], [316, 240], [320, 150], [338, 70]],
+  8,
+  true,
+);
+/** Sternum down the front of the chest, ending in the xiphoid process (where the sternal part inserts). */
+const STERNUM = spline([[340, 64], [334, 140], [332, 220], [334, 290], [338, 322]], 8);
 const SPINE_X = 650;
 const SPINE = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'L1', 'L2', 'L3'];
 const spineY = (i: number) => 60 + i * 30;
@@ -238,11 +245,19 @@ const spineY = (i: number) => 60 + i * 30;
 const DOME = spline([[332, 334], [372, 282], [440, 252], [520, 258], [588, 300], [624, 360], [640, 420], [648, 474]], 12);
 const DOME_U = { sternal: [0, 0.14], tendon: [0.2, 0.56], lumbar: [0.66, 1] } as const;
 
-function domePart(u0: number, u1: number) {
-  const r = resample(DOME, 201);
+/** The dome at the end of an inspiration: the insertions stay, the central tendon goes down and flattens. */
+const DOME_IN = resample(DOME, 201).map((p, i) => [p[0], p[1] + 30 * Math.pow(Math.sin((Math.PI * i) / 200), 0.9)] as Pt);
+/** Anything below `top` follows the dome down (lungs, pleura). */
+const breathe = (pts: Pt[], top = 230, k = 0.3): Pt[] => pts.map(([x, y]) => [x, y + Math.max(0, Math.min(30, (y - top) * k))]);
+
+function domePart(u0: number, u1: number, pts: Pt[] = DOME) {
+  const r = resample(pts, 201);
   return r.slice(Math.round(u0 * 200), Math.round(u1 * 200) + 1);
 }
 
+const ESO_P = 'M566,40 C574,140 586,230 590,300 C592,330 588,350 574,372';
+const AORTA_P = 'M462,170 C462,120 492,92 540,92 C590,92 618,116 622,160 C626,240 628,360 628,600';
+const IVC_P = 'M600,600 C590,480 520,330 470,268 C462,256 456,248 450,240';
 const PLEURA = spline([[410, 66], [520, 56], [618, 86], [640, 190], [638, 330], [618, 336], [590, 292], [530, 262], [496, 254], [520, 190], [476, 128], [420, 112]], 8, true);
 const LUNG = offset(PLEURA, -9, true);
 const PERI = spline([[372, 262], [376, 196], [420, 150], [486, 150], [520, 196], [516, 244], [440, 244]], 8, true);
@@ -253,31 +268,68 @@ const PERITO = spline(
   true,
 );
 
-export function DiaphragmProfile({ t }: SceneProps) {
+export function DiaphragmProfile({ t, reduced }: SceneProps) {
   const cav = vis(t, 0.7);
   const stroke = (pts: Pt[]) => `M${pts.map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}`;
+  // Breathing: the dome contracts (goes down, flattens) and the lungs fill the space; the heart rides on the tendon.
+  const breath = !reduced;
+  const B = { dur: '4.2s', repeatCount: 'indefinite', calcMode: 'spline', keyTimes: '0;0.45;1', keySplines: '0.4 0 0.6 1;0.4 0 0.6 1' } as const;
+  const anim = (a: string, b: string) => (breath ? <animate attributeName="d" values={`${a};${b};${a}`} {...B} /> : null);
+  const dome = resample(DOME, 201);
+  const sp = (pts: Pt[]) => smoothPath(pts, true, 0.3);
   return (
     <g>
       <Defs7 />
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
+      <defs>
+        <radialGradient id="w7-adult-heart" cx="38%" cy="30%" r="80%">
+          <stop offset="0" stopColor="#ec6378" />
+          <stop offset="0.6" stopColor="#c62d42" />
+          <stop offset="1" stopColor="#7d1527" />
+        </radialGradient>
+      </defs>
       <path d={poly(TORSO)} fill={P.wall} />
       <path d={poly(TORSO)} fill="url(#w7-mesench)" />
       <path d={poly(offset(TORSO, -16, true))} fill={P.space} />
 
       {/* Thorax: the pleural cavity (lung) behind and the pericardial cavity (heart) on the central tendon. */}
+      {/* Oesophagus behind the heart, through its hiatus to the stomach; aorta (arch, then down in front of the column); IVC up through the tendon. */}
+      <Part id="hestegorria">
+        <path d={ESO_P} fill="none" stroke="#6a4c16" strokeWidth={13} strokeLinecap="round" />
+        <path d={ESO_P} fill="none" stroke="#d9ab3c" strokeWidth={9} strokeLinecap="round" />
+      </Part>
+      <Part id="aorta">
+        <path d={AORTA_P} fill="none" stroke="#7a0f1e" strokeWidth={15} strokeLinecap="round" />
+        <path d={AORTA_P} fill="none" stroke={P.aorta} strokeWidth={11} strokeLinecap="round" />
+      </Part>
+      <Part id="beheko-kaba-zaina">
+        <path d={IVC_P} fill="none" stroke="#1c3c88" strokeWidth={14} strokeLinecap="round" />
+        <path d={IVC_P} fill="none" stroke={P.ivc} strokeWidth={10} strokeLinecap="round" />
+      </Part>
       <Part id="pleura-barrunbea">
-        <path d={smoothPath(PLEURA, true, 0.3)} fill={P.pleura} stroke="#9fd0ff" strokeWidth={1.4} />
+        <path d={sp(PLEURA)} fill={P.pleura} stroke="#9fd0ff" strokeWidth={1.4}>
+          {anim(sp(PLEURA), sp(breathe(PLEURA)))}
+        </path>
       </Part>
       <Part id="birikak">
-        <path d={smoothPath(LUNG, true, 0.3)} fill={P.lung} opacity={0.8} />
-        <path d={smoothPath(LUNG, true, 0.3)} fill="url(#w7-lung)" />
+        <path d={sp(LUNG)} fill={P.lung} opacity={0.8}>
+          {anim(sp(LUNG), sp(breathe(LUNG)))}
+        </path>
+        <path d={sp(LUNG)} fill="url(#w7-lung)">
+          {anim(sp(LUNG), sp(breathe(LUNG)))}
+        </path>
       </Part>
-      <Part id="perikardio-barrunbea">
-        <path d={smoothPath(PERI, true, 0.3)} fill={P.peri} stroke="#ffb3c4" strokeWidth={1.4} />
-      </Part>
-      <Part id="bihotza">
-        <path d={smoothPath(HEART, true, 0.3)} fill={P.heart} stroke={P.heartDeep} strokeWidth={1.2} />
-      </Part>
+      <g>
+        {breath && <animateTransform attributeName="transform" type="translate" values="0 0;0 12;0 0" {...B} />}
+        <Part id="perikardio-barrunbea">
+          <path d={smoothPath(PERI, true, 0.3)} fill={P.peri} stroke="#ffb3c4" strokeWidth={1.4} />
+        </Part>
+        <Part id="bihotza">
+          <path d={smoothPath(HEART, true, 0.3)} fill="url(#w7-adult-heart)" stroke={P.heartDeep} strokeWidth={1.4} />
+          <path d="M404,214 C420,196 446,188 470,192" fill="none" stroke="#7d1527" strokeWidth={1.4} opacity={0.6} />
+          <ellipse cx={428} cy={196} rx={16} ry={9} fill="#fff" opacity={0.12} />
+        </Part>
+      </g>
 
       {/* Abdomen: the peritoneal cavity does not fill it (a retroperitoneal kidney behind it). */}
       <Part id="peritoneo-barrunbea" show={cav}>
@@ -300,26 +352,34 @@ export function DiaphragmProfile({ t }: SceneProps) {
           </Note>
         ) : null,
       )}
-      <rect x={312} y={70} width={20} height={262} rx={8} fill={P.bone} opacity={0.9} />
+      <path d={smoothPath(STERNUM, false, 0.3)} fill="none" stroke={P.bone} strokeWidth={18} strokeLinecap="round" opacity={0.9} />
 
       {/* The dome, with its parts. */}
       <Part id="diafragma">
-        <path d={stroke(DOME)} fill="none" stroke={MUSCLE} strokeWidth={14} strokeLinecap="round" />
+        <path d={stroke(dome)} fill="none" stroke={MUSCLE} strokeWidth={14} strokeLinecap="round">
+          {anim(stroke(dome), stroke(DOME_IN))}
+        </path>
       </Part>
       <Part id="bularrezur-atala">
-        <path d={stroke(domePart(...DOME_U.sternal))} fill="none" stroke="#c45a6a" strokeWidth={14} strokeLinecap="round" />
+        <path d={stroke(domePart(...DOME_U.sternal))} fill="none" stroke="#c45a6a" strokeWidth={14} strokeLinecap="round">
+          {anim(stroke(domePart(...DOME_U.sternal)), stroke(domePart(...DOME_U.sternal, DOME_IN)))}
+        </path>
       </Part>
       <Part id="zentro-tendinosoa">
-        <path d={stroke(domePart(...DOME_U.tendon))} fill="none" stroke="#e9e2d6" strokeWidth={12} strokeLinecap="round" />
+        <path d={stroke(domePart(...DOME_U.tendon))} fill="none" stroke="#e9e2d6" strokeWidth={12} strokeLinecap="round">
+          {anim(stroke(domePart(...DOME_U.tendon)), stroke(domePart(...DOME_U.tendon, DOME_IN)))}
+        </path>
       </Part>
       <Part id="gerriko-atala">
-        <path d={stroke(domePart(...DOME_U.lumbar))} fill="none" stroke="#a8404f" strokeWidth={14} strokeLinecap="round" />
+        <path d={stroke(domePart(...DOME_U.lumbar))} fill="none" stroke="#a8404f" strokeWidth={14} strokeLinecap="round">
+          {anim(stroke(domePart(...DOME_U.lumbar)), stroke(domePart(...DOME_U.lumbar, DOME_IN)))}
+        </path>
       </Part>
       <Mark id="bularrezur-atala" x={334} y={330} rx={22} show={vis(t, 0.62, 0.78)} />
       <Mark id="gerriko-atala" x={646} y={470} rx={22} show={vis(t, 0.62, 0.78)} />
       <path d={poly(TORSO)} fill="url(#w7-light)" pointerEvents="none" />
 
-      <Note x={500} y={16} size={11.5}>
+      <Note x={250} y={16} size={11.5}>
         aurrea ← → atzea
       </Note>
       <Note x={460} y={538} tone="accent" show={vis(t, 0.7)}>

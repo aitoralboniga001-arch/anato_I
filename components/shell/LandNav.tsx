@@ -47,7 +47,7 @@ export function LandFoot({ children }: { children?: ReactNode }) {
   return (
     <footer className="land-foot">
       <Wordmark size={18} />
-      <p>Iturria: Giza Anatomia I ikasgaiko apunteak (1.–6. gaiak) eta haietako irudiak (Langman). Simulagailu honek ez du ordezkatzen irakaslearen irizpidea.</p>
+      <p>Iturria: Giza Anatomia I ikasgaiko apunteak (1.–8. gaiak) eta haietako irudiak (Langman). Simulagailu honek ez du ordezkatzen irakaslearen irizpidea.</p>
       {children}
     </footer>
   );

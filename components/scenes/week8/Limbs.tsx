@@ -251,7 +251,7 @@ export function LimbBuds({ t, reduced }: SceneProps) {
       </g>
       <path d={`M${WALL_X},0L${WALL_X},640`} stroke={Q.skin} strokeWidth={2.4} opacity={0.8} />
 
-      <Note x={560} y={30} size={13} tone="accent">
+      <Note x={260} y={30} size={13} tone="accent">
         {week}
       </Note>
       <Note x={560} y={612} tone="accent" show={vis(t, 0, LIMB_T.aer)}>
@@ -352,6 +352,45 @@ function LimbTube({ l, alpha }: { l: L2; alpha: number }) {
       <path d={band(-1, -0.55)} fill="rgba(0,0,0,0.22)" />
       <path d={band(0.55, 1)} fill="rgba(0,0,0,0.22)" />
       <path d={band(-0.15, 0.15)} fill="rgba(255,255,255,0.12)" />
+      {/* The joint halfway (elbow / knee): a crease, and its point (olecranon / patella) on the extensor side,
+          seen from the front only while that side faces us. */}
+      {(() => {
+        const m: Pt = [(l.p0[0] + l.p1[0]) / 2, (l.p0[1] + l.p1[1]) / 2];
+        const ext = rad(alpha + 180);
+        const o = Math.sin(ext) * l.w * 0.82;
+        const face = Math.cos(ext);
+        const cap: Pt = [m[0] + n[0] * o, m[1] + n[1] * o];
+        const ang = (Math.atan2(dy, dx) * 180) / Math.PI;
+        return (
+          <g>
+            <path d={`M${f1(m[0] - n[0] * l.w)},${f1(m[1] - n[1] * l.w)}L${f1(m[0] + n[0] * l.w)},${f1(m[1] + n[1] * l.w)}`} stroke="rgba(60,30,20,0.45)" strokeWidth={1.6} />
+            {face > -0.25 && (
+              <ellipse
+                cx={f1(cap[0])}
+                cy={f1(cap[1])}
+                rx={f1(l.lower ? 11 : 8)}
+                ry={f1((l.lower ? 11 : 8) * (0.45 + 0.55 * Math.max(0, face)))}
+                transform={`rotate(${f1(ang + 90)} ${f1(cap[0])} ${f1(cap[1])})`}
+                fill="#f3dcc2"
+                stroke={EDGE}
+                strokeWidth={1.4}
+                opacity={Math.min(1, (face + 0.25) * 2)}
+              />
+            )}
+          </g>
+        );
+      })()}
+      {/* The first digit (thumb / big toe) on the preaxial border: ends lateral above, medial below. */}
+      {(() => {
+        const th = rad(alpha - 90);
+        const face = Math.cos(th);
+        const o = Math.sin(th) * (l.lower ? 12 : 10);
+        const ang = Math.atan2(dy, dx);
+        const tip: Pt = [end[0] + Math.cos(ang) * (l.lower ? 6 : 4) + n[0] * o, end[1] + Math.sin(ang) * (l.lower ? 6 : 4) + n[1] * o];
+        return face > -0.3 ? (
+          <ellipse cx={f1(tip[0])} cy={f1(tip[1])} rx={l.lower ? 6.5 : 5} ry={l.lower ? 8 : 7.5} transform={`rotate(${f1((ang * 180) / Math.PI - 90)} ${f1(tip[0])} ${f1(tip[1])})`} fill="#f3dcc2" stroke={EDGE} strokeWidth={1.3} opacity={Math.min(1, (face + 0.3) * 2)} />
+        ) : null;
+      })()}
     </g>
   );
 }
@@ -422,14 +461,20 @@ export function LimbRotation({ t }: SceneProps) {
         <Disc key={i} l={l} alpha={l.lower ? aLow : aUp} turning={l.lower ? lowTurn : upTurn} label={1} />
       ))}
 
-      <Note x={500} y={30} size={12}>
+      <Note x={260} y={30} size={12}>
         8. astea · aurretik (bentrala); ondoan zeharkako ebakidura
       </Note>
       <Note x={500} y={262} size={12.5} tone="accent" show={upTurn}>
         Goikoak: 90° albora (kanpora)
       </Note>
-      <Note x={500} y={500} size={12.5} tone="accent" show={lowTurn}>
+      <Note x={500} y={418} size={12.5} tone="accent" show={lowTurn}>
         Behekoak: 90° erdialdera (barrura)
+      </Note>
+      <Note x={240} y={282} size={11} tone="dim" show={seg(ru, 0.7, 1)}>
+        ukondoa atzera
+      </Note>
+      <Note x={322} y={548} size={11} tone="dim" show={seg(rl, 0.7, 1)}>
+        belauna aurrera
       </Note>
       <Note x={500} y={612} tone="accent" show={upTurn}>
         Goiko gorputz-adarrak: aurrean tolestatzaileak; atzean eta alboan hedatzaileak

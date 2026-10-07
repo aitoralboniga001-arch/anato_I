@@ -22,7 +22,8 @@ const subscribe = (cb: () => void) => {
 export function HeroFold({ playing = true }: { playing?: boolean }) {
   const reduced = useSyncExternalStore(subscribe, () => window.matchMedia(REDUCED).matches, () => false);
   const mounted = useSyncExternalStore(subscribe, () => true, () => false);
-  const [t, setT] = useState(1);
+  // The loop opens on the folding embryo (see t0 below): start there too, so playback begins without a pop.
+  const [t, setT] = useState(0.62 / 0.7);
   const box = useRef<HTMLElement>(null);
 
   useEffect(() => {

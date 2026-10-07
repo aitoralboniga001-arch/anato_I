@@ -109,6 +109,7 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept, r
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [log, setLog] = useState<{ q: Q; picked: number }[]>([]);
+  const [skipped, setSkipped] = useState(0);
   const [now] = useState(() => Date.now());
   const [only, setOnly] = useState(concept);
 
@@ -122,6 +123,7 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept, r
     setI(0);
     setPicked(null);
     setLog([]);
+    setSkipped(0);
   };
 
   const inScope = select(week, scope, kind, only);
@@ -137,6 +139,17 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept, r
   const missed = log.filter((l) => l.picked !== l.q.answer).length;
   const next = () => {
     setI((x) => x + 1);
+    setPicked(null);
+  };
+
+  /** Leave this question unanswered: nothing is recorded, and it does not count against the score. */
+  const skip = () => {
+    setSkipped((n) => n + 1);
+    next();
+  };
+  /** Stop here and see the result of what was answered. */
+  const finish = () => {
+    setI(pool.length);
     setPicked(null);
   };
 
@@ -163,6 +176,9 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept, r
     if (picked === null && n >= 0 && n < q.options.length) {
       e.preventDefault();
       choose(n);
+    } else if (picked === null && (key === 's' || e.key === 'ArrowRight')) {
+      e.preventDefault();
+      skip();
     } else if (picked !== null && !exam && (e.key === 'Enter' || e.key === 'ArrowRight')) {
       // Enter on a focused button keeps its own meaning.
       if (e.key === 'Enter' && (e.target as HTMLElement)?.closest?.('button, a')) return;
@@ -259,11 +275,12 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept, r
           <p className="muted pad">{mode === 'errepasoa' ? 'Ez dago errepasatzeko gaitasunik orain. Ondo!' : 'Ez dago mota honetako galderarik hemen.'}</p>
         ) : finished ? (
           <div className="quiz-done">
-            <p className="quiz-score">
-              {ok}/{log.length}
-            </p>
+            <p className="quiz-score">{log.length ? `${ok}/${log.length}` : '—'}</p>
             <span className="quiz-score-bar" style={{ '--p': log.length ? ok / log.length : 0 } as React.CSSProperties} aria-hidden />
-            <p>{ok / Math.max(1, log.length) >= 0.8 ? 'Bikain! Jarraitu horrela.' : 'Errepasatu hutsegiteak: azalpenak behean dituzu.'}</p>
+            <p>
+              {log.length === 0 ? 'Ez duzu galderarik erantzun.' : ok / log.length >= 0.8 ? 'Bikain! Jarraitu horrela.' : 'Errepasatu hutsegiteak: azalpenak behean dituzu.'}
+              {skipped > 0 && <span className="muted"> · {skipped} saltatuta</span>}
+            </p>
             {log.some((l) => l.picked !== l.q.answer) && (
               <ol className="qz-review">
                 {log
@@ -315,11 +332,18 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept, r
                 </em>
                 <em className="qz-src">{sourceLabel[q.source]}</em>
               </span>
-              {!exam && (
-                <span>
-                  <IconCheck size={14} /> {ok}
-                </span>
-              )}
+              <span className="qz-progress-end">
+                {!exam && (
+                  <span>
+                    <IconCheck size={14} /> {ok}
+                  </span>
+                )}
+                {log.length > 0 && (
+                  <button className="link-quiet" onClick={finish} title="Amaitu orain eta emaitza ikusi">
+                    Amaitu
+                  </button>
+                )}
+              </span>
             </div>
             <p className="quiz-question">{q.question}</p>
             <div className="quiz-options">
@@ -351,7 +375,14 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept, r
               </div>
             )}
             {exam
-              ? picked === null && <KeyHint n={q.options.length} />
+              ? picked === null && (
+                  <div className="quiz-actions">
+                    <KeyHint n={q.options.length} />
+                    <button className="btn ghost" onClick={skip} title="Galdera hau saltatu (S edo →)">
+                      Saltatu
+                    </button>
+                  </div>
+                )
               : (
                 <div className="quiz-actions">
                   {picked === null ? (
@@ -376,6 +407,11 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept, r
                       )}
                     </button>
                   )}
+                  {picked === null && (
+                    <button className="btn ghost" onClick={skip} title="Galdera hau saltatu (S edo →)">
+                      Saltatu
+                    </button>
+                  )}
                   <button className="btn primary" disabled={picked === null} onClick={next} aria-keyshortcuts="Enter">
                     Hurrengoa →
                   </button>
@@ -392,7 +428,7 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept, r
 function KeyHint({ n }: { n: number }) {
   return (
     <p className="qz-keys">
-      Teklak: <kbd>1</kbd>–<kbd>{n}</kbd> edo <kbd>A</kbd>–<kbd>{String.fromCharCode(64 + n)}</kbd> erantzuteko
+      Teklak: <kbd>1</kbd>–<kbd>{n}</kbd> edo <kbd>A</kbd>–<kbd>{String.fromCharCode(64 + n)}</kbd> erantzuteko · <kbd>S</kbd> saltatzeko
     </p>
   );
 }

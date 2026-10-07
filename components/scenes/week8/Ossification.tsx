@@ -1,8 +1,8 @@
 'use client';
 
 import { useId } from 'react';
-import { Label, Note, Part, lerp, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
-import { Defs8, MesCell, Q, f1, inPoly, mesCells, spline, vis } from './common';
+import { Label, Note, Part, clamp, lerp, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Defs8, MesCell, Q, f1, inPoly, mesCells, sm, spline, vis } from './common';
 
 /**
  * 8:hezurtzapena — apunteen 2. atala eta 29. orriko irudia (A–D). Bi panel aldi berean:
@@ -45,15 +45,15 @@ const BRANCHES: { from: number; spic: number; pts: Pt[] }[] = SPICULES.flatMap((
 const RX = 655;
 const TOP = 112;
 const BOT = 520;
+const MID = (TOP + BOT) / 2;
 function boneShape(sw: number, ew: number): Pt[] {
-  const mid = (TOP + BOT) / 2;
   const R: Pt[] = [
     [RX, TOP - 6],
     [RX + ew * 0.7, TOP],
     [RX + ew, TOP + 40],
     [RX + ew * 0.8, TOP + 92],
     [RX + sw, TOP + 140],
-    [RX + sw * 0.94, mid],
+    [RX + sw * 0.94, MID],
     [RX + sw, BOT - 140],
     [RX + ew * 0.8, BOT - 92],
     [RX + ew, BOT - 40],
@@ -64,34 +64,91 @@ function boneShape(sw: number, ew: number): Pt[] {
   return spline([...R, ...L], 8, true);
 }
 const MODEL = boneShape(30, 56);
-const R_CELLS = mesCells((x, y) => inPoly(boneShape(44, 70), x, y) || Math.abs(x - RX) < 110, [RX - 110, 120, RX + 110, 512], 26, 41);
-const condensedAt = (p: Pt): Pt => {
-  // Pull each cell into the bone model (keeps its relative position).
-  const y = lerp(TOP + 14, BOT - 14, (p[1] - 120) / 392);
-  const half = inPoly(MODEL, RX + 1, y) ? halfWidthAt(y) : 30;
-  return [RX + ((p[0] - RX) / 110) * (half - 8), y];
-};
-function halfWidthAt(y: number) {
-  let best = 0;
-  for (const q of MODEL) if (Math.abs(q[1] - y) < 6 && q[0] > RX) best = Math.max(best, q[0] - RX);
-  return best || 30;
+/** The model's half-width at a height (its right side, read as a function of y along the shaft and metaphyses). */
+const SIDE = MODEL.filter(([x, y]) => x > RX && y > TOP + 10 && y < BOT - 10).sort((a, b) => a[1] - b[1]);
+function halfW(y: number) {
+  if (y <= SIDE[0][1]) return SIDE[0][0] - RX;
+  for (let i = 1; i < SIDE.length; i++)
+    if (SIDE[i][1] >= y) {
+      const [x0, y0] = SIDE[i - 1];
+      const [x1, y1] = SIDE[i];
+      return lerp(x0, x1, (y - y0) / (y1 - y0 || 1)) - RX;
+    }
+  return SIDE[SIDE.length - 1][0] - RX;
 }
-const LACUNAE: { p: Pt; r: number }[] = (() => {
-  const out: { p: Pt; r: number }[] = [];
+function offsetIn(pts: Pt[], d: number): Pt[] {
+  return pts.map(([x, y]) => [x - Math.sign(x - RX) * d, y - Math.sign(y - MID) * d * 0.6]);
+}
+/**
+ * Each chondrocyte of the model, with the loose mesenchymal cell it starts as: the cells crowd in (condensation)
+ * from a wider field, the middle first, round up into chondroblasts and wall themselves in matrix (lacunae).
+ */
+const CHONDRO = (() => {
+  const out: { p: Pt; r: number; src: Pt; lag: number; a: number; col: number }[] = [];
+  const inner = offsetIn(MODEL, 6);
   let i = 0;
   for (let y = TOP + 8; y < BOT - 6; y += 13)
     for (let x = RX - 64; x < RX + 64; x += 15) {
       i++;
       const jx = x + (rand(i * 2.3) - 0.5) * 7 + ((y / 13) % 2) * 6;
       const jy = y + (rand(i * 4.1) - 0.5) * 5;
-      if (inPoly(offsetIn(MODEL, 6), jx, jy)) out.push({ p: [jx, jy], r: 3 + rand(i * 6.7) * 0.8 });
+      if (!inPoly(inner, jx, jy)) continue;
+      const dy = jy - MID;
+      out.push({
+        p: [jx, jy],
+        r: 3 + rand(i * 6.7) * 0.8,
+        src: [RX + (jx - RX) * 1.75 + (rand(i * 9.1) - 0.5) * 26, MID + dy * 1.1 + (rand(i * 2.9) - 0.5) * 18],
+        lag: 0.35 * (Math.abs(dy) / 210) + 0.15 * rand(i * 3.7),
+        a: rand(i * 1.3) * 360,
+        col: RX + Math.round((jx - RX) / 12) * 12,
+      });
     }
   return out;
 })();
-function offsetIn(pts: Pt[], d: number): Pt[] {
-  const cy = (TOP + BOT) / 2;
-  return pts.map(([x, y]) => [x - Math.sign(x - RX) * d, y - Math.sign(y - cy) * d * 0.6]);
+/** Chondroblasts along the inside of the perichondrium (appositional growth). */
+const RIM = offsetIn(MODEL, 4).filter((_, i) => i % 4 === 0);
+/** Primary spongiosa: longitudinal trabeculae (laid on the calcified cartilage columns) with cross-links. */
+const TRAB_COLS = [-0.74, -0.37, 0, 0.37, 0.74];
+const TRABECULAE: Pt[][] = TRAB_COLS.map((f, k) =>
+  Array.from({ length: 33 }, (_, j) => {
+    const y = MID - 160 + j * 10;
+    return [RX + f * (halfW(y) - 8) + Math.sin(j * 1.3 + k * 2.1) * 2.4, y] as Pt;
+  }),
+);
+const TRAB_LINKS: [Pt, Pt][] = [];
+TRABECULAE.forEach((c, k) => {
+  if (k === TRABECULAE.length - 1) return;
+  c.forEach((p, j) => {
+    if (j % 2 === (k % 2) || rand(k * 31 + j * 7.7) < 0.35) return;
+    const q = TRABECULAE[k + 1][Math.min(32, j + (rand(k + j * 3.1) < 0.5 ? 0 : 1))];
+    TRAB_LINKS.push([p, q]);
+  });
+});
+/** The periosteal bud: a vessel from outside, through the bone collar, into the middle of the shaft. */
+const BUD = `M${RX - 150},${MID - 92} C${RX - 96},${MID - 80} ${RX - 60},${MID - 30} ${RX - 30},${MID - 10} S${RX - 8},${MID + 4} ${RX + 4},${MID + 2}`;
+/** The bone collar on one side of the shaft, reaching `R` up and down from the middle. */
+function collarPath(R: number, s: number) {
+  if (R < 2) return '';
+  const out: Pt[] = [];
+  const inn: Pt[] = [];
+  for (let k = 0; k <= 24; k++) {
+    const y = MID - R + (2 * R * k) / 24;
+    const taper = Math.min(1, (R - Math.abs(y - MID)) / 14 + 0.2);
+    const w = halfW(y);
+    out.push([RX + s * (w + 2), y]);
+    inn.push([RX + s * (w + 2 - 8 * taper), y]);
+  }
+  return smoothPath([...out, ...inn.reverse()], true, 0.3);
 }
+const rimAngle = (i: number) => {
+  const a = RIM[(i + RIM.length - 1) % RIM.length];
+  const b = RIM[(i + 1) % RIM.length];
+  return (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI;
+};
+/** A cell in the upper right of the field, for the mesenchyme's name. */
+const MES_I = CHONDRO.reduce((best, c, i) => (c.src[1] < MID - 110 && c.src[0] > CHONDRO[best].src[0] ? i : best), 0);
+/** A chondroblast of the rim on the right side of the shaft. */
+const RIM_I = RIM.reduce((best, p, i) => (p[0] > RX && Math.abs(p[1] - (TOP + 132)) < Math.abs(RIM[best][1] - (TOP + 132)) ? i : best), 0);
 
 export function OssificationTypes({ t, reduced }: SceneProps) {
   const cid = useId().replace(/:/g, '');
@@ -99,16 +156,42 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
   const lCentre = seg(t, OSS_T.membrane + 0.02, OSS_T.membrane + 0.08);
   const spic = seg(t, OSS_T.spicules + 0.01, OSS_T.spicules + 0.13);
   // Right timeline.
-  const cond = seg(t, OSS_T.cartilage + 0.005, OSS_T.cartilage + 0.05);
-  const cart = seg(t, OSS_T.cartilage + 0.04, OSS_T.cartilage + 0.09);
-  const hyper = seg(t, OSS_T.centre + 0.005, OSS_T.centre + 0.04);
-  const vessel = seg(t, OSS_T.centre + 0.03, OSS_T.centre + 0.07);
-  const prim = seg(t, OSS_T.centre + 0.06, OSS_T.centre + 0.1);
-  const spread = seg(t, OSS_T.spread + 0.01, OSS_T.spread + 0.1);
-  const mid = (TOP + BOT) / 2;
-  const reach = lerp(18, 128, spread) + 14 * prim;
-  const boneTop = mid - reach;
-  const boneBot = mid + reach;
+  const cond = seg(t, OSS_T.cartilage + 0.005, OSS_T.cartilage + 0.065);
+  const round = seg(t, OSS_T.cartilage + 0.05, OSS_T.cartilage + 0.08);
+  const matrix = seg(t, OSS_T.cartilage + 0.06, OSS_T.cartilage + 0.12);
+  const hyper = seg(t, OSS_T.centre + 0.005, OSS_T.centre + 0.035);
+  const collar = seg(t, OSS_T.centre + 0.02, OSS_T.centre + 0.055);
+  const vessel = seg(t, OSS_T.centre + 0.045, OSS_T.centre + 0.08);
+  const prim = seg(t, OSS_T.centre + 0.075, OSS_T.centre + 0.12);
+  const spread = seg(t, OSS_T.spread + 0.01, OSS_T.spread + 0.12);
+  // How far the bone reaches up and down from the middle; the collar runs a little ahead of it.
+  const boneR = 50 * prim + 88 * spread;
+  const collarR = Math.max(lerp(0, 84, collar), boneR + 14);
+  const calcIn = prim > 0 ? boneR : 0;
+  const calcOut = lerp(72, boneR + 30, prim);
+  const cells = CHONDRO.map((c) => {
+    const u = sm(clamp(cond * 1.5 - c.lag, 0, 1));
+    const ady = Math.abs(c.p[1] - MID);
+    // Hypertrophy: first in the middle of the shaft, then in a band just ahead of the ossification front.
+    const nearMid = clamp(1 - ady / 90, 0, 1) * hyper;
+    const zone = ady > boneR ? clamp(1 - (ady - boneR) / 44, 0, 1) : 1;
+    const h = Math.max(nearMid * (1 - prim), zone * prim);
+    // Ahead of that, the proliferating cells stack up in columns (the future growth plate).
+    const flat = spread * clamp(1 - Math.abs(ady - boneR - 64) / 26, 0, 1);
+    const x = lerp(c.p[0], c.col, flat * 0.8);
+    return { u, h, flat, p: [lerp(c.src[0], x, u), lerp(c.src[1], c.p[1], u)] as Pt };
+  });
+  const osteo: Pt[] =
+    prim < 0.01
+      ? []
+      : TRAB_COLS.flatMap((f, k) =>
+          [-1, 1].flatMap((s) =>
+            [boneR - 7, boneR * (s > 0 ? 0.78 - 0.13 * k : 0.26 + 0.13 * k)].map((d) => {
+              const y = MID + s * d;
+              return [RX + f * (halfW(y) - 8) + 4, y] as Pt;
+            }),
+          ),
+        );
   const pulse = reduced ? 0 : Math.sin(t * 90) * 0.5 + 0.5;
 
   const spicPath = (pts: Pt[], u: number) => {
@@ -119,7 +202,7 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
     if (k < n) out.push([lerp(pts[k][0], pts[k + 1][0], m - k), lerp(pts[k][1], pts[k + 1][1], m - k)]);
     return `M${out.map((p) => `${f1(p[0])},${f1(p[1])}`).join('L')}`;
   };
-  const shaftClip = `M${RX - 80},${f1(boneTop)}H${RX + 80}V${f1(boneBot)}H${RX - 80}Z`;
+  const shaftClip = `M${RX - 80},${f1(MID - boneR)}H${RX + 80}V${f1(MID + boneR)}H${RX - 80}Z`;
 
   return (
     <g>
@@ -132,6 +215,38 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
       <clipPath id={`w8-oss-shaft${cid}`}>
         <path d={shaftClip} />
       </clipPath>
+      <defs>
+        <radialGradient id={`w8-oss-field${cid}`}>
+          <stop offset="0" stopColor={Q.mes} stopOpacity={0.16} />
+          <stop offset="0.6" stopColor={Q.mes} stopOpacity={0.07} />
+          <stop offset="1" stopColor={Q.mes} stopOpacity={0} />
+        </radialGradient>
+        <radialGradient id={`w8-oss-hyal${cid}`} cx="38%" cy="30%" r="85%">
+          <stop offset="0" stopColor="#fff" stopOpacity={0.3} />
+          <stop offset="0.5" stopColor="#fff" stopOpacity={0.04} />
+          <stop offset="1" stopColor="#140c3a" stopOpacity={0.4} />
+        </radialGradient>
+        <pattern id={`w8-oss-calc${cid}`} width="7" height="7" patternUnits="userSpaceOnUse">
+          <rect width="7" height="7" fill="#43378a" opacity={0.75} />
+          <circle cx="2" cy="2" r="0.9" fill="#1d1450" />
+          <circle cx="5.5" cy="5" r="0.7" fill="#a79be8" />
+        </pattern>
+        <radialGradient id={`w8-oss-marrow${cid}`}>
+          <stop offset="0" stopColor="#a02a3a" />
+          <stop offset="1" stopColor="#3a0c14" />
+        </radialGradient>
+        <radialGradient id={`w8-oss-glow${cid}`}>
+          <stop offset="0" stopColor={Q.centre} stopOpacity={0.55} />
+          <stop offset="1" stopColor={Q.centre} stopOpacity={0} />
+        </radialGradient>
+        <radialGradient id={`w8-oss-growg${cid}`}>
+          <stop offset="0.7" stopColor="#fff" />
+          <stop offset="1" stopColor="#000" />
+        </radialGradient>
+        <mask id={`w8-oss-grow${cid}`} maskUnits="userSpaceOnUse" x={0} y={0} width={1000} height={640}>
+          <ellipse cx={RX} cy={MID} rx={f1(lerp(24, 170, matrix))} ry={f1(lerp(40, 320, matrix))} fill={`url(#w8-oss-growg${cid})`} />
+        </mask>
+      </defs>
 
       {/* ——— Membranous: between the skin and the brain ——— */}
       <rect x={214} y={136} width={262} height={22} rx={8} fill={Q.skin} opacity={0.55} />
@@ -172,58 +287,136 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
       </Part>
 
       {/* ——— Endochondral: a long-bone model ——— */}
-      <Part id="mesenkima" show={1 - cart}>
-        {R_CELLS.map((c, i) => (
-          <MesCell key={i} p={[lerp(c.p[0], condensedAt(c.p)[0], cond), lerp(c.p[1], condensedAt(c.p)[1], cond)]} r={c.r} a={c.a + cond * 40} />
+      <Part id="mesenkima" show={1 - round}>
+        <ellipse cx={RX} cy={MID} rx={128} ry={236} fill={`url(#w8-oss-field${cid})`} />
+        {cells.map((c, i) => (
+          <MesCell key={i} p={c.p} r={CHONDRO[i].r * 0.26 + 0.1} a={CHONDRO[i].a + c.u * 50} />
         ))}
       </Part>
-      <Part id="kartilago-eredua" show={cart}>
-        <path d={smoothPath(MODEL, true, 0.3)} fill={Q.cart} stroke={Q.cartDeep} strokeWidth={2.4} />
-        <g clipPath={`url(#w8-oss-model${cid})`}>
-          {LACUNAE.map((l, i) => {
-            const near = 1 - Math.min(1, Math.abs(l.p[1] - mid) / 150);
-            const r = l.r * (1 + 0.6 * hyper * near);
-            return (
-              <g key={i}>
-                <ellipse cx={l.p[0]} cy={l.p[1]} rx={r * 1.3} ry={r} fill={Q.cartCell} opacity={0.8} />
-                <circle cx={l.p[0]} cy={l.p[1]} r={r * 0.42} fill={Q.cartDeep} />
-              </g>
-            );
-          })}
+      <Part id="kondroblastoak" show={round * (1 - hyper)}>
+        {cells.map((c, i) => (
+          <g key={i}>
+            <ellipse cx={f1(c.p[0])} cy={f1(c.p[1])} rx={f1(CHONDRO[i].r * 1.05)} ry={f1(CHONDRO[i].r * 0.95)} fill={Q.cartCell} stroke={Q.cartDeep} strokeWidth={0.8} />
+            <circle cx={f1(c.p[0])} cy={f1(c.p[1])} r={f1(CHONDRO[i].r * 0.42)} fill={Q.cartDeep} />
+          </g>
+        ))}
+      </Part>
+      <Part id="kartilago-eredua" show={matrix}>
+        <g mask={`url(#w8-oss-grow${cid})`}>
+          <path d={smoothPath(MODEL, true, 0.3)} fill={Q.cart} />
+          <path d={smoothPath(MODEL, true, 0.3)} fill={`url(#w8-oss-hyal${cid})`} />
+          <g clipPath={`url(#w8-oss-model${cid})`}>
+            {/* Calcified matrix round the hypertrophic chondrocytes. */}
+            {calcOut > 2 && (
+              <path
+                d={`M${RX - 80},${f1(MID - calcOut)}H${RX + 80}V${f1(MID - calcIn)}H${RX - 80}ZM${RX - 80},${f1(MID + calcIn)}H${RX + 80}V${f1(MID + calcOut)}H${RX - 80}Z`}
+                fill={`url(#w8-oss-calc${cid})`}
+                opacity={0.85 * hyper}
+              />
+            )}
+            {cells.map((c, i) => {
+              const r = CHONDRO[i].r;
+              const k = 1 + 0.35 * c.flat;
+              const q = 1 - 0.42 * c.flat;
+              return (
+                <g key={i} transform={`translate(${f1(c.p[0])},${f1(c.p[1])})`}>
+                  <ellipse rx={f1(r * 1.5 * (1 + 0.9 * c.h) * k)} ry={f1(r * 1.2 * (1 + 1.15 * c.h) * q)} fill="#ddd7ff" opacity={0.45} />
+                  <ellipse rx={f1(r * 1.05 * (1 + 0.75 * c.h) * k)} ry={f1(r * 0.95 * (1 + 0.95 * c.h) * q)} fill={Q.cartCell} opacity={1 - 0.4 * c.h} stroke={Q.cartDeep} strokeWidth={0.8} />
+                  <circle r={f1(r * 0.42 * (1 - 0.35 * c.h))} fill={Q.cartDeep} />
+                </g>
+              );
+            })}
+          </g>
+          {/* Perichondrium. */}
+          <path d={smoothPath(MODEL, true, 0.3)} fill="none" stroke="#c6b9ff" strokeWidth={3.2} opacity={0.9} />
+          <path d={smoothPath(MODEL, true, 0.3)} fill="none" stroke={Q.cartDeep} strokeWidth={1.2} />
         </g>
       </Part>
-      <Part id="kondroblastoak" show={cart * (1 - hyper)}>
-        {MODEL.filter((_, i) => i % 5 === 0).map((p, i) => (
-          <ellipse key={i} cx={p[0] - Math.sign(p[0] - RX) * 3} cy={p[1]} rx={4.6} ry={2.6} fill={Q.cartCell} stroke={Q.cartDeep} strokeWidth={1} />
+      <Part id="kondroblastoak" show={matrix * (1 - hyper)}>
+        {RIM.map((p, i) => (
+          <ellipse key={i} cx={f1(p[0])} cy={f1(p[1])} rx={4.4} ry={2.2} transform={`rotate(${f1(rimAngle(i))} ${f1(p[0])} ${f1(p[1])})`} fill={Q.cartCell} stroke={Q.cartDeep} strokeWidth={0.9} />
         ))}
       </Part>
-      <Part id="kondrozitoak" show={hyper * (1 - prim * 0.7)}>
-        {LACUNAE.filter((l) => Math.abs(l.p[1] - mid) < 70).map((l, i) => (
-          <circle key={i} cx={l.p[0]} cy={l.p[1]} r={l.r * 0.95} fill="none" stroke={Q.cartDeep} strokeWidth={1.2} />
-        ))}
+      <Part id="kondrozitoak" show={hyper}>
+        {cells.map((c, i) =>
+          c.h > 0.25 ? (
+            <ellipse
+              key={i}
+              cx={f1(c.p[0])}
+              cy={f1(c.p[1])}
+              rx={f1(CHONDRO[i].r * 1.5 * (1 + 0.9 * c.h))}
+              ry={f1(CHONDRO[i].r * 1.2 * (1 + 1.15 * c.h))}
+              fill="none"
+              stroke="#f4f1ff"
+              strokeWidth={1.1}
+              opacity={c.h}
+            />
+          ) : null,
+        )}
       </Part>
+
+      {/* The primary centre: marrow and trabeculae where the cartilage was. */}
       <Part id="hezurtzapen-zentroak" show={prim}>
         <g clipPath={`url(#w8-oss-model${cid})`}>
           <g clipPath={`url(#w8-oss-shaft${cid})`}>
-            <rect x={RX - 80} y={TOP} width={160} height={BOT - TOP} fill={Q.bone} />
-            <rect x={RX - 80} y={TOP} width={160} height={BOT - TOP} fill="url(#w8-bone)" />
-            {/* Marrow cavity with vessels. */}
-            <path d={`M${RX - 14},${f1(boneTop + 12)}Q${RX + 8},${mid} ${RX - 10},${f1(boneBot - 12)}`} fill="none" stroke={Q.vessel} strokeWidth={1.6} opacity={0.7} />
+            <rect x={RX - 80} y={TOP} width={160} height={BOT - TOP} fill="#5a1622" />
+            <rect x={RX - 80} y={TOP} width={160} height={BOT - TOP} fill={`url(#w8-oss-marrow${cid})`} />
+            {TRAB_LINKS.map(([a, b], i) => (
+              <path key={i} d={`M${f1(a[0])},${f1(a[1])}L${f1(b[0])},${f1(b[1])}`} stroke={Q.bone} strokeWidth={2} strokeLinecap="round" />
+            ))}
+            {TRABECULAE.map((c, i) => (
+              <path key={i} d={smoothPath(c, false, 0.3)} fill="none" stroke={Q.bone} strokeWidth={3.2} strokeLinecap="round" />
+            ))}
+            {/* The calcified cartilage cores the bone is laid on. */}
+            {TRABECULAE.map((c, i) => (
+              <path key={i} d={smoothPath(c, false, 0.3)} fill="none" stroke={Q.cartDeep} strokeWidth={1} opacity={0.55} />
+            ))}
           </g>
         </g>
-        {/* Collar of bone round the shaft. */}
-        <path d={`M${RX - 32},${f1(boneTop + 6)}V${f1(boneBot - 6)}M${RX + 32},${f1(boneTop + 6)}V${f1(boneBot - 6)}`} stroke={Q.bone} strokeWidth={6} strokeLinecap="round" />
+        <ellipse cx={RX} cy={MID} rx={lerp(30, 46, pulse)} ry={lerp(40, 56, pulse) + boneR * 0.6} fill={`url(#w8-oss-glow${cid})`} opacity={1 - 0.8 * spread} />
       </Part>
-      <Part id="osteoblastoak" show={prim}>
-        {[[-12, -6], [8, -14], [14, 6], [-6, 12], [0, 0]].map(([dx, dy], i) => (
-          <circle key={i} cx={RX + dx} cy={mid + dy} r={4.4} fill={Q.osteo} />
+      {/* Periosteal bone collar round the shaft (the perichondrium there turns periosteum). */}
+      <Part id="hezurtzapen-zentroak" show={collar}>
+        {[-1, 1].map((s) => (
+          <g key={s}>
+            <path d={collarPath(collarR, s)} fill={Q.bone} stroke={Q.boneDeep} strokeWidth={1} />
+            <path d={collarPath(collarR, s)} fill="url(#w8-bone)" />
+          </g>
         ))}
-        {[-1, 1].map((s) =>
-          [0.3, 0.7].map((u, j) => <circle key={`${s}${j}`} cx={RX + s * 18} cy={lerp(mid, s > 0 ? boneBot - 8 : boneTop + 8, u)} r={3.6} fill={Q.osteo} />),
-        )}
       </Part>
-      {/* The vessel that brings the osteoblasts in. */}
-      {vessel > 0.01 && <path d={`M${RX + 112},${mid - 44}Q${RX + 64},${mid - 30} ${f1(lerp(RX + 70, RX + 4, vessel))},${mid - 4}`} fill="none" stroke={Q.vessel} strokeWidth={4} strokeLinecap="round" opacity={vessel} />}
+      {/* The vessel that brings the osteoblasts in, then runs up and down the marrow behind the front. */}
+      {vessel > 0.01 && (
+        <g>
+          <path d={BUD} fill="none" stroke="#7a1410" strokeWidth={7} strokeLinecap="round" pathLength={1} strokeDasharray={`${f1(vessel)} 2`} />
+          <path d={BUD} fill="none" stroke={Q.vessel} strokeWidth={4.4} strokeLinecap="round" pathLength={1} strokeDasharray={`${f1(vessel)} 2`} />
+          {prim > 0.01 &&
+            [-1, 1].map((s) => (
+              <path
+                key={s}
+                d={`M${RX + 4},${MID + 2}C${RX + 10},${f1(MID + s * boneR * 0.3)} ${RX - 8},${f1(MID + s * boneR * 0.6)} ${RX - 2},${f1(MID + s * Math.max(4, boneR - 10))}`}
+                fill="none"
+                stroke={Q.vessel}
+                strokeWidth={2.4}
+                strokeLinecap="round"
+                opacity={0.9}
+              />
+            ))}
+          {!reduced && vessel > 0.98 && (
+            <g>
+              {[0, 1, 2, 3].map((k) => (
+                <circle key={k} r={2.2} fill="#ffd0c8">
+                  <animateMotion dur="2.4s" begin={`${k * 0.6}s`} repeatCount="indefinite" path={BUD} />
+                </circle>
+              ))}
+            </g>
+          )}
+        </g>
+      )}
+      <Part id="osteoblastoak" show={prim}>
+        {osteo.map((p, i) => (
+          <ellipse key={i} cx={f1(p[0])} cy={f1(p[1])} rx={3.6} ry={2.6} fill={Q.osteo} stroke={Q.centre} strokeWidth={1.2} />
+        ))}
+      </Part>
 
       <path d={smoothPath(MEMBRANE, true, 0.3)} fill="url(#w8-light)" pointerEvents="none" />
 
@@ -245,7 +438,7 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
       <Note x={RX} y={78} size={11.5} tone="accent" show={vis(t, OSS_T.centre + 0.02)}>
         2. fasea: kartilagoa hezurtzen da
       </Note>
-      <Note x={RX + 112} y={mid - 58} size={11} tone="dim" show={vessel * (1 - spread)}>
+      <Note x={RX - 108} y={MID - 108} size={11} tone="dim" show={vessel * (1 - spread)}>
         odol hodia
       </Note>
 
@@ -273,12 +466,13 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
       <Label id="osteoblastoak" x={190} y={360} ax={LC[0] - lerp(14, 34, spic) * Math.cos(Math.PI / 9)} ay={LC[1] + 12} show={lCentre} small />
       <Label id="hezur-espikulak" x={190} y={420} ax={SPICULES[5][4][0]} ay={SPICULES[5][4][1]} show={spic} />
 
-      <Label id="mesenkima" x={810} y={150} ax={RX + 60} ay={170} show={1 - cart} />
-      <Label id="kartilago-eredua" x={776} y={150} ax={RX + 46} ay={TOP + 40} show={cart} />
-      <Label id="kondroblastoak" x={810} y={230} ax={RX + 42} ay={TOP + 120} show={cart * (1 - hyper)} small />
-      <Label id="kondrozitoak" x={810} y={230} ax={RX + 22} ay={mid - 50} show={hyper * (1 - prim * 0.7)} small />
-      <Label id="hezurtzapen-zentroak" text="Zentro primarioa" x={810} y={316} ax={RX + 24} ay={mid + 10} show={prim} />
-      <Label id="osteoblastoak" x={810} y={360} ax={RX + 14} ay={mid + 6} show={prim} small />
+      <Label id="mesenkima" x={810} y={110} ax={cells[MES_I].p[0] + 4} ay={cells[MES_I].p[1]} show={1 - round} />
+      <Label id="kartilago-eredua" x={776} y={150} ax={RX + halfW(TOP + 60) - 2} ay={TOP + 60} show={matrix} />
+      <Label id="kondroblastoak" x={810} y={196} ax={RIM[RIM_I][0] + 4} ay={RIM[RIM_I][1]} show={round * (1 - hyper)} small />
+      <Label id="kondrozitoak" x={810} y={236} ax={RX + 14} ay={MID - boneR - 22} show={hyper} small />
+      <Label id="hezurtzapen-zentroak" text="Hezur lepokoa" x={810} y={276} ax={RX + halfW(MID + 40) + 2} ay={MID + 40} show={collar} small />
+      <Label id="hezurtzapen-zentroak" text="Zentro primarioa" x={810} y={316} ax={RX + 12} ay={MID + 18} show={prim} />
+      <Label id="osteoblastoak" x={810} y={360} ax={osteo.length ? osteo[osteo.length - 2][0] + 3 : RX} ay={osteo.length ? osteo[osteo.length - 2][1] : MID} show={prim} small />
     </g>
   );
 }

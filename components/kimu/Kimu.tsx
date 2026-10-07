@@ -137,6 +137,22 @@ export function Kimu() {
     };
   }, []);
 
+  // The nudge hangs over the view tabs: the student's first click or key anywhere puts it away.
+  useEffect(() => {
+    if (!nudge) return;
+    const away = (e: Event) => {
+      // A click on the nudge itself opens Kimu (its own handler).
+      if (e.target instanceof Element && e.target.closest('.kimu-nudge')) return;
+      setNudge(false);
+    };
+    window.addEventListener('pointerdown', away, true);
+    window.addEventListener('keydown', away, true);
+    return () => {
+      window.removeEventListener('pointerdown', away, true);
+      window.removeEventListener('keydown', away, true);
+    };
+  }, [nudge]);
+
   // Keep the in-simulator nudge under the top-bar button (and on screen) while it shows.
   useEffect(() => {
     if (!nudge || !inSim) return;

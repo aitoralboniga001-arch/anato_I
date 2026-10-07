@@ -4,10 +4,11 @@ import { useSyncExternalStore } from 'react';
  * Boolean viewer preferences (playback mode, narration, which side panels are open), remembered per
  * browser. The playback mode is `quick` (quick replay) over `guided` (guided) over neither (normal).
  */
+/** `asks`: guided mode checks each step with a one-tap question (off = the steps just play on). */
 /** `fsAsk`: offer full screen when a stage starts playing ("Ez galdetu berriro" turns it off). */
-export type PrefKey = 'guided' | 'quick' | 'voice' | 'subtitles' | 'outline' | 'panel' | 'fsAsk' | 'notes';
+export type PrefKey = 'guided' | 'quick' | 'voice' | 'subtitles' | 'outline' | 'panel' | 'fsAsk' | 'notes' | 'asks';
 
-const DEFAULTS: Record<PrefKey, boolean> = { guided: true, quick: false, voice: false, subtitles: false, outline: true, panel: true, fsAsk: true, notes: false };
+const DEFAULTS: Record<PrefKey, boolean> = { guided: true, quick: false, voice: false, subtitles: false, outline: true, panel: true, fsAsk: true, notes: false, asks: true };
 
 export type PlayMode = 'gidatua' | 'arrunta' | 'azkarra';
 

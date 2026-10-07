@@ -148,7 +148,7 @@ export function RibSection({ t }: SceneProps) {
         </Part>
       )}
 
-      <Note x={500} y={30} size={12.5} tone="accent">
+      <Note x={250} y={30} size={12.5} tone="accent">
         Toraxaren zeharkako ebakidura (goian atzea)
       </Note>
       <Note x={500} y={612} tone="accent" show={vis(t, 0, RS_T.cross)}>
@@ -259,7 +259,7 @@ export function SternumFront({ t }: SceneProps) {
           : [MAN, BODY, XIPH].map((p, i) => <path key={i} d={smoothPath(p, true, 0.2)} fill="none" stroke={CART_DEEP} strokeWidth={1.2} />)}
       </Part>
 
-      <Note x={500} y={22} size={12.5} tone="accent">
+      <Note x={250} y={22} size={12.5} tone="accent">
         Toraxaren aurrealdea
       </Note>
       <Note x={500} y={612} tone="accent" show={vis(t, RS_T.bars, RS_T.bars + 0.08)}>

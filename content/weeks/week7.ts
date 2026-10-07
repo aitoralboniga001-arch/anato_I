@@ -5,6 +5,7 @@ import { PeritoneumSection } from '@/components/scenes/week7/Peritoneum';
 import { LungBudFront, ThoraxSection } from '@/components/scenes/week7/Thorax';
 import { DiaphragmDescent, DiaphragmSection } from '@/components/scenes/week7/Diaphragm';
 import { DiaphragmBelow, DiaphragmProfile } from '@/components/scenes/week7/DiaphragmAdult';
+import { CoelomMapDiaphragm, CoelomMapSeptum, CoelomMapThorax } from '@/components/scenes/week7/CoelomMap';
 import { structures7 } from './week7-structures';
 
 const FILE = '7.GAIA_Gorputzaren barrunbeak (ZUZENDUTA).pdf';
@@ -135,6 +136,14 @@ export const week7: WeekDef = {
           orientation: lateralOrientation,
           scene: SeptumLateral,
         },
+        {
+          id: 'mapa',
+          label: 'Barrunbeen mapa',
+          plane: 'eskema',
+          description: 'Enborraren zeloma osoa aurretik, bloke garden gisa, eta ondoan plano zuriaren mailako zeharkako mozketa. Septumaren gainean hasierako perikardio barrunbea, azpian peritoneo barrunbea, eta atzean bi erreten. Planoa arrastatu daiteke.',
+          orientation: { top: 'Kraneala', bottom: 'Kaudala' },
+          scene: CoelomMapSeptum,
+        },
       ],
       beats: [
         {
@@ -165,6 +174,7 @@ export const week7: WeekDef = {
         {
           at: 0.72,
           notes: ['w7/2/p5/s3'],
+          view: 'mapa',
           text: 'Banaketa partziala da: septumaren alde dortsolateraletan bi kanal geratzen dira, goiko eta beheko atalak komunikatzen dituztenak: erreten perikardioperitonealak.',
           focus: ['erreten-perikardioperitonealak'],
           caution: 'Septum transversumak ez ditu barrunbeak erabat bereizten: erretenak 5. astean itxiko dira (mintz pleuroperitonealak).',
@@ -312,6 +322,14 @@ export const week7: WeekDef = {
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Eskuina', right: 'Ezkerra' },
           scene: LungBudFront,
         },
+        {
+          id: 'mapa',
+          label: 'Barrunbeen mapa',
+          plane: 'eskema',
+          description: 'Enborraren zeloma osoa aurretik, bloke garden gisa, eta ondoan plano zuriaren mailako zeharkako mozketa: birika hastapenak atze-alboko aldeetan, mintz pleuroperikardikoak eta perikardio barrunbea aurrean. Planoa arrastatu daiteke.',
+          orientation: { top: 'Kraneala', bottom: 'Kaudala' },
+          scene: CoelomMapThorax,
+        },
       ],
       beats: [
         {
@@ -433,6 +451,14 @@ export const week7: WeekDef = {
           scene: DiaphragmSection,
           locator: { level: 0.5, note: 'Diafragmaren maila' },
         },
+        {
+          id: 'mapa',
+          label: 'Barrunbeen mapa',
+          plane: 'eskema',
+          description: 'Enborraren zeloma osoa aurretik, bloke garden gisa, eta ondoan plano zuriaren mailako zeharkako mozketa: erreten perikardioperitonealek goiko eta beheko barrunbeak lotzen dituzte, mintz pleuroperitonealek itxi arte. Planoa arrastatu daiteke.',
+          orientation: { top: 'Kraneala', bottom: 'Kaudala' },
+          scene: CoelomMapDiaphragm,
+        },
       ],
       beats: [
         {
@@ -465,13 +491,14 @@ export const week7: WeekDef = {
         {
           at: 0.62,
           notes: ['w7/3/p7/s1'],
-          view: 'zeharkakoa',
+          view: 'mapa',
           text: '4. astean, goiko hasierako perikardio barrunbea (gero pleura barrunbeak) eta beheko peritoneo barrunbea erreten perikardioperitonealen bitartez (alde dortsalean) komunikatuta daude.',
           focus: ['erreten-perikardioperitonealak'],
         },
         {
           at: 0.74,
           notes: ['w7/3/p7/s2-s4'],
+          view: 'zeharkakoa',
           text: '5. astean gorputzaren atze-alboko paretetatik mintz pleuroperitonealak agertzen dira. Hazi eta hestegorri inguruko mesenkimarekin eta septumaren atzeko ertzarekin fusionatzen dira: erretenak itxi egiten dira, pleura eta peritoneo barrunbeen arteko komunikazioa galduz.',
           focus: ['mintz-pleuroperitonealak', 'hestegorri-inguruko-mesenkima', 'septum-transversum'],
           exam: 'Mintz pleuroperitonealak: 5. astea, erreten perikardioperitonealak ixten dituzte.',

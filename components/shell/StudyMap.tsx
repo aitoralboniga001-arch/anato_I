@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import type { CSSProperties } from 'react';
 import { KEY_IDS, POOL } from '@/content/pool';
 import { weeks } from '@/content/registry';
 import { competenceLevel, isDue, useAnswers } from './answers';
@@ -96,14 +97,14 @@ export function StudyMap() {
   return (
     <>
       <section id="mapa" className="land-section map">
-        <header className="section-head">
+        <header className="section-head" data-rv>
           <p className="kicker">Mapa · 20 segundotan</p>
           <h2>Gai osoa, begirada batean</h2>
-          <p>Sei etapa, ordenan. Hau buruan izanda, xehetasun bakoitzak badu bere lekua.</p>
+          <p>Zortzi gai, ordenan. Hau buruan izanda, xehetasun bakoitzak badu bere lekua.</p>
         </header>
         <ol className="map-row">
           {MAP.map((m, k) => (
-            <li key={m.title}>
+            <li key={m.title} data-rv style={{ '--d': `${(k % 4) * 80}ms` } as CSSProperties}>
               <Link href={m.href} className="map-card">
                 <span className="map-n">{String(k + 1).padStart(2, '0')}</span>
                 <span className="map-days">{m.days}</span>
@@ -120,14 +121,14 @@ export function StudyMap() {
       </section>
 
       <section id="ibilbidea" className="land-section route">
-        <header className="section-head">
+        <header className="section-head" data-rv>
           <p className="kicker">10/10 ibilbidea</p>
           <h2>Apunteetatik simulagailura</h2>
           <p>Ikusteak ez du esan nahi jakitea. Sei pauso, eta bakoitzean zure aurrerapena.</p>
         </header>
         <ol className="route-list">
-          {route.map((r) => (
-            <li key={r.n}>
+          {route.map((r, k) => (
+            <li key={r.n} data-rv style={{ '--d': `${k * 70}ms` } as CSSProperties}>
               <Link href={r.href} className="route-step">
                 <span className="route-n">{r.n}</span>
                 <span className="route-main">

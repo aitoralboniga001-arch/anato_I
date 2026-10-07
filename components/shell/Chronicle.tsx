@@ -62,6 +62,36 @@ function chapters(): Chapter[] {
       text: 'Zeharkako eta zefalokaudal tolespenak aldi berean gertatzen dira: disko laua C itxurako enbrioi zilindriko bihurtzen da eta endodermoa hestea bihurtzen da.',
       ...pick(4, 'tolespenak'),
     },
+    {
+      days: '5.–8. asteak',
+      title: 'Kanpo-itxura',
+      text: 'Aurpegia eratzen da eta gorputz-adarrak segmentatzen dira: hasikinetik esku eta oin plaketara, eta hortik hatzetako izpietara. 8. astearen amaieran bukatzen da enbrioi-aroa.',
+      ...pick(5, 'enbrioia-42-56'),
+    },
+    {
+      days: '2.–3. hilabeteak',
+      title: 'Karena',
+      text: 'Korion hostotsua eta dezidua basala elkartuta karena osatzen dute; soilik korion hostotsuak hartzen du parte elkartrukeetan. Korion leuna, aldiz, amnios pareta eta paretako deziduarekin fusionatzen da.',
+      ...pick(6, 'korion-hostotsua'),
+    },
+    {
+      days: '4.–5. asteak',
+      title: 'Diafragmaren jaitsiera',
+      text: 'Septum transversuma lepoko C3–C5 mailetan sortzen da eta nerbio frenikoaren zuntzak jasotzen ditu. Enbrioia atzetik gehiago hazten denez, septuma jaitsi egiten da (aurrean T6, atzean T12) eta nerbioa luzatzen da.',
+      ...pick(7, 'diafragma-eraketa'),
+    },
+    {
+      days: '6.–12. asteak',
+      title: 'Hezurtzapena',
+      text: 'Hezur guztiak mesenkimatik abiatzen dira. Mintzezkoan mesenkima zuzenean hezurtzen da (buru-gangako hezur lauak); endokondralean lehenik kartilago-eredua sortzen da eta gero hezurrak ordezkatzen du.',
+      ...pick(8, 'hezurtzapena'),
+    },
+    {
+      days: '4. astetik helduarora',
+      title: 'Bizkarrezurra',
+      text: 'Somitetako esklerotomak hodi neurala eta notokorda inguratzen dituzte; birsegmentazioaren ondoren orno gorputzak eta ornoarteko diskoak sortzen dira. Fetuaren makurdura primarioa zifosia da; jaio ondoren lepokoa eta gerrikoa lordosiak agertzen dira.',
+      ...pick(8, 'bizkarrezurra', 2),
+    },
   ];
 }
 
@@ -103,7 +133,7 @@ export function Chronicle() {
   const ch = CH[pos.i];
   const Scene = ch.scene;
   return (
-    <section ref={ref} id="kronologia" className="chron" style={{ height: `${CH.length * 100 + 60}vh` }} aria-label="Kronologia">
+    <section ref={ref} id="kronologia" className="chron" style={{ height: `${CH.length * 80 + 60}vh` }} aria-label="Kronologia">
       <div className="chron-sticky">
         <div className="chron-text">
           <p className="kicker">Kronologia</p>

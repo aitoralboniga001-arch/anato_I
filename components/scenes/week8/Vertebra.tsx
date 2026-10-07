@@ -215,7 +215,7 @@ export function VertebraTop({ t }: SceneProps) {
         </Part>
       </g>
 
-      <Note x={500} y={30} size={12.5} tone="accent">
+      <Note x={250} y={30} size={12.5} tone="accent">
         Orno bat goitik ikusita
       </Note>
       <Note x={500} y={612} tone="accent" show={vis(t, 0, OR_T.arch)}>
@@ -387,7 +387,7 @@ export function VertebraBack({ t }: SceneProps) {
         )}
       </Part>
 
-      <Note x={500} y={30} size={12.5} tone="accent">
+      <Note x={250} y={30} size={12.5} tone="accent">
         Bizkarrezurra atzetik, laminak kenduta
       </Note>
       {REG_N.map((n, k) => {

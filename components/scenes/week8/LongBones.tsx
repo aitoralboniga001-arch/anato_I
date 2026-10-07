@@ -211,7 +211,7 @@ export function LongBone({ t, reduced }: SceneProps) {
       )}
 
       {/* Age along a timeline. */}
-      <Note x={500} y={30} size={13} tone="accent" show={1 - cmp}>
+      <Note x={250} y={30} size={13} tone="accent" show={1 - cmp}>
         {age}
       </Note>
       {push > 0.5 && (

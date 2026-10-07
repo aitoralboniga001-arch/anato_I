@@ -298,7 +298,7 @@ export function StructureAtlas() {
       <LandNav current="egiturak" />
       <main className={styles.main}>
         <header className={styles.hero}>
-          <p className="eyebrow">1.–6. gaiak · Egituren atlasa</p>
+          <p className="eyebrow">1.–8. gaiak · Egituren atlasa</p>
           <h1>Egituren garapena, eskema batean</h1>
           <p>Gai guztietako egiturak eta haien garapen-loturak, adarrez adar.</p>
           <Link href="/leinuak" className={styles.related}>Ernetze orrien leinuak ikusi <span aria-hidden="true">↗</span></Link>
@@ -306,7 +306,7 @@ export function StructureAtlas() {
           <section className={styles.filters} aria-label="Eskemen iragazkiak">
             <label className={styles.field}>
               <span>Bilatu euskaraz edo gaztelaniaz</span>
-              <input ref={searchRef} type="search" value={query} onChange={(event) => filter(event.target.value, topic)} placeholder="Adib. epiblastoa, placenta…"
+              <input ref={searchRef} type="search" aria-label="Bilatu egiturak euskaraz edo gaztelaniaz" value={query} onChange={(event) => filter(event.target.value, topic)} placeholder="Adib. epiblastoa, placenta…"
                 onKeyDown={(event) => { if (event.key === 'Enter' && results.length) { event.preventDefault(); choose(results[0].id); } }} aria-describedby="atlas-search-hint" />
               <small id="atlas-search-hint" className={styles.hint}>
                 {query && results.length ? <>Enter: <b>{results[0].name}</b> ireki</> : <>Laster-tekla: <kbd>/</kbd></>}

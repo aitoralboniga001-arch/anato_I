@@ -21,10 +21,11 @@ const KEYS: [number, number][] = [
   [5.3, 6],
 ];
 /** The blastocyst steps back first; the title only arrives once it has room (they never overlap). */
-const RECEDE_AT = 5.25;
-const TITLE_AT = 5.75;
-const OUT_AT = 7.25;
-const END = 8.0;
+const RECEDE_AT = 5.15;
+const TITLE_AT = 5.5;
+/** The title gets a full beat to be read before the overlay lets go; the page reveal (≈1 s) lasts as long as the dissolve. */
+const OUT_AT = 7.4;
+const END = 8.6;
 
 const progressAt = (s: number) => {
   if (s <= KEYS[0][0]) return 0;
@@ -116,6 +117,9 @@ export function Intro({ onDone, onOut }: { onDone: () => void; /** The overlay s
   const title = smooth((s - TITLE_AT) / 0.9);
   const tagline = smooth((s - TITLE_AT - 0.35) / 0.8);
   const out = smooth((s - OUT_AT) / (END - OUT_AT));
+  // The wordmark leaves first (it blurs and opens up as the camera passes through it), then the dark
+  // veil dissolves onto the page: no frame where both are half-there.
+  const titleOut = smooth(out / 0.6);
   // Slow push-in while dividing; the embryo steps back above the title; on the way out the camera
   // moves through the title into the page.
   const scale = (0.94 + 0.08 * clamp(s / RECEDE_AT)) * (1 - 0.52 * recede);
@@ -140,9 +144,13 @@ export function Intro({ onDone, onOut }: { onDone: () => void; /** The overlay s
 
       <div
         className="intro-title"
-        style={{ opacity: title, transform: `translateY(${(1 - title) * 14}px) scale(${1 + 0.035 * out})`, filter: title < 1 ? `blur(${(1 - title) * 8}px)` : undefined }}
+        style={{
+          opacity: title * (1 - titleOut),
+          transform: `translateY(${(1 - title) * 14}px) scale(${1 + 0.1 * out})`,
+          filter: title < 1 || titleOut > 0 ? `blur(${(1 - title) * 8 + titleOut * 9}px)` : undefined,
+        }}
       >
-        <h1 style={{ letterSpacing: `${-0.055 + 0.03 * (1 - title)}em` }}>
+        <h1 style={{ letterSpacing: `${-0.055 + 0.03 * (1 - title) + 0.02 * out}em` }}>
           Enbrio<span>Atlas</span>
         </h1>
         <p style={{ opacity: tagline, transform: `translateY(${(1 - tagline) * 6}px)` }}>Giza garapena, zelulaz zelula</p>

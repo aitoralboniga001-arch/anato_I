@@ -4,7 +4,7 @@ import { firstSentence } from '@/content/generate';
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Beat, MicroQuestion, StageDef, StructureDef } from '@/lib/sim/types';
 import { structures } from '@/content/registry';
-import { IconBolt, IconCalendar, IconCaptions, IconGuide, IconLoop, IconNext, IconNotes, IconPause, IconPlay, IconPrev, IconRestart, IconSkipNext, IconSkipPrev, IconSliders, IconVoice, IconVoiceOff } from './icons';
+import { IconBolt, IconCalendar, IconQuiz, IconCaptions, IconGuide, IconLoop, IconNext, IconNotes, IconPause, IconPlay, IconPrev, IconRestart, IconSkipNext, IconSkipPrev, IconSliders, IconVoice, IconVoiceOff } from './icons';
 import { Popover } from './Popover';
 import { categoryColor } from '@/lib/sim/palette';
 import type { AudioSnapshot } from './narrate';
@@ -30,6 +30,9 @@ interface PlayerProps {
   onBeat: (delta: number) => void;
   onSpeed: (s: number) => void;
   onAutoContinue: (v: boolean) => void;
+  /** Guided mode's one-tap question at the end of each step: on, and the switch for it. */
+  asks: boolean;
+  onAsks: (v: boolean) => void;
   /** Guided mode: slower, holds each step until read, shows the step's new structures. */
   guided: boolean;
   voice: boolean;
@@ -535,6 +538,14 @@ export function Player(p: PlayerProps) {
                 </span>
                 <i aria-hidden />
               </button>
+              {p.guided && (
+                <button className="tp-row tp-switch" role="switch" aria-checked={p.asks} onClick={() => p.onAsks(!p.asks)} title="Urrats bakoitzaren amaierako galdera txikia: piztuta, erantzun edo saltatu dezakezu; itzalita, urratsak jarraian doaz">
+                  <span>
+                    <IconQuiz size={15} /> Galdera txikiak
+                  </span>
+                  <i aria-hidden />
+                </button>
+              )}
             </div>
           )}
         </Popover>

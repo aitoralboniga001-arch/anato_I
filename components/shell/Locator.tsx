@@ -31,6 +31,20 @@ export const markSeen = (plane: string) => {
   } catch {}
 };
 
+/** A drawn summary is not a cut of the embryo: the thumbnail is a sheet with a small diagram on it. */
+function SchemeGlyph() {
+  const Y = '#fbbf24';
+  return (
+    <svg viewBox="0 0 120 88" className="loc-svg" aria-hidden>
+      <rect x={22} y={12} width={76} height={64} rx={9} fill="rgba(232,238,252,0.05)" stroke="rgba(232,238,252,0.45)" strokeWidth={2.5} />
+      <circle cx={45} cy={36} r={10} fill="none" stroke={Y} strokeWidth={3} />
+      <rect x={65} y={26} width={20} height={20} rx={4} fill="none" stroke={Y} strokeWidth={3} />
+      <path d="M55 36h6" stroke={Y} strokeWidth={3} strokeLinecap="round" />
+      <path d="M34 60h52M34 67h34" stroke="rgba(232,238,252,0.4)" strokeWidth={3} strokeLinecap="round" />
+    </svg>
+  );
+}
+
 const levelName = (l: number) => (l < 0.3 ? 'buru-aldean' : l > 0.7 ? 'buztan-aldean' : 'erdiko mailan (enborra)');
 
 /**
@@ -125,7 +139,7 @@ export function Locator({
         title={`Non nago? ${info.name} · ${SHAPE_TEXT[shape]}${view ? `
 ${view}` : ''}`}
       >
-        <Specimen plane={plane} week={week} day={day} level={level} flip={flip} />
+        {plane === 'eskema' ? <SchemeGlyph /> : <Specimen plane={plane} week={week} day={day} level={level} flip={flip} />}
         <span className="loc-txt">
           <small>Non nago?</small>
           <b>{info.name}</b>

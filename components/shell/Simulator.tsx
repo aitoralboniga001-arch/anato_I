@@ -358,6 +358,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const outlineOpen = usePref('outline');
   const infoOpen = usePref('panel');
   const notesOpen = usePref('notes');
+  const asksOn = usePref('asks');
   // Stage preview progress (0..1 + rest) while the quick overview animation runs; null otherwise.
   const [intro, setIntro] = useState<number | null>(null);
   // Guided mode: the step's animation is done but its text is still being read.
@@ -464,7 +465,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     setViewByStage((m) => ({ ...m, [stage.id]: id }));
   };
   // Guided mode asks the step's micro-question once its animation is done, before moving on.
-  const askNow = !formation && guided && playing && waiting && intro === null && (!tour || (voice && audioState.status === 'done')) && !!beat?.ask && !asked.includes(askKey);
+  const askNow = !formation && guided && playing && waiting && intro === null && (!tour || (voice && audioState.status === 'done')) && asksOn && !!beat?.ask && !asked.includes(askKey);
 
   // Cross-fade: when the scene changes (stage or view), the previous one fades out over the new one.
   const sceneKey = `${week.week}/${stage.id}/${view.id}`;
@@ -1594,8 +1595,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               {/* Where this stage sits in the notes: topic › heading, numbered as the notes number it. */}
               <div className="crumbs-row">
                 <p className="kicker crumbs" title={[notesAt?.parent && sectionLabel(notesAt.parent), notesAt?.section.covers].filter(Boolean).join(' · ') || undefined}>
-                  <span>{week.week}. gaia</span>
-                  {notesAt && <span className="crumb-sec">{sectionLabel(notesAt.section)}</span>}
+                  {/* The topic is lit in the top bar and named under the index: the room goes to the notes' heading. */}
+                  {notesAt ? <span className="crumb-sec">{sectionLabel(notesAt.section)}</span> : <span>{week.week}. gaia</span>}
                 </p>
                 {/* Where this stage sits among the topic's stages: a counter and one pip per stage. */}
                 {week.stages.length > 1 && (
@@ -1896,6 +1897,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             onBeat={stepBeat}
             onSpeed={setSpeed}
             onAutoContinue={setAutoContinue}
+            asks={asksOn}
+            onAsks={(v) => setPref('asks', v)}
             guided={guided}
             mode={mode}
             onMode={setPlayMode}

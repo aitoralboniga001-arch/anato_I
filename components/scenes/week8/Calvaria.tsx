@@ -23,7 +23,7 @@ export const CAL_T = {
   after: 0.9,
 };
 
-type Bone = { id: string; region: Pt[]; c: Pt; r: number; side?: 1 | -1 };
+export type Bone = { id: string; region: Pt[]; c: Pt; r: number; side?: 1 | -1 };
 
 // ——— Top view (front at the top) ———
 const CX = 500;
@@ -139,106 +139,122 @@ const PF_SHAPE = (k: number): Pt[] => {
   );
 };
 
-// ——— Side view (face to the right) ———
-const SOUT = spline(
+// ——— Side view (a newborn skull, face to the right): a big vault over a small face ———
+export const SOUT = spline(
   [
-    [300, 150],
-    [380, 92],
-    [480, 72],
-    [580, 90],
-    [652, 150],
-    [690, 236],
-    [692, 300],
-    [668, 330],
-    [600, 348],
-    [520, 384],
-    [450, 420],
-    [380, 426],
-    [312, 400],
-    [270, 330],
-    [262, 240],
+    [700, 296],
+    [712, 252],
+    [716, 200],
+    [704, 150],
+    [676, 108],
+    [630, 80],
+    [574, 64],
+    [510, 60],
+    [446, 68],
+    [388, 90],
+    [336, 126],
+    [296, 176],
+    [270, 240],
+    [264, 300],
+    [276, 360],
+    [304, 410],
+    [344, 446],
+    [392, 466],
+    [440, 462],
+    [490, 440],
+    [548, 414],
+    [604, 388],
+    [652, 358],
+    [688, 326],
   ],
   10,
   true,
 );
-const SAF: Pt = [574, 312];
-const SPF: Pt = [372, 392];
+/** Sphenoidal (pterion) and mastoid (asterion) fontanelles. */
+const SAF: Pt = [594, 300];
+const SPF: Pt = [374, 396];
 const SCORONAL = spline(
   [
-    [590, 92],
-    [592, 160],
-    [586, 240],
+    [578, 40],
+    [588, 140],
+    [598, 222],
     [SAF[0], SAF[1]],
   ],
   8,
 );
 const SLAMBDOID = spline(
   [
-    [330, 118],
-    [326, 200],
-    [340, 300],
+    [352, 92],
+    [326, 190],
+    [336, 300],
     [SPF[0], SPF[1]],
   ],
   8,
 );
+/** The squamous suture: the arched top of the temporal squama. */
 const SSQUAMOUS = spline(
   [
-    [SAF[0] - 18, SAF[1] + 6],
-    [520, 290],
-    [450, 292],
-    [400, 320],
-    [SPF[0] + 6, SPF[1] - 6],
+    [SAF[0] - 10, SAF[1] + 4],
+    [544, 270],
+    [480, 260],
+    [422, 282],
+    [388, 330],
+    [SPF[0] + 4, SPF[1] - 4],
   ],
   8,
 );
 const SSPHENO = spline(
   [
-    [SAF[0] - 8, SAF[1] + 14],
-    [560, 360],
-    [552, 400],
+    [SAF[0] - 4, SAF[1] + 10],
+    [586, 352],
+    [578, 410],
   ],
   6,
 );
-const SIDE_BONES: Bone[] = [
+/** Greater wing ↔ frontal and zygomatic (the front edge of the wing). */
+const SFRONT = spline([[SAF[0] + 6, SAF[1] + 4], [614, 330], [618, 372], [612, 404]], 6);
+/** Occipital ↔ temporal, from the mastoid fontanelle down to the base. */
+const SOCCMAST = spline([[SPF[0] + 4, SPF[1] + 6], [386, 432], [398, 470]], 6);
+export const SIDE_BONES: Bone[] = [
   {
     id: 'hezur-frontala',
-    region: [...SCORONAL, [SAF[0] + 20, SAF[1] + 40], [BIG, SAF[1] + 40], [BIG, -BIG], [SCORONAL[0][0], -BIG]],
-    c: [636, 190],
-    r: 200,
+    region: [...SCORONAL, ...SFRONT.slice(1), [640, 440], [BIG, 440], [BIG, -BIG], [SCORONAL[0][0], -BIG]],
+    c: [668, 168],
+    r: 220,
   },
   {
     id: 'hezur-parietala',
-    region: [...SCORONAL, ...SSQUAMOUS, ...SLAMBDOID.slice().reverse(), [330, -BIG], [SCORONAL[0][0], -BIG]],
-    c: [470, 200],
-    r: 230,
+    region: [...SCORONAL, ...SSQUAMOUS, ...SLAMBDOID.slice().reverse(), [352, -BIG], [SCORONAL[0][0], -BIG]],
+    c: [470, 162],
+    r: 240,
   },
   {
     id: 'okzipitalaren-ezkata',
-    region: [[330, -BIG], ...SLAMBDOID, [SPF[0], SPF[1] + 40], [-BIG, 500], [-BIG, -BIG]],
-    c: [300, 300],
-    r: 200,
+    region: [[352, -BIG], ...SLAMBDOID, ...SOCCMAST, [398, BIG], [-BIG, BIG], [-BIG, -BIG]],
+    c: [300, 290],
+    r: 220,
   },
   {
     id: 'tenporalaren-ezkata',
-    region: [...SSQUAMOUS, [SPF[0] + 10, SPF[1] + 30], [470, 460], [548, 420], ...SSPHENO.slice().reverse()],
-    c: [462, 350],
-    r: 120,
+    region: [...SSQUAMOUS, ...SOCCMAST, [398, 520], [578, 520], ...SSPHENO.slice().reverse()],
+    c: [478, 338],
+    r: 150,
   },
   {
     id: 'esfenoidesaren-hego-handia',
-    region: [...SSPHENO, [600, 420], [600, 330], [SAF[0] + 10, SAF[1] + 24]],
-    c: [572, 370],
-    r: 70,
+    region: [...SSPHENO, [612, 420], ...SFRONT.slice().reverse()],
+    c: [598, 352],
+    r: 80,
   },
 ];
 const SAF_SHAPE = (k: number): Pt[] => {
   const s = Math.max(0.001, k);
   return spline(
     [
-      [SAF[0] - 6 * s, SAF[1] - 26 * s],
-      [SAF[0] + 18 * s, SAF[1] - 2 * s],
-      [SAF[0] + 2 * s, SAF[1] + 22 * s],
-      [SAF[0] - 22 * s, SAF[1] + 4 * s],
+      [SAF[0] - 6 * s, SAF[1] - 24 * s],
+      [SAF[0] + 16 * s, SAF[1] - 2 * s],
+      [SAF[0] + 4 * s, SAF[1] + 20 * s],
+      [SAF[0] - 20 * s, SAF[1] + 4 * s],
     ],
     6,
     true,
@@ -248,68 +264,44 @@ const SPF_SHAPE = (k: number): Pt[] => {
   const s = Math.max(0.001, k);
   return spline(
     [
-      [SPF[0] - 4 * s, SPF[1] - 26 * s],
-      [SPF[0] + 22 * s, SPF[1] - 4 * s],
-      [SPF[0] + 4 * s, SPF[1] + 22 * s],
-      [SPF[0] - 20 * s, SPF[1] + 2 * s],
+      [SPF[0] - 4 * s, SPF[1] - 24 * s],
+      [SPF[0] + 20 * s, SPF[1] - 4 * s],
+      [SPF[0] + 6 * s, SPF[1] + 20 * s],
+      [SPF[0] - 18 * s, SPF[1] + 2 * s],
     ],
     6,
     true,
   );
 };
-const ORBIT = spline(
-  [
-    [606, 300],
-    [636, 296],
-    [656, 316],
-    [650, 346],
-    [622, 352],
-    [600, 336],
-  ],
-  8,
-  true,
-);
+// The face (viscerocranium): small at birth, under a big orbit. One mass (nasal, maxilla, zygomatic and the arch)
+// with its sutures drawn in, the mandible apart below it.
+export const ORBIT = spline([[636, 296], [664, 284], [692, 296], [700, 324], [688, 352], [660, 362], [636, 352], [626, 324]], 8, true);
 const FACE = spline(
-  [
-    [600, 348],
-    [668, 330],
-    [700, 352],
-    [708, 392],
-    [690, 420],
-    [640, 430],
-    [600, 420],
-    [586, 390],
-  ],
+  [[700, 290], [716, 312], [730, 342], [714, 352], [720, 374], [718, 400], [708, 424], [676, 434], [636, 430], [612, 412], [592, 400], [554, 400], [512, 410], [500, 400], [512, 390], [556, 384], [596, 376], [612, 352], [616, 318], [624, 290], [650, 278], [682, 280]],
   8,
   true,
 );
-const MANDIBLE = spline(
-  [
-    [520, 402],
-    [540, 430],
-    [600, 446],
-    [660, 440],
-    [700, 430],
-    [706, 452],
-    [670, 476],
-    [600, 480],
-    [548, 466],
-    [512, 430],
-  ],
+/** Sutures of the face: nasal ↔ maxilla, zygomatic ↔ maxilla, zygomatic ↔ temporal (in the arch). */
+const FACE_SUTURES = 'M704,296 C712,312 716,330 716,348 M650,362 C644,380 632,398 622,414 M560,385 L556,400';
+export const MANDIBLE = spline(
+  [[700, 434], [718, 454], [710, 484], [682, 502], [612, 506], [562, 492], [536, 468], [526, 438], [516, 420], [534, 414], [548, 440], [560, 428], [576, 400], [590, 428], [622, 442], [664, 440]],
   8,
   true,
 );
-const ZYGO = spline(
-  [
-    [548, 384],
-    [600, 376],
-    [626, 384],
-    [600, 394],
-    [552, 396],
-  ],
-  6,
-  true,
-);
+export const EAM: Pt = [482, 420];
+/** Tooth germs in their crypts (maxilla, mandible). */
+const TEETH: Pt[] = [[696, 414], [676, 418], [654, 416], [692, 462], [670, 470], [646, 472], [622, 470]];
+/** The brain the vault is built round (only while the box is being explained). */
+const BRAIN = spline([[700, 286], [706, 200], [676, 124], [600, 86], [500, 80], [400, 100], [322, 150], [288, 230], [290, 320], [330, 392], [400, 430], [480, 420], [540, 396], [610, 366], [668, 330]], 8, true);
+const GYRI = [
+  'M640,120 C600,150 610,200 650,220',
+  'M560,96 C530,140 560,190 520,230',
+  'M470,90 C450,140 490,180 460,240',
+  'M380,120 C400,170 360,210 390,260',
+  'M320,200 C350,230 330,280 360,320',
+  'M420,300 C470,280 520,300 560,330',
+  'M600,260 C630,240 660,260 680,240',
+];
 
 const line = (pts: Pt[]) => `M${pts.map((p) => `${f1(p[0])},${f1(p[1])}`).join('L')}`;
 
@@ -480,6 +472,8 @@ export function CalvariaSide({ t }: SceneProps) {
   const grow = seg(t, CAL_T.grow + 0.01, CAL_T.bones + 0.03);
   const sutures = vis(t, CAL_T.sutures - 0.01);
   const boxes = vis(t, 0, CAL_T.grow);
+  const brain = vis(t, 0, CAL_T.grow + 0.04);
+  const faceFill = '#dccfb2';
   return (
     <g>
       <Defs8 />
@@ -490,6 +484,13 @@ export function CalvariaSide({ t }: SceneProps) {
       <clipPath id={`w8-side-out${cid}`}>
         <path d={smoothPath(SOUT, true, 0.3)} />
       </clipPath>
+      {/* The brain inside, seen through the still-membranous vault. */}
+      {brain > 0.01 && (
+        <g opacity={0.5 * brain * (1 - grow)} clipPath={`url(#w8-side-out${cid})`} pointerEvents="none">
+          <path d={smoothPath(BRAIN, true, 0.3)} fill="#c98a96" />
+          <path d={GYRI.join('')} fill="none" stroke="#8a4b58" strokeWidth={3} strokeLinecap="round" />
+        </g>
+      )}
       {SIDE_BONES.map((b, i) => (
         <Part key={i} id={b.id} show={grow > 0.01 ? 1 : 0}>
           <g clipPath={`url(#w8-side-out${cid})`}>
@@ -497,29 +498,59 @@ export function CalvariaSide({ t }: SceneProps) {
           </g>
         </Part>
       ))}
-      <path d={`${line(SCORONAL)}${line(SLAMBDOID)}${line(SSQUAMOUS)}${line(SSPHENO)}`} fill="none" stroke={Q.suture} strokeWidth={5} strokeLinecap="round" opacity={sutures * 0.85} />
+      <g clipPath={`url(#w8-side-out${cid})`}>
+        <path
+          d={`${line(SCORONAL)}${line(SLAMBDOID)}${line(SSQUAMOUS)}${line(SSPHENO)}${line(SFRONT)}${line(SOCCMAST)}`}
+          fill="none"
+          stroke={Q.suture}
+          strokeWidth={5}
+          strokeLinecap="round"
+          opacity={sutures * 0.85}
+        />
+      </g>
       <Part id="fontanela-esfenoidala" show={vis(t, CAL_T.sutures - 0.01)}>
         <path d={smoothPath(SAF_SHAPE(1), true, 0.3)} fill={Q.suture} stroke="#9ad8f8" strokeWidth={1.4} />
       </Part>
       <Part id="fontanela-mastoidea" show={vis(t, CAL_T.sutures - 0.01)}>
         <path d={smoothPath(SPF_SHAPE(1), true, 0.3)} fill={Q.suture} stroke="#9ad8f8" strokeWidth={1.4} />
       </Part>
-      {/* The face (viscerocranium), small at birth. */}
-      <Part id="errai-kraneoa">
-        <path d={smoothPath(FACE, true, 0.3)} fill="#d9ccb0" stroke={Q.boneDeep} strokeWidth={1.2} />
-        <path d={smoothPath(ZYGO, true, 0.3)} fill="#e5d8bc" stroke={Q.boneDeep} strokeWidth={1} />
-        <path d={smoothPath(MANDIBLE, true, 0.3)} fill="#d9ccb0" stroke={Q.boneDeep} strokeWidth={1.2} />
-        <path d={smoothPath(ORBIT, true, 0.3)} fill="#0f0f11" stroke={Q.boneDeep} strokeWidth={1.2} />
+      {/* Neurocranium floor: the chondrocranium (cranial base), under the face. */}
+      <Part id="kondrokraneoa" show={boxes}>
+        <path d="M318,430 C380,470 450,466 510,436 C570,410 630,384 690,330" fill="none" stroke={Q.cart} strokeWidth={12} strokeLinecap="round" opacity={0.9} />
+        <path d="M318,430 C380,470 450,466 510,436 C570,410 630,384 690,330" fill="none" stroke="url(#w8-cart)" strokeWidth={12} strokeLinecap="round" />
       </Part>
       {/* Neurocranium (the box round the brain): vault on top and sides, floor = chondrocranium. */}
       <Part id="neurokraneoa" show={boxes}>
         <path d={smoothPath(SOUT, true, 0.3)} fill="rgba(255,255,255,0.03)" stroke="#f0c674" strokeWidth={3} />
       </Part>
-      <Part id="kondrokraneoa" show={boxes}>
-        <path d={`M300,400Q420,436 520,392Q580,366 640,338`} fill="none" stroke={Q.cart} strokeWidth={10} strokeLinecap="round" opacity={0.85} />
-      </Part>
       <path d={smoothPath(SOUT, true, 0.3)} fill="url(#w8-light)" pointerEvents="none" />
+      {/* The face (viscerocranium), small at birth, in front of the vault's lower edge. */}
+      <g pointerEvents="none">
+        <path d={smoothPath(MANDIBLE, true, 0.3)} fill="#0f0f11" />
+        <path d={smoothPath(FACE, true, 0.3)} fill="#0f0f11" />
+      </g>
+      <Part id="errai-kraneoa">
+        <path d={smoothPath(MANDIBLE, true, 0.3)} fill={faceFill} stroke={Q.boneDeep} strokeWidth={1.3} />
+        <path d={smoothPath(MANDIBLE, true, 0.3)} fill="url(#w8-boneshade)" />
+        <path d={smoothPath(FACE, true, 0.3)} fill={faceFill} stroke={Q.boneDeep} strokeWidth={1.3} />
+        <path d={smoothPath(FACE, true, 0.3)} fill="url(#w8-boneshade)" />
+        <path d={FACE_SUTURES} fill="none" stroke={Q.boneDeep} strokeWidth={1.2} opacity={0.8} />
+        {TEETH.map((p, i) => (
+          <ellipse key={i} cx={p[0]} cy={p[1]} rx={6} ry={4.6} fill="#f7f0de" stroke={Q.boneDeep} strokeWidth={0.9} opacity={0.5} />
+        ))}
+        {/* Infraorbital and mental foramina. */}
+        <ellipse cx={664} cy={380} rx={3.2} ry={2.4} fill="#2a2418" />
+        <ellipse cx={664} cy={484} rx={3.2} ry={2.4} fill="#2a2418" />
+        <path d={smoothPath(ORBIT, true, 0.3)} fill="#08080a" stroke={Q.boneDeep} strokeWidth={1.6} />
+        <path d={smoothPath(ORBIT, true, 0.3)} fill="none" stroke="#fff" strokeWidth={1.2} opacity={0.25} transform="translate(-1.5 -1.5)" />
+        {/* External acoustic meatus in its tympanic ring (open above at birth; no mastoid process yet). */}
+        <circle cx={EAM[0]} cy={EAM[1]} r={10} fill="#08080a" />
+        <path d={`M${EAM[0] - 8},${EAM[1] - 9}A13,13 0 1 0 ${EAM[0] + 8},${EAM[1] - 9}`} fill="none" stroke={faceFill} strokeWidth={4.5} strokeLinecap="round" />
+      </Part>
 
+      <Note x={470} y={250} size={12} tone="dim" show={brain * (1 - grow)}>
+        entzefaloa
+      </Note>
       <Note x={500} y={612} tone="accent" show={vis(t, 0, CAL_T.grow)}>
         Neurokraneoa (entzefaloa babesten du) · errai kraneoa (aurpegia)
       </Note>
@@ -530,16 +561,16 @@ export function CalvariaSide({ t }: SceneProps) {
         Bi fontanela bilateral: aurre-albokoa (esfenoidala) eta atze-albokoa (mastoidea)
       </Note>
 
-      <Label id="okzipitalaren-ezkata" x={190} y={250} ax={292} ay={250} show={grow} />
+      <Label id="neurokraneoa" x={190} y={130} ax={338} ay={124} show={boxes} />
+      <Label id="hezur-parietala" x={190} y={190} ax={430} ay={160} show={grow} />
+      <Label id="okzipitalaren-ezkata" x={190} y={250} ax={290} ay={262} show={grow} />
       <Label id="fontanela-mastoidea" x={190} y={410} ax={SPF[0] - 14} ay={SPF[1]} show={vis(t, CAL_T.sutures - 0.01)} />
-      <Label id="tenporalaren-ezkata" x={190} y={470} ax={440} ay={372} show={grow} />
-      <Label id="kondrokraneoa" x={190} y={530} ax={400} ay={426} show={boxes} />
-      <Label id="neurokraneoa" x={190} y={130} ax={330} ay={118} show={boxes} />
-      <Label id="hezur-parietala" x={190} y={190} ax={430} ay={170} show={grow} />
-      <Label id="hezur-frontala" x={810} y={130} ax={650} ay={170} show={grow} />
-      <Label id="fontanela-esfenoidala" x={800} y={250} ax={SAF[0] + 14} ay={SAF[1] - 6} show={vis(t, CAL_T.sutures - 0.01)} />
-      <Label id="esfenoidesaren-hego-handia" x={780} y={380} ax={574} ay={384} show={grow} small />
-      <Label id="errai-kraneoa" x={810} y={460} ax={690} ay={436} />
+      <Label id="tenporalaren-ezkata" x={190} y={470} ax={446} ay={340} show={grow} />
+      <Label id="kondrokraneoa" x={190} y={530} ax={420} ay={460} show={boxes} />
+      <Label id="hezur-frontala" x={810} y={130} ax={690} ay={170} show={grow} />
+      <Label id="fontanela-esfenoidala" x={810} y={250} ax={SAF[0] + 14} ay={SAF[1] - 6} show={vis(t, CAL_T.sutures - 0.01)} />
+      <Label id="esfenoidesaren-hego-handia" x={810} y={400} ax={602} ay={342} show={grow} small />
+      <Label id="errai-kraneoa" x={810} y={500} ax={708} ay={482} />
     </g>
   );
 }

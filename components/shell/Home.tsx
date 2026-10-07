@@ -1,18 +1,20 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import { weeks } from '@/content/registry';
 import { POOL, compKey } from '@/content/pool';
 import { isDue, useAnswers } from './answers';
 import { Chronicle } from './Chronicle';
-import { HeroFold } from './HeroFold';
+import { HeroReel } from './HeroReel';
 import { StudyMap } from './StudyMap';
 import { INTRO_KEY, Intro } from './intro/Intro';
 import { LandFoot, LandNav, firstReady, isWip } from './LandNav';
 import { IconPlay } from './icons';
 import { useLastPlace, useVisited } from './progress';
-import { Specimen } from './Specimen';
+import { TopicShot } from './TopicShot';
+import { CountUp, useReveal } from './landing-fx';
+import './landing.css';
 import { spanOf } from '@/lib/sim/age';
 
 const stageCount = weeks.reduce((n, w) => n + w.stages.filter((s) => !s.views.every((v) => v.description === 'Prestatzen')).length, 0);
@@ -20,64 +22,77 @@ const viewCount = weeks.reduce((n, w) => n + w.stages.reduce((m, s) => m + s.vie
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-// The object each topic is about, as the light 3-D sketch the simulator's "Non nago?" uses.
-const SKETCH_DAY: Record<number, number> = { 1: 4, 2: 10, 3: 17, 4: 24, 5: 40, 6: 80, 7: 35, 8: 56 };
+const NEWEST = 7;
 
-/** One topic on the home shelf: its object, span, title, progress and the next step. */
-function TopicCard({ w }: { w: (typeof weeks)[number] }) {
+/** Cursor-following light on a card (CSS variables the stylesheet reads). */
+const spot = (e: PointerEvent<HTMLElement>) => {
+  const r = e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
+  e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
+};
+
+/** One topic on the home shelf: a frame of its own scene, span, title, progress and the next step. */
+function TopicCard({ w, i }: { w: (typeof weeks)[number]; i: number }) {
   const visited = useVisited(w.week);
+  const [hot, setHot] = useState(false);
   const days = spanOf(w).long;
-  const sketch = (
-    <span className="tc-fig" aria-hidden>
-      <Specimen plane="eskema" week={w.week} day={SKETCH_DAY[w.week] ?? w.dayRange[0]} className="tc-svg" />
-    </span>
-  );
-  const head = (
-    <>
-      <span className="tc-k">
-        <span className="tc-n">{pad(w.week)}</span>
-        <span className="tc-days">{days}</span>
-      </span>
-      <b className="tc-t">{w.title}</b>
-      <small className="tc-sub">{w.subtitle}</small>
-    </>
-  );
-  if (isWip(w))
-    return (
-      <li className="tc is-wip">
-        <span className="tc-in">
-          {sketch}
-          {head}
-          <span className="tc-foot">
-            <span className="tc-state">Prestatzen</span>
-          </span>
-        </span>
-      </li>
-    );
+  const wip = isWip(w);
   const done = w.stages.filter((s) => visited.includes(s.id)).length;
   const next = w.stages.find((s) => !visited.includes(s.id)) ?? w.stages[0];
   const href = done > 0 && done < w.stages.length ? `/astea/${w.week}?etapa=${next.id}` : `/astea/${w.week}`;
-  return (
-    <li className="tc">
-      <Link href={href} className="tc-in">
-        {sketch}
-        {head}
-        <span className="tc-foot">
-          <span className="tc-prog" aria-label={`${done}/${w.stages.length} etapa ikusita`}>
-            <span className="toc-ticks">
-              {w.stages.map((s) => (
-                <i key={s.id} className={visited.includes(s.id) ? 'is-on' : ''} />
-              ))}
+  const inner = (
+    <>
+      <span className="lp-card-fig">
+        <TopicShot week={w.week} hot={hot} />
+        <span className="lp-card-n">{pad(w.week)}</span>
+        {w.week >= NEWEST && !wip && <span className="lp-card-new">Berria</span>}
+      </span>
+      <span className="lp-card-body">
+        <span className="lp-card-days">{days}</span>
+        <b>{w.title}</b>
+        <small>{w.subtitle}</small>
+      </span>
+      <span className="lp-card-foot">
+        {wip ? (
+          <span className="lp-card-state">Prestatzen</span>
+        ) : (
+          <>
+            <span className="lp-card-prog" aria-label={`${done}/${w.stages.length} etapa ikusita`}>
+              <span className="toc-ticks">
+                {w.stages.map((s) => (
+                  <i key={s.id} className={visited.includes(s.id) ? 'is-on' : ''} />
+                ))}
+              </span>
+              <small>
+                {done}/{w.stages.length}
+              </small>
             </span>
-            <small>
-              {done}/{w.stages.length}
-            </small>
-          </span>
-          <span className="tc-go">
-            {done === 0 ? 'Hasi' : done < w.stages.length ? 'Jarraitu' : 'Berrikusi'} <span aria-hidden>→</span>
-          </span>
-        </span>
-      </Link>
+            <span className="lp-card-go">
+              {done === 0 ? 'Hasi' : done < w.stages.length ? 'Jarraitu' : 'Berrikusi'} <span aria-hidden>→</span>
+            </span>
+          </>
+        )}
+      </span>
+    </>
+  );
+  const style = { '--d': `${(i % 4) * 80}ms` } as CSSProperties;
+  return (
+    <li className={`lp-card${wip ? ' is-wip' : ''}`} data-rv style={style}>
+      {wip ? (
+        <span className="lp-card-in">{inner}</span>
+      ) : (
+        <Link
+          href={href}
+          className="lp-card-in"
+          onPointerEnter={() => setHot(true)}
+          onPointerLeave={() => setHot(false)}
+          onFocus={() => setHot(true)}
+          onBlur={() => setHot(false)}
+          onPointerMove={spot}
+        >
+          {inner}
+        </Link>
+      )}
     </li>
   );
 }
@@ -126,6 +141,9 @@ export function Home() {
   const [intro, setIntro] = useState(true);
   // The page reveals as the opening lifts (not after it is gone), so the two cross-dissolve.
   const [lifting, setLifting] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  const ready = !intro || lifting;
+  useReveal(root, true);
 
   const replay = () => {
     try {
@@ -138,20 +156,26 @@ export function Home() {
   };
 
   return (
-    <div className={`landing${intro && !lifting ? '' : ' is-ready'}`}>
+    <div ref={root} className={`landing${ready ? ' is-ready' : ' is-intro'}`}>
       {intro && <Intro onDone={() => setIntro(false)} onOut={() => setLifting(true)} />}
       <LandNav />
 
-      <section className="hero">
+      <section className="hero lp-hero">
+        <div className="lp-aurora" aria-hidden />
         <div className="hero-text">
-          <p className="kicker rv">Giza Anatomia I — Enbriologia</p>
-          <h1 className="rv">
-            Giza garapena,
-            <br />
-            zelulaz zelula.
+          <p className="kicker rv">
+            <span className="lp-live" aria-hidden /> Giza Anatomia I — Enbriologia
+          </p>
+          <h1 className="rv lp-h1">
+            <span className="lp-line">
+              <span>Giza garapena,</span>
+            </span>
+            <span className="lp-line">
+              <span>zelulaz zelula.</span>
+            </span>
           </h1>
           <p className="hero-lead rv">
-            Ernalkuntzatik enbrioiaren tolespenetara, prozesu bakoitza animatuta eta zure apunteetako izen guztiekin, euskaraz. Eten, atzera egin, mozketa aldatu eta egitura bakoitza klikatu.
+            Ernalkuntzatik enbrioiaren tolespenetara, diafragmaren jaitsieratik hezurren hezurtzapenera: prozesu bakoitza animatuta eta zure apunteetako izen guztiekin, euskaraz. Eten, atzera egin, mozketa aldatu eta egitura bakoitza klikatu.
           </p>
           <div className="hero-cta rv">
             <ContinueCta />
@@ -160,31 +184,52 @@ export function Home() {
               Gai osoa 20 segundotan <span aria-hidden>↓</span>
             </Link>
           </div>
-          <p className="hero-meta rv">
-            <span>{weeks.length} gai</span>
-            <span>{stageCount} etapa</span>
-            <span>{viewCount} ikuspegi</span>
-            <span>euskaraz</span>
-          </p>
+          <dl className="lp-stats rv">
+            <div>
+              <dt>gai</dt>
+              <dd>
+                <CountUp to={weeks.length} go={ready} delay={500} />
+              </dd>
+            </div>
+            <div>
+              <dt>etapa</dt>
+              <dd>
+                <CountUp to={stageCount} go={ready} delay={600} />
+              </dd>
+            </div>
+            <div>
+              <dt>ikuspegi</dt>
+              <dd>
+                <CountUp to={viewCount} go={ready} delay={700} />
+              </dd>
+            </div>
+            <div>
+              <dt>hizkuntza</dt>
+              <dd className="is-word">euskara</dd>
+            </div>
+          </dl>
         </div>
         <div className="hero-visual rv">
-          <HeroFold playing={!intro || lifting} />
+          <HeroReel playing={ready} />
         </div>
       </section>
 
-      <section id="gaiak" className="shelf" aria-labelledby="shelf-h">
-        <header className="shelf-head">
-          <p className="kicker" id="shelf-h">
-            Gaiak · aukeratu nondik hasi
-          </p>
-          <p className="shelf-note">Garapenaren ordenan, etapatan banatuta. Ikusitako etapak nabigatzaile honetan gordetzen dira.</p>
+      <section id="gaiak" className="shelf lp-shelf" aria-labelledby="shelf-h">
+        <header className="lp-shelf-head" data-rv>
+          <div>
+            <p className="kicker" id="shelf-h">
+              Gaiak · aukeratu nondik hasi
+            </p>
+            <h2>Zortzi gai, garapenaren ordenan</h2>
+          </div>
+          <p className="shelf-note">Etapatan banatuta, eta bakoitza bere eszenarekin. Pasatu sagua gainetik eta ikusiko duzu mugitzen. Ikusitako etapak nabigatzaile honetan gordetzen dira.</p>
         </header>
-        <ol className="shelf-row">
-          {weeks.map((w) => (
-            <TopicCard key={w.week} w={w} />
+        <ol className="lp-cards">
+          {weeks.map((w, i) => (
+            <TopicCard key={w.week} w={w} i={i} />
           ))}
         </ol>
-        <div className="keys" aria-label="Laster-teklak">
+        <div className="keys" aria-label="Laster-teklak" data-rv>
           <span>
             <kbd>Zuriunea</kbd> erreproduzitu / pausatu
           </span>
@@ -206,7 +251,6 @@ export function Home() {
       <StudyMap />
 
       <Chronicle />
-
 
       <LandFoot>
         <button className="link-quiet" onClick={replay}>
