@@ -110,7 +110,7 @@ function CompetenceGrid({ id, answers, drawn, onPractice, onFind }: { id: string
 }
 
 /**
- * Structure passport: the six questions an exam asks about any structure (zer da, noiz, non, nondik,
+ * Structure passport: the six questions to ask about any structure (zer da, noiz, non, nondik,
  * nola, zertan bihurtzen da), each answered from one canonical place, plus a jump to watch it form.
  */
 export function Inspector({ id, week, onClose, onSelect, onGoto, onReplay, onPractice, onFind, currentStageId }: InspectorProps) {

@@ -2,8 +2,8 @@
 
 import { useId } from 'react';
 import { Label, Note, Part, lerp, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
-import { EAM, MANDIBLE, ORBIT, SIDE_BONES, SOUT } from './Calvaria';
-import { Defs8, MesCell, Q, f1, inPoly, mesCells, offset, resample, spline, vis } from './common';
+import { EAM, MANDIBLE, Orbit, SIDE_BONES, SOUT } from './Calvaria';
+import { Defs8, MesCell, Q, f1, inPoly, mesCells, offset, resample, sm, spline, vis } from './common';
 
 /**
  * 8:errai-kraneoa — apunteen 3.2 atala eta haren bi irudiak (5. asteko burua arkuekin; jaioberriaren burezurra
@@ -248,15 +248,13 @@ const mx = (pts: readonly Pt[]): Pt[] => pts.map(([x, y]) => [1000 - x, y] as Pt
 const SKULL = mx(SOUT);
 const VAULT = SIDE_BONES.map((b) => ({ ...b, region: mx(b.region), c: [1000 - b.c[0], b.c[1]] as Pt }));
 const VAULT_OF = (id: string) => VAULT.find((b) => b.id === id)!;
-const ORBIT_V = mx(ORBIT);
-const ORBIT_B: Pt = [336, 324];
 /** Temporal squama, closed along the lower edge of the vault. */
 const SQUAMA_T = mx(spline([[584, 304], [544, 270], [480, 260], [422, 282], [388, 330], [378, 392], [386, 432], [398, 466], [440, 462], [490, 440], [548, 414], [578, 404], [586, 352]], 8, true));
 /** The temporal's zygomatic process (back half of the arch). */
 const ARCH_T = mx([[498, 400], [528, 394], [558, 390]]);
-const MALAR = mx(spline([[624, 290], [632, 300], [628, 326], [638, 352], [652, 362], [644, 382], [630, 400], [614, 412], [592, 400], [556, 400], [552, 386], [596, 376], [612, 352], [616, 318]], 8, true));
-const MAXILLA = mx(spline([[652, 360], [688, 354], [702, 334], [714, 352], [720, 374], [718, 400], [708, 424], [676, 434], [636, 430], [618, 414], [632, 398], [646, 380]], 8, true));
-const NASAL = mx(spline([[700, 290], [716, 312], [730, 342], [714, 352], [702, 334]], 6, true));
+const MALAR = mx(spline([[628, 292], [636, 300], [632, 330], [640, 352], [652, 362], [645, 380], [637, 396], [633, 406], [612, 404], [584, 405], [563, 407], [562, 390], [596, 386], [616, 370], [620, 340], [622, 306]], 8, true));
+const MAXILLA = mx(spline([[652, 362], [684, 360], [700, 344], [705, 316], [702, 298], [712, 318], [719, 340], [721, 352], [718, 362], [732, 378], [734, 384], [729, 398], [723, 414], [704, 421], [684, 424], [664, 424], [644, 419], [633, 407], [638, 392], [645, 378]], 8, true));
+const NASAL = mx(spline([[700, 288], [712, 304], [724, 328], [730, 344], [721, 350], [716, 330], [705, 306]], 6, true));
 const MANDIBLE_V = mx(MANDIBLE);
 const EAR_C: Pt = [1000 - EAM[0], EAM[1]];
 /** Meckel's cartilage runs inside the mandible, back to the ear (where its end becomes the malleus). */
@@ -266,13 +264,30 @@ const REICHERT_B = spline([[EAR_C[0] + 10, EAR_C[1] + 8], [528, 462], [508, 500]
 const STYLOID: Pt[] = [[EAR_C[0] + 4, EAR_C[1] + 12], [EAR_C[0] + 12, EAR_C[1] + 14], [510, 478], [503, 476]];
 const HYOID: Pt[] = [[436, 536], [468, 528], [484, 538], [470, 548], [438, 550], [428, 544]];
 /** Face growth after birth: the face bones scale up from behind the jaw. */
-const FACE_ORIGIN: Pt = [500, 410];
+/**
+ * Growth after birth: the orbit is already near its adult size, the face grows DOWN under it (and a little forward)
+ * as the sinuses and alveolar processes form. The maxilla stretches from under the orbit; the mandible keeps its
+ * condyle at the joint while its ramus lengthens, so the body comes down with the teeth.
+ */
+const UP: Pt = [334, 300];
+const COND: Pt = [489, 410];
+const JAW_DROP = 52;
+const HYOID_DROP = 30;
+const upAt = (p: Pt, g: number): Pt => [UP[0] + (p[0] - UP[0]) * (1 + 0.12 * g), UP[1] + (p[1] - UP[1]) * (1 + 0.32 * g)];
+const jawAt = (p: Pt, g: number): Pt => {
+  const s = 1 + 0.15 * g;
+  return [COND[0] + (p[0] - COND[0]) * s, COND[1] + (p[1] - COND[1]) * s + JAW_DROP * g * sm((COND[0] - p[0] - 8) / 62)];
+};
+const upT = (g: number) => `translate(${UP[0]},${UP[1]}) scale(${(1 + 0.12 * g).toFixed(3)},${(1 + 0.32 * g).toFixed(3)}) translate(${-UP[0]},${-UP[1]})`;
+/** The jaw's body (front of the ramus): one affine piece of `jawAt`. */
+const jawT = (g: number) =>
+  `translate(0,${f1(JAW_DROP * g)}) translate(${COND[0]},${COND[1]}) scale(${(1 + 0.15 * g).toFixed(3)}) translate(${-COND[0]},${-COND[1]})`;
 
 /** A bone that ossifies out of a centre to fill its shape (membranous growth). */
-function Grow({ id, pts, c, k, fill, deep, uid }: { id: string; pts: Pt[]; c: Pt; k: number; fill: string; deep: string; uid: string }) {
+function Grow({ id, pts, c, k, fill, deep, uid, size = 140 }: { id: string; pts: Pt[]; c: Pt; k: number; fill: string; deep: string; uid: string; size?: number }) {
   const cid = useId().replace(/:/g, '');
   if (k <= 0.01) return null;
-  const r = 140 * k;
+  const r = size * k;
   return (
     <Part id={id}>
       <clipPath id={uid + cid}>
@@ -289,24 +304,51 @@ function Grow({ id, pts, c, k, fill, deep, uid }: { id: string; pts: Pt[]; c: Pt
 }
 
 /** The three ossicles, drawn at the scale of the push-in (centre = EAR_C, 1 unit ≈ 1 px of the skull). */
+/** Malleus, incus and stapes as an anatomy atlas draws the chain (anterior to the left), in units round EAR_C. */
+const MALLEUS: Pt[] = [
+  [-8, -12.2], [-5.2, -11], [-3.9, -7.6], [-5, -3.8], [-7.3, -1.4], [-8.5, 2.8], [-9.8, 7.4], [-10.9, 11.2], [-12.4, 11.3],
+  [-11.6, 7.2], [-10.9, 3.2], [-12.3, 0.6], [-11.6, -1.2], [-11.5, -3.4], [-12.4, -7], [-10.8, -11],
+];
+const INCUS: Pt[] = [
+  [-4.3, -10.6], [-1, -12.1], [4.8, -11.3], [9.4, -9.9], [9.1, -8.4], [4.2, -7.6], [1.3, -5.6], [0.5, -1.2], [0.8, 3.4],
+  [2.7, 5.2], [3, 7], [0.9, 7.4], [-1, 4.6], [-1.5, -0.8], [-3.1, -4.4], [-4.3, -6.6],
+];
 function Ossicles({ m, i, s, z, colors }: { m: number; i: number; s: number; z: number; colors: { m: string; i: string; s: string } }) {
+  const gid = useId().replace(/:/g, '');
   const [x, y] = EAR_C;
-  const sw = Math.max(0.6, 1.4 / z);
+  const sw = Math.max(0.35, 1.4 / z);
+  const at = (pts: Pt[]) => pts.map(([u, v]) => [x + u, y + v] as Pt);
+  const shade = `w8-oss${gid}`;
   return (
     <g>
+      <defs>
+        <radialGradient id={shade} cx="0.35" cy="0.3" r="0.8">
+          <stop offset="0" stopColor="#fff" stopOpacity={0.55} />
+          <stop offset="0.45" stopColor="#fff" stopOpacity={0.06} />
+          <stop offset="1" stopColor="#000" stopOpacity={0.4} />
+        </radialGradient>
+      </defs>
       <Part id="mailua" show={m}>
-        {/* hammer: head up, handle down */}
-        <ellipse cx={x - 9} cy={y - 6} rx={4.2} ry={4.6} fill={colors.m} stroke="#3b0a24" strokeWidth={sw} />
-        <path d={`M${x - 10},${y - 2}L${x - 13},${y + 10}`} stroke={colors.m} strokeWidth={2.4} strokeLinecap="round" />
+        {/* hammer: rounded head (up, against the incus), neck, lateral process, long handle down to the umbo */}
+        <path d={smoothPath(at(MALLEUS), true, 0.3)} fill={colors.m} stroke="#3b0a24" strokeWidth={sw} strokeLinejoin="round" />
+        <path d={smoothPath(at(MALLEUS), true, 0.3)} fill={`url(#${shade})`} />
       </Part>
       <Part id="ingudea" show={i}>
-        {/* anvil: body joined to the hammer's head, a short and a long process */}
-        <ellipse cx={x - 2} cy={y - 6} rx={4} ry={4.4} fill={colors.i} stroke="#4a2205" strokeWidth={sw} />
-        <path d={`M${x + 1},${y - 8}L${x + 7},${y - 9}M${x - 1},${y - 2}L${x + 2},${y + 6}`} stroke={colors.i} strokeWidth={2.2} strokeLinecap="round" />
+        {/* anvil: body (joint with the hammer's head), short process back, long process down to the lenticular process */}
+        <path d={smoothPath(at(INCUS), true, 0.3)} fill={colors.i} stroke="#4a2205" strokeWidth={sw} strokeLinejoin="round" />
+        <path d={smoothPath(at(INCUS), true, 0.3)} fill={`url(#${shade})`} />
       </Part>
       <Part id="ointokia" show={s}>
-        {/* stirrup: head on the anvil's long process, two crura, footplate */}
-        <path d={`M${x + 3},${y + 6}L${x + 9},${y + 3}M${x + 3},${y + 6}L${x + 9},${y + 10}M${x + 9},${y + 1.5}L${x + 9},${y + 11.5}`} stroke={colors.s} strokeWidth={1.8} strokeLinecap="round" fill="none" />
+        {/* stirrup: head on the lenticular process, two crura round the opening, the oval footplate */}
+        <g fill="none" stroke="#0f2a5c" strokeWidth={1.9} strokeLinecap="round">
+          <path d={`M${x + 4.6},${y + 5.8}Q${x + 7},${y + 2.2} ${x + 10.8},${y + 2.4}M${x + 4.6},${y + 6.8}Q${x + 7},${y + 10.4} ${x + 10.8},${y + 10.2}`} />
+        </g>
+        <g fill="none" stroke={colors.s} strokeWidth={1.2} strokeLinecap="round">
+          <path d={`M${x + 4.6},${y + 5.8}Q${x + 7},${y + 2.2} ${x + 10.8},${y + 2.4}M${x + 4.6},${y + 6.8}Q${x + 7},${y + 10.4} ${x + 10.8},${y + 10.2}`} />
+        </g>
+        <ellipse cx={x + 3.7} cy={y + 6.3} rx={1.7} ry={1.5} fill={colors.s} stroke="#0f2a5c" strokeWidth={sw} />
+        <ellipse cx={x + 11.3} cy={y + 6.3} rx={1.3} ry={4.6} fill={colors.s} stroke="#0f2a5c" strokeWidth={sw} />
+        <ellipse cx={x + 11.3} cy={y + 6.3} rx={1.3} ry={4.6} fill={`url(#${shade})`} />
       </Part>
     </g>
   );
@@ -332,7 +374,10 @@ export function FaceSkull({ t }: SceneProps) {
   // Colours: arch family, then germ origin at the last step (crest teal / paraxial coral).
   const col = (fam: string) => (orig > 0.5 ? Q.crest : fam);
   const vaultCol = (front: boolean) => (orig > 0.5 ? (front ? Q.crest : Q.paraxial) : '#cfc6b4');
-  const faceT = `translate(${f1(FACE_ORIGIN[0])},${f1(FACE_ORIGIN[1])}) scale(${(1 + 0.32 * grow).toFixed(3)}) translate(${-FACE_ORIGIN[0]},${-FACE_ORIGIN[1]})`;
+  const manV = grow > 0 ? MANDIBLE_V.map((p) => jawAt(p, grow)) : MANDIBLE_V;
+  const sinusA = upAt([316, 384], grow);
+  const alvA = upAt([336, 424], grow);
+  const jawA = A(jawAt([340, 494], grow));
   const ossCol = { m: col(F.man), i: col(F.max), s: col(F.hyo) };
   return (
     <g>
@@ -355,43 +400,49 @@ export function FaceSkull({ t }: SceneProps) {
           <Grow id="tenporalaren-ezkata" uid="w8-vk-sq" pts={SQUAMA_T} c={[522, 338]} k={maxB} fill={col(F.max)} deep={F.maxDeep} />
         </g>
         <path d={smoothPath(SKULL, true, 0.3)} fill="url(#w8-light)" pointerEvents="none" />
+        <path d={smoothPath(SKULL, true, 0.3)} fill="url(#w8-dome)" pointerEvents="none" />
         <Part id="tenporalaren-ezkata" show={maxB}>
           <path d={path(ARCH_T)} fill="none" stroke={F.maxDeep} strokeWidth={11} strokeLinecap="round" />
           <path d={path(ARCH_T)} fill="none" stroke={col(F.max)} strokeWidth={8} strokeLinecap="round" />
         </Part>
-        <g transform={faceT}>
+        <g>
           {/* The face's outline before its bones form (and the nasal bone, not followed here). */}
-          <path d={smoothPath(MAXILLA, true, 0.3)} fill="#8f877c" stroke="#6d6458" strokeWidth={1.4} />
+          <path d={smoothPath(MAXILLA, true, 0.3)} fill="#8f877c" stroke="#6d6458" strokeWidth={1.4} transform={upT(grow)} />
           <path d={smoothPath(MALAR, true, 0.3)} fill="#8f877c" stroke="#6d6458" strokeWidth={1.4} />
-          <path d={smoothPath(MANDIBLE_V, true, 0.3)} fill="#8f877c" stroke="#6d6458" strokeWidth={1.4} />
+          <path d={smoothPath(manV, true, 0.3)} fill="#8f877c" stroke="#6d6458" strokeWidth={1.4} />
           <path d={smoothPath(NASAL, true, 0.3)} fill={orig > 0.5 ? Q.crest : '#8f877c'} stroke="#6d6458" strokeWidth={1.2} />
+          <g transform={upT(grow)}>
+            <Grow id="goiko-maxilarra" uid="w8-vk-mx" pts={MAXILLA} c={[320, 395]} k={maxB} fill={col(F.max)} deep={F.maxDeep} />
+            <Part id="sinu-paranasalak" show={grow}>
+              <ellipse cx={330} cy={384} rx={17 * grow} ry={10 * grow} fill="#1b2b44" stroke="#7aa7f5" strokeWidth={1.4} />
+            </Part>
+          </g>
           <Grow id="hezur-malarra" uid="w8-vk-ma" pts={MALAR} c={[390, 380]} k={maxB} fill={col(F.max)} deep={F.maxDeep} />
-          <Grow id="goiko-maxilarra" uid="w8-vk-mx" pts={MAXILLA} c={[320, 395]} k={maxB} fill={col(F.max)} deep={F.maxDeep} />
           <Part id="sinu-paranasalak" show={grow}>
-            <ellipse cx={328} cy={396} rx={17 * grow} ry={11 * grow} fill="#1b2b44" stroke="#7aa7f5" strokeWidth={1.4} />
-            <ellipse cx={312} cy={262} rx={10 * grow} ry={8 * grow} fill="#1b2b44" stroke="#7aa7f5" strokeWidth={1.2} />
+            <ellipse cx={318} cy={270} rx={9 * grow} ry={7 * grow} fill="#1b2b44" stroke="#7aa7f5" strokeWidth={1.2} />
           </Part>
           {/* Mandibular process family: Meckel's cartilage, the mandible round it. */}
-          <Grow id="beheko-maxilarra" uid="w8-vk-mn" pts={MANDIBLE_V} c={[360, 480]} k={manB} fill={col(F.man)} deep={F.manDeep} />
+          <Grow id="beheko-maxilarra" uid="w8-vk-mn" pts={manV} c={jawAt([360, 480], grow)} k={manB} size={140 + 70 * grow} fill={col(F.man)} deep={F.manDeep} />
           <Part id="meckel-kartilagoa" show={meckelShow}>
             <path d={smoothPath(MECKEL_B, false, 0.3)} fill="none" stroke={F.manDeep} strokeWidth={9} strokeLinecap="round" />
             <path d={smoothPath(MECKEL_B, false, 0.3)} fill="none" stroke={F.man} strokeWidth={6} strokeLinecap="round" />
           </Part>
-          {/* Alveolar processes with the teeth, after birth. */}
+          {/* Alveolar processes with the teeth, after birth: the lower row on the jaw, the upper row under the maxilla. */}
           <Part id="apofisi-albeolarrak" show={grow}>
-            <path d={`M294,424Q330,${f1(430 + 8 * grow)} 364,430`} fill="none" stroke={col(F.max)} strokeWidth={8 * grow} strokeLinecap="round" />
-            <path d={`M302,438Q340,${f1(436 - 8 * grow)} 378,442`} fill="none" stroke={col(F.man)} strokeWidth={8 * grow} strokeLinecap="round" />
-            {Array.from({ length: 6 }, (_, i) => {
-              const x = 302 + i * 11;
-              return (
-                <g key={i} opacity={seg(grow, 0.4 + i * 0.05, 0.7 + i * 0.04)}>
-                  <rect x={x} y={427 + i * 0.6} width={7.5} height={6.5} rx={2} fill="#fffaf0" stroke="#b9a77e" strokeWidth={0.8} />
-                  <rect x={x + 1} y={434 + i * 0.6} width={7.5} height={6} rx={2} fill="#fffaf0" stroke="#b9a77e" strokeWidth={0.8} />
-                </g>
-              );
-            })}
+            <g transform={jawT(grow)}>
+              <path d="M294,419Q336,415 380,421" fill="none" stroke={col(F.man)} strokeWidth={7 * grow} strokeLinecap="round" />
+              {Array.from({ length: 7 }, (_, i) => (
+                <rect key={i} x={298 + i * 11} y={410.5 + i * 0.3} width={8} height={8} rx={2.2} fill="#fffaf0" stroke="#b9a77e" strokeWidth={0.8} opacity={seg(grow, 0.4 + i * 0.05, 0.7 + i * 0.04)} />
+              ))}
+            </g>
+            <g transform={upT(grow)}>
+              <path d="M290,423Q330,427 370,421" fill="none" stroke={col(F.max)} strokeWidth={7 * grow} strokeLinecap="round" />
+              {Array.from({ length: 6 }, (_, i) => (
+                <rect key={i} x={303 + i * 11} y={420 + i * 0.2} width={8} height={7.5} rx={2.2} fill="#fffaf0" stroke="#b9a77e" strokeWidth={0.8} opacity={seg(grow, 0.4 + i * 0.05, 0.7 + i * 0.04)} />
+              ))}
+            </g>
           </Part>
-          <path d={smoothPath(ORBIT_V, true, 0.3)} fill="#0b0a0d" stroke="#5b5360" strokeWidth={1.6} />
+          <Orbit flip />
         </g>
         <Part id="barra-pterigopalatino-karratua" show={ptqShow}>
           <path d={path(PTQ_B)} fill="none" stroke="#3b1a05" strokeWidth={10} strokeLinecap="round" strokeLinejoin="round" />
@@ -406,8 +457,9 @@ export function FaceSkull({ t }: SceneProps) {
         <Part id="apofisi-estiloidea" show={maxB}>
           <path d={smoothPath(STYLOID, true, 0.2)} fill={col(F.max)} stroke={F.maxDeep} strokeWidth={1.2} />
         </Part>
+        {/* The hyoid comes down with the jaw. */}
         <Part id="hioidesa" quiet>
-          <path d={smoothPath(HYOID, true, 0.3)} fill="#cfc6b4" stroke="#8a8170" strokeWidth={1.2} />
+          <path d={smoothPath(HYOID, true, 0.3)} fill="#cfc6b4" stroke="#8a8170" strokeWidth={1.2} transform={`translate(0,${f1(HYOID_DROP * grow)})`} />
         </Part>
         {/* External acoustic meatus: the window onto the middle ear, with its tympanic ring. */}
         <circle cx={EAR_C[0]} cy={EAR_C[1]} r={15} fill="#09080b" />
@@ -435,12 +487,12 @@ export function FaceSkull({ t }: SceneProps) {
       {orig > 0.02 && (
         <g opacity={orig} fontSize={12.5} fontWeight={600} stroke="#0f0f11" strokeWidth={3} paintOrder="stroke">
           {[
-            { s: 'Gandor neurala (ektodermoa)', c: Q.crest, y: 548 },
-            { s: 'Mesodermo paraxiala', c: Q.paraxial, y: 570 },
+            { s: 'Gandor neurala (ektodermoa)', c: Q.crest, y: 66 },
+            { s: 'Mesodermo paraxiala', c: Q.paraxial, y: 88 },
           ].map((k) => (
             <g key={k.s}>
-              <rect x={214} y={k.y - 8} width={16} height={12} rx={3} fill={k.c} stroke="#0f0f11" strokeWidth={1} />
-              <text x={238} y={k.y + 2.5} fill="#fff">
+              <rect x={30} y={k.y - 8} width={16} height={12} rx={3} fill={k.c} stroke="#0f0f11" strokeWidth={1} />
+              <text x={54} y={k.y + 2.5} fill="#fff">
                 {k.s}
               </text>
             </g>
@@ -476,9 +528,9 @@ export function FaceSkull({ t }: SceneProps) {
       <Label id="hezur-frontala" x={190} y={150} ax={A([320, 200])[0]} ay={A([320, 200])[1]} show={orig * inFrame(A([320, 200]))} />
       <Label id="hezur-malarra" x={190} y={280} ax={A([388, 384])[0]} ay={A([388, 384])[1]} show={maxB * inFrame(A([388, 384])) * (1 - grow)} />
       <Label id="goiko-maxilarra" x={190} y={380} ax={A([300, 404])[0]} ay={A([300, 404])[1]} show={maxB * inFrame(A([300, 404])) * (1 - grow)} />
-      <Label id="sinu-paranasalak" x={190} y={360} ax={328 + (328 - FACE_ORIGIN[0]) * 0.32 * grow - 14} ay={396 + (396 - FACE_ORIGIN[1]) * 0.32 * grow} show={grow} />
-      <Label id="apofisi-albeolarrak" x={190} y={420} ax={330 + (330 - FACE_ORIGIN[0]) * 0.32 * grow} ay={432 + (432 - FACE_ORIGIN[1]) * 0.32 * grow} show={grow} />
-      <Label id="beheko-maxilarra" x={190} y={480} ax={A([340, 494])[0] + (340 - FACE_ORIGIN[0]) * 0.32 * grow} ay={A([340, 494])[1] + (494 - FACE_ORIGIN[1]) * 0.32 * grow} show={manB * inFrame(A([330, 476]))} />
+      <Label id="sinu-paranasalak" x={190} y={360} ax={sinusA[0]} ay={sinusA[1]} show={grow} />
+      <Label id="apofisi-albeolarrak" x={190} y={420} ax={alvA[0]} ay={alvA[1]} show={grow} />
+      <Label id="beheko-maxilarra" x={190} y={480} ax={jawA[0]} ay={jawA[1]} show={manB * inFrame(A([330, 476]))} />
       <Label id="meckel-kartilagoa" x={190} y={540} ax={A([400, 464])[0]} ay={A([400, 464])[1]} show={meckelShow * inFrame(A([400, 464]))} />
       {/* Right gutter: the ear region and the vault behind. */}
       <Label id="hezur-parietala" x={810} y={100} ax={A([600, 130])[0]} ay={A([600, 130])[1]} show={orig} />
@@ -490,7 +542,7 @@ export function FaceSkull({ t }: SceneProps) {
       <Label id="okzipitalaren-ezkata" x={810} y={440} ax={A([724, 300])[0]} ay={A([724, 300])[1]} show={orig} />
       <Label id="apofisi-estiloidea" x={810} y={480} ax={A([510, 466])[0]} ay={A([510, 466])[1]} show={maxB * inFrame(A([510, 466]))} />
       <Label id="reichert-kartilagoa" x={810} y={530} ax={A([524, 482])[0]} ay={A([524, 482])[1]} show={reiShow * inFrame(A([524, 482]))} />
-      <Label id="hioidesa" x={810} y={570} ax={A([476, 540])[0]} ay={A([476, 540])[1]} show={inFrame(A([476, 540]))} small />
+      <Label id="hioidesa" x={810} y={570} ax={A([476, 540 + HYOID_DROP * grow])[0]} ay={A([476, 540 + HYOID_DROP * grow])[1]} show={inFrame(A([476, 540]))} small />
     </g>
   );
 }

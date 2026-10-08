@@ -39,7 +39,7 @@ export interface PoolQuestion {
   stageId?: string;
 }
 
-const SKILL_COMP: Record<Skill, Competence> = { kronologia: 'noiz', presentzia: 'noiz', ordena: 'noiz', jatorria: 'jatorria', eratorria: 'patua', definizioa: 'erlazioak', kokapena: 'kokapena' };
+const SKILL_COMP: Record<Skill, Competence> = { kronologia: 'noiz', ordena: 'noiz', jatorria: 'jatorria', eratorria: 'patua', definizioa: 'erlazioak', kokapena: 'kokapena' };
 
 /** Competence from the wording of a hand-written question (Basque question words). */
 export function inferCompetence(text: string): Competence {
@@ -94,17 +94,15 @@ const TAGS: Record<string, { comp?: Competence; concept?: string }> = {
   'w3a-q-bukaera-diskoa': { concept: 'bi-orriko-diskoa' },
   'w3a-q-endodermo-jatorria': { concept: 'endodermoa' },
   'w3b-q-zirkulazio-funtzionala': { concept: 'zirkulazio-uteroplazentarioa' },
-  'w4-q-fusio-hasiera': { comp: 'kokapena', concept: 'tolesdura-neuralak' },
-  'w4-q-neuroporoak-egunak': { comp: 'noiz', concept: 'neuroporo-kraneala' },
+  'w4-q-fusio-hasiera': { comp: 'kausa', concept: 'tolesdura-neuralak' },
+  'w4-q-neuroporoak-amnios': { comp: 'erlazioak', concept: 'neuroporo-kraneala' },
   'w4-q-ile-azazkalak': { comp: 'jatorria', concept: 'melanozitoak' },
-  'w4-q-giltzurrun-gaineko': { comp: 'jatorria', concept: 'giltzurrun-gaineko-muina' },
   'w5-q-sudur-plaka': { concept: 'sudur-plaka' },
-  'w5-q-iraupena': { comp: 'noiz' },
   'w6-q-muga-lau': { comp: 'erlazioak' },
   'w6-q-muga-bi': { comp: 'erlazioak' },
   'w6-q-kotiledoiak': { concept: 'kotiledoiak' },
   'w6-q-likidoa': { comp: 'erlazioak', concept: 'likido-amniotikoa' },
-  'mikro:4/neurulazioa:3': { comp: 'kokapena', concept: 'tolesdura-neuralak' },
+  'mikro:4/neurulazioa:3': { comp: 'eraketa', concept: 'tolesdura-neuralak' },
   'mikro:4/mesodermoa-banatzen:6': { concept: 'errai-orria' },
 };
 

@@ -314,7 +314,7 @@ function Counter({ st, t }: { st: St; t: number }) {
 
 /**
  * Region ruler beside the body: a bracket in the region's colour that grows as its somites form, and
- * the count + name (the exam numbers) level with the middle of the region.
+ * the count + name (the numbers of the notes) level with the middle of the region.
  */
 function Regions({ st, at, x0, regress = 0 }: { st: St; at: (x: number, y: number) => Pt; x0: number; regress?: number }) {
   return (

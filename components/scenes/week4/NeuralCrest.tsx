@@ -9,7 +9,7 @@ import { CrestCell, Route, along, spline } from './crestRoute';
 export { CrestSection as NeuralCrestSection } from './CrestSection';
 
 /**
- * Stage `gandor-neurala`, derivatives view — an exam-style figure in two parts that stay on screen
+ * Stage `gandor-neurala`, derivatives view — a textbook-style figure in two parts that stay on screen
  * together: the head and neck of the day-28 embryo (side view: cranial crest → face, skull,
  * meninges, cranial ganglia, pharyngeal arches, heart outflow) and a schematic trunk section
  * (trunk crest → ganglia, nerves, adrenal medulla, gut wall, skin). Each step sends teal crest

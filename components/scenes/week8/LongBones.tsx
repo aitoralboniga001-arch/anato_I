@@ -81,6 +81,11 @@ export function LongBone({ t, reduced }: SceneProps) {
   const PH = 14;
   const reach = reach0 * (Ld / 2 + 8);
   const outline = boneOutline(CX, top, bot, SW, EW, E);
+  // The rim of each joint end (outline from the top-left round over the top to the top-right; same at the bottom).
+  const half = Math.floor(outline.length / 2);
+  const line = (pts: Pt[]) => `M${pts.map((p) => `${f1(p[0])},${f1(p[1])}`).join('L')}`;
+  const capTop = line([...outline.slice(half).filter((p) => p[1] < top + E * 0.5), ...outline.slice(0, half).filter((p) => p[1] < top + E * 0.5)]);
+  const capBot = line(outline.filter((p) => p[1] > bot - E * 0.5));
   // Camera: in on the upper growth plate while the bone lengthens.
   const zs = lerp(1, 2.8, push);
   const z = zoom(CX, lerp(320, plateT, push), zs, 500, 320);
@@ -104,6 +109,39 @@ export function LongBone({ t, reduced }: SceneProps) {
     <g>
       <Defs8 />
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
+      <defs>
+        {/* Spongy bone: ivory trabeculae with red marrow between them. */}
+        <pattern id={`w8-hl-spongy${cid}`} width="26" height="26" patternUnits="userSpaceOnUse">
+          <rect width="26" height="26" fill="#a5463a" />
+          <circle cx="5" cy="20" r="1.3" fill="#d9776a" />
+          <circle cx="19" cy="4" r="1.3" fill="#d9776a" />
+          <path
+            d="M0,6L9,4L15,11L26,8M9,4L10,0M9,4L6,15L15,11M6,15L0,19M6,15L12,23L21,19L26,21M15,11L21,19M12,23L11,26M21,19L23,26"
+            fill="none"
+            stroke={Q.bone}
+            strokeWidth={2.6}
+            strokeLinejoin="round"
+          />
+        </pattern>
+        {/* Red marrow of the cavity: blood-forming cells. */}
+        <pattern id={`w8-hl-marrow${cid}`} width="12" height="12" patternUnits="userSpaceOnUse">
+          <rect width="12" height="12" fill="#8e2f28" />
+          <circle cx="3" cy="3" r="1.6" fill="#c2564a" />
+          <circle cx="9" cy="8" r="1.4" fill="#b84a3f" />
+          <circle cx="5" cy="10" r="0.9" fill="#e7b7a8" />
+        </pattern>
+        {/* Compact bone of the cortex: lamellae along the shaft. */}
+        <pattern id={`w8-hl-compact${cid}`} width="6" height="40" patternUnits="userSpaceOnUse">
+          <path d="M1.5,0V40" stroke="rgba(150,120,70,0.35)" strokeWidth={0.9} />
+          <ellipse cx="4.5" cy="20" rx="0.8" ry="2" fill="rgba(110,85,40,0.45)" />
+        </pattern>
+        <linearGradient id={`w8-hl-round${cid}`} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stopColor="#000" stopOpacity={0.3} />
+          <stop offset="0.3" stopColor="#fff" stopOpacity={0.08} />
+          <stop offset="0.7" stopColor="#000" stopOpacity={0} />
+          <stop offset="1" stopColor="#000" stopOpacity={0.32} />
+        </linearGradient>
+      </defs>
       <clipPath id={clipId}>
         <path d={smoothPath(outline, true, 0.25)} />
       </clipPath>
@@ -127,10 +165,11 @@ export function LongBone({ t, reduced }: SceneProps) {
           {/* Diaphysis: bone spreading from the primary centre toward both ends. */}
           <Part id={fid('diafisia')} show={reach0 > 0.01 ? 1 : 0}>
             <g clipPath={`url(#${clipId})`}>
+              {/* Compact cortex, spongy bone toward the ends, the marrow cavity hollowed out in the middle. */}
               <rect x={CX - 120} y={MID - reach} width={240} height={reach * 2} fill={Q.bone} />
-              <rect x={CX - 120} y={MID - reach} width={240} height={reach * 2} fill="url(#w8-bone)" />
-              {/* marrow cavity */}
-              <rect x={CX - SW * 0.55} y={MID - reach * 0.8} width={SW * 1.1} height={reach * 1.6} rx={SW * 0.5} fill="#8a3b2e" opacity={0.55 * seg(reach0, 0.3, 1)} />
+              <rect x={CX - 120} y={MID - reach} width={240} height={reach * 2} fill={`url(#w8-hl-compact${cid})`} />
+              <rect x={CX - SW * 0.68} y={MID - reach} width={SW * 1.36} height={reach * 2} rx={SW * 0.3} fill={`url(#w8-hl-spongy${cid})`} opacity={seg(reach0, 0.1, 0.5)} />
+              <rect x={CX - SW * 0.6} y={MID - reach * 0.62} width={SW * 1.2} height={reach * 1.24} rx={SW * 0.6} fill={`url(#w8-hl-marrow${cid})`} opacity={seg(reach0, 0.3, 1)} />
             </g>
           </Part>
           {/* Epiphyses: cartilage until birth, then bone from their secondary centres. */}
@@ -146,7 +185,7 @@ export function LongBone({ t, reduced }: SceneProps) {
                   {s2 > 0.01 && (
                     <>
                       <circle cx={CX} cy={(y0 + y1) / 2} r={lerp(4, 90, s2)} fill={Q.bone} />
-                      <circle cx={CX} cy={(y0 + y1) / 2} r={lerp(4, 90, s2)} fill="url(#w8-bone)" />
+                      <circle cx={CX} cy={(y0 + y1) / 2} r={lerp(4, 90, s2) * 0.86} fill={`url(#w8-hl-spongy${cid})`} />
                     </>
                   )}
                 </g>
@@ -179,11 +218,27 @@ export function LongBone({ t, reduced }: SceneProps) {
           {/* Primary ossification centre with its vessel, in the middle of the shaft. */}
           <Part id="hezurtzapen-zentroak" show={p1 * (1 - 0.7 * seg(t, HL_T.prenatal + 0.12, HL_T.secondary))}>
             <path d={`M${CX + 110},${MID - 30}Q${CX + 60},${MID - 10} ${CX + 6},${MID}`} fill="none" stroke={Q.vessel} strokeWidth={3} strokeLinecap="round" />
-            <ellipse cx={CX} cy={MID} rx={lerp(4, 22, p1)} ry={lerp(4, 16, p1)} fill={Q.centre} stroke={Q.osteo} strokeWidth={1.2} />
-            {[-2, -1, 0, 1, 2].map((q) => (
-              <circle key={q} cx={CX + q * 7 * p1} cy={MID + (q % 2) * 5} r={1.8} fill={Q.osteo} />
-            ))}
+            {/* The centre melts into the marrow cavity; its vessel stays as the nutrient artery. */}
+            <g opacity={1 - seg(t, HL_T.secondary, HL_T.secondary + 0.03)}>
+              <ellipse cx={CX} cy={MID} rx={lerp(4, 22, p1)} ry={lerp(4, 16, p1)} fill={Q.centre} stroke={Q.osteo} strokeWidth={1.2} />
+              {[-2, -1, 0, 1, 2].map((q) => (
+                <circle key={q} cx={CX + q * 7 * p1} cy={MID + (q % 2) * 5} r={1.8} fill={Q.osteo} />
+              ))}
+            </g>
           </Part>
+          {/* Joint ends: a cap of articular cartilage stays on each epiphysis for life. */}
+          {s2 > 0.01 && (
+            <g clipPath={`url(#${clipId})`} opacity={seg(s2, 0.4, 1)} pointerEvents="none">
+              {[capTop, capBot].map((d, i) => (
+                <g key={i}>
+                  <path d={d} fill="none" stroke={Q.cart} strokeWidth={13} strokeLinecap="round" />
+                  <path d={d} fill="none" stroke="url(#w8-cart)" strokeWidth={13} strokeLinecap="round" />
+                </g>
+              ))}
+            </g>
+          )}
+          {/* The bone is round: shade both flanks. */}
+          <path d={smoothPath(outline, true, 0.25)} fill={`url(#w8-hl-round${cid})`} pointerEvents="none" />
           <Part id="femurra" quiet>
             <path d={smoothPath(outline, true, 0.25)} fill="none" stroke={fz > 0.5 ? Q.boneDeep : Q.cartDeep} strokeWidth={2.2} />
           </Part>
@@ -193,8 +248,18 @@ export function LongBone({ t, reduced }: SceneProps) {
       {cmp > 0.01 && (
         <g opacity={cmp}>
           <Part id="falangeak">
-            <path d={smoothPath(phal, true, 0.25)} fill={Q.bone} stroke={Q.boneDeep} strokeWidth={2} />
-            <path d={smoothPath(phal, true, 0.25)} fill="url(#w8-bone)" />
+            <clipPath id={`w8-hl-pclip${cid}`}>
+              <path d={smoothPath(phal, true, 0.25)} />
+            </clipPath>
+            <path d={smoothPath(phal, true, 0.25)} fill={Q.bone} />
+            <g clipPath={`url(#w8-hl-pclip${cid})`}>
+              <rect x={PX - 60} y={ptop - 10} width={120} height={pbot - ptop + 20} fill={`url(#w8-hl-compact${cid})`} />
+              <rect x={PX - 34} y={ptop - 10} width={68} height={60} fill={`url(#w8-hl-spongy${cid})`} />
+              <rect x={PX - 14} y={ptop + 62} width={28} height={pbot - ptop - 96} rx={12} fill={`url(#w8-hl-marrow${cid})`} />
+              <rect x={PX - 22} y={pbot - 40} width={44} height={44} rx={14} fill={`url(#w8-hl-spongy${cid})`} />
+              <path d={`M${PX - 44},${ptop + 10}Q${PX},${ptop - 16} ${PX + 44},${ptop + 10}`} fill="none" stroke={Q.cart} strokeWidth={12} />
+            </g>
+            <path d={smoothPath(phal, true, 0.25)} fill={`url(#w8-hl-round${cid})`} stroke={Q.boneDeep} strokeWidth={2} />
           </Part>
           <Part id="hazkuntza-plaka">
             <rect x={PX - 34} y={ptop + 46 - 6} width={68} height={12} rx={3} fill={Q.cart} stroke={Q.cartDeep} strokeWidth={1.2} />
@@ -247,7 +312,7 @@ export function LongBone({ t, reduced }: SceneProps) {
       <Label id="kartilago-eredua" x={190} y={500} {...pt(F([CX - SW, bot - E * 1.6]))} show={(1 - seg(t, HL_T.secondary, HL_T.secondary + 0.03)) * inFrame(F([CX - SW, bot - E * 1.6]))} />
       <Label id="hezurtzapen-zentro-sekundarioak" x={716} y={240} {...pt(F([CX + 14, (top + plateT) / 2]))} show={vis(t, HL_T.secondary, HL_T.fusion) * inFrame(F([CX + 14, (top + plateT) / 2]))} />
       <Label id="hezurtzapen-zentroak" text="Zentro primarioa" x={810} y={360} {...pt(F([CX + 20, MID + 4]))} show={p1 * (1 - seg(t, HL_T.secondary, HL_T.secondary + 0.03)) * inFrame(F([CX + 20, MID + 4]))} />
-      <Label id="femurra" x={810} y={560} {...pt(F([CX + SW, MID + 100]))} show={vis(t, HL_T.count)} />
+      <Label id="femurra" x={190} y={520} {...pt(F([CX - SW, MID + 110]))} show={vis(t, HL_T.count)} />
       <Label id="falangeak" x={810} y={250} ax={PX + 24} ay={(ptop + pbot) / 2} show={cmp} />
     </g>
   );

@@ -92,6 +92,18 @@ export function Defs8() {
         <stop offset="0.6" stopColor="#fff" stopOpacity={0} />
         <stop offset="1" stopColor="#000" stopOpacity={0.25} />
       </radialGradient>
+      <radialGradient id="w8-boss" cx="0.5" cy="0.5" r="0.5">
+        <stop offset="0" stopColor="#fff" stopOpacity={0.2} />
+        <stop offset="0.45" stopColor="#fff" stopOpacity={0.04} />
+        <stop offset="1" stopColor="#3a2a10" stopOpacity={0.32} />
+      </radialGradient>
+      {/* A vault seen from outside: a dome, lit at its crown, falling into shadow toward the rim. */}
+      <radialGradient id="w8-dome" cx="0.46" cy="0.4" r="0.62">
+        <stop offset="0" stopColor="#fff" stopOpacity={0.16} />
+        <stop offset="0.55" stopColor="#fff" stopOpacity={0} />
+        <stop offset="0.85" stopColor="#000" stopOpacity={0.14} />
+        <stop offset="1" stopColor="#000" stopOpacity={0.4} />
+      </radialGradient>
       <pattern id="w8-cart" width="13" height="12" patternUnits="userSpaceOnUse">
         <ellipse cx="4" cy="4" rx="2.6" ry="2" fill={Q.cartCell} opacity={0.75} />
         <circle cx="4" cy="4" r="1" fill={Q.cartDeep} />

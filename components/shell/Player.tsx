@@ -178,8 +178,8 @@ function Caption({
           )}
           {beat.exam && (
             <p className="cap-note is-exam">
-              <b>Azterketan</b>
-              {beat.exam.replace(/^Azterketan:\s*(.)/, (_, c: string) => c.toUpperCase())}
+              <b>Funtsezkoa</b>
+              {beat.exam}
             </p>
           )}
           {beat.caution && (
@@ -219,12 +219,22 @@ function Caption({
   );
 }
 
+/** At most this many "Berria" chips before a "+N" chip: a long list would squeeze the scene. */
+const FRESH_CAP = 5;
+
 /** The "BERRIA" chips of a step: its new structures, easing in one after the other. */
 function FreshList({ items, onPick, k }: { items: StructureDef[]; onPick: (id: string) => void; k: string }) {
+  return <FreshChips key={k} items={items} onPick={onPick} />;
+}
+
+function FreshChips({ items, onPick }: { items: StructureDef[]; onPick: (id: string) => void }) {
+  const [all, setAll] = useState(false);
+  const folded = !all && items.length > FRESH_CAP + 1;
+  const shown = folded ? items.slice(0, FRESH_CAP) : items;
   return (
-    <ul className="fresh" key={k}>
+    <ul className="fresh">
       <li className="fresh-tag">Berria</li>
-      {items.map((s, i) => (
+      {shown.map((s, i) => (
         <li key={s.id} style={{ animationDelay: `${0.25 + i * 0.2}s` }}>
           <button onClick={() => onPick(s.id)} title={`${s.definition} — klik fitxa irekitzeko`}>
             <i style={{ background: s.color ?? categoryColor[s.category] }} />
@@ -232,6 +242,13 @@ function FreshList({ items, onPick, k }: { items: StructureDef[]; onPick: (id: s
           </button>
         </li>
       ))}
+      {folded && (
+        <li style={{ animationDelay: `${0.25 + FRESH_CAP * 0.2}s` }}>
+          <button className="fresh-more" onClick={() => setAll(true)} title={items.slice(FRESH_CAP).map((s) => s.name).join(', ')}>
+            +{items.length - FRESH_CAP} gehiago
+          </button>
+        </li>
+      )}
     </ul>
   );
 }

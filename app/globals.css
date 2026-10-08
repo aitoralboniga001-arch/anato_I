@@ -1808,7 +1808,16 @@ kbd {
 
 /* While a step talks about something, the other names step back (still readable on their plates). */
 .label-ctx {
-  opacity: 0.5;
+  opacity: 0.78;
+}
+
+.label-ctx .label-plate {
+  fill: rgba(11, 12, 15, 0.9);
+  stroke: rgba(255, 255, 255, 0.26);
+}
+
+.label-ctx .label-leader {
+  stroke: rgba(242, 239, 233, 0.95);
 }
 
 /* The step's names: bigger, bold, on a warm lit plate — also for spaces (italic and dashed, in the focus colour). */
@@ -11126,6 +11135,13 @@ a.ln-chip:focus-visible {
 .fresh li,
 .cap .fresh li:not(.fresh-tag) {
   animation-fill-mode: backwards;
+}
+
+/* The "+N" chip of a long list: quieter than the names, it only unfolds the rest. */
+.fresh button.fresh-more {
+  background: transparent;
+  border-style: dashed;
+  color: var(--text-2);
 }
 
 /* Landing pages: the footer's last column ends clear of Kimu's corner button. */

@@ -73,7 +73,7 @@ function NotesList({ week, current, visited, onStage }: Omit<OutlineProps, 'coll
                     {!same && <span className="nt-stage">{s.title}</span>}
                     <span className="ol-day">
                       {s.day}
-                      {s.optional && <em> · azterketatik kanpo</em>}
+                      {s.optional && <em> · gaitegitik kanpo</em>}
                       {done && <IconCheck size={11} />}
                     </span>
                   </span>
@@ -105,7 +105,7 @@ function NotesList({ week, current, visited, onStage }: Omit<OutlineProps, 'coll
                           <span className="ol-title">{s.title}</span>
                           <span className="ol-day">
                             {s.day}
-                            {s.optional && <em> · azterketatik kanpo</em>}
+                            {s.optional && <em> · gaitegitik kanpo</em>}
                           </span>
                         </span>
                       </button>
@@ -272,6 +272,15 @@ const subscribeFolds = (cb: () => void) => {
   };
 };
 
+/** The notes' file name as a title: no extensions, revision tags or underscores. */
+const sourceName = (file: string) =>
+  file
+    .replace(/(\.(docx|pdf))+$/i, '')
+    .replace(/\s*\((zuzenduta|zuzendu gabe)\)\s*/i, ' ')
+    .replace(/_\s*/g, ': ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
 /** A summary section with a heading that folds it away (kicker, count, chevron). */
 function InfoSection({ id, title, icon, count, tone, children }: { id: string; title: string; icon: ReactNode; count?: number; tone?: 'date' | 'key' | 'warn'; children: ReactNode }) {
   const folded = useSyncExternalStore(subscribeFolds, () => readFolds().split(',').includes(id), () => false);
@@ -295,7 +304,7 @@ function InfoSection({ id, title, icon, count, tone, children }: { id: string; t
   );
 }
 
-/** Right column: exam dates and key points, the structures of the stage, and where they come from. */
+/** Right column: key dates and key points, the structures of the stage, and where they come from. */
 export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, onDismiss }: InfoProps) {
   const [picked, setTab] = useState<Tab>('gakoak');
   const dates = stageExamDates(week, stage);
@@ -304,7 +313,7 @@ export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, 
   return (
     <div className="info-body">
       <div className="tabs" role="tablist">
-        <button role="tab" aria-selected={tab === 'gakoak'} className={tab === 'gakoak' ? 'is-on' : ''} onClick={() => setTab('gakoak')} title="Azterketarako gakoak eta datak">
+        <button role="tab" aria-selected={tab === 'gakoak'} className={tab === 'gakoak' ? 'is-on' : ''} onClick={() => setTab('gakoak')} title="Gakoak eta data garrantzitsuak">
           Gakoak
         </button>
         <button role="tab" aria-selected={tab === 'egiturak'} className={tab === 'egiturak' ? 'is-on' : ''} onClick={() => setTab('egiturak')}>
@@ -325,7 +334,7 @@ export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, 
       ) : tab === 'gakoak' ? (
         <div className="info-scroll">
           {dates.length > 0 && (
-            <InfoSection id="datak" title="Azterketarako datak" icon={<IconCalendar size={14} />} count={dates.length} tone="date">
+            <InfoSection id="datak" title="Data garrantzitsuak" icon={<IconCalendar size={14} />} count={dates.length} tone="date">
               <ol className="xd">
                 {dates.map((d, i) => (
                   <li key={i} className={d.k === activeBeat ? 'is-on' : ''}>
@@ -364,7 +373,7 @@ export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, 
             </InfoSection>
           )}
           <p className="source">
-            Iturria: {stage.source.file} · {stage.source.section}
+            Iturria: {sourceName(stage.source.file)} (apunteak) · {stage.source.section}
           </p>
         </div>
       ) : (

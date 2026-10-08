@@ -14,7 +14,7 @@ import { PLANE_TEXT } from './Locator';
 import { PrivateImages, PrivateTab } from './PrivateImages';
 
 /**
- * Image lab: our own scenes shown as exam figures (black and white, no labels, sometimes turned or
+ * Image lab: our own scenes shown as plain figures (black and white, no labels, sometimes turned or
  * mirrored), with four exercises: point at a structure, name the arrowed one, read the orientation
  * and recognise the cut plane. Every attempt feeds the "Irudian" competence of that structure.
  */
@@ -137,7 +137,7 @@ function newItem(mode: Mode, week: number | null, prev?: Item): Item {
   if (prev && pool.length > 1) pool = pool.filter((e) => !(e.stage === prev.stage && e.view === prev.view));
   if (!pool.length) pool = ENTRIES;
   const e = pickOne(pool);
-  // Exam figures come in the textbook orientation most of the time; turning them is the orientation drill.
+  // Figures come in the textbook orientation most of the time; turning them is the orientation drill.
   const turn = kind === 'orientazioa' ? 1 : kind === 'planoa' ? 0.45 : 0.25;
   const rot: Rot = Math.random() < turn ? pickOne<Rot>([90, 180, 270]) : 0;
   const mirror = Math.random() < (kind === 'orientazioa' ? 0.4 : turn / 2);
@@ -536,7 +536,7 @@ export function ImageLab() {
       <section className="ln-hero lab-hero">
         <p className="eyebrow">Irudi-laborategia</p>
         <h1>Irudiak irakurtzen</h1>
-        <p className="hero-lead">Azterketako irudiak etiketarik gabe eta zuri-beltzean datoz, batzuetan biratuta. Hemen gure eszenak horrela ikusten dituzu: seinalatu egitura, esan zer den gezia, aurkitu orientazioa eta ebaki-planoa.</p>
+        <p className="hero-lead">Irudi bat etiketarik gabe, zuri-beltzean eta biratuta ere irakurtzen jakin behar da. Hemen gure eszenak horrela ikusten dituzu: seinalatu egitura, esan zer den gezia, aurkitu orientazioa eta ebaki-planoa.</p>
       </section>
 
       <section className="lab">
@@ -589,7 +589,7 @@ export function ImageLab() {
             <div className="lab-main">
               <div className={`lab-fig${color ? '' : ' is-print'}${labels ? ' is-labelled' : ''}${item?.kind === 'seinalatu' && !answered ? ' is-pointing' : ''}`} ref={box} style={{ ['--lab-r' as string]: `${-(item?.rot ?? 0)}deg`, ['--lab-m' as string]: item?.mirror ? -1 : 1 }}>
                 {hydrated && item && Scene && (
-                  <svg ref={svg} viewBox={vb} preserveAspectRatio="xMidYMid meet" className={`lab-svg${fit?.key === figKey ? '' : ' is-fitting'}`} style={{ ['--lab-ar' as string]: aspectOf(vb) }} role="img" aria-label="Azterketako irudia">
+                  <svg ref={svg} viewBox={vb} preserveAspectRatio="xMidYMid meet" className={`lab-svg${fit?.key === figKey ? '' : ' is-fitting'}`} style={{ ['--lab-ar' as string]: aspectOf(vb) }} role="img" aria-label="Etiketarik gabeko irudia">
                     <Defs />
                     <SceneContext.Provider value={ctx}>
                       <g transform={f.turn}>
@@ -677,7 +677,7 @@ export function ImageLab() {
                       Etiketak
                     </button>
                   )}
-                  <button className={`btn small ghost${color ? ' is-on' : ''}`} onClick={() => setColor((v) => !v)} aria-pressed={color} title="Koloreak ala zuri-beltza (azterketan bezala)">
+                  <button className={`btn small ghost${color ? ' is-on' : ''}`} onClick={() => setColor((v) => !v)} aria-pressed={color} title="Koloreak ala zuri-beltza">
                     Koloretan
                   </button>
                   {answered && (

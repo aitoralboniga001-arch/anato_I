@@ -275,22 +275,73 @@ const SPF_SHAPE = (k: number): Pt[] => {
 };
 // The face (viscerocranium): small at birth, under a big orbit. One mass (nasal, maxilla, zygomatic and the arch)
 // with its sutures drawn in, the mandible apart below it.
-export const ORBIT = spline([[636, 296], [664, 284], [692, 296], [700, 324], [688, 352], [660, 362], [636, 352], [626, 324]], 8, true);
+/** The orbit: big at birth, a rounded square seen a little from the front. */
+export const ORBIT = spline([[640, 300], [662, 290], [688, 296], [701, 316], [699, 342], [683, 358], [656, 361], [636, 347], [630, 322]], 8, true);
+/**
+ * The face (nasal, maxilla, zygomatic and the zygomatic arch back to the temporal root): nasion, nasal bone,
+ * the edge of the piriform aperture, anterior nasal spine, alveolar process, maxillary tuberosity, the arch
+ * (lower border back, upper border forward), the zygomatic's frontal process up the lateral orbital rim.
+ */
 const FACE = spline(
-  [[700, 290], [716, 312], [730, 342], [714, 352], [720, 374], [718, 400], [708, 424], [676, 434], [636, 430], [612, 412], [592, 400], [554, 400], [512, 410], [500, 400], [512, 390], [556, 384], [596, 376], [612, 352], [616, 318], [624, 290], [650, 278], [682, 280]],
+  [
+    [700, 288], [712, 304], [724, 328], [730, 344], [722, 350], [718, 362], [732, 378], [734, 384], [729, 398], [723, 414],
+    [706, 423], [686, 425], [664, 425], [644, 423], [633, 410], [612, 404], [584, 405], [556, 407], [530, 409], [512, 409],
+    [505, 401], [514, 393], [544, 391], [574, 389], [604, 385], [618, 371], [622, 348], [624, 322], [628, 296], [636, 284],
+    [662, 276], [688, 279],
+  ],
   8,
   true,
 );
 /** Sutures of the face: nasal ↔ maxilla, zygomatic ↔ maxilla, zygomatic ↔ temporal (in the arch). */
-const FACE_SUTURES = 'M704,296 C712,312 716,330 716,348 M650,362 C644,380 632,398 622,414 M560,385 L556,400';
+const FACE_SUTURES = 'M702,292 C710,310 716,330 720,348 M652,360 C645,378 639,392 633,406 M567,389 L563,406';
+/** The newborn mandible: rounded chin, long body, short ramus at an open angle, condyle at the joint, coronoid under the arch. */
 export const MANDIBLE = spline(
-  [[700, 434], [718, 454], [710, 484], [682, 502], [612, 506], [562, 492], [536, 468], [526, 438], [516, 420], [534, 414], [548, 440], [560, 428], [576, 400], [590, 428], [622, 442], [664, 440]],
+  [
+    [722, 417], [729, 444], [725, 468], [712, 488], [680, 500], [640, 504], [600, 498], [568, 486], [548, 471], [536, 453],
+    [528, 433], [519, 422], [511, 416], [512, 406], [522, 404], [531, 411], [539, 424], [550, 430], [559, 418], [566, 401],
+    [575, 398], [581, 412], [594, 422], [614, 419], [642, 418], [672, 418], [700, 418],
+  ],
   8,
   true,
 );
 export const EAM: Pt = [482, 420];
-/** Tooth germs in their crypts (maxilla, mandible). */
-const TEETH: Pt[] = [[696, 414], [676, 418], [654, 416], [692, 462], [670, 470], [646, 472], [622, 470]];
+/** Tooth germs in their crypts (maxilla, mandible): the teeth have not erupted at birth. */
+const TEETH: Pt[] = [[706, 408], [686, 411], [664, 410], [700, 446], [678, 452], [654, 455], [628, 452]];
+/**
+ * The orbit as a deep socket: dark at the back, its walls catching light inside, a bright rim. `flip` mirrors it
+ * (face to the left).
+ */
+export function Orbit({ flip = false }: { flip?: boolean }) {
+  const gid = useId().replace(/:/g, '');
+  const pts = flip ? ORBIT.map(([x, y]) => [1000 - x, y] as Pt) : ORBIT;
+  const d = smoothPath(pts, true, 0.3);
+  const fx = (x: number) => (flip ? 1000 - x : x);
+  return (
+    <g pointerEvents="none">
+      <defs>
+        <radialGradient id={`w8-orb${gid}`} cx={flip ? '0.6' : '0.4'} cy="0.55" r="0.62">
+          <stop offset="0" stopColor="#030304" />
+          <stop offset="0.55" stopColor="#141010" />
+          <stop offset="0.85" stopColor="#5a4e3c" />
+          <stop offset="1" stopColor="#a8987a" />
+        </radialGradient>
+        <clipPath id={`w8-orbc${gid}`}>
+          <path d={d} />
+        </clipPath>
+      </defs>
+      <path d={d} fill={`url(#w8-orb${gid})`} />
+      <g clipPath={`url(#w8-orbc${gid})`}>
+        {/* Orbital floor and the greater wing at the back, lit from above; the superior orbital fissure between them. */}
+        <path d={`M${fx(628)},350 Q${fx(664)},330 ${fx(704)},346 L${fx(704)},366 L${fx(628)},366Z`} fill="#c9b994" opacity={0.28} />
+        <path d={`M${fx(640)},318 Q${fx(650)},300 ${fx(664)},302`} fill="none" stroke="#000" strokeWidth={3} opacity={0.6} strokeLinecap="round" />
+        <circle cx={fx(668)} cy={322} r={3.2} fill="#000" />
+      </g>
+      <path d={d} fill="none" stroke={Q.boneDeep} strokeWidth={2.4} />
+      <path d={d} fill="none" stroke="#fffaf0" strokeWidth={1.4} opacity={0.5} transform={`translate(${flip ? 1.5 : -1.5} -1.5)`} />
+    </g>
+  );
+}
+
 /** The brain the vault is built round (only while the box is being explained). */
 const BRAIN = spline([[700, 286], [706, 200], [676, 124], [600, 86], [500, 80], [400, 100], [322, 150], [288, 230], [290, 320], [330, 392], [400, 430], [480, 420], [540, 396], [610, 366], [668, 330]], 8, true);
 const GYRI = [
@@ -321,6 +372,8 @@ function BoneGrow({ b, uid, grow, fill = Q.bone }: { b: Bone; uid: string; grow:
       <g clipPath={`url(#${uid}${cid}-reg)`}>
         <circle cx={b.c[0]} cy={b.c[1]} r={r} fill={fill} opacity={0.92} />
         <circle cx={b.c[0]} cy={b.c[1]} r={r} fill="url(#w8-boneshade)" />
+        {/* Each plate bulges at its centre (the parietal and frontal eminences): light there, shade at the edges. */}
+        <circle cx={b.c[0]} cy={b.c[1]} r={r} fill="url(#w8-boss)" />
         <path d={spikes} stroke="rgba(150,120,70,0.38)" strokeWidth={1.4} />
         <circle cx={b.c[0]} cy={b.c[1]} r={7} fill="rgba(150,110,50,0.5)" />
         <path d={`M${b.region.map((p) => `${f1(p[0])},${f1(p[1])}`).join('L')}Z`} fill="none" stroke={Q.boneDeep} strokeWidth={3} opacity={Math.min(1, grow * 3)} />
@@ -418,6 +471,7 @@ export function CalvariaTop({ t, reduced }: SceneProps) {
           )}
         </Part>
         <path d={smoothPath(OUT, true, 0.3)} fill="url(#w8-light)" pointerEvents="none" />
+        <path d={smoothPath(OUT, true, 0.3)} fill="url(#w8-dome)" pointerEvents="none" />
       </g>
 
       {/* Birth: the head is squeezed through the canal. */}
@@ -524,6 +578,7 @@ export function CalvariaSide({ t }: SceneProps) {
         <path d={smoothPath(SOUT, true, 0.3)} fill="rgba(255,255,255,0.03)" stroke="#f0c674" strokeWidth={3} />
       </Part>
       <path d={smoothPath(SOUT, true, 0.3)} fill="url(#w8-light)" pointerEvents="none" />
+      <path d={smoothPath(SOUT, true, 0.3)} fill="url(#w8-dome)" pointerEvents="none" />
       {/* The face (viscerocranium), small at birth, in front of the vault's lower edge. */}
       <g pointerEvents="none">
         <path d={smoothPath(MANDIBLE, true, 0.3)} fill="#0f0f11" />
@@ -539,10 +594,9 @@ export function CalvariaSide({ t }: SceneProps) {
           <ellipse key={i} cx={p[0]} cy={p[1]} rx={6} ry={4.6} fill="#f7f0de" stroke={Q.boneDeep} strokeWidth={0.9} opacity={0.5} />
         ))}
         {/* Infraorbital and mental foramina. */}
-        <ellipse cx={664} cy={380} rx={3.2} ry={2.4} fill="#2a2418" />
-        <ellipse cx={664} cy={484} rx={3.2} ry={2.4} fill="#2a2418" />
-        <path d={smoothPath(ORBIT, true, 0.3)} fill="#08080a" stroke={Q.boneDeep} strokeWidth={1.6} />
-        <path d={smoothPath(ORBIT, true, 0.3)} fill="none" stroke="#fff" strokeWidth={1.2} opacity={0.25} transform="translate(-1.5 -1.5)" />
+        <ellipse cx={676} cy={378} rx={3.2} ry={2.4} fill="#2a2418" />
+        <ellipse cx={682} cy={474} rx={3.2} ry={2.4} fill="#2a2418" />
+        <Orbit />
         {/* External acoustic meatus in its tympanic ring (open above at birth; no mastoid process yet). */}
         <circle cx={EAM[0]} cy={EAM[1]} r={10} fill="#08080a" />
         <path d={`M${EAM[0] - 8},${EAM[1] - 9}A13,13 0 1 0 ${EAM[0] + 8},${EAM[1] - 9}`} fill="none" stroke={faceFill} strokeWidth={4.5} strokeLinecap="round" />

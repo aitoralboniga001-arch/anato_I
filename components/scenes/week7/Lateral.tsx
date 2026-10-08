@@ -577,7 +577,7 @@ function Levels({ show }: { show: number }) {
         const s = SOMITES[C3 + j];
         if (!s) return null;
         return (
-          <Note key={n} x={s.p[0] + 74} y={s.p[1] + 2} size={11.5} tone="accent" show={show}>
+          <Note key={n} x={s.p[0] + 74} y={s.p[1] + 2} size={13} tone="accent" show={show}>
             {n}
           </Note>
         );
@@ -657,7 +657,7 @@ function CanalLoupe({ show, reduced, cid }: { show: number; reduced: boolean; ci
         </g>
       </g>
       <circle cx={cx} cy={cy} r={LR + 3} fill="none" stroke="#7fc8e8" strokeWidth={2} />
-      <Note x={cx} y={cy - LR - 14} size={11}>
+      <Note x={cx} y={cy - LR - 14} size={12.5}>
         zeharkako ebakia septumaren mailan
       </Note>
     </g>
@@ -674,7 +674,7 @@ export function CoelomExtent({ t, reduced }: SceneProps) {
       {/* The plane of the transverse view (midgut level, at the yolk stalk). */}
       <path d="M392,456L690,456" stroke="#0f0f11" strokeWidth={4.4} strokeLinecap="round" opacity={0.8} />
       <path d="M392,456L690,456" stroke="#ffb86b" strokeWidth={2} strokeLinecap="round" opacity={0.85} />
-      <Note x={760} y={604} size={11.5}>
+      <Note x={760} y={604} size={13}>
         marra laranja: zeharkako ebakiaren maila
       </Note>
       <Arrow from={[392, 392]} to={[lerp(392, 396, sweep), lerp(392, 296, sweep)]} color="#c4a8ff" width={2.6} show={sweep > 0.05 ? 1 : 0} bend={-0.06} />

@@ -320,7 +320,7 @@ function loser(l: (typeof LOSERS)[number], t: number, i: number, wave: number): 
 
 // ---------------------------------------------------------------------------
 
-/** The three phases as a persistent checklist (exam order), lit as the camera reaches each. */
+/** The three phases as a persistent checklist (the notes' order), lit as the camera reaches each. */
 function PhaseTrail({ t }: { t: number }) {
   const steps = [
     { n: 1, txt: 'Koroa erradiatua', a: 0.14, b: 0.3 },

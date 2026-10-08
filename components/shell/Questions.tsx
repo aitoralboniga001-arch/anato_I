@@ -196,10 +196,10 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept, r
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal quiz-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Azterketa-galderak">
+      <div className="modal quiz-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Galderak">
         <header className="drawer-head qz-head">
           <div>
-            <p className="eyebrow">Azterketa prestatu</p>
+            <p className="eyebrow">Frogatu zure burua</p>
             <h2>Galderak</h2>
           </div>
           {only ? (
@@ -228,7 +228,7 @@ export function Questions({ week: startWeek, onClose, onGoto, onFind, concept, r
               Errepasatu <small>{due}</small>
             </button>
             <button role="tab" aria-selected={exam} className={exam ? 'is-on' : ''} onClick={() => reset('azterketa', scope, kind)} title={`${EXAM_SIZE} galdera, laguntzarik gabe; emaitza bukaeran`}>
-              Azterketa-simulakroa
+              Proba osoa
             </button>
           </div>
           <p className="qz-stat" title="Gaitasun bat menderatuta dago azken 3 saiakerak zuzenak direnean, gutxienez 2 galdera desberdinekin eta 2 egun desberdinetan. Bi aldiz jarraian asmatzea ez da nahikoa.">

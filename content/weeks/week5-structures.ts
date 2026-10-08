@@ -112,7 +112,7 @@ export const structures5: StructureDef[] = [
     location: 'Aurpegiaren aurrealdean, kristalinoaren plakaren aurrean.',
     origin: 'Azaleko ektodermoa.',
     fate: 'Sudur hobia (42. eguna) eta, azkenik, sudurra.',
-    caution: '28. eguneko irudian dagoeneko "sudur plaka" etiketa ageri da, baina testuak 32. egunean kokatzen du haren sorrera: azterketan, testuari eutsi.',
+    caution: '28. eguneko irudian dagoeneko "sudur plaka" etiketa ageri da, baina testuak 32. egunean kokatzen du haren sorrera: hemen testuari eusten zaio.',
     related: ['sudur-hobia', 'sudurra', 'kristalinoaren-plaka'],
   },
   {

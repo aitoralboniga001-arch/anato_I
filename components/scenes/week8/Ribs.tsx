@@ -58,6 +58,66 @@ const RIB_CELLS = Array.from({ length: 96 }, (_, i) => ({
   r: 1.25 + rand(i * 9.3) * 0.3,
 }));
 
+/** Lung (right of the picture; the other is its mirror) and its budding bronchial tree, in the pleural cavity. */
+const LUNG = spline([[566, 316], [626, 316], [676, 344], [700, 400], [694, 458], [660, 500], [612, 512], [588, 486], [584, 430], [568, 372]], 8, true);
+const BRONCHI: Pt[][] = [
+  [[566, 352], [600, 372], [630, 360], [660, 352]],
+  [[600, 372], [622, 404], [656, 410], [680, 402]],
+  [[622, 404], [628, 440], [652, 470]],
+  [[628, 440], [610, 480]],
+  [[630, 360], [646, 334]],
+];
+const MEDIASTINUM = spline([[468, 300], [532, 300], [552, 356], [584, 410], [594, 470], [566, 526], [500, 538], [434, 526], [406, 470], [416, 410], [448, 356]], 8, true);
+const HEART = spline([[436, 446], [470, 424], [512, 422], [556, 432], [578, 462], [566, 498], [528, 518], [482, 516], [446, 496], [430, 470]], 8, true);
+
+/**
+ * What fills the thorax (context, unlabelled): the mediastinum with oesophagus and aorta behind and the heart in its
+ * pericardial cavity in front; a lung in each pleural cavity, still a tree of budding bronchi.
+ */
+function ThoraxContents() {
+  const lungs: Pt[][] = [LUNG, LUNG.map((p) => mirror(p))];
+  return (
+    <g opacity={0.85} pointerEvents="none">
+      <defs>
+        <radialGradient id="w8-rs-lung" cx="0.4" cy="0.4" r="0.7">
+          <stop offset="0" stopColor="#e2a3a8" />
+          <stop offset="1" stopColor="#9a5560" />
+        </radialGradient>
+        <radialGradient id="w8-rs-heart" cx="0.38" cy="0.35" r="0.75">
+          <stop offset="0" stopColor="#d9505a" />
+          <stop offset="1" stopColor="#7a1820" />
+        </radialGradient>
+      </defs>
+      {lungs.map((pts, i) => (
+        <g key={i}>
+          <path d={smoothPath(pts, true, 0.25)} fill="url(#w8-rs-lung)" stroke="#e8c3c6" strokeWidth={1.4} />
+          {BRONCHI.map((b, j) => {
+            const q = i ? b.map((p) => mirror(p)) : b;
+            return (
+              <g key={j}>
+                <path d={smoothPath(q, false, 0.3)} fill="none" stroke="#f6e0d8" strokeWidth={j < 2 ? 3.4 : 2.4} strokeLinecap="round" opacity={0.85} />
+                <circle cx={q[q.length - 1][0]} cy={q[q.length - 1][1]} r={4.5} fill="#f6e0d8" opacity={0.8} />
+              </g>
+            );
+          })}
+        </g>
+      ))}
+      <path d={smoothPath(MEDIASTINUM, true, 0.25)} fill="#3e2c3c" stroke="#5a4a58" strokeWidth={1.2} />
+      {/* Pericardial cavity round the heart, its septum between the ventricles. */}
+      <path d={smoothPath(offset(HEART, -9), true, 0.25)} fill="#160f18" stroke="#e8c3c6" strokeWidth={1.2} opacity={0.9} />
+      <path d={smoothPath(HEART, true, 0.25)} fill="url(#w8-rs-heart)" stroke="#5a1016" strokeWidth={1.4} />
+      {/* Thick-walled round left ventricle, thin crescent of the right one wrapped in front of it. */}
+      <ellipse cx={538} cy={462} rx={17} ry={21} fill="#4a0e14" opacity={0.6} transform="rotate(-20 538 462)" />
+      <path d="M454,452 Q478,436 506,446 Q496,472 510,502 Q480,506 458,490 Q448,470 454,452Z" fill="#4a0e14" opacity={0.5} />
+      {/* Oesophagus and aorta behind, in front of the vertebral body. */}
+      <circle cx={490} cy={322} r={12} fill="#c58a7a" stroke="#7a4a40" strokeWidth={1.2} />
+      <path d="M484,318L490,322L496,317M490,322L489,329" fill="none" stroke="#6a3a30" strokeWidth={1.6} strokeLinecap="round" />
+      <circle cx={526} cy={314} r={13} fill="#c0392b" stroke="#6b1d14" strokeWidth={1.4} />
+      <circle cx={526} cy={314} r={7} fill="#5a0f0f" />
+    </g>
+  );
+}
+
 export function RibSection({ t }: SceneProps) {
   // overview first: the finished rib, then it is built again from the start
   const back = seg(t, RS_T.cross - 0.035, RS_T.cross - 0.005);
@@ -79,7 +139,7 @@ export function RibSection({ t }: SceneProps) {
       <path d={smoothPath(OUTLINE, true, 0.2)} fill={Q.body} stroke={Q.skin} strokeWidth={3} />
       <path d={smoothPath(PARAXIAL, true, 0.2)} fill="rgba(239,107,91,0.10)" />
       <path d={smoothPath(COELOM, true, 0.2)} fill={Q.space} stroke="#5a4a58" strokeWidth={1.5} />
-      <path d="M500,296V540" stroke="#4a3a48" strokeWidth={30} opacity={0.9} />
+      <ThoraxContents />
       <Part id="paretako-orria">
         {sides.map(([s, m]) => (
           <path key={s} d={smoothPath(WALL.map(m), true, 0.15)} fill="rgba(230,162,60,0.30)" stroke={CART_DEEP} strokeWidth={1.2} />
@@ -179,6 +239,7 @@ const BAR_TOP = 150;
 const BAR_BOT = 470;
 const RIB_Y = Array.from({ length: 7 }, (_, i) => 176 + i * 40);
 const BAR_W = 24;
+const CHEST: Pt[] = [[420, 40], [580, 40], [590, 100], [760, 128], [800, 200], [790, 420], [740, 560], [500, 590], [260, 560], [210, 420], [200, 200], [240, 128], [410, 100]];
 
 export function SternumFront({ t }: SceneProps) {
   const grow = seg(t, RS_T.bars + 0.01, RS_T.bars + 0.07); // bars appear top → bottom
@@ -194,7 +255,7 @@ export function SternumFront({ t }: SceneProps) {
     return smoothPath([...inner, ...outer], true, 0.2);
   };
   // the three parts, once fused
-  const MAN = spline([[500, 140], [548, 146], [556, 176], [540, 214], [500, 220], [460, 214], [444, 176], [452, 146]], 6, true);
+  const MAN = spline([[500, 152], [522, 142], [548, 146], [556, 176], [540, 214], [500, 220], [460, 214], [444, 176], [452, 146], [478, 142]], 6, true);
   const BODY = spline([[500, 226], [530, 228], [536, 300], [534, 380], [524, 418], [500, 424], [476, 418], [466, 380], [464, 300], [470, 228]], 6, true);
   const XIPH = spline([[500, 430], [516, 434], [512, 458], [500, 478], [488, 458], [484, 434]], 6, true);
   const edge = (y: number) => (parts > 0.5 ? (y < 220 ? 46 : 34) : off(y) + BAR_W / 2);
@@ -203,7 +264,14 @@ export function SternumFront({ t }: SceneProps) {
       <Defs8 />
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       {/* Chest wall seen from the front. */}
-      <path d={smoothPath([[420, 40], [580, 40], [590, 100], [760, 128], [800, 200], [790, 420], [740, 560], [500, 590], [260, 560], [210, 420], [200, 200], [240, 128], [410, 100]], true, 0.2)} fill={Q.body} stroke={Q.skin} strokeWidth={2.4} />
+      <defs>
+        <linearGradient id="w8-rs-chest" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stopColor="#22181f" />
+          <stop offset="0.5" stopColor="#40303d" />
+          <stop offset="1" stopColor="#22181f" />
+        </linearGradient>
+      </defs>
+      <path d={smoothPath(CHEST, true, 0.2)} fill="url(#w8-rs-chest)" stroke={Q.skin} strokeWidth={2.4} />
       {/* Ribs: bone laterally, costal cartilage reaching the sternal bar. */}
       {RIB_Y.map((y, i) =>
         [1, -1].map((s) => {
@@ -220,9 +288,14 @@ export function SternumFront({ t }: SceneProps) {
             <g key={`${i}${s}`}>
               <Part id="saihets-hezurra">
                 <path d={bandPath(bonePts, 16)} fill={RIB} stroke={RIB_DEEP} strokeWidth={1.4} />
+                <path d={bandPath(bonePts, 16)} fill="url(#w8-bone)" />
+                {/* Round in section: lit along the upper border, the costal groove shadowed below. */}
+                <path d={smoothPath(offset(bonePts, -4), false, 0.2)} fill="none" stroke="#fff" strokeOpacity={0.28} strokeWidth={2.4} strokeLinecap="round" />
+                <path d={smoothPath(offset(bonePts, 5), false, 0.2)} fill="none" stroke={RIB_DEEP} strokeOpacity={0.55} strokeWidth={2.4} strokeLinecap="round" />
               </Part>
               <Part id="saihets-kartilagoa">
                 <path d={bandPath(spline(cartPts, 4), 13)} fill={CART} stroke={CART_DEEP} strokeWidth={1.2} opacity={0.6 + 0.4 * reach} />
+                <path d={bandPath(spline(cartPts, 4), 13)} fill="url(#w8-cart)" opacity={0.4} />
               </Part>
             </g>
           );
@@ -240,16 +313,19 @@ export function SternumFront({ t }: SceneProps) {
       <Part id="kirtena" show={parts}>
         <path d={smoothPath(MAN, true, 0.2)} fill={CART} stroke={CART_DEEP} strokeWidth={2} />
         <path d={smoothPath(MAN, true, 0.2)} fill="url(#w8-cart)" opacity={0.5} />
+        <path d={smoothPath(MAN, true, 0.2)} fill="url(#w8-boneshade)" />
       </Part>
       <Part id="esternoiaren-gorputza" show={parts}>
         <path d={smoothPath(BODY, true, 0.2)} fill={CART} stroke={CART_DEEP} strokeWidth={2} />
         <path d={smoothPath(BODY, true, 0.2)} fill="url(#w8-cart)" opacity={0.5} />
+        <path d={smoothPath(BODY, true, 0.2)} fill="url(#w8-boneshade)" />
         {[290, 350].map((y) => (
           <path key={y} d={`M${470},${y}H${530}`} stroke={CART_DEEP} strokeWidth={1} opacity={0.5} />
         ))}
       </Part>
       <Part id="apofisi-xifoidea" show={parts}>
         <path d={smoothPath(XIPH, true, 0.2)} fill={CART} stroke={CART_DEEP} strokeWidth={2} />
+        <path d={smoothPath(XIPH, true, 0.2)} fill="url(#w8-boneshade)" />
       </Part>
 
       {/* The sternum as a whole: its outline, first round the bars, then round the three parts. */}

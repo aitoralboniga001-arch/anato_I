@@ -334,6 +334,54 @@ export function CranialBase({ t, reduced }: SceneProps) {
         {PIECES.map((p) => piece(p, -1))}
         {PIECES.map((p) => piece(p, 1))}
 
+        {/* Once fused, the floor shows its real relief: three stepped fossae (anterior, middle, posterior), the
+            lesser wings' sharp edge and the petrous ridges between them, the crista galli, the dorsum sellae. */}
+        {fuse > 0.01 && (
+          <g opacity={fuse} pointerEvents="none">
+            <defs>
+              <radialGradient id={`w8-cb-deep${cid}`} cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0" stopColor="#2a1d10" stopOpacity={0.5} />
+                <stop offset="0.7" stopColor="#2a1d10" stopOpacity={0.2} />
+                <stop offset="1" stopColor="#2a1d10" stopOpacity={0} />
+              </radialGradient>
+              <linearGradient id={`w8-cb-ridge${cid}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#fffaf0" stopOpacity={0.95} />
+                <stop offset="1" stopColor="#8a7448" stopOpacity={0.9} />
+              </linearGradient>
+            </defs>
+            {([-1, 1] as const).map((side) => {
+              const P = (p: Pt) => (side < 0 ? p : mx(p));
+              const d = (pts: Pt[]) => smoothPath(pts.map(P), false, 0.3);
+              const mid = P([372, 322]);
+              return (
+                <g key={side}>
+                  {/* Middle fossa (temporal lobe), deeper than the anterior one. */}
+                  <ellipse cx={mid[0]} cy={mid[1]} rx={88} ry={64} transform={`rotate(${side * -22} ${f1(mid[0])} ${f1(mid[1])})`} fill={`url(#w8-cb-deep${cid})`} />
+                  {/* Orbital roof: the gentle bumps of the gyri pressed into it. */}
+                  {[[392, 168], [420, 196], [364, 196]].map((q, i) => {
+                    const c = P(q as Pt);
+                    return <ellipse key={i} cx={c[0]} cy={c[1]} rx={18} ry={10} fill="#fffaf0" opacity={0.14} />;
+                  })}
+                  {/* Lesser wing: the sharp free edge between the anterior and middle fossae. */}
+                  <path d={d([[334, 226], [372, 234], [420, 246], [456, 252], [482, 250]])} fill="none" stroke="#5c4a2a" strokeWidth={6} strokeLinecap="round" opacity={0.55} />
+                  <path d={d([[334, 224], [372, 232], [420, 244], [456, 250], [482, 248]])} fill="none" stroke={`url(#w8-cb-ridge${cid})`} strokeWidth={3} strokeLinecap="round" />
+                  {/* Petrous ridge: the top of the petrous part, between the middle and posterior fossae. */}
+                  <path d={d([[326, 438], [366, 418], [404, 396], [436, 374], [458, 356]])} fill="none" stroke="#5c4a2a" strokeWidth={8} strokeLinecap="round" opacity={0.55} />
+                  <path d={d([[326, 435], [366, 415], [404, 393], [436, 371], [458, 353]])} fill="none" stroke={`url(#w8-cb-ridge${cid})`} strokeWidth={4} strokeLinecap="round" />
+                </g>
+              );
+            })}
+            {/* Posterior fossa (cerebellum): the deepest bowl, round the foramen magnum. */}
+            <ellipse cx={CX} cy={476} rx={150} ry={74} fill={`url(#w8-cb-deep${cid})`} />
+            {/* Crista galli, in the midline of the ethmoid; the dorsum sellae and clinoid processes behind the sella. */}
+            <path d={`M${CX},112L${CX},166`} stroke="#5c4a2a" strokeWidth={7} strokeLinecap="round" opacity={0.5} />
+            <path d={`M${CX},110L${CX},164`} stroke={`url(#w8-cb-ridge${cid})`} strokeWidth={4} strokeLinecap="round" />
+            <path d={`M${CX - 20},300Q${CX},310 ${CX + 20},300`} fill="none" stroke={`url(#w8-cb-ridge${cid})`} strokeWidth={4} strokeLinecap="round" />
+            <circle cx={CX - 22} cy={262} r={4} fill="#fffaf0" opacity={0.8} />
+            <circle cx={CX + 22} cy={262} r={4} fill="#fffaf0" opacity={0.8} />
+          </g>
+        )}
+
         {/* Hypophyseal fossa on the sphenoid body, with the gland in it. */}
         <Part id="hipofisi-hobitxoa" show={sella}>
           <ellipse cx={SELLA[0]} cy={SELLA[1]} rx={18} ry={15} fill="#2a1c12" stroke={Q.boneDeep} strokeWidth={2} />

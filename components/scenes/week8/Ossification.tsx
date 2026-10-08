@@ -426,19 +426,19 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
       <Note x={RX} y={44} size={13}>
         Hezurtzapen endokondrala
       </Note>
-      <Note x={LX} y={147} size={11} tone="dim">
+      <Note x={LX} y={147} size={12.5} tone="dim">
         azala
       </Note>
-      <Note x={LX} y={502} size={11} tone="dim">
+      <Note x={LX} y={502} size={12.5} tone="dim">
         entzefaloa
       </Note>
-      <Note x={RX} y={78} size={11.5} tone="accent" show={vis(t, OSS_T.cartilage + 0.02, OSS_T.centre)}>
+      <Note x={RX} y={78} size={13} tone="accent" show={vis(t, OSS_T.cartilage + 0.02, OSS_T.centre)}>
         1. fasea: kartilago hialinozko eredua
       </Note>
-      <Note x={RX} y={78} size={11.5} tone="accent" show={vis(t, OSS_T.centre + 0.02)}>
+      <Note x={RX} y={78} size={13} tone="accent" show={vis(t, OSS_T.centre + 0.02)}>
         2. fasea: kartilagoa hezurtzen da
       </Note>
-      <Note x={RX - 108} y={MID - 108} size={11} tone="dim" show={vessel * (1 - spread)}>
+      <Note x={RX - 108} y={MID - 108} size={12.5} tone="dim" show={vessel * (1 - spread)}>
         odol hodia
       </Note>
 

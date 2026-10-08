@@ -217,17 +217,17 @@ function Balloon({ t }: { t: number }) {
       <path d={outer + inner} fill="rgba(110,180,255,0.3)" stroke="#9fd0ff" strokeWidth={2.6} strokeLinejoin="round" />
       <path d={fist} fill={P.lung} stroke={P.lungDeep} strokeWidth={1.4} />
       <path d={`M${f1(cx - fr + 5)},${f1(fy - 4)}h${2 * fr - 10}M${f1(cx - fr + 4)},${f1(fy + 3)}h${2 * fr - 8}`} stroke={P.lungDeep} strokeWidth={1.2} opacity={0.8} />
-      <text x={124} y={531} fontSize={14} fontWeight={700} fill="#ffb067">
+      <text x={124} y={528} fontSize={15.5} fontWeight={700} fill="#ffb067">
         Ukabila puxikan sakatuta
       </text>
-      <g fontSize={12.5} fill="rgba(232,238,252,0.9)" opacity={sm(seg(t, 0.77, 0.79))}>
-        <text x={124} y={550}>
+      <g fontSize={14} fill="rgba(232,238,252,0.94)" opacity={sm(seg(t, 0.77, 0.79))}>
+        <text x={124} y={547}>
           ukabila → birika
         </text>
-        <text x={124} y={566}>
+        <text x={124} y={564}>
           barneko orria → errai pleura
         </text>
-        <text x={124} y={582}>
+        <text x={124} y={581}>
           kanpoko orria → paretako pleura
         </text>
         <text x={124} y={598}>
@@ -556,16 +556,16 @@ export function LungBudFront({ t }: SceneProps) {
       <Note x={FRONT_X} y={40} tone="accent">
         Aurretik
       </Note>
-      <Note x={SIDE_X - 84} y={92} size={11}>
+      <Note x={SIDE_X - 84} y={92} size={12.5}>
         bentrala
       </Note>
-      <Note x={SIDE_X + 84} y={92} size={11}>
+      <Note x={SIDE_X + 84} y={92} size={12.5}>
         dortsala
       </Note>
-      <Note x={FRONT_X - 120} y={92} size={11}>
+      <Note x={FRONT_X - 120} y={92} size={12.5}>
         eskuina
       </Note>
-      <Note x={FRONT_X + 120} y={92} size={11}>
+      <Note x={FRONT_X + 120} y={92} size={12.5}>
         ezkerra
       </Note>
       <path d="M520,60L520,580" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />

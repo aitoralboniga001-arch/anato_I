@@ -1,5 +1,5 @@
 /**
- * Exam questions generated from the canonical data (chronology + lineage), so a date or a lineage
+ * Practice questions generated from the canonical data (chronology + lineage), so a date or a lineage
  * is written once and every question about it agrees. Each option carries its own feedback: a wrong
  * answer is explained by what that option actually is, which is the conceptual error to fix.
  *
@@ -10,12 +10,11 @@ import { LIFE, MILESTONES, dayIn, dayLabel, firstSeenOf, spanLabel } from './chr
 import { LAYERS, ancestry, childrenOf, descendantsOf, layerOf, lineageIds, type LNode } from './lineage';
 import { nameOf, structures } from './registry';
 
-/** The exam skill a question trains (the brief's competences). */
-export type Skill = 'kronologia' | 'presentzia' | 'ordena' | 'jatorria' | 'eratorria' | 'definizioa' | 'kokapena';
+/** The skill a question trains (the brief's competences). */
+export type Skill = 'kronologia' | 'ordena' | 'jatorria' | 'eratorria' | 'definizioa' | 'kokapena';
 
 export const skillLabel: Record<Skill, string> = {
   kronologia: 'Zein egunetan?',
-  presentzia: 'Zer EZ dago?',
   ordena: 'Ordena',
   jatorria: 'Nondik dator?',
   eratorria: 'Zer sortzen du?',
@@ -101,36 +100,6 @@ function whenQuestions(): GenQuestion[] {
       days.map((d) => ({ text: dayLabel(d), why: `${dayIn(d)} ${nameOf(byDay.get(d)!)} agertzen da, ez ${nameOf(id)}.` })),
     );
     out.push({ id: qid, skill: 'kronologia', concept: id, question: isProcess(id) ? `Noiz hasten da ${nm(id)}?` : `Noiz agertzen ${verb(id, 'da', 'dira')} lehen aldiz ${nm(id)}?`, ...p, explanation: `${nameOf(id)}: ${spanLabel(l.from, l.to)}.`, week: weekOf(id), stageId: stageOf(id) });
-  }
-  return out;
-}
-
-// ——— 2. Zer EZ dago N. egunean? ———
-
-const clearlyIn = (l: (typeof LIFE)[string], d: number) => l.from <= d - 1 && (l.to === undefined || l.to >= d + 1);
-const clearlyOut = (l: (typeof LIFE)[string], d: number) => l.from >= d + 2 || (l.to !== undefined && l.to <= d - 2);
-
-function absentQuestions(): GenQuestion[] {
-  const out: GenQuestion[] = [];
-  const days = [...new Set(MILESTONES.filter((m) => m.day >= 6 && m.day <= 35).map((m) => m.day))];
-  for (const d of days) {
-    const present = dated.filter(([, l]) => clearlyIn(l, d));
-    // Absent but close in time (just gone or about to appear): those are the tempting ones.
-    const absent = dated.filter(([, l]) => clearlyOut(l, d) && (l.from > d ? l.from - d <= 10 : d - l.to! <= 8));
-    if (present.length < 3 || !absent.length) continue;
-    for (let v = 0; v < 2; v++) {
-      const qid = `ez-${d}-${v}`;
-      const [aid, al] = pick(qid, absent, 1)[0];
-      const ins = pick(`${qid}-in`, present, 3);
-      const whyOut = al.from > d ? `${nameOf(aid)} geroago agertzen da, ${dayIn(al.from)}.` : `${nameOf(aid)} jada ez dago: ${dayIn(al.to!)} desagertu edo bihurtu zen${al.becomes?.length ? ` (→ ${al.becomes.map(nameOf).join(', ')})` : ''}.`;
-      const p = place(
-        qid,
-        { text: nameOf(aid), why: `Hau da: ${whyOut}` },
-        ins.map(([i, l]) => ({ text: nameOf(i), why: `${nameOf(i)} badago ${dayIn(d)} (${spanLabel(l.from, l.to)}).` })),
-      );
-      const week = MILESTONES.find((m) => m.day === d)!.week;
-      out.push({ id: qid, skill: 'presentzia', concept: aid, question: `Zer EZ dago garapenaren ${dayIn(d)}?`, ...p, explanation: whyOut, week, stageId: MILESTONES.find((m) => m.day === d)!.stage });
-    }
   }
   return out;
 }
@@ -358,14 +327,87 @@ function locationQuestions(): GenQuestion[] {
   return out;
 }
 
+/** Left out after a hand review of the pool: the atlas asks these facts its own way (notes and step questions). */
+const LEFT_OUT = new Set([
+  'eratorri-gandor-neurala',
+  'noiz-biloxka-sekundarioa',
+  'noiz-hasierako-zilbor-eraztuna',
+  'noiz-hipoblastoa',
+  'noiz-notokorda',
+  'non-alantoidea',
+  'non-amnios-barrunbea',
+  'non-aorta',
+  'non-beheko-kaba-zaina',
+  'non-enbrioi-barruko-zeloma',
+  'non-ernalkuntza',
+  'non-errai-orria',
+  'non-finkapen-pedikulua',
+  'non-hasierako-perikardio-barrunbea',
+  'non-heste-lakioak',
+  'non-heuser-mintza',
+  'non-hioidesa',
+  'non-hipofisi-kartilagoak',
+  'non-hodi-onfalomesenterikoa',
+  'non-karena-muga',
+  'non-laugarren-bentrikulua',
+  'non-mesodermo-intraenbrionarioa',
+  'non-paretako-orria',
+  'non-peritoneo-atzeko-egiturak',
+  'non-peritoneo-barruko-egiturak',
+  'non-peritoneo-kanpoko-egiturak',
+  'non-reichert-kartilagoa',
+  'non-sinzitiotrofoblastoa',
+  'non-zilbor-ernia-fisiologikoa',
+  'non-zilbor-hodiak',
+  'nondik-ektodermoa',
+  'nondik-endodermoa',
+  'orria-giltzurrun-gaineko-muina',
+  'zer-amnios-barrunbea',
+  'zer-aurreko-hestea',
+  'zer-azken-hilekoa',
+  'zer-barne-belarria',
+  'zer-begizulo-hegoa',
+  'zer-bitelo-zaku-sekundarioa',
+  'zer-ektodermoa',
+  'zer-enbrioi-aroa',
+  'zer-endodermoa',
+  'zer-ernalkuntza',
+  'zer-erreten-perikardioperitonealak',
+  'zer-esfenoidesaren-gorputza',
+  'zer-esfenoidesaren-hego-handia',
+  'zer-esfenoidesaren-hego-txikia',
+  'zer-giltzurrun-gaineko-muina',
+  'zer-gongoil-errakideoak',
+  'zer-gongoil-sinpatikoak',
+  'zer-gorpuskulu-polarrak',
+  'zer-harkaitza',
+  'zer-hasierako-bitelo-zakua',
+  'zer-heuser-mintza',
+  'zer-ingudea',
+  'zer-kapsula-periotikoa',
+  'zer-karena-muga',
+  'zer-karena-mugaren-meheketa',
+  'zer-korion-barrunbea',
+  'zer-kristalinoaren-plaka',
+  'zer-laugarren-bentrikulua',
+  'zer-mailua',
+  'zer-melanozitoak',
+  'zer-meningeak-kraneal',
+  'zer-mesenterio-dortsala',
+  'zer-mintz-amniokorionikoa',
+  'zer-peritoneo-barruko-egiturak',
+  'zer-peritoneo-kanpoko-egiturak',
+  'zer-reichert-kartilagoa',
+  'zer-sinzitiotrofoblastoa',
+]);
+
 /** All generated questions, built once. */
 export const generated: GenQuestion[] = [
   ...whenQuestions(),
-  ...absentQuestions(),
   ...orderQuestions(),
   ...layerQuestions(),
   ...derivativeQuestions(),
   ...parentQuestions(),
   ...definitionQuestions(),
   ...locationQuestions(),
-];
+].filter((q) => !LEFT_OUT.has(q.id));

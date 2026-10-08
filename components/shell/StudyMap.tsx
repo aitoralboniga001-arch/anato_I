@@ -89,7 +89,7 @@ export function StudyMap() {
     { n: '1', title: 'Ikusi prozesuak', text: 'Etapa bakoitza ikasteko moduan: aurrebista, urratsak eta egituren bira.', href: '/astea/1', state: `${seen}/${stageTotal} etapa` },
     { n: '2', title: 'Kokatu denboran', text: 'Kronologian: zer dagoen egun bakoitzean, zer den berria eta zer desagertu den.', href: '/kronologia', state: 'Zer dago orain?' },
     { n: '3', title: 'Lotu jatorriak', text: 'Leinuetan: ernetze orri bakoitzetik zer sortzen den.', href: '/leinuak', state: 'Nondik → zertan' },
-    { n: '4', title: 'Irakurri irudiak', text: 'Irudi-laborategian: etiketarik gabe, zuri-beltzean eta biratuta, azterketan bezala.', href: '/irudiak', state: 'Seinalatu · gezia · orientazioa' },
+    { n: '4', title: 'Irakurri irudiak', text: 'Irudi-laborategian: etiketarik gabe, zuri-beltzean eta biratuta.', href: '/irudiak', state: 'Seinalatu · gezia · orientazioa' },
     { n: '5', title: 'Praktikatu', text: 'Galderak simulagailuan: noiz, nondik, nola, non, zertan eta zergatik.', href: '/astea/1', state: `${answered}/${questionIds.length} erantzunda` },
     { n: '6', title: 'Menderatu', text: 'Gaitasun bat menderatuta dago azken 3 saiakerak ondo daudenean, galdera desberdinekin eta egun desberdinetan. Huts egindakoak «Errepasoa» moduan itzultzen dira.', href: '/astea/1', state: `${mastered}/${competenceKeys.length} gaitasun${missed ? ` · ${missed} errepasatzeko` : ''}` },
   ];

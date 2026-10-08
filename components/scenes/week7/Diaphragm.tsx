@@ -234,7 +234,7 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
         <ellipse cx={liverC[0]} cy={liverC[1]} rx={lerp(56, 104, s)} ry={lerp(20, 40, s)} fill={`url(#w7-desc-liver${cid})`} stroke="#4d1714" strokeWidth={1.4} />
         <ellipse cx={liverC[0]} cy={liverC[1]} rx={lerp(56, 104, s)} ry={lerp(20, 40, s)} fill="url(#w7-lung)" opacity={0.6} />
       </g>
-      <Note x={liverC[0]} y={liverC[1] + 4} size={11} tone="dim">
+      <Note x={liverC[0]} y={liverC[1] + 4} size={12.5} tone="dim">
         gibela
       </Note>
 
@@ -258,7 +258,7 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
       </Part>
       {LEVELS.map((l, i) =>
         ['C1', 'C3', 'C4', 'C5', 'C8', 'T6', 'T12', 'L3'].includes(l) && (s > 0.3 || !['C3', 'C5'].includes(l)) ? (
-          <Note key={l} x={CORD_X + 30} y={levelAt(i, s)} size={11} tone={['C3', 'C4', 'C5', 'T6', 'T12'].includes(l) ? 'accent' : 'dim'}>
+          <Note key={l} x={CORD_X + 30} y={levelAt(i, s)} size={12.5} tone={['C3', 'C4', 'C5', 'T6', 'T12'].includes(l) ? 'accent' : 'dim'}>
             {l}
           </Note>
         ) : null,
@@ -333,10 +333,10 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
 
       <path d={smoothPath(body, true, 0.3)} fill="url(#w7-light)" pointerEvents="none" />
 
-      <Note x={330} y={24} size={11}>
+      <Note x={330} y={24} size={12.5}>
         aurrea (bentrala)
       </Note>
-      <Note x={660} y={24} size={11}>
+      <Note x={660} y={24} size={12.5}>
         atzea (dortsala)
       </Note>
       <Note x={850} y={40} size={13} tone="accent">
@@ -414,15 +414,60 @@ export function DiaphragmSection({ t, reduced }: SceneProps) {
       <Part id="azaleko-ektodermoa" quiet>
         <Sheet outer={BODY_X} inner={offset(BODY_X, -9, true)} color={P.skin} nucleus="rgba(20,40,110,0.7)" cell={9} seed={11} />
       </Part>
+      {/* The body wall's own muscle layer, under the skin: later it adds the diaphragm's outer rim. */}
+      <defs>
+        <linearGradient id={`w7-dia-wallfade${cid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0.22" stopColor="#fff" stopOpacity={0} />
+          <stop offset="0.4" stopColor="#fff" stopOpacity={1} />
+        </linearGradient>
+        <mask id={`w7-dia-wall${cid}`} maskUnits="userSpaceOnUse" x={0} y={0} width={1000} height={640}>
+          <rect x={0} y={0} width={1000} height={640} fill={`url(#w7-dia-wallfade${cid})`} />
+        </mask>
+        <radialGradient id={`w7-dia-hole${cid}`} cx="0.5" cy="0.5" r="0.6">
+          <stop offset="0" stopColor="#05070c" stopOpacity={0.95} />
+          <stop offset="0.7" stopColor="#0d1824" stopOpacity={0.55} />
+          <stop offset="1" stopColor="#7fc8e8" stopOpacity={0.25} />
+        </radialGradient>
+        <radialGradient id={`w7-dia-lung${cid}`} cx="0.45" cy="0.4" r="0.6">
+          <stop offset="0" stopColor="#f6b6c4" stopOpacity={0.55} />
+          <stop offset="1" stopColor="#f6b6c4" stopOpacity={0} />
+        </radialGradient>
+        <radialGradient id={`w7-dia-dome${cid}`} cx="0.5" cy="0.3" r="0.75">
+          <stop offset="0" stopColor="#fff" stopOpacity={0.22} />
+          <stop offset="0.6" stopColor="#fff" stopOpacity={0} />
+          <stop offset="1" stopColor="#000" stopOpacity={0.25} />
+        </radialGradient>
+      </defs>
+      <Part id="gorputz-paretako-mesodermoa" quiet>
+        <g mask={`url(#w7-dia-wall${cid})`}>
+          <path d={`${poly(offset(BODY_X, -12, true))}${poly([...offset(BODY_X, -32, true)].reverse())}`} fill={P.bodyMuscle} opacity={0.45} fillRule="evenodd" />
+          <path d={`${poly(offset(BODY_X, -12, true))}${poly([...offset(BODY_X, -32, true)].reverse())}`} fill="url(#w7-muscle)" opacity={0.6} fillRule="evenodd" />
+        </g>
+      </Part>
+      {/* The back: muscle masses from the somites either side, the spinal cord in its forming vertebra. */}
+      <g pointerEvents="none">
+        {[1, -1].map((k) => (
+          <g key={k}>
+            <ellipse cx={500 + k * 72} cy={116} rx={40} ry={30} fill="#6e2a40" opacity={0.75} />
+            <ellipse cx={500 + k * 72} cy={116} rx={40} ry={30} fill="url(#w7-muscle)" opacity={0.45} />
+          </g>
+        ))}
+      </g>
+      <Part id="ornoak" quiet>
+        <path d="M466,150 C458,112 470,70 500,62 C530,70 542,112 534,150" fill="none" stroke={P.bone} strokeWidth={9} strokeLinecap="round" opacity={0.7} />
+        <ellipse cx={500} cy={158} rx={36} ry={20} fill={P.bone} opacity={0.9} />
+        <ellipse cx={500} cy={158} rx={36} ry={20} fill="url(#w7-light)" />
+        <circle cx={500} cy={158} r={4.5} fill="#dfe9ff" stroke="#9fb2d8" strokeWidth={1} />
+      </Part>
       <Part id="hodi-neurala">
         <ellipse cx={500} cy={100} rx={26} ry={32} fill={P.neural} stroke="rgba(10,16,48,0.6)" strokeWidth={1} />
+        <path d="M486,86 C494,96 494,104 486,114 M514,86 C506,96 506,104 514,114" fill="none" stroke="#c4cdf7" strokeWidth={5} strokeLinecap="round" opacity={0.45} />
         <ellipse cx={500} cy={100} rx={3} ry={9} fill="#0c1428" />
       </Part>
-      <Part id="ornoak" quiet>
-        <ellipse cx={500} cy={158} rx={36} ry={20} fill={P.bone} opacity={0.85} />
-      </Part>
       <Part id="aorta">
-        <circle cx={AORTA_X[0]} cy={AORTA_X[1]} r={14} fill={P.aorta} stroke="#7a0f1e" strokeWidth={1.2} />
+        <circle cx={AORTA_X[0]} cy={AORTA_X[1]} r={15} fill={P.aorta} stroke="#7a0f1e" strokeWidth={1.4} />
+        <circle cx={AORTA_X[0]} cy={AORTA_X[1]} r={9} fill="#9e1228" />
+        <circle cx={AORTA_X[0] - 4} cy={AORTA_X[1] - 5} r={3.5} fill="#ff8a9a" opacity={0.55} />
       </Part>
 
       <path d={poly(CAV_X)} fill={P.space} />
@@ -446,6 +491,9 @@ export function DiaphragmSection({ t, reduced }: SceneProps) {
             <g clipPath={`url(#w7-dia-open${cid})`}>
               <path d={smoothPath(pts, true, 0.3)} fill={P.space} />
               <path d={smoothPath(pts, true, 0.3)} fill={P.canal} />
+              {/* Looking up the open canal: a deep passage, the lung bud glimpsed in the cavity above. */}
+              <path d={smoothPath(pts, true, 0.3)} fill={`url(#w7-dia-hole${cid})`} />
+              <ellipse cx={i ? 1000 - 330 : 330} cy={262} rx={58} ry={46} fill={`url(#w7-dia-lung${cid})`} />
             </g>
           </g>
         ))}
@@ -471,9 +519,13 @@ export function DiaphragmSection({ t, reduced }: SceneProps) {
       <Part id="septum-transversum">
         <path d={smoothPath(SEPTUM_X, true, 0.2)} fill={P.septum} stroke={P.septumDeep} strokeWidth={1.2} />
         <path d={smoothPath(SEPTUM_X, true, 0.2)} fill="url(#w7-mesench)" />
+        <path d={smoothPath(SEPTUM_X, true, 0.2)} fill={`url(#w7-dia-dome${cid})`} />
+        <path d={smoothPath(SEPT_EDGE, false, 0.3)} fill="none" stroke="#ffd9a8" strokeWidth={2} opacity={0.55} strokeLinecap="round" />
       </Part>
       <Part id="beheko-kaba-zaina">
         <circle cx={IVC_X[0]} cy={IVC_X[1]} r={13} fill={P.ivc} stroke="#1c3c88" strokeWidth={1.2} />
+        <ellipse cx={IVC_X[0]} cy={IVC_X[1] + 1} rx={8} ry={7} fill="#1d3f8a" />
+        <circle cx={IVC_X[0] - 4} cy={IVC_X[1] - 4} r={3} fill="#9fbcff" opacity={0.5} />
       </Part>
 
       {/* Muscle from the body wall: a rim growing in from the periphery. */}
@@ -488,9 +540,11 @@ export function DiaphragmSection({ t, reduced }: SceneProps) {
         <path d={poly(MES)} fill="url(#w7-mesench)" />
       </Part>
       <Part id="hestegorria">
-        <circle cx={ESO_X[0]} cy={ESO_X[1]} r={14} fill="#7a3b48" stroke="rgba(40,10,20,0.6)" strokeWidth={1} />
-        <circle cx={ESO_X[0]} cy={ESO_X[1]} r={8} fill={P.gut} />
-        <circle cx={ESO_X[0]} cy={ESO_X[1]} r={3} fill="#1a1208" />
+        <circle cx={ESO_X[0]} cy={ESO_X[1]} r={15} fill="#7a3b48" stroke="rgba(40,10,20,0.6)" strokeWidth={1} />
+        <circle cx={ESO_X[0]} cy={ESO_X[1]} r={15} fill="url(#w7-muscle)" opacity={0.5} />
+        <circle cx={ESO_X[0]} cy={ESO_X[1]} r={8.5} fill={P.gut} />
+        {/* The folded lumen of the oesophagus. */}
+        <path d={`M${ESO_X[0] - 4},${ESO_X[1]} L${ESO_X[0] + 4},${ESO_X[1]} M${ESO_X[0]},${ESO_X[1] - 4} L${ESO_X[0]},${ESO_X[1] + 4} M${ESO_X[0] - 3},${ESO_X[1] - 3} L${ESO_X[0] + 3},${ESO_X[1] + 3}`} stroke="#1a1208" strokeWidth={1.8} strokeLinecap="round" />
       </Part>
 
       {/* Myocytes from the septum migrate into the pleuroperitoneal membranes. */}

@@ -120,7 +120,7 @@ export const week6: WeekDef = {
         { at: 0, notes: ['w6/1.3/p3/s1'], text: 'Hurrengo 2.–3. hilabeteetan biloxka tertziarioen enborrak adarkatzen hasten dira; adarkadurak geroz eta txikiagoak dira.', focus: ['biloxka-enborra', 'biloxka-tertziarioa'] },
         { at: 0.16, notes: ['w6/1.3/p3/s2-s3', 'w6/1.3/p4/s1'], text: 'Adarkadura guzti hauek biloxka askeak dira: poliki-poliki biloxka arteko espazioa okupatzen dute.', focus: ['biloxka-askea', 'biloxka-arteko-espazioa'] },
         { at: 0.34, notes: ['w6/1.4/p4/s1-s2'], text: '4. hilabetetik aurrera biloxka askeen paretetan desagerpen prozesua: lehenik adarkadura txikiko biloxketan, gero handiagoetan.', focus: ['karena-mugaren-meheketa', 'biloxka-askea'] },
-        { at: 0.5, notes: ['w6/1.4/p5/s1-s3'], view: 'karena-muga', exam: 'Azterketan: 4. hilabetetik aurrera karena muga = endotelioa + sinzitiotrofoblastoa.', text: 'Zitotrofoblastoa eta ehun konektiboko zelulak desagertzen dira: karena muga bi geruzakoa da (endotelioa + sinzitiotrofoblastoa), askoz meheagoa eta eraginkorragoa.', focus: ['karena-muga', 'endotelioa', 'sinzitiotrofoblastoa'] },
+        { at: 0.5, notes: ['w6/1.4/p5/s1-s3'], view: 'karena-muga', text: 'Zitotrofoblastoa eta ehun konektiboko zelulak desagertzen dira: karena muga bi geruzakoa da (endotelioa + sinzitiotrofoblastoa), askoz meheagoa eta eraginkorragoa.', focus: ['karena-muga', 'endotelioa', 'sinzitiotrofoblastoa'] },
         { at: 0.7, notes: ['w6/1.4/p4/s3-s4'], view: 'korion-zakua', text: 'Desagerpena ez da inoiz enborrezko/aingurazko biloxketara heltzen: hauek ez dute elkartrukeetan parte hartzen, biloxka askeek bakarrik.', focus: ['biloxka-enborra', 'biloxka-askea'] },
         { at: 0.8, notes: ['w6/1.5/p3/s1', 'w6/1.5/p4/s1-s6'], view: 'zirkulazioa', text: 'Enbrioi kanpoko sistema zirkulatorioa: fetuaren odola zilbor-hestetik korion orriko odol-hodietara eta biloxketara; amaren odola biloxka arteko espazioetara. Ez dute zuzeneko kontakturik, baina trukea badago.', focus: ['enbrioi-kanpoko-zirkulazioa', 'zilbor-hodiak', 'korion-plaka'] },
       ],
@@ -180,7 +180,7 @@ export const week6: WeekDef = {
         { at: 0.4, notes: ['w6/2/p9/s1', 'w6/2/p10/s1-s3', 'w6/2/p11/s1', 'w6/2/p12/s1'], text: 'Dezidua: endometrioaren geruza funtzionala. Dezidua basala korion hostotsuarekin kontaktuan (oso trinkoa, zelulak lipido eta glukogenoz aberatsak); dezidua kapsularra korion leunarekin; paretako dezidua gainerako umetoki paretan.', focus: ['dezidua-basala', 'dezidua-kapsularra', 'paretako-dezidua'] },
         { at: 0.56, notes: ['w6/2/p4/s1', 'w6/2/p5/s1', 'w6/2/p6/s1-s2'], text: 'Korion hostotsua + dezidua basala = karena. Soilik korion hostotsuak hartzen du parte elkartrukeetan.', focus: ['korion-hostotsua', 'dezidua-basala', 'karena'] },
         { at: 0.7, notes: ['w6/2/p13/s1-s4'], text: 'Korion barrunbea handitzean dezidua kapsularra endekatzen da; korion leuna paretako deziduarekin fusionatzen da eta umetoki gorputzaren barrunbea itxita geratzen da.', focus: ['dezidua-kapsularra', 'korion-leuna', 'paretako-dezidua', 'umetoki-barrunbea'] },
-        { at: 0.86, notes: ['w6/2/p14/s1-s6'], exam: 'Azterketan: mintz amniokorionikoan korion LEUNA dago (ez hostotsua).', text: 'Amnios barrunbea hazten da (likido gehiago) eta korion barrunbea okupatzen du: amnios pareta korion leunarekin fusionatzen da → mintz amniokorionikoa, erditzean apurtzen dena.', focus: ['amnios-barrunbea', 'mintz-amniokorionikoa', 'korion-barrunbea'] },
+        { at: 0.86, notes: ['w6/2/p14/s1-s6'], text: 'Amnios barrunbea hazten da (likido gehiago) eta korion barrunbea okupatzen du: amnios pareta korion leunarekin fusionatzen da → mintz amniokorionikoa, erditzean apurtzen dena.', focus: ['amnios-barrunbea', 'mintz-amniokorionikoa', 'korion-barrunbea'] },
       ],
       structures: [
         'korion-hostotsua',
@@ -485,10 +485,15 @@ export const week6: WeekDef = {
     },
     {
       id: 'w6-q-muga-bi',
-      question: '4. hilabetetik aurrera, zein bi geruzak osatzen dute karena muga biloxka askeetan?',
-      options: ['Endotelioa eta sinzitiotrofoblastoa', 'Zitotrofoblastoa eta sinzitiotrofoblastoa', 'Endotelioa eta zitotrofoblastoa', 'Ehun konektiboa eta sinzitiotrofoblastoa'],
+      question: 'Biloxka askeetan karena muga mehetzen denean, zer lortzen da?',
+      options: [
+        'Muga eraginkorragoa: amaren eta fetuaren odolen arteko bidea laburragoa da, odolak nahastu gabe',
+        'Amaren eta fetuaren odolak nahastu ahal izatea',
+        'Biloxkak dezidua basalari hobeto ainguratzea',
+        'Karenak hazteari uztea',
+      ],
       answer: 0,
-      explanation: 'Zitotrofoblastoa eta ehun konektiboa desagertzen dira; endotelioa eta sinzitiotrofoblastoa geratzen dira.',
+      explanation: 'Geruza batzuk desagertzean karena muga askoz meheagoa eta eraginkorragoa da: elkartrukaketa errazagoa da, baina bi odolak bereizita jarraitzen dute.',
       stageId: 'biloxka-askeak',
     },
     {
@@ -553,10 +558,10 @@ export const week6: WeekDef = {
     },
     {
       id: 'w6-q-amniokorionikoa',
-      question: 'Zein da erditzean apurtzen den mintza?',
-      options: ['Mintz amniokorionikoa (amnios pareta + korion leuna)', 'Dezidua basala', 'Korion plaka', 'Deziduaren orria'],
+      question: 'Amnios barrunbea hazten denean, zein barrunbe desagertzen da bere bidean?',
+      options: ['Korion barrunbea (enbrioi kanpoko zeloma)', 'Biloxka arteko espazioa', 'Enbrioi barruko zeloma', 'Hodi neuralaren barrunbea'],
       answer: 0,
-      explanation: 'Amnios barrunbearen pareta korion leunarekin fusionatzean mintz amniokorionikoa sortzen da.',
+      explanation: 'Amnios barrunbea likidoz betez hazten da eta korion barrunbea okupatzen du; amnios pareta korioiarekin fusionatzean mintz amniokorionikoa sortzen da, erditzean apurtzen dena.',
       stageId: 'korion-hostotsua',
     },
     {
@@ -624,15 +629,15 @@ export const week6: WeekDef = {
     },
     {
       id: 'w6-q-distala',
-      question: 'Hasierako zilbor-hestearen atal proximalean zer dago?',
+      question: 'Zergatik irten daitezke heste lakioak hasierako zilbor-hestera (zilbor ernia fisiologikoa)?',
       options: [
-        'Heste lakioak, alantoidea eta zilbor-hodiak (zelomen komunikazioa irekita)',
-        'Hodi onfalomesenterikoa eta bitelo-zakua',
-        'Wharton-en gelatina bakarrik',
-        'Korion plaka eta biloxkak',
+        'Hurbileko atalean enbrioi barruko eta kanpoko zelomak oraindik komunikatuta daudelako',
+        'Wharton-en gelatinak tiratzen dituelako',
+        'Korion plakak erakartzen dituelako',
+        'Zilbor-hesteak bitelo-zakua barneratzen duelako',
       ],
       answer: 0,
-      explanation: 'Atal distalean daude hodi onfalomesenterikoa, bitelo-zakua eta finkapen pedikulua zilbor-hodiekin.',
+      explanation: 'Hasierako zilbor-hestearen atal proximalean zelomen arteko komunikazioa irekita dago oraindik; barrunbe abdominalean lekurik ez dagoenean, heste lakioak bertara irteten dira.',
       stageId: 'zilbor-hestea',
     },
     {

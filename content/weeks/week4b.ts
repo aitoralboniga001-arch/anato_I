@@ -525,7 +525,7 @@ export const stagesB: StageDef[] = [
       { at: 0.12, notes: ['w4/3.1/p3/s4', 'w4/3.1/p4/s2'], text: 'Okzipitaletik behera, mesodermo paraxiala somitatan segmentatzen da. Lehen bikotea (okzipitala) 20. egunean agertzen da.', focus: ['somitak'] },
       { at: 0.3, notes: ['w4/3.1/p4/s2-s3'], text: 'Egunero ~3 somita bikote berri sortzen dira, kraneokaudalki, 5. astearen amaiera arte.', focus: ['somitak'] },
       { at: 0.55, notes: ['w4/3.1/p4/s1'], text: 'Somitek egitura bilaterala dute: bikoteak dira, hodi neuralaren bi aldeetan.', focus: ['somitak', 'hodi-neurala'] },
-      { at: 0.7, notes: ['w4/3.1/p4/s4', 'w4/3.1/p5/s1', 'w4/3.1/p6/s1', 'w4/3.1/p7/s1', 'w4/3.1/p8/s1', 'w4/3.1/p9/s1', 'w4/3.1/p10/s1', 'w4/3.1/p13/s1'], exam: 'Azterketan: somita kopuruak — 4 okzipital, 8 zerbikal, 12 toraziko, 5 lunbar, 5 sakro, 8–10 kokzigeo.', text: 'Guztira 42-44 somita bikote: 4 okzipital, 8 zerbikal, 12 toraziko, 5 lunbar, 5 sakro, 8-10 kokzigeo.', focus: ['somitak'] },
+      { at: 0.7, notes: ['w4/3.1/p4/s4', 'w4/3.1/p5/s1', 'w4/3.1/p6/s1', 'w4/3.1/p7/s1', 'w4/3.1/p8/s1', 'w4/3.1/p9/s1', 'w4/3.1/p10/s1', 'w4/3.1/p13/s1'], text: 'Guztira 42-44 somita bikote: 4 okzipital, 8 zerbikal, 12 toraziko, 5 lunbar, 5 sakro, 8-10 kokzigeo.', focus: ['somitak'] },
       { at: 0.88, notes: ['w4/3.1/p12/s1'], text: 'Lehen somita bikote okzipitala eta azken 5-7 kokzigeoak normalean desagertu egiten dira.', focus: ['somitak'] },
       { at: 0.95, notes: ['w4/3.1/p11/s1-s2'], text: 'Somita kopurua enbrioiaren adina kalkulatzeko erabiltzen da klinikan.', focus: ['somitak'] },
     ],
@@ -773,7 +773,7 @@ export const stagesB: StageDef[] = [
       'Mintz orofaringeoa eta kloaka mintza ektodermo eta endodermoaren artean daude: heste-muturrak (estomodeoa, proktodeoa) ektodermikoak dira.',
     ],
     cautions: [
-      'Apunteek 6 faringe-poltsa bikote aipatzen dituzte. Ez da akatsa, kontaketa-irizpide zaharragoa baizik: gaur egungo liburuek 4 poltsa ondo garatu + 5.a hastapenezkoa (askotan 4.aren zati gisa) deskribatzen dituzte. Azterketan apunteetako kopurua erabili.',
+      'Apunteek 6 faringe-poltsa bikote aipatzen dituzte. Ez da akatsa, kontaketa-irizpide zaharragoa baizik: gaur egungo liburuek 4 poltsa ondo garatu + 5.a hastapenezkoa (askotan 4.aren zati gisa) deskribatzen dituzte. Hemen apunteetako kopurua erabiltzen da.',
       'Apunteetan faringe-poltsen eratorrien artean "kanpoko entzunbidea" agertzen da, baina hori transkripzio-akatsa da: kanpoko entzunbidea 1. faringe-arrailetik (ektodermoa) dator; 1. faringe-poltsak danbor-barrunbea eta Eustakioren tronpa (erdiko belarria) sortzen ditu.',
     ],
   },

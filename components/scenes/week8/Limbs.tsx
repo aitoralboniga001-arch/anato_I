@@ -66,16 +66,41 @@ type Limb = ReturnType<typeof limb>;
 const CELLS_UP = mesCells(() => true, [WALL_X - 4, UP_Y - 80, 560, UP_Y + 80], 15, 301);
 const CELLS_LOW = mesCells(() => true, [WALL_X - 4, LOW_Y - 80, 560, LOW_Y + 80], 15, 377);
 
-/** A cartilage rod from p0 toward p1 (grown to k), lavender with lacunae. */
+/**
+ * A cartilage model from p0 toward p1 (grown to k): the shape of the future bone — a waisted shaft between two
+ * rounded ends — lavender with cells in lacunae, lit from above.
+ */
 function Rod({ p0, p1, w, k }: { p0: Pt; p1: Pt; w: number; k: number }) {
   if (k <= 0.01) return null;
   const e: Pt = [lerp(p0[0], p1[0], k), lerp(p0[1], p1[1], k)];
-  const d = `M${f1(p0[0])},${f1(p0[1])}L${f1(e[0])},${f1(e[1])}`;
+  const len = Math.hypot(e[0] - p0[0], e[1] - p0[1]);
+  if (len < 1) return null;
+  const u: Pt = [(e[0] - p0[0]) / len, (e[1] - p0[1]) / len];
+  const n: Pt = [-u[1], u[0]];
+  // Half-width along the model: ends swell (future epiphyses), the middle narrows (future diaphysis).
+  const ends = Math.min(1, len / (w * 3));
+  const half = (s: number) => (w / 2) * (0.78 + 0.34 * ends * (Math.exp(-((s / 0.16) ** 2)) + Math.exp(-(((1 - s) / 0.16) ** 2))));
+  const N = 14;
+  const side = (sgn: number) =>
+    Array.from({ length: N + 1 }, (_, i) => {
+      const s = sgn > 0 ? i / N : 1 - i / N;
+      const c: Pt = [p0[0] + u[0] * len * s, p0[1] + u[1] * len * s];
+      return [c[0] + n[0] * half(s) * sgn, c[1] + n[1] * half(s) * sgn] as Pt;
+    });
+  const cap = (c: Pt, dir: number, r: number) =>
+    Array.from({ length: 7 }, (_, i) => {
+      const a = ((i + 1) / 8) * Math.PI;
+      return [c[0] + n[0] * Math.cos(a) * r * dir + u[0] * Math.sin(a) * r * dir, c[1] + n[1] * Math.cos(a) * r * dir + u[1] * Math.sin(a) * r * dir] as Pt;
+    });
+  const pts: Pt[] = [...side(1), ...cap(e, 1, half(1)), ...side(-1), ...cap(p0, -1, half(0))];
+  const d = smoothPath(pts, true, 0.25);
+  const hi = `M${f1(p0[0] - n[0] * half(0) * 0.45)},${f1(p0[1] - n[1] * half(0) * 0.45)}L${f1(e[0] - n[0] * half(1) * 0.45)},${f1(e[1] - n[1] * half(1) * 0.45)}`;
   return (
     <g>
-      <path d={d} stroke={Q.cartDeep} strokeWidth={w + 3} strokeLinecap="round" />
-      <path d={d} stroke={Q.cart} strokeWidth={w} strokeLinecap="round" />
-      <path d={d} stroke="url(#w8-cart)" strokeWidth={w} strokeLinecap="round" />
+      <path d={d} fill={Q.cart} stroke={Q.cartDeep} strokeWidth={1.5} />
+      <path d={d} fill="url(#w8-cart)" />
+      <path d={hi} stroke="#fff" strokeOpacity={0.28} strokeWidth={Math.max(1, w * 0.18)} strokeLinecap="round" />
+      <path d={d} fill="url(#w8-light)" />
     </g>
   );
 }
@@ -94,16 +119,23 @@ function Cartilages({ g, s, lower }: { g: Limb; s: number; lower: boolean }) {
     <g>
       {lower && (
         <>
-          <Part id="iliona" show={k(0) > 0.01 ? 1 : 0}>
-            <ellipse cx={WALL_X + 8} cy={y - 50} rx={15 * k(0)} ry={32 * k(0)} fill={Q.cart} stroke={Q.cartDeep} strokeWidth={1.5} transform={`rotate(-12 ${WALL_X + 8} ${y - 50})`} />
-          </Part>
-          <Part id="pubisa" show={k(0) > 0.01 ? 1 : 0}>
-            <ellipse cx={WALL_X + 18} cy={y + 50} rx={17 * k(0)} ry={9 * k(0)} fill={Q.cart} stroke={Q.cartDeep} strokeWidth={1.5} transform={`rotate(20 ${WALL_X + 18} ${y + 50})`} />
-          </Part>
-          <Part id="iskiona" show={k(0) > 0.01 ? 1 : 0}>
-            <ellipse cx={WALL_X - 8} cy={y + 60} rx={12 * k(0)} ry={11 * k(0)} fill={Q.cart} stroke={Q.cartDeep} strokeWidth={1.5} />
-          </Part>
-        </>
+          {/* The three girdle cartilages of the hip bone. */}
+          {(
+            [
+              { id: 'iliona', c: [WALL_X + 8, y - 50], pts: [[-2, 30], [-14, 6], [-18, -22], [-6, -36], [10, -30], [14, -6], [8, 22]] },
+              { id: 'pubisa', c: [WALL_X + 18, y + 50], pts: [[-12, -12], [2, -10], [16, 2], [18, 10], [8, 10], [-6, 2], [-14, 2]] },
+              { id: 'iskiona', c: [WALL_X - 8, y + 60], pts: [[-2, -20], [10, -14], [10, 2], [4, 14], [-8, 14], [-12, 0], [-8, -14]] },
+            ] as { id: string; c: Pt; pts: Pt[] }[]
+          ).map((b) => {
+            const d = smoothPath(b.pts.map(([px, py]) => [b.c[0] + px * k(0), b.c[1] + py * k(0)] as Pt), true, 0.3);
+            return (
+              <Part key={b.id} id={b.id} show={k(0) > 0.01 ? 1 : 0}>
+                <path d={d} fill={Q.cart} stroke={Q.cartDeep} strokeWidth={1.5} />
+                <path d={d} fill="url(#w8-cart)" />
+                <path d={d} fill="url(#w8-light)" />
+              </Part>
+            );
+          })}        </>
       )}
       <Part id={ids.long} show={k(0) > 0.01 ? 1 : 0}>
         <Rod p0={[g.X(14), y]} p1={[g.X(g.xe - 10), y]} w={lower ? 17 : 15} k={k(0)} />
@@ -152,6 +184,8 @@ function LimbDrawing({ g, s, cells, lower, t, reduced }: { g: Limb; s: number; c
       <Part id={lower ? 'beheko-gorputz-adarraren-hasikina' : 'goiko-gorputz-adarraren-hasikina'}>
         <path d={smoothPath(g.outline, true, 0.25)} fill={TISSUE} stroke={EDGE} strokeWidth={1.5} />
         <path d={smoothPath(g.outline, true, 0.25)} fill="url(#w8-light)" />
+        {/* Round across its axis: lit on top, shadowed underneath. */}
+        <path d={smoothPath(g.outline, true, 0.25)} fill="url(#w8-limb-round)" />
       </Part>
       {/* Mesenchyme from the parietal layer fills the bud. */}
       <Part id="gorputz-adarren-mesenkima">
@@ -234,6 +268,14 @@ export function LimbBuds({ t, reduced }: SceneProps) {
     <g>
       <Defs8 />
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
+      <defs>
+        <linearGradient id="w8-limb-round" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#3a1a0c" stopOpacity={0.28} />
+          <stop offset="0.3" stopColor="#fff" stopOpacity={0.14} />
+          <stop offset="0.55" stopColor="#fff" stopOpacity={0} />
+          <stop offset="1" stopColor="#3a1a0c" stopOpacity={0.38} />
+        </linearGradient>
+      </defs>
       {/* The body wall, seen from behind: somites near the midline, the parietal layer at the side. */}
       <path d={`M0,0L${WALL_X},0L${WALL_X},640L0,640Z`} fill={TISSUE} />
       <path d={`M0,0L${WALL_X},0L${WALL_X},640L0,640Z`} fill="url(#w8-light)" />
@@ -316,7 +358,71 @@ const LIMBS: L2[] = [
   { p0: [462, 436], p1: [384, 572], w: 26, ms: 1, disc: [278, 470], lower: true },
   { p0: [538, 436], p1: [616, 572], w: 26, ms: -1, disc: [722, 470], lower: true },
 ];
-const TORSO: Pt[] = [[436, 150], [564, 150], [594, 220], [592, 330], [578, 418], [540, 452], [460, 452], [422, 418], [408, 330], [406, 220]];
+/** An 8th-week embryo from the front: big head, chest with the heart bulge, belly with the liver and the cord. */
+const TORSO: Pt[] = [[446, 178], [554, 178], [590, 214], [598, 300], [596, 382], [574, 432], [530, 456], [470, 456], [426, 432], [404, 382], [402, 300], [410, 214]];
+
+/** Tube geometry of a limb: unit axis u, normal n toward the midline, radius tapering from the root to the wrist/ankle. */
+function tube(l: L2) {
+  const dx = l.p1[0] - l.p0[0];
+  const dy = l.p1[1] - l.p0[1];
+  const len = Math.hypot(dx, dy);
+  const u: Pt = [dx / len, dy / len];
+  let n: Pt = [-u[1], u[0]];
+  if (n[0] * l.ms < 0) n = [-n[0], -n[1]];
+  const w0 = l.w * 1.12;
+  const w1 = l.w * 0.8;
+  const band = (o1: number, o2: number) => {
+    const P = (p: Pt, w: number, o: number) => `${f1(p[0] + n[0] * w * o)},${f1(p[1] + n[1] * w * o)}`;
+    return `M${P(l.p0, w0, o1)}L${P(l.p1, w1, o1)}L${P(l.p1, w1, o2)}L${P(l.p0, w0, o2)}Z`;
+  };
+  const sweep = n[0] * u[1] - n[1] * u[0] > 0 ? 1 : 0;
+  const Q2 = (p: Pt, w: number, o: number) => `${f1(p[0] + n[0] * w * o)},${f1(p[1] + n[1] * w * o)}`;
+  const capsule = `M${Q2(l.p0, w0, 1)}L${Q2(l.p1, w1, 1)}A${f1(w1)},${f1(w1)} 0 0 ${sweep} ${Q2(l.p1, w1, -1)}L${Q2(l.p0, w0, -1)}A${f1(w0)},${f1(w0)} 0 0 ${sweep} ${Q2(l.p0, w0, 1)}Z`;
+  return { u, n, w0, w1, band, capsule, ang: Math.atan2(dy, dx) };
+}
+
+/**
+ * Hand or foot: a plate whose palm/sole faces the flexor side, so from the front its width and the order of the digits
+ * follow the rotation — thumb lateral at the end above, big toe medial below.
+ */
+function Extremity({ l, alpha }: { l: L2; alpha: number }) {
+  const { u, n } = tube(l);
+  const th = rad(alpha - 90);
+  const span = Math.sin(th);
+  const W = l.lower ? 15 : 13;
+  const at = (p: Pt, along: number, across: number): Pt => [p[0] + u[0] * along + n[0] * across, p[1] + u[1] * along + n[1] * across];
+  const wrist = at(l.p1, l.w * 0.55, 0);
+  const palm = at(wrist, l.lower ? 13 : 11, 0);
+  const plateW = Math.max(5, W * Math.abs(span));
+  const angDeg = (Math.atan2(u[1], u[0]) * 180) / Math.PI;
+  const lens = l.lower ? [9, 7, 6.5, 6, 5.5] : [11, 15, 16.5, 15, 12];
+  const widths = l.lower ? [8, 6, 5.6, 5.2, 4.8] : [5.6, 5.4, 5.6, 5.4, 5];
+  const digits = lens.map((len, k) => {
+    const f = 1 - k / 2;
+    const thumb = k === 0;
+    const o = span * W * f * (thumb && !l.lower ? 1.05 : 0.86);
+    const z = Math.cos(th) * f;
+    const root = at(palm, thumb && !l.lower ? -2 : l.lower ? 9 : 10, o);
+    const spread = thumb && !l.lower ? 0.55 : 0.08 * f;
+    const dir: Pt = [u[0] + n[0] * spread * Math.sign(span || 1), u[1] + n[1] * spread * Math.sign(span || 1)];
+    const tip: Pt = [root[0] + dir[0] * len, root[1] + dir[1] * len];
+    return { k, root, tip, w: widths[k], z };
+  });
+  const digit = (d: (typeof digits)[number]) => (
+    <g key={d.k}>
+      <path d={`M${f1(d.root[0])},${f1(d.root[1])}L${f1(d.tip[0])},${f1(d.tip[1])}`} stroke={EDGE} strokeWidth={d.w + 2.6} strokeLinecap="round" />
+      <path d={`M${f1(d.root[0])},${f1(d.root[1])}L${f1(d.tip[0])},${f1(d.tip[1])}`} stroke="#f0d2b8" strokeWidth={d.w} strokeLinecap="round" />
+    </g>
+  );
+  return (
+    <g>
+      {digits.filter((d) => d.z < 0).sort((a, b) => a.z - b.z).map(digit)}
+      <ellipse cx={f1(palm[0])} cy={f1(palm[1])} rx={f1(plateW + 2)} ry={l.lower ? 15 : 13} transform={`rotate(${f1(angDeg - 90)} ${f1(palm[0])} ${f1(palm[1])})`} fill="#ecc9ad" stroke={EDGE} strokeWidth={1.4} />
+      <ellipse cx={f1(palm[0])} cy={f1(palm[1])} rx={f1(plateW + 2)} ry={l.lower ? 15 : 13} transform={`rotate(${f1(angDeg - 90)} ${f1(palm[0])} ${f1(palm[1])})`} fill="url(#w8-boneshade)" opacity={0.6} />
+      {digits.filter((d) => d.z >= 0).sort((a, b) => a.z - b.z).map(digit)}
+    </g>
+  );
+}
 
 /** The visible part (as offsets −1…1 across the limb, + toward the midline) of a surface sector [a, b] (degrees from the front). */
 function visibleBand(a: number, b: number): [number, number] | null {
@@ -329,29 +435,29 @@ function visibleBand(a: number, b: number): [number, number] | null {
 }
 
 function LimbTube({ l, alpha }: { l: L2; alpha: number }) {
+  const { n, band, capsule, w1 } = tube(l);
   const dx = l.p1[0] - l.p0[0];
   const dy = l.p1[1] - l.p0[1];
-  const len = Math.hypot(dx, dy);
-  let n: Pt = [-dy / len, dx / len];
-  if (n[0] * l.ms < 0) n = [-n[0], -n[1]];
-  const band = (o1: number, o2: number) => {
-    const a = l.w * o1;
-    const b = l.w * o2;
-    return `M${f1(l.p0[0] + n[0] * a)},${f1(l.p0[1] + n[1] * a)}L${f1(l.p1[0] + n[0] * a)},${f1(l.p1[1] + n[1] * a)}L${f1(l.p1[0] + n[0] * b)},${f1(l.p1[1] + n[1] * b)}L${f1(l.p0[0] + n[0] * b)},${f1(l.p0[1] + n[1] * b)}Z`;
-  };
   const fl = visibleBand(alpha - 90, alpha + 90);
   const ex = visibleBand(alpha + 90, alpha + 270);
-  const end: Pt = [l.p1[0] + (dx / len) * 22, l.p1[1] + (dy / len) * 22];
   return (
     <g>
-      <path d={`M${f1(l.p0[0])},${f1(l.p0[1])}L${f1(l.p1[0])},${f1(l.p1[1])}`} stroke={EDGE} strokeWidth={l.w * 2 + 3} strokeLinecap="round" />
-      <ellipse cx={end[0]} cy={end[1]} rx={l.lower ? 14 : 12} ry={l.lower ? 24 : 18} fill={TISSUE} stroke={EDGE} strokeWidth={1.5} transform={`rotate(${f1((Math.atan2(dy, dx) * 180) / Math.PI - 90)} ${f1(end[0])} ${f1(end[1])})`} />
-      <Part id="muskulu-tolestatzaileak">{fl && <path d={band(fl[0], fl[1])} fill={Q.flexor} />}</Part>
-      <Part id="muskulu-hedatzaileak">{ex && <path d={band(ex[0], ex[1])} fill={Q.extensor} />}</Part>
-      {/* Cylinder shading: darker toward both edges. */}
-      <path d={band(-1, -0.55)} fill="rgba(0,0,0,0.22)" />
-      <path d={band(0.55, 1)} fill="rgba(0,0,0,0.22)" />
-      <path d={band(-0.15, 0.15)} fill="rgba(255,255,255,0.12)" />
+      <Extremity l={l} alpha={alpha} />
+      <path d={capsule} fill={TISSUE} stroke={EDGE} strokeWidth={1.6} />
+      {/* The muscle masses seen through the thin skin, fibres along the limb. */}
+      <Part id="muskulu-tolestatzaileak">
+        {fl && <path d={band(fl[0] * 0.94, fl[1] * 0.94)} fill={Q.flexor} opacity={0.88} />}
+        {fl && <path d={band(fl[0] * 0.94, fl[1] * 0.94)} fill="url(#w8-muscle)" />}
+      </Part>
+      <Part id="muskulu-hedatzaileak">
+        {ex && <path d={band(ex[0] * 0.94, ex[1] * 0.94)} fill={Q.extensor} opacity={0.88} />}
+        {ex && <path d={band(ex[0] * 0.94, ex[1] * 0.94)} fill="url(#w8-muscle)" />}
+      </Part>
+      {/* Cylinder shading: darker toward both edges, a soft highlight down the middle; the wrist/ankle crease. */}
+      <path d={band(-1, -0.5)} fill="rgba(40,16,10,0.26)" />
+      <path d={band(0.5, 1)} fill="rgba(40,16,10,0.26)" />
+      <path d={band(-0.2, 0.1)} fill="rgba(255,255,255,0.14)" />
+      <path d={`M${f1(l.p1[0] - n[0] * w1)},${f1(l.p1[1] - n[1] * w1)}L${f1(l.p1[0] + n[0] * w1)},${f1(l.p1[1] + n[1] * w1)}`} stroke="rgba(60,30,20,0.35)" strokeWidth={1.4} />
       {/* The joint halfway (elbow / knee): a crease, and its point (olecranon / patella) on the extensor side,
           seen from the front only while that side faces us. */}
       {(() => {
@@ -379,17 +485,6 @@ function LimbTube({ l, alpha }: { l: L2; alpha: number }) {
             )}
           </g>
         );
-      })()}
-      {/* The first digit (thumb / big toe) on the preaxial border: ends lateral above, medial below. */}
-      {(() => {
-        const th = rad(alpha - 90);
-        const face = Math.cos(th);
-        const o = Math.sin(th) * (l.lower ? 12 : 10);
-        const ang = Math.atan2(dy, dx);
-        const tip: Pt = [end[0] + Math.cos(ang) * (l.lower ? 6 : 4) + n[0] * o, end[1] + Math.sin(ang) * (l.lower ? 6 : 4) + n[1] * o];
-        return face > -0.3 ? (
-          <ellipse cx={f1(tip[0])} cy={f1(tip[1])} rx={l.lower ? 6.5 : 5} ry={l.lower ? 8 : 7.5} transform={`rotate(${f1((ang * 180) / Math.PI - 90)} ${f1(tip[0])} ${f1(tip[1])})`} fill="#f3dcc2" stroke={EDGE} strokeWidth={1.3} opacity={Math.min(1, (face + 0.3) * 2)} />
-        ) : null;
       })()}
     </g>
   );
@@ -430,10 +525,10 @@ function Disc({ l, alpha, turning, label }: { l: L2; alpha: number; turning: num
           <path d={`M${f1(head[0] + Math.cos(ang) * 8)},${f1(head[1] + Math.sin(ang) * 8)}L${f1(head[0] + Math.cos(ang + 2.4) * 8)},${f1(head[1] + Math.sin(ang + 2.4) * 8)}L${f1(head[0] + Math.cos(ang - 2.4) * 8)},${f1(head[1] + Math.sin(ang - 2.4) * 8)}Z`} fill="#fff" />
         </g>
       )}
-      <text x={cx} y={cy - R - 18} textAnchor="middle" fontSize={11.5} fontWeight={600} fill="#cbd5e1" stroke="#0f0f11" strokeWidth={3} paintOrder="stroke" opacity={label}>
+      <text x={cx} y={cy - R - 18} textAnchor="middle" fontSize={13} fontWeight={600} fill="#cbd5e1" stroke="#0f0f11" strokeWidth={3} paintOrder="stroke" opacity={label}>
         aurrea
       </text>
-      <text x={cx} y={cy + R + 22} textAnchor="middle" fontSize={11.5} fontWeight={600} fill="#cbd5e1" stroke="#0f0f11" strokeWidth={3} paintOrder="stroke" opacity={label}>
+      <text x={cx} y={cy + R + 22} textAnchor="middle" fontSize={13} fontWeight={600} fill="#cbd5e1" stroke="#0f0f11" strokeWidth={3} paintOrder="stroke" opacity={label}>
         atzea
       </text>
     </g>
@@ -451,9 +546,46 @@ export function LimbRotation({ t }: SceneProps) {
     <g>
       <Defs8 />
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
-      <circle cx={500} cy={98} r={58} fill={TISSUE} stroke={EDGE} strokeWidth={1.5} />
-      <path d={smoothPath(TORSO, true, 0.3)} fill={TISSUE} stroke={EDGE} strokeWidth={1.5} />
-      <path d={smoothPath(TORSO, true, 0.3)} fill="url(#w8-light)" />
+      <defs>
+        <radialGradient id="w8-rot-skin" cx="0.42" cy="0.36" r="0.7">
+          <stop offset="0" stopColor="#f8e2cf" />
+          <stop offset="0.65" stopColor="#e7c2a4" />
+          <stop offset="1" stopColor="#b98b6e" />
+        </radialGradient>
+        <radialGradient id="w8-rot-bulge" cx="0.5" cy="0.4" r="0.6">
+          <stop offset="0" stopColor="#fff" stopOpacity={0.22} />
+          <stop offset="1" stopColor="#fff" stopOpacity={0} />
+        </radialGradient>
+      </defs>
+      {/* Trunk: the heart and liver bulges, the umbilical cord cut short (two arteries, one vein), the genital tubercle. */}
+      <path d={smoothPath(TORSO, true, 0.3)} fill="url(#w8-rot-skin)" stroke={EDGE} strokeWidth={1.6} />
+      <ellipse cx={500} cy={248} rx={56} ry={44} fill="url(#w8-rot-bulge)" />
+      <ellipse cx={500} cy={338} rx={82} ry={52} fill="url(#w8-rot-bulge)" />
+      <path d="M454,296 Q500,312 546,296" fill="none" stroke="rgba(120,70,50,0.28)" strokeWidth={1.6} />
+      <circle cx={500} cy={372} r={25} fill="#e9d6c6" stroke={EDGE} strokeWidth={1.6} />
+      <circle cx={500} cy={372} r={25} fill="url(#w8-rot-bulge)" />
+      <circle cx={500} cy={364} r={6.5} fill="#5a4a9a" stroke="#2a1f55" strokeWidth={1} />
+      <circle cx={491} cy={379} r={4.2} fill="#c0392b" stroke="#6b1d14" strokeWidth={1} />
+      <circle cx={509} cy={379} r={4.2} fill="#c0392b" stroke="#6b1d14" strokeWidth={1} />
+      <ellipse cx={500} cy={446} rx={9} ry={7} fill="#e3b99c" stroke={EDGE} strokeWidth={1.2} />
+      {/* The head, half the embryo: wide-set eyes under thin lids, a flat nose, a wide mouth, ears still low. */}
+      <path d="M470,168 L530,168 L534,192 L466,192Z" fill="#dcb497" />
+      <ellipse cx={500} cy={104} rx={90} ry={82} fill="url(#w8-rot-skin)" stroke={EDGE} strokeWidth={1.6} />
+      <ellipse cx={470} cy={70} rx={46} ry={30} fill="url(#w8-rot-bulge)" />
+      {[452, 548].map((x) => (
+        <g key={x}>
+          <ellipse cx={x} cy={118} rx={13} ry={9} fill="#2b1d22" opacity={0.78} />
+          <path d={`M${x - 14},116 Q${x},${106} ${x + 14},116`} fill="none" stroke="#9a6a52" strokeWidth={2} strokeLinecap="round" />
+          <ellipse cx={x - 3} cy={116} rx={3} ry={2} fill="#fff" opacity={0.35} />
+        </g>
+      ))}
+      <path d="M492,140 Q500,150 508,140" fill="none" stroke="#a87458" strokeWidth={2} strokeLinecap="round" />
+      <circle cx={494} cy={143} r={1.6} fill="#7a4a36" />
+      <circle cx={506} cy={143} r={1.6} fill="#7a4a36" />
+      <path d="M474,164 Q500,166 526,164" fill="none" stroke="#8a5240" strokeWidth={2.2} strokeLinecap="round" />
+      {[1, -1].map((s) => (
+        <path key={s} d={`M${500 - s * 88},138 C${500 - s * 100},134 ${500 - s * 102},156 ${500 - s * 90},164`} fill="#e2bb9e" stroke={EDGE} strokeWidth={1.4} />
+      ))}
       {LIMBS.map((l, i) => (
         <LimbTube key={i} l={l} alpha={l.lower ? aLow : aUp} />
       ))}
@@ -461,8 +593,11 @@ export function LimbRotation({ t }: SceneProps) {
         <Disc key={i} l={l} alpha={l.lower ? aLow : aUp} turning={l.lower ? lowTurn : upTurn} label={1} />
       ))}
 
-      <Note x={260} y={30} size={12}>
-        8. astea · aurretik (bentrala); ondoan zeharkako ebakidura
+      <Note x={24} y={24} size={12.5} align="start">
+        8. astea · aurretik (bentrala)
+      </Note>
+      <Note x={24} y={44} size={12.5} align="start">
+        ondoan: zeharkako ebakidura
       </Note>
       <Note x={500} y={262} size={12.5} tone="accent" show={upTurn}>
         Goikoak: 90° albora (kanpora)
@@ -470,10 +605,10 @@ export function LimbRotation({ t }: SceneProps) {
       <Note x={500} y={418} size={12.5} tone="accent" show={lowTurn}>
         Behekoak: 90° erdialdera (barrura)
       </Note>
-      <Note x={240} y={282} size={11} tone="dim" show={seg(ru, 0.7, 1)}>
+      <Note x={240} y={282} size={12.5} tone="dim" show={seg(ru, 0.7, 1)}>
         ukondoa atzera
       </Note>
-      <Note x={322} y={548} size={11} tone="dim" show={seg(rl, 0.7, 1)}>
+      <Note x={322} y={548} size={12.5} tone="dim" show={seg(rl, 0.7, 1)}>
         belauna aurrera
       </Note>
       <Note x={500} y={612} tone="accent" show={upTurn}>

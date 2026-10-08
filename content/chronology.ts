@@ -39,7 +39,7 @@ export interface Milestone {
   /** Topic number and stage id that shows it. */
   week: number;
   stage: string;
-  /** Priority: 'gakoa' = core date the exams ask for (or build on), 'oinarria' = needed to follow, 'xehetasuna' = detail. */
+  /** Priority: 'gakoa' = core date of the notes (or one others build on), 'oinarria' = needed to follow, 'xehetasuna' = detail. */
   weight: 'gakoa' | 'oinarria' | 'xehetasuna';
   /** Structures this milestone creates (used by "Zer dago orain?" to mark them as new). */
   makes?: string[];
@@ -81,7 +81,7 @@ export const MILESTONES: Milestone[] = [
 ];
 
 /**
- * Life span of the structures whose timing matters for the exam. `from`/`to` are development days;
+ * Life span of the structures whose timing the notes stress. `from`/`to` are development days;
  * `to` is omitted while the structure persists (or becomes something else, see `becomes`).
  * Structures not listed here fall back to the stage that first shows them (see `lifeOf`).
  */

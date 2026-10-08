@@ -49,7 +49,7 @@ export function useHelpOnce(): [boolean, (v: boolean) => void, boolean] {
 const WELCOME: [string, string][] = [
   ['Ikusi', 'Sakatu ▶. Etapa bakoitza urratsez urrats doa: testua eta animazioa batera, eta urrats bakoitzaren amaieran galdera txiki bat.'],
   ['Ulertu', 'Klikatu edozein egitura haren fitxa ikusteko. Irudiaren gaineko koadroak ebakia non dagoen erakusten du, eta egun-txipak zer dagoen une horretan.'],
-  ['Frogatu', '«Aurkitu» eta «Galderak»: azterketa-motakoak. Beste tresnak (glosarioa, kronologia, leinuak, irudiak) «Tresnak» menuan daude, eta goiko «?» botoiak botoi bakoitzak zer egiten duen azaltzen du.'],
+  ['Frogatu', '«Aurkitu» eta «Galderak»: zure burua frogatzeko. Beste tresnak (glosarioa, kronologia, leinuak, irudiak) «Tresnak» menuan daude, eta goiko «?» botoiak botoi bakoitzak zer egiten duen azaltzen du.'],
 ];
 
 /** What every control on the study screen does, grouped by where it sits, each with the icon it shows. */
@@ -59,8 +59,8 @@ const CONTROLS: { area: string; items: { icon: ReactNode; name: string; text: st
     items: [
       { icon: <KimuFace size={20} mood="happy" still />, name: 'Galdetu Kimuri', text: 'Galdetu edozer (euskaraz, gaztelaniaz edo ingelesez): azalpena hasten den urratsera eramango zaitu.', key: 'K' },
       { icon: <IconTarget size={16} />, name: 'Aurkitu', text: 'Egitura baten izena agertzen da: aurkitu irudian eta klikatu. Berriro sakatuta, jokoa amaitzen da.' },
-      { icon: <IconQuiz size={16} />, name: 'Galderak', text: 'Azterketa-motako galderak, akats bakoitzaren azalpenarekin; huts egindakoak errepasatzeko ere bai.' },
-      { icon: <IconRail open side="right" />, name: 'Laburpena', text: 'Eskuineko zutabea: etaparen gakoak, azterketarako datak eta egiturak. Berriro sakatuta, ezkutatzen da.', key: ']' },
+      { icon: <IconQuiz size={16} />, name: 'Galderak', text: 'Aukera anitzeko galderak, akats bakoitzaren azalpenarekin; huts egindakoak errepasatzeko ere bai.' },
+      { icon: <IconRail open side="right" />, name: 'Laburpena', text: 'Eskuineko zutabea: etaparen gakoak, data garrantzitsuak eta egiturak. Berriro sakatuta, ezkutatzen da.', key: ']' },
       { icon: <IconNotes size={16} />, name: 'Apunteak', text: 'Eskuineko zutabea: jatorrizko apunteak, simulazioarekin batera argituta. Esaldi bat klikatuta, hara joaten da simulazioa.', key: 'N' },
       { icon: <IconMore size={16} />, name: 'Tresnak', text: 'Glosarioa, kronologia, leinuak, etiketarik gabeko irudiak eta foku modua.' },
       { icon: <IconHelp size={16} />, name: 'Laguntza', text: 'Orri hau.', key: '?' },
@@ -111,7 +111,7 @@ const STEPS: [string, string][] = [
   ['Hiru modu', 'Beheko eskuineko botoiak aukeratzen du (G tekla): «Gidatua»: mantso, urrats bakoitzean gelditu, egiturak banan-banan eta galdera txikiak. «Arrunta»: jarraian. «Azkarra»: prozesu osoa minutu batean baino gutxiagoan, errepasatzeko. Bertan: abiadura eta ahotsa.'],
   ['Egitura baten fitxa', 'Klikatu edozein egitura: zer den, noiz agertzen den, non dagoen, nondik datorren, nola sortzen den eta zertan bihurtzen den.'],
   ['Denboran atzera', '«Ikusi nola sortzen den» sakatuta, egitura sortzen den urratsera salto egiten da; «Bueltatu» sakatuta, zeunden lekura itzultzen zara.'],
-  ['Frogatu', '«Aurkitu»: egitura irudian topatu. «Galderak»: azterketa-motako galderak, akatsaren azalpenarekin.'],
+  ['Frogatu', '«Aurkitu»: egitura irudian topatu. «Galderak»: aukera anitzeko galderak, akatsaren azalpenarekin.'],
 ];
 
 const KEYS: [string, string][] = [

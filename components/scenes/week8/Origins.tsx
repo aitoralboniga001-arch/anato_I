@@ -359,13 +359,13 @@ export function OriginsSection({ t }: SceneProps) {
               </g>
             ))}
           </Part>
-          <Note x={cellX[0]} y={CELL_Y - 34} size={11} tone="dim">
+          <Note x={cellX[0]} y={CELL_Y - 34} size={12.5} tone="dim">
             ehun konektiboa
           </Note>
-          <Note x={cellX[1]} y={CELL_Y - 34} size={11} tone="dim">
+          <Note x={cellX[1]} y={CELL_Y - 34} size={12.5} tone="dim">
             kartilagoa
           </Note>
-          <Note x={cellX[2]} y={CELL_Y - 34} size={11} tone="dim">
+          <Note x={cellX[2]} y={CELL_Y - 34} size={12.5} tone="dim">
             hezurra
           </Note>
         </g>

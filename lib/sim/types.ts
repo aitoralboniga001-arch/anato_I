@@ -70,7 +70,9 @@ export interface Beat {
   idea?: string;
   /** ULERTZEKO GAKOA: the one idea that makes this step make sense. */
   key?: string;
-  /** AZTERKETARAKO GAKOA: what the exams have asked about this step (checked against past papers). */
+  /**
+   * FUNTSEZKOA: the fact of this step to keep, worded from the notes.
+   */
   exam?: string;
   /** GOGORATU: earlier structures this step builds on (re-activated before it, with a way to watch them again). */
   recall?: string[];
@@ -113,7 +115,7 @@ export interface StageDef {
   beats: Beat[];
   /** Structure ids that appear in this stage (quiz pool + structure list). */
   structures: string[];
-  /** Exam-oriented summary bullets, faithful to the notes. */
+  /** Summary bullets, faithful to the notes. */
   keyPoints: string[];
   /** "KONTUZ" traps the notes warn about. */
   cautions?: string[];

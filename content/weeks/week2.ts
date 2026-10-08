@@ -391,14 +391,6 @@ export const week2: WeekDef = {
   structures,
   quiz: [
     {
-      id: 'w2-q-heuser-izenak',
-      question: 'Zein da Heuser-en mintzaren beste izen bat?',
-      options: ['Mintz exozelomikoa', 'Korion plaka', 'Mintz amniotikoa', 'Mintz bukofaringeoa'],
-      answer: 0,
-      explanation: 'Heuser-en mintza = mintz exozelomikoa = zeloma kanpoko mintza: egitura bera, izen desberdinak (9. eguna).',
-      stageId: 'eguna-9',
-    },
-    {
       id: 'w2-q-heuser-jatorria',
       question: 'Nondik datoz mutur anenbrionarioan zitotrofoblastoaren barruko azalera estaltzen duten zelulak (9. eguna)?',
       options: ['Epiblastotik', 'Zitotrofoblastotik', 'Hipoblastotik', 'Sinzitiotrofoblastotik'],
@@ -640,7 +632,7 @@ export const week2: WeekDef = {
         {
           at: 0.5, notes: ['w2/2/p5/s3'],
           idea: 'Lakuengatik, une honi garai lakunarra deritzo.',
-          text: 'Izen hori azterketetan agertzen da: 9. eguna = garai lakunarra.',
+          text: 'Gogoratzeko lotura: 9. eguna = garai lakunarra (lakuen garaia).',
           focus: ['garai-lakunarra', 'lakuak'],
           view: 'lakuak',
           ask: {
@@ -874,7 +866,7 @@ export const week2: WeekDef = {
       cautions: [
         'Somatopleura eta esplaknopleura ez dira bi ehun: enbrioi kanpoko mesodermo bera da, kokapenaren arabera izen desberdinarekin.',
         'Korion barrunbea (enbrioi kanpoko zeloma) ≠ hasierako bitelo zakua (barrunbe exozelomikoa). Izenak antzekoak dira; barrunbeak ez.',
-        'Enbrioi kanpoko mesodermoaren jatorria: apunteek hasierako bitelo zakuaren paretako zelulak aipatzen dituzte; beste testu batzuek (Langman) epiblastoa ere aipatzen dute. Azterketan, apunteetako bertsioa.',
+        'Enbrioi kanpoko mesodermoaren jatorria: apunteek hasierako bitelo zakuaren paretako zelulak aipatzen dituzte; beste testu batzuek (Langman) epiblastoa ere aipatzen dute. Hemen apunteetako bertsioa jarraitzen da.',
         'Hasierako zirkulazio uteroplazentarioa amaren odola da laku sarean: enbrioiaren odolik ez dago oraindik.',
       ],
     },
@@ -931,7 +923,7 @@ export const week2: WeekDef = {
         {
           at: 0.22, notes: ['w2/4/p4/s3'],
           idea: 'Biloxka primario bat zeharka moztuta: erdian zitotrofoblastoa, kanpoan sinzitiotrofoblastoa.',
-          text: 'Azterketako irudietan horrela ezagutzen da: bi geruza bakarrik, barrukoa argia (zito) eta kanpokoa iluna (sinzitio).',
+          text: 'Irudietan horrela ezagutzen da: bi geruza bakarrik, barrukoa argia (zito) eta kanpokoa iluna (sinzitio).',
           caution: 'Biloxka primarioak EZ du mesodermorik (hori sekundarioa da, 3. astean).',
           focus: ['biloxka-primarioa', 'sinzitiotrofoblastoa'],
           view: 'biloxkak',
@@ -988,7 +980,6 @@ export const week2: WeekDef = {
         },
         {
           at: 0.94, notes: ['w2/4/p3/s4-s6'],
-          exam: 'Azterketan: «zer EZ dago 2. astean?» — lerro primitiborik, notokordarik eta hiru orriko diskorik ez (3. astekoak dira).',
           idea: 'Egun honetan odol-jario txiki bat gerta daiteke; normala da.',
           text: 'Endometriotik sinzitiora odol-fluxu handiagoa iristen delako. Ez nahastu hilekoarekin (28. eguna): erditze-data kalkulatzeko garrantzitsua da.',
           caution: 'Habiratze-odoljarioa ≠ hilekoa.',

@@ -410,19 +410,6 @@ export const quizB: QuizQuestion[] = [
     stageId: 'zorro-zitotrofoblastikoa',
   },
   {
-    id: 'w3b-q-karena-muga-geruzak',
-    question: 'Zein geruzek osatzen dute karena muga (biloxka tertziarioaren pareta, kanpotik barrura)?',
-    options: [
-      'Dezidua, zitotrofoblastoa, mesodermoa, endometrioa',
-      'Sinzitiotrofoblastoa, zitotrofoblastoa, ehun konektiboa (mesodermoa), kapilarraren endotelioa',
-      'Sinzitiotrofoblastoa, amnios-mintza, mesodermoa, dezidua',
-      'Zitotrofoblastoa, sinzitiotrofoblastoa, dezidua basala, arteria espiralak',
-    ],
-    answer: 1,
-    explanation: 'Kanpotik barrura: sinzitiotrofoblastoa, zitotrofoblastoa, ehun konektiboa (enbrioi kanpoko mesodermoa) eta kapilarraren endotelioa. Hemen gertatzen dira elkartrukaketa guztiak, bi odolak nahastu gabe.',
-    stageId: 'zirkulazioa',
-  },
-  {
     id: 'w3b-q-zirkulazio-funtzionala',
     question: 'Noiz hasten da benetan enbrioiaren odola biloxka tertziarioetan zirkulatzen, anatomikoki zirkuitua 3. astean osatuta egon arren?',
     options: ['3. astearen erdian', 'Bihotzak taupada egiten hasten duenean, 4. astean', 'Habiratzea amaitzean', 'Dezidua basala sortzen denean'],

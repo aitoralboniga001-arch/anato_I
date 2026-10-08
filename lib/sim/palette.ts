@@ -4,7 +4,7 @@ import type { StructureCategory } from './types';
  * Tissue colours follow the convention of the course figures (Langman):
  * ectoderm/epiblast blue, endoderm/hypoblast yellow, intra-embryonic mesoderm red.
  * Extra-embryonic mesoderm is a distinct salmon so it is never confused with intra-embryonic
- * mesoderm (the notes flag this as a classic exam mistake).
+ * mesoderm (the notes warn that mixing them up is a classic mistake).
  */
 export const C = {
   // Embryoblast lineages

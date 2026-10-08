@@ -329,7 +329,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   // Offer of full screen when an explanation starts; `autoFs` = we entered it for this playback, so we leave it at the end.
   const [fsOffer, setFsOffer] = useState(false);
   const autoFs = useRef(false);
-  // Exam-style image: the find quiz in black and white, like the printed exam figures.
+  // Plain image: the find quiz in black and white, like a printed textbook figure.
   const [print, setPrint] = useState(false);
   const [back, setBack] = useState<Back | null>(null);
   const [formation, setFormation] = useState<Formation | null>(null);
@@ -1458,7 +1458,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     ? undefined
     : nextTopic
       ? { label: 'Hurrengo gaia', tip: `Hurrengo gaia: ${nextTopic.week}. ${nextTopic.title}`, onClick: () => router.push(`/astea/${nextTopic.week}`) }
-      : { label: 'Galderak', tip: 'Gaiak amaituta: frogatu zure burua azterketa-motako galderekin', onClick: () => { setQuestionsConcept(undefined); setQuestionsOpen(true); } };
+      : { label: 'Galderak', tip: 'Gaiak amaituta: frogatu zure burua galderekin', onClick: () => { setQuestionsConcept(undefined); setQuestionsOpen(true); } };
   const prevWeek = weeks[weeks.indexOf(week) - 1];
   const prevStage = week.stages[pos.i - 1] ?? prevWeek?.stages[prevWeek.stages.length - 1];
   const sceneT = intro !== null ? easeInOut(Math.min(1, intro)) : pos.t;
@@ -1496,7 +1496,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               setQuestionsConcept(undefined);
               setQuestionsOpen(true);
             }}
-            data-tip="Frogatu: azterketa-motako galderak, azalpenarekin"
+            data-tip="Frogatu: aukera anitzeko galderak, azalpenarekin"
             data-tip-pos="bottom"
           >
             <IconQuiz size={16} /> <span>Galderak</span>
@@ -1829,7 +1829,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       <span className="find-score">
                         {find.ok}/{find.tries}
                       </span>
-                      <button className={`btn small ghost${print ? ' is-on' : ''}`} onClick={() => setPrint((v) => !v)} aria-pressed={print} title="Azterketako irudiak bezala: zuri-beltzean">
+                      <button className={`btn small ghost${print ? ' is-on' : ''}`} onClick={() => setPrint((v) => !v)} aria-pressed={print} title="Zuri-beltzean, etiketarik gabe">
                         Zuri-beltza
                       </button>
                       <button className="btn small" onClick={revealFind} disabled={!find.target}>

@@ -495,23 +495,18 @@ export const week4: WeekDef = {
     },
     {
       id: 'w4-q-fusio-hasiera',
-      question: 'Non hasten da tolesdura neuralen fusioa?',
-      options: ['Alde zefalikoan', 'Alde kaudalean', 'Etorkizuneko lepo-eskualdean, eta handik zabaltzen da bi norabidetan', 'Neuroporo bakoitzean aldi berean'],
+      question: 'Tolesdura neuralen fusioan, zergatik geratzen dira irekita hodiaren bi muturrak denbora batez?',
+      options: ['Muturrak hazten jarraitzen dutelako eta ez direlako inoiz ixten', 'Notokordak ixtea galarazten duelako', 'Fusioa tartean hasi eta bi norabidetan zabaltzen delako: muturrak dira azkenak', 'Amnios likidoak irekita mantentzen dituelako'],
       answer: 2,
       explanation: 'Fusioa etorkizuneko lepo-eskualdean hasten da eta handik zefalikorantz eta kaudalerantz zabaltzen da (zippertze-efektua), bi neuroporoak azkenak itxita geratuz.',
       stageId: 'neurulazioa',
     },
     {
-      id: 'w4-q-neuroporoak-egunak',
-      question: 'Neuroporoen itxiera-egunei buruz, zein da baieztapen zuzena?',
-      options: [
-        'Biak aldi berean ixten dira, 25. egunean',
-        'Aurrekoa (kraneala) ixten da lehenago (≈25. eguna), atzekoa (kaudala) geroago (≈28. eguna), gutxi gorabeherako datak',
-        'Atzekoa lehenago ixten da beti',
-        'Egun zehatz eta finkoak dira, ez hurbilketak',
-      ],
-      answer: 1,
-      explanation: 'Neuroporo kraneala lehenago ixten da (≈25. eguna) eta kaudala geroago (≈28. eguna); garapen biologikoa ez denez erloju finkoa, datak gutxi gorabeherakoak dira.',
+      id: 'w4-q-neuroporoak-amnios',
+      question: 'Neuroporoak irekita dauden bitartean, zein barrunberekin dago komunikatuta hodi neuralaren barrunbea?',
+      options: ['Amnios barrunbearekin', 'Bitelo zakuarekin', 'Enbrioi barruko zelomarekin', 'Korion barrunbearekin'],
+      answer: 0,
+      explanation: 'Bi neuroporoek (kraneala eta kaudala) hodi neurala amnios barrunbearekin komunikatzen dute, behin-behinean, fusioa osatu arte; itxi ondoren hodia erabat itxita geratzen da.',
       stageId: 'neurulazioa',
     },
     {
@@ -538,14 +533,6 @@ export const week4: WeekDef = {
       ],
       answer: 0,
       explanation: 'Bide dortsolateraletik epidermisera iristen dira eta hiru egitura sortzen dituzte: melanozitoak, ile-folikuluak eta azazkalak. Oharra: liburuetan (Langman, Moore) melanozitoak bakarrik datoz gandor neuraletik.',
-      stageId: 'gandor-neurala',
-    },
-    {
-      id: 'w4-q-giltzurrun-gaineko',
-      question: 'Giltzurrun gaineko guruinaren zein zatik du jatorri gandor neuralean?',
-      options: ['Kortexak', 'Muinak', 'Bi zatiek batera', 'Ez batak ez besteak'],
-      answer: 1,
-      explanation: 'Giltzurrun gaineko guruinaren muina (adrenalina eta noradrenalina ekoizten dituena) gandor neuraletik dator; kortexa mesodermotik dator.',
       stageId: 'gandor-neurala',
     },
   ],
@@ -588,7 +575,6 @@ export const week4: WeekDef = {
         },
         {
           at: 0.08, notes: ['w4/3.3/p7/s1-s2', 'w4/4/p3/s1'],
-          exam: 'Azterketan: tolespen zefalokaudala ← nerbio-sistema zentralaren luzetarako hazkuntza.',
           view: 'sagitala',
           idea: 'Buruaren tolespenak mintz bukofaringeoa eta bihotz-eremua bentralera eramaten ditu.',
           text: 'Eragilea: nerbio-sistema zentralaren luzetarako hazkuntza. Endodermoaren alde kraneala enbrioi barrura sartzen da: aurreko hestea eratzen hasten da. Begiratu ibilbideei: puntu txikia hasierako lekua da, borobil handia oraingoa (bihotza eta mintza).',
@@ -605,7 +591,6 @@ export const week4: WeekDef = {
         {
           at: 0.44, notes: ['w4/3.3/p6/s1-s3', 'w4/3.3/p9/s1-s3'],
           recall: ['somitak'],
-          exam: 'Azterketan: zeharkako tolespena ← somiten hazkuntza.',
           view: 'zeharkakoa',
           idea: 'Alboko tolesdurak behera eta erdirantz hurbiltzen dira.',
           text: 'Eragilea: somiten hazkuntza (gezi laranjak). Ertz bakoitzak ektodermoa eta paretako orria darama (gezi horiak). Endodermoa eta errai orria hodi bihurtzen hasten dira, eta aurrez sortutako enbrioi barruko zeloma enbrioi barruan geratzen da.',
@@ -739,7 +724,6 @@ export const week4: WeekDef = {
         {
           at: 0, notes: ['w4/2/p3/s1'],
           recall: ['notokorda'],
-          exam: 'Azterketan: notokorda beharrezkoa da hodi neurala sortzeko.',
           idea: 'Azaleko ektodermoaren eremu honek plaka neurala osatzen du.',
           text: 'Notokordak eta lamina prekordalak (plaka prekordala) gainean duten ektodermoari seinaleak bidaltzen dizkiote (zeharkako mozketan: geziak). Ektodermo hori loditu egiten da: plaka neurala (neuroektodermoa).',
           key: 'Indukzioa: notokorda + plaka prekordala → plaka neurala.',
@@ -774,13 +758,13 @@ export const week4: WeekDef = {
           caution: 'Fusioa ez da muturretik hasten: erditik (lepotik) bi norabidetan.',
           focus: ['hodi-neurala', 'tolesdura-neuralak'],
           ask: {
-            q: 'Non hasten da tolesdura neuralen fusioa?',
-            options: ['Etorkizuneko lepo-eskualdean', 'Mutur kranealean', 'Mutur kaudalean'],
+            q: 'Fusioa hasi ondoren, nola zabaltzen da hodiaren itxiera?',
+            options: ['Bi norabidetan, kremailera bat bezala, muturretan bi zulo geratu arte', 'Norabide bakarrean, buruan hasi eta buztanera', 'Puntu askotan aldi berean, ordenarik gabe'],
             answer: 0,
             why: [
-              'Hori da: lepotik hasi eta bi norabidetan zabaltzen da (zippertze-efektua).',
-              'Mutur kraneala ez da lehena: neuroporo kraneala azkenetakoa da ixten.',
-              'Mutur kaudala da azkena ixten (neuroporo kaudala).',
+              'Hori da: zefalikorantz eta kaudalerantz zabaltzen da (zippertze-efektua); muturretan neuroporoak geratzen dira.',
+              'Ez: ez da mutur batetik hasten; bi norabidetan zabaltzen da.',
+              'Ez: itxiera jarraitua da, kremailera baten antzera.',
             ],
           },
         },
@@ -817,7 +801,6 @@ export const week4: WeekDef = {
         {
           at: 0.9, notes: ['w4/2/p5/s1-s3', 'w4/2/p6/s1'],
           view: 'dortsala',
-          exam: 'Azterketan: neuroporo kraneala ≈25. egunean ixten da, kaudala ≈28. egunean.',
           idea: 'Muturretan, hodia amnios barrunbera irekita dago: neuroporoak.',
           text: 'Ikuspegi dortsalean: kraneala lehenago ixten da (≈25. eguna) eta kaudala geroago (≈28. eguna). Itxi arte, hodi neurala amnios barrunbearekin komunikatuta dago.',
           caution: 'Egunak gutxi gorabeherakoak dira (apunteetan: «inguruan»).',
@@ -974,7 +957,6 @@ export const week4: WeekDef = {
           idea: 'Gongoilak, Schwann eta glia zelulak; eta, aparte, giltzurrun gaineko muina.',
           text: 'Gongoil errakideoak, sinpatikoak eta digestio aparatuaren gongoil parasinpatikoak, Schwann zelulak eta nerbio periferikoen glia gandor neuraletik datoz. Giltzurrun gaineko guruinaren muineko zelulak ere bai: adrenalina eta noradrenalina ekoizten dituzte.',
           key: 'Muina BAI; kortexa EZ. Gongoil enterikoak hestearen paretan daude.',
-          exam: 'Azterketan: bereizi gongoil errakideoak (sentsorialak), sinpatikoak eta digestio aparatuaren gongoil parasinpatikoak.',
           focus: ['gongoil-errakideoak', 'gongoil-sinpatikoak', 'gongoil-parasinpatikoak', 'schwann-zelulak', 'glia-zelulak'],
         },
         {
@@ -982,8 +964,7 @@ export const week4: WeekDef = {
           idea: 'Epidermisera iristen diren gandor-zelulek hiru egitura sortzen dituzte.',
           text: 'Bide dortsolateraletik epidermisera iritsitako gandor neuraleko zelulek melanozitoak, ile-folikuluak eta azazkalak sortzen dituzte. Epidermisa bera azaleko ektodermotik dator: gandor-zelulak kanpotik sartzen zaizkio.',
           key: 'Gandor neurala → epidermisera → melanozitoak, ile-folikuluak eta azazkalak.',
-          exam: 'Azterketan: epidermisera iristen diren gandor-zelulek melanozitoak, ile-folikuluak eta azazkalak sortzen dituzte.',
-          caution: 'Oharra: liburuetan (Langman, Moore) melanozitoak bakarrik datoz gandor neuraletik; ile-folikuluak eta azazkalak azaleko ektodermotik. Azterketarako, apunteak jarraitu.',
+          caution: 'Oharra: liburuetan (Langman, Moore) melanozitoak bakarrik datoz gandor neuraletik; ile-folikuluak eta azazkalak azaleko ektodermotik. Hemen apunteak jarraitzen dira.',
           focus: ['melanozitoak', 'ile-folikuluak', 'azazkalak'],
           ask: {
             q: 'Epidermisera iristen diren gandor-zelulek zer sortzen dute?',
@@ -1027,7 +1008,7 @@ export const week4: WeekDef = {
         'Ektodermoaren eratorriak, laburbilduz: erdiko nerbio sistema (hodi neurala), nerbio sistema periferikoa eta begetatiboa (gandor neurala), usaimen-, ikusmen- eta entzumen-epitelio sentikorrak, larruazalaren epidermisa (ile-folikuluak, azazkalak), guruinak (hipofisia, izerdi-, titi- eta gantz-guruinak), meningeak, hortz-esmaltea eta aurpegiko hezurrak.',
       ],
       cautions: [
-        'Apunteek diote epidermisera iristen diren gandor-zelulek melanozitoak, ile-folikuluak eta azazkalak sortzen dituztela (azterketarako bertsioa). Oharra: liburuetan (Langman, Moore) gandor neuraletik melanozitoak bakarrik datoz; ile-folikuluak eta azazkalak azaleko ektodermotik.',
+        'Apunteek diote epidermisera iristen diren gandor-zelulek melanozitoak, ile-folikuluak eta azazkalak sortzen dituztela (apunteetako bertsioa). Oharra: liburuetan (Langman, Moore) gandor neuraletik melanozitoak bakarrik datoz; ile-folikuluak eta azazkalak azaleko ektodermotik.',
         'Giltzurrun gaineko guruinaren muina soilik da gandor-jatorrikoa; kortexa mesodermotik dator.',
         'Tiroideko C zelulak (kaltzitonina) gandor-jatorrikoak dira; tiroideko folikulu-zelula gehienak, ostera, endodermotik (hodi tiroglosotik) datoz.',
       ],

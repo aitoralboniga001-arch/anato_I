@@ -117,7 +117,7 @@ export function DiaphragmBelow({ t }: SceneProps) {
         ))}
       </Part>
       {VERT.map((v) => (
-        <Note key={v.n} x={500} y={v.y} size={11}>
+        <Note key={v.n} x={500} y={v.y} size={12.5}>
           {v.n}
         </Note>
       ))}
@@ -154,13 +154,13 @@ export function DiaphragmBelow({ t }: SceneProps) {
         <path d={poly(TENDON)} fill={P.septum} opacity={0.75 * septTint} />
         <path d="M500,262L452,206M500,262L548,206" stroke="#c9bda8" strokeWidth={1.2} opacity={0.8} />
       </Part>
-      <Note x={360} y={286} size={11} show={vis(t, 0, 0.16)}>
+      <Note x={360} y={286} size={12.5} show={vis(t, 0, 0.16)}>
         eskuineko hostoa
       </Note>
-      <Note x={500} y={186} size={11} show={vis(t, 0, 0.16)}>
+      <Note x={500} y={186} size={12.5} show={vis(t, 0, 0.16)}>
         erdiko hostoa
       </Note>
-      <Note x={640} y={286} size={11} show={vis(t, 0, 0.16)}>
+      <Note x={640} y={286} size={12.5} show={vis(t, 0, 0.16)}>
         ezkerreko hostoa
       </Note>
 
@@ -206,7 +206,7 @@ export function DiaphragmBelow({ t }: SceneProps) {
         Gerriko atala (hestegorri inguruko mesenkimatik): eskuineko zutabea L1–L3, ezkerrekoa L1–L2
       </Note>
       <Note x={500} y={624} tone="accent" show={fromBelow}>
-        Aorta (lotailu arkutuaren azpitik) · beheko kaba (tendoian) · hestegorria
+        Aorta (lotailu arkutuaren atzetik) · beheko kaba (tendoian) · hestegorria
       </Note>
 
       <Label id="bularrezur-atala" x={796} y={104} ax={510} ay={104} />
@@ -347,7 +347,7 @@ export function DiaphragmProfile({ t, reduced }: SceneProps) {
       </Part>
       {SPINE.map((n, i) =>
         ['T6', 'T12', 'L1', 'L3'].includes(n) ? (
-          <Note key={n} x={SPINE_X + 64} y={spineY(i)} size={11} tone={n === 'L1' || n === 'L3' ? 'accent' : 'dim'}>
+          <Note key={n} x={SPINE_X + 64} y={spineY(i)} size={12.5} tone={n === 'L1' || n === 'L3' ? 'accent' : 'dim'}>
             {n}
           </Note>
         ) : null,
@@ -379,7 +379,7 @@ export function DiaphragmProfile({ t, reduced }: SceneProps) {
       <Mark id="gerriko-atala" x={646} y={470} rx={22} show={vis(t, 0.62, 0.78)} />
       <path d={poly(TORSO)} fill="url(#w7-light)" pointerEvents="none" />
 
-      <Note x={250} y={16} size={11.5}>
+      <Note x={250} y={16} size={13}>
         aurrea ← → atzea
       </Note>
       <Note x={460} y={538} tone="accent" show={vis(t, 0.7)}>

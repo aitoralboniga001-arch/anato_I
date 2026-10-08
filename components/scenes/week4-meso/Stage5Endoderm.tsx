@@ -778,7 +778,7 @@ export function PharynxClose({ t }: SceneProps) {
         Eratorriak (geroago)
       </Note>
       {/* Each derivative sits level with its pouch: a faint leader from the pouch, a swatch in the colour the
-          derivative has inside the pouch, then the name — so the exam list reads straight off the drawing. */}
+          derivative has inside the pouch, then the name — so the notes' list reads straight off the drawing. */}
       {derived.map((d, i) => {
         const y = POUCH_Y[i];
         const x0 = tipX(1, i) + (i === 0 ? 10 : 6);

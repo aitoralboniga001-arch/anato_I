@@ -31,6 +31,7 @@ const BODY = spline(
   6,
   true,
 );
+const BODY_IN = spline([[440, 410], [500, 400], [560, 410], [590, 455], [570, 505], [500, 522], [430, 505], [410, 455]], 6, true);
 const NOTO: Pt = [500, 458];
 const TUBE: Pt = [500, 300];
 const FORAMEN = spline([[500, 238], [542, 250], [558, 290], [558, 340], [550, 374], [500, 378], [450, 374], [442, 340], [442, 290], [458, 250]], 6, true);
@@ -42,7 +43,7 @@ const SPINE: Pt[] = spline([[500, 207], [500, 176], [500, 134], [500, 90]], 8);
 const ARTIC: Pt = [586, 246];
 
 /** A band of width w0→w1 along the first u of a centre line, with a round cap. */
-function band(path: readonly Pt[], w0: number, w1: number, u: number, from = 0): { d: string; cap: Pt; r: number } | null {
+function band(path: readonly Pt[], w0: number, w1: number, u: number, from = 0): { d: string; cap: Pt; r: number; sub: Pt[]; w: (i: number) => number } | null {
   if (u - from <= 0.01) return null;
   const r = resample(path, 61);
   const a = Math.round(from * 60);
@@ -51,7 +52,7 @@ function band(path: readonly Pt[], w0: number, w1: number, u: number, from = 0):
   const w = (i: number) => lerp(w0, w1, (a + i) / 60) / 2;
   const L = offset(sub, w);
   const R = offset(sub, (i) => -w(i)).reverse();
-  return { d: smoothPath([...L, ...R], true, 0.15), cap: sub[sub.length - 1], r: w(sub.length - 1) };
+  return { d: smoothPath([...L, ...R], true, 0.15), cap: sub[sub.length - 1], r: w(sub.length - 1), sub, w };
 }
 
 function Band({ path, w0, w1, u, from = 0, fill = BONE, edge = EDGE, pattern = true, capAtEnd = true }: { path: readonly Pt[]; w0: number; w1: number; u: number; from?: number; fill?: string; edge?: string; pattern?: boolean; capAtEnd?: boolean }) {
@@ -65,6 +66,13 @@ function Band({ path, w0, w1, u, from = 0, fill = BONE, edge = EDGE, pattern = t
       <path d={b.d} fill={fill} />
       {cap && <circle cx={b.cap[0]} cy={b.cap[1]} r={b.r} fill={fill} />}
       {pattern && <path d={b.d} fill="url(#w8-bone)" />}
+      {/* Rounded bone: a soft highlight along one flank, a shadow along the other. */}
+      {b.sub.length > 2 && (
+        <>
+          <path d={smoothPath(offset(b.sub, (i) => b.w(i) * 0.4), false, 0.2)} fill="none" stroke="#fff" strokeOpacity={0.3} strokeWidth={3} strokeLinecap="round" />
+          <path d={smoothPath(offset(b.sub, (i) => -b.w(i) * 0.62), false, 0.2)} fill="none" stroke="#3a2a10" strokeOpacity={0.22} strokeWidth={4} strokeLinecap="round" />
+        </>
+      )}
     </g>
   );
 }
@@ -126,6 +134,15 @@ export function VertebraTop({ t }: SceneProps) {
         <clipPath id={`${cid}-body`}>
           <circle cx={NOTO[0]} cy={NOTO[1]} r={bodyR} />
         </clipPath>
+        <clipPath id={`${cid}-bodyshape`}>
+          <path d={smoothPath(BODY, true, 0.25)} />
+        </clipPath>
+        <pattern id={`${cid}-pores`} width="14" height="13" patternUnits="userSpaceOnUse">
+          <ellipse cx="3" cy="3" rx="1.6" ry="1.2" fill="#8a7448" opacity={0.55} />
+          <ellipse cx="10" cy="5" rx="1.1" ry="0.9" fill="#8a7448" opacity={0.45} />
+          <ellipse cx="6" cy="10" rx="1.4" ry="1.1" fill="#8a7448" opacity={0.5} />
+          <ellipse cx="12.5" cy="11.5" rx="0.9" ry="0.8" fill="#8a7448" opacity={0.4} />
+        </pattern>
       </defs>
       <g transform={z.transform}>
         {/* The vertebral foramen: open space between the body and the arch. */}
@@ -165,7 +182,10 @@ export function VertebraTop({ t }: SceneProps) {
             <path d={smoothPath(BODY, true, 0.25)} fill={BONE} stroke={EDGE} strokeWidth={3} />
             <path d={smoothPath(BODY, true, 0.25)} fill="url(#w8-bone)" />
             <path d={smoothPath(BODY, true, 0.25)} fill="url(#w8-boneshade)" />
-            <path d={smoothPath(spline([[440, 410], [500, 400], [560, 410], [590, 455], [570, 505], [500, 522], [430, 505], [410, 455]], 6, true), true, 0.2)} fill="none" stroke={EDGE} strokeWidth={1.2} opacity={0.6} />
+            {/* End plate: a smooth raised rim round a porous centre. */}
+            <path d={smoothPath(BODY, true, 0.25)} fill="none" stroke="#fff7df" strokeWidth={18} opacity={0.3} clipPath={`url(#${cid}-bodyshape)`} />
+            <path d={smoothPath(BODY_IN, true, 0.2)} fill={`url(#${cid}-pores)`} opacity={0.8} />
+            <path d={smoothPath(BODY_IN, true, 0.2)} fill="none" stroke={EDGE} strokeWidth={1.4} opacity={0.7} />
           </g>
         </Part>
         <Part id="notokorda">
@@ -276,6 +296,9 @@ function nervePath(i: number, s: 1 | -1): Pt[] {
     8,
   );
 }
+/** A vertebral body seen from behind: rims flare at the end plates, the sides curve in. */
+const vbody = (y: number) =>
+  `M410,${y - 27}H590Q604,${y - 27} 604,${y - 16}Q596,${y} 604,${y + 16}Q604,${y + 27} 590,${y + 27}H410Q396,${y + 27} 396,${y + 16}Q404,${y} 396,${y - 16}Q396,${y - 27} 410,${y - 27}Z`;
 const sub = (pts: readonly Pt[], u: number) => {
   const r = resample(pts, 50);
   return r.slice(0, Math.max(2, Math.round(u * 49) + 1));
@@ -297,8 +320,11 @@ export function VertebraBack({ t }: SceneProps) {
       {levels.map((i) => (
         <g key={i} opacity={lvl(i)}>
           <Part id="orno-gorputza">
-            <rect x={396} y={Y(i) - 27} width={208} height={54} rx={14} fill={BONE} stroke={EDGE} strokeWidth={2} />
-            <rect x={396} y={Y(i) - 27} width={208} height={54} rx={14} fill="url(#w8-bone)" />
+            {/* Waisted body, rims (end plates) top and bottom. */}
+            <path d={vbody(Y(i))} fill={BONE} stroke={EDGE} strokeWidth={2} />
+            <path d={vbody(Y(i))} fill="url(#w8-bone)" />
+            <path d={vbody(Y(i))} fill="url(#w8-boneshade)" />
+            <path d={`M404,${Y(i) - 22}H596M404,${Y(i) + 22}H596`} stroke="#fff7df" strokeWidth={2} opacity={0.5} />
           </Part>
         </g>
       ))}
@@ -306,6 +332,16 @@ export function VertebraBack({ t }: SceneProps) {
         <g key={i} opacity={Math.min(lvl(i), lvl(i + 1))}>
           <Part id="ornoarteko-diskoa">
             <rect x={402} y={D(i) - 9} width={196} height={18} rx={8} fill={DISC} stroke={DISC_DEEP} strokeWidth={1.4} />
+            {/* Fibres of the annulus, crossing obliquely. */}
+            <path
+              d={Array.from({ length: 12 }, (_, k) => {
+                const x = 414 + k * 15;
+                return `M${x},${D(i) - 7}l${k % 2 ? 9 : -9},14`;
+              }).join('')}
+              stroke={DISC_DEEP}
+              strokeWidth={1}
+              opacity={0.45}
+            />
           </Part>
         </g>
       ))}
@@ -323,6 +359,9 @@ export function VertebraBack({ t }: SceneProps) {
           <path key={y} d={`M482,${y}H518`} stroke="#c7d2ff" strokeWidth={1.4} opacity={0.8} />
         ))}
         <rect x={482} y={50} width={36} height={560} rx={16} fill="url(#w8-light)" stroke="#8fa7ff" strokeWidth={1.6} />
+        {/* Posterior median sulcus with its vessel. */}
+        <path d="M500,54V606" stroke="#0d1640" strokeWidth={1.6} opacity={0.6} />
+        <path d="M497,54C495,200 499,400 497,606" fill="none" stroke="#c0392b" strokeWidth={1} opacity={0.55} />
       </Part>
       {/* Cut pedicles and transverse processes of each vertebra. */}
       {levels.map((i) => (
@@ -377,10 +416,13 @@ export function VertebraBack({ t }: SceneProps) {
             if (u <= 0.01) return null;
             const p = sub(nervePath(i, s as 1 | -1), u);
             const d = `M${p.map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}`;
+            // The spinal ganglion swells the dorsal root in the foramen.
+            const gx = 500 + s * (PX + 6);
             return (
               <g key={`${i}${s}`}>
                 <path d={d} fill="none" stroke="#7a6410" strokeWidth={7} strokeLinecap="round" />
                 <path d={d} fill="none" stroke={Q.nerve} strokeWidth={4.4} strokeLinecap="round" />
+                {u > 0.4 && <ellipse cx={gx} cy={D(i) + 3} rx={9} ry={6.5} fill={Q.nerve} stroke="#7a6410" strokeWidth={1.4} opacity={seg(u, 0.4, 0.6)} />}
               </g>
             );
           }),
@@ -396,7 +438,7 @@ export function VertebraBack({ t }: SceneProps) {
         return (
           <g key={n}>
             <rect x={828} y={y - 6} width={12} height={12} rx={3} fill={REG_C[k]} stroke="#8fa7ff" strokeWidth={1} opacity={vis(t, OR_T.canal + 0.06)} />
-            <Note x={846} y={y} size={12} align="start" show={vis(t, OR_T.canal + 0.06)}>
+            <Note x={846} y={y} size={13.5} align="start" show={vis(t, OR_T.canal + 0.06)}>
               {n}
             </Note>
           </g>

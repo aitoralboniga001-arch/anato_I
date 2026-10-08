@@ -163,6 +163,14 @@ const YC = (k: number) => 120 + PITCH * k; // segment centres (later: discs)
 const YB = (k: number) => 56 + PITCH * k; // intersegmental levels (later: middle of the bodies)
 const KS = [-1, 0, 1, 2, 3, 4];
 const HW = 72; // column half-width
+/** A vertebral body between y0 and y1: rounded corners, the sides drawn in by `waist` at mid-height. */
+const waisted = (y0: number, y1: number, waist: number) => {
+  const r = 6;
+  const m = (y0 + y1) / 2;
+  const L = 500 - HW;
+  const R = 500 + HW;
+  return `M${L + r},${y0}H${R - r}Q${R},${y0} ${R},${y0 + r}Q${R - waist},${m} ${R},${y1 - r}Q${R},${y1} ${R - r},${y1}H${L + r}Q${L},${y1} ${L},${y1 - r}Q${L + waist},${m} ${L},${y0 + r}Q${L},${y0} ${L + r},${y0}Z`;
+};
 const IW = 58; // intersegmental band half-width (narrower, looser)
 const IH = 11;
 
@@ -274,10 +282,12 @@ export function ColumnCoronal({ t }: SceneProps) {
         <Part id="orno-gorputza" show={merge}>
           {KS.map((k) => (
             <g key={k}>
-              <rect x={500 - HW} y={YC(k) + gap} width={2 * HW} height={YC(k + 1) - YC(k) - 2 * gap} rx={8 * fuse} fill={BODYC} stroke="#a8946a" strokeWidth={2} />
-              <rect x={500 - HW} y={YC(k) + gap} width={2 * HW} height={YC(k + 1) - YC(k) - 2 * gap} rx={8 * fuse} fill="url(#w8-cart)" opacity={0.35} />
+              {/* The body takes its waisted shape (sides drawing in between the end plates) as it fuses. */}
+              <path d={waisted(YC(k) + gap, YC(k + 1) - gap, 16 * fuse * merge)} fill={BODYC} stroke="#a8946a" strokeWidth={2} />
+              <path d={waisted(YC(k) + gap, YC(k + 1) - gap, 16 * fuse * merge)} fill="url(#w8-cart)" opacity={0.35} />
               {/* the old intersegmental mesenchyme, now inside the body */}
-              <rect x={500 - HW + 6} y={YB(k + 1) - IH} width={2 * HW - 12} height={2 * IH} fill={INTER} opacity={0.45} />
+              <rect x={500 - HW + 10} y={YB(k + 1) - IH} width={2 * HW - 20} height={2 * IH} fill={INTER} opacity={0.45} />
+              <path d={waisted(YC(k) + gap, YC(k + 1) - gap, 16 * fuse * merge)} fill="url(#w8-boneshade)" />
             </g>
           ))}
         </Part>

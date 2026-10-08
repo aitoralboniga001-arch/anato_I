@@ -740,7 +740,7 @@ function SectionPlane({ f, t }: { f: Fold; t: number }) {
   const a = X(g.map(sMid, -NT0 - 20));
   const b = X(g.map(sMid, D_ROOF + ENDO + 36));
   const u = unit(sub(a, b));
-  // short caps across each end: the cut-line convention of the exam figures
+  // short caps across each end: the cut-line convention of textbook figures
   const cap = (p: P2) => `M${f1(p[0] - u[1] * 7)},${f1(p[1] + u[0] * 7)}L${f1(p[0] + u[1] * 7)},${f1(p[1] - u[0] * 7)}`;
   const d = `M${f1(a[0])},${f1(a[1])}L${f1(b[0])},${f1(b[1])}${cap(a)}${cap(b)}`;
   return (

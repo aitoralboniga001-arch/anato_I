@@ -23,7 +23,7 @@ export const NOTES: Record<number, NotesSection[]> = {
   1: [
     { n: '1', title: 'Anatomiako terminoak', depth: 0, stages: ['terminoak'], covers: '1.1 Planoak eta ardatzak · 1.2 Kokapen terminoak' },
     { n: '2', title: 'Sarrera', depth: 0, stages: [], note: 'Testua soilik: garapenaren garaiak (lehen bi asteak, enbrioi aroa, fetu aroa).' },
-    { n: '3', title: 'Gametogenesia', depth: 0, stages: [], note: 'Ez da azterketan sartzen.' },
+    { n: '3', title: 'Gametogenesia', depth: 0, stages: [], note: 'Gaitegitik kanpo.' },
     { n: '4', title: 'Lehenengo asteko prozesuak', depth: 0, stages: [] },
     { n: '4.1', title: 'Emakumearen ugal aparatua', depth: 1, stages: ['ibilbidea'] },
     { n: '4.2', title: 'Ernalkuntza', depth: 1, stages: ['ernalkuntza'] },

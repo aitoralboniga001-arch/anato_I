@@ -1,5 +1,5 @@
 /**
- * HITO-DATAK: the dates exams ask about ("in which day does the chorionic cavity form?"), pinned to
+ * HITO-DATAK: the key dates of the notes (the day the chorionic cavity forms…), pinned to
  * the step where the animation shows them. The simulator stamps them on the scene while that step
  * plays, so the picture and the calendar are learnt together. Every date is taken from the step's own
  * text (checked by the tests), which is faithful to the notes.

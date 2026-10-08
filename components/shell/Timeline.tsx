@@ -88,7 +88,7 @@ export function Timeline() {
         <p className="eyebrow">Kronologia</p>
         <h1>Zer dago orain?</h1>
         <p className="hero-lead">
-          Aukeratu garapenaren egun bat: zer dagoen, zer den berria, zer desagertu edo bihurtu den eta zer ez den oraindik agertu. Azterketako «zein egunetan?» eta «zer EZ da X. astean gertatzen?» galderak hemen ebazten dira.
+          Aukeratu garapenaren egun bat: zer dagoen, zer den berria, zer desagertu edo bihurtu den eta zer ez den oraindik agertu. Egun bakoitzean zer dagoen eta zer ez dagoen begiratuta, kronologia osoa ordenatzen da.
         </p>
       </section>
 
@@ -240,7 +240,7 @@ export function Timeline() {
         <div className="section-head">
           <p className="eyebrow">Mugarriak</p>
           <h2>Egunez egun</h2>
-          <p>Azterketan behin eta berriz galdetzen diren datak. Klikatu bat erregelan kokatzeko; «Ikusi» sakatuta, simulagailuan irekitzen da.</p>
+          <p>Apunteetako data garrantzitsuenak. Klikatu bat erregelan kokatzeko; «Ikusi» sakatuta, simulagailuan irekitzen da.</p>
         </div>
         <ol className="kr-miles">
           {MILESTONES.map((m, k) => (

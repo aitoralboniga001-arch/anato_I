@@ -1512,12 +1512,6 @@
       "bytes": 46272,
       "spokenTextHash": "97d4e716e7b9d9a2a34b5d9cf81e597f68c580608b2245fe594d115c7a1900d2"
     },
-    "8be1057cebf8ead7de32f64e83e1fca0081baf186eba01da2f93702e500ef222": {
-      "url": "/narration/audio/b5502fd53ac46e6185ef5fa54b6110afda9b169c943e8c9b70e7aca57c3dfffb.mp3",
-      "durationMs": 4440,
-      "bytes": 35520,
-      "spokenTextHash": "c69491c3d766dfcaaeea57a317585f8f8ef53ba213beed2c9e2f7e4caff0a83f"
-    },
     "f7f91d1d458bc99035811fa6ff3c041e0dcc23daa5d8255d7675f3dbf3a6fe7f": {
       "url": "/narration/audio/daab494f7b38a3e4315b5d558f4dbde322175f6218a8dd1846cc0f203d0a7d49.mp3",
       "durationMs": 7224,
@@ -1955,12 +1949,6 @@
       "durationMs": 6864,
       "bytes": 54912,
       "spokenTextHash": "fed15376fbb3a652a903a462004a53728b1e4fc8ee82fe3a983f6a840bc89761"
-    },
-    "e37bacb92f03f99110f07b9c08343123ab6e9c7b0c64b11a512c4265ef74c2b3": {
-      "url": "/narration/audio/821681d338d73e0d1ea6c5e4cb3fe52430e3b42594ef9b07c53f77c087091bbc.mp3",
-      "durationMs": 7752,
-      "bytes": 62016,
-      "spokenTextHash": "e37bacb92f03f99110f07b9c08343123ab6e9c7b0c64b11a512c4265ef74c2b3"
     },
     "9c4dca1f82480160b9fb5324885c328360e92af6d24bd72d2f7c1ba4bfc5aeb0": {
       "url": "/narration/audio/e33d961f05bb472758d6270e05623a97c81ba5f145fb9a0bd0cfbad02de57551.mp3",
@@ -2525,12 +2513,6 @@
       "durationMs": 1416,
       "bytes": 11328,
       "spokenTextHash": "f1a8a63d6bac229389403097cbb4ad618aed1c48836bb68c1d61d14ca2c1a62f"
-    },
-    "e3f655c5bbbb2540709a62d197df0dbc2c689d2947fc633f2a63c388e30a036d": {
-      "url": "/narration/audio/5a87f539d3440e26f96210187051e5299ecc20bd946f0e2fdc557ee1825f9121.mp3",
-      "durationMs": 7896,
-      "bytes": 63168,
-      "spokenTextHash": "e3f655c5bbbb2540709a62d197df0dbc2c689d2947fc633f2a63c388e30a036d"
     },
     "36fffd9f3b8186b456226baf9429c8eac7bb138230395c25d5066c7e9795d96d": {
       "url": "/narration/audio/5b3f0e8ec899a9076c04d5b542fcab2c6a6ec7e60c7dcf78e523596a30f42f41.mp3",

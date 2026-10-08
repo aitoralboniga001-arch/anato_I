@@ -235,8 +235,8 @@ export const week5: WeekDef = {
       beats: [
         { at: 0, notes: ['w5/2/p6/s1-s2'], text: 'Erditze-data jakitea garrantzitsua da haurdunaldia eta fetuaren garapena kontrolatzeko, batez ere arrisku handiko haurdunaldietan.', focus: ['erditze-data'] },
         { at: 0.2, notes: ['w5/2/p7/s1'], text: 'Azken hilekoaren (ziklo obarikoaren) hasieratik: 40 aste edo 280 egun. Metodo askoz zehatzagoa.', focus: ['azken-hilekoa'] },
-        { at: 0.42, notes: ['w5/2/p8/s1-s2', 'w5/2.3/p7/s2'], exam: 'Azterketan: haurdunaldia 266 egun (ernalkuntzatik) edo 280 egun (azken hilekotik).', text: 'Ernalkuntzatik: 38 aste edo 266 egun. Zaila da ernalkuntza-data jakitea: obulazioa aldakorra da eta espermatozoideak 6 egunez mantentzen dira.', focus: ['ernalkuntza'] },
-        { at: 0.62, notes: ['w5/2/p2/s1', 'w5/1/p2/s1'], exam: 'Azterketan: enbrioi aroa 3. astean hasi eta 8. astearen amaieran bukatzen da.', text: 'Enbrioi aroa (3.–8. asteak) eta fetu aroa (9. astetik jaio arte), ernalkuntzatik kontatuta.', focus: ['enbrioi-aroa', 'fetu-aroa'] },
+        { at: 0.42, notes: ['w5/2/p8/s1-s2', 'w5/2.3/p7/s2'], text: 'Ernalkuntzatik: 38 aste edo 266 egun. Zaila da ernalkuntza-data jakitea: obulazioa aldakorra da eta espermatozoideak 6 egunez mantentzen dira.', focus: ['ernalkuntza'] },
+        { at: 0.62, notes: ['w5/2/p2/s1', 'w5/1/p2/s1'], text: 'Enbrioi aroa (3.–8. asteak) eta fetu aroa (9. astetik jaio arte), ernalkuntzatik kontatuta.', focus: ['enbrioi-aroa', 'fetu-aroa'] },
         { at: 0.8, notes: ['w5/2.3/p9/s1'], text: 'Espero baino lehenago jaiotzen direnak goiztiarrak dira; beranduago jaiotzen direnak, berantiarrak.', focus: ['goiztiarra', 'berantiarra'] },
       ],
       structures: ['erditze-data', 'azken-hilekoa', 'ernalkuntza', 'enbrioi-aroa', 'fetu-aroa', 'goiztiarra', 'berantiarra', 'luzera-zefalokaudala', 'vertex-orpo-luzera'],
@@ -587,14 +587,6 @@ export const week5: WeekDef = {
       answer: 1,
       explanation: 'Sistema gehienak funtzionalak dira, baina arnas aparatua ↔ erdiko nerbio sistema koordinazioa falta da. 7. hilabetean bizirautea %90 ingurukoa da.',
       stageId: 'azken-hilabeteak',
-    },
-    {
-      id: 'w5-q-iraupena',
-      question: 'Zenbat irauten du haurdunaldiak ERNALKUNTZATIK?',
-      options: ['40 aste / 280 egun', '38 aste / 266 egun', '36 aste / 252 egun', '42 aste / 294 egun'],
-      answer: 1,
-      explanation: 'Ernalkuntzatik 38 aste (266 egun); azken hilekoaren hasieratik 40 aste (280 egun), metodo zehatzagoa.',
-      stageId: 'iraupena',
     },
     {
       id: 'w5-q-gertaerak',
