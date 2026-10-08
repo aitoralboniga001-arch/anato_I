@@ -29,6 +29,11 @@ interface ViewportProps {
   onFullscreenChange?: (on: boolean) => void;
   /** A card sits over the left of the scene (the stage preview): the specimen glides aside to stay in view. */
   makeRoom?: boolean;
+  /**
+   * Name whatever the pointer is on when the scene shows no label for it, so nothing drawn is ever
+   * unnamed. Off while names are hidden on purpose (labels off, the find quiz).
+   */
+  hoverNames?: boolean;
 }
 
 interface Zoom {
@@ -129,9 +134,10 @@ const sameMarks = (a: Mark[], b: Mark[]) =>
 
 /** SVG stage with wheel/drag zoom-pan, orientation edges and a feathered specimen backdrop. */
 export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewport(
-  { orientation, children, resetKey, onBackgroundClick, overlay, marks, nameOf, fullscreenRef, onFullscreenChange, makeRoom },
+  { orientation, children, resetKey, onBackgroundClick, overlay, marks, nameOf, fullscreenRef, onFullscreenChange, makeRoom, hoverNames },
   svgRef,
 ) {
+  const [tag, setTag] = useState<{ id: string; x: number; y: number } | null>(null);
   const [z, setZ] = useState<Zoom>(HOME);
   // Zoom glides (buttons, rings, reset); the wheel and dragging stay direct.
   const zNow = useRef<Zoom>(HOME);
@@ -308,6 +314,16 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
         drag.current = { x: e.clientX, y: e.clientY, zx: z.x, zy: z.y, moved: false };
       }}
       onPointerMove={(e) => {
+        if (hoverNames && e.pointerType === 'mouse') {
+          const svg = wrap.current?.querySelector<SVGSVGElement>('svg.viewport-svg');
+          const el = e.target instanceof Element && !e.target.closest('[data-label]') ? e.target.closest('[data-part]') : null;
+          const id = el?.getAttribute('data-part') ?? null;
+          // Only what the picture leaves unnamed: a visible label already says it.
+          const named = !!id && !!svg && [...svg.querySelectorAll(`[data-label="${CSS.escape(id)}"]`)].some((l) => seenOpacity(l, svg) > 0.3);
+          const r = wrap.current!.getBoundingClientRect();
+          const next = id && !named && !drag.current?.moved ? { id, x: e.clientX - r.left, y: e.clientY - r.top } : null;
+          setTag((p) => (!next ? null : p && p.id === next.id && Math.abs(p.x - next.x) + Math.abs(p.y - next.y) < 3 ? p : next));
+        }
         const d = drag.current;
         if (!d || z.k === 1) return;
         const dx = e.clientX - d.x;
@@ -320,6 +336,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
       onPointerUp={() => {
         setTimeout(() => (drag.current = null), 0);
       }}
+      onPointerLeave={() => setTag(null)}
       onClickCapture={(e) => {
         if (drag.current?.moved) {
           e.stopPropagation();
@@ -437,6 +454,11 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
         </button>
       </div>
       {fullscreenError && <div className="viewport-fullscreen-error" role="status" aria-live="polite">{fullscreenError}</div>}
+      {hoverNames && tag && nameOf && (
+        <div className="hover-name" style={{ left: tag.x, top: tag.y }} aria-hidden>
+          {nameOf(tag.id)}
+        </div>
+      )}
       {overlay}
     </div>
   );

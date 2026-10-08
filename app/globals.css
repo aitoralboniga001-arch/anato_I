@@ -1713,9 +1713,30 @@ kbd {
   filter: brightness(1.2);
 }
 
-.part-quiet.part-active,
 .part-quiet.part-focus {
   filter: brightness(1.08);
+}
+
+/* A background tissue pointed at on purpose (its name, the side list, the pointer) still answers clearly. */
+.part-quiet.part-active {
+  filter: brightness(1.28) drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
+}
+
+/* The name of whatever the pointer is on when the drawing leaves it unnamed. */
+.hover-name {
+  position: absolute;
+  z-index: 6;
+  transform: translate(14px, -50%);
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(14, 15, 18, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  color: #f6f3ee;
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .flash-ok {
@@ -9785,6 +9806,79 @@ button.tp-switch:hover {
   animation-duration: 6.5s;
 }
 
+/* A new view's name, for a moment over the middle of the picture (it lets the pointer through). */
+.view-flash {
+  position: absolute;
+  z-index: 29;
+  /* Below the bridge card (top right), still over the middle of the drawing. */
+  top: 64%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 26px 13px;
+  border-radius: 16px;
+  background: rgba(14, 15, 18, 0.86);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  box-shadow: var(--shadow-2);
+  pointer-events: none;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  animation: view-flash 2.2s var(--ease) both;
+}
+
+.view-flash-k {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fbbf24;
+}
+
+.view-flash b {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.view-flash small {
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+
+@keyframes view-flash {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.94);
+  }
+  12%,
+  78% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view-flash {
+    animation-name: view-flash-calm;
+  }
+  @keyframes view-flash-calm {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    10%,
+    85% {
+      opacity: 1;
+    }
+  }
+}
+
 /* Folded: one line in the same corner; it opens again on click. */
 .bridge-chip {
   position: absolute;
@@ -12212,4 +12306,156 @@ kbd {
   display: inline-flex;
   align-items: center;
   gap: 14px;
+}
+
+/* Topic 7: the cavity road at the top of the summary (which cavity comes from which, the stage being watched lit) */
+.road {
+  flex: none;
+  margin: 0 0 14px;
+  padding: 10px 10px 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.road-kicker {
+  margin: 0 0 6px 2px;
+}
+.road-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.road-svg g {
+  cursor: pointer;
+}
+.road-link {
+  fill: none;
+  stroke: var(--line-2);
+  stroke-width: 1.5;
+  transition: stroke 0.3s, opacity 0.3s;
+}
+.road-link.is-here,
+.road-link.is-lit {
+  stroke: var(--signal);
+  stroke-width: 2;
+}
+.road-link.is-later {
+  stroke-dasharray: 3 4;
+  opacity: 0.5;
+}
+.road-box rect:first-of-type {
+  fill: var(--bg);
+  stroke-width: 1.2;
+  stroke-opacity: 0.55;
+  transition: fill 0.3s, stroke-opacity 0.3s, opacity 0.3s;
+}
+.road-t1 {
+  font-size: 10.5px;
+  font-weight: 600;
+  fill: var(--text-2);
+}
+.road-t2 {
+  font-size: 9.5px;
+  fill: var(--text-3);
+}
+.road-when {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  fill: var(--text-3);
+}
+.road-foot {
+  font-size: 9px;
+  fill: var(--text-4);
+}
+.road-box.is-here rect:first-of-type {
+  stroke-opacity: 1;
+  stroke-width: 1.6;
+  fill: var(--surface-2);
+}
+.road-box.is-here .road-t1 {
+  fill: var(--text);
+}
+.road-box.is-lit rect:first-of-type {
+  stroke-opacity: 1;
+  stroke-width: 2.2;
+  fill: var(--surface-2);
+  filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.35));
+}
+.road-box.is-lit .road-t1 {
+  fill: var(--text);
+}
+.road-box.is-later,
+.road-wall.is-later,
+.road-canal.is-later,
+.road-dia.is-later {
+  opacity: 0.38;
+}
+.road-box.is-later rect:first-of-type {
+  stroke-dasharray: 3 3;
+}
+.road-wall rect {
+  opacity: 0.32;
+  transition: opacity 0.3s;
+}
+.road-wall text:first-of-type {
+  font-size: 9.5px;
+  font-weight: 600;
+  fill: var(--text);
+}
+.road-wall.is-here rect,
+.road-wall.is-lit rect {
+  opacity: 0.85;
+}
+.road-wall.is-lit rect {
+  filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.45));
+}
+.road-wall.is-here .road-when,
+.road-wall.is-lit .road-when {
+  fill: var(--signal);
+}
+.road-canal path:first-of-type {
+  fill: none;
+  stroke-width: 3;
+  stroke-dasharray: 2 3;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+.road-canal.is-here path:first-of-type,
+.road-canal.is-lit path:first-of-type {
+  opacity: 1;
+  stroke-width: 4;
+}
+.road-canal.is-closed path:first-of-type {
+  opacity: 0.35;
+}
+.road-x {
+  fill: none;
+  stroke: var(--signal);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.road-dome {
+  fill: none;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  opacity: 0.6;
+}
+.road-dia.is-here .road-dome,
+.road-dia.is-lit .road-dome {
+  opacity: 1;
+}
+.road-dia.is-lit .road-dome {
+  filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.45));
+}
+.road-dia.is-here .road-t1,
+.road-dia.is-lit .road-t1 {
+  fill: var(--text);
+}
+.road-svg g:hover rect:first-of-type,
+.road-svg g:focus-visible rect:first-of-type {
+  stroke-opacity: 1;
+}
+.road-svg g:hover .road-t1 {
+  fill: var(--text);
 }

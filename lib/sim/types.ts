@@ -41,6 +41,13 @@ export interface ViewDef {
   ownFocus?: boolean;
   /** "Non nago?": where the cut lies along the body (0 = cranial … 1 = caudal) and an optional note. */
   locator?: { level?: number; note?: string };
+  /**
+   * For a diagram (`eskema`) that is still drawn in one plane of the body (a front view, a view from
+   * below), that plane: the move from or to this view can then be shown as a camera travelling between planes.
+   */
+  frame?: PlaneKind;
+  /** For the camera move: the stretch of the body the drawing shows (0 = head … 1 = tail end), when it is not the whole body. */
+  span?: [number, number];
 }
 
 /** A narrative caption active from `at` until the next beat. `focus` highlights structures while active. */
@@ -157,6 +164,8 @@ export interface StructureDef {
   related?: string[];
   /** A space (cavity, lacuna), not a tissue — drawn and labelled differently so the two are never confused. */
   space?: boolean;
+  /** A whole made of other drawn structures (e.g. lateral mesoderm = its two layers): naming it lights them. */
+  parts?: string[];
 }
 
 export interface QuizQuestion {

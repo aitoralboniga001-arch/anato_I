@@ -20,6 +20,8 @@ export interface SceneContextValue {
   nameOf: (id: string) => string;
   /** Spaces (cavities) are labelled differently from tissues. */
   isSpace?: (id: string) => boolean;
+  /** A whole's drawn members: pointing at the whole lights them too. */
+  partsOf?: (id: string) => readonly string[];
   onSelect: (id: string) => void;
   onHover: (id: string | null) => void;
 }
@@ -55,13 +57,17 @@ export const LabelScaleContext = createContext<LabelScale>({ k: 1, left: false, 
 
 export const useLabelScale = () => useContext(LabelScaleContext);
 
-/** Visual state of a structure id given the current interaction state. */
-export function partState(ctx: SceneContextValue, id: string): 'active' | 'dim' | 'focus' | 'idle' | 'spot' | 'shade' | 'ctx' {
+/**
+ * Visual state of a structure id given the current interaction state. A drawing also answers to the
+ * groups it belongs to in the scene (`groups`) and to any whole whose drawn members include it.
+ */
+export function partState(ctx: SceneContextValue, id: string, groups: readonly string[] = []): 'active' | 'dim' | 'focus' | 'idle' | 'spot' | 'shade' | 'ctx' {
+  const is = (x: string) => x === id || groups.includes(x) || !!ctx.partsOf?.(x).includes(id);
   const pointed = ctx.hovered ?? ctx.selected;
   if (ctx.quizFlash?.id === id) return 'active';
-  if (pointed) return pointed === id ? 'active' : 'dim';
-  if (ctx.spotlight) return ctx.spotlight === id ? 'spot' : 'shade';
-  if (ctx.focus.length) return ctx.focus.includes(id) ? 'focus' : ctx.dimContext ? 'ctx' : 'idle';
+  if (pointed) return is(pointed) ? 'active' : 'dim';
+  if (ctx.spotlight) return is(ctx.spotlight) ? 'spot' : 'shade';
+  if (ctx.focus.length) return ctx.focus.some(is) ? 'focus' : ctx.dimContext ? 'ctx' : 'idle';
   return 'idle';
 }
 

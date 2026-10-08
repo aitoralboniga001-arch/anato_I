@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { LabelScaleContext, SceneContext, type SceneContextValue } from '@/components/kit/context';
-import { structures, weeks } from '@/content/registry';
+import { partsOf, structures, weeks } from '@/content/registry';
 import type { StageDef } from '@/lib/sim/types';
 
 /**
@@ -139,6 +139,8 @@ function render(Scene: unknown, t: number): Seen {
     const part = /data-part="([^"]+)"/.exec(attrs)?.[1];
     const label = /data-label="([^"]+)"/.exec(attrs)?.[1] ?? parent?.label;
     if (part) parts.set(part, Math.max(parts.get(part) ?? 0, o));
+    // A drawing also stands for the groups it belongs to in the scene (e.g. intraperitoneal organs).
+    for (const g of /data-groups="([^"]+)"/.exec(attrs)?.[1]?.split(' ') ?? []) parts.set(g, Math.max(parts.get(g) ?? 0, o));
     if (/data-label="/.test(attrs)) labels.set(label!, Math.max(labels.get(label!) ?? 0, o));
     const dot = /class="label-dot" cx="([^"]+)" cy="([^"]+)"/.exec(attrs);
     if (dot && label) dots.push({ id: label, x: Number(dot[1]), y: Number(dot[2]), o });
@@ -149,6 +151,9 @@ function render(Scene: unknown, t: number): Seen {
 
 /** The picture the viewer sees: the 1000×640 frame, less the tool column at the top right. */
 const outside = (x: number, y: number) => x < 6 || x > 994 || y < 6 || y > 634 || (x > 932 && y < 222);
+
+/** How visibly a structure is drawn: as itself or, for a whole (sutures, lateral mesoderm), as its members. */
+const shown = (seen: Seen, id: string) => Math.max(seen.parts.get(id) ?? 0, ...partsOf(id).map((m) => seen.parts.get(m) ?? 0));
 
 const viewOf = (stage: StageDef, k: number) => {
   const want = [...stage.beats.slice(0, k + 1)].reverse().find((b) => b.view && stage.views.some((v) => v.id === b.view))?.view;
@@ -175,7 +180,7 @@ for (const w of weeks)
               for (const d of seen.dots) if (d.id === id && d.o > 0.3 && outside(d.x, d.y)) problems.push(`${where} — izenaren lerroa irudiz kanpo (${d.x.toFixed(0)}, ${d.y.toFixed(0)})`);
               if (CONCEPT.has(structures.get(id)?.category ?? '')) continue;
               if (GONE[`${w.week}/${stage.id}/${k + 1}/${id}`]) continue;
-              const drawn = (seen.parts.get(id) ?? 0) > 0.3 || (LABEL_ONLY.has(id) && (seen.labels.get(id) ?? 0) > 0.3);
+              const drawn = shown(seen, id) > 0.3 || (LABEL_ONLY.has(id) && (seen.labels.get(id) ?? 0) > 0.3);
               const named = (seen.labels.get(id) ?? 0) > 0.3;
               if (!drawn) problems.push(`${where} — ez dago marraztuta`);
               else if (!named) problems.push(`${where} — marraztuta baina izenik gabe`);
@@ -216,7 +221,7 @@ for (const w of weeks)
           const seen = render(view.scene, Math.max(b.at, end - 0.035));
           for (const id of ids) {
             if (MENTION_ONLY[`${w.week}/${stage.id}/${k + 1}/${id}`]) continue;
-            const drawn = (seen.parts.get(id) ?? 0) > 0.3 || (seen.labels.get(id) ?? 0) > 0.3;
+            const drawn = shown(seen, id) > 0.3 || (seen.labels.get(id) ?? 0) > 0.3;
             if (!drawn) problems.push(`${k + 1}. urratsa [${view.id}]: ${id} — testuan aipatuta, irudian ez`);
           }
         });

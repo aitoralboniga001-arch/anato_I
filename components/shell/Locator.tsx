@@ -114,9 +114,10 @@ export function Locator({
   }
   const shown = !!open;
 
-  const where =
-    plane === 'zeharkakoa' || plane === 'xehetasuna'
-      ? `Maila: ${levelName(level)}.`
+  // A cut's own note names its level better than the rough head / trunk / tail split.
+  const leveled = plane === 'zeharkakoa' || plane === 'xehetasuna';
+  const where = leveled
+    ? `Maila: ${note ?? levelName(level)}.`
       : plane === 'sagitala'
         ? 'Erdiko lerroan.'
         : plane === 'dortsala'
@@ -163,7 +164,7 @@ ${view}` : ''}`}
             {view && <p className="loc-view">{view}</p>}
             <p>{info.text}</p>
             <p className="loc-where">
-              Irudian: {SHAPE_TEXT[shape]}. {where} {note}
+              Irudian: {SHAPE_TEXT[shape]}. {where} {leveled ? null : note}
             </p>
             <p className="loc-dirs">Horia = orain ikusten duzun planoa · Kr = kraneala (burua) · Ka = kaudala (buztana) · Dor = dortsala (bizkarra) · Ben = bentrala (sabela)</p>
             <div className="loc-foot">

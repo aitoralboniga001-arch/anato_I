@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react';
 import { SceneContext, type QuizFlash, type SceneContextValue } from '@/components/kit/context';
-import { getWeek, isSpace, nameOf, structures, weeks } from '@/content/registry';
+import { getWeek, isSpace, partsOf, nameOf, structures, weeks } from '@/content/registry';
 import { firstSeenOf, periodOf, weekOfDay } from '@/content/chronology';
 import { ageLabel, spanOf } from '@/lib/sim/age';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
-import type { StageDef, StructureCategory, StructureDef, WeekDef } from '@/lib/sim/types';
+import type { PlaneKind, StageDef, StructureCategory, StructureDef, WeekDef } from '@/lib/sim/types';
 import { Glossary } from './Glossary';
 import { IconBook, IconCalendar, IconNotes, IconClock, IconExpand, IconHelp, IconImage, IconLayers, IconMore, IconPlay, IconQuiz, IconShrink, IconTag, IconTarget, IconTree } from './icons';
 import { Popover } from './Popover';
@@ -21,7 +21,9 @@ import { NotesPanel } from './NotesPanel';
 import type { NotesAnchor } from '@/content/notes-text';
 import { NowCard } from './NowCard';
 import { Locator } from './Locator';
-import { ViewBridge, needsBridge, type ViewSnap } from './ViewBridge';
+import { ViewBridge, ViewFlash, needsBridge, type ViewSnap } from './ViewBridge';
+import { ViewTravel, travelPlan, type TravelPlan } from './ViewTravel';
+import { CavityRoad } from './CavityRoad';
 import { IconRail, Outline, StageInfo } from './SidePanel';
 import { Viewport } from './Viewport';
 import { ViewSwitch } from './ViewSwitch';
@@ -491,11 +493,19 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       });
     setShown({ key: sceneKey, w: week.week, i: pos.i, view: view.id });
   }
+  /** The camera move between two views (see ViewTravel), while it plays; playback waits for it. */
+  const [travel, setTravel] = useState<{ key: string; plan: TravelPlan } | null>(null);
+  const travelRef = useRef(false);
   useEffect(() => {
-    if (!ghost) return;
+    travelRef.current = !!travel;
+  }, [travel]);
+  /** The view a camera move arrived at: it is already on screen, so it does not fade in again. */
+  const [arrived, setArrived] = useState('');
+  useEffect(() => {
+    if (!ghost || travel) return;
     const id = window.setTimeout(() => setGhost(null), 1000);
     return () => window.clearTimeout(id);
-  }, [ghost]);
+  }, [ghost, travel]);
   const ghostStage = ghost ? week.stages[ghost.i] : undefined;
   const GhostScene = ghost && ghostStage ? (ghostStage.views.find((v) => v.id === ghost.view) ?? ghostStage.views[0]).scene : null;
 
@@ -566,7 +576,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 
       // Speech samples drive scene movement; observation time only advances while playing.
       if (voice && !formation && !find) {
-        if (!voiceStarted || voiceConfigured !== true) return;
+        if (!voiceStarted || voiceConfigured !== true || travelRef.current) return;
         const p = live.current;
         const st = week.stages[p.i];
         const k = beatIndexAt(st, p.t);
@@ -768,6 +778,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     const tick = (now: number) => {
       const g = glideRef.current;
       if (!g || g.w !== week.week) return;
+      // A step that changes the view starts once the camera has arrived.
+      if (travelRef.current) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
       if (!g.start) g.start = now;
       const x = Math.min(1, (now - g.start) / g.ms);
       const next = { i: g.i, t: g.from + (g.to - g.from) * easeInOut(x) };
@@ -1414,6 +1429,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     quizFlash: flash,
     nameOf,
     isSpace,
+    partsOf,
     onSelect,
     onHover: setHovered,
   };
@@ -1431,11 +1447,21 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   // specimen — next step, next stage, next week — it says so on the same 3-D sketch.
   const snap: ViewSnap = { key: sceneKey, week: week.week, stageTitle: stage.title, label: view.label, plane: view.plane, day, level: view.locator?.level, orientation: view.orientation };
   const [seenView, setSeenView] = useState<ViewSnap | null>(null);
+  const [viewFlash, setViewFlash] = useState<{ key: string; label: string; plane: PlaneKind } | null>(null);
   if (mounted && seenView?.key !== sceneKey) {
     const from = seenView ?? readLastView(week.week);
     setSeenView(snap);
-    if (!formation && from && pickedView !== sceneKey && needsBridge(from, snap)) setBridge({ from, to: snap });
+    // When the simulation itself changes the view of the same body, the camera travels from the old plane to the new one.
+    const [fw, fs, fv] = seenView?.key.split('/') ?? [];
+    const fromView = Number(fw) === week.week ? week.stages.find((x) => x.id === fs)?.views.find((x) => x.id === fv) : undefined;
+    const plan = !formation && !reduced && !travel && intro === null && fromView && seenView && pickedView !== sceneKey ? travelPlan(week.week, day, fromView, view, seenView.day) : null;
+    if (plan) setTravel({ key: sceneKey, plan });
+    else if (travel) setTravel(null);
+    // After a camera move the card is only its chip (reopen to read it); narrated, it is read out as before.
+    if (!formation && from && pickedView !== sceneKey && needsBridge(from, snap)) setBridge({ from, to: snap, small: !!plan && !voice });
     else if (bridge) setBridge(null);
+    // Every other view change the simulation makes is announced over the picture itself, briefly.
+    if (!plan && !formation && seenView && pickedView !== sceneKey && seenView.label !== snap.label) setViewFlash({ key: sceneKey, label: view.label, plane: view.plane });
   }
   const saveView = useEffectEvent(() => {
     try {
@@ -1448,8 +1474,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   // Guided playback waits while the bridge is up.
   useEffect(() => {
     // Folded into its chip, the card no longer holds the playback.
-    bridgeHold.current = !!bridge && !bridge.small && guided;
-  }, [bridge, guided]);
+    bridgeHold.current = (!!bridge && !bridge.small && guided) || !!travel;
+  }, [bridge, guided, travel]);
 
   const nextStage = week.stages[pos.i + 1];
   // The topic's last stage ends on the next topic (or, after the last one, on the questions): no dead end.
@@ -1661,14 +1687,15 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           <SceneContext.Provider value={ctx}>
             <Viewport
               ref={svgRef}
-              orientation={view.orientation}
+              orientation={travel ? undefined : view.orientation}
               resetKey={`${stage.id}/${view.id}`}
               onBackgroundClick={() => !find && setSelected(null)}
-              marks={marks}
+              marks={travel ? [] : marks}
               nameOf={nameOf}
               fullscreenRef={appRef}
               onFullscreenChange={setFocusMode}
               makeRoom={intro !== null}
+              hoverNames={showLabels && !find && intro === null && !travel}
               overlay={
                 <>
                   <div className="view-tools">
@@ -1717,7 +1744,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       </button>
                     </div>
                   )}
-                  {bridge && intro === null && <ViewBridge autoClose={!voice} key={bridge.to.key} from={bridge.from} to={bridge.to} small={!!bridge.small} onSmall={(v) => setBridge((b) => (b ? { ...b, small: v } : b))} onClose={() => { transport.cancel(); setBridge(null); }} />}
+                  {viewFlash && viewFlash.key === sceneKey && intro === null && <ViewFlash key={`flash-${viewFlash.key}`} label={viewFlash.label} plane={viewFlash.plane} onDone={() => setViewFlash(null)} />}
+                  {bridge && intro === null && !travel && <ViewBridge autoClose={!voice} key={bridge.to.key} from={bridge.from} to={bridge.to} small={!!bridge.small} onSmall={(v) => setBridge((b) => (b ? { ...b, small: v } : b))} onClose={() => { transport.cancel(); setBridge(null); }} />}
                   {tour && intro === null && structures.get(tour.items[tour.idx]) && (
                     <TourCard compact={voice} item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} onSkip={skipTour} onPick={onSelect} />
                   )}
@@ -1843,13 +1871,30 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                 </>
               }
             >
-              <g key={`${stage.id}/${view.id}`} className="scene-enter">
-                {mounted && <Scene t={sceneT} reduced={reduced} />}
-              </g>
-              {ghost && GhostScene && (
-                <g key={`ghost-${ghost.key}`} className="scene-ghost" pointerEvents="none" aria-hidden>
-                  <GhostScene t={ghost.t} reduced={reduced} />
-                </g>
+              {travel?.key === sceneKey && ghost && GhostScene ? (
+                <ViewTravel
+                  key={`travel-${travel.key}`}
+                  plan={travel.plan}
+                  old={<GhostScene t={ghost.t} reduced={reduced} />}
+                  onDone={() => {
+                    setTravel(null);
+                    setGhost(null);
+                    setArrived(sceneKey);
+                  }}
+                >
+                  {mounted && <Scene t={sceneT} reduced={reduced} />}
+                </ViewTravel>
+              ) : (
+                <>
+                  <g key={`${stage.id}/${view.id}`} className={arrived === sceneKey ? undefined : 'scene-enter'}>
+                    {mounted && <Scene t={sceneT} reduced={reduced} />}
+                  </g>
+                  {ghost && GhostScene && (
+                    <g key={`ghost-${ghost.key}`} className="scene-ghost" pointerEvents="none" aria-hidden>
+                      <GhostScene t={ghost.t} reduced={reduced} />
+                    </g>
+                  )}
+                </>
               )}
             </Viewport>
           </SceneContext.Provider>
@@ -1966,6 +2011,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               onSelect={onSelect}
               onDismiss={() => (narrow() ? setPanelOpen(false) : setPref('panel', false))}
               onHover={(id) => setHovered(id && inScene(id) ? id : null)}
+              guide={
+                week.week === 7 ? (
+                  <CavityRoad week={week} stage={stage.id} focus={stage.beats[glideBeat ?? activeBeat]?.focus ?? []} onStage={openStage} onHover={(id) => setHovered(id && inScene(id) ? id : null)} />
+                ) : undefined
+              }
             />
           )}
         </aside>

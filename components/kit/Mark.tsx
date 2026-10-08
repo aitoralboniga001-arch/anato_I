@@ -41,9 +41,9 @@ export function Mark({ id, x = 0, y = 0, rx = 16, ry, rot = 0, show = 1, childre
             <stop offset="0.5" stopColor={FOCUS} stopOpacity={0.24} />
             <stop offset="1" stopColor={FOCUS} stopOpacity={0} />
           </radialGradient>
-          {/* Large marks often sit over other structures: they let the pointer through to what is underneath, except along their rim. */}
-          <ellipse className="mark-light" cx={x} cy={y} rx={rx * 1.3} ry={(ry ?? rx) * 1.3} fill={`url(#${glow})`} pointerEvents={big ? 'none' : undefined} />
-          {big && <ellipse cx={x} cy={y} rx={rx} ry={ry ?? rx} fill="none" stroke="transparent" strokeWidth={14} pointerEvents="stroke" />}
+          {/* Marks sit over other structures (a hiatus over its vessel): they let the pointer through to what is underneath, except along their rim. */}
+          <ellipse className="mark-light" cx={x} cy={y} rx={rx * 1.3} ry={(ry ?? rx) * 1.3} fill={`url(#${glow})`} pointerEvents="none" />
+          <ellipse cx={x} cy={y} rx={rx} ry={ry ?? rx} fill="none" stroke="transparent" strokeWidth={big ? 14 : 8} pointerEvents="stroke" />
         </g>
       )}
     </Part>

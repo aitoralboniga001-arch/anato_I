@@ -77,11 +77,11 @@ function Band({ path, w0, w1, u, from = 0, fill = BONE, edge = EDGE, pattern = t
   );
 }
 
-/** Outline only, for a part that is lit on its own edge inside a larger piece. */
+/** A stretch of a larger piece (its outline and a faint sheen over it), so the stretch itself can be pointed at and lit. */
 function BandEdge({ path, w0, w1, u, from = 0, color = EDGE, width = 2.2 }: { path: readonly Pt[]; w0: number; w1: number; u: number; from?: number; color?: string; width?: number }) {
   const b = band(path, w0, w1, u, from);
   if (!b) return null;
-  return <path d={b.d} fill="none" stroke={color} strokeWidth={width} strokeLinejoin="round" />;
+  return <path d={b.d} fill="#fff7df" fillOpacity={0.08} stroke={color} strokeWidth={width} strokeLinejoin="round" />;
 }
 
 /** Sclerotome cells: from the two sides toward the notochord (body) and round the neural tube (arch). */
@@ -197,12 +197,12 @@ export function VertebraTop({ t }: SceneProps) {
             <Band key={s} path={p} w0={34} w1={24} u={archU} capAtEnd={false} />
           ))}
         </Part>
-        <Part id="pedikulua" quiet show={archU > 0.2 ? 1 : 0}>
+        <Part id="pedikulua" show={archU > 0.2 ? 1 : 0}>
           {arches((p, s) => (
             <BandEdge key={s} path={p} w0={34} w1={24} u={Math.min(archU, PED_U)} color="#6b5a35" />
           ))}
         </Part>
-        <Part id="lamina" quiet show={archU > PED_U + 0.1 ? 1 : 0}>
+        <Part id="lamina" show={archU > PED_U + 0.1 ? 1 : 0}>
           {arches((p, s) => (
             <BandEdge key={s} path={p} w0={34} w1={24} u={archU} from={PED_U} color="#6b5a35" />
           ))}
@@ -262,7 +262,7 @@ export function VertebraTop({ t }: SceneProps) {
       <Label id="apofisi-artikularrak" x={190} y={250} {...L(mirror([ARTIC[0] + 6, ARTIC[1]]))} show={artic * inFrame(A(mirror([ARTIC[0] + 6, ARTIC[1]])))} />
       <Label id="pedikulua" x={190} y={330} {...L([426, 344])} show={seg(archU, 0.3, 0.5) * inFrame(A([426, 344]))} />
       <Label id="orno-zuloa" x={190} y={400} {...L([474, 362])} show={hole * inFrame(A([474, 362]))} />
-      <Label id="notokorda" x={190} y={480} {...L([NOTO[0] - noto + 2, NOTO[1]])} show={(1 - seg(t, OR_T.trans, OR_T.trans + 0.03)) * inFrame(A(NOTO))} />
+      <Label id="notokorda" x={190} y={480} {...L([NOTO[0] - noto + 2, NOTO[1]])} show={(1 - seg(t, OR_T.hole, OR_T.hole + 0.03)) * inFrame(A(NOTO))} />
       <Label id="esklerotoma" x={190} y={560} {...L(CELLS[1].start)} show={vis(t, 0, 0.06)} />
       <Label id="apofisi-zeharrak" x={810} y={240} {...L([700, 256])} show={seg(transU, 0.6, 0.9) * inFrame(A([700, 256]))} />
       <Label id="orno-arkua" x={810} y={330} {...L([592, 300])} show={seg(archU, 0.5, 0.8) * inFrame(A([592, 300]))} />
@@ -347,7 +347,8 @@ export function VertebraBack({ t }: SceneProps) {
       ))}
       {/* The canal: every foramen in a row. */}
       <Part id="hodi-errakideoa">
-        <rect x={447} y={60} width={106} height={canalY - 60} fill={Q.space} opacity={0.38} />
+        {/* A see-through shade: the pointer reaches the bodies and discs on the canal's floor. */}
+        <rect x={447} y={60} width={106} height={canalY - 60} fill={Q.space} opacity={0.38} pointerEvents="none" />
         <path d={`M447,60V${f1(canalY)}M553,60V${f1(canalY)}`} stroke="#e8dcb8" strokeWidth={2.2} />
       </Part>
       {/* Spinal cord, its regions tinted. */}
@@ -454,13 +455,13 @@ export function VertebraBack({ t }: SceneProps) {
         Orno gorputzak segmentu arteko mailetan; miotomak eta nerbioak orno gorputzen artean
       </Note>
 
-      <Label id="hodi-errakideoa" x={190} y={70} ax={458} ay={Y(0) - 20} show={seg(t, OR_T.canal + 0.02, OR_T.canal + 0.05)} />
+      <Label id="hodi-errakideoa" x={190} y={70} ax={447} ay={Y(0) - 20} show={seg(t, OR_T.canal + 0.02, OR_T.canal + 0.05)} />
       <Label id="ornomuina" x={190} y={180} ax={480} ay={Y(1) + 6} />
-      <Label id="orno-gorputza" x={190} y={300} ax={436} ay={Y(3) - 14} show={vis(t, OR_T.canal + 0.03)} />
-      <Label id="ornoarteko-diskoa" x={190} y={420} ax={438} ay={D(4)} show={vis(t, OR_T.canal + 0.05)} />
-      <Label id="pedikulua" x={190} y={520} ax={500 - PX - 12} ay={Y(6) + 8} show={vis(t, OR_T.canal + 0.06, OR_T.nerves)} small />
+      <Label id="orno-gorputza" x={190} y={300} ax={466} ay={Y(3) - 14} show={vis(t, OR_T.canal + 0.03)} />
+      <Label id="ornoarteko-diskoa" x={190} y={420} ax={466} ay={D(4)} show={vis(t, OR_T.canal + 0.05)} />
+      <Label id="pedikulua" x={190} y={520} ax={500 - PX - 12} ay={Y(6) + 8} show={vis(t, OR_T.canal + 0.06)} small />
       <Label id="ornoarteko-zuloak" x={770} y={92} ax={500 + PX + 10} ay={D(0) - 6} show={vis(t, OR_T.canal + 0.06)} />
-      <Label id="apofisi-zeharrak" x={810} y={210} ax={500 + 150} ay={Y(2) - 14} show={vis(t, OR_T.canal + 0.06, OR_T.myo)} small />
+      <Label id="apofisi-zeharrak" x={810} y={210} ax={500 + 150} ay={Y(2) - 14} show={vis(t, OR_T.canal + 0.06)} small />
       <Label id="nerbio-espinalak" x={810} y={410} ax={500 + 170} ay={D(2) + 23} show={seg(nerve(2), 0.7, 1)} />
       <Label id="miotoma" x={810} y={566} ax={500 + 262 + 28} ay={D(4) + 6} show={seg(myo, 0.4, 0.8)} />
     </g>

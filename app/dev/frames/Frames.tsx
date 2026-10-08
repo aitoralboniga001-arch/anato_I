@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import { Defs } from '@/components/kit/Defs';
 import { SceneContext, type SceneContextValue } from '@/components/kit/context';
-import { isSpace, nameOf, weeks } from '@/content/registry';
+import { isSpace, partsOf, nameOf, weeks } from '@/content/registry';
+import { Audit } from './Audit';
+import { Travels } from './Travels';
 
 const noop = () => {};
 
@@ -11,10 +13,13 @@ const noop = () => {};
 export function Frames() {
   const [q, setQ] = useState<URLSearchParams | null>(null);
   useEffect(() => {
-    const raf = requestAnimationFrame(() => setQ(new URLSearchParams(window.location.search)));
-    return () => cancelAnimationFrame(raf);
+    // A timer, not a frame callback: hidden panes (batch audits) throttle animation frames.
+    const id = setTimeout(() => setQ(new URLSearchParams(window.location.search)), 0);
+    return () => clearTimeout(id);
   }, []);
   if (!q) return null;
+  if (q.get('audit')) return <Audit q={q} />;
+  if (q.get('travel')) return <Travels q={q} />;
   if (q.get('index'))
     return (
       <pre id="index" style={{ color: '#ddd', fontSize: 12 }}>
@@ -68,6 +73,7 @@ export function Frames() {
                       quizFlash: null,
                       nameOf,
                       isSpace,
+                      partsOf,
                       onSelect: noop,
                       onHover: noop,
                     };

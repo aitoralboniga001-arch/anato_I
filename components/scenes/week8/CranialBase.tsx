@@ -223,6 +223,18 @@ export function CranialBase({ t, reduced }: SceneProps) {
   const L = (p: Pt) => A(p);
   void reduced;
   const prog: Record<string, number> = { scl, sq, ...Object.fromEntries(PIECES.map((p) => [p.key, cartK(p)])) };
+  // Where the mesenchyme is still loose: a cell not yet pulled into its cartilage (bottom left first).
+  const mesAt = (() => {
+    let best: Pt | null = null;
+    for (const cell of FIELD_T) {
+      const k = cell.tg ? (prog[cell.tg.key] ?? 0) : seg(t, CB_T.all, CB_T.all + 0.05);
+      if (k > 0.3) continue;
+      const to = cell.tg ? cell.tg.c : cell.p;
+      const p: Pt = [lerp(cell.p[0], to[0], 0.6 * k), lerp(cell.p[1], to[1], 0.6 * k)];
+      if (!best || p[1] - p[0] > best[1] - best[0]) best = p;
+    }
+    return best;
+  })();
 
   const piece = (p: Piece, side: 1 | -1) => {
     const C = side < 0 ? p.C : p.C.map(mx);
@@ -512,7 +524,7 @@ export function CranialBase({ t, reduced }: SceneProps) {
       <Label id="esfenoidesaren-hego-handia" x={232} y={356} ax={L([372, 318])[0]} ay={L([372, 318])[1]} show={ossL(PIECE.temp)} />
       <Label id="okzipitalaren-oinaldea" x={204} y={404} ax={L([472, 372])[0]} ay={L([472, 372])[1]} show={ossL(PIECE.para) * inFrame(L([472, 372]))} />
       <Label id="harkaitza" x={204} y={452} ax={L([352, 428])[0]} ay={L([352, 428])[1]} show={ossL(PIECE.peri)} />
-      <Label id="kondrokraneoa" x={190} y={496} ax={L([338, 470])[0]} ay={L([338, 470])[1]} show={vis(t, 0, CB_T.scl) + vis(t, CB_T.all, CB_T.holes)} />
+      <Label id="kondrokraneoa" x={190} y={496} ax={L([338, 470])[0]} ay={L([338, 470])[1]} show={inFrame(L([338, 470]))} />
       <Label id="okzipitalaren-ezkata" x={190} y={540} ax={L([420, 532])[0]} ay={L([420, 532])[1]} show={sq * inFrame(L([420, 532]))} />
 
       {/* Right gutter: the cartilages (right half). */}
@@ -520,7 +532,8 @@ export function CranialBase({ t, reduced }: SceneProps) {
       <Label id="nerbio-kranialak" x={780} y={120} ax={L([513, 146])[0]} ay={L([513, 146])[1]} show={vis(t, CB_T.holes + 0.02)} />
       <Label id="burezurreko-zuloak" x={690} y={170} ax={L([509, 172])[0]} ay={L([509, 172])[1]} show={holes} />
       <Label id="begizulo-hegoa" x={810} y={200} ax={L([580, 226])[0]} ay={L([580, 226])[1]} show={cartK(PIECE.orb) * (1 - ossR)} />
-      <Label id="hipofisi-guruina" x={810} y={210} ax={L([508, 276])[0]} ay={L([508, 276])[1]} show={vis(t, CB_T.hyp + 0.04, CB_T.trab)} />
+      <Label id="hipofisi-guruina" x={810} y={226} ax={L([508, 276])[0]} ay={L([508, 276])[1]} show={vis(t, CB_T.hyp + 0.04)} small />
+      {mesAt && <Label id="mesenkima" x={190} y={586} ax={L(mesAt)[0]} ay={L(mesAt)[1]} show={(1 - ossR) * inFrame(L(mesAt))} small />}
       <Label id="hipofisi-kartilagoak" x={800} y={250} ax={L([516, 288])[0]} ay={L([516, 288])[1]} show={cartK(PIECE.hyp) * (1 - ossR) * inFrame(L([516, 288]))} />
       <Label id="hego-tenporala" x={810} y={284} ax={L([596, 300])[0]} ay={L([596, 300])[1]} show={cartK(PIECE.temp) * (1 - ossR)} />
       <Label id="kartilago-parakordalak" x={790} y={356} ax={L([524, 372])[0]} ay={L([524, 372])[1]} show={cartK(PIECE.para) * (1 - ossR) * inFrame(L([524, 372]))} />

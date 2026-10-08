@@ -264,6 +264,12 @@ export function LimbBuds({ t, reduced }: SceneProps) {
   const cart = vis(t, LIMB_T.cart);
   const week = t < LIMB_T.plates ? '4.–5. astea' : t < LIMB_T.centres ? '6. astea' : '8. astea';
   const ray = (g: Limb, th: number, u: number) => along([g.X(g.xp - g.R * 0.45), g.ay], g.rim(th), u);
+  // The mesenchyme is loose cells: its name points at the drawn cell nearest the middle of the bud.
+  const mesWant: Pt = [up.X(up.xp * 0.45), UP_Y + 12];
+  const mesAt = CELLS_UP.filter((c) => inPoly(up.outline, c.p[0], c.p[1])).reduce<Pt>(
+    (a, c) => (Math.hypot(c.p[0] - mesWant[0], c.p[1] - mesWant[1]) < Math.hypot(a[0] - mesWant[0], a[1] - mesWant[1]) ? c.p : a),
+    [up.X(0), UP_Y],
+  );
   return (
     <g>
       <Defs8 />
@@ -320,7 +326,7 @@ export function LimbBuds({ t, reduced }: SceneProps) {
 
       {/* Upper limb names (above its axis, proximal ones highest), then the lower limb's. */}
       <Label id="goiko-gorputz-adarraren-hasikina" x={680} y={100} {...at(up.rim(-50), UP_Y)} show={vis(t, 0, LIMB_T.plates)} />
-      <Label id="gorputz-adarren-mesenkima" x={700} y={160} {...at([up.X(up.xp * 0.45), UP_Y + 12], UP_Y)} show={vis(t, 0, LIMB_T.cart)} />
+      <Label id="gorputz-adarren-mesenkima" x={700} y={160} {...at(mesAt, UP_Y)} show={vis(t, 0, LIMB_T.cart)} />
       <Label id="erpineko-ektodermo-ertza" x={770} y={236} {...at([up.rim(32)[0] + 2, up.rim(32)[1]], UP_Y)} show={seg(t, LIMB_T.aer, LIMB_T.aer + 0.03) * (1 - seg(su, 0.7, 0.76))} />
       <Label id="esku-plaka" x={810} y={276} {...at([up.X(up.xp + 6), UP_Y + up.R * 0.6], UP_Y)} show={vis(t, LIMB_T.plates, LIMB_T.cart)} />
       <Label id="hatzetako-izpiak" x={810} y={70} {...at(ray(up, -32, 0.72), UP_Y)} show={vis(t, LIMB_T.rays, LIMB_T.cart)} />
@@ -351,13 +357,32 @@ export function LimbBuds({ t, reduced }: SceneProps) {
 }
 
 // ——— View `biraketa`: the 8th-week rotations, from the front ———
-type L2 = { p0: Pt; p1: Pt; w: number; ms: 1 | -1; disc: Pt; lower: boolean };
-const LIMBS: L2[] = [
-  { p0: [418, 200], p1: [296, 330], w: 22, ms: 1, disc: [250, 196], lower: false },
-  { p0: [582, 200], p1: [704, 330], w: 22, ms: -1, disc: [750, 196], lower: false },
-  { p0: [462, 436], p1: [384, 572], w: 26, ms: 1, disc: [278, 470], lower: true },
-  { p0: [538, 436], p1: [616, 572], w: 26, ms: -1, disc: [722, 470], lower: true },
-];
+/** One straight piece of a limb (arm, forearm, thigh, leg); `k0`/`k1` its radius at each end, in limb widths. */
+type L2 = { p0: Pt; p1: Pt; w: number; ms: 1 | -1; disc: Pt; lower: boolean; k0?: number; k1?: number };
+/**
+ * Each limb from the root, with its joint (elbow / knee) and end (wrist / ankle) before the rotation (`pe0`, `p10`)
+ * and after it (`pe1`, `p11`). Before, the limbs stick out with a slight bend; after, the elbow points back (caudal)
+ * and the forearms come forward, hands in front of the trunk, while the knee points forward and the feet meet,
+ * soles towards each other.
+ */
+type Bent = L2 & { pe0: Pt; pe1: Pt; p11: Pt };
+const bent = (ms: 1 | -1, lower: boolean, p0: Pt, pe0: Pt, p10: Pt, pe1: Pt, p11: Pt, disc: Pt): Bent => {
+  const x = (p: Pt): Pt => (ms > 0 ? p : [1000 - p[0], p[1]]);
+  return { p0: x(p0), p1: x(p10), pe0: x(pe0), pe1: x(pe1), p11: x(p11), w: lower ? 26 : 22, ms, disc: x(disc), lower };
+};
+const arm = (ms: 1 | -1) => bent(ms, false, [418, 200], [352, 262], [300, 338], [336, 298], [402, 334], [250, 196]);
+const leg = (ms: 1 | -1) => bent(ms, true, [462, 436], [424, 505], [392, 574], [400, 506], [462, 566], [278, 470]);
+const LIMBS: Bent[] = [arm(1), arm(-1), leg(1), leg(-1)];
+/** The two pieces of a limb at rotation progress r (0 before, 1 after). */
+function pieces(l: Bent, r: number): [L2, L2] {
+  const k = smooth(r);
+  const pe: Pt = [lerp(l.pe0[0], l.pe1[0], k), lerp(l.pe0[1], l.pe1[1], k)];
+  const p1: Pt = [lerp(l.p1[0], l.p11[0], k), lerp(l.p1[1], l.p11[1], k)];
+  return [
+    { ...l, p1: pe, k0: 1.12, k1: 0.96 },
+    { ...l, p0: pe, p1, k0: 0.96, k1: 0.8 },
+  ];
+}
 /** An 8th-week embryo from the front: big head, chest with the heart bulge, belly with the liver and the cord. */
 const TORSO: Pt[] = [[446, 178], [554, 178], [590, 214], [598, 300], [596, 382], [574, 432], [530, 456], [470, 456], [426, 432], [404, 382], [402, 300], [410, 214]];
 
@@ -369,8 +394,8 @@ function tube(l: L2) {
   const u: Pt = [dx / len, dy / len];
   let n: Pt = [-u[1], u[0]];
   if (n[0] * l.ms < 0) n = [-n[0], -n[1]];
-  const w0 = l.w * 1.12;
-  const w1 = l.w * 0.8;
+  const w0 = l.w * (l.k0 ?? 1.12);
+  const w1 = l.w * (l.k1 ?? 0.8);
   const band = (o1: number, o2: number) => {
     const P = (p: Pt, w: number, o: number) => `${f1(p[0] + n[0] * w * o)},${f1(p[1] + n[1] * w * o)}`;
     return `M${P(l.p0, w0, o1)}L${P(l.p1, w1, o1)}L${P(l.p1, w1, o2)}L${P(l.p0, w0, o2)}Z`;
@@ -434,15 +459,25 @@ function visibleBand(a: number, b: number): [number, number] | null {
   return null;
 }
 
-function LimbTube({ l, alpha }: { l: L2; alpha: number }) {
+/** A limb in two pieces, bent at the elbow / knee; the hand or foot at the end of the distal piece. */
+function LimbTube({ l, alpha, r }: { l: Bent; alpha: number; r: number }) {
+  const [a, b] = pieces(l, r);
+  return (
+    <g>
+      <Extremity l={b} alpha={alpha} />
+      <LimbPiece l={b} alpha={alpha} />
+      <LimbPiece l={a} alpha={alpha} />
+      <Joint l={a} next={b} alpha={alpha} />
+    </g>
+  );
+}
+
+function LimbPiece({ l, alpha }: { l: L2; alpha: number }) {
   const { n, band, capsule, w1 } = tube(l);
-  const dx = l.p1[0] - l.p0[0];
-  const dy = l.p1[1] - l.p0[1];
   const fl = visibleBand(alpha - 90, alpha + 90);
   const ex = visibleBand(alpha + 90, alpha + 270);
   return (
     <g>
-      <Extremity l={l} alpha={alpha} />
       <path d={capsule} fill={TISSUE} stroke={EDGE} strokeWidth={1.6} />
       {/* The muscle masses seen through the thin skin, fibres along the limb. */}
       <Part id="muskulu-tolestatzaileak">
@@ -457,38 +492,51 @@ function LimbTube({ l, alpha }: { l: L2; alpha: number }) {
       <path d={band(-1, -0.5)} fill="rgba(40,16,10,0.26)" />
       <path d={band(0.5, 1)} fill="rgba(40,16,10,0.26)" />
       <path d={band(-0.2, 0.1)} fill="rgba(255,255,255,0.14)" />
-      <path d={`M${f1(l.p1[0] - n[0] * w1)},${f1(l.p1[1] - n[1] * w1)}L${f1(l.p1[0] + n[0] * w1)},${f1(l.p1[1] + n[1] * w1)}`} stroke="rgba(60,30,20,0.35)" strokeWidth={1.4} />
-      {/* The joint halfway (elbow / knee): a crease, and its point (olecranon / patella) on the extensor side,
-          seen from the front only while that side faces us. */}
-      {(() => {
-        const m: Pt = [(l.p0[0] + l.p1[0]) / 2, (l.p0[1] + l.p1[1]) / 2];
-        const ext = rad(alpha + 180);
-        const o = Math.sin(ext) * l.w * 0.82;
-        const face = Math.cos(ext);
-        const cap: Pt = [m[0] + n[0] * o, m[1] + n[1] * o];
-        const ang = (Math.atan2(dy, dx) * 180) / Math.PI;
-        return (
-          <g>
-            <path d={`M${f1(m[0] - n[0] * l.w)},${f1(m[1] - n[1] * l.w)}L${f1(m[0] + n[0] * l.w)},${f1(m[1] + n[1] * l.w)}`} stroke="rgba(60,30,20,0.45)" strokeWidth={1.6} />
-            {face > -0.25 && (
-              <ellipse
-                cx={f1(cap[0])}
-                cy={f1(cap[1])}
-                rx={f1(l.lower ? 11 : 8)}
-                ry={f1((l.lower ? 11 : 8) * (0.45 + 0.55 * Math.max(0, face)))}
-                transform={`rotate(${f1(ang + 90)} ${f1(cap[0])} ${f1(cap[1])})`}
-                fill="#f3dcc2"
-                stroke={EDGE}
-                strokeWidth={1.4}
-                opacity={Math.min(1, (face + 0.25) * 2)}
-              />
-            )}
-          </g>
-        );
-      })()}
+      {/* The wrist / ankle crease. */}
+      {l.k1 === 0.8 && <path d={`M${f1(l.p1[0] - n[0] * w1)},${f1(l.p1[1] - n[1] * w1)}L${f1(l.p1[0] + n[0] * w1)},${f1(l.p1[1] + n[1] * w1)}`} stroke="rgba(60,30,20,0.35)" strokeWidth={1.4} />}
     </g>
   );
 }
+
+/**
+ * The elbow / knee between the two pieces: a crease across, and its point (olecranon / patella) on the extensor side,
+ * seen from the front only while that side faces us — the elbow turns away to the back, the knee to the front.
+ */
+function Joint({ l, next, alpha }: { l: L2; next: L2; alpha: number }) {
+  const { n, ang } = tube(l);
+  const { n: n2 } = tube(next);
+  const m = l.p1;
+  // Across the joint: halfway between the two pieces' cross directions.
+  const c = norm2([n[0] + n2[0], n[1] + n2[1]]);
+  const w = l.w * 0.96;
+  const ext = rad(alpha + 180);
+  const o = Math.sin(ext) * l.w * 0.82;
+  const face = Math.cos(ext);
+  const cap: Pt = [m[0] + c[0] * o, m[1] + c[1] * o];
+  return (
+    <g>
+      <path d={`M${f1(m[0] - c[0] * w)},${f1(m[1] - c[1] * w)}L${f1(m[0] + c[0] * w)},${f1(m[1] + c[1] * w)}`} stroke="rgba(60,30,20,0.45)" strokeWidth={1.6} />
+      {face > -0.25 && (
+        <ellipse
+          cx={f1(cap[0])}
+          cy={f1(cap[1])}
+          rx={f1(l.lower ? 11 : 8)}
+          ry={f1((l.lower ? 11 : 8) * (0.45 + 0.55 * Math.max(0, face)))}
+          transform={`rotate(${f1((ang * 180) / Math.PI + 90)} ${f1(cap[0])} ${f1(cap[1])})`}
+          fill="#f3dcc2"
+          stroke={EDGE}
+          strokeWidth={1.4}
+          opacity={Math.min(1, (face + 0.25) * 2)}
+        />
+      )}
+    </g>
+  );
+}
+
+const norm2 = (v: Pt): Pt => {
+  const k = Math.hypot(v[0], v[1]) || 1;
+  return [v[0] / k, v[1] / k];
+};
 
 /** Cross-section of the limb: front at the top, the midline toward the body; flexors red, extensors blue, the bone white. */
 function Disc({ l, alpha, turning, label }: { l: L2; alpha: number; turning: number; label: number }) {
@@ -587,7 +635,7 @@ export function LimbRotation({ t }: SceneProps) {
         <path key={s} d={`M${500 - s * 88},138 C${500 - s * 100},134 ${500 - s * 102},156 ${500 - s * 90},164`} fill="#e2bb9e" stroke={EDGE} strokeWidth={1.4} />
       ))}
       {LIMBS.map((l, i) => (
-        <LimbTube key={i} l={l} alpha={l.lower ? aLow : aUp} />
+        <LimbTube key={i} l={l} alpha={l.lower ? aLow : aUp} r={l.lower ? rl : ru} />
       ))}
       {LIMBS.map((l, i) => (
         <Disc key={i} l={l} alpha={l.lower ? aLow : aUp} turning={l.lower ? lowTurn : upTurn} label={1} />
@@ -608,7 +656,7 @@ export function LimbRotation({ t }: SceneProps) {
       <Note x={240} y={282} size={12.5} tone="dim" show={seg(ru, 0.7, 1)}>
         ukondoa atzera
       </Note>
-      <Note x={322} y={548} size={12.5} tone="dim" show={seg(rl, 0.7, 1)}>
+      <Note x={300} y={548} size={12.5} tone="dim" show={seg(rl, 0.7, 1)}>
         belauna aurrera
       </Note>
       <Note x={500} y={612} tone="accent" show={upTurn}>

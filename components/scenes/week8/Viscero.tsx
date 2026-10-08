@@ -40,6 +40,11 @@ const HEAD = spline(
   8,
   true,
 );
+/** A point on the skin outline behind the arches (where its name points). */
+const SKIN_AT = (() => {
+  const want: Pt = [770, 300];
+  return HEAD.reduce((a, q) => (Math.hypot(q[0] - want[0], q[1] - want[1]) < Math.hypot(a[0] - want[0], a[1] - want[1]) ? q : a));
+})();
 const ARCH: { id: number; c: Pt[]; w: number }[] = [
   { id: 1, c: spline([[562, 292], [538, 340], [492, 384], [424, 414], [352, 424]], 8), w: 25 },
   { id: 2, c: spline([[608, 314], [588, 370], [542, 420], [472, 452], [410, 464]], 8), w: 20 },
@@ -147,10 +152,10 @@ export function FaceArches({ t, reduced }: SceneProps) {
       </Part>
       {/* …its ventral part, below the primitive mouth, is the mandibular process. */}
       <Part id="barail-prozesua" show={arch12}>
-        <path d={smoothPath(archBand(ARCH[0]), true, 0.3)} fill="none" stroke={F.manDeep} strokeWidth={2.6} />
+        <path d={smoothPath(archBand(ARCH[0]), true, 0.3)} fill={F.man} fillOpacity={0.14} stroke={F.manDeep} strokeWidth={2.6} />
       </Part>
       <Part id="hioide-arkua" show={arch12}>
-        <path d={smoothPath(archBand(ARCH[1]), true, 0.3)} fill="none" stroke={F.hyoDeep} strokeWidth={2.6} />
+        <path d={smoothPath(archBand(ARCH[1]), true, 0.3)} fill={F.hyo} fillOpacity={0.14} stroke={F.hyoDeep} strokeWidth={2.6} />
       </Part>
 
       {/* Neural crest cells reach the arches and make their mesenchyme. */}
@@ -227,7 +232,7 @@ export function FaceArches({ t, reduced }: SceneProps) {
       </Note>
 
       <Label id="gandor-neurala" x={810} y={110} ax={CREST[18][0]} ay={CREST[18][1]} />
-      <Label id="azaleko-ektodermoa" x={810} y={200} ax={760} ay={300} small />
+      <Label id="azaleko-ektodermoa" x={810} y={200} ax={SKIN_AT[0]} ay={SKIN_AT[1]} small />
       <Label id="faringe-arkuak" x={810} y={470} ax={ARCH[3].c[6][0] + 6} ay={ARCH[3].c[6][1]} />
       <Label id="hioide-arkua" x={810} y={530} ax={ARCH[1].c[22][0]} ay={ARCH[1].c[22][1] + 12} show={arch12} />
       <Label id="reichert-kartilagoa" x={810} y={380} ax={REICHERT[10][0] + 4} ay={REICHERT[10][1]} show={rei} />
@@ -375,7 +380,7 @@ export function FaceSkull({ t }: SceneProps) {
   const col = (fam: string) => (orig > 0.5 ? Q.crest : fam);
   const vaultCol = (front: boolean) => (orig > 0.5 ? (front ? Q.crest : Q.paraxial) : '#cfc6b4');
   const manV = grow > 0 ? MANDIBLE_V.map((p) => jawAt(p, grow)) : MANDIBLE_V;
-  const sinusA = upAt([316, 384], grow);
+  const sinusA = upAt([330, 384], grow);
   const alvA = upAt([336, 424], grow);
   const jawA = A(jawAt([340, 494], grow));
   const ossCol = { m: col(F.man), i: col(F.max), s: col(F.hyo) };
@@ -526,9 +531,9 @@ export function FaceSkull({ t }: SceneProps) {
 
       {/* Left gutter: the face (in front). */}
       <Label id="hezur-frontala" x={190} y={150} ax={A([320, 200])[0]} ay={A([320, 200])[1]} show={orig * inFrame(A([320, 200]))} />
-      <Label id="hezur-malarra" x={190} y={280} ax={A([388, 384])[0]} ay={A([388, 384])[1]} show={maxB * inFrame(A([388, 384])) * (1 - grow)} />
-      <Label id="goiko-maxilarra" x={190} y={380} ax={A([300, 404])[0]} ay={A([300, 404])[1]} show={maxB * inFrame(A([300, 404])) * (1 - grow)} />
-      <Label id="sinu-paranasalak" x={190} y={360} ax={sinusA[0]} ay={sinusA[1]} show={grow} />
+      <Label id="hezur-malarra" x={190} y={244} ax={A([388, 384])[0]} ay={A([388, 384])[1]} show={maxB * inFrame(A([388, 384]))} />
+      <Label id="sinu-paranasalak" x={190} y={288} ax={sinusA[0]} ay={sinusA[1]} show={grow} />
+      <Label id="goiko-maxilarra" x={190} y={372} ax={A(upAt([300, 404], grow))[0]} ay={A(upAt([300, 404], grow))[1]} show={maxB * inFrame(A([300, 404]))} />
       <Label id="apofisi-albeolarrak" x={190} y={420} ax={alvA[0]} ay={alvA[1]} show={grow} />
       <Label id="beheko-maxilarra" x={190} y={480} ax={jawA[0]} ay={jawA[1]} show={manB * inFrame(A([330, 476]))} />
       <Label id="meckel-kartilagoa" x={190} y={540} ax={A([400, 464])[0]} ay={A([400, 464])[1]} show={meckelShow * inFrame(A([400, 464]))} />
@@ -536,9 +541,9 @@ export function FaceSkull({ t }: SceneProps) {
       <Label id="hezur-parietala" x={810} y={100} ax={A([600, 130])[0]} ay={A([600, 130])[1]} show={orig} />
       <Label id="tenporalaren-ezkata" x={760} y={196} ax={A([540, 312])[0]} ay={A([540, 312])[1]} show={maxB * inFrame(A([540, 312]))} />
       <Label id="ingudea" x={810} y={250} ax={A([EAR_C[0] + 6, EAR_C[1] - 9])[0]} ay={A([EAR_C[0] + 6, EAR_C[1] - 9])[1]} show={maxB} />
-      <Label id="barra-pterigopalatino-karratua" x={754} y={290} ax={A([486, 378])[0]} ay={A([486, 378])[1]} show={ptqShow * inFrame(A([486, 378]))} small />
+      <Label id="barra-pterigopalatino-karratua" x={754} y={290} ax={A([470, 395])[0]} ay={A([470, 395])[1]} show={ptqShow * inFrame(A([470, 395]))} small />
       <Label id="mailua" x={810} y={350} ax={A([EAR_C[0] - 12, EAR_C[1] + 6])[0]} ay={A([EAR_C[0] - 12, EAR_C[1] + 6])[1]} show={manB} />
-      <Label id="ointokia" x={810} y={400} ax={A([EAR_C[0] + 9, EAR_C[1] + 9])[0]} ay={A([EAR_C[0] + 9, EAR_C[1] + 9])[1]} show={hyoB} />
+      <Label id="ointokia" x={810} y={400} ax={A([EAR_C[0] + 11.3, EAR_C[1] + 6.3])[0]} ay={A([EAR_C[0] + 11.3, EAR_C[1] + 6.3])[1]} show={hyoB} />
       <Label id="okzipitalaren-ezkata" x={810} y={440} ax={A([724, 300])[0]} ay={A([724, 300])[1]} show={orig} />
       <Label id="apofisi-estiloidea" x={810} y={480} ax={A([510, 466])[0]} ay={A([510, 466])[1]} show={maxB * inFrame(A([510, 466]))} />
       <Label id="reichert-kartilagoa" x={810} y={530} ax={A([524, 482])[0]} ay={A([524, 482])[1]} show={reiShow * inFrame(A([524, 482]))} />

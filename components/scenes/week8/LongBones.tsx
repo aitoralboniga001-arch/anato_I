@@ -306,9 +306,10 @@ export function LongBone({ t, reduced }: SceneProps) {
         Femurra: bi hazkuntza plaka (bi muturretatik) · falangea: plaka bakarra (mutur batetik)
       </Note>
 
-      <Label id="epifisiak" x={190} y={130} {...pt(F([CX - EW * 0.8, top + E * 0.45]))} show={vis(t, HL_T.parts) * inFrame(F([CX - EW * 0.8, top + E * 0.45]))} />
+      <Label id="epifisiak" x={190} y={130} {...pt(F([CX - EW * 0.8, top + E * 0.45]))} show={vis(t, HL_T.parts) * (1 - cmp) * inFrame(F([CX - EW * 0.8, top + E * 0.45]))} />
       <Label id="hazkuntza-plaka" x={190} y={230} {...pt(F([CX - SW * 1.1, plateT]))} show={vis(t, HL_T.plate) * inFrame(F([CX - SW * 1.1, plateT]))} />
-      <Label id="diafisia" x={190} y={390} {...pt(F([CX - SW * 0.9, MID + 40]))} show={vis(t, HL_T.parts) * inFrame(F([CX - SW * 0.9, MID + 40]))} />
+      {/* Inside the bone already formed (it spreads from the centre toward the ends). */}
+      <Label id="diafisia" x={190} y={390} {...pt(F([CX - SW * 0.9, MID + Math.min(40, reach * 0.5)]))} show={vis(t, HL_T.parts) * (1 - cmp) * inFrame(F([CX - SW * 0.9, MID + 40]))} />
       <Label id="kartilago-eredua" x={190} y={500} {...pt(F([CX - SW, bot - E * 1.6]))} show={(1 - seg(t, HL_T.secondary, HL_T.secondary + 0.03)) * inFrame(F([CX - SW, bot - E * 1.6]))} />
       <Label id="hezurtzapen-zentro-sekundarioak" x={716} y={240} {...pt(F([CX + 14, (top + plateT) / 2]))} show={vis(t, HL_T.secondary, HL_T.fusion) * inFrame(F([CX + 14, (top + plateT) / 2]))} />
       <Label id="hezurtzapen-zentroak" text="Zentro primarioa" x={810} y={360} {...pt(F([CX + 20, MID + 4]))} show={p1 * (1 - seg(t, HL_T.secondary, HL_T.secondary + 0.03)) * inFrame(F([CX + 20, MID + 4]))} />

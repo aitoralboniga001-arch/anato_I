@@ -37,6 +37,7 @@ export const structuresB: StructureDef[] = [
   },
   {
     id: 'alboko-mesodermoa',
+    parts: ['paretako-orria', 'errai-orria'],
     name: 'Alboko mesodermoa',
     es: 'Mesodermo lateral',
     category: 'mesodermoa',

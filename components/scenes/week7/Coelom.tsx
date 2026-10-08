@@ -33,8 +33,6 @@ export function CoelomFold({ t }: SceneProps) {
   // Intermediate mesoderm: the small cord between the somite and the lateral plate.
   const im = g.mapT(118, 64);
   const imRot = (Math.atan2(g.mapT(122, 64)[1] - g.mapT(114, 64)[1], g.mapT(122, 64)[0] - g.mapT(114, 64)[0]) * 180) / Math.PI;
-  // The lateral plate splits where the coelom begins.
-  const split = g.closing[1];
 
   // Continuity: until the walls meet, the coelom opens at each edge straight into the chorionic cavity.
   const open = vis(t, 0.36, 0.69);
@@ -99,7 +97,8 @@ export function CoelomFold({ t }: SceneProps) {
 
       <Label id="amnios-barrunbea" x={190} y={78} ax={L(A.amnion)[0]} ay={L(A.amnion)[1]} />
       <Label id="ektodermoa" x={190} y={114} ax={L(A.ecto)[0]} ay={L(A.ecto)[1]} />
-      <Label id="tolestura-laterala" x={190} y={150} ax={L(g.E0)[0]} ay={L(g.E0)[1]} show={vis(t, 0.5, 0.7)} />
+      {/* Follows the fold: the left edge while it moves, then the midline where the two walls meet. */}
+      <Label id="tolestura-laterala" x={190} y={150} ax={t < 0.68 ? L(g.E0)[0] : meet[0]} ay={t < 0.68 ? L(g.E0)[1] : meet[1]} show={vis(t, 0.5, 0.84)} />
       <Label id="paretako-orria" x={190} y={232} ax={L(A.parietal)[0]} ay={L(A.parietal)[1]} />
       <Label id="errai-orria" x={190} y={268} ax={L(A.visceral)[0]} ay={L(A.visceral)[1]} />
       <Label id="korion-barrunbea" x={190} y={380} ax={L(A.chorion)[0]} ay={L(A.chorion)[1]} small />
@@ -107,8 +106,10 @@ export function CoelomFold({ t }: SceneProps) {
 
       <Label id="hodi-neurala" x={810} y={78} ax={R(A.tube)[0]} ay={R(A.tube)[1]} />
       <Label id="somitak" x={810} y={112} ax={R(A.somite)[0]} ay={R(A.somite)[1]} small />
+      <Label id="notokorda" x={810} y={150} ax={R(A.noto)[0]} ay={R(A.noto)[1]} small />
+      <Label id="aorta-dortsalak" x={810} y={190} ax={R(A.aorta)[0]} ay={R(A.aorta)[1]} small />
       <Label id="bitarteko-mesodermoa" x={810} y={238} ax={R(im)[0]} ay={R(im)[1]} small />
-      <Label id="alboko-mesodermoa" x={810} y={272} ax={R(split)[0]} ay={R(split)[1]} small />
+      <Label id="alboko-mesodermoa" x={810} y={272} ax={R(A.parietal)[0]} ay={R(A.parietal)[1]} small />
       <Label id="enbrioi-barruko-zeloma" x={810} y={310} ax={R(A.coelom)[0]} ay={R(A.coelom)[1]} />
       <Label id="mesenterio-dortsala" x={810} y={354} ax={R(A.mesentery)[0]} ay={R(A.mesentery)[1]} show={seg(g.mes, 8, 20)} small />
       <Label id="endodermoa" x={810} y={392} ax={R(A.gut)[0]} ay={R(A.gut)[1]} show={1 - seg(g.ff, 0.665, 0.69)} />

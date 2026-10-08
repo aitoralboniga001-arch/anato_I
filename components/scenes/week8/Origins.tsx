@@ -116,6 +116,8 @@ export function OriginsMap({ t, reduced }: SceneProps) {
   const boneFill = (c: string, k1: number) => ({ fill: fill(c, k1), opacity: k1 > 0.01 ? 0.35 + 0.65 * k1 : 1 });
 
   const both = (pts: Pt[]) => [pts, pts.map((p) => mirror(p, EX))];
+  const flow = MES_FLOWS.find((r) => t >= r.from && t < r.to);
+  const flowMid = flow ? quad(flow.a, flow.b, flow.bend, 0.5) : ([0, 0] as Pt);
   return (
     <g>
       <Defs8 />
@@ -261,8 +263,8 @@ export function OriginsMap({ t, reduced }: SceneProps) {
         const show = vis(t, r.from, r.to);
         return (
           <g key={i}>
-            <Arrow from={r.a} to={r.b} color={r.color} width={2.6} bend={r.bend} show={show * 0.8} flow={!reduced} />
             <Part id="mesenkima" show={show}>
+              <Arrow from={r.a} to={r.b} color={r.color} width={2.6} bend={r.bend} show={0.8} flow={!reduced} />
               {Array.from({ length: 6 }, (_, k) => {
                 const u = (k / 6 + (reduced ? 0 : t * 9)) % 1;
                 const p = quad(r.a, r.b, r.bend, 0.06 + u * 0.82);
@@ -296,11 +298,14 @@ export function OriginsMap({ t, reduced }: SceneProps) {
       <Label id="hodi-neurala" x={190} y={84} ax={EX + 14} ay={96} />
       <Label id="gandor-neurala" x={190} y={130} ax={2 * EX - 346} ay={150} />
       <Label id="somitomeroak" x={190} y={186} ax={2 * EX - 372} ay={182} show={segs} />
-      <Label id="mesodermo-paraxiala" x={190} y={256} ax={2 * EX - 378} ay={196} show={1 - segs} />
+      <Label id="mesodermo-paraxiala" x={190} y={256} ax={2 * EX - 378} ay={196} />
       <Label id="somitak" x={190} y={300} ax={2 * EX - somiteBox(4).x1 + 4} ay={somiteBox(4).y + 5} show={segs} />
-      <Label id="bitarteko-mesodermoa" x={190} y={360} ax={2 * EX - 366} ay={360} small />
+      <Label id="bitarteko-mesodermoa" x={190} y={360} ax={2 * EX - 368} ay={380} small />
       <Label id="paretako-orria" x={190} y={420} ax={2 * EX - 384} ay={420} />
-      <Label id="azaleko-ektodermoa" x={190} y={540} ax={2 * EX - 383} ay={528} small />
+      <Label id="azaleko-ektodermoa" x={190} y={540} ax={2 * EX - LIMB_BUDS[1][0] - 7} ay={LIMB_BUDS[1][1]} small />
+
+      {/* The mesenchyme on its way: named on the arrow of the step's tissue. */}
+      {flow && <Label id="mesenkima" x={535} y={flowMid[1] - 40} ax={flowMid[0]} ay={flowMid[1]} align="middle" show={vis(t, flow.from, flow.to)} small />}
 
       <Label id="hezur-parietala" x={810} y={70} ax={S([726, 110])[0]} ay={S([726, 110])[1]} />
       <Label id="buru-aurpegi-hezurrak" x={786} y={236} ax={S([702, 196])[0]} ay={S([702, 196])[1]} />
@@ -396,6 +401,7 @@ export function OriginsSection({ t }: SceneProps) {
       <Label id="dermatoma" x={810} y={150} ax={a.dermatoma[0]} ay={a.dermatoma[1]} show={tm.dt} small />
       <Label id="miotoma" x={810} y={200} ax={a.miotoma[0]} ay={a.miotoma[1]} show={tm.my} small />
       <Label id="paretako-orria" x={810} y={290} ax={a['paretako-orria'][0]} ay={a['paretako-orria'][1]} small />
+      <Label id="bitarteko-mesodermoa" x={810} y={560} ax={a['bitarteko-mesodermoa'][0]} ay={a['bitarteko-mesodermoa'][1]} show={1 - cells} small />
       <Label id="saihetsak" x={810} y={400} ax={a.saihetsak[0]} ay={a.saihetsak[1]} show={tm.fa} />
       <Label id="fibroblastoak" x={cellX[0]} y={CELL_Y + 46} align="middle" show={cells} small />
       <Label id="kondroblastoak" x={cellX[1]} y={CELL_Y + 46} align="middle" show={cells} small />

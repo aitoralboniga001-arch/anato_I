@@ -13,8 +13,8 @@ import type { PlaneKind } from '@/lib/sim/types';
  * y = up (dorsal / endometrium side), z = depth (away from the viewer).
  */
 
-type V3 = [number, number, number];
-type Pt = [number, number];
+export type V3 = [number, number, number];
+export type Pt = [number, number];
 
 export type SpecimenShape = 'umetokia' | 'blastozistoa' | 'habiratzea' | 'diskoa' | 'tolesten' | 'c' | 'fetua' | 'karena';
 
@@ -45,7 +45,7 @@ export function shapeFor(week: number, day: number, plane: PlaneKind): SpecimenS
 const DX = 0.5;
 const DY = 0.3;
 
-interface Blob {
+export interface Blob {
   c: V3;
   r: V3;
   fill: string;
@@ -57,7 +57,7 @@ interface Blob {
   ghost?: boolean;
 }
 
-interface Model {
+export interface Model {
   blobs: Blob[];
   /** Extra drawing in world coordinates (tubes, streak…), under the plane. */
   extra?: (p: (v: V3) => Pt) => ReactNode;
@@ -94,7 +94,7 @@ function cCurve(big: boolean): V3[] {
   return pts;
 }
 
-function modelOf(shape: SpecimenShape, day: number): Model {
+export function modelOf(shape: SpecimenShape, day: number): Model {
   switch (shape) {
     case 'umetokia':
       return {
@@ -236,7 +236,7 @@ function modelOf(shape: SpecimenShape, day: number): Model {
 
 // ---- geometry helpers -------------------------------------------------------
 
-function hull(points: Pt[]): Pt[] {
+export function hull(points: Pt[]): Pt[] {
   const p = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
   const cross = (o: Pt, a: Pt, b: Pt) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
   const lower: Pt[] = [];
@@ -252,10 +252,10 @@ function hull(points: Pt[]): Pt[] {
   return [...lower.slice(0, -1), ...upper.slice(0, -1)];
 }
 
-const poly = (pts: Pt[]) => (pts.length ? `M${pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' L')}Z` : '');
+export const poly = (pts: Pt[]) => (pts.length ? `M${pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' L')}Z` : '');
 
 /** Outline of an ellipsoid (or its upper/lower half) as seen by the oblique camera. */
-function silhouette(b: Blob, P: (v: V3) => Pt) {
+export function silhouette(b: Blob, P: (v: V3) => Pt) {
   const pts: Pt[] = [];
   for (let i = 0; i <= 14; i++) {
     const u = -Math.PI / 2 + (i / 14) * Math.PI;
@@ -268,7 +268,7 @@ function silhouette(b: Blob, P: (v: V3) => Pt) {
   return poly(hull(pts));
 }
 
-type Axis = 0 | 1 | 2;
+export type Axis = 0 | 1 | 2;
 /** The ellipse an axis-aligned plane cuts from an ellipsoid (null when it misses it). */
 function sectionOf(b: Blob, axis: Axis, at: number, P: (v: V3) => Pt) {
   const d = (at - b.c[axis]) / b.r[axis];
@@ -302,14 +302,15 @@ function planeQuad(axis: Axis, at: number, ext: Model['ext'], P: (v: V3) => Pt) 
 }
 
 /** Axis and position of a plane in the model (null for views that are not cuts). */
-function cutOf(plane: PlaneKind, m: Model, level: number): { axis: Axis; at: number } | null {
+export function cutOf(plane: PlaneKind, m: Model, level: number): { axis: Axis; at: number } | null {
   const lerp = (a: number, b: number) => a + (b - a) * level;
   if (plane === 'sagitala') return { axis: 2, at: 0 };
   if (plane === 'zeharkakoa') {
     if (m.box) return { axis: 2, at: 0 };
     return m.transverse === 'x' ? { axis: 0, at: lerp(m.ext.x[0] * 0.6, m.ext.x[1] * 0.6) } : { axis: 1, at: lerp(m.ext.y[1] * 0.6, m.ext.y[0] * 0.6) };
   }
-  if (plane === 'koronala') return m.transverse === 'y' && !m.box ? { axis: 2, at: 0 } : { axis: 1, at: m.spot[1] };
+  // Coronal: for the upright C body, the vertical plane across it through the trunk (the back's arc); for a flat embryo, parallel to its surface.
+  if (plane === 'koronala') return m.tube ? { axis: 0, at: m.ext.x[1] * 0.5 } : m.transverse === 'y' && !m.box ? { axis: 2, at: 0 } : { axis: 1, at: m.spot[1] };
   return null;
 }
 

@@ -466,9 +466,9 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
       <Label id="osteoblastoak" x={190} y={360} ax={LC[0] - lerp(14, 34, spic) * Math.cos(Math.PI / 9)} ay={LC[1] + 12} show={lCentre} small />
       <Label id="hezur-espikulak" x={190} y={420} ax={SPICULES[5][4][0]} ay={SPICULES[5][4][1]} show={spic} />
 
-      <Label id="mesenkima" x={810} y={110} ax={cells[MES_I].p[0] + 4} ay={cells[MES_I].p[1]} show={1 - round} />
+      <Label id="mesenkima" x={810} y={110} ax={cells[MES_I].p[0]} ay={cells[MES_I].p[1]} show={1 - round} />
       <Label id="kartilago-eredua" x={776} y={150} ax={RX + halfW(TOP + 60) - 2} ay={TOP + 60} show={matrix} />
-      <Label id="kondroblastoak" x={810} y={196} ax={RIM[RIM_I][0] + 4} ay={RIM[RIM_I][1]} show={round * (1 - hyper)} small />
+      <Label id="kondroblastoak" x={810} y={196} ax={RIM[RIM_I][0]} ay={RIM[RIM_I][1]} show={round * (1 - hyper)} small />
       <Label id="kondrozitoak" x={810} y={236} ax={RX + 14} ay={MID - boneR - 22} show={hyper} small />
       <Label id="hezurtzapen-zentroak" text="Hezur lepokoa" x={810} y={276} ax={RX + halfW(MID + 40) + 2} ay={MID + 40} show={collar} small />
       <Label id="hezurtzapen-zentroak" text="Zentro primarioa" x={810} y={316} ax={RX + 12} ay={MID + 18} show={prim} />

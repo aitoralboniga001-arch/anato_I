@@ -235,6 +235,8 @@ interface InfoProps {
   onHover: (id: string | null) => void;
   /** Closes the panel when it is shown as a drawer (narrow screens). */
   onDismiss: () => void;
+  /** A topic's own guide at the top of the summary (topic 7: the cavity road). */
+  guide?: ReactNode;
 }
 
 type Tab = 'gakoak' | 'egiturak' | 'leinuak';
@@ -305,7 +307,7 @@ function InfoSection({ id, title, icon, count, tone, children }: { id: string; t
 }
 
 /** Right column: key dates and key points, the structures of the stage, and where they come from. */
-export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, onDismiss }: InfoProps) {
+export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, onDismiss, guide }: InfoProps) {
   const [picked, setTab] = useState<Tab>('gakoak');
   const dates = stageExamDates(week, stage);
   const branch = branchOf(stage.structures);
@@ -333,6 +335,7 @@ export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, 
         <StageLineage ids={stage.structures} root={branch} onSelect={onSelect} />
       ) : tab === 'gakoak' ? (
         <div className="info-scroll">
+          {guide}
           {dates.length > 0 && (
             <InfoSection id="datak" title="Data garrantzitsuak" icon={<IconCalendar size={14} />} count={dates.length} tone="date">
               <ol className="xd">

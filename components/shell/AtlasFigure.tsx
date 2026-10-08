@@ -5,7 +5,7 @@ import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } fro
 import { createPortal } from 'react-dom';
 import { Defs } from '@/components/kit/Defs';
 import { LabelScaleContext, SceneContext, type SceneContextValue } from '@/components/kit/context';
-import { appearances, isSpace, nameOf } from '@/content/registry';
+import { appearances, isSpace, partsOf, nameOf } from '@/content/registry';
 import type { StageDef } from '@/lib/sim/types';
 import { IconClose, IconExpand } from './icons';
 import styles from './structure-atlas.module.css';
@@ -145,6 +145,7 @@ export function AtlasFigure({ id }: { id: string }) {
     quizFlash: null,
     nameOf,
     isSpace,
+    partsOf,
     onSelect: noop,
     onHover: noop,
   };

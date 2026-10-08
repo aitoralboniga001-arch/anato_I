@@ -34,6 +34,8 @@ const KIDNEY_R: Pt = [638, 214];
 /** Ascending colon (viewer's left = embryo's right) and descending colon: hanging → fused to the back wall. */
 const colonAt = (side: -1 | 1, k: number): Pt => [500 + side * lerp(170, 152, k), lerp(404, 312, k)];
 const CR = 25;
+const OUTSIDE = ['peritoneo-kanpoko-egiturak'];
+const INSIDE = ['peritoneo-barruko-egiturak'];
 
 /** The peritoneal cavity: dorsal border (it bulges in front of the colons as they fuse), then the walls. */
 function cavity(k: number): Pt[] {
@@ -127,6 +129,8 @@ export function PeritoneumSection({ t }: SceneProps) {
     return <path key={side} d={poly(band)} fill="#c98a8a" opacity={0.85} />;
   };
   const extra = vis(t, 0.62);
+  // The groups the notes name are their organs: naming one lights them. The colons change group as they fuse.
+  const colonGroup = [k < 0.5 ? 'peritoneo-barruko-egiturak' : 'peritoneo-atzeko-egiturak'];
 
   return (
     <g>
@@ -195,29 +199,21 @@ export function PeritoneumSection({ t }: SceneProps) {
       {/* Renal arteries from the aorta (the right one passes behind the vena cava). */}
       <path d="M488,234 Q440,214 384,222 M512,234 Q560,214 616,222" fill="none" stroke="#9e1228" strokeWidth={5.5} strokeLinecap="round" opacity={0.9} pointerEvents="none" />
       <path d="M488,234 Q440,214 384,222 M512,234 Q560,214 616,222" fill="none" stroke={P.aorta} strokeWidth={3.5} strokeLinecap="round" pointerEvents="none" />
-      <Part id="giltzurruna">
+      <Part id="giltzurruna" groups={OUTSIDE}>
         <Bean c={KIDNEY_L} />
         <Bean c={KIDNEY_R} flip />
       </Part>
-      <Part id="aorta">
+      <Part id="aorta" groups={OUTSIDE}>
         <circle cx={AORTA[0]} cy={AORTA[1]} r={17} fill={P.aorta} stroke="#7a0f1e" strokeWidth={1.4} />
         <circle cx={AORTA[0] - 4} cy={AORTA[1] - 5} r={6} fill="#fff" opacity={0.18} />
       </Part>
-      <Part id="beheko-kaba-zaina">
+      <Part id="beheko-kaba-zaina" groups={OUTSIDE}>
         <ellipse cx={IVC[0]} cy={IVC[1]} rx={15} ry={12} fill={P.ivc} stroke="#1c3c88" strokeWidth={1.2} />
         <circle cx={IVC[0] - 4} cy={IVC[1] - 4} r={4} fill="#fff" opacity={0.16} />
       </Part>
       {/* Renal veins into the vena cava: the left one is long and crosses in front of the aorta. */}
       <path d="M386,228 Q412,240 438,240 M614,228 Q520,276 466,246" fill="none" stroke="#1c3c88" strokeWidth={6.5} strokeLinecap="round" pointerEvents="none" />
       <path d="M386,228 Q412,240 438,240 M614,228 Q520,276 466,246" fill="none" stroke={P.ivc} strokeWidth={4.5} strokeLinecap="round" pointerEvents="none" />
-      <Part id="peritoneo-kanpoko-egiturak" show={extra}>
-        <g opacity={0.001}>
-          <Bean c={KIDNEY_L} />
-          <Bean c={KIDNEY_R} flip />
-          <circle cx={AORTA[0]} cy={AORTA[1]} r={17} fill={P.aorta} />
-          <ellipse cx={IVC[0]} cy={IVC[1]} rx={15} ry={12} fill={P.ivc} />
-        </g>
-      </Part>
 
       {/* The dorsal attachment of the gut: broad mesenchyme first, then the two-layered dorsal mesentery. */}
       <Part id="mesenterio-dortsala">
@@ -225,7 +221,7 @@ export function PeritoneumSection({ t }: SceneProps) {
         <path d={smoothPath(gut, true, 0.3)} fill="url(#w7-mesench)" />
         <path d={`M500,${ROOT_Y + 6}L500,${f1(GUT[1] - GR.y)}`} stroke="#d8203a" strokeWidth={lerp(5, 2.4, thin)} opacity={0.7} />
       </Part>
-      <Part id="erdiko-hestea">
+      <Part id="erdiko-hestea" groups={INSIDE}>
         <Tube c={GUT} rx={GR.x - 4} ry={GR.y - 4} />
       </Part>
 
@@ -236,10 +232,10 @@ export function PeritoneumSection({ t }: SceneProps) {
             {colonMes(colonL, -1)}
             {colonMes(colonR, 1)}
           </g>
-          <Part id="goranzko-kolona" show={colons}>
+          <Part id="goranzko-kolona" show={colons} groups={colonGroup}>
             <Tube c={colonL} rx={CR} ry={CR - 2} />
           </Part>
-          <Part id="beheranzko-kolona" show={colons}>
+          <Part id="beheranzko-kolona" show={colons} groups={colonGroup}>
             <Tube c={colonR} rx={CR} ry={CR - 2} />
           </Part>
         </>
@@ -263,20 +259,6 @@ export function PeritoneumSection({ t }: SceneProps) {
           ))}
       </Part>
 
-      {/* Groups (no outline of their own): they light up as the organs they name. */}
-      <Part id="peritoneo-barruko-egiturak" show={vis(t, 0.48)}>
-        <g opacity={0.001}>
-          <ellipse cx={GUT[0]} cy={GUT[1]} rx={GR.x} ry={GR.y} />
-          {k < 0.5 && <circle cx={colonL[0]} cy={colonL[1]} r={CR} />}
-          {k < 0.5 && <circle cx={colonR[0]} cy={colonR[1]} r={CR} />}
-        </g>
-      </Part>
-      <Part id="peritoneo-atzeko-egiturak" show={k}>
-        <g opacity={0.001}>
-          <circle cx={colonL[0]} cy={colonL[1]} r={CR} />
-          <circle cx={colonR[0]} cy={colonR[1]} r={CR} />
-        </g>
-      </Part>
       <Mark id="peritoneo-atzeko-egiturak" x={colonL[0]} y={colonL[1] - 18} rx={34} ry={16} show={vis(t, 0.78, 0.9)} />
       <Mark id="peritoneo-atzeko-egiturak" x={colonR[0]} y={colonR[1] - 18} rx={34} ry={16} show={vis(t, 0.78, 0.9)} />
 
@@ -305,8 +287,8 @@ export function PeritoneumSection({ t }: SceneProps) {
       </Note>
 
       {/* Left gutter. */}
-      <Label id="beheko-kaba-zaina" x={190} y={150} ax={IVC[0] - 10} ay={IVC[1] - 6} show={extra} small />
-      <Label id="giltzurruna" x={190} y={196} ax={KIDNEY_L[0] - 20} ay={KIDNEY_L[1]} show={extra} />
+      <Label id="beheko-kaba-zaina" x={190} y={150} ax={IVC[0] - 10} ay={IVC[1] - 6} small />
+      <Label id="giltzurruna" x={190} y={196} ax={KIDNEY_L[0] - 20} ay={KIDNEY_L[1]} />
       <Label id="peritoneo-atzeko-egiturak" x={190} y={290} ax={colonL[0] - 18} ay={colonL[1] - 8} show={k} small />
       <Label id="goranzko-kolona" x={190} y={360} ax={colonL[0] - CR + 4} ay={colonL[1]} show={colons} />
       <Label id="paretako-orria" x={190} y={432} ax={258} ay={432} show={1 - named} />
@@ -315,14 +297,14 @@ export function PeritoneumSection({ t }: SceneProps) {
 
       {/* Right gutter. */}
       <Label id="hodi-neurala" x={810} y={92} ax={526} ay={100} small />
-      <Label id="aorta" x={810} y={180} ax={AORTA[0] + 14} ay={AORTA[1] - 6} show={extra} />
+      <Label id="aorta" x={810} y={180} ax={AORTA[0] + 14} ay={AORTA[1] - 6} />
       <Label id="peritoneo-kanpoko-egiturak" x={804} y={240} ax={KIDNEY_R[0] + 20} ay={KIDNEY_R[1] + 4} show={extra} small />
-      <Label id="mesenterio-dortsala" x={810} y={290} ax={500 + w / 2 - 6} ay={ROOT_Y + 30} show={seg(thin, 0.6, 1)} />
+      <Label id="mesenterio-dortsala" x={810} y={290} ax={500 + w / 2 - 6} ay={ROOT_Y + 30} />
       <Label id="beheranzko-kolona" x={810} y={360} ax={colonR[0] + CR - 4} ay={colonR[1]} show={colons} />
       <Label id="erdiko-hestea" x={810} y={410} ax={GUT[0] + 20} ay={GUT[1]} />
       <Label id="errai-orria" x={810} y={452} ax={GUT[0] + 26} ay={GUT[1] + 30} show={1 - named} />
       <Label id="errai-peritoneoa" x={810} y={452} ax={GUT[0] + 26} ay={GUT[1] + 30} show={named} />
-      <Label id="peritoneo-barruko-egiturak" x={804} y={500} ax={GUT[0] + 10} ay={GUT[1] + 36} show={vis(t, 0.48)} small />
+      <Label id="peritoneo-barruko-egiturak" x={804} y={500} ax={GUT[0] + 14} ay={GUT[1] + 20} show={vis(t, 0.48)} small />
     </g>
   );
 }

@@ -674,8 +674,12 @@ export function CoelomExtent({ t, reduced }: SceneProps) {
       {/* The plane of the transverse view (midgut level, at the yolk stalk). */}
       <path d="M392,456L690,456" stroke="#0f0f11" strokeWidth={4.4} strokeLinecap="round" opacity={0.8} />
       <path d="M392,456L690,456" stroke="#ffb86b" strokeWidth={2} strokeLinecap="round" opacity={0.85} />
-      <Note x={760} y={604} size={13}>
+      <Note x={760} y={580} size={13}>
         marra laranja: zeharkako ebakiaren maila
+      </Note>
+      {/* The heart was not in the transverse cut: say what it is the moment this view opens. */}
+      <Note x={500} y={616} tone="accent" show={t < 0.84 ? 1 : seg(t, 0.865, 0.89)}>
+        Albotik: bihotza zelomaren goiko aldean dago, geroko toraxean
       </Note>
       <Arrow from={[392, 392]} to={[lerp(392, 396, sweep), lerp(392, 296, sweep)]} color="#c4a8ff" width={2.6} show={sweep > 0.05 ? 1 : 0} bend={-0.06} />
       <Arrow from={[420, 432]} to={[lerp(420, 560, sweep), lerp(432, 494, sweep)]} color="#c4a8ff" width={2.6} show={sweep > 0.05 ? 1 : 0} bend={0.1} />
@@ -687,7 +691,7 @@ export function CoelomExtent({ t, reduced }: SceneProps) {
       </Note>
 
       <Label id="enbrioi-barruko-zeloma" x={236} y={372} ax={386} ay={330} />
-      <Label id="bihotza" x={236} y={262} ax={452} ay={330} small />
+      <Label id="bihotza" x={236} y={262} ax={452} ay={330} />
       <Label id="hodi-onfalomesenterikoa" x={236} y={556} ax={320} ay={548} small />
       <Label id="hodi-neurala" x={790} y={80} ax={650} ay={88} />
       <Label id="somitak" x={790} y={132} ax={SOMITES[2]?.p[0] ?? 660} ay={SOMITES[2]?.p[1] ?? 140} small />
@@ -729,7 +733,7 @@ export function SeptumLateral({ t, reduced }: SceneProps) {
       </Note>
 
       <Label id="enbrioi-barruko-zeloma" x={236} y={372} ax={386} ay={330} show={1 - split} />
-      <Label id="hasierako-perikardio-barrunbea" x={250} y={214} ax={404} ay={244} show={split} />
+      <Label id="hasierako-perikardio-barrunbea" x={250} y={214} ax={372} ay={300} show={split} />
       <Label id="bihotza" x={236} y={268} ax={452} ay={330} />
       <Label id="septum-transversum" x={236} y={420} ax={404} ay={414} show={seg(t, 0.2, 0.24)} />
       <Label id="peritoneo-barrunbea" x={236} y={470} ax={446} ay={446} show={split} />

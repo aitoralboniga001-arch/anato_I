@@ -269,9 +269,14 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
   const periNamed = seg(t, 0.84, 0.88);
   const memShow = G.m;
   const memCore = periNamed > 0.5 ? '#d9c7a4' : P.mesench;
-  const nerve = along(G.mem, 0.16);
-  const vein = along(G.mem, 0.3);
+  const nerve = along(G.mem, 0.12);
+  const vein = along(G.mem, 0.34);
   const heartS = lerp(1, 1.1, G.virt);
+  // The pleural cavity's name points into it wherever it is: between the wall and the lung, a little dorsal of the membrane's base.
+  const wallQ = wallAt(lerp(lerp(0.46, 0.105, G.d), 1, 0.3));
+  const lungQ = G.lung.reduce((a, q) => (Math.hypot(q[0] - wallQ[0], q[1] - wallQ[1]) < Math.hypot(a[0] - wallQ[0], a[1] - wallQ[1]) ? q : a));
+  const pleuraAt: Pt = [lerp(wallQ[0], lungQ[0], 0.45), lerp(wallQ[1], lungQ[1], 0.45)];
+  const serosaAt = heartPts(heartS * 1.02)[3];
   // Cavity tints: one primitive pericardial cavity, then two pleural + one pericardial.
   const periTint = poly(G.peri);
   const pleuraTint = `${poly(G.pleura)}${poly(G.pleura.map(mirror))}`;
@@ -381,16 +386,16 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
         <path d={smoothPath(inset(resample(G.peri, 120), 9), true, 0.3)} fill="none" stroke="#ffb3c4" strokeWidth={2.6} />
         <path d={heartD(heartS * 1.02)} fill="none" stroke="#ffb3c4" strokeWidth={2.6} />
       </Part>
-      <Part id="nerbio-frenikoa" show={memShow}>
-        {both((s) => {
-          const q = sideP(nerve, s);
-          return <circle key={s} cx={q[0]} cy={q[1]} r={5.5} fill={P.nerve} stroke="#8a6d00" strokeWidth={1} />;
-        })}
-      </Part>
       <Part id="bena-kardinal-komuna" show={memShow}>
         {both((s) => {
           const q = sideP(vein, s);
           return <ellipse key={s} cx={q[0]} cy={q[1]} rx={7} ry={5.5} fill={P.ivc} stroke="#1c3c88" strokeWidth={1} />;
+        })}
+      </Part>
+      <Part id="nerbio-frenikoa" show={memShow}>
+        {both((s) => {
+          const q = sideP(nerve, s);
+          return <circle key={s} cx={q[0]} cy={q[1]} r={5.5} fill={P.nerve} stroke="#8a6d00" strokeWidth={1} />;
         })}
       </Part>
 
@@ -448,17 +453,18 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
       <Label id="perikardio-fibrosoa" x={190} y={260} ax={along(G.mem, 0.62)[0]} ay={along(G.mem, 0.62)[1]} show={periNamed} />
       <Label id="nerbio-frenikoa" x={190} y={360} ax={nerve[0]} ay={nerve[1]} show={memShow} />
       <Label id="bena-kardinal-komuna" x={190} y={400} ax={vein[0]} ay={vein[1]} show={memShow} small />
-      <Label id="pleura-barrunbea" x={190} y={450} ax={286} ay={456} show={fused} />
+      <Label id="pleura-barrunbea" x={190} y={450} ax={pleuraAt[0]} ay={pleuraAt[1]} show={fused} />
       <Label id="paretako-pleura" x={190} y={492} ax={300} ay={494} show={pleuraNamed} />
 
       {/* Right gutter: midline and the pericardial side. */}
+      <Label id="hodi-neurala" x={810} y={84} ax={526} ay={100} small />
       <Label id="aorta" x={810} y={128} ax={AORTA[0] + 12} ay={AORTA[1] - 4} small />
       <Label id="hestegorria" x={810} y={176} ax={ESO[0] + 12} ay={ESO[1] - 6} />
       <Label id="hestegorri-inguruko-mesenkima" x={780} y={250} ax={540} ay={300} small />
       <Label id="hasierako-perikardio-barrunbea" x={776} y={380} ax={580} ay={386} show={1 - fused} small />
       <Label id="perikardio-barrunbea" x={810} y={380} ax={556} ay={386} show={fused} />
       <Label id="bihotza" x={810} y={440} ax={HEART[0] + 40} ay={HEART[1]} />
-      <Label id="perikardio-serosoa" x={810} y={500} ax={HEART[0] + 56} ay={HEART[1] + 26} show={periNamed} />
+      <Label id="perikardio-serosoa" x={810} y={500} ax={serosaAt[0]} ay={serosaAt[1]} show={periNamed} />
     </g>
   );
 }

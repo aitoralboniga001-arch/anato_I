@@ -285,10 +285,14 @@ export function ColumnCoronal({ t }: SceneProps) {
               {/* The body takes its waisted shape (sides drawing in between the end plates) as it fuses. */}
               <path d={waisted(YC(k) + gap, YC(k + 1) - gap, 16 * fuse * merge)} fill={BODYC} stroke="#a8946a" strokeWidth={2} />
               <path d={waisted(YC(k) + gap, YC(k + 1) - gap, 16 * fuse * merge)} fill="url(#w8-cart)" opacity={0.35} />
-              {/* the old intersegmental mesenchyme, now inside the body */}
-              <rect x={500 - HW + 10} y={YB(k + 1) - IH} width={2 * HW - 20} height={2 * IH} fill={INTER} opacity={0.45} />
               <path d={waisted(YC(k) + gap, YC(k + 1) - gap, 16 * fuse * merge)} fill="url(#w8-boneshade)" />
             </g>
+          ))}
+        </Part>
+        {/* The old intersegmental mesenchyme, now inside the body (still named, and lit, as itself). */}
+        <Part id="segmentu-arteko-mesenkima" show={merge}>
+          {KS.map((k) => (
+            <rect key={k} x={500 - HW + 10} y={YB(k + 1) - IH} width={2 * HW - 20} height={2 * IH} fill={INTER} opacity={0.45} />
           ))}
         </Part>
         {/* Resegmentation: the cleft through the middle of each segment, and the lower half joining the next. */}
@@ -325,7 +329,7 @@ export function ColumnCoronal({ t }: SceneProps) {
             );
           })}
         </Part>
-        <Part id="gune-pulposoa" show={np > 0.01 ? 1 : 0}>
+        <Part id="gune-pulposoa" show={np > 0.01 ? 1 : 0} groups={['notokorda']}>
           {KS.map((k) => (
             <ellipse key={k} cx={500} cy={YC(k)} rx={lerp(7, 30, np)} ry={lerp(gap, gap * 0.78, np)} fill={Q.noto} stroke="#e9d5ff" strokeWidth={1.4} />
           ))}
@@ -364,12 +368,13 @@ export function ColumnCoronal({ t }: SceneProps) {
         Arteriak: hasieran segmentu artekoak, amaieran orno gorputzaren mailan
       </Note>
 
+      {/* The notochord stays in the discs as the nucleus pulposus: its name follows it there. */}
       <Label id="notokorda" x={236} y={80} ax={lerp(494, 486, np)} ay={lerp(YB(0) + 40, YC(0) - 6, np)} />
       <Label id="esklerotoma-segmentuak" x={236} y={150} ax={500 - HW + 4} ay={YC(0) + 30} show={1 - merge} />
       <Label id="segmentu-arteko-mesenkima" x={250} y={230} ax={500 - IW + 4} ay={YB(1)} />
       <Label id="orno-gorputza" x={236} y={300} ax={500 - HW + 4} ay={YB(2) + 26} show={merge} />
-      <Label id="ornoarteko-diskoa" x={236} y={380} ax={500 - HW + 4} ay={YC(2)} show={disc * (1 - np)} />
-      <Label id="eraztun-fibrosoa" x={236} y={380} ax={500 - HW + 6} ay={YC(2)} show={np} />
+      <Label id="ornoarteko-diskoa" x={236} y={380} ax={500 - HW + 4} ay={YC(2)} show={disc} />
+      <Label id="eraztun-fibrosoa" x={236} y={424} ax={500 - HW + 6} ay={YC(3)} show={np} />
       <Label id="gune-pulposoa" x={236} y={470} ax={500 - 20} ay={YC(3)} show={np} />
       <Label id="mesenkima-zutabea" x={770} y={70} ax={500 + HW + 2} ay={86} show={1 - fuse} />
       <Label id="miotoma" x={810} y={240} ax={500 + myoX + 42} ay={YC(1)} />

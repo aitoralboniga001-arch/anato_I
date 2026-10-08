@@ -123,6 +123,17 @@ export function RibSection({ t }: SceneProps) {
   const back = seg(t, RS_T.cross - 0.035, RS_T.cross - 0.005);
   const front = lerp(0, U_CROSS + 0.1, seg(t, RS_T.cross + 0.01, RS_T.cross + 0.08)) + lerp(0, U_BONE - U_CROSS - 0.1, seg(t, RS_T.wall + 0.005, RS_T.wall + 0.06));
   const cellsOn = seg(t, RS_T.cross, RS_T.cross + 0.02) * (1 - seg(t, RS_T.cart - 0.02, RS_T.cart + 0.02) * 0.7);
+  /** Where a sclerotome cell is now: from its start toward its place along the rib path. */
+  const cellAt = (c: (typeof RIB_CELLS)[number]): Pt => {
+    const u = Math.min(c.u, front);
+    const p = RIB_PATH[Math.round(u * (RIB_PATH.length - 1))];
+    const q: Pt = [p[0] + c.j * 0.4, p[1] + c.j];
+    const k = seg(front, 0, 0.05 + c.u * 0.2);
+    const pos: Pt = [lerp(c.start[0], q[0], k), lerp(c.start[1], q[1], k)];
+    return c.side > 0 ? pos : mirror(pos);
+  };
+  // The sclerotome is loose cells: its name points at a drawn cell near the start of the rib (left side).
+  const sclAt = cellAt(RIB_CELLS.filter((c) => c.side < 0).reduce((a, c) => (Math.abs(c.u - 0.1) < Math.abs(a.u - 0.1) ? c : a)));
   const bone = t < RS_T.cross ? U_BONE * (1 - back) : Math.max(0, front - 0.04) * seg(t, RS_T.wall, RS_T.wall + 0.02);
   const cart = t < RS_T.cross ? 1 - back * (1 - U_BONE) : lerp(U_BONE, 1, seg(t, RS_T.cart + 0.01, RS_T.cart + 0.07));
   const cartOn = t < RS_T.cross ? 1 : cart > U_BONE + 0.01 ? 1 : 0;
@@ -197,14 +208,9 @@ export function RibSection({ t }: SceneProps) {
       {/* Sclerotome cells: out sideways, over the frontier, into the wall. */}
       {cellsOn > 0.01 && (
         <Part id="esklerotoma">
-          {RIB_CELLS.map((c, i) => {
-            const u = Math.min(c.u, front);
-            const p = RIB_PATH[Math.round(u * (RIB_PATH.length - 1))];
-            const q: Pt = [p[0] + c.j * 0.4, p[1] + c.j];
-            const k = seg(front, 0, 0.05 + c.u * 0.2);
-            const pos: Pt = [lerp(c.start[0], q[0], k), lerp(c.start[1], q[1], k)];
-            return <MesCell key={i} p={c.side > 0 ? pos : mirror(pos)} r={c.r} a={c.a + u * 300} opacity={cellsOn} />;
-          })}
+          {RIB_CELLS.map((c, i) => (
+            <MesCell key={i} p={cellAt(c)} r={c.r} a={c.a + Math.min(c.u, front) * 300} opacity={cellsOn} />
+          ))}
         </Part>
       )}
 
@@ -225,7 +231,7 @@ export function RibSection({ t }: SceneProps) {
       </Note>
 
       <Label id="ornoak" x={190} y={110} ax={470} ay={226} show={0.9} small />
-      <Label id="esklerotoma" x={190} y={250} ax={mirror(RIB_PATH[Math.round(Math.min(0.1, front) * 119)])[0]} ay={RIB_PATH[Math.round(Math.min(0.1, front) * 119)][1] + 10} show={cellsOn} />
+      <Label id="esklerotoma" x={190} y={250} ax={sclAt[0]} ay={sclAt[1]} show={cellsOn} />
       <Label id="paretako-orria" x={190} y={420} ax={mirror(E(30, 0.8))[0]} ay={E(30, 0.8)[1]} />
       <Label id="somitaren-alboko-muga" x={770} y={110} ax={FRONTIER[3][0] + 4} ay={FRONTIER[3][1]} />
       <Label id="saihets-hezurra" x={840} y={300} ax={E(8, 0.85)[0] + 8} ay={E(8, 0.85)[1]} show={seg(bone, 0.3, 0.45)} />

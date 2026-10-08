@@ -228,6 +228,8 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
       <Part id="hestegorria">
         <path d={esoD} fill="none" stroke="#6a4c16" strokeWidth={12} strokeLinecap="round" />
         <path d={esoD} fill="none" stroke="#d9ab3c" strokeWidth={8.5} strokeLinecap="round" />
+      </Part>
+      <Part id="urdaila">
         <ellipse cx={stomach[0]} cy={stomach[1]} rx={22} ry={30} transform={`rotate(-14 ${stomach[0]} ${f1(stomach[1])})`} fill={P.gut} stroke="#7a5a1c" strokeWidth={2} />
       </Part>
       <g pointerEvents="none">
@@ -355,14 +357,17 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
         Atzea gehiago hazten da: septuma aurrean T6, atzean T12 mailara; nerbio frenikoa luzatzen da
       </Note>
 
-      <Label id="hasierako-perikardio-barrunbea" x={226} y={Math.max(56, Math.min(ct + 20, T.heartY - 40))} ax={ventralX(T, ct + 34) + 30} ay={ct + 34} small show={vis(t, 0.46)} />
+      <Label id="hasierako-perikardio-barrunbea" x={226} y={Math.max(56, Math.min(ct + 20, T.heartY - 40))} ax={ventralX(T, ct + 34) + 30} ay={ct + 34} small />
       <Label id="bihotza" x={190} y={T.heartY - 6} ax={heartC[0] - 50} ay={heartC[1] + 6} small />
       <Label id="septum-transversum" x={190} y={F + 2} ax={frontX(T, F) + 14} ay={F} />
       <Label id="mioblastoak" x={190} y={F + 50} ax={onSlab(T, CELLS[1].u, CELLS[1].v * 0.75)[0] - 6} ay={onSlab(T, CELLS[1].u, CELLS[1].v * 0.75)[1]} show={mb * (1 - late)} />
       <Label id="miozitoak" x={190} y={F + 90} ax={onSlab(T, CELLS[0].u, CELLS[0].v * 0.75)[0] - 10} ay={onSlab(T, CELLS[0].u, CELLS[0].v * 0.75)[1]} show={mz} />
-      <Label id="peritoneo-barrunbea" x={190} y={Math.min(560, cb - 16)} ax={ventralX(T, cb - 16) + 34} ay={cb - 16} small show={vis(t, 0.46)} />
+      <Label id="peritoneo-barrunbea" x={190} y={Math.min(560, cb - 16)} ax={ventralX(T, cb - 16) + 34} ay={cb - 16} small />
+      <Label id="hestegorria" x={810} y={110} ax={esoX + 5} ay={Math.max(hy + 80, 120)} small />
+      <Label id="urdaila" x={810} y={lerp(410, 524, s)} ax={stomach[0] + 20} ay={stomach[1] + 4} small />
+      <Label id="hodi-neurala" x={810} y={lerp(460, 470, s)} ax={CORD_X + 9} ay={lerp(460, 470, s)} small />
       <Label id="lepoko-nerbio-espinalak" x={810} y={250} ax={668} ay={levelAt(iOf('C4'), s) + gapOf(iOf('C4')) / 2 + 1} show={n > 0.01 ? 1 : 0} />
-      <Label id="nerbio-frenikoa" x={810} y={330} ax={along(trunk, 0.6)[0] + 4} ay={along(trunk, 0.6)[1]} show={seg(n, 0.6, 1)} />
+      <Label id="nerbio-frenikoa" x={810} y={290} ax={along(trunk, 0.6)[0]} ay={along(trunk, 0.6)[1]} show={seg(n, 0.6, 1)} />
       <Label id="ornoak" x={810} y={590} ax={VERT_X + 17} ay={levelAt(iOf('L3'), s)} small />
     </g>
   );
@@ -572,12 +577,13 @@ export function DiaphragmSection({ t, reduced }: SceneProps) {
         Lau osagai: septuma · mintz pleuroperitonealak · hestegorri inguruko mesenkima · gorputz pareta
       </Note>
 
-      <Label id="mintz-pleuroperitonealak" x={202} y={196} ax={300} ay={250} show={seg(t, 0.72, 0.76)} />
+      <Label id="mintz-pleuroperitonealak" x={202} y={196} ax={345} ay={250} show={seg(t, 0.72, 0.76)} />
       <Label id="erreten-perikardioperitonealak" x={226} y={300} ax={Math.max(CANAL_MID[0], front + 24)} ay={lerp(CANAL_MID[1], FOCUS_L[1] - 30, c)} show={canalsOpen} small />
       <Label id="miozitoak" x={190} y={352} ax={370} ay={372} show={migrate} small />
       <Label id="beheko-kaba-zaina" x={190} y={400} ax={IVC_X[0] - 12} ay={IVC_X[1]} small />
       <Label id="gorputz-paretako-mesodermoa" x={206} y={462} ax={262 + rim * 0.4} ay={462} show={mus} small />
       <Label id="septum-transversum" x={190} y={540} ax={380} ay={500} />
+      <Label id="hodi-neurala" x={810} y={96} ax={524} ay={100} small />
       <Label id="aorta" x={810} y={150} ax={AORTA_X[0] + 12} ay={AORTA_X[1] - 4} small />
       <Label id="hestegorria" x={810} y={196} ax={ESO_X[0] + 12} ay={ESO_X[1] - 6} />
       <Label id="hestegorri-inguruko-mesenkima" x={780} y={250} ax={550} ay={300} small />

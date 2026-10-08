@@ -133,6 +133,7 @@ export const structures8: StructureDef[] = [
   // ---- Burezurra: neurokraneoa eta buru-ganga ----
   {
     id: 'neurokraneoa',
+    parts: ['kondrokraneoa'],
     name: 'Neurokraneoa',
     es: 'Neurocráneo',
     category: 'anatomia',
@@ -229,6 +230,7 @@ export const structures8: StructureDef[] = [
   {
     id: 'joskurak',
     name: 'Joskurak',
+    parts: ['joskura-metopikoa', 'joskura-koronala', 'joskura-sagitala', 'joskura-lanbdoidea'],
     es: 'Suturas',
     category: 'anatomia',
     color: '#4fb3e8',
@@ -282,6 +284,7 @@ export const structures8: StructureDef[] = [
   {
     id: 'fontanelak',
     name: 'Fontanelak',
+    parts: ['aurreko-fontanela', 'atzeko-fontanela', 'fontanela-esfenoidala', 'fontanela-mastoidea'],
     es: 'Fontanelas',
     aka: ['Fontikuluak'],
     category: 'anatomia',
@@ -1076,6 +1079,7 @@ export const structures8: StructureDef[] = [
   },
   {
     id: 'ornoarteko-diskoa',
+    parts: ['eraztun-fibrosoa', 'gune-pulposoa'],
     name: 'Ornoarteko diskoa',
     es: 'Disco intervertebral',
     category: 'mesodermoa',
@@ -1113,6 +1117,7 @@ export const structures8: StructureDef[] = [
   // ---- Ornoa ----
   {
     id: 'orno-arkua',
+    parts: ['pedikulua', 'lamina'],
     name: 'Orno arkua',
     es: 'Arco vertebral',
     aka: ['Arku neurala'],

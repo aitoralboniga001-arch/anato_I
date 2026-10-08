@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Defs } from '@/components/kit/Defs';
 import { LabelScaleContext, SceneContext, type SceneContextValue } from '@/components/kit/context';
-import { appearances, isSpace, nameOf, weeks } from '@/content/registry';
+import { appearances, isSpace, partsOf, nameOf, weeks } from '@/content/registry';
 import { atlasTopics } from '@/content/structure-atlas';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { StructureDef } from '@/lib/sim/types';
@@ -74,6 +74,7 @@ function AtlasMini({ id }: { id: string }) {
     quizFlash: null,
     nameOf,
     isSpace,
+    partsOf,
     onSelect: noop,
     onHover: noop,
   };

@@ -392,6 +392,8 @@ export function CalvariaTop({ t, reduced }: SceneProps) {
   const scale = 1 + 0.05 * growth - 0.06 * mold;
   const sutW = lerp(7, 4, growth);
   const sutures = vis(t, CAL_T.sutures - 0.01);
+  // Heights inside the growing skull (it is scaled about y = 320).
+  const sy = (y: number) => 320 + (y - 320) * (1 + 0.05 * growth);
   const mon = afClose > 0.5 ? '18. hilabetea' : pfClose > 0.5 ? '1.–2. hilabetea' : 'jaiotzean';
   void reduced;
   return (
@@ -418,17 +420,16 @@ export function CalvariaTop({ t, reduced }: SceneProps) {
             </Part>
           );
         })}
-        {/* Sutures: the narrow connective strips between two bones. */}
-        <Part id="joskurak" show={sutures}>
-          <path
-            d={`${line(CORONAL_L)}${line(CORONAL_L.map(mirX))}${line(LAMBDOID_L)}${line(LAMBDOID_L.map(mirX))}M${CX},70L${CX},${AF[1]}M${CX},${AF[1]}L${CX},${PF[1]}`}
-            fill="none"
-            stroke={Q.suture}
-            strokeWidth={sutW}
-            strokeLinecap="round"
-            opacity={0.75}
-          />
-        </Part>
+        {/* Sutures: the narrow connective strips between two bones (each named below; "joskurak" names them all). */}
+        <path
+          d={`${line(CORONAL_L)}${line(CORONAL_L.map(mirX))}${line(LAMBDOID_L)}${line(LAMBDOID_L.map(mirX))}M${CX},70L${CX},${AF[1]}M${CX},${AF[1]}L${CX},${PF[1]}`}
+          fill="none"
+          stroke={Q.suture}
+          strokeWidth={sutW}
+          strokeLinecap="round"
+          opacity={0.75 * sutures}
+          pointerEvents="none"
+        />
         <Part id="joskura-metopikoa" show={sutures}>
           <path d={`M${CX},68L${CX},${AF[1] - 50}`} stroke={Q.suture} strokeWidth={sutW} strokeLinecap="round" />
         </Part>
@@ -441,11 +442,7 @@ export function CalvariaTop({ t, reduced }: SceneProps) {
         <Part id="joskura-lanbdoidea" show={sutures}>
           <path d={`${line(LAMBDOID_L)}${line(LAMBDOID_L.map(mirX))}`} fill="none" stroke={Q.suture} strokeWidth={sutW} strokeLinecap="round" />
         </Part>
-        {/* Fontanelles: wide where more than two bones meet. */}
-        <Part id="fontanelak" show={vis(t, CAL_T.fontanelles - 0.01) * (1 - afClose)}>
-          <path d={smoothPath(AF_SHAPE(1 - afClose), true, 0.3)} fill={Q.suture} opacity={0.5} />
-          <path d={smoothPath(PF_SHAPE(1 - pfClose), true, 0.3)} fill={Q.suture} opacity={0.5} />
-        </Part>
+        {/* Fontanelles: wide where more than two bones meet ("fontanelak" names them all). */}
         <Part id="aurreko-fontanela" show={vis(t, CAL_T.sutures - 0.01) * (1 - afClose)}>
           <path d={smoothPath(AF_SHAPE((1 - afClose) * (1 - 0.35 * mold)), true, 0.3)} fill={Q.suture} stroke="#9ad8f8" strokeWidth={1.4} />
         </Part>
@@ -511,11 +508,11 @@ export function CalvariaTop({ t, reduced }: SceneProps) {
       <Label id="buru-ganga" x={190} y={86} ax={402} ay={92} show={vis(t, 0, CAL_T.sutures)} small />
       <Label id="hezurtzapen-zentroak" x={810} y={356} ax={TOP_BONES[1].c[0] + 8} ay={TOP_BONES[1].c[1]} show={vis(t, CAL_T.grow, CAL_T.bones + 0.04)} text="Hezurtzapen zentroak" small />
       <Label id="hezur-espikulak" x={810} y={190} ax={TOP_BONES[3].c[0] + 30} ay={TOP_BONES[3].c[1] - 20} show={vis(t, CAL_T.grow, CAL_T.bones + 0.04)} small />
-      <Label id="joskura-metopikoa" x={810} y={150} ax={CX + 3} ay={130} show={sutures} />
+      <Label id="joskura-metopikoa" x={810} y={150} ax={CX} ay={sy(130)} show={sutures} />
       <Label id="aurreko-fontanela" x={810} y={250} ax={AF[0] + 20} ay={AF[1]} show={vis(t, CAL_T.sutures) * (1 - afClose)} />
-      <Label id="joskurak" x={810} y={420} ax={CX + 3} ay={430} show={vis(t, CAL_T.sutures, CAL_T.fontanelles) + vis(t, CAL_T.birth, CAL_T.after)} small />
+      <Label id="joskurak" x={810} y={420} ax={CX} ay={sy(430)} show={vis(t, CAL_T.sutures, CAL_T.fontanelles) + vis(t, CAL_T.birth, CAL_T.after)} small />
       <Label id="fontanelak" x={810} y={290} ax={AF[0] + 30} ay={AF[1] + 10} show={vis(t, CAL_T.fontanelles) * (1 - afClose)} small />
-      <Label id="joskura-sagitala" x={810} y={380} ax={CX + 3} ay={380} show={sutures} />
+      <Label id="joskura-sagitala" x={810} y={380} ax={CX} ay={sy(380)} show={sutures} />
       <Label id="atzeko-fontanela" x={810} y={480} ax={PF[0] + 16} ay={PF[1]} show={vis(t, CAL_T.sutures) * (1 - pfClose)} />
     </g>
   );
@@ -568,14 +565,14 @@ export function CalvariaSide({ t }: SceneProps) {
       <Part id="fontanela-mastoidea" show={vis(t, CAL_T.sutures - 0.01)}>
         <path d={smoothPath(SPF_SHAPE(1), true, 0.3)} fill={Q.suture} stroke="#9ad8f8" strokeWidth={1.4} />
       </Part>
-      {/* Neurocranium floor: the chondrocranium (cranial base), under the face. */}
-      <Part id="kondrokraneoa" show={boxes}>
-        <path d="M318,430 C380,470 450,466 510,436 C570,410 630,384 690,330" fill="none" stroke={Q.cart} strokeWidth={12} strokeLinecap="round" opacity={0.9} />
-        <path d="M318,430 C380,470 450,466 510,436 C570,410 630,384 690,330" fill="none" stroke="url(#w8-cart)" strokeWidth={12} strokeLinecap="round" />
-      </Part>
       {/* Neurocranium (the box round the brain): vault on top and sides, floor = chondrocranium. */}
       <Part id="neurokraneoa" show={boxes}>
         <path d={smoothPath(SOUT, true, 0.3)} fill="rgba(255,255,255,0.03)" stroke="#f0c674" strokeWidth={3} />
+      </Part>
+      {/* Neurocranium floor: the chondrocranium (cranial base), under the face; on top so it can be pointed at. */}
+      <Part id="kondrokraneoa" show={boxes}>
+        <path d="M318,430 C380,470 450,466 510,436 C570,410 630,384 690,330" fill="none" stroke={Q.cart} strokeWidth={12} strokeLinecap="round" opacity={0.9} />
+        <path d="M318,430 C380,470 450,466 510,436 C570,410 630,384 690,330" fill="none" stroke="url(#w8-cart)" strokeWidth={12} strokeLinecap="round" />
       </Part>
       <path d={smoothPath(SOUT, true, 0.3)} fill="url(#w8-light)" pointerEvents="none" />
       <path d={smoothPath(SOUT, true, 0.3)} fill="url(#w8-dome)" pointerEvents="none" />

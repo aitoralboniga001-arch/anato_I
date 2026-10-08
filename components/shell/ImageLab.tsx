@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react';
 import { Defs } from '@/components/kit/Defs';
 import { SceneContext, type QuizFlash, type SceneContextValue } from '@/components/kit/context';
-import { isSpace, nameOf, structures, weeks } from '@/content/registry';
+import { isSpace, partsOf, nameOf, structures, weeks } from '@/content/registry';
 import { imageId } from '@/content/pool';
 import type { Orientation, PlaneKind } from '@/lib/sim/types';
 import { recordAnswer } from './answers';
@@ -462,6 +462,7 @@ export function ImageLab() {
     quizFlash: flash,
     nameOf,
     isSpace,
+    partsOf,
     onSelect: (id) => {
       if (item?.kind === 'seinalatu' && !answered) answer(id);
     },

@@ -211,17 +211,17 @@ export function DiaphragmBelow({ t }: SceneProps) {
 
       <Label id="bularrezur-atala" x={796} y={104} ax={510} ay={104} />
       <Label id="zentro-tendinosoa" x={790} y={196} ax={640} ay={226} />
-      <Label id="hestegorriaren-hiatoa" x={810} y={250} ax={ESO[0] + 16} ay={ESO[1] - 6} show={vis(t, 0.32)} />
-      <Label id="hestegorria" x={810} y={286} ax={ESO[0] + 8} ay={ESO[1] + 4} show={vis(t, 0.32)} small />
+      <Label id="hestegorriaren-hiatoa" x={810} y={250} ax={ESO[0] + 16} ay={ESO[1] - 6} />
+      <Label id="hestegorria" x={810} y={286} ax={ESO[0] + 6} ay={ESO[1] + 2} small />
       <Label id="erdiko-lotailu-arkutua" x={810} y={400} ax={522} ay={424} />
       <Label id="aortaren-hiatoa" x={810} y={448} ax={AORTA[0] + 22} ay={AORTA[1] + 6} />
       <Label id="aorta" x={810} y={492} ax={AORTA[0] + 12} ay={AORTA[1] + 4} small />
       <Label id="diafragma" x={810} y={548} ax={664} ay={451} />
 
-      <Label id="beheko-kabaren-zuloa" x={190} y={180} ax={IVC[0] - 16} ay={IVC[1] - 6} show={vis(t, 0.32)} />
-      <Label id="beheko-kaba-zaina" x={190} y={222} ax={IVC[0] - 8} ay={IVC[1] + 4} show={vis(t, 0.32)} small />
+      <Label id="beheko-kabaren-zuloa" x={190} y={180} ax={IVC[0] - 15} ay={IVC[1] - 5} />
+      <Label id="beheko-kaba-zaina" x={190} y={222} ax={IVC[0] - 6} ay={IVC[1] + 3} small />
       <Label id="saihets-hezur-atala" x={190} y={400} ax={248} ay={392} />
-      <Label id="gerriko-atala" x={190} y={448} ax={448} ay={430} />
+      <Label id="gerriko-atala" x={190} y={448} ax={478} ay={318} />
       <Label id="diafragmaren-zutabeak" x={190} y={500} ax={CRUS_R[30][0] - 12} ay={CRUS_R[30][1]} />
       <Label id="ornoak" x={190} y={580} ax={458} ay={580} small />
     </g>
@@ -398,12 +398,15 @@ export function DiaphragmProfile({ t, reduced }: SceneProps) {
       <Label id="perikardio-barrunbea" x={190} y={150} ax={386} ay={196} />
       <Label id="bihotza" x={190} y={196} ax={400} ay={222} small />
       <Label id="zentro-tendinosoa" x={190} y={250} ax={440} ay={252} />
-      <Label id="bularrezur-atala" x={190} y={340} ax={326} ay={332} />
+      <Label id="bularrezur-atala" x={190} y={358} ax={326} ay={332} />
+      <Label id="beheko-kaba-zaina" x={190} y={400} ax={548} ay={420} small />
       <Label id="peritoneo-barrunbea" x={190} y={460} ax={340} ay={460} show={cav} />
       <Label id="pleura-barrunbea" x={796} y={110} ax={616} ay={120} />
       <Label id="birikak" x={810} y={170} ax={600} ay={190} small />
+      <Label id="hestegorria" x={810} y={214} ax={590} ay={322} small />
       <Label id="diafragma" x={810} y={260} ax={600} ay={318} />
-      <Label id="giltzurruna" x={810} y={420} ax={638} ay={470} show={cav} small />
+      <Label id="giltzurruna" x={810} y={420} ax={618} ay={500} show={cav} small />
+      <Label id="aorta" x={810} y={460} ax={628} ay={540} small />
       <Label id="gerriko-atala" x={810} y={500} ax={652} ay={468} />
       <Label id="ornoak" x={810} y={560} ax={SPINE_X + 42} ay={spineY(14)} small />
     </g>

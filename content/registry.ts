@@ -41,6 +41,9 @@ export const getWeek = (n: number) => weeks.find((w) => w.week === n);
 
 export const nameOf = (id: string) => structures.get(id)?.name ?? id;
 
+/** The drawn structures a whole is made of (none for an ordinary structure). */
+export const partsOf = (id: string): readonly string[] => structures.get(id)?.parts ?? [];
+
 /** A space (cavity / lacuna) rather than a tissue. */
 export const isSpace = (id: string) => {
   const s = structures.get(id);

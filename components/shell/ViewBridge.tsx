@@ -45,6 +45,30 @@ function compass(o?: Orientation) {
   return parts.length ? parts : null;
 }
 
+/** How long the centred view name stays over the picture (ms). */
+export const FLASH_MS = 2200;
+
+/**
+ * Over the middle of the picture, for a moment, whenever the simulation changes the view: the new view's
+ * name, so nobody keeps reading the new drawing as the old one. It lets the pointer through and goes by itself.
+ */
+export function ViewFlash({ label, plane, onDone }: { label: string; plane: PlaneKind; onDone: () => void }) {
+  const done = useEffectEvent(onDone);
+  useEffect(() => {
+    const id = window.setTimeout(done, FLASH_MS);
+    return () => window.clearTimeout(id);
+  }, []);
+  const kind = PLANE_TEXT[plane].name;
+  const said = label.toLowerCase().includes(plane) || label.toLowerCase() === kind.toLowerCase();
+  return (
+    <div className="view-flash" role="status" aria-live="polite">
+      <span className="view-flash-k">Ikuspegi berria</span>
+      <b>{label}</b>
+      {!said && <small>{kind}</small>}
+    </div>
+  );
+}
+
 /** How long the card stays open before it folds into its chip, and how long the chip then stays (ms). */
 export const BRIDGE_OPEN_MS = 6500;
 const BRIDGE_CHIP_MS = 14000;
