@@ -106,6 +106,18 @@ const withRecall = (week: number, stage: StageDef): StageDef => {
   return out;
 };
 
+/** Every step's dates and new structures, so the caption can reserve the stage's tallest step. */
+const extrasCache = new Map<string, { dates: ReturnType<typeof examDatesAt>; fresh: StructureDef[] }[]>();
+const stepExtrasOf = (week: number, stage: StageDef, guided: boolean) => {
+  const key = `${week}/${stage.id}/${guided ? 'g' : ''}`;
+  let hit = extrasCache.get(key);
+  if (!hit) {
+    hit = stage.beats.map((b, k) => ({ dates: examDatesAt(week, stage.id, b.at), fresh: guided ? freshAt(stage, k, week) : [] }));
+    extrasCache.set(key, hit);
+  }
+  return hit;
+};
+
 const LAST_VIEW_KEY = 'enbrioatlas:last-view';
 /** The view shown last in ANOTHER week (so the first view of this week can be bridged from it). */
 const readLastView = (week: number): ViewSnap | null => {
@@ -357,6 +369,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 
   // Micro-questions already answered or skipped on this visit (stage:step).
   const [asked, setAsked] = useState<string[]>([]);
+  /** The micro-question answered just now (its key), so the Next key lights up to go on. */
+  const [answered, setAnswered] = useState('');
   const outlineOpen = usePref('outline');
   const infoOpen = usePref('panel');
   const notesOpen = usePref('notes');
@@ -977,7 +991,22 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     const to = stage.beats[activeBeat]?.tour?.length ? tourAtOf(stage, activeBeat) : doneAt(stage, activeBeat);
     return pos.t < to - 0.004;
   };
+  /** The micro-question is done (answered or skipped): on to the next step. */
+  const doneAsk = () => {
+    setAsked((a) => [...a, askKey]);
+    continueHold();
+  };
   const stepBeat = (delta: number) => {
+    // → during the preview starts step 1 (the Next key's "Hasi"); it no longer skips over it.
+    if (delta > 0 && intro !== null) {
+      endIntro();
+      return;
+    }
+    // → on the micro-question leaves it the same way as the Next key ("Saltatu" / "Jarraitu").
+    if (delta > 0 && askNow) {
+      doneAsk();
+      return;
+    }
     const tr = tourRef.current;
     if (tr && intro === null && tr.key === `${pos.i}:${activeBeat}`) {
       const j = tr.idx + delta;
@@ -1954,6 +1983,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             waiting={!formation && waiting && playing && intro === null}
             waitSeconds={!formation && waiting && playing && intro === null ? waitSeconds : null}
             fresh={!formation && guided && intro === null && !tour ? fresh : []}
+            stepExtras={stepExtrasOf(week.week, stage, guided)}
+            intro={formation || intro === null ? null : intro >= 1 ? 'ready' : 'running'}
+            onStart={endIntro}
+            askState={askNow ? (answered === askKey ? 'answered' : 'open') : undefined}
+            onAskDone={doneAsk}
             onVoice={(v) => { transport.cancel(); setVoiceStarted(true); setPref('voice', v); if (v) { setPlayMode('gidatua'); setPref('panel', false); setPanelOpen(false); setSelected(null); endIntro(); place({ i: pos.i, t: beat.at + .000001 }); setPlaying(true); } }}
             onContinue={continueHold}
             onNextStage={continueNext}
@@ -1972,15 +2006,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             }}
             ask={
               askNow && beat.ask ? (
-                <AskCard
-                  key={askKey}
-                  id={`mikro:${week.week}/${askKey}`}
-                  ask={beat.ask}
-                  onDone={() => {
-                    setAsked((a) => [...a, askKey]);
-                    continueHold();
-                  }}
-                />
+                <AskCard key={askKey} id={`mikro:${week.week}/${askKey}`} ask={beat.ask} onAnswer={() => setAnswered(askKey)} />
               ) : undefined
             }
           />

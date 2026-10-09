@@ -45,7 +45,14 @@ interface PlayerProps {
   waitSeconds: number | null;
   /** Structures introduced by the current step (only filled in guided mode). */
   fresh: StructureDef[];
-  /** The same for every step of the stage (guided mode), so the caption can reserve its tallest height. */
+  /** Every step's exam dates and new structures, so the caption can reserve the stage's tallest step. */
+  stepExtras?: { dates: ExamDate[]; fresh: StructureDef[] }[];
+  /** The stage preview over the scene: still playing (`running`) or read and waiting for "Hasi" (`ready`). */
+  intro?: 'running' | 'ready' | null;
+  onStart?: () => void;
+  /** Guided micro-question in the dock: still open, or answered (the Next key then lights up). */
+  askState?: 'open' | 'answered';
+  onAskDone?: () => void;
   mode: PlayMode;
   onMode: (m: PlayMode) => void;
   onVoice: (v: boolean) => void;
@@ -68,6 +75,7 @@ interface PlayerProps {
 
 const SPEEDS = [0.5, 1, 1.5, 2];
 const NO_TERMS: Term[] = [];
+const noop = () => {};
 const pad = (n: number) => String(n).padStart(2, '0');
 
 /** The step in one line: its IDEIA NAGUSIA, or the first sentence of its explanation ("15. eguna" is not a sentence end). */
@@ -326,7 +334,53 @@ export function Player(p: PlayerProps) {
   const atEnd = p.t >= 1;
   const allTerms = useMemo(() => termsOf([...p.stage.structures, ...p.stage.beats.flatMap((b) => b.focus ?? [])]), [p.stage]);
   const terms = p.noTerms ? NO_TERMS : allTerms;
-  // The caption keeps the stage's tallest height (no jump between steps); narrated mode stays compact.
+  const showText = !p.voice || fullText;
+
+  // The one Next key: whatever moves the study on right now (start after the preview, skip or leave the
+  // question, go on after a step, the next stage), always in the same place. `go` lights it up: the app
+  // is waiting for this press.
+  const next: { tone: 'plain' | 'go' | 'timed' | 'stage'; label: string; tip: string; onClick: () => void; seconds?: number; disabled?: boolean } =
+    p.intro && p.onStart
+      ? { tone: p.intro === 'ready' ? 'go' : 'plain', label: 'Hasi', tip: p.intro === 'ready' ? 'Hasi urratsez urrats · →' : 'Aurrebista saltatu eta hasi · →', onClick: p.onStart }
+      : p.ask && p.askState && p.onAskDone
+        ? p.askState === 'answered'
+          ? { tone: 'go', label: 'Jarraitu', tip: 'Hurrengo urratsera · →', onClick: p.onAskDone }
+          : { tone: 'plain', label: 'Saltatu', tip: 'Galdera saltatu eta jarraitu · →', onClick: p.onAskDone }
+        : atEnd && p.nextTitle
+          ? { tone: 'stage', label: 'Hurrengo etapa', tip: `Hurrengo etapa: ${p.nextTitle} · Shift + →`, onClick: p.onNextStage }
+          : atEnd && p.finish
+            ? { tone: 'stage', label: p.finish.label, tip: p.finish.tip, onClick: p.finish.onClick }
+            : p.waiting && p.guided
+              ? { tone: 'go', label: 'Jarraitu', tip: 'Urratsa ikusita: sakatu hurrengora pasatzeko · →', onClick: p.onContinue }
+              : p.waiting
+                ? { tone: 'timed', label: 'Hurrengoa', tip: 'Berez aurreratzen da; sakatu orain aurreratzeko · →', onClick: p.onContinue, seconds: p.waitSeconds ?? 1 }
+                : { tone: 'plain', label: 'Hurrengoa', tip: 'Hurrengo urratsa · →', onClick: () => p.onBeat(1), disabled: atEnd };
+
+  // Every step of the stage, invisible in the caption's cell so it keeps the stage's tallest height.
+  // Built once per stage (the dock re-renders on every animation frame).
+  const quick = p.mode === 'azkarra';
+  const recall = !!p.onRecall;
+  const extras = p.stepExtras;
+  const sizers = useMemo(
+    () =>
+      showText &&
+      beats.map((b, k) => (
+        <div className="cap-sizer" key={k} aria-hidden inert>
+          <Caption
+            beat={b}
+            quick={quick}
+            stageId={p.stage.id}
+            k={k}
+            dates={extras?.[k]?.dates ?? []}
+            onRecall={recall ? noop : undefined}
+            terms={terms}
+            onPick={noop}
+            extra={(extras?.[k]?.fresh.length ?? 0) > 0 && <FreshChips items={extras![k].fresh} onPick={noop} />}
+          />
+        </div>
+      )),
+    [showText, beats, quick, p.stage.id, extras, recall, terms],
+  );
 
   const tAt = (clientX: number) => {
     const r = bar.current!.getBoundingClientRect();
@@ -354,23 +408,30 @@ export function Player(p: PlayerProps) {
             </button>
           )}
           {p.voice && !p.ask && <SpokenCaption beat={beat} audio={p.audioState} configured={p.voiceConfigured} fullText={fullText} onFullText={setFullText} onRepeat={p.onRepeat} onOff={() => p.onVoice(false)} />}
-          {p.ask ?? ((!p.voice || fullText) && (
-            <Caption
-              beat={beat}
-              quick={p.mode === 'azkarra'}
-              stageId={p.stage.id}
-              k={p.activeBeat}
-              dates={p.dates ?? []}
-              onRecall={p.onRecall}
-              terms={terms}
-              onPick={p.onPick}
-              onTermHover={p.onTermHover}
-              extra={p.fresh.length > 0 && <FreshList items={p.fresh} onPick={p.onPick} k={`f-${p.stage.id}-${p.activeBeat}`} />}
-            />
-          ))}
+          {(p.ask || showText) && (
+            // Every step of the stage sits invisibly in the same cell, so the card keeps the stage's
+            // tallest height: the scene and the pager stay put from step to step.
+            <div className="cap-stack" key={p.stage.id}>
+              {sizers}
+              {p.ask ?? (
+                <Caption
+                  beat={beat}
+                  quick={quick}
+                  stageId={p.stage.id}
+                  k={p.activeBeat}
+                  dates={p.dates ?? []}
+                  onRecall={p.onRecall}
+                  terms={terms}
+                  onPick={p.onPick}
+                  onTermHover={p.onTermHover}
+                  extra={p.fresh.length > 0 && <FreshList items={p.fresh} onPick={p.onPick} k={`f-${p.stage.id}-${p.activeBeat}`} />}
+                />
+              )}
+            </div>
+          )}
         </div>
-        {/* Step pager: one Next key whose state says what happens next (read and go on, the countdown,
-            the next stage), always in the same place and size, so the caption never reflows. */}
+        {/* Step pager: one Next key whose state says what happens next, pinned to the card's bottom edge
+            at a fixed width, so it never moves under the pointer. */}
         <div className="cap-nav">
           <span className="cap-nav-l">
             Urratsa{' '}
@@ -383,40 +444,19 @@ export function Player(p: PlayerProps) {
             <button className="icon-btn" onClick={() => p.onBeat(-1)} aria-label="Aurreko urratsa" data-tip="Aurreko urratsa · ←" data-tip-pos="top">
               <IconPrev />
             </button>
-            {atEnd && p.nextTitle ? (
-              <button className="cap-next is-stage" onClick={p.onNextStage} data-tip={`Hurrengo etapa: ${p.nextTitle} · Shift + →`} data-tip-pos="top-end">
-                <span>Hurrengo etapa</span>
-                <IconNext size={15} />
-              </button>
-            ) : atEnd && p.finish ? (
-              <button className="cap-next is-stage" onClick={p.finish.onClick} data-tip={p.finish.tip} data-tip-pos="top-end">
-                <span>{p.finish.label}</span>
-                <IconNext size={15} />
-              </button>
-            ) : p.waiting && !p.ask && p.guided ? (
-              <button className="cap-next is-wait" onClick={p.onContinue} aria-label="Jarraitu: hurrengo urratsa" data-tip="Urratsa ikusita: sakatu hurrengora pasatzeko · →" data-tip-pos="top-end">
-                <span className="cap-wait-dot" aria-hidden />
-                <span>Jarraitu</span>
-                <IconNext size={15} />
-              </button>
-            ) : p.waiting && !p.ask ? (
-              <button
-                className="cap-next is-timed"
-                onClick={p.onContinue}
-                aria-label={`Hurrengo urratsa (${p.waitSeconds ?? 1} s barru)`}
-                data-tip="Berez aurreratzen da; sakatu orain aurreratzeko · →"
-                data-tip-pos="top-end"
-              >
-                <span>Hurrengoa</span>
-                <em>{p.waitSeconds ?? 1} s</em>
-                <IconNext size={15} />
-              </button>
-            ) : (
-              <button className="cap-next" onClick={() => p.onBeat(1)} disabled={atEnd && !p.nextTitle} aria-label="Hurrengo urratsa" data-tip="Hurrengo urratsa · →" data-tip-pos="top-end">
-                <span>Hurrengoa</span>
-                <IconNext size={15} />
-              </button>
-            )}
+            <button
+              className={`cap-next${next.tone === 'go' ? ' is-wait' : next.tone === 'timed' ? ' is-timed' : next.tone === 'stage' ? ' is-stage' : ''}`}
+              onClick={next.onClick}
+              disabled={next.disabled}
+              aria-label={next.seconds ? `${next.label} (${next.seconds} s barru)` : next.label}
+              data-tip={next.tip}
+              data-tip-pos="top-end"
+            >
+              {next.tone === 'go' && <span className="cap-wait-dot" aria-hidden />}
+              <span>{next.label}</span>
+              {next.seconds !== undefined && <em>{next.seconds} s</em>}
+              <IconNext size={15} />
+            </button>
           </div>
         </div>
       </div>
@@ -570,7 +610,7 @@ export function Player(p: PlayerProps) {
       <nav className="mobile-study-nav" aria-label="Urratsen nabigazioa">
         <div className="mobile-study-status">
           <span>Urratsa {p.activeBeat + 1}/{n}</span>
-          {p.ask && <span>Erantzun edo saltatu galdera</span>}
+          {p.ask && p.askState === 'open' && <span>Erantzun edo saltatu galdera</span>}
         </div>
         <div className="mobile-study-actions">
           <button className="btn" onClick={() => p.onBeat(-1)} disabled={p.activeBeat === 0 && p.t === 0}>
@@ -580,17 +620,8 @@ export function Player(p: PlayerProps) {
             {p.playing ? <IconPause size={16} /> : <IconPlay size={16} />}
             <span>{p.playing ? 'Pausatu' : 'Hasi'}</span>
           </button>
-          <button
-            className="btn mobile-study-next"
-            disabled={!!p.ask || (atEnd && !p.nextTitle && !p.finish)}
-            onClick={() => {
-              if (atEnd && p.nextTitle) p.onNextStage();
-              else if (atEnd && p.finish) p.finish.onClick();
-              else if (p.guided && p.waiting) p.onContinue();
-              else p.onBeat(1);
-            }}
-          >
-            {atEnd && p.nextTitle ? 'Hurrengo etapa' : atEnd && p.finish ? p.finish.label : 'Jarraitu'} <IconNext size={15} />
+          <button className={`btn mobile-study-next${next.tone === 'go' ? ' is-go' : ''}`} disabled={next.disabled} onClick={next.onClick}>
+            {next.label} <IconNext size={15} />
           </button>
         </div>
       </nav>
@@ -632,19 +663,16 @@ export function TourCard({ item, idx, n, onSkip, onPick, compact = false }: { it
 
 /**
  * Guided mode's check at the end of a step: one tap, then the reason, then on. It takes the caption's
- * place in the dock so the scene stays visible; answers are kept with the rest (`mikro:` ids).
+ * place in the dock so the scene stays visible; answers are kept with the rest (`mikro:` ids). Skipping
+ * and going on are the pager's Next key ("Saltatu", then a lit "Jarraitu"), never a second button.
  */
-export function AskCard({ id, ask, onDone }: { id: string; ask: MicroQuestion; onDone: () => void }) {
+export function AskCard({ id, ask, onAnswer }: { id: string; ask: MicroQuestion; onAnswer: () => void }) {
   const [picked, setPicked] = useState<number | null>(null);
   const ok = picked === ask.answer;
   return (
     <div className="tour ask" role="dialog" aria-label="Galdera txikia">
       <div className="tour-top">
         <span className="tour-kicker">Egiaztatu · galdera txikia</span>
-        <span className="tour-dots" />
-        <button className="btn small ghost" onClick={onDone} title="Galdera saltatu eta jarraitu">
-          {picked === null ? 'Saltatu' : 'Jarraitu'} <span aria-hidden>→</span>
-        </button>
       </div>
       <p className="ask-q">{ask.q}</p>
       <div className="ask-options">
@@ -656,6 +684,7 @@ export function AskCard({ id, ask, onDone }: { id: string; ask: MicroQuestion; o
             onClick={() => {
               setPicked(k);
               recordAnswer(id, k === ask.answer, ask.options[k]);
+              onAnswer();
             }}
           >
             <span className="opt-letter">{String.fromCharCode(65 + k)}</span>

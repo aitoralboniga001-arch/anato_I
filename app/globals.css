@@ -5849,17 +5849,17 @@ a.ln-chip:hover {
 }
 
 /* The micro-question takes the caption's place in the dock, so the scene stays fully visible. */
-.cap-body > .ask {
+.cap-stack > .ask {
   max-width: none;
   gap: 8px;
   animation: cap-in 0.3s var(--ease) both;
 }
 
-.cap-body > .ask .ask-options {
+.cap-stack > .ask .ask-options {
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 }
 
-.cap-body > .ask .ask-options button {
+.cap-stack > .ask .ask-options button {
   padding: 7px 10px;
   font-size: 13px;
 }
@@ -11527,7 +11527,9 @@ a.ln-chip:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  min-width: 150px;
+  /* Fixed width for every state (longest label: "Hurrengoa" + countdown), so the key never moves under the pointer. */
+  width: 172px;
+  min-width: 172px;
   height: 34px;
   padding: 0 11px 0 14px;
   border-radius: var(--radius-sm);
@@ -12479,4 +12481,80 @@ kbd {
 }
 .road-svg g:hover .road-t1 {
   fill: var(--text);
+}
+
+/* ——— Step card: a steady footprint ———
+   Every step of the stage sits invisibly in the caption's cell (.cap-sizer), so the card takes the
+   stage's tallest step and keeps it while the steps change: the scene does not resize and the pager
+   does not move. The reservation stops at the card's own scroll limit, so a short step never scrolls
+   into blank space. */
+.cap-stack {
+  display: grid;
+  min-width: 0;
+}
+
+.cap-stack > * {
+  grid-area: 1 / 1;
+  align-self: start;
+  min-width: 0;
+}
+
+.cap-sizer {
+  max-height: var(--cap-max, none);
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.dock .cap .cap-sizer .cap-text,
+.cap-sizer .fresh li {
+  animation: none;
+}
+
+@media (max-height: 820px) and (min-width: 821px) {
+  .dock {
+    --cap-max: 30vh;
+  }
+}
+
+/* The pager rides the card's bottom edge, beside the transport: the Next key sits on the same pixel
+   whatever the step's text, the question or the voice strip above it. */
+@media (min-width: 821px) {
+  .dock .cap {
+    align-items: stretch;
+  }
+  .dock .cap-nav {
+    align-self: end;
+  }
+}
+
+/* Once answered, the right (and the picked wrong) option stays at full strength; only the others fade.
+   The global disabled-button dimming made the right answer the faintest of the three. */
+.ask-options button:disabled:not(.is-faded) {
+  opacity: 1;
+}
+
+/* The voice key is a peer of the mode key (same quiet chip, coloured icon); the accent stays for what
+   the app is waiting for: the lit Next key, the current step, the playhead. */
+.voice-cta.tp-voice {
+  border-color: var(--line-2);
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.voice-cta.tp-voice:hover {
+  border-color: var(--line-3);
+  background: var(--surface-3);
+}
+
+@media (max-width: 820px) {
+  .mobile-study-actions .mobile-study-next.is-go {
+    background: var(--signal);
+    border-color: var(--signal);
+    color: #170a05;
+  }
+  .mobile-study-actions .mobile-study-next.is-go svg {
+    color: currentColor;
+  }
 }
