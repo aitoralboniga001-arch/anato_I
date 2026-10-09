@@ -43,6 +43,43 @@ function boneOutline(cx: number, top: number, bot: number, sw: number, ew: numbe
   return spline([...R, ...L], 8, true);
 }
 
+/**
+ * The femur from the front (medial side on the left): the head on its neck up and in, the greater trochanter lower
+ * and out, the notch between them; below, the two condyles with the intercondylar notch.
+ */
+function femurOutline(cx: number, top: number, bot: number, sw: number, ew: number, e: number): Pt[] {
+  const mid = (top + bot) / 2;
+  return spline(
+    [
+      [cx - ew * 0.45, top - 8],
+      [cx + ew * 0.2, top + e * 0.22],
+      [cx + ew * 0.62, top + e * 0.02],
+      [cx + ew * 0.98, top + e * 0.3],
+      [cx + ew * 0.85, top + e * 0.9],
+      [cx + sw, top + e * 1.5],
+      [cx + sw * 0.94, mid],
+      [cx + sw, bot - e * 1.5],
+      [cx + ew * 0.85, bot - e * 0.9],
+      [cx + ew, bot - e * 0.4],
+      [cx + ew * 0.7, bot],
+      [cx + ew * 0.32, bot + 4],
+      [cx, bot - 8],
+      [cx - ew * 0.32, bot + 4],
+      [cx - ew * 0.7, bot],
+      [cx - ew, bot - e * 0.4],
+      [cx - ew * 0.85, bot - e * 0.9],
+      [cx - sw, bot - e * 1.5],
+      [cx - sw * 0.94, mid],
+      [cx - sw, top + e * 1.5],
+      [cx - ew * 0.55, top + e * 1.0],
+      [cx - ew * 0.98, top + e * 0.55],
+      [cx - ew * 0.95, top + e * 0.1],
+    ],
+    8,
+    true,
+  );
+}
+
 /** Columns of chondrocytes in a growth plate band [y0, y1], streaming toward the shaft (dir +1 = down). */
 function PlateColumns({ cx, y0, y1, half, dir, t, rate }: { cx: number; y0: number; y1: number; half: number; dir: 1 | -1; t: number; rate: number }) {
   const cols = Math.floor((half * 2) / 7);
@@ -80,11 +117,12 @@ export function LongBone({ t, reduced }: SceneProps) {
   const plateB = bot - E - 8;
   const PH = 14;
   const reach = reach0 * (Ld / 2 + 8);
-  const outline = boneOutline(CX, top, bot, SW, EW, E);
+  const outline = femurOutline(CX, top, bot, SW, EW, E);
   // The rim of each joint end (outline from the top-left round over the top to the top-right; same at the bottom).
   const half = Math.floor(outline.length / 2);
   const line = (pts: Pt[]) => `M${pts.map((p) => `${f1(p[0])},${f1(p[1])}`).join('L')}`;
-  const capTop = line([...outline.slice(half).filter((p) => p[1] < top + E * 0.5), ...outline.slice(0, half).filter((p) => p[1] < top + E * 0.5)]);
+  // Articular cartilage on the head only (the trochanter is not a joint surface).
+  const capTop = line([...outline.slice(half), ...outline.slice(0, half)].filter((p) => p[1] < top + E * 0.62 && p[0] < CX + EW * 0.12));
   const capBot = line(outline.filter((p) => p[1] > bot - E * 0.5));
   // Camera: in on the upper growth plate while the bone lengthens.
   const zs = lerp(1, 2.8, push);
@@ -172,8 +210,8 @@ export function LongBone({ t, reduced }: SceneProps) {
               <rect x={CX - SW * 0.6} y={MID - reach * 0.62} width={SW * 1.2} height={reach * 1.24} rx={SW * 0.6} fill={`url(#w8-hl-marrow${cid})`} opacity={seg(reach0, 0.3, 1)} />
             </g>
           </Part>
-          {/* Epiphyses: cartilage until birth, then bone from their secondary centres. */}
-          <Part id={fid('epifisiak')} show={Math.max(seg(t, HL_T.parts, HL_T.parts + 0.03) * (1 - s2), s2)}>
+          {/* Epiphyses: cartilage until birth (part of the cartilage model), then bone from their secondary centres. */}
+          <Part id={fid('epifisiak')} groups={s2 < 0.5 ? ['kartilago-eredua'] : undefined} show={Math.max(seg(t, HL_T.parts, HL_T.parts + 0.03) * (1 - s2), s2)}>
             <g clipPath={`url(#${clipId})`}>
               {[
                 [top - 10, plateT - PH / 2],
@@ -217,7 +255,12 @@ export function LongBone({ t, reduced }: SceneProps) {
           </Part>
           {/* Primary ossification centre with its vessel, in the middle of the shaft. */}
           <Part id="hezurtzapen-zentroak" show={p1 * (1 - 0.7 * seg(t, HL_T.prenatal + 0.12, HL_T.secondary))}>
-            <path d={`M${CX + 110},${MID - 30}Q${CX + 60},${MID - 10} ${CX + 6},${MID}`} fill="none" stroke={Q.vessel} strokeWidth={3} strokeLinecap="round" />
+            {/* It comes in from outside the plane: its outer end fades instead of stopping in mid-air. */}
+            <linearGradient id={`w8-hl-vessel${cid}`} gradientUnits="userSpaceOnUse" x1={CX + 150} y1={0} x2={CX + 70} y2={0}>
+              <stop offset="0" stopColor={Q.vessel} stopOpacity={0} />
+              <stop offset="1" stopColor={Q.vessel} />
+            </linearGradient>
+            <path d={`M${CX + 150},${MID - 44}Q${CX + 66},${MID - 14} ${CX + 6},${MID}`} fill="none" stroke={`url(#w8-hl-vessel${cid})`} strokeWidth={3.4} strokeLinecap="round" />
             {/* The centre melts into the marrow cavity; its vessel stays as the nutrient artery. */}
             <g opacity={1 - seg(t, HL_T.secondary, HL_T.secondary + 0.03)}>
               <ellipse cx={CX} cy={MID} rx={lerp(4, 22, p1)} ry={lerp(4, 16, p1)} fill={Q.centre} stroke={Q.osteo} strokeWidth={1.2} />
@@ -310,11 +353,11 @@ export function LongBone({ t, reduced }: SceneProps) {
       <Label id="hazkuntza-plaka" x={190} y={230} {...pt(F([CX - SW * 1.1, plateT]))} show={vis(t, HL_T.plate) * inFrame(F([CX - SW * 1.1, plateT]))} />
       {/* Inside the bone already formed (it spreads from the centre toward the ends). */}
       <Label id="diafisia" x={190} y={390} {...pt(F([CX - SW * 0.9, MID + Math.min(40, reach * 0.5)]))} show={vis(t, HL_T.parts) * (1 - cmp) * inFrame(F([CX - SW * 0.9, MID + 40]))} />
-      <Label id="kartilago-eredua" x={190} y={500} {...pt(F([CX - SW, bot - E * 1.6]))} show={(1 - seg(t, HL_T.secondary, HL_T.secondary + 0.03)) * inFrame(F([CX - SW, bot - E * 1.6]))} />
+      <Label id="kartilago-eredua" x={190} y={500} {...pt(F([CX - SW + 6, bot - E * 0.7]))} show={Math.min(1 - seg(t, HL_T.secondary, HL_T.secondary + 0.03), 1 - seg(t, HL_T.fusion + 0.01, HL_T.fusion + 0.07)) * inFrame(F([CX - SW + 6, bot - E * 0.7]))} />
       <Label id="hezurtzapen-zentro-sekundarioak" x={716} y={240} {...pt(F([CX + 14, (top + plateT) / 2]))} show={vis(t, HL_T.secondary, HL_T.fusion) * inFrame(F([CX + 14, (top + plateT) / 2]))} />
       <Label id="hezurtzapen-zentroak" text="Zentro primarioa" x={810} y={360} {...pt(F([CX + 20, MID + 4]))} show={p1 * (1 - seg(t, HL_T.secondary, HL_T.secondary + 0.03)) * inFrame(F([CX + 20, MID + 4]))} />
-      <Label id="femurra" x={190} y={520} {...pt(F([CX - SW, MID + 110]))} show={vis(t, HL_T.count)} />
-      <Label id="falangeak" x={810} y={250} ax={PX + 24} ay={(ptop + pbot) / 2} show={cmp} />
+      <Label id="femurra" x={190} y={520} {...pt(F([CX - SW + 4, MID + 110]))} show={vis(t, HL_T.count)} />
+      <Label id="falangeak" x={810} y={250} ax={PX + 18} ay={(ptop + pbot) / 2 + 2} show={cmp} />
     </g>
   );
 }

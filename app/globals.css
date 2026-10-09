@@ -3942,6 +3942,27 @@ a.ln-chip:hover {
   animation: ghost-out 0.9s ease forwards;
 }
 
+/* Camera move: of the old drawing left in place, only its names show (fading). */
+.travel-names * {
+  visibility: hidden;
+}
+.travel-names [data-label],
+.travel-names [data-label] * {
+  visibility: visible;
+}
+
+/* After a camera move the drawing is already in place: only its names and the edge words come in. */
+.scene-arrived [data-label],
+.orient span {
+  animation: names-in 0.6s ease both;
+}
+
+@keyframes names-in {
+  from {
+    opacity: 0;
+  }
+}
+
 @keyframes ghost-out {
   to {
     opacity: 0;

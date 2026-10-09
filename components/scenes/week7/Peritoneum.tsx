@@ -90,18 +90,18 @@ function BeanShape({ c, s }: { c: Pt; s: number }) {
 }
 
 function Tube({ c, rx, ry, wall = '#7a3b48' }: { c: Pt; rx: number; ry: number; wall?: string }) {
-  // The folded lumen: a star of mucosal folds, not a round hole.
-  const folds = Array.from({ length: 7 }, (_, i) => {
-    const a = (i / 7) * Math.PI * 2 + 0.3;
-    return `M${f1(c[0])},${f1(c[1])}L${f1(c[0] + Math.cos(a) * rx * 0.36)},${f1(c[1] + Math.sin(a) * ry * 0.34)}`;
-  }).join('');
+  // The lumen, its outline gently scalloped by the mucosal folds.
+  const lumen = Array.from({ length: 36 }, (_, i) => {
+    const a = (i / 36) * Math.PI * 2;
+    const r = 1 + 0.12 * Math.cos(5 * a + 0.4);
+    return [c[0] + Math.cos(a) * rx * 0.26 * r, c[1] + Math.sin(a) * ry * 0.24 * r] as Pt;
+  });
   return (
     <>
       <ellipse cx={c[0]} cy={c[1]} rx={rx} ry={ry} fill={wall} stroke="rgba(40,10,20,0.6)" strokeWidth={1} />
       <ellipse cx={c[0]} cy={c[1]} rx={rx} ry={ry} fill="url(#w7-muscle)" opacity={0.55} />
       <ellipse cx={c[0]} cy={c[1]} rx={rx * 0.66} ry={ry * 0.66} fill={P.gut} stroke="rgba(90,60,10,0.6)" strokeWidth={0.9} />
-      <ellipse cx={c[0]} cy={c[1]} rx={rx * 0.22} ry={ry * 0.2} fill="#1a1208" />
-      <path d={folds} stroke="#1a1208" strokeWidth={Math.max(1.6, rx * 0.07)} strokeLinecap="round" />
+      <path d={smoothPath(lumen, true, 0.3)} fill="#1a1208" stroke="#c9a24a" strokeWidth={0.8} strokeOpacity={0.6} />
       <ellipse cx={c[0]} cy={c[1]} rx={rx} ry={ry} fill="url(#w7-light)" />
     </>
   );
@@ -138,8 +138,10 @@ export function PeritoneumSection({ t }: SceneProps) {
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
 
       {/* Body wall and dorsal mesenchyme. */}
-      <path d={poly(BODY)} fill={P.wall} />
-      <path d={poly(BODY)} fill="url(#w7-mesench)" />
+      <Part id="gorputz-pareta" quiet>
+        <path d={poly(BODY)} fill={P.wall} />
+        <path d={poly(BODY)} fill="url(#w7-mesench)" />
+      </Part>
       <Part id="azaleko-ektodermoa" quiet>
         <Sheet outer={BODY} inner={SKIN_IN} color={P.skin} nucleus="rgba(20,40,110,0.7)" cell={9} seed={5} />
       </Part>
@@ -160,13 +162,15 @@ export function PeritoneumSection({ t }: SceneProps) {
         </radialGradient>
       </defs>
       {/* The muscle layer of the body wall (lateral and ventral). */}
-      <g mask="url(#w7-pt-wall)" pointerEvents="none">
-        <path d={`${poly(offset(BODY, -12, true))}${poly([...offset(BODY, -34, true)].reverse())}`} fill={P.bodyMuscle} opacity={0.42} fillRule="evenodd" />
-        <path d={`${poly(offset(BODY, -12, true))}${poly([...offset(BODY, -34, true)].reverse())}`} fill="url(#w7-muscle)" opacity={0.6} fillRule="evenodd" />
-      </g>
+      <Part id="gorputz-pareta" quiet>
+        <g mask="url(#w7-pt-wall)">
+          <path d={`${poly(offset(BODY, -12, true))}${poly([...offset(BODY, -34, true)].reverse())}`} fill={P.bodyMuscle} opacity={0.42} fillRule="evenodd" />
+          <path d={`${poly(offset(BODY, -12, true))}${poly([...offset(BODY, -34, true)].reverse())}`} fill="url(#w7-muscle)" opacity={0.6} fillRule="evenodd" />
+        </g>
+      </Part>
 
       {/* Axial structures at the back: back muscles either side, the cord in its vertebral arch, the psoas muscles. */}
-      <g pointerEvents="none">
+      <Part id="gorputz-pareta" quiet>
         {[1, -1].map((s) => (
           <g key={s}>
             <ellipse cx={500 + s * 74} cy={118} rx={44} ry={32} fill="#6e2a40" opacity={0.75} />
@@ -175,7 +179,7 @@ export function PeritoneumSection({ t }: SceneProps) {
             <ellipse cx={500 + s * 52} cy={196} rx={18} ry={24} transform={`rotate(${s * -20} ${500 + s * 52} 196)`} fill="url(#w7-muscle)" opacity={0.5} />
           </g>
         ))}
-      </g>
+      </Part>
       <Part id="ornoak" quiet>
         <path d="M466,160 C458,120 470,76 500,68 C530,76 542,120 534,160" fill="none" stroke={P.bone} strokeWidth={9} strokeLinecap="round" opacity={0.7} />
         <ellipse cx={500} cy={170} rx={36} ry={22} fill={P.bone} opacity={0.9} />
@@ -189,17 +193,17 @@ export function PeritoneumSection({ t }: SceneProps) {
       </Part>
 
       {/* Peritoneal cavity: a closed space lined by serosa, with a film of fluid. */}
-      <path d={poly(cav)} fill={P.space} />
       <Part id="peritoneo-barrunbea">
+        <path d={poly(cav)} fill={P.space} />
         <path d={poly(cav)} fill={P.perito} />
         <path d={poly(cav)} fill="url(#w7-pt-cav)" />
       </Part>
 
       {/* Behind the cavity, in the back wall: kidneys, aorta, inferior vena cava (outside the peritoneum). */}
       {/* Renal arteries from the aorta (the right one passes behind the vena cava). */}
-      <path d="M488,234 Q440,214 384,222 M512,234 Q560,214 616,222" fill="none" stroke="#9e1228" strokeWidth={5.5} strokeLinecap="round" opacity={0.9} pointerEvents="none" />
-      <path d="M488,234 Q440,214 384,222 M512,234 Q560,214 616,222" fill="none" stroke={P.aorta} strokeWidth={3.5} strokeLinecap="round" pointerEvents="none" />
       <Part id="giltzurruna" groups={OUTSIDE}>
+        <path d="M488,234 Q440,214 384,222 M512,234 Q560,214 616,222" fill="none" stroke="#9e1228" strokeWidth={5.5} strokeLinecap="round" opacity={0.9} />
+        <path d="M488,234 Q440,214 384,222 M512,234 Q560,214 616,222" fill="none" stroke={P.aorta} strokeWidth={3.5} strokeLinecap="round" />
         <Bean c={KIDNEY_L} />
         <Bean c={KIDNEY_R} flip />
       </Part>
@@ -212,8 +216,10 @@ export function PeritoneumSection({ t }: SceneProps) {
         <circle cx={IVC[0] - 4} cy={IVC[1] - 4} r={4} fill="#fff" opacity={0.16} />
       </Part>
       {/* Renal veins into the vena cava: the left one is long and crosses in front of the aorta. */}
-      <path d="M386,228 Q412,240 438,240 M614,228 Q520,276 466,246" fill="none" stroke="#1c3c88" strokeWidth={6.5} strokeLinecap="round" pointerEvents="none" />
-      <path d="M386,228 Q412,240 438,240 M614,228 Q520,276 466,246" fill="none" stroke={P.ivc} strokeWidth={4.5} strokeLinecap="round" pointerEvents="none" />
+      <Part id="giltzurruna" groups={OUTSIDE}>
+        <path d="M386,228 Q412,240 438,240 M614,228 Q520,276 466,246" fill="none" stroke="#1c3c88" strokeWidth={6.5} strokeLinecap="round" />
+        <path d="M386,228 Q412,240 438,240 M614,228 Q520,276 466,246" fill="none" stroke={P.ivc} strokeWidth={4.5} strokeLinecap="round" />
+      </Part>
 
       {/* The dorsal attachment of the gut: broad mesenchyme first, then the two-layered dorsal mesentery. */}
       <Part id="mesenterio-dortsala">
@@ -228,10 +234,12 @@ export function PeritoneumSection({ t }: SceneProps) {
       {/* Colons, each on its own short mesentery, appear as more of the gut's derivatives. */}
       {colons > 0.01 && (
         <>
-          <g opacity={colons}>
-            {colonMes(colonL, -1)}
-            {colonMes(colonR, 1)}
-          </g>
+          <Part id="mesenterio-dortsala">
+            <g opacity={colons}>
+              {colonMes(colonL, -1)}
+              {colonMes(colonR, 1)}
+            </g>
+          </Part>
           <Part id="goranzko-kolona" show={colons} groups={colonGroup}>
             <Tube c={colonL} rx={CR} ry={CR - 2} />
           </Part>
@@ -290,20 +298,20 @@ export function PeritoneumSection({ t }: SceneProps) {
       <Label id="beheko-kaba-zaina" x={190} y={150} ax={IVC[0] - 10} ay={IVC[1] - 6} small />
       <Label id="giltzurruna" x={190} y={196} ax={KIDNEY_L[0] - 20} ay={KIDNEY_L[1]} />
       <Label id="peritoneo-atzeko-egiturak" x={190} y={290} ax={colonL[0] - 18} ay={colonL[1] - 8} show={k} small />
-      <Label id="goranzko-kolona" x={190} y={360} ax={colonL[0] - CR + 4} ay={colonL[1]} show={colons} />
-      <Label id="paretako-orria" x={190} y={432} ax={258} ay={432} show={1 - named} />
-      <Label id="paretako-peritoneoa" x={190} y={432} ax={258} ay={432} show={named} />
+      <Label id="goranzko-kolona" x={190} y={360} ax={colonL[0] - CR + 11} ay={colonL[1] + 7} show={colons} />
+      <Label id="paretako-orria" x={190} y={432} ax={252} ay={430} show={1 - named} />
+      <Label id="paretako-peritoneoa" x={190} y={432} ax={252} ay={430} show={named} />
       <Label id="peritoneo-barrunbea" x={190} y={492} ax={318} ay={498} />
 
       {/* Right gutter. */}
       <Label id="hodi-neurala" x={810} y={92} ax={526} ay={100} small />
       <Label id="aorta" x={810} y={180} ax={AORTA[0] + 14} ay={AORTA[1] - 6} />
       <Label id="peritoneo-kanpoko-egiturak" x={804} y={240} ax={KIDNEY_R[0] + 20} ay={KIDNEY_R[1] + 4} show={extra} small />
-      <Label id="mesenterio-dortsala" x={810} y={290} ax={500 + w / 2 - 6} ay={ROOT_Y + 30} />
-      <Label id="beheranzko-kolona" x={810} y={360} ax={colonR[0] + CR - 4} ay={colonR[1]} show={colons} />
+      <Label id="mesenterio-dortsala" x={810} y={290} ax={500 + w * 0.25} ay={ROOT_Y + 28} />
+      <Label id="beheranzko-kolona" x={810} y={360} ax={colonR[0] + CR - 13} ay={colonR[1] + 8} show={colons} />
       <Label id="erdiko-hestea" x={810} y={410} ax={GUT[0] + 20} ay={GUT[1]} />
-      <Label id="errai-orria" x={810} y={452} ax={GUT[0] + 26} ay={GUT[1] + 30} show={1 - named} />
-      <Label id="errai-peritoneoa" x={810} y={452} ax={GUT[0] + 26} ay={GUT[1] + 30} show={named} />
+      <Label id="errai-orria" x={810} y={452} ax={GUT[0] + 20} ay={GUT[1] + 28} show={1 - named} />
+      <Label id="errai-peritoneoa" x={810} y={452} ax={GUT[0] + 20} ay={GUT[1] + 28} show={named} />
       <Label id="peritoneo-barruko-egiturak" x={804} y={500} ax={GUT[0] + 14} ay={GUT[1] + 20} show={vis(t, 0.48)} small />
     </g>
   );

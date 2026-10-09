@@ -1064,6 +1064,8 @@ export const week8: WeekDef = {
           plane: 'zeharkakoa',
           description: 'Orno bat goitik, goian atzea: esklerotomako zelulak notokorda eta hodi neuralaren inguruan bildu, gorputza eta arkua hazi eta apofisiak atera; amaieran orno zuloa ornomuinarekin.',
           orientation: { top: 'Atzea', bottom: 'Aurrea' },
+          // One vertebra, not a cut of the whole body: no camera move.
+          travel: false,
           scene: VertebraTop,
         },
         {

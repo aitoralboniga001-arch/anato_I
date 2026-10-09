@@ -15,7 +15,15 @@ export function Frames() {
   useEffect(() => {
     // A timer, not a frame callback: hidden panes (batch audits) throttle animation frames.
     const id = setTimeout(() => setQ(new URLSearchParams(window.location.search)), 0);
-    return () => clearTimeout(id);
+    // The hover and arrow probes (public/dev-probes.js) need to know which structures are wholes of other parts.
+    Object.assign(window, { __partsOf: partsOf, __isSpace: isSpace });
+    const s = document.createElement('script');
+    s.src = '/dev-probes.js';
+    document.head.appendChild(s);
+    return () => {
+      clearTimeout(id);
+      s.remove();
+    };
   }, []);
   if (!q) return null;
   if (q.get('audit')) return <Audit q={q} />;

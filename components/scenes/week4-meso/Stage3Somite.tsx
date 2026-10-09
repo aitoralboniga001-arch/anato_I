@@ -647,8 +647,8 @@ function anchors(c: Ctx): Record<string, Pt> {
 const CTX: Place = { k: 1.16, ox: 500, oy: 190 };
 
 /** The close-up drawing and its label anchors, for other topics that retell the somite (topic 8: bone origins). */
-export function somiteClose(t: number, sids?: SomiteIds) {
-  const { c, drawing } = scene(t, CLOSE, true, sids);
+export function somiteClose(t: number, sids?: SomiteIds, pl: Place = CLOSE) {
+  const { c, drawing } = scene(t, pl, true, sids);
   return { drawing, anchors: anchors(c), tm: c.tm, M: c.M, rib: ribLine(c.g).map((p) => c.M(p)) };
 }
 /** The same for the two-sided context view. */

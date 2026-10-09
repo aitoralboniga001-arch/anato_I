@@ -98,10 +98,10 @@ export function CoelomFold({ t }: SceneProps) {
       <Label id="amnios-barrunbea" x={190} y={78} ax={L(A.amnion)[0]} ay={L(A.amnion)[1]} />
       <Label id="ektodermoa" x={190} y={114} ax={L(A.ecto)[0]} ay={L(A.ecto)[1]} />
       {/* Follows the fold: the left edge while it moves, then the midline where the two walls meet. */}
-      <Label id="tolestura-laterala" x={190} y={150} ax={t < 0.68 ? L(g.E0)[0] : meet[0]} ay={t < 0.68 ? L(g.E0)[1] : meet[1]} show={vis(t, 0.5, 0.84)} />
+      <Label id="tolestura-laterala" x={190} y={150} ax={t < 0.68 ? L(g.E0)[0] + 21 : meet[0] + 26} ay={t < 0.68 ? L(g.E0)[1] + 16 : meet[1]} show={vis(t, 0.5, 0.84)} />
       <Label id="paretako-orria" x={190} y={232} ax={L(A.parietal)[0]} ay={L(A.parietal)[1]} />
       <Label id="errai-orria" x={190} y={268} ax={L(A.visceral)[0]} ay={L(A.visceral)[1]} />
-      <Label id="korion-barrunbea" x={190} y={380} ax={L(A.chorion)[0]} ay={L(A.chorion)[1]} small />
+      <Label id="korion-barrunbea" x={190} y={380} ax={L(A.chorion)[0] - 5} ay={L(A.chorion)[1] - 4} small />
       <Label id="bitelo-zaku-sekundarioa" x={190} y={430} ax={L(A.yolk)[0]} ay={Math.min(L(A.yolk)[1], 600)} show={1 - 0.75 * lam} />
 
       <Label id="hodi-neurala" x={810} y={78} ax={R(A.tube)[0]} ay={R(A.tube)[1]} />
@@ -111,7 +111,7 @@ export function CoelomFold({ t }: SceneProps) {
       <Label id="bitarteko-mesodermoa" x={810} y={238} ax={R(im)[0]} ay={R(im)[1]} small />
       <Label id="alboko-mesodermoa" x={810} y={272} ax={R(A.parietal)[0]} ay={R(A.parietal)[1]} small />
       <Label id="enbrioi-barruko-zeloma" x={810} y={310} ax={R(A.coelom)[0]} ay={R(A.coelom)[1]} />
-      <Label id="mesenterio-dortsala" x={810} y={354} ax={R(A.mesentery)[0]} ay={R(A.mesentery)[1]} show={seg(g.mes, 8, 20)} small />
+      <Label id="mesenterio-dortsala" x={810} y={354} ax={R(A.mesentery)[0] - 3} ay={R(A.mesentery)[1] - 9} show={seg(g.mes, 8, 20)} small />
       <Label id="endodermoa" x={810} y={392} ax={R(A.gut)[0]} ay={R(A.gut)[1]} show={1 - seg(g.ff, 0.665, 0.69)} />
       <Label id="erdiko-hestea" x={810} y={392} ax={R(A.gut)[0]} ay={R(A.gut)[1]} show={seg(g.ff, 0.665, 0.69)} />
       <Label id="hodi-onfalomesenterikoa" x={810} y={430} ax={R(A.duct)[0]} ay={Math.min(R(A.duct)[1], 600)} show={seg(g.ff, 0.5, 0.6) * (1 - 0.75 * lam)} />

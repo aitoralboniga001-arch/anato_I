@@ -1451,10 +1451,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   if (mounted && seenView?.key !== sceneKey) {
     const from = seenView ?? readLastView(week.week);
     setSeenView(snap);
-    // When the simulation itself changes the view of the same body, the camera travels from the old plane to the new one.
+    // When the view of the same body changes (by the simulation or by the viewer), the camera travels from the old plane to the new one.
     const [fw, fs, fv] = seenView?.key.split('/') ?? [];
     const fromView = Number(fw) === week.week ? week.stages.find((x) => x.id === fs)?.views.find((x) => x.id === fv) : undefined;
-    const plan = !formation && !reduced && !travel && intro === null && fromView && seenView && pickedView !== sceneKey ? travelPlan(week.week, day, fromView, view, seenView.day) : null;
+    const plan = !formation && !reduced && !travel && intro === null && fromView && seenView ? travelPlan(week.week, day, fromView, view, seenView.day) : null;
     if (plan) setTravel({ key: sceneKey, plan });
     else if (travel) setTravel(null);
     // After a camera move the card is only its chip (reopen to read it); narrated, it is read out as before.
@@ -1803,7 +1803,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       </div>
                     </div>
                   )}
-                  {!playing && pos.t === 0 && !find && intro === null && (
+                  {!playing && pos.t === 0 && !find && intro === null && !travel && (
                     <button className="start" onClick={togglePlay}>
                       <span className="start-icon">
                         <IconPlay size={14} />
@@ -1886,7 +1886,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                 </ViewTravel>
               ) : (
                 <>
-                  <g key={`${stage.id}/${view.id}`} className={arrived === sceneKey ? undefined : 'scene-enter'}>
+                  <g key={`${stage.id}/${view.id}`} className={arrived === sceneKey ? 'scene-arrived' : 'scene-enter'}>
                     {mounted && <Scene t={sceneT} reduced={reduced} />}
                   </g>
                   {ghost && GhostScene && (

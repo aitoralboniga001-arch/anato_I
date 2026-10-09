@@ -84,6 +84,8 @@ const VERT = [
   { n: 'L2', y: 546 },
   { n: 'L3', y: 590 },
 ];
+/** A lumbar vertebral body from below: wide, kidney-shaped, hollowed behind where the canal is. */
+const BODY_V = 'M-42,-3 C-42,-17 -26,-19 0,-19 C26,-19 42,-17 42,-3 C42,12 30,19 17,19 C8,19 6,12 0,12 C-6,12 -8,19 -17,19 C-30,19 -42,12 -42,-3Z';
 const CRUS_R = spline([[438, 330], [440, 390], [450, 440], [464, 500], [470, 600]], 8);
 const CRUS_L = spline([[562, 330], [560, 390], [550, 440], [536, 500], [530, 552]], 8);
 const AORTA: Pt = [500, 446];
@@ -106,13 +108,25 @@ export function DiaphragmBelow({ t }: SceneProps) {
     <g>
       <Defs7 />
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
+      <defs>
+        <radialGradient id="w7-below-vert" cx="45%" cy="35%" r="75%">
+          <stop offset="0" stopColor="#f6f0e2" />
+          <stop offset="0.7" stopColor="#ddd3bd" />
+          <stop offset="1" stopColor="#b3a88f" />
+        </radialGradient>
+      </defs>
 
       {/* Lumbar vertebrae behind the crura. */}
       <Part id="ornoak" quiet>
-        {VERT.map((v) => (
-          <g key={v.n}>
-            <rect x={458} y={v.y - 19} width={84} height={38} rx={8} fill={P.bone} opacity={0.9} />
-            <rect x={458} y={v.y - 19} width={84} height={38} rx={8} fill="url(#w7-light)" />
+        {VERT.map((v, i) => (
+          <g key={v.n} transform={`translate(500 ${v.y})`}>
+            {/* Transverse processes, then the body (kidney-shaped, hollow behind for the canal), the disc below it. */}
+            {[-1, 1].map((s) => (
+              <path key={s} d={`M${s * 34},2 L${s * 66},${-2} L${s * 68},8 L${s * 34},12Z`} fill="#cfc6b2" stroke="#7d7462" strokeWidth={1} strokeLinejoin="round" />
+            ))}
+            {i < VERT.length - 1 && <rect x={-36} y={18} width={72} height={8} rx={3} fill="#9fb4c8" opacity={0.6} />}
+            <path d={BODY_V} fill="url(#w7-below-vert)" stroke="#7d7462" strokeWidth={1.2} />
+            <path d={BODY_V} fill="url(#w7-light)" />
           </g>
         ))}
       </Part>
@@ -189,12 +203,13 @@ export function DiaphragmBelow({ t }: SceneProps) {
       <Part id="aorta">
         <circle cx={AORTA[0]} cy={AORTA[1]} r={15} fill={P.aorta} stroke="#7a0f1e" strokeWidth={1.4} />
       </Part>
-      <Part id="erdiko-lotailu-arkutua">
-        <path d={`M466,452Q500,404 534,452`} fill="none" stroke="#efe6d6" strokeWidth={5} strokeLinecap="round" />
-      </Part>
       <Mark id="aortaren-hiatoa" x={AORTA[0]} y={AORTA[1]} rx={26} show={vis(t, 0.48, 0.62)} />
       <Mark id="hestegorriaren-hiatoa" x={ESO[0]} y={ESO[1]} rx={22} show={vis(t, 0.48, 0.62)} />
       <Mark id="beheko-kabaren-zuloa" x={IVC[0]} y={IVC[1]} rx={22} show={vis(t, 0.48, 0.62)} />
+      {/* Over the hiatus' glow: the ligament arching over the aorta stays pickable while the hiatus is lit. */}
+      <Part id="erdiko-lotailu-arkutua">
+        <path d={`M466,452Q500,404 534,452`} fill="none" stroke="#efe6d6" strokeWidth={5} strokeLinecap="round" />
+      </Part>
 
       <Note x={500} y={624} tone="accent" show={vis(t, 0, 0.16)}>
         Septum transversumetik: zentro tendinosoa (eskuineko, erdiko eta ezkerreko hostoak)
@@ -213,7 +228,7 @@ export function DiaphragmBelow({ t }: SceneProps) {
       <Label id="zentro-tendinosoa" x={790} y={196} ax={640} ay={226} />
       <Label id="hestegorriaren-hiatoa" x={810} y={250} ax={ESO[0] + 16} ay={ESO[1] - 6} />
       <Label id="hestegorria" x={810} y={286} ax={ESO[0] + 6} ay={ESO[1] + 2} small />
-      <Label id="erdiko-lotailu-arkutua" x={810} y={400} ax={522} ay={424} />
+      <Label id="erdiko-lotailu-arkutua" x={810} y={400} ax={478} ay={438} />
       <Label id="aortaren-hiatoa" x={810} y={448} ax={AORTA[0] + 22} ay={AORTA[1] + 6} />
       <Label id="aorta" x={810} y={492} ax={AORTA[0] + 12} ay={AORTA[1] + 4} small />
       <Label id="diafragma" x={810} y={548} ax={664} ay={451} />
@@ -222,7 +237,7 @@ export function DiaphragmBelow({ t }: SceneProps) {
       <Label id="beheko-kaba-zaina" x={190} y={222} ax={IVC[0] - 6} ay={IVC[1] + 3} small />
       <Label id="saihets-hezur-atala" x={190} y={400} ax={248} ay={392} />
       <Label id="gerriko-atala" x={190} y={448} ax={478} ay={318} />
-      <Label id="diafragmaren-zutabeak" x={190} y={500} ax={CRUS_R[30][0] - 12} ay={CRUS_R[30][1]} />
+      <Label id="diafragmaren-zutabeak" x={190} y={500} ax={CRUS_R[30][0] - 6} ay={CRUS_R[30][1]} />
       <Label id="ornoak" x={190} y={580} ax={458} ay={580} small />
     </g>
   );
@@ -232,12 +247,21 @@ export function DiaphragmBelow({ t }: SceneProps) {
 
 // Trunk in profile: chest in front (sternum), the abdominal wall bulging below the xiphoid, the back behind.
 const TORSO = spline(
-  [[372, 24], [632, 24], [702, 96], [718, 210], [714, 330], [698, 440], [704, 530], [670, 604], [372, 610], [314, 560], [298, 470], [310, 386], [322, 336], [316, 240], [320, 150], [338, 70]],
+  [
+    [338, 70], [368, 38], [414, 12], [424, -30], [592, -30], [604, 8], [662, 46], [704, 100], [720, 210], [714, 330], [696, 440], [706, 530], [670, 604],
+    [372, 610], [314, 560], [298, 470], [310, 386], [322, 336], [316, 240], [320, 150],
+  ],
   8,
   true,
 );
-/** Sternum down the front of the chest, ending in the xiphoid process (where the sternal part inserts). */
-const STERNUM = spline([[340, 64], [334, 140], [332, 220], [334, 290], [338, 322]], 8);
+/** Sternum down the front of the chest: manubrium, body, and the xiphoid process (where the sternal part inserts). */
+const STERNUM = [
+  { d: 'M341,66 L337,108', w: 22 },
+  { d: 'M336,118 C333,180 332,240 334,288', w: 16 },
+  { d: 'M334,296 L338,322', w: 8 },
+];
+/** The liver under the right half of the dome, the IVC running up through it. */
+const LIVER = spline([[346, 340], [378, 294], [440, 266], [514, 270], [566, 298], [584, 328], [560, 352], [500, 372], [430, 394], [372, 402], [342, 382]], 8, true);
 const SPINE_X = 650;
 const SPINE = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'L1', 'L2', 'L3'];
 const spineY = (i: number) => 60 + i * 30;
@@ -282,21 +306,40 @@ export function DiaphragmProfile({ t, reduced }: SceneProps) {
       <Defs7 />
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <defs>
+        <linearGradient id="w7-adult-vert" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#b3a88f" />
+          <stop offset="0.45" stopColor="#f1eadb" />
+          <stop offset="1" stopColor="#a39880" />
+        </linearGradient>
         <radialGradient id="w7-adult-heart" cx="38%" cy="30%" r="80%">
           <stop offset="0" stopColor="#ec6378" />
           <stop offset="0.6" stopColor="#c62d42" />
           <stop offset="1" stopColor="#7d1527" />
         </radialGradient>
       </defs>
-      <path d={poly(TORSO)} fill={P.wall} />
-      <path d={poly(TORSO)} fill="url(#w7-mesench)" />
-      <path d={poly(offset(TORSO, -16, true))} fill={P.space} />
+      {/* The wall is the ring only: the room inside it is the cavities and organs, each named on its own. */}
+      <Part id="gorputz-pareta" quiet>
+        <path d={`${poly(TORSO)}${poly([...offset(TORSO, -16, true)].reverse())}`} fill={P.wall} fillRule="evenodd" />
+        <path d={`${poly(TORSO)}${poly([...offset(TORSO, -16, true)].reverse())}`} fill="url(#w7-mesench)" fillRule="evenodd" />
+      </Part>
+      <path d={poly(offset(TORSO, -16, true))} fill={P.space} pointerEvents="none" />
 
       {/* Thorax: the pleural cavity (lung) behind and the pericardial cavity (heart) on the central tendon. */}
       {/* Oesophagus behind the heart, through its hiatus to the stomach; aorta (arch, then down in front of the column); IVC up through the tendon. */}
+      {/* The liver under the dome: it goes down with it at each breath. */}
+      <Part id="gibela" quiet>
+        <g>
+          {breath && <animateTransform attributeName="transform" type="translate" values="0 0;0 22;0 0" {...B} />}
+          <path d={sp(LIVER)} fill="#8d3a34" stroke="#4d1714" strokeWidth={1.4} />
+          <path d={sp(LIVER)} fill="url(#w7-light)" />
+        </g>
+      </Part>
       <Part id="hestegorria">
         <path d={ESO_P} fill="none" stroke="#6a4c16" strokeWidth={13} strokeLinecap="round" />
         <path d={ESO_P} fill="none" stroke="#d9ab3c" strokeWidth={9} strokeLinecap="round" />
+      </Part>
+      <Part id="giltzurruna" show={cav}>
+        <ellipse cx={626} cy={478} rx={16} ry={32} fill="#b2485a" stroke="#6e1f2e" strokeWidth={1.2} />
       </Part>
       <Part id="aorta">
         <path d={AORTA_P} fill="none" stroke="#7a0f1e" strokeWidth={15} strokeLinecap="round" />
@@ -335,24 +378,39 @@ export function DiaphragmProfile({ t, reduced }: SceneProps) {
       <Part id="peritoneo-barrunbea" show={cav}>
         <path d={smoothPath(PERITO, true, 0.3)} fill={P.perito} stroke="#7ed492" strokeWidth={1.2} />
       </Part>
-      <Part id="giltzurruna" show={cav}>
-        <ellipse cx={626} cy={478} rx={16} ry={32} fill="#b2485a" stroke="#6e1f2e" strokeWidth={1.2} />
-      </Part>
 
       {/* Sternum and vertebrae. */}
       <Part id="ornoak" quiet>
-        {SPINE.map((n, i) => (
-          <rect key={n} x={SPINE_X - 2} y={spineY(i) - 11} width={44} height={22} rx={5} fill={P.bone} opacity={['L1', 'L2', 'L3'].includes(n) ? 0.95 : 0.6} />
-        ))}
+        {SPINE.map((n, i) => {
+          const y = spineY(i);
+          const lumbar = i >= 12;
+          const h = lumbar ? 24 : 21;
+          // Body in front, the intervertebral disc below it, the spinous process down and back.
+          const spine = lumbar ? `M${SPINE_X + 40},${y - 7} L${SPINE_X + 56},${y - 5} L${SPINE_X + 57},${y + 7} L${SPINE_X + 40},${y + 6}Z` : `M${SPINE_X + 40},${y - 6} L${SPINE_X + 52},${y - 1} L${SPINE_X + 54},${y + 16} L${SPINE_X + 46},${y + 12} L${SPINE_X + 40},${y + 5}Z`;
+          return (
+            <g key={n} opacity={['L1', 'L2', 'L3'].includes(n) ? 1 : 0.78}>
+              <path d={spine} fill={P.bone} stroke="#7d7462" strokeWidth={1} />
+              {i < SPINE.length - 1 && <rect x={SPINE_X} y={y + h / 2} width={40} height={30 - h} rx={2} fill="#9fb4c8" opacity={0.55} />}
+              <rect x={SPINE_X - 2} y={y - h / 2} width={44} height={h} rx={4} fill="url(#w7-adult-vert)" stroke="#7d7462" strokeWidth={1} />
+            </g>
+          );
+        })}
       </Part>
       {SPINE.map((n, i) =>
         ['T6', 'T12', 'L1', 'L3'].includes(n) ? (
-          <Note key={n} x={SPINE_X + 64} y={spineY(i)} size={12.5} tone={n === 'L1' || n === 'L3' ? 'accent' : 'dim'}>
+          <Note key={n} x={SPINE_X + 96} y={spineY(i)} size={12.5} tone={n === 'L1' || n === 'L3' ? 'accent' : 'dim'}>
             {n}
           </Note>
         ) : null,
       )}
-      <path d={smoothPath(STERNUM, false, 0.3)} fill="none" stroke={P.bone} strokeWidth={18} strokeLinecap="round" opacity={0.9} />
+      <Part id="esternoia" quiet>
+        {STERNUM.map((b, i) => (
+          <path key={`o${i}`} d={b.d} fill="none" stroke="#7d7462" strokeWidth={b.w + 2.4} strokeLinecap="round" />
+        ))}
+        {STERNUM.map((b, i) => (
+          <path key={i} d={b.d} fill="none" stroke={P.bone} strokeWidth={b.w} strokeLinecap="round" />
+        ))}
+      </Part>
 
       {/* The dome, with its parts. */}
       <Part id="diafragma">
@@ -399,12 +457,12 @@ export function DiaphragmProfile({ t, reduced }: SceneProps) {
       <Label id="bihotza" x={190} y={196} ax={400} ay={222} small />
       <Label id="zentro-tendinosoa" x={190} y={250} ax={440} ay={252} />
       <Label id="bularrezur-atala" x={190} y={358} ax={326} ay={332} />
-      <Label id="beheko-kaba-zaina" x={190} y={400} ax={548} ay={420} small />
+      <Label id="beheko-kaba-zaina" x={190} y={400} ax={471} ay={265} small />
       <Label id="peritoneo-barrunbea" x={190} y={460} ax={340} ay={460} show={cav} />
-      <Label id="pleura-barrunbea" x={796} y={110} ax={616} ay={120} />
+      <Label id="pleura-barrunbea" x={796} y={110} ax={628} ay={120} />
       <Label id="birikak" x={810} y={170} ax={600} ay={190} small />
-      <Label id="hestegorria" x={810} y={214} ax={590} ay={322} small />
-      <Label id="diafragma" x={810} y={260} ax={600} ay={318} />
+      <Label id="hestegorria" x={810} y={194} ax={590} ay={322} small />
+      <Label id="diafragma" x={810} y={260} ax={595} ay={309} />
       <Label id="giltzurruna" x={810} y={420} ax={618} ay={500} show={cav} small />
       <Label id="aorta" x={810} y={460} ax={628} ay={540} small />
       <Label id="gerriko-atala" x={810} y={500} ax={652} ay={468} />

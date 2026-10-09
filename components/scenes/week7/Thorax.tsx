@@ -277,6 +277,8 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
   const lungQ = G.lung.reduce((a, q) => (Math.hypot(q[0] - wallQ[0], q[1] - wallQ[1]) < Math.hypot(a[0] - wallQ[0], a[1] - wallQ[1]) ? q : a));
   const pleuraAt: Pt = [lerp(wallQ[0], lungQ[0], 0.45), lerp(wallQ[1], lungQ[1], 0.45)];
   const serosaAt = heartPts(heartS * 1.02)[3];
+  // The middle of the right lung (bud or lobe): an edge point would land on its coat or the tissue round it.
+  const lungMid = G.lung.map((q) => sideP(q, 1)).reduce<Pt>((a, q, _, all) => [a[0] + q[0] / all.length, a[1] + q[1] / all.length], [0, 0]);
   // Cavity tints: one primitive pericardial cavity, then two pleural + one pericardial.
   const periTint = poly(G.peri);
   const pleuraTint = `${poly(G.pleura)}${poly(G.pleura.map(mirror))}`;
@@ -296,8 +298,10 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
         </radialGradient>
       </defs>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
-      <path d={poly(BODY)} fill={P.wall} />
-      <path d={poly(BODY)} fill="url(#w7-mesench)" />
+      <Part id="gorputz-pareta" quiet>
+        <path d={poly(BODY)} fill={P.wall} />
+        <path d={poly(BODY)} fill="url(#w7-mesench)" />
+      </Part>
       <Part id="azaleko-ektodermoa" quiet>
         <Sheet outer={BODY} inner={SKIN_IN} color={P.skin} nucleus="rgba(20,40,110,0.7)" cell={9} seed={7} />
       </Part>
@@ -313,16 +317,21 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
       </Part>
 
       {/* The thoracic cavity. */}
-      <path d={poly(WALL)} fill={P.space} />
+      {/* Under the tints: what the tints leave uncovered is still the cavity (the pleural parts once split). */}
+      <Part id={fused > 0.5 ? 'pleura-barrunbea' : 'hasierako-perikardio-barrunbea'}>
+        <path d={poly(WALL)} fill={P.space} />
+      </Part>
       <Part id="hasierako-perikardio-barrunbea" show={1 - fused}>
-        <path d={poly(WALL)} fill={P.peri} opacity={gap} />
+        <path d={poly(WALL)} fill={P.peri} opacity={gap * 0.6} />
       </Part>
       <Part id="pleura-barrunbea" show={fused}>
-        <path d={pleuraTint} fill={P.pleura} opacity={gap} />
+        <path d={pleuraTint} fill={P.pleura} opacity={gap * 0.6} />
       </Part>
       <Part id="perikardio-barrunbea" show={fused}>
-        <path d={periTint} fill={P.peri} opacity={gap} />
+        <path d={periTint} fill={P.peri} opacity={gap * 0.6} />
       </Part>
+      {/* The cavity's lining (mesothelium): a fine bright edge, so the wall and the space read apart. */}
+      <path d={poly(WALL)} fill="none" stroke="rgba(255,200,190,0.4)" strokeWidth={1.6} pointerEvents="none" />
 
       {/* Parietal pleura along the wall of each pleural cavity. */}
       <Part id="paretako-pleura" show={pleuraNamed}>
@@ -447,14 +456,14 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
       {/* Left gutter: the lung side and the membrane. */}
       <Label id="errai-orria" x={190} y={150} ax={sideP(along(G.lung, 0.3), 1)[0]} ay={sideP(along(G.lung, 0.3), 1)[1]} show={1 - pleuraNamed} small />
       <Label id="errai-pleura" x={190} y={150} ax={sideP(along(G.lung, 0.3), 1)[0]} ay={sideP(along(G.lung, 0.3), 1)[1]} show={pleuraNamed} small />
-      <Label id="birika-hastapenak" x={190} y={200} ax={sideP(along(G.lung, 0.62), 1)[0] + 6} ay={sideP(along(G.lung, 0.62), 1)[1]} show={1 - G.d} />
-      <Label id="birikak" x={190} y={200} ax={sideP(along(G.lung, 0.62), 1)[0] + 10} ay={sideP(along(G.lung, 0.62), 1)[1]} show={G.d} />
+      <Label id="birika-hastapenak" x={190} y={200} ax={lungMid[0]} ay={lungMid[1]} show={1 - G.d} />
+      <Label id="birikak" x={190} y={200} ax={lungMid[0]} ay={lungMid[1]} show={G.d} />
       <Label id="mintz-pleuroperikardikoak" x={190} y={260} ax={along(G.mem, 0.62)[0]} ay={along(G.mem, 0.62)[1]} show={memShow * (1 - periNamed)} small />
       <Label id="perikardio-fibrosoa" x={190} y={260} ax={along(G.mem, 0.62)[0]} ay={along(G.mem, 0.62)[1]} show={periNamed} />
       <Label id="nerbio-frenikoa" x={190} y={360} ax={nerve[0]} ay={nerve[1]} show={memShow} />
       <Label id="bena-kardinal-komuna" x={190} y={400} ax={vein[0]} ay={vein[1]} show={memShow} small />
       <Label id="pleura-barrunbea" x={190} y={450} ax={pleuraAt[0]} ay={pleuraAt[1]} show={fused} />
-      <Label id="paretako-pleura" x={190} y={492} ax={300} ay={494} show={pleuraNamed} />
+      <Label id="paretako-pleura" x={190} y={492} ax={307} ay={487} show={pleuraNamed} />
 
       {/* Right gutter: midline and the pericardial side. */}
       <Label id="hodi-neurala" x={810} y={84} ax={526} ay={100} small />
@@ -462,7 +471,7 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
       <Label id="hestegorria" x={810} y={176} ax={ESO[0] + 12} ay={ESO[1] - 6} />
       <Label id="hestegorri-inguruko-mesenkima" x={780} y={250} ax={540} ay={300} small />
       <Label id="hasierako-perikardio-barrunbea" x={776} y={380} ax={580} ay={386} show={1 - fused} small />
-      <Label id="perikardio-barrunbea" x={810} y={380} ax={556} ay={386} show={fused} />
+      <Label id="perikardio-barrunbea" x={810} y={380} ax={553} ay={400} show={fused} />
       <Label id="bihotza" x={810} y={440} ax={HEART[0] + 40} ay={HEART[1]} />
       <Label id="perikardio-serosoa" x={810} y={500} ax={serosaAt[0]} ay={serosaAt[1]} show={periNamed} />
     </g>
@@ -510,6 +519,115 @@ function Endo({ c, hw, lumen = 0.42 }: { c: Pt[]; hw: (u: number) => number; lum
   );
 }
 
+/** Half-width of the front view's body at height y: neck with the arches, then the chest widening. */
+const frontHalf = (y: number) => (y < 180 ? 98 - 10 * gaussY(y - 180, 40) : lerp(98, 150, Math.min(1, (y - 180) / 220)));
+const gaussY = (d: number, w: number) => Math.exp(-(d * d) / (2 * w * w));
+const SIDE_BODY: Pt[] = spline(
+  [[300, 40], [284, 90], [288, 130], [280, 172], [252, 212], [214, 256], [202, 304], [214, 352], [236, 392], [226, 440], [216, 480], [226, 530], [244, 572], [250, 610], [496, 610], [494, 420], [492, 220], [484, 110], [470, 40]],
+  8,
+);
+const FRONT_BODY: Pt[] = (() => {
+  const ys = Array.from({ length: 29 }, (_, k) => 40 + k * 20);
+  return [...ys.map((y) => [FRONT_X + frontHalf(y), y] as Pt), ...[...ys].reverse().map((y) => [FRONT_X - frontHalf(y), y] as Pt)];
+})();
+/** The two pericardioperitoneal canals beside the foregut, where the buds grow. */
+const CANALS: { c: Pt; rx: number; ry: number }[] = [
+  { c: [FRONT_X - 76, 486], rx: 52, ry: 118 },
+  { c: [FRONT_X + 84, 476], rx: 54, ry: 116 },
+];
+
+/**
+ * Where the outgrowth is: a faint embryo round both views. Side view: the pharyngeal arches and the heart
+ * in front, the notochord and neural tube behind, the septum transversum and liver below the heart.
+ * Front view: the neck with its arches and the chest with the two canals the buds grow into.
+ */
+function BudContext() {
+  const sideD = smoothPath(SIDE_BODY, true, 0.3);
+  const frontD = smoothPath(FRONT_BODY, true, 0.3);
+  return (
+    <g>
+      <defs>
+        <linearGradient id="w7-bud-fade" x1="0" y1="40" x2="0" y2="610" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor={P.wall} stopOpacity={0} />
+          <stop offset="0.12" stopColor={P.wall} stopOpacity={0.55} />
+          <stop offset="0.86" stopColor={P.wall} stopOpacity={0.55} />
+          <stop offset="1" stopColor={P.wall} stopOpacity={0} />
+        </linearGradient>
+        <linearGradient id="w7-bud-edge" x1="0" y1="40" x2="0" y2="610" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#c99aa8" stopOpacity={0} />
+          <stop offset="0.12" stopColor="#c99aa8" stopOpacity={0.55} />
+          <stop offset="0.86" stopColor="#c99aa8" stopOpacity={0.55} />
+          <stop offset="1" stopColor="#c99aa8" stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <Part id="gorputz-pareta" quiet>
+        {[sideD, frontD].map((d, i) => (
+          <g key={i}>
+            <path d={d} fill="url(#w7-bud-fade)" />
+            <path d={d} fill="url(#w7-mesench)" opacity={0.5} />
+            <path d={d} fill="none" stroke="url(#w7-bud-edge)" strokeWidth={2} />
+          </g>
+        ))}
+      </Part>
+
+      {/* Side view, behind the gut: notochord and neural tube. */}
+      <Part id="notokorda" quiet>
+        <rect x={407} y={150} width={9} height={440} rx={4.5} fill="#9fb4d8" opacity={0.75} />
+      </Part>
+      <Part id="hodi-neurala" quiet>
+        <rect x={436} y={56} width={30} height={540} rx={15} fill={P.neural} opacity={0.7} />
+        <rect x={449} y={60} width={4} height={530} rx={2} fill="#0c1428" opacity={0.8} />
+      </Part>
+      {/* In front: the arches under the pharynx, the heart, the septum transversum and the liver below it. */}
+      <Part id="faringe-arkuak" quiet>
+        {[0, 1, 2].map((k) => {
+          const y = 92 + k * 32;
+          return (
+            <g key={k}>
+              <path d={`M${SIDE_X - 46 + k * 6},${y} Q${SIDE_X - 62},${y + 12} ${292 + k * 2},${y + 10}`} fill="none" stroke="#5a2c36" strokeWidth={15 - k * 2} strokeLinecap="round" />
+              <path d={`M${SIDE_X - 46 + k * 6},${y} Q${SIDE_X - 62},${y + 12} ${292 + k * 2},${y + 10}`} fill="none" stroke="#dd9e90" strokeWidth={11 - k * 2} strokeLinecap="round" opacity={0.8} />
+              {[-1, 1].map((sd) => {
+                const d = `M${FRONT_X + sd * 48},${y + 2} Q${FRONT_X + sd * 70},${y - 6} ${FRONT_X + sd * (88 - k * 4)},${y + 6}`;
+                return (
+                  <g key={sd}>
+                    <path d={d} fill="none" stroke="#5a2c36" strokeWidth={15 - k * 2} strokeLinecap="round" opacity={0.7} />
+                    <path d={d} fill="none" stroke="#dd9e90" strokeWidth={11 - k * 2} strokeLinecap="round" opacity={0.6} />
+                  </g>
+                );
+              })}
+            </g>
+          );
+        })}
+      </Part>
+      <Part id="bihotza" quiet>
+        <g opacity={0.85}>
+          <path d="M262,236 C246,214 262,190 284,184" fill="none" stroke={P.heartDeep} strokeWidth={20} strokeLinecap="round" />
+          <path d="M262,236 C246,214 262,190 284,184" fill="none" stroke="#d23a52" strokeWidth={15} strokeLinecap="round" />
+          <circle cx={274} cy={262} r={20} fill="#7d1527" stroke={P.heartDeep} strokeWidth={2} />
+          <ellipse cx={244} cy={304} rx={30} ry={42} fill={P.heart} stroke={P.heartDeep} strokeWidth={2.4} />
+          <path d="M228,282 C224,300 230,320 244,332" fill="none" stroke="#ffd0d6" strokeWidth={2} opacity={0.35} strokeLinecap="round" />
+        </g>
+      </Part>
+      <Part id="septum-transversum" quiet>
+        <path d="M222,412 C250,404 282,404 304,410 L304,436 C280,430 250,430 220,438 Z" fill={P.septum} stroke={P.septumDeep} strokeWidth={1.2} opacity={0.85} />
+      </Part>
+      <Part id="gibela" quiet>
+        <ellipse cx={262} cy={486} rx={38} ry={34} fill="#8d3a34" stroke="#4d1714" strokeWidth={1.4} opacity={0.8} />
+      </Part>
+
+      {/* Front view: the canals on each side of the foregut. */}
+      <Part id="erreten-perikardioperitonealak" quiet>
+        {CANALS.map(({ c, rx, ry }, i) => (
+          <ellipse key={i} cx={c[0]} cy={c[1]} rx={rx} ry={ry} fill={P.space} stroke={P.canal} strokeWidth={1.6} />
+        ))}
+        {CANALS.map(({ c, rx, ry }, i) => (
+          <ellipse key={`f${i}`} cx={c[0]} cy={c[1]} rx={rx} ry={ry} fill={P.canal} opacity={0.5} />
+        ))}
+      </Part>
+    </g>
+  );
+}
+
 export function LungBudFront({ t }: SceneProps) {
   const e = seg(t, 0.1, 0.17);
   const b = seg(t, 0.16, 0.23);
@@ -544,8 +662,8 @@ export function LungBudFront({ t }: SceneProps) {
   const fork: Pt = [FRONT_X, OUT_Y + 14 + len];
   const trachea = spline([fTop, [FRONT_X, (OUT_Y + fork[1]) / 2], fork], 10);
   // Embryo's right (viewer's left) bud runs more vertically and is larger than the left.
-  const budR = spline([fork, [fork[0] - 24 * grow, fork[1] + 36 * grow], [fork[0] - 66 * grow, fork[1] + 108 * grow]], 10);
-  const budL = spline([fork, [fork[0] + 34 * grow, fork[1] + 28 * grow], [fork[0] + 92 * grow, fork[1] + 84 * grow]], 10);
+  const budR = spline([fork, [fork[0] - 24 * grow, fork[1] + 36 * grow], [fork[0] - 60 * grow, fork[1] + 108 * grow]], 10);
+  const budL = spline([fork, [fork[0] + 32 * grow, fork[1] + 28 * grow], [fork[0] + 80 * grow, fork[1] + 86 * grow]], 10);
   const end = (c: Pt[]) => c[c.length - 1];
   const tipR = end(budR);
   const tipL = end(budL);
@@ -556,25 +674,26 @@ export function LungBudFront({ t }: SceneProps) {
     <g>
       <Defs7 />
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
-      <Note x={SIDE_X - 10} y={40} tone="accent">
+      <Note x={SIDE_X - 10} y={28} tone="accent">
         Albotik
       </Note>
-      <Note x={FRONT_X} y={40} tone="accent">
+      <Note x={FRONT_X} y={28} tone="accent">
         Aurretik
       </Note>
-      <Note x={SIDE_X - 84} y={92} size={12.5}>
+      <Note x={SIDE_X - 110} y={54} size={12.5}>
         bentrala
       </Note>
-      <Note x={SIDE_X + 84} y={92} size={12.5}>
+      <Note x={SIDE_X + 100} y={54} size={12.5}>
         dortsala
       </Note>
-      <Note x={FRONT_X - 120} y={92} size={12.5}>
+      <Note x={FRONT_X - 120} y={54} size={12.5}>
         eskuina
       </Note>
-      <Note x={FRONT_X + 120} y={92} size={12.5}>
+      <Note x={FRONT_X + 120} y={54} size={12.5}>
         ezkerra
       </Note>
-      <path d="M520,60L520,580" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
+      <path d="M512,60L512,580" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
+      <BudContext />
 
       {/* Splanchnic mesoderm round the outgrowth: pushed ahead by the buds, later the visceral pleura. */}
       <Part id="errai-orria">
@@ -675,8 +794,16 @@ export function LungBudFront({ t }: SceneProps) {
 
       <Label id="arnas-hastapena" x={190} y={196} ax={SIDE_X - ESO_HW - 18} ay={OUT_Y + 2} />
       <Label id="hodi-laringotrakeala" x={190} y={292} ax={sidePts[12][0] - 12} ay={sidePts[12][1]} show={seg(e, 0.3, 0.7)} />
-      <Label id="errai-orria" x={190} y={372} ax={sidePts[18][0] - 24} ay={sidePts[18][1]} small />
+      {/* Before the outgrowth has length, the coat is only round the front view's tube. */}
+      <Label id="errai-orria" x={190} y={372} ax={len < 40 ? FRONT_X - 22 : sidePts[18][0] - 24} ay={len < 40 ? OUT_Y + 12 : sidePts[18][1]} small />
       <Label id="aurreko-hestea" x={830} y={130} ax={FRONT_X + 24} ay={130} />
+      <Note x={204} y={232} size={12} tone="dim">
+        bihotza
+      </Note>
+      <Note x={262} y={490} size={12} tone="dim">
+        gibela
+      </Note>
+      <Label id="erreten-perikardioperitonealak" x={790} y={588} ax={FRONT_X + 84 - 26} ay={584} small />
       <Label id="birika-hastapenak" x={830} y={470} ax={tipL[0] + lBud - 2} ay={tipL[1]} show={seg(b, 0.2, 0.5)} />
     </g>
   );

@@ -102,8 +102,10 @@ export function ColumnSection({ t }: SceneProps) {
     <g>
       <Defs8 />
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
-      <path d={smoothPath(OUTLINE, true, 0.25)} fill={Q.body} stroke={Q.skin} strokeWidth={3} />
-      <path d={smoothPath(OUTLINE, true, 0.25)} fill="url(#w8-light)" />
+      <Part id="gorputz-pareta" quiet>
+        <path d={smoothPath(OUTLINE, true, 0.25)} fill={Q.body} stroke={Q.skin} strokeWidth={3} />
+      </Part>
+      <path d={smoothPath(OUTLINE, true, 0.25)} fill="url(#w8-light)" pointerEvents="none" />
       {/* The column forming round the tube and the notochord. */}
       <Part id="mesenkima-zutabea" show={col}>
         <path d={smoothPath(COLUMN, true, 0.25)} fill={Q.mes} opacity={0.85} stroke={Q.mesDeep} strokeWidth={2} />
@@ -116,9 +118,11 @@ export function ColumnSection({ t }: SceneProps) {
       <Part id="notokorda">
         <circle cx={NOTO_S[0]} cy={NOTO_S[1]} r={15} fill={Q.noto} stroke="#e9d5ff" strokeWidth={1.5} />
       </Part>
-      {[455, 545].map((x) => (
-        <circle key={x} cx={x} cy={372} r={13} fill="#7a1f1a" stroke={ART} strokeWidth={2} />
-      ))}
+      <Part id="aorta-dortsalak">
+        {[455, 545].map((x) => (
+          <circle key={x} cx={x} cy={372} r={13} fill="#7a1f1a" stroke={ART} strokeWidth={2} />
+        ))}
+      </Part>
       <Somite c={SOM_R} side={1} t={t} />
       <Somite c={mirror(SOM_R)} side={-1} t={t} />
       {/* Sclerotome: the ventromedial wall comes loose into mesenchyme and moves to the midline. */}
@@ -149,9 +153,9 @@ export function ColumnSection({ t }: SceneProps) {
       <Label id="hodi-neurala" x={190} y={150} ax={458} ay={168} />
       <Label id="notokorda" x={190} y={300} ax={485} ay={302} />
       <Label id="mesenkima-zutabea" x={190} y={420} ax={452} ay={330} show={col} />
-      <Label id="dermatoma" x={810} y={130} ax={690} ay={186} show={loose} />
+      <Label id="dermatoma" x={810} y={130} ax={685} ay={195} show={loose} />
       <Label id="miotoma" x={810} y={190} ax={694} ay={226} show={loose} />
-      <Label id="somitak" x={810} y={250} ax={708} ay={240} show={1 - seg(t, BZ_T.migrate, BZ_T.migrate + 0.02)} />
+      <Label id="somitak" x={810} y={250} ax={691} ay={269} show={1 - seg(t, BZ_T.migrate, BZ_T.migrate + 0.02)} />
       <Label id="esklerotoma" x={810} y={330} ax={cell1[0]} ay={cell1[1]} show={loose} />
     </g>
   );
@@ -197,6 +201,16 @@ export function ColumnCoronal({ t }: SceneProps) {
         <clipPath id="w8-bz-col">
           <rect x={300} y={44} width={400} height={552} />
         </clipPath>
+        {/* The arteries come in from the side, out of the plane: their lateral ends fade instead of stopping in mid-air. */}
+        <linearGradient id="w8-bz-artfade" gradientUnits="userSpaceOnUse" x1={170} y1={0} x2={830} y2={0}>
+          <stop offset="0" stopColor="#fff" stopOpacity={0} />
+          <stop offset="0.16" stopColor="#fff" />
+          <stop offset="0.84" stopColor="#fff" />
+          <stop offset="1" stopColor="#fff" stopOpacity={0} />
+        </linearGradient>
+        <mask id="w8-bz-artmask" maskUnits="userSpaceOnUse" x={0} y={0} width={1000} height={640}>
+          <rect x={0} y={0} width={1000} height={640} fill="url(#w8-bz-artfade)" />
+        </mask>
       </defs>
       {/* Myotomes: at the segment levels; arrive from the sides, later reach from one vertebra to the next. */}
       <Part id="miotoma">
@@ -224,6 +238,7 @@ export function ColumnCoronal({ t }: SceneProps) {
       </Part>
       {/* Intersegmental arteries, between the dense segments (later: at the middle of each body). */}
       <Part id="segmentu-arteko-arteriak" show={artIn > 0.01 ? 1 : 0}>
+        <g mask="url(#w8-bz-artmask)">
         {KS.map((k) =>
           [1, -1].map((s) => {
             const y = YB(k);
@@ -243,6 +258,7 @@ export function ColumnCoronal({ t }: SceneProps) {
             );
           }),
         )}
+        </g>
       </Part>
       {/* Spinal nerves: at the segment levels, then between the bodies (disc level). */}
       <Part id="nerbio-espinalak" show={nerve > 0.01 ? 1 : 0}>
@@ -258,7 +274,7 @@ export function ColumnCoronal({ t }: SceneProps) {
 
       <g clipPath="url(#w8-bz-col)">
         {/* Column outline and the opaque backing under its pieces. */}
-        <rect x={500 - HW - 3} y={30} width={2 * HW + 6} height={600} fill="#1d1a22" />
+        <rect x={500 - HW - 3} y={30} width={2 * HW + 6} height={600} fill="#1d1a22" pointerEvents="none" />
         <Part id="mesenkima-zutabea" quiet>
           <path d={`M${500 - HW - 2},30V630M${500 + HW + 2},30V630`} stroke={Q.mesDeep} strokeWidth={2} />
         </Part>
@@ -372,7 +388,7 @@ export function ColumnCoronal({ t }: SceneProps) {
       <Label id="notokorda" x={236} y={80} ax={lerp(494, 486, np)} ay={lerp(YB(0) + 40, YC(0) - 6, np)} />
       <Label id="esklerotoma-segmentuak" x={236} y={150} ax={500 - HW + 4} ay={YC(0) + 30} show={1 - merge} />
       <Label id="segmentu-arteko-mesenkima" x={250} y={230} ax={500 - IW + 4} ay={YB(1)} />
-      <Label id="orno-gorputza" x={236} y={300} ax={500 - HW + 4} ay={YB(2) + 26} show={merge} />
+      <Label id="orno-gorputza" x={236} y={300} ax={500 - HW + 9} ay={YB(2) + 26} show={merge} />
       <Label id="ornoarteko-diskoa" x={236} y={380} ax={500 - HW + 4} ay={YC(2)} show={disc} />
       <Label id="eraztun-fibrosoa" x={236} y={424} ax={500 - HW + 6} ay={YC(3)} show={np} />
       <Label id="gune-pulposoa" x={236} y={470} ax={500 - 20} ay={YC(3)} show={np} />
@@ -425,6 +441,18 @@ const DEPTH = (i: number) => {
   return lerp(a[1], b[1], (s - a[0]) / (b[0] - a[0] || 1));
 };
 
+/** Head in profile, in its own frame: u along the neck toward the crown, v toward the face (units ≈ px). */
+const HEAD_PROFILE: Pt[] = [
+  [-6, -20], [34, -30], [78, -16], [104, 18], [100, 52], [82, 72], [60, 80], [48, 90], [40, 84], [32, 86], [24, 80], [12, 76], [2, 58], [-10, 46],
+];
+/** Limb angles per pose (degrees from the caudal direction of the trunk toward its front): [upper, lower] piece. */
+const LIMB_POSE = {
+  fetus: { arm: [70, 172], leg: [128, 4] },
+  prone: { arm: [92, 170], leg: [2, 0] },
+  walk: { arm: [2, 16], leg: [0, -2] },
+};
+const mixA = (a: number[], b: number[], u: number) => a.map((x, i) => lerp(x, b[i], u));
+
 export function Curvatures({ t }: SceneProps) {
   const cid = useId().replace(/:/g, '');
   const curl = seg(t, BZ_T.kypho, BZ_T.kypho + 0.03);
@@ -469,16 +497,56 @@ export function Curvatures({ t }: SceneProps) {
   const trunk = [...P.map((_, i) => along(i, 22)), ...P.map((_, i) => along(i, -DEPTH(i))).reverse()];
   const top = P[0];
   const up = tan(0);
-  const headC: Pt = [top[0] - up[0] * 46 - back(0)[0] * 28, top[1] - up[1] * 46 - back(0)[1] * 28];
+  // A body with a face and limbs, so the pose reads: the curled fetus, the baby on its belly, the child standing.
+  const hk = lerp(1.12, 0.9, walk);
+  const inFrame = (o: Pt, i: number, u: number, v: number): Pt => {
+    const [tx, ty] = tan(i);
+    const [bx, by] = back(i);
+    return [o[0] - tx * u - bx * v, o[1] - ty * u - by * v];
+  };
+  const headPts = HEAD_PROFILE.map(([u, v]) => inFrame(top, 0, u * hk, v * hk));
+  const eye = inFrame(top, 0, 54 * hk, 60 * hk);
+  const ear = inFrame(top, 0, 38 * hk, 6 * hk);
+  const poseOf = (k: 'arm' | 'leg') => {
+    const a = mixA(mixA(LIMB_POSE.fetus[k], LIMB_POSE.prone[k], head), LIMB_POSE.walk[k], walk);
+    return a.map((d) => (d * Math.PI) / 180);
+  };
+  const limb = (i: number, depth: number, lens: [number, number], k: 'arm' | 'leg') => {
+    const root = along(i, -depth);
+    // Angles against the whole body's axis (head → rump), not the local curve of the column.
+    const ax = P[NV][0] - P[0][0];
+    const ay = P[NV][1] - P[0][1];
+    const al = Math.hypot(ax, ay) || 1;
+    const [tx, ty] = [ax / al, ay / al];
+    const bm = back(Math.round(NV / 2));
+    const [bx, by] = bm[0] * -ty + bm[1] * tx > 0 ? [-ty, tx] : [ty, -tx];
+    const dir = (a: number): Pt => [tx * Math.cos(a) - bx * Math.sin(a), ty * Math.cos(a) - by * Math.sin(a)];
+    const [a1, a2] = poseOf(k);
+    const d1 = dir(a1);
+    const d2 = dir(a2);
+    const mid: Pt = [root[0] + d1[0] * lens[0], root[1] + d1[1] * lens[0]];
+    const end: Pt = [mid[0] + d2[0] * lens[1], mid[1] + d2[1] * lens[1]];
+    return { root, mid, end, d2 };
+  };
+  const arm = limb(Math.round(NV * 0.2), DEPTH(Math.round(NV * 0.2)) * 0.5, [62, 56], 'arm');
+  const leg = limb(NV, DEPTH(NV) * 0.55, [84, 80], 'leg');
+  const limbD = (l: ReturnType<typeof limb>) => `M${f1(l.root[0])},${f1(l.root[1])}L${f1(l.mid[0])},${f1(l.mid[1])}L${f1(l.end[0])},${f1(l.end[1])}`;
+  // Standing, the child with its legs is taller: the whole figure is drawn a little smaller.
+  const zk = lerp(1, 0.8, walk);
+  const cy0 = lerp(352, 400, walk);
+  const cy1 = lerp(352, 330, walk);
+  const Z = (q: Pt): Pt => [500 + (q[0] - 500) * zk, cy1 + (q[1] - cy0) * zk];
+  const zoom = `translate(${f1(500 - 500 * zk)} ${f1(cy1 - cy0 * zk)}) scale(${zk.toFixed(4)})`;
   const mid = (r: number) => {
     const ids = verts.map((v, i) => (v.r === r ? i : -1)).filter((i) => i >= 0);
     return ids[Math.floor(ids.length / 2)];
   };
-  const tag = (r: number, d = 26) => {
-    const p = along(mid(r), d);
-    return { ax: p[0], ay: p[1] };
+  // dx/dy nudge a tip back onto the vertebrae where the curve's offset point falls just off them.
+  const tag = (r: number, d = 26, dx = 0, dy = 0) => {
+    const p = Z(along(mid(r), d));
+    return { ax: p[0] + dx * zk, ay: p[1] + dy * zk };
   };
-  const ground = Math.max(...trunk.map((q) => q[1])) + 2;
+  const ground = Math.max(...trunk.map((q) => q[1]), arm.end[1], arm.mid[1], leg.end[1], leg.mid[1]) + 8;
   // Intervertebral discs between the bodies.
   const discs = verts.slice(0, -1).map((v, i) => {
     const n = verts[i + 1];
@@ -499,27 +567,54 @@ export function Curvatures({ t }: SceneProps) {
           <stop offset="1" stopColor="#221c28" />
         </radialGradient>
       </defs>
-      {/* The floor the baby lies on. */}
-      <path d={`M150,${f1(ground)}H850`} stroke="#5b5360" strokeWidth={2} opacity={lie} />
-      <path d={smoothPath(trunk, true, 0.2)} fill={`url(#w8-curv-body${cid})`} stroke={Q.greyEdge} strokeWidth={2} />
-      <circle cx={headC[0]} cy={headC[1]} r={50} fill={`url(#w8-curv-body${cid})`} stroke={Q.greyEdge} strokeWidth={2} />
-      {discs.map((d, i) => (
-        <g key={i} transform={`translate(${f1(d.m[0])},${f1(d.m[1])}) rotate(${f1(d.ang - 90)})`}>
-          <rect x={-d.w / 2} y={-2.4} width={d.w} height={4.8} rx={2} fill={Q.suture} opacity={0.75} />
-        </g>
-      ))}
+      <g transform={zoom}>
+      {/* The floor the baby lies on, then stands on. */}
+      <path d={`M150,${f1(ground)}H850`} stroke="#5b5360" strokeWidth={2} opacity={Math.max(lie, walk)} />
+      {/* The far arm and leg, behind the trunk. */}
+      <Part id="gorputz-pareta" quiet>
+        {[arm, leg].map((l, i) => (
+          <g key={i} opacity={0.75}>
+            <path d={limbD(l)} fill="none" stroke={Q.greyEdge} strokeWidth={i ? 30 : 22} strokeLinecap="round" strokeLinejoin="round" transform={`translate(${f1(back(0)[0] * 8)} ${f1(back(0)[1] * 8 - 6)})`} />
+            <path d={limbD(l)} fill="none" stroke="#2a2230" strokeWidth={i ? 26 : 18} strokeLinecap="round" strokeLinejoin="round" transform={`translate(${f1(back(0)[0] * 8)} ${f1(back(0)[1] * 8 - 6)})`} />
+          </g>
+        ))}
+        <path d={smoothPath(trunk, true, 0.2)} fill={`url(#w8-curv-body${cid})`} stroke={Q.greyEdge} strokeWidth={2} />
+      </Part>
+      <Part id="burua" quiet>
+        <path d={smoothPath(headPts, true, 0.3)} fill={`url(#w8-curv-body${cid})`} stroke={Q.greyEdge} strokeWidth={2} />
+        <ellipse cx={f1(ear[0])} cy={f1(ear[1])} rx={9 * hk} ry={13 * hk} fill="none" stroke={Q.greyEdge} strokeWidth={1.8} />
+        <circle cx={f1(eye[0])} cy={f1(eye[1])} r={4.2 * hk} fill="#141018" />
+      </Part>
+      {/* The near arm and leg (bent in the womb, propping up on the belly, straight when standing). */}
+      <Part id="gorputz-pareta" quiet>
+        {[arm, leg].map((l, i) => (
+          <g key={i}>
+            <path d={limbD(l)} fill="none" stroke={Q.greyEdge} strokeWidth={i ? 32 : 24} strokeLinecap="round" strokeLinejoin="round" />
+            <path d={limbD(l)} fill="none" stroke="#43394c" strokeWidth={i ? 28 : 20} strokeLinecap="round" strokeLinejoin="round" />
+            <ellipse cx={f1(l.end[0] + l.d2[0] * (i ? 4 : 8))} cy={f1(l.end[1] + l.d2[1] * (i ? 4 : 8))} rx={i ? 12 : 10} ry={i ? 18 : 9} transform={`rotate(${f1((Math.atan2(l.d2[1], l.d2[0]) * 180) / Math.PI + (i ? 0 : 90))} ${f1(l.end[0] + l.d2[0] * (i ? 4 : 8))} ${f1(l.end[1] + l.d2[1] * (i ? 4 : 8))})`} fill="#43394c" stroke={Q.greyEdge} strokeWidth={1.8} />
+          </g>
+        ))}
+      </Part>
+      <Part id="ornoarteko-diskoa" quiet>
+        {discs.map((d, i) => (
+          <g key={i} transform={`translate(${f1(d.m[0])},${f1(d.m[1])}) rotate(${f1(d.ang - 90)})`}>
+            <rect x={-d.w / 2} y={-2.4} width={d.w} height={4.8} rx={2} fill={Q.suture} opacity={0.75} />
+          </g>
+        ))}
+      </Part>
       <Part id="zifosia" show={kyLit > 0.01 ? 1 : 0}>
         {piece(1)}
         {piece(3)}
       </Part>
       {kyLit <= 0.01 && (
-        <>
+        <Part id="ornoak" quiet>
           {piece(1)}
           {piece(3)}
-        </>
+        </Part>
       )}
-      {head > 0.01 ? <Part id="lordosia">{piece(0)}</Part> : piece(0)}
-      {walk > 0.01 ? <Part id="lordosia">{piece(2)}</Part> : piece(2)}
+      {head > 0.01 ? <Part id="lordosia">{piece(0)}</Part> : <Part id="ornoak" quiet>{piece(0)}</Part>}
+      {walk > 0.01 ? <Part id="lordosia">{piece(2)}</Part> : <Part id="ornoak" quiet>{piece(2)}</Part>}
+      </g>
 
       {pose.map((p) => (
         <Note key={p.text} x={260} y={50} size={12.5} show={p.on}>
@@ -537,9 +632,9 @@ export function Curvatures({ t }: SceneProps) {
       </Note>
 
       <Label id="lordosia" text="Lordosia (lepokoa)" x={740} y={150} {...tag(0, 20)} show={head} />
-      <Label id="zifosia" text="Zifosia (bizkarrekoa)" x={810} y={270} {...tag(1)} show={kyLit} />
+      <Label id="zifosia" text="Zifosia (bizkarrekoa)" x={810} y={270} {...tag(1, 26, -13, -4)} show={kyLit} />
       <Label id="lordosia" text="Lordosia (gerrikoa)" x={810} y={420} {...tag(2)} show={walk} />
-      <Label id="zifosia" text="Zifosia (sakroa)" x={810} y={520} {...tag(3, 16)} show={kyLit} />
+      <Label id="zifosia" text="Zifosia (sakroa)" x={810} y={520} {...tag(3, 16, -15, -8)} show={kyLit} />
     </g>
   );
 }

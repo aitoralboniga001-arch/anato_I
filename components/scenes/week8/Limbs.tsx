@@ -208,7 +208,8 @@ function LimbDrawing({ g, s, cells, lower, t, reduced }: { g: Limb; s: number; c
           <path key={th} d={`M${f1(along(inner, g.rim(th), 0.35)[0])},${f1(along(inner, g.rim(th), 0.35)[1])}L${f1(g.rim(th, 1.02)[0])},${f1(g.rim(th, 1.02)[1])}`} stroke="#5a3418" strokeWidth={3} strokeLinecap="round" />
         ))}
       </Part>
-      <Part id="apoptosia" show={dying}>
+      {/* The dying cells lie in the grooves: they count as the grooves too. */}
+      <Part id="apoptosia" groups={['izpiarteko-ildoak']} show={dying}>
         {GROOVES.flatMap((th, i) =>
           [0.5, 0.64, 0.78, 0.92].map((u, j) => {
             const p = along(inner, g.rim(th), u);
@@ -254,7 +255,8 @@ function LimbDrawing({ g, s, cells, lower, t, reduced }: { g: Limb; s: number; c
 /** The limbs are drawn 1.3× about their root on the body wall; label anchors go through the same map. */
 const K = 1.3;
 const zoomAt = (ay: number) => `translate(${WALL_X},${ay}) scale(${K}) translate(${-WALL_X},${-ay})`;
-const at = (p: Pt, ay: number) => ({ ax: WALL_X + (p[0] - WALL_X) * K, ay: ay + (p[1] - ay) * K });
+/** `dx`/`dy` nudge the tip in screen pixels, after the zoom. */
+const at = (p: Pt, ay: number, dx = 0, dy = 0) => ({ ax: WALL_X + (p[0] - WALL_X) * K + dx, ay: ay + (p[1] - ay) * K + dy });
 
 export function LimbBuds({ t, reduced }: SceneProps) {
   const su = limbS(t, false);
@@ -283,11 +285,15 @@ export function LimbBuds({ t, reduced }: SceneProps) {
         </linearGradient>
       </defs>
       {/* The body wall, seen from behind: somites near the midline, the parietal layer at the side. */}
-      <path d={`M0,0L${WALL_X},0L${WALL_X},640L0,640Z`} fill={TISSUE} />
-      <path d={`M0,0L${WALL_X},0L${WALL_X},640L0,640Z`} fill="url(#w8-light)" />
-      {Array.from({ length: 16 }, (_, i) => (
-        <rect key={i} x={26} y={6 + i * 40} width={44} height={32} rx={9} fill={Q.paraxial} opacity={0.35} />
-      ))}
+      <Part id="gorputz-pareta" quiet>
+        <path d={`M0,0L${WALL_X},0L${WALL_X},640L0,640Z`} fill={TISSUE} />
+        <path d={`M0,0L${WALL_X},0L${WALL_X},640L0,640Z`} fill="url(#w8-light)" />
+      </Part>
+      <Part id="somitak" quiet>
+        {Array.from({ length: 16 }, (_, i) => (
+          <rect key={i} x={26} y={6 + i * 40} width={44} height={32} rx={9} fill={Q.paraxial} opacity={0.35} />
+        ))}
+      </Part>
       <Part id="paretako-orria">
         <rect x={WALL_X - 30} y={0} width={24} height={640} fill={Q.lateral} opacity={0.8} />
       </Part>
@@ -297,7 +303,9 @@ export function LimbBuds({ t, reduced }: SceneProps) {
       <g transform={zoomAt(LOW_Y)}>
         <LimbDrawing g={low} s={sl} cells={CELLS_LOW} lower t={t} reduced={reduced} />
       </g>
-      <path d={`M${WALL_X},0L${WALL_X},640`} stroke={Q.skin} strokeWidth={2.4} opacity={0.8} />
+      <Part id="azaleko-ektodermoa" quiet>
+        <path d={`M${WALL_X},0L${WALL_X},640`} stroke={Q.skin} strokeWidth={2.4} opacity={0.8} />
+      </Part>
 
       <Note x={260} y={30} size={13} tone="accent">
         {week}
@@ -325,31 +333,31 @@ export function LimbBuds({ t, reduced }: SceneProps) {
       </Note>
 
       {/* Upper limb names (above its axis, proximal ones highest), then the lower limb's. */}
-      <Label id="goiko-gorputz-adarraren-hasikina" x={680} y={100} {...at(up.rim(-50), UP_Y)} show={vis(t, 0, LIMB_T.plates)} />
+      <Label id="goiko-gorputz-adarraren-hasikina" x={680} y={100} {...at(up.rim(-50), UP_Y, -3, 5)} show={vis(t, 0, LIMB_T.plates)} />
       <Label id="gorputz-adarren-mesenkima" x={700} y={160} {...at(mesAt, UP_Y)} show={vis(t, 0, LIMB_T.cart)} />
       <Label id="erpineko-ektodermo-ertza" x={770} y={236} {...at([up.rim(32)[0] + 2, up.rim(32)[1]], UP_Y)} show={seg(t, LIMB_T.aer, LIMB_T.aer + 0.03) * (1 - seg(su, 0.7, 0.76))} />
-      <Label id="esku-plaka" x={810} y={276} {...at([up.X(up.xp + 6), UP_Y + up.R * 0.6], UP_Y)} show={vis(t, LIMB_T.plates, LIMB_T.cart)} />
+      <Label id="esku-plaka" x={810} y={276} {...at([up.X(up.xp + 6), UP_Y + up.R * 0.6], UP_Y, -5, 9)} show={vis(t, LIMB_T.plates, LIMB_T.cart)} />
       <Label id="hatzetako-izpiak" x={810} y={70} {...at(ray(up, -32, 0.72), UP_Y)} show={vis(t, LIMB_T.rays, LIMB_T.cart)} />
-      <Label id="izpiarteko-ildoak" x={810} y={112} {...at(ray(up, -16, 0.86), UP_Y)} show={vis(t, LIMB_T.rays, LIMB_T.cart)} />
+      <Label id="izpiarteko-ildoak" x={810} y={112} {...at(ray(up, -16, 0.42), UP_Y)} show={Math.min(vis(t, LIMB_T.rays, LIMB_T.cart), seg(su, 0.56, 0.64))} />
       <Label id="apoptosia" x={810} y={196} {...at(ray(up, 16, 0.78), UP_Y)} show={vis(t, LIMB_T.rays, LIMB_T.cart)} />
-      <Label id="humeroa" x={810} y={50} {...at([up.X(40), UP_Y - 7], UP_Y)} show={cart} />
-      <Label id="erradioa" x={810} y={84} {...at([up.X(up.xe + 30), UP_Y - 13], UP_Y)} show={cart} />
+      <Label id="humeroa" x={810} y={50} {...at([up.X(40), UP_Y - 7], UP_Y, 5, 4)} show={cart} />
+      <Label id="erradioa" x={810} y={84} {...at([up.X(up.xe + 30), UP_Y - 13], UP_Y, 5, 4)} show={cart} />
       <Label id="eskuko-kartilagoak" x={760} y={118} {...at(ray(up, -32, 0.3), UP_Y)} show={cart} />
       <Label id="falangeak" x={810} y={152} {...at(ray(up, -32, 0.76), UP_Y)} show={cart} />
-      <Label id="ulna" x={810} y={236} {...at([up.X(up.xe + 30), UP_Y + 14], UP_Y)} show={cart} />
-      <Label id="hezurtzapen-zentroak" x={740} y={290} {...at([up.X(14 + (up.xe - 24) / 2) + 8, UP_Y + 5], UP_Y)} show={vis(t, LIMB_T.centres)} />
+      <Label id="ulna" x={810} y={236} {...at([up.X(up.xe + 30), UP_Y + 14], UP_Y, -3, -5)} show={cart} />
+      <Label id="hezurtzapen-zentroak" x={740} y={290} {...at([up.X(14 + (up.xe - 24) / 2) + 8, UP_Y + 5], UP_Y, -2, -3)} show={vis(t, LIMB_T.centres)} />
 
       <Label id="paretako-orria" x={810} y={318} ax={WALL_X - 18} ay={318} />
-      <Label id="beheko-gorputz-adarraren-hasikina" x={680} y={372} {...at(low.rim(-50), LOW_Y)} show={vis(t, 0.04, LIMB_T.plates)} />
-      <Label id="oin-plaka" x={810} y={530} {...at([low.X(low.xp + 6), LOW_Y + low.R * 0.6], LOW_Y)} show={vis(t, LIMB_T.plates, LIMB_T.cart)} />
+      <Label id="beheko-gorputz-adarraren-hasikina" x={680} y={372} {...at(low.rim(-50), LOW_Y, -3, 6)} show={vis(t, 0.04, LIMB_T.plates)} />
+      <Label id="oin-plaka" x={810} y={530} {...at([low.X(low.xp + 6), LOW_Y + low.R * 0.6], LOW_Y, -5, 9)} show={vis(t, LIMB_T.plates, LIMB_T.cart)} />
       <Label id="azaleko-ektodermoa" x={810} y={566} {...at([low.X(low.xp * 0.5), LOW_Y + low.w(low.xp * 0.5)], LOW_Y)} show={vis(t, 0, LIMB_T.cart)} small />
       <Label id="iliona" x={810} y={352} {...at([WALL_X + 14, LOW_Y - 66], LOW_Y)} show={cart} />
-      <Label id="femurra" x={810} y={384} {...at([low.X(40), LOW_Y - 8], LOW_Y)} show={cart} />
-      <Label id="tibia" x={810} y={414} {...at([low.X(low.xe + 30), LOW_Y - 14], LOW_Y)} show={cart} />
+      <Label id="femurra" x={810} y={384} {...at([low.X(40), LOW_Y - 8], LOW_Y, 5, 4)} show={cart} />
+      <Label id="tibia" x={810} y={414} {...at([low.X(low.xe + 30), LOW_Y - 14], LOW_Y, 1, 6)} show={cart} />
       <Label id="tartsoaren-kartilagoak" x={786} y={444} {...at([low.X(low.xw + 9), LOW_Y - 17], LOW_Y)} show={cart} />
       <Label id="metatartsoaren-kartilagoak" x={756} y={474} {...at(ray(low, 0, 0.3), LOW_Y)} show={cart} />
       <Label id="falangeak" x={810} y={504} {...at(ray(low, 32, 0.78), LOW_Y)} show={cart} />
-      <Label id="peroneoa" x={810} y={534} {...at([low.X(low.xe + 30), LOW_Y + 13], LOW_Y)} show={cart} />
+      <Label id="peroneoa" x={810} y={534} {...at([low.X(low.xe + 30), LOW_Y + 13], LOW_Y, -3, -5)} show={cart} />
       <Label id="iskiona" x={810} y={562} {...at([WALL_X - 8, LOW_Y + 66], LOW_Y)} show={cart} />
       <Label id="pubisa" x={810} y={590} {...at([WALL_X + 24, LOW_Y + 56], LOW_Y)} show={cart} />
     </g>
@@ -387,6 +395,8 @@ function pieces(l: Bent, r: number): [L2, L2] {
 const TORSO: Pt[] = [[446, 178], [554, 178], [590, 214], [598, 300], [596, 382], [574, 432], [530, 456], [470, 456], [426, 432], [404, 382], [402, 300], [410, 214]];
 
 /** Tube geometry of a limb: unit axis u, normal n toward the midline, radius tapering from the root to the wrist/ankle. */
+const poly = (pts: Pt[]) => `M${pts.map((p) => `${f1(p[0])},${f1(p[1])}`).join('L')}Z`;
+
 function tube(l: L2) {
   const dx = l.p1[0] - l.p0[0];
   const dy = l.p1[1] - l.p0[1];
@@ -396,14 +406,19 @@ function tube(l: L2) {
   if (n[0] * l.ms < 0) n = [-n[0], -n[1]];
   const w0 = l.w * (l.k0 ?? 1.12);
   const w1 = l.w * (l.k1 ?? 0.8);
-  const band = (o1: number, o2: number) => {
-    const P = (p: Pt, w: number, o: number) => `${f1(p[0] + n[0] * w * o)},${f1(p[1] + n[1] * w * o)}`;
-    return `M${P(l.p0, w0, o1)}L${P(l.p1, w1, o1)}L${P(l.p1, w1, o2)}L${P(l.p0, w0, o2)}Z`;
-  };
-  const sweep = n[0] * u[1] - n[1] * u[0] > 0 ? 1 : 0;
-  const Q2 = (p: Pt, w: number, o: number) => `${f1(p[0] + n[0] * w * o)},${f1(p[1] + n[1] * w * o)}`;
-  const capsule = `M${Q2(l.p0, w0, 1)}L${Q2(l.p1, w1, 1)}A${f1(w1)},${f1(w1)} 0 0 ${sweep} ${Q2(l.p1, w1, -1)}L${Q2(l.p0, w0, -1)}A${f1(w0)},${f1(w0)} 0 0 ${sweep} ${Q2(l.p0, w0, 1)}Z`;
-  return { u, n, w0, w1, band, capsule, ang: Math.atan2(dy, dx) };
+  // Not a straight tube: the muscle belly swells a little past the root, then the limb narrows to the wrist/ankle.
+  const S = Array.from({ length: 13 }, (_, i) => i / 12);
+  const wAt = (s: number) => lerp(w0, w1, s * s * (0.6 + 0.4 * s) + 0.4 * s * (1 - s)) * (1 + 0.1 * Math.sin(Math.PI * Math.min(1, s * 1.25)));
+  const at = (s: number, o: number): Pt => [l.p0[0] + dx * s + n[0] * wAt(s) * o, l.p0[1] + dy * s + n[1] * wAt(s) * o];
+  const band = (o1: number, o2: number) => poly([...S.map((s) => at(s, o1)), ...[...S].reverse().map((s) => at(s, o2))]);
+  // Round ends: half circles at the root and at the wrist/ankle.
+  const cap = (p: Pt, w: number, dir: 1 | -1): Pt[] =>
+    Array.from({ length: 9 }, (_, i) => {
+      const a = (Math.PI * (i + 1)) / 10;
+      return [p[0] + n[0] * w * Math.cos(a) * dir + u[0] * w * Math.sin(a) * dir, p[1] + n[1] * w * Math.cos(a) * dir + u[1] * w * Math.sin(a) * dir] as Pt;
+    });
+  const capsule = smoothPath([...S.map((s) => at(s, 1)), ...cap(l.p1, wAt(1), 1), ...[...S].reverse().map((s) => at(s, -1)), ...cap(l.p0, wAt(0), -1)], true, 0.2);
+  return { u, n, w0, w1: wAt(1), band, capsule, ang: Math.atan2(dy, dx) };
 }
 
 /**
@@ -414,36 +429,37 @@ function Extremity({ l, alpha }: { l: L2; alpha: number }) {
   const { u, n } = tube(l);
   const th = rad(alpha - 90);
   const span = Math.sin(th);
-  const W = l.lower ? 15 : 13;
+  const W = l.lower ? 16 : 14;
   const at = (p: Pt, along: number, across: number): Pt => [p[0] + u[0] * along + n[0] * across, p[1] + u[1] * along + n[1] * across];
   const wrist = at(l.p1, l.w * 0.55, 0);
-  const palm = at(wrist, l.lower ? 13 : 11, 0);
+  const palm = at(wrist, l.lower ? 12 : 10, 0);
   const plateW = Math.max(5, W * Math.abs(span));
   const angDeg = (Math.atan2(u[1], u[0]) * 180) / Math.PI;
-  const lens = l.lower ? [9, 7, 6.5, 6, 5.5] : [11, 15, 16.5, 15, 12];
-  const widths = l.lower ? [8, 6, 5.6, 5.2, 4.8] : [5.6, 5.4, 5.6, 5.4, 5];
+  const lens = l.lower ? [6, 5, 4.6, 4.2, 3.8] : [7, 9, 10, 9, 7];
+  const widths = l.lower ? [8.6, 7, 6.6, 6.2, 5.8] : [7.4, 7, 7.4, 7, 6.4];
   const digits = lens.map((len, k) => {
     const f = 1 - k / 2;
     const thumb = k === 0;
     const o = span * W * f * (thumb && !l.lower ? 1.05 : 0.86);
     const z = Math.cos(th) * f;
-    const root = at(palm, thumb && !l.lower ? -2 : l.lower ? 9 : 10, o);
-    const spread = thumb && !l.lower ? 0.55 : 0.08 * f;
+    const root = at(palm, thumb && !l.lower ? -1 : l.lower ? 10 : 9, o);
+    const spread = thumb && !l.lower ? 0.45 : 0.05 * f;
     const dir: Pt = [u[0] + n[0] * spread * Math.sign(span || 1), u[1] + n[1] * spread * Math.sign(span || 1)];
     const tip: Pt = [root[0] + dir[0] * len, root[1] + dir[1] * len];
     return { k, root, tip, w: widths[k], z };
   });
   const digit = (d: (typeof digits)[number]) => (
     <g key={d.k}>
-      <path d={`M${f1(d.root[0])},${f1(d.root[1])}L${f1(d.tip[0])},${f1(d.tip[1])}`} stroke={EDGE} strokeWidth={d.w + 2.6} strokeLinecap="round" />
-      <path d={`M${f1(d.root[0])},${f1(d.root[1])}L${f1(d.tip[0])},${f1(d.tip[1])}`} stroke="#f0d2b8" strokeWidth={d.w} strokeLinecap="round" />
+      <path d={`M${f1(d.root[0])},${f1(d.root[1])}L${f1(d.tip[0])},${f1(d.tip[1])}`} stroke={EDGE} strokeWidth={d.w + 2.4} strokeLinecap="round" />
+      <path d={`M${f1(d.root[0])},${f1(d.root[1])}L${f1(d.tip[0])},${f1(d.tip[1])}`} stroke="#efcfb4" strokeWidth={d.w} strokeLinecap="round" />
+      <circle cx={f1(d.tip[0] - (d.tip[0] - d.root[0]) * 0.2)} cy={f1(d.tip[1] - (d.tip[1] - d.root[1]) * 0.2)} r={d.w * 0.22} fill="#fff" opacity={0.25} />
     </g>
   );
   return (
     <g>
       {digits.filter((d) => d.z < 0).sort((a, b) => a.z - b.z).map(digit)}
-      <ellipse cx={f1(palm[0])} cy={f1(palm[1])} rx={f1(plateW + 2)} ry={l.lower ? 15 : 13} transform={`rotate(${f1(angDeg - 90)} ${f1(palm[0])} ${f1(palm[1])})`} fill="#ecc9ad" stroke={EDGE} strokeWidth={1.4} />
-      <ellipse cx={f1(palm[0])} cy={f1(palm[1])} rx={f1(plateW + 2)} ry={l.lower ? 15 : 13} transform={`rotate(${f1(angDeg - 90)} ${f1(palm[0])} ${f1(palm[1])})`} fill="url(#w8-boneshade)" opacity={0.6} />
+      <ellipse cx={f1(palm[0])} cy={f1(palm[1])} rx={f1(plateW + 2)} ry={l.lower ? 16 : 14} transform={`rotate(${f1(angDeg - 90)} ${f1(palm[0])} ${f1(palm[1])})`} fill="#ecc9ad" stroke={EDGE} strokeWidth={1.4} />
+      <ellipse cx={f1(palm[0])} cy={f1(palm[1])} rx={f1(plateW + 2)} ry={l.lower ? 16 : 14} transform={`rotate(${f1(angDeg - 90)} ${f1(palm[0])} ${f1(palm[1])})`} fill="url(#w8-boneshade)" opacity={0.6} />
       {digits.filter((d) => d.z >= 0).sort((a, b) => a.z - b.z).map(digit)}
     </g>
   );
@@ -462,23 +478,31 @@ function visibleBand(a: number, b: number): [number, number] | null {
 /** A limb in two pieces, bent at the elbow / knee; the hand or foot at the end of the distal piece. */
 function LimbTube({ l, alpha, r }: { l: Bent; alpha: number; r: number }) {
   const [a, b] = pieces(l, r);
+  // Segment names: proximal piece, distal piece, hand / foot, elbow / knee.
+  const [near, far, end, joint] = l.lower ? ['izterra', 'berna', 'oina', 'belauna'] : ['besoa', 'besaurrea', 'eskua', 'ukondoa'];
   return (
     <g>
-      <Extremity l={b} alpha={alpha} />
-      <LimbPiece l={b} alpha={alpha} />
-      <LimbPiece l={a} alpha={alpha} />
-      <Joint l={a} next={b} alpha={alpha} />
+      <Part id={end} quiet>
+        <Extremity l={b} alpha={alpha} />
+      </Part>
+      <LimbPiece l={b} alpha={alpha} id={far} />
+      <LimbPiece l={a} alpha={alpha} id={near} />
+      <Part id={joint} quiet>
+        <Joint l={a} next={b} alpha={alpha} />
+      </Part>
     </g>
   );
 }
 
-function LimbPiece({ l, alpha }: { l: L2; alpha: number }) {
+function LimbPiece({ l, alpha, id }: { l: L2; alpha: number; id: string }) {
   const { n, band, capsule, w1 } = tube(l);
   const fl = visibleBand(alpha - 90, alpha + 90);
   const ex = visibleBand(alpha + 90, alpha + 270);
   return (
     <g>
-      <path d={capsule} fill={TISSUE} stroke={EDGE} strokeWidth={1.6} />
+      <Part id={id} quiet>
+        <path d={capsule} fill={TISSUE} stroke={EDGE} strokeWidth={1.6} />
+      </Part>
       {/* The muscle masses seen through the thin skin, fibres along the limb. */}
       <Part id="muskulu-tolestatzaileak">
         {fl && <path d={band(fl[0] * 0.94, fl[1] * 0.94)} fill={Q.flexor} opacity={0.88} />}
@@ -489,11 +513,11 @@ function LimbPiece({ l, alpha }: { l: L2; alpha: number }) {
         {ex && <path d={band(ex[0] * 0.94, ex[1] * 0.94)} fill="url(#w8-muscle)" />}
       </Part>
       {/* Cylinder shading: darker toward both edges, a soft highlight down the middle; the wrist/ankle crease. */}
-      <path d={band(-1, -0.5)} fill="rgba(40,16,10,0.26)" />
-      <path d={band(0.5, 1)} fill="rgba(40,16,10,0.26)" />
-      <path d={band(-0.2, 0.1)} fill="rgba(255,255,255,0.14)" />
+      <path d={band(-1, -0.5)} fill="rgba(40,16,10,0.26)" pointerEvents="none" />
+      <path d={band(0.5, 1)} fill="rgba(40,16,10,0.26)" pointerEvents="none" />
+      <path d={band(-0.2, 0.1)} fill="rgba(255,255,255,0.14)" pointerEvents="none" />
       {/* The wrist / ankle crease. */}
-      {l.k1 === 0.8 && <path d={`M${f1(l.p1[0] - n[0] * w1)},${f1(l.p1[1] - n[1] * w1)}L${f1(l.p1[0] + n[0] * w1)},${f1(l.p1[1] + n[1] * w1)}`} stroke="rgba(60,30,20,0.35)" strokeWidth={1.4} />}
+      {l.k1 === 0.8 && <path d={`M${f1(l.p1[0] - n[0] * w1)},${f1(l.p1[1] - n[1] * w1)}L${f1(l.p1[0] + n[0] * w1)},${f1(l.p1[1] + n[1] * w1)}`} stroke="rgba(60,30,20,0.35)" strokeWidth={1.4} pointerEvents="none" />}
     </g>
   );
 }
@@ -559,14 +583,14 @@ function Disc({ l, alpha, turning, label }: { l: L2; alpha: number; turning: num
   const ang = Math.atan2(head[1] - prev[1], head[0] - prev[0]);
   return (
     <g>
-      <circle cx={cx} cy={cy} r={R + 3} fill="#1a1418" stroke="#4a3a46" strokeWidth={1.5} />
+      <circle cx={cx} cy={cy} r={R + 3} fill="#1a1418" stroke="#4a3a46" strokeWidth={1.5} pointerEvents="none" />
       <Part id="muskulu-tolestatzaileak">
         <path d={wedge(alpha - 90, alpha + 90)} fill={Q.flexor} />
       </Part>
       <Part id="muskulu-hedatzaileak">
         <path d={wedge(alpha + 90, alpha + 270)} fill={Q.extensor} />
       </Part>
-      <circle cx={cx} cy={cy} r={9} fill="#f5efe2" stroke="#b9a77e" strokeWidth={1.2} />
+      <circle cx={cx} cy={cy} r={9} fill="#f5efe2" stroke="#b9a77e" strokeWidth={1.2} pointerEvents="none" />
       {turning > 0.02 && Math.abs(alpha - start) > 4 && (
         <g opacity={turning}>
           <path d={`M${arc.map((p) => `${f1(p[0])},${f1(p[1])}`).join('L')}`} fill="none" stroke="#fff" strokeWidth={2.6} strokeLinecap="round" />
@@ -606,17 +630,24 @@ export function LimbRotation({ t }: SceneProps) {
         </radialGradient>
       </defs>
       {/* Trunk: the heart and liver bulges, the umbilical cord cut short (two arteries, one vein), the genital tubercle. */}
+      <Part id="gorputz-pareta" quiet>
       <path d={smoothPath(TORSO, true, 0.3)} fill="url(#w8-rot-skin)" stroke={EDGE} strokeWidth={1.6} />
       <ellipse cx={500} cy={248} rx={56} ry={44} fill="url(#w8-rot-bulge)" />
       <ellipse cx={500} cy={338} rx={82} ry={52} fill="url(#w8-rot-bulge)" />
       <path d="M454,296 Q500,312 546,296" fill="none" stroke="rgba(120,70,50,0.28)" strokeWidth={1.6} />
+      <ellipse cx={500} cy={446} rx={9} ry={7} fill="#e3b99c" stroke={EDGE} strokeWidth={1.2} />
+      </Part>
+      <Part id="behin-betiko-zilbor-hestea" quiet>
       <circle cx={500} cy={372} r={25} fill="#e9d6c6" stroke={EDGE} strokeWidth={1.6} />
       <circle cx={500} cy={372} r={25} fill="url(#w8-rot-bulge)" />
+      </Part>
+      <Part id="zilbor-hodiak" quiet>
       <circle cx={500} cy={364} r={6.5} fill="#5a4a9a" stroke="#2a1f55" strokeWidth={1} />
       <circle cx={491} cy={379} r={4.2} fill="#c0392b" stroke="#6b1d14" strokeWidth={1} />
       <circle cx={509} cy={379} r={4.2} fill="#c0392b" stroke="#6b1d14" strokeWidth={1} />
-      <ellipse cx={500} cy={446} rx={9} ry={7} fill="#e3b99c" stroke={EDGE} strokeWidth={1.2} />
+      </Part>
       {/* The head, half the embryo: wide-set eyes under thin lids, a flat nose, a wide mouth, ears still low. */}
+      <Part id="burua" quiet>
       <path d="M470,168 L530,168 L534,192 L466,192Z" fill="#dcb497" />
       <ellipse cx={500} cy={104} rx={90} ry={82} fill="url(#w8-rot-skin)" stroke={EDGE} strokeWidth={1.6} />
       <ellipse cx={470} cy={70} rx={46} ry={30} fill="url(#w8-rot-bulge)" />
@@ -634,6 +665,7 @@ export function LimbRotation({ t }: SceneProps) {
       {[1, -1].map((s) => (
         <path key={s} d={`M${500 - s * 88},138 C${500 - s * 100},134 ${500 - s * 102},156 ${500 - s * 90},164`} fill="#e2bb9e" stroke={EDGE} strokeWidth={1.4} />
       ))}
+      </Part>
       {LIMBS.map((l, i) => (
         <LimbTube key={i} l={l} alpha={l.lower ? aLow : aUp} r={l.lower ? rl : ru} />
       ))}
@@ -669,7 +701,7 @@ export function LimbRotation({ t }: SceneProps) {
       <Label id="muskulu-tolestatzaileak" x={720} y={130} ax={640} ay={262} show={vis(t, 0, LIMB_T.rotLow)} />
       <Label id="muskulu-hedatzaileak" x={810} y={290} ax={LIMBS[1].disc[0]} ay={LIMBS[1].disc[1] + 24} show={vis(t, 0, LIMB_T.rotLow)} />
       <Label id="muskulu-tolestatzaileak" x={810} y={420} ax={LIMBS[3].disc[0]} ay={LIMBS[3].disc[1] + 24} show={lowTurn} />
-      <Label id="muskulu-hedatzaileak" x={810} y={540} ax={588} ay={524} show={lowTurn} />
+      <Label id="muskulu-hedatzaileak" x={810} y={540} ax={583} ay={533} show={lowTurn} />
     </g>
   );
 }

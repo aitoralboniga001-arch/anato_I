@@ -449,19 +449,32 @@ export function TrunkSection({ g, pl, detail = 1, ids = {}, mid, over, gut }: Tr
           <stop offset="1" stopColor="#1d180a" />
         </linearGradient>
       </defs>
-      <rect x={-20} y={-20} width={1040} height={680} fill="url(#w4b-tr-chorion)" />
-      <path d={poly(amnionCav)} fill={COL.amnion} />
-      <path d={poly(lumen)} fill="url(#w4b-tr-yolk)" opacity={1 - gutK * 0.55} />
-      {gutK > 0.01 && <path d={poly(lumen)} fill="#120f0a" opacity={gutK * 0.7} />}
+      <Part id="korion-barrunbea" quiet>
+        <rect x={-20} y={-20} width={1040} height={680} fill="url(#w4b-tr-chorion)" />
+      </Part>
+      <Part id="amnios-barrunbea" quiet>
+        <path d={poly(amnionCav)} fill={COL.amnion} />
+      </Part>
+      {/* The yolk sac's cavity becomes the gut's lumen as the folds close. */}
+      <Part id={gutK > 0.5 ? 'erdiko-hestea' : 'bitelo-zaku-sekundarioa'} quiet>
+        <path d={poly(lumen)} fill="url(#w4b-tr-yolk)" opacity={1 - gutK * 0.55} />
+        {gutK > 0.01 && <path d={poly(lumen)} fill="#120f0a" opacity={gutK * 0.7} />}
+      </Part>
 
       {/* Extra-embryonic sheets: amnion (amnioblasts + somatic coat) and yolk sac (endoderm + splanchnic coat). */}
       <g opacity={0.92}>
         {sides.map((sd) => (
           <g key={sd}>
-            {cellsS(`co${sd}`, sd, coat, C.mesoExtra, { nucleus: 'rgba(140,62,40,0.6)', edge: 'rgba(140,62,40,0.28)', seed: 61 + sd })}
-            {cellsS(`am${sd}`, sd, amnio, C.amnioblast, { seed: 71 + sd })}
-            {g.iM < G.length - 2 && cellsS(`yc${sd}`, sd, yolkC, C.mesoExtra, { nucleus: 'rgba(140,62,40,0.6)', edge: 'rgba(140,62,40,0.28)', seed: 81 + sd })}
-            {g.iM < G.length - 2 && cellsS(`ye${sd}`, sd, yolkE, C.endoderm, { seed: 91 + sd })}
+            <Part id="amniosa" quiet>
+              {cellsS(`co${sd}`, sd, coat, C.mesoExtra, { nucleus: 'rgba(140,62,40,0.6)', edge: 'rgba(140,62,40,0.28)', seed: 61 + sd })}
+              {cellsS(`am${sd}`, sd, amnio, C.amnioblast, { seed: 71 + sd })}
+            </Part>
+            {g.iM < G.length - 2 && (
+              <Part id="bitelo-zaku-sekundarioa" quiet>
+                {cellsS(`yc${sd}`, sd, yolkC, C.mesoExtra, { nucleus: 'rgba(140,62,40,0.6)', edge: 'rgba(140,62,40,0.28)', seed: 81 + sd })}
+                {cellsS(`ye${sd}`, sd, yolkE, C.endoderm, { seed: 91 + sd })}
+              </Part>
+            )}
           </g>
         ))}
       </g>
@@ -479,7 +492,7 @@ export function TrunkSection({ g, pl, detail = 1, ids = {}, mid, over, gut }: Tr
       </Part>
       {/* Lining of the coelom's dorsal wall (parietal, running on into the mesentery). */}
       {sides.map((sd) => (
-        <path key={sd} d={smoothPath(scr(reg.liningR, sd), false, 0.4)} fill="none" stroke={COL.lining} strokeWidth={Math.max(1.4, 2.6 * k)} strokeOpacity={0.55} strokeLinecap="round" />
+        <path key={sd} d={smoothPath(scr(reg.liningR, sd), false, 0.4)} fill="none" stroke={COL.lining} strokeWidth={Math.max(1.4, 2.6 * k)} strokeOpacity={0.55} strokeLinecap="round" pointerEvents="none" />
       ))}
 
       {mid}

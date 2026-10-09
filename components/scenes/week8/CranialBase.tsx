@@ -413,7 +413,7 @@ export function CranialBase({ t, reduced }: SceneProps) {
         {/* Foramen magnum: a hole in the occipital base as each half ossifies. */}
         {([-1, 1] as const).map((side) => {
           const o = side < 0 ? ossL(PIECE.para) : ossR;
-          return o > 0.01 ? <path key={side} d={closed([...fmHalf(side), FM.c])} fill="#0f0b0e" stroke={Q.boneDeep} strokeWidth={1.2} opacity={o} /> : null;
+          return o > 0.01 ? <path key={side} d={closed([...fmHalf(side), FM.c])} fill="#0f0b0e" stroke={Q.boneDeep} strokeWidth={1.2} opacity={o} pointerEvents="none" /> : null;
         })}
 
         {/* Fusion leaves holes; the cranial nerves leave the brain through them. */}
@@ -431,8 +431,13 @@ export function CranialBase({ t, reduced }: SceneProps) {
         </Part>
         {ghost > 0.01 && (
           <g opacity={ghost * 0.85}>
-            <path d={smoothPath(BRAINSTEM, true, 0.3)} fill="rgba(58,95,217,0.28)" stroke="rgba(120,150,240,0.6)" strokeWidth={1.2} />
-            <path d={`M${CX - 30},244L${CX + 30},272M${CX + 30},244L${CX - 30},272`} stroke="rgba(120,150,240,0.5)" strokeWidth={5} strokeLinecap="round" />
+            <Part id="erronbentzefaloa" quiet>
+              <path d={smoothPath(BRAINSTEM, true, 0.3)} fill="rgba(58,95,217,0.28)" stroke="rgba(120,150,240,0.6)" strokeWidth={1.2} />
+            </Part>
+            {/* The optic nerves crossing (chiasm). */}
+            <Part id="nerbio-kranialak" quiet>
+              <path d={`M${CX - 30},244L${CX + 30},272M${CX + 30},244L${CX - 30},272`} stroke="rgba(120,150,240,0.5)" strokeWidth={5} strokeLinecap="round" />
+            </Part>
           </g>
         )}
         <Part id="nerbio-kranialak" show={ghost}>
@@ -482,10 +487,11 @@ export function CranialBase({ t, reduced }: SceneProps) {
         </g>
       )}
 
-      <Note x={380} y={48} size={12} show={vis(t, CB_T.para, CB_T.all + 0.03) * (1 - push)}>
+      {/* The zoom keeps the midline in place, so the two halves stay named while it is pushed in. */}
+      <Note x={380} y={48} size={12} show={vis(t, CB_T.para, CB_T.all + 0.03)}>
         Hezurrak
       </Note>
-      <Note x={620} y={48} size={12} show={vis(t, CB_T.para, CB_T.all + 0.03) * (1 - push)}>
+      <Note x={620} y={48} size={12} show={vis(t, CB_T.para, CB_T.all + 0.03)}>
         Kartilagoak
       </Note>
       <Note x={500} y={612} tone="accent" show={vis(t, 0, CB_T.scl)}>
@@ -517,12 +523,12 @@ export function CranialBase({ t, reduced }: SceneProps) {
       </Note>
 
       {/* Left gutter: the bones (left half). */}
-      <Label id="etmoidesa" x={190} y={120} ax={L([484, 160])[0]} ay={L([484, 160])[1]} show={ossL(PIECE.trab) * inFrame(L([484, 160]))} />
+      <Label id="etmoidesa" x={190} y={120} ax={L([479, 151])[0]} ay={L([479, 151])[1]} show={ossL(PIECE.trab) * inFrame(L([484, 160]))} />
       <Label id="esfenoidesaren-hego-txikia" x={232} y={180} ax={L([372, 226])[0]} ay={L([372, 226])[1]} show={ossL(PIECE.orb)} />
       <Label id="hipofisi-hobitxoa" x={190} y={236} ax={L([489, 283])[0]} ay={L([489, 283])[1]} show={sella} />
-      <Label id="esfenoidesaren-gorputza" x={210} y={270} ax={L([468, 296])[0]} ay={L([468, 296])[1]} show={ossL(PIECE.hyp) * inFrame(L([468, 296]))} />
+      <Label id="esfenoidesaren-gorputza" x={210} y={270} ax={L([466, 299])[0]} ay={L([466, 299])[1]} show={ossL(PIECE.hyp) * inFrame(L([468, 296]))} />
       <Label id="esfenoidesaren-hego-handia" x={232} y={356} ax={L([372, 318])[0]} ay={L([372, 318])[1]} show={ossL(PIECE.temp)} />
-      <Label id="okzipitalaren-oinaldea" x={204} y={404} ax={L([472, 372])[0]} ay={L([472, 372])[1]} show={ossL(PIECE.para) * inFrame(L([472, 372]))} />
+      <Label id="okzipitalaren-oinaldea" x={204} y={404} ax={L([466, 374])[0]} ay={L([466, 374])[1]} show={ossL(PIECE.para) * inFrame(L([472, 372]))} />
       <Label id="harkaitza" x={204} y={452} ax={L([352, 428])[0]} ay={L([352, 428])[1]} show={ossL(PIECE.peri)} />
       <Label id="kondrokraneoa" x={190} y={496} ax={L([338, 470])[0]} ay={L([338, 470])[1]} show={inFrame(L([338, 470]))} />
       <Label id="okzipitalaren-ezkata" x={190} y={540} ax={L([420, 532])[0]} ay={L([420, 532])[1]} show={sq * inFrame(L([420, 532]))} />
@@ -530,11 +536,11 @@ export function CranialBase({ t, reduced }: SceneProps) {
       {/* Right gutter: the cartilages (right half). */}
       <Label id="trenkada-kranialak" x={748} y={140} ax={L([514, 180])[0]} ay={L([514, 180])[1]} show={cartK(PIECE.trab) * (1 - ossR) * inFrame(L([514, 180]))} />
       <Label id="nerbio-kranialak" x={780} y={120} ax={L([513, 146])[0]} ay={L([513, 146])[1]} show={vis(t, CB_T.holes + 0.02)} />
-      <Label id="burezurreko-zuloak" x={690} y={170} ax={L([509, 172])[0]} ay={L([509, 172])[1]} show={holes} />
+      <Label id="burezurreko-zuloak" x={690} y={170} ax={L([563, 257])[0]} ay={L([563, 257])[1]} show={holes} />
       <Label id="begizulo-hegoa" x={810} y={200} ax={L([580, 226])[0]} ay={L([580, 226])[1]} show={cartK(PIECE.orb) * (1 - ossR)} />
       <Label id="hipofisi-guruina" x={810} y={226} ax={L([508, 276])[0]} ay={L([508, 276])[1]} show={vis(t, CB_T.hyp + 0.04)} small />
       {mesAt && <Label id="mesenkima" x={190} y={586} ax={L(mesAt)[0]} ay={L(mesAt)[1]} show={(1 - ossR) * inFrame(L(mesAt))} small />}
-      <Label id="hipofisi-kartilagoak" x={800} y={250} ax={L([516, 288])[0]} ay={L([516, 288])[1]} show={cartK(PIECE.hyp) * (1 - ossR) * inFrame(L([516, 288]))} />
+      <Label id="hipofisi-kartilagoak" x={800} y={250} ax={L([522, 288])[0]} ay={L([522, 288])[1]} show={cartK(PIECE.hyp) * (1 - ossR) * inFrame(L([516, 288]))} />
       <Label id="hego-tenporala" x={810} y={284} ax={L([596, 300])[0]} ay={L([596, 300])[1]} show={cartK(PIECE.temp) * (1 - ossR)} />
       <Label id="kartilago-parakordalak" x={790} y={356} ax={L([524, 372])[0]} ay={L([524, 372])[1]} show={cartK(PIECE.para) * (1 - ossR) * inFrame(L([524, 372]))} />
       <Label id="barne-belarria" x={810} y={398} ax={L([606, 396])[0]} ay={L([606, 396])[1]} show={ear} />

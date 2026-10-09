@@ -76,6 +76,31 @@ function prof(z: number, z0: number, z1: number, r: number, top = true, bottom =
 
 const scale = (e: Ell, k: number): Ell => ({ ...e, ru: e.ru * k, rv: e.rv * k });
 
+/** Below the trunk's lowest slice the rump rounds off, so the body is closed, not a cut tube. */
+const ZR = 0.13;
+const hullAt = (z: number): Ell | null => {
+  if (z >= 0) return bodyAt(z);
+  const k = Math.sqrt(Math.max(0, 1 - (z / ZR) ** 2));
+  const b = bodyAt(0);
+  return k > 0.05 ? { ...b, ru: b.ru * k, rv: b.rv * k, rd: (b.rd ?? b.rv) * k } : null;
+};
+
+type V3 = [number, number, number];
+/** Limb buds (model space, root on the wall, tip forward and down): upper at the top of the chest, lower at the rump. */
+const LIMB_BUDS: { id: string; root: V3; tip: V3; w0: number; w1: number }[] = ([1, -1] as const).flatMap((s) => [
+  { id: 'goiko-gorputz-adarraren-hasikina', root: [s * 0.88, 0.1, 0.86] as V3, tip: [s * 1.42, 0.62, 0.64] as V3, w0: 18, w1: 23 },
+  { id: 'beheko-gorputz-adarraren-hasikina', root: [s * 0.8, 0.2, 0.06] as V3, tip: [s * 1.24, 0.6, -0.1] as V3, w0: 17, w1: 21 },
+]);
+
+/** A paddle on screen from root to tip: a stalk widening into a rounded plate. */
+function paddle(r: Pt, tip: Pt, w0: number, w1: number) {
+  const L = Math.hypot(tip[0] - r[0], tip[1] - r[1]) || 1;
+  const ux = (tip[0] - r[0]) / L;
+  const uy = (tip[1] - r[1]) / L;
+  const at = (a: number, w: number): Pt => [r[0] + ux * a * L - uy * w, r[1] + uy * a * L + ux * w];
+  return smoothPath([at(0, w0), at(0.5, w0 * 0.85), at(0.85, w1), at(1, w1 * 0.7), at(1 + w1 / L / 1.6, 0), at(1, -w1 * 0.7), at(0.85, -w1), at(0.5, -w0 * 0.85), at(0, -w0)], true, 0.3);
+}
+
 type Shape = (z: number, S: State) => Ell | null;
 
 const SH: Record<string, Shape> = {
@@ -191,11 +216,11 @@ const colours = (S: State) => {
 // ——— Projection (the block) and the flat section ———
 
 const MX = 392;
-const MY = 548;
+const MY = 500;
 const AU = 138;
 const BV = -24;
 const CV = 46;
-const HZ = 418;
+const HZ = 330;
 /** The block turns about its long axis (yaw, radians): the viewer can drag it round. */
 interface View {
   c: number;
@@ -318,6 +343,13 @@ function Block({ V, at, z0, z1, color, alpha, shade, vol = 'cyl', tex }: { V: Vi
   );
 }
 
+/** An invisible copy of a block's outline that only catches the pointer: for a part seen through a nearer one. */
+function Hit({ V, at, z0, z1 }: { V: View; at: (z: number) => Ell | null; z0: number; z1: number }) {
+  if (z1 - z0 < 0.002) return null;
+  const s = solid(V, at, z0, z1);
+  return s ? <path d={poly(s.outline)} fill="transparent" /> : null;
+}
+
 /**
  * Everything of the block between z0 and z1. Three layers, each drawn far to near for the current turn:
  * the dorsal midline, then the see-through cavities and sheets, then the solid organs on top.
@@ -414,6 +446,24 @@ function Layer({ V, S, z0, z1, shade, ids }: { V: View; S: State; z0: number; z1
         </Part>,
       );
     }
+
+  // The canals (and the membranes that close them) lie behind the see-through septum: they are seen
+  // through it, so the pointer reaches them there too, and their names' leaders end on them.
+  if (S.one < 0.5)
+    for (const s of sides)
+      put(
+        3,
+        s * 0.44,
+        -0.4,
+        <>
+          <Part id="erreten-perikardioperitonealak" show={S.pom > 0.9 ? 0 : 1}>
+            <Hit V={V} at={(z) => canal(z, S, s)} z0={Math.max(ZB, z0)} z1={Math.min(ZS, z1)} />
+          </Part>
+          <Part id="mintz-pleuroperitonealak" show={S.pom > 0.02 ? 1 : 0}>
+            <Hit V={V} at={(z) => membraneP(z, S, s)} z0={Math.max(ZB, z0)} z1={Math.min(ZS, z1)} />
+          </Part>
+        </>,
+      );
 
   // Solid organs.
   put(2, 0.05, 0.3, <Part id="bihotza">{B((z) => SH.heart(z, S), 0.57, 0.83, COL.heart, 0.98, 'sph')}</Part>);
@@ -539,7 +589,7 @@ function coelomMap(script: Script): SceneComponent {
     const here = bodyAt(S.zc);
     const plane = ring3(V, here, S.zc, 48);
     const grip = P3(here.ru + 0.12, 0.2, S.zc);
-    const bodyHull = solid(V, bodyAt, 0, 1)?.outline ?? [];
+    const bodyHull = solid(V, hullAt, -ZR, 1)?.outline ?? [];
     const sides = [1, -1] as const;
 
     // Anchors for the names (left side of the block).
@@ -549,6 +599,7 @@ function coelomMap(script: Script): SceneComponent {
     };
     const upperName = S.one > 0.5 ? 'enbrioi-barruko-zeloma' : S.ppm > 0.5 ? 'perikardio-barrunbea' : 'hasierako-perikardio-barrunbea';
     const lungR = lung(0.72, S, -1);
+    const sepE = SH.septum(ZS - 0.02, S);
     // The fluid that can still pass from the upper cavity through a canal into the peritoneal cavity.
     const flowOn = S.canal > 0.02 && S.pom < 0.6;
     const flowPath = (s: 1 | -1) =>
@@ -581,9 +632,9 @@ function coelomMap(script: Script): SceneComponent {
           </radialGradient>
           {/* The body wall: lit on the left, a skin-coloured edge, deeper tissue inside. */}
           <linearGradient id={`${shade}-w`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#7a4a5c" />
-            <stop offset="0.3" stopColor="#6a3d4e" />
-            <stop offset="1" stopColor="#3a2230" />
+            <stop offset="0" stopColor="#8e5a6a" />
+            <stop offset="0.3" stopColor="#7a4a5c" />
+            <stop offset="1" stopColor="#442838" />
           </linearGradient>
           {/* Rounded flanks: the wall darkens towards the silhouette, so the trunk reads as a body, not a tube. */}
           <radialGradient id={`${shade}-rim`} cx="0.42" cy="0.46" r="0.62">
@@ -596,6 +647,12 @@ function coelomMap(script: Script): SceneComponent {
             <stop offset="0.7" stopColor="#000" stopOpacity={0} />
             <stop offset="1" stopColor="#000" stopOpacity={0.3} />
           </radialGradient>
+          {/* Embryo skin for the head, the limb buds and the cord. */}
+          <radialGradient id={`${shade}-skin`} cx="0.38" cy="0.32" r="0.8">
+            <stop offset="0" stopColor="#e6b8b8" />
+            <stop offset="0.55" stopColor="#b47e88" />
+            <stop offset="1" stopColor="#6a3d4e" />
+          </radialGradient>
           <radialGradient id={`${shade}-glow`} cx="0.5" cy="0.5" r="0.5">
             <stop offset="0" stopColor="#8a5a9a" stopOpacity={0.28} />
             <stop offset="1" stopColor="#8a5a9a" stopOpacity={0} />
@@ -603,8 +660,12 @@ function coelomMap(script: Script): SceneComponent {
         </defs>
         <rect x={0} y={0} width={1000} height={640} fill="#0c0c0f" />
         <ellipse cx={f1(MX)} cy={f1(MY - 0.5 * HZ)} rx={330} ry={300} fill={`url(#${shade}-glow)`} />
-        {/* Contact shadow under the trunk. */}
-        <ellipse cx={f1(MX + 6)} cy={f1(MY + 38)} rx={AU * 0.95} ry={30} fill="#000" opacity={0.55} />
+        {/* The limb buds, on the far side of the see-through wall: upper ones at the top of the chest, lower ones at the rump. */}
+        {LIMB_BUDS.map((l, i) => (
+          <Part key={i} id={l.id} quiet>
+            <path d={paddle(P3(...l.root), P3(...l.tip), l.w0, l.w1)} fill={`url(#${shade}-skin)`} stroke={P.skin} strokeWidth={1.6} strokeOpacity={0.7} opacity={0.92} />
+          </Part>
+        ))}
 
         {/* ——— The block (drag it sideways to turn it) ——— */}
         <g
@@ -617,10 +678,11 @@ function coelomMap(script: Script): SceneComponent {
             if (rot.current?.moved) e.stopPropagation();
           }}
         >
-          <path d={poly(bodyHull)} fill={`url(#${shade}-w)`} opacity={0.55} />
-          <path d={poly(bodyHull)} fill="url(#w7-mesench)" opacity={0.5} />
-          <path d={poly(bodyHull)} fill={`url(#${shade}-rim)`} />
-          <path d={poly(ring3(V, bodyAt(0), 0, 48))} fill="#241620" opacity={0.7} stroke={P.skin} strokeWidth={1.6} strokeOpacity={0.5} />
+          <Part id="gorputz-pareta" quiet>
+            <path d={poly(bodyHull)} fill={`url(#${shade}-w)`} opacity={0.55} />
+            <path d={poly(bodyHull)} fill="url(#w7-mesench)" opacity={0.5} />
+            <path d={poly(bodyHull)} fill={`url(#${shade}-rim)`} />
+          </Part>
           <Layer V={V} S={S} z0={0} z1={S.zc} shade={shade} ids={{ gut: S.gut }} />
           {/* The section plane, and on it what it cuts. */}
           <g pointerEvents="none">
@@ -634,11 +696,53 @@ function coelomMap(script: Script): SceneComponent {
           </g>
           <Layer V={V} S={S} z0={S.zc} z1={1} shade={shade} ids={{ gut: S.gut }} />
           <path d={poly(plane)} fill="none" stroke="#f4f7ff" strokeWidth={2.4} opacity={0.95} pointerEvents="none" />
-          {/* The cut edge of the body wall at the top: thick tissue, skin outside. */}
-          <path d={poly(ring3(V, bodyAt(1), 1, 48))} fill={P.wallDeep} fillOpacity={0.16} stroke={P.skin} strokeWidth={2.2} strokeOpacity={0.75} />
-          <path d={poly(ring3(V, scale(bodyAt(1), 0.9), 1, 48))} fill="none" stroke="rgba(255,190,200,0.25)" strokeWidth={1.2} />
-          <path d={poly(bodyHull)} fill="none" stroke={P.skin} strokeWidth={2} strokeOpacity={0.6} strokeLinejoin="round" />
+          <Part id="gorputz-pareta" quiet>
+            <path d={poly(bodyHull)} fill="none" stroke={P.skin} strokeWidth={2} strokeOpacity={0.6} strokeLinejoin="round" />
+          </Part>
         </g>
+
+        {/* The umbilical cord leaves the belly towards the viewer: cut short, two arteries and a vein. */}
+        {(() => {
+          const r0 = P3(0, 0.84, 0.22);
+          const r1 = P3(0, 1.32, 0.12);
+          return (
+            <Part id="hasierako-zilbor-hestea" quiet>
+              <path d={paddle(r0, r1, 15, 17)} fill={`url(#${shade}-skin)`} stroke={P.skin} strokeWidth={1.4} strokeOpacity={0.7} opacity={0.88} />
+              <ellipse cx={f1(r1[0])} cy={f1(r1[1])} rx={17} ry={11} fill="#d9b4b8" stroke={P.skin} strokeWidth={1.2} />
+              <circle cx={f1(r1[0] - 6)} cy={f1(r1[1] + 2)} r={3} fill="#c0392b" />
+              <circle cx={f1(r1[0] + 6)} cy={f1(r1[1] + 2)} r={3} fill="#c0392b" />
+              <circle cx={f1(r1[0])} cy={f1(r1[1] - 4)} r={4} fill="#5a4a9a" />
+            </Part>
+          );
+        })()}
+
+        {/* The head on top, big as in the embryo: eyes at the sides of the face and the mouth turn with the body. */}
+        {(() => {
+          const n = P3(0, 0.1, 1);
+          const hc: Pt = [n[0], n[1] - 62];
+          const rx = 82;
+          const ry = 70;
+          /** A point on the face: azimuth from the ventral midline, height below the centre. */
+          const face = (phi: number, dy: number) => {
+            const w = Math.sqrt(Math.max(0, 1 - (dy / ry) ** 2));
+            const u = Math.sin(phi);
+            const v = Math.cos(phi);
+            return { x: hc[0] + (u * V.c - v * V.s) * rx * w, y: hc[1] + dy, d: depth(V, u, v) };
+          };
+          const mouth = face(0, 40);
+          return (
+            <Part id="burua" quiet>
+              <ellipse cx={f1(hc[0])} cy={f1(hc[1])} rx={rx} ry={ry} fill={`url(#${shade}-skin)`} stroke={P.skin} strokeWidth={2} strokeOpacity={0.75} />
+              <ellipse cx={f1(hc[0] - 24)} cy={f1(hc[1] - 26)} rx={30} ry={20} fill="#fff" opacity={0.1} />
+              {sides.map((s) => {
+                const e = face(s * 0.95, 4);
+                return e.d > 0.05 ? <ellipse key={s} cx={f1(e.x)} cy={f1(e.y)} rx={f1(10 * Math.max(0.35, e.d))} ry={8} fill="#1c0c14" opacity={Math.min(1, e.d * 1.8)} /> : null;
+              })}
+              {/* The stomodeum: a wide slit under the face. */}
+              {mouth.d > 0.05 && <ellipse cx={f1(mouth.x)} cy={f1(mouth.y)} rx={f1(20 * mouth.d)} ry={4} fill="#3a1a26" opacity={0.85} />}
+            </Part>
+          );
+        })()}
 
         {/* The communication through the canals. */}
         {flowOn &&
@@ -660,24 +764,44 @@ function coelomMap(script: Script): SceneComponent {
 
         {/* Drag handle on the plane. */}
         <g style={{ cursor: 'ns-resize' }} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
+          <title>Mozketa planoa: arrastatu gora eta behera, eskuineko zeharkako mozketa maila horretan ikusteko</title>
           <path d={poly(plane)} fill="none" stroke="transparent" strokeWidth={16} />
           <rect x={grip[0] - 13} y={grip[1] - 17} width={26} height={34} rx={9} fill="#f4f7ff" />
           <path d={`M${f1(grip[0] - 6)},${f1(grip[1] - 4)}L${f1(grip[0])},${f1(grip[1] - 11)}L${f1(grip[0] + 6)},${f1(grip[1] - 4)}M${f1(grip[0] - 6)},${f1(grip[1] + 4)}L${f1(grip[0])},${f1(grip[1] + 11)}L${f1(grip[0] + 6)},${f1(grip[1] + 4)}`} fill="none" stroke="#1a1d26" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
         </g>
 
-        <Note x={392} y={50} size={12.5} tone="dim">
-          Aurretik (aurreko pareta gardena) · ↔ arrastatu biratzeko
+        <Note x={770} y={22} size={13}>
+          Enbrioia aurretik ikusita · aurreko pareta gardena
         </Note>
-        <Note x={598} y={P3(0, 0, 0.7)[1]} size={13} tone="dim">
+        <Note x={770} y={42} size={12.5} tone="dim">
+          ↔ arrastatu biratzeko
+        </Note>
+        {/* Which way is which: seen from the front, the embryo's right is on the viewer's left. */}
+        <Note x={Math.round(MX - AU - 10)} y={588} size={12.5} tone="dim">
+          ← eskuina
+        </Note>
+        <Note x={Math.round(MX + AU + 10)} y={588} size={12.5} tone="dim">
+          ezkerra →
+        </Note>
+        <Note x={640} y={Math.round(P3(0, 0, 0.7)[1])} size={13} tone="dim">
           toraxa
         </Note>
-        <Note x={598} y={P3(0, 0, 0.22)[1]} size={13} tone="dim">
+        <Note x={640} y={Math.round(P3(0, 0, 0.22)[1])} size={13} tone="dim">
           abdomena
         </Note>
 
         {/* ——— The section at the plane ——— */}
-        <Note x={SX} y={226} size={12.5} tone="dim">
-          Zeharkako mozketa planoan · arrastatu planoa
+        <Note x={SX} y={208} size={12.5} tone="dim">
+          Plano zuriko zeharkako mozketa, goitik ikusita
+        </Note>
+        <Note x={SX} y={228} size={12.5} tone="dim">
+          (arrastatu planoa gora eta behera)
+        </Note>
+        <Note x={Math.round(SX - SR - 34)} y={SY} size={12.5} tone="dim">
+          eskuina
+        </Note>
+        <Note x={Math.round(SX + SR + 34)} y={SY} size={12.5} tone="dim">
+          ezkerra
         </Note>
         <Note x={SX} y={250} size={12.5} tone="dim">
           dortsala
@@ -685,24 +809,34 @@ function coelomMap(script: Script): SceneComponent {
         <Note x={SX} y={Math.round(SY + (here.rv + 0.13) * SR)} size={12.5} tone="dim">
           bentrala
         </Note>
-        <path d={poly(ringF(here, 64))} fill={P.wall} />
-        <path d={poly(ringF(here, 64))} fill="url(#w7-mesench)" />
-        <path d={poly(ringF(here, 64))} fill={`url(#${shade}-sec)`} />
-        <path d={poly(ringF(here, 64))} fill="none" stroke={P.skin} strokeWidth={5} opacity={0.95} />
+        <Part id="gorputz-pareta">
+          <path d={poly(ringF(here, 64))} fill={P.wall} />
+          <path d={poly(ringF(here, 64))} fill="url(#w7-mesench)" />
+          <path d={poly(ringF(here, 64))} fill={`url(#${shade}-sec)`} />
+          <path d={poly(ringF(here, 64))} fill="none" stroke={P.skin} strokeWidth={5} opacity={0.95} />
+        </Part>
         {/* Back: the somites either side, the spinal cord with its canal, the notochord in the forming vertebra, the aorta. */}
-        <g pointerEvents="none">
+        <Part id="somitak">
           {sides.map((s) => (
             <g key={s}>
               <ellipse cx={f1(SX + s * 0.3 * SR)} cy={f1(SY - 0.72 * SR)} rx={0.13 * SR} ry={0.1 * SR} fill="#a84a5c" opacity={0.75} />
               <ellipse cx={f1(SX + s * 0.3 * SR)} cy={f1(SY - 0.72 * SR)} rx={0.13 * SR} ry={0.1 * SR} fill="url(#w7-muscle)" opacity={0.7} />
             </g>
           ))}
-        </g>
-        <ellipse cx={SX} cy={f1(SY - 0.86 * SR)} rx={0.07 * SR} ry={0.065 * SR} fill="#6d7fe0" stroke="rgba(10,16,48,0.6)" strokeWidth={1} />
-        <ellipse cx={SX} cy={f1(SY - 0.86 * SR)} rx={0.012 * SR} ry={0.035 * SR} fill="#0c1428" />
-        <ellipse cx={SX} cy={f1(SY - 0.72 * SR)} rx={0.15 * SR} ry={0.1 * SR} fill={P.bone} opacity={0.85} />
-        <circle cx={SX} cy={f1(SY - 0.72 * SR)} r={0.03 * SR} fill="#dfe9ff" opacity={0.9} />
-        <circle cx={SX} cy={f1(SY - 0.58 * SR)} r={0.05 * SR} fill={P.aorta} stroke="#7a0f1e" strokeWidth={1} />
+        </Part>
+        <Part id="hodi-neurala">
+          <ellipse cx={SX} cy={f1(SY - 0.86 * SR)} rx={0.07 * SR} ry={0.065 * SR} fill="#6d7fe0" stroke="rgba(10,16,48,0.6)" strokeWidth={1} />
+          <ellipse cx={SX} cy={f1(SY - 0.86 * SR)} rx={0.012 * SR} ry={0.035 * SR} fill="#0c1428" />
+        </Part>
+        <Part id="ornoak">
+          <ellipse cx={SX} cy={f1(SY - 0.72 * SR)} rx={0.15 * SR} ry={0.1 * SR} fill={P.bone} opacity={0.85} />
+        </Part>
+        <Part id="notokorda">
+          <circle cx={SX} cy={f1(SY - 0.72 * SR)} r={0.03 * SR} fill="#dfe9ff" opacity={0.9} />
+        </Part>
+        <Part id="aorta">
+          <circle cx={SX} cy={f1(SY - 0.58 * SR)} r={0.05 * SR} fill={P.aorta} stroke="#7a0f1e" strokeWidth={1} />
+        </Part>
         {cut.cav.map((p, i) => (
           <Part key={`fc${i}`} id={p.id}>
             <path d={poly(ringF(p.e))} fill={P.space} />
@@ -712,7 +846,9 @@ function coelomMap(script: Script): SceneComponent {
           </Part>
         ))}
         {S.zc < ZB && S.zc > 0.08 && (
-          <path d={`M${SX},${f1(SY - 0.66 * SR)}L${SX},${f1(SY + (SH.stomach(S.zc, S)?.cv ?? -0.1) * SR)}`} stroke={P.serosa} strokeWidth={5} opacity={0.8} />
+          <Part id="mesenterio-dortsala">
+            <path d={`M${SX},${f1(SY - 0.66 * SR)}L${SX},${f1(SY + (SH.stomach(S.zc, S)?.cv ?? -0.1) * SR)}`} stroke={P.serosa} strokeWidth={5} opacity={0.8} />
+          </Part>
         )}
         {cut.solids.map((p, i) => {
           const L = ringF(p.e);
@@ -746,22 +882,26 @@ function coelomMap(script: Script): SceneComponent {
             ))}
           </Part>
         )}
-        <path d={poly(ringF(here, 64))} fill="none" stroke="#f4f7ff" strokeWidth={2} opacity={0.85} />
+        <path d={poly(ringF(here, 64))} fill="none" stroke="#f4f7ff" strokeWidth={2} opacity={0.85} pointerEvents="none" />
 
         {/* Colour key: the same colour for the same cavity in every view of the topic. */}
         <g fontSize={13.5} fill="rgba(244,247,255,0.96)" style={{ paintOrder: 'stroke' }} stroke="rgba(11,12,15,0.9)" strokeWidth={3}>
           {[
-            { k: S.one > 0.5 ? COL.coelom : c.upper, t: S.one > 0.5 ? 'zeloma' : S.ppm > 0.5 ? 'perikardioa' : 'hasierako perikardioa' },
-            ...(S.ppm > 0.5 || S.lung > 0.3 ? [{ k: c.side, t: 'pleura' }] : []),
-            ...(S.one > 0.5 ? [] : [{ k: c.lower, t: 'peritoneoa' }]),
-            { k: COL.septum, t: 'septuma' },
+            { k: S.one > 0.5 ? COL.coelom : c.upper, t: S.one > 0.5 ? 'zeloma' : S.ppm > 0.5 ? 'perikardioa' : 'hasierako perikardioa', id: upperName },
+            ...(S.ppm > 0.5 || S.lung > 0.3 ? [{ k: c.side, t: 'pleura', id: S.ppm > 0.5 ? 'pleura-barrunbea' : upperName }] : []),
+            ...(S.one > 0.5 ? [] : [{ k: c.lower, t: 'peritoneoa', id: 'peritoneo-barrunbea' }]),
+            { k: COL.septum, t: 'septuma', id: 'septum-transversum' },
           ].map((r, i) => (
-            <g key={r.t} transform={`translate(${712} ${518 + i * 21})`}>
-              <rect x={0} y={-6} width={14} height={12} rx={3} fill={r.k} opacity={0.85} />
-              <text x={20} y={4}>
-                {r.t}
-              </text>
-            </g>
+            // Each key row is the cavity itself: resting on it names and lights it in both drawings.
+            <Part key={r.t} id={r.id}>
+              <g transform={`translate(${36} ${528 + i * 20})`}>
+                <rect x={-4} y={-9} width={130} height={18} fill="transparent" />
+                <rect x={0} y={-6} width={14} height={12} rx={3} fill={r.k} opacity={0.85} />
+                <text x={20} y={4}>
+                  {r.t}
+                </text>
+              </g>
+            </Part>
           ))}
         </g>
 
@@ -772,17 +912,17 @@ function coelomMap(script: Script): SceneComponent {
         ))}
 
         {/* Names: left of the block; the midline ones above the section. */}
-        <Label id={upperName} x={236} y={150} {...A3(-0.3, 0.42, 0.78)} />
-        <Label id="pleura-barrunbea" x={236} y={196} {...A3(-0.62, -0.32, 0.84)} show={S.one > 0.5 ? 0 : S.ppm} />
+        <Label id={upperName} x={236} y={150} {...A3(-0.4, 0.44, 0.8)} />
+        <Label id="pleura-barrunbea" x={236} y={196} {...A3(-0.56, -0.46, 0.86)} show={S.one > 0.5 || S.ppm <= 0.5 ? 0 : S.ppm} />
         <Label id={S.lung < 0.75 ? 'birika-hastapenak' : 'birikak'} x={236} y={244} ax={lungR ? P3(lungR.cu - lungR.ru * 0.6, lungR.cv, 0.72)[0] : 0} ay={lungR ? P3(lungR.cu, lungR.cv, 0.72)[1] : 0} show={lungR ? 1 : 0} />
-        <Label id="mintz-pleuroperikardikoak" x={236} y={292} {...A3(-0.62, -0.02, 0.6)} show={S.ppm > 0.02 ? 1 : 0} small />
+        <Label id="mintz-pleuroperikardikoak" x={236} y={292} {...A3(-0.7, 0.04, 0.555)} show={S.ppm > 0.02 ? 1 : 0} small />
         <Label id="erreten-perikardioperitonealak" x={236} y={348} {...A3(-0.44, -0.4, 0.47)} show={S.one > 0.5 || S.pom > 0.9 ? 0 : 1} small />
-        <Label id="septum-transversum" x={236} y={394} {...A3(-0.5, 0.55, ZS)} show={S.sep > 0.15 ? 1 : 0} />
+        <Label id="septum-transversum" x={236} y={394} {...(sepE ? A3(sepE.cu - sepE.ru * 0.55, sepE.cv + sepE.rv * 0.45, ZS - 0.02) : A3(0, 0, ZS))} show={S.sep > 0.15 ? 1 : 0} />
         <Label id="mintz-pleuroperitonealak" x={236} y={438} {...A3(-0.54, -0.4, 0.47)} show={S.pom > 0.05 ? 1 : 0} small />
         <Label id="peritoneo-barrunbea" x={236} y={496} {...A3(-0.62, 0.3, 0.26)} show={S.one > 0.5 ? 0 : 1} />
         <Label id="enbrioi-barruko-zeloma" x={236} y={496} {...A3(-0.62, 0.3, 0.26)} show={S.one > 0.5 ? 1 : 0} />
-        <Label id={S.gut} x={600} y={92} {...A3(0.04, -0.38, 0.97)} />
-        <Label id="hestegorri-inguruko-mesenkima" x={600} y={128} {...A3(0.14, -0.3, 0.92)} small />
+        <Label id={S.gut} x={600} y={92} {...A3(0.04, -0.38, 0.84)} />
+        <Label id="hestegorri-inguruko-mesenkima" x={600} y={128} {...A3(0.11, -0.3, 0.84)} small />
         <Label id="bihotza" x={600} y={170} {...A3(0.22, 0.32, 0.72)} />
       </g>
     );

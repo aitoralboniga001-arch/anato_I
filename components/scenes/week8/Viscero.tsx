@@ -107,8 +107,10 @@ export function FaceArches({ t, reduced }: SceneProps) {
           <stop offset="1" stopColor="#5a2a22" stopOpacity={0.35} />
         </radialGradient>
       </defs>
-      <path d={smoothPath(HEAD, true, 0.3)} fill={TISSUE} />
-      <path d={smoothPath(HEAD, true, 0.3)} fill={`url(#w8-vk-head${cid})`} />
+      <Part id="burua" quiet>
+        <path d={smoothPath(HEAD, true, 0.3)} fill={TISSUE} />
+        <path d={smoothPath(HEAD, true, 0.3)} fill={`url(#w8-vk-head${cid})`} />
+      </Part>
       {/* Brain bulges under the skin, the otic pit behind the arches and the nasal placode in front of the eye. */}
       <g pointerEvents="none">
         <path d="M300,150 C380,96 470,92 540,120" fill="none" stroke="#b98a7a" strokeWidth={2} opacity={0.5} />
@@ -280,13 +282,15 @@ const JAW_DROP = 52;
 const HYOID_DROP = 30;
 const upAt = (p: Pt, g: number): Pt => [UP[0] + (p[0] - UP[0]) * (1 + 0.12 * g), UP[1] + (p[1] - UP[1]) * (1 + 0.32 * g)];
 const jawAt = (p: Pt, g: number): Pt => {
-  const s = 1 + 0.15 * g;
-  return [COND[0] + (p[0] - COND[0]) * s, COND[1] + (p[1] - COND[1]) * s + JAW_DROP * g * sm((COND[0] - p[0] - 8) / 62)];
+  const s = 1 + 0.08 * g;
+  // The ramus grows taller evenly (the coronoid stays up under the arch); the body, well in front, drops whole.
+  const drop = Math.max(sm((COND[0] - p[0] - 70) / 40), sm((p[1] - COND[1] + 14) / 70));
+  return [COND[0] + (p[0] - COND[0]) * s, COND[1] + (p[1] - COND[1]) * s + JAW_DROP * g * drop];
 };
 const upT = (g: number) => `translate(${UP[0]},${UP[1]}) scale(${(1 + 0.12 * g).toFixed(3)},${(1 + 0.32 * g).toFixed(3)}) translate(${-UP[0]},${-UP[1]})`;
 /** The jaw's body (front of the ramus): one affine piece of `jawAt`. */
 const jawT = (g: number) =>
-  `translate(0,${f1(JAW_DROP * g)}) translate(${COND[0]},${COND[1]}) scale(${(1 + 0.15 * g).toFixed(3)}) translate(${-COND[0]},${-COND[1]})`;
+  `translate(0,${f1(JAW_DROP * g)}) translate(${COND[0]},${COND[1]}) scale(${(1 + 0.08 * g).toFixed(3)}) translate(${-COND[0]},${-COND[1]})`;
 
 /** A bone that ossifies out of a centre to fill its shape (membranous growth). */
 function Grow({ id, pts, c, k, fill, deep, uid, size = 140 }: { id: string; pts: Pt[]; c: Pt; k: number; fill: string; deep: string; uid: string; size?: number }) {
@@ -390,7 +394,9 @@ export function FaceSkull({ t }: SceneProps) {
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <g transform={z.transform}>
         {/* Neurocranium (vault) for scale: plain until the origin step. */}
-        <path d={smoothPath(SKULL, true, 0.3)} fill="#3b3540" stroke="#5b5360" strokeWidth={2} />
+        <Part id="neurokraneoa" quiet>
+          <path d={smoothPath(SKULL, true, 0.3)} fill="#3b3540" stroke="#5b5360" strokeWidth={2} />
+        </Part>
         <clipPath id={`w8-vk-skull${cid}`}>
           <path d={smoothPath(SKULL, true, 0.3)} />
         </clipPath>
@@ -412,10 +418,12 @@ export function FaceSkull({ t }: SceneProps) {
         </Part>
         <g>
           {/* The face's outline before its bones form (and the nasal bone, not followed here). */}
-          <path d={smoothPath(MAXILLA, true, 0.3)} fill="#8f877c" stroke="#6d6458" strokeWidth={1.4} transform={upT(grow)} />
-          <path d={smoothPath(MALAR, true, 0.3)} fill="#8f877c" stroke="#6d6458" strokeWidth={1.4} />
-          <path d={smoothPath(manV, true, 0.3)} fill="#8f877c" stroke="#6d6458" strokeWidth={1.4} />
-          <path d={smoothPath(NASAL, true, 0.3)} fill={orig > 0.5 ? Q.crest : '#8f877c'} stroke="#6d6458" strokeWidth={1.2} />
+          <Part id="buru-aurpegi-hezurrak" quiet>
+            <path d={smoothPath(MAXILLA, true, 0.3)} fill="#8f877c" stroke="#6d6458" strokeWidth={1.4} transform={upT(grow)} />
+            <path d={smoothPath(MALAR, true, 0.3)} fill="#8f877c" stroke="#6d6458" strokeWidth={1.4} />
+            <path d={smoothPath(manV, true, 0.3)} fill="#8f877c" stroke="#6d6458" strokeWidth={1.4} />
+            <path d={smoothPath(NASAL, true, 0.3)} fill={orig > 0.5 ? Q.crest : '#8f877c'} stroke="#6d6458" strokeWidth={1.2} />
+          </Part>
           <g transform={upT(grow)}>
             <Grow id="goiko-maxilarra" uid="w8-vk-mx" pts={MAXILLA} c={[320, 395]} k={maxB} fill={col(F.max)} deep={F.maxDeep} />
             <Part id="sinu-paranasalak" show={grow}>
@@ -467,8 +475,8 @@ export function FaceSkull({ t }: SceneProps) {
           <path d={smoothPath(HYOID, true, 0.3)} fill="#cfc6b4" stroke="#8a8170" strokeWidth={1.2} transform={`translate(0,${f1(HYOID_DROP * grow)})`} />
         </Part>
         {/* External acoustic meatus: the window onto the middle ear, with its tympanic ring. */}
-        <circle cx={EAR_C[0]} cy={EAR_C[1]} r={15} fill="#09080b" />
-        <path d={`M${EAR_C[0] - 11},${EAR_C[1] - 11}A16,16 0 1 0 ${EAR_C[0] + 11},${EAR_C[1] - 11}`} fill="none" stroke="#cfc6b4" strokeWidth={Math.max(1.2, 4 / zs)} strokeLinecap="round" opacity={0.7} />
+        <circle cx={EAR_C[0]} cy={EAR_C[1]} r={15} fill="#09080b" pointerEvents="none" />
+        <path d={`M${EAR_C[0] - 11},${EAR_C[1] - 11}A16,16 0 1 0 ${EAR_C[0] + 11},${EAR_C[1] - 11}`} fill="none" stroke="#cfc6b4" strokeWidth={Math.max(1.2, 4 / zs)} strokeLinecap="round" opacity={0.7} pointerEvents="none" />
         <Ossicles m={manB} i={maxB} s={hyoB} z={zs} colors={ossCol} />
       </g>
 
@@ -532,17 +540,17 @@ export function FaceSkull({ t }: SceneProps) {
       {/* Left gutter: the face (in front). */}
       <Label id="hezur-frontala" x={190} y={150} ax={A([320, 200])[0]} ay={A([320, 200])[1]} show={orig * inFrame(A([320, 200]))} />
       <Label id="hezur-malarra" x={190} y={244} ax={A([388, 384])[0]} ay={A([388, 384])[1]} show={maxB * inFrame(A([388, 384]))} />
-      <Label id="sinu-paranasalak" x={190} y={288} ax={sinusA[0]} ay={sinusA[1]} show={grow} />
+      <Label id="sinu-paranasalak" x={190} y={288} ax={sinusA[0] - 1} ay={sinusA[1] - 10} show={grow} />
       <Label id="goiko-maxilarra" x={190} y={372} ax={A(upAt([300, 404], grow))[0]} ay={A(upAt([300, 404], grow))[1]} show={maxB * inFrame(A([300, 404]))} />
-      <Label id="apofisi-albeolarrak" x={190} y={420} ax={alvA[0]} ay={alvA[1]} show={grow} />
+      <Label id="apofisi-albeolarrak" x={190} y={420} ax={alvA[0] - 2} ay={alvA[1] - 12} show={grow} />
       <Label id="beheko-maxilarra" x={190} y={480} ax={jawA[0]} ay={jawA[1]} show={manB * inFrame(A([330, 476]))} />
-      <Label id="meckel-kartilagoa" x={190} y={540} ax={A([400, 464])[0]} ay={A([400, 464])[1]} show={meckelShow * inFrame(A([400, 464]))} />
+      <Label id="meckel-kartilagoa" x={190} y={540} ax={A([409, 475])[0]} ay={A([409, 475])[1]} show={meckelShow * inFrame(A([400, 464]))} />
       {/* Right gutter: the ear region and the vault behind. */}
       <Label id="hezur-parietala" x={810} y={100} ax={A([600, 130])[0]} ay={A([600, 130])[1]} show={orig} />
       <Label id="tenporalaren-ezkata" x={760} y={196} ax={A([540, 312])[0]} ay={A([540, 312])[1]} show={maxB * inFrame(A([540, 312]))} />
       <Label id="ingudea" x={810} y={250} ax={A([EAR_C[0] + 6, EAR_C[1] - 9])[0]} ay={A([EAR_C[0] + 6, EAR_C[1] - 9])[1]} show={maxB} />
       <Label id="barra-pterigopalatino-karratua" x={754} y={290} ax={A([470, 395])[0]} ay={A([470, 395])[1]} show={ptqShow * inFrame(A([470, 395]))} small />
-      <Label id="mailua" x={810} y={350} ax={A([EAR_C[0] - 12, EAR_C[1] + 6])[0]} ay={A([EAR_C[0] - 12, EAR_C[1] + 6])[1]} show={manB} />
+      <Label id="mailua" x={810} y={350} ax={A([EAR_C[0] - 7, EAR_C[1] - 2])[0]} ay={A([EAR_C[0] - 7, EAR_C[1] - 2])[1]} show={manB} />
       <Label id="ointokia" x={810} y={400} ax={A([EAR_C[0] + 11.3, EAR_C[1] + 6.3])[0]} ay={A([EAR_C[0] + 11.3, EAR_C[1] + 6.3])[1]} show={hyoB} />
       <Label id="okzipitalaren-ezkata" x={810} y={440} ax={A([724, 300])[0]} ay={A([724, 300])[1]} show={orig} />
       <Label id="apofisi-estiloidea" x={810} y={480} ax={A([510, 466])[0]} ay={A([510, 466])[1]} show={maxB * inFrame(A([510, 466]))} />

@@ -161,7 +161,7 @@ export function VertebraTop({ t }: SceneProps) {
           )}
         </Part>
         {/* Opaque backing under the bone pieces, so a dimmed piece reads as dark bone, not see-through. */}
-        <g fill="#1d1a22" stroke="#1d1a22" strokeWidth={6}>
+        <g fill="#1d1a22" stroke="#1d1a22" strokeWidth={6} pointerEvents="none">
           {bodyR > 1 && <path d={smoothPath(BODY, true, 0.25)} clipPath={`url(#${cid}-body)`} />}
           {[ARCH_R, archL].map((p, i) => {
             const b = band(p, 34, 24, archU);
@@ -289,9 +289,10 @@ function nervePath(i: number, s: 1 | -1): Pt[] {
       [500 + s * 17, y - 8],
       [500 + s * 44, y - 3],
       [500 + s * PX, y + 2],
-      [500 + s * 120, y + 14],
-      [500 + s * 186, y + 26],
-      [500 + s * 236, y + 30],
+      // Out into the middle of its myotome, between the fibres that run up and down to the processes.
+      [500 + s * 120, y + 8],
+      [500 + s * 180, y + 9],
+      [500 + s * 236, y + 4],
     ],
     8,
   );
@@ -305,8 +306,13 @@ const sub = (pts: readonly Pt[], u: number) => {
 };
 
 export function VertebraBack({ t }: SceneProps) {
-  // Level by level (cranial → caudal) each vertebra's foramen joins the tube.
-  const lvl = (i: number) => seg(t, OR_T.canal + 0.005 + i * 0.008, OR_T.canal + 0.03 + i * 0.008);
+  // The column builds in step with the view from above (body, arch, processes), level by level cranial → caudal;
+  // later each vertebra's foramen joins the tube.
+  const grow = (at: number) => (i: number) => seg(t, at + 0.005 + i * 0.008, at + 0.03 + i * 0.008);
+  const bodyK = grow(OR_T.body);
+  const archK = grow(OR_T.arch);
+  const transK = grow(OR_T.trans);
+  const lvl = grow(OR_T.canal);
   const canalY = lerp(60, 600, seg(t, OR_T.canal + 0.005, OR_T.canal + 0.085));
   const nerve = (i: number) => seg(t, OR_T.nerves + 0.01 + i * 0.01, OR_T.nerves + 0.05 + i * 0.01);
   const myo = seg(t, OR_T.myo + 0.005, OR_T.myo + 0.06);
@@ -318,7 +324,7 @@ export function VertebraBack({ t }: SceneProps) {
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       {/* Floor of the canal: the back of the vertebral bodies and the discs between them. */}
       {levels.map((i) => (
-        <g key={i} opacity={lvl(i)}>
+        <g key={i} opacity={bodyK(i)}>
           <Part id="orno-gorputza">
             {/* Waisted body, rims (end plates) top and bottom. */}
             <path d={vbody(Y(i))} fill={BONE} stroke={EDGE} strokeWidth={2} />
@@ -329,7 +335,7 @@ export function VertebraBack({ t }: SceneProps) {
         </g>
       ))}
       {discs.map((i) => (
-        <g key={i} opacity={Math.min(lvl(i), lvl(i + 1))}>
+        <g key={i} opacity={Math.min(bodyK(i), bodyK(i + 1))}>
           <Part id="ornoarteko-diskoa">
             <rect x={402} y={D(i) - 9} width={196} height={18} rx={8} fill={DISC} stroke={DISC_DEEP} strokeWidth={1.4} />
             {/* Fibres of the annulus, crossing obliquely. */}
@@ -366,25 +372,29 @@ export function VertebraBack({ t }: SceneProps) {
       </Part>
       {/* Cut pedicles and transverse processes of each vertebra. */}
       {levels.map((i) => (
-        <g key={i} opacity={lvl(i)} transform={`translate(0,${f1((1 - lvl(i)) * -14)})`}>
-          <Part id="pedikulua">
+        <g key={i}>
+          <Part id="pedikulua" show={archK(i) > 0.01 ? 1 : 0}>
+            <g opacity={archK(i)} transform={`translate(0,${f1((1 - archK(i)) * -14)})`}>
             {[1, -1].map((s) => (
               <g key={s}>
                 <ellipse cx={500 + s * PX} cy={Y(i)} rx={17} ry={25} fill={BONE} stroke={EDGE} strokeWidth={2} />
                 <ellipse cx={500 + s * PX} cy={Y(i)} rx={11} ry={17} fill="#d8c79c" />
               </g>
             ))}
+            </g>
           </Part>
-          <Part id="apofisi-zeharrak">
-            {[1, -1].map((s) => (
-              <path key={s} d={smoothPath([[500 + s * 78, Y(i) - 12], [500 + s * 150, Y(i) - 20], [500 + s * 156, Y(i) - 8], [500 + s * 78, Y(i) + 6]], true, 0.3)} fill={BONE} stroke={EDGE} strokeWidth={2} />
-            ))}
+          <Part id="apofisi-zeharrak" show={transK(i) > 0.01 ? 1 : 0}>
+            <g opacity={transK(i)}>
+              {[1, -1].map((s) => (
+                <path key={s} d={smoothPath([[500 + s * 78, Y(i) - 12], [500 + s * (150 - (1 - transK(i)) * 60), Y(i) - 20], [500 + s * (156 - (1 - transK(i)) * 60), Y(i) - 8], [500 + s * 78, Y(i) + 6]], true, 0.3)} fill={BONE} stroke={EDGE} strokeWidth={2} />
+              ))}
+            </g>
           </Part>
         </g>
       ))}
       {/* Intervertebral foramina: the gaps between consecutive pedicles, at disc level. */}
       {discs.map((i) => (
-        <g key={i} opacity={Math.min(lvl(i), lvl(i + 1))}>
+        <g key={i} opacity={Math.min(archK(i), archK(i + 1))}>
           <Part id="ornoarteko-zuloak">
             {[1, -1].map((s) => (
               <ellipse key={s} cx={500 + s * PX} cy={D(i)} rx={12} ry={11} fill={Q.space} stroke="#cbbfa0" strokeWidth={1.6} />
@@ -438,13 +448,24 @@ export function VertebraBack({ t }: SceneProps) {
         const y = (Y(ys[0]) + Y(ys[ys.length - 1])) / 2;
         return (
           <g key={n}>
-            <rect x={828} y={y - 6} width={12} height={12} rx={3} fill={REG_C[k]} stroke="#8fa7ff" strokeWidth={1} opacity={vis(t, OR_T.canal + 0.06)} />
+            <Part id="ornomuina" quiet>
+              <rect x={828} y={y - 6} width={12} height={12} rx={3} fill={REG_C[k]} stroke="#8fa7ff" strokeWidth={1} opacity={vis(t, OR_T.canal + 0.06)} />
+            </Part>
             <Note x={846} y={y} size={13.5} align="start" show={vis(t, OR_T.canal + 0.06)}>
               {n}
             </Note>
           </g>
         );
       })}
+      <Note x={500} y={612} tone="accent" show={vis(t, OR_T.body, OR_T.arch)}>
+        Orno gorputzak bata bestearen gainean, ornoarteko diskoak haien artean
+      </Note>
+      <Note x={500} y={612} tone="accent" show={vis(t, OR_T.arch, OR_T.trans)}>
+        Pedikuluek arkua gorputzari lotzen diote; pedikuluen artean ornoarteko zuloak
+      </Note>
+      <Note x={500} y={612} tone="accent" show={vis(t, OR_T.trans, OR_T.canal)}>
+        Arkutik alboetara apofisi zeharrak (laminak eta arantza apofisiak kenduta daude)
+      </Note>
       <Note x={500} y={612} tone="accent" show={vis(t, OR_T.canal, OR_T.nerves)}>
         Orno guztien zuloak elkarren segidan: hodi errakideoa, ornomuina barruan
       </Note>
@@ -455,14 +476,14 @@ export function VertebraBack({ t }: SceneProps) {
         Orno gorputzak segmentu arteko mailetan; miotomak eta nerbioak orno gorputzen artean
       </Note>
 
-      <Label id="hodi-errakideoa" x={190} y={70} ax={447} ay={Y(0) - 20} show={seg(t, OR_T.canal + 0.02, OR_T.canal + 0.05)} />
-      <Label id="ornomuina" x={190} y={180} ax={480} ay={Y(1) + 6} />
-      <Label id="orno-gorputza" x={190} y={300} ax={466} ay={Y(3) - 14} show={vis(t, OR_T.canal + 0.03)} />
-      <Label id="ornoarteko-diskoa" x={190} y={420} ax={466} ay={D(4)} show={vis(t, OR_T.canal + 0.05)} />
-      <Label id="pedikulua" x={190} y={520} ax={500 - PX - 12} ay={Y(6) + 8} show={vis(t, OR_T.canal + 0.06)} small />
-      <Label id="ornoarteko-zuloak" x={770} y={92} ax={500 + PX + 10} ay={D(0) - 6} show={vis(t, OR_T.canal + 0.06)} />
-      <Label id="apofisi-zeharrak" x={810} y={210} ax={500 + 150} ay={Y(2) - 14} show={vis(t, OR_T.canal + 0.06)} small />
-      <Label id="nerbio-espinalak" x={810} y={410} ax={500 + 170} ay={D(2) + 23} show={seg(nerve(2), 0.7, 1)} />
+      <Label id="hodi-errakideoa" x={190} y={70} ax={447} ay={Y(0) - 28} show={seg(t, OR_T.canal + 0.02, OR_T.canal + 0.05)} />
+      <Label id="ornomuina" x={190} y={180} ax={486} ay={Y(1) + 6} />
+      <Label id="orno-gorputza" x={190} y={300} ax={466} ay={Y(3) - 14} show={bodyK(3)} />
+      <Label id="ornoarteko-diskoa" x={190} y={420} ax={466} ay={D(4)} show={Math.min(bodyK(4), bodyK(5))} />
+      <Label id="pedikulua" x={190} y={520} ax={500 - PX - 12} ay={Y(6) + 8} show={archK(6)} small />
+      <Label id="ornoarteko-zuloak" x={770} y={92} ax={500 + PX + 10} ay={D(0) - 6} show={Math.min(archK(0), archK(1))} />
+      <Label id="apofisi-zeharrak" x={810} y={210} ax={647} ay={Y(2) - 9} show={transK(2)} small />
+      <Label id="nerbio-espinalak" x={810} y={410} ax={500 + 170} ay={D(2) + 9} show={seg(nerve(2), 0.7, 1)} />
       <Label id="miotoma" x={810} y={566} ax={500 + 262 + 28} ay={D(4) + 6} show={seg(myo, 0.4, 0.8)} />
     </g>
   );

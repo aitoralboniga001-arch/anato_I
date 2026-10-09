@@ -514,7 +514,11 @@ export function FoldXDrawing({ g, X, k, ghost }: { g: FoldX; X: (p: Pt) => Pt; k
       </Part>
 
       {/* Gut lumen once closed (its own tube). */}
-      {g.lam >= 0.5 && <path d={poly(lumen)} fill="#2b2413" />}
+      {g.lam >= 0.5 && (
+        <Part id="erdiko-hestea">
+          <path d={poly(lumen)} fill="#2b2413" />
+        </Part>
+      )}
 
       {/* Intra-embryonic mesoderm of the axis (mesenchyme) — somites, aortae, notochord and tube sit in it. */}
       <Part id="mesodermo-intraenbrionarioa" quiet>

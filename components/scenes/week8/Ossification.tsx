@@ -18,8 +18,19 @@ export const OSS_T = { membrane: 0.16, spicules: 0.32, cartilage: 0.48, centre: 
 // ——— Left: membranous (skull vault) ———
 const LX = 345;
 const LC: Pt = [LX, 318];
-const MEMBRANE = spline([[232, 196], [300, 182], [390, 182], [458, 196], [462, 318], [458, 440], [390, 454], [300, 454], [232, 440], [228, 318]], 8, true);
-const L_CELLS = mesCells((x, y) => inPoly(MEMBRANE, x, y), [232, 186, 460, 452], 26, 11);
+/** A piece of the vault cut across: every layer bows with the curve of the head (x from 210 to 480). */
+const VX0 = 210;
+const VX1 = 480;
+const bow = (x: number) => 0.0012 * (x - LX) ** 2;
+const layer = (y0: number, y1: number): Pt[] => {
+  const xs = Array.from({ length: 19 }, (_, i) => VX0 + ((VX1 - VX0) * i) / 18);
+  return [...xs.map((x) => [x, y0 + bow(x)] as Pt), ...[...xs].reverse().map((x) => [x, y1 + bow(x)] as Pt)];
+};
+/** Skin (surface ectoderm over its dermis), the membrane of mesenchyme, the brain under its meninges. */
+const SKIN = layer(140, 166);
+const MEMBRANE = layer(172, 464);
+const BRAIN = layer(476, 560);
+const L_CELLS = mesCells((x, y) => inPoly(MEMBRANE, x, y) && x > VX0 + 6 && x < VX1 - 6, [VX0, 172, VX1, 486], 26, 11);
 /** Radial spicules: each a branching polyline from the centre. */
 const SPICULES: Pt[][] = Array.from({ length: 14 }, (_, i) => {
   const a = (i / 14) * Math.PI * 2 + rand(i * 3.3) * 0.3;
@@ -248,12 +259,44 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
         </mask>
       </defs>
 
-      {/* ——— Membranous: between the skin and the brain ——— */}
-      <rect x={214} y={136} width={262} height={22} rx={8} fill={Q.skin} opacity={0.55} />
-      <rect x={214} y={480} width={262} height={44} rx={14} fill={Q.neural} opacity={0.45} />
-      <path d={smoothPath(MEMBRANE, true, 0.3)} fill="#2a1d18" stroke="#5a3a28" strokeWidth={1.2} />
+      {/* ——— Membranous: a piece of the vault, between the skin and the brain ——— */}
+      <defs>
+        <linearGradient id={`w8-oss-fadeg${cid}`} gradientUnits="userSpaceOnUse" x1={VX0} y1={0} x2={VX1} y2={0}>
+          <stop offset="0" stopColor="#fff" stopOpacity={0} />
+          <stop offset="0.12" stopColor="#fff" />
+          <stop offset="0.88" stopColor="#fff" />
+          <stop offset="1" stopColor="#fff" stopOpacity={0} />
+        </linearGradient>
+        <mask id={`w8-oss-fade${cid}`} maskUnits="userSpaceOnUse" x={0} y={0} width={1000} height={640}>
+          <rect x={VX0} y={100} width={VX1 - VX0} height={500} fill={`url(#w8-oss-fadeg${cid})`} />
+        </mask>
+        <linearGradient id={`w8-oss-brain${cid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#5b7fe8" />
+          <stop offset="1" stopColor="#253c98" />
+        </linearGradient>
+      </defs>
+      {/* Where this piece is: the top of the head (its vault glows). */}
+      <Part id="buru-ganga" quiet>
+        <g transform="translate(96 118)">
+          <path d="M-40,22 C-48,-6 -34,-38 0,-44 C34,-48 52,-22 50,6 C48,30 34,44 14,48 C4,50 -6,48 -12,40 C-20,44 -30,40 -32,34 C-38,32 -40,28 -40,22Z" fill="#e6c2a6" stroke="#9a7056" strokeWidth={1.4} />
+          <circle cx={-26} cy={14} r={4} fill="#2b1d22" opacity={0.75} />
+          <path d="M-46,4 C-40,-30 -10,-48 18,-44 C40,-40 52,-20 52,2" fill="none" stroke={Q.centre} strokeWidth={9} strokeLinecap="round" opacity={0.35} />
+          <path d="M-46,4 C-40,-30 -10,-48 18,-44 C40,-40 52,-20 52,2" fill="none" stroke="#ffd9a0" strokeWidth={3.4} strokeLinecap="round" />
+        </g>
+      </Part>
+      <g mask={`url(#w8-oss-fade${cid})`}>
+        <Part id="azaleko-ektodermoa" quiet>
+          <path d={smoothPath(SKIN, true, 0.2)} fill="#c99a86" />
+          <path d={smoothPath(layer(140, 147), true, 0.2)} fill={Q.skin} opacity={0.85} />
+        </Part>
+        <Part id="prosentzefaloa" quiet>
+          <path d={smoothPath(BRAIN, true, 0.2)} fill={`url(#w8-oss-brain${cid})`} />
+          <path d={smoothPath(layer(476, 481), true, 0.2)} fill="#a9bdf5" opacity={0.6} />
+        </Part>
+        <path d={smoothPath(MEMBRANE, true, 0.2)} fill="#2a1d18" />
+      </g>
       <Part id="mesenkima">
-        <path d={smoothPath(MEMBRANE, true, 0.3)} fill="url(#w8-mes)" />
+        <path d={smoothPath(MEMBRANE, true, 0.2)} fill="url(#w8-mes)" mask={`url(#w8-oss-fade${cid})`} />
         {L_CELLS.map((c, i) => {
           const d = Math.hypot(c.p[0] - LC[0], c.p[1] - LC[1]);
           // Cells near the centre become osteoblasts; spicules then sweep past the rest.
@@ -346,7 +389,7 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
               cy={f1(c.p[1])}
               rx={f1(CHONDRO[i].r * 1.5 * (1 + 0.9 * c.h))}
               ry={f1(CHONDRO[i].r * 1.2 * (1 + 1.15 * c.h))}
-              fill="none"
+              fill="transparent"
               stroke="#f4f1ff"
               strokeWidth={1.1}
               opacity={c.h}
@@ -386,9 +429,21 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
       </Part>
       {/* The vessel that brings the osteoblasts in, then runs up and down the marrow behind the front. */}
       {vessel > 0.01 && (
-        <g>
-          <path d={BUD} fill="none" stroke="#7a1410" strokeWidth={7} strokeLinecap="round" pathLength={1} strokeDasharray={`${f1(vessel)} 2`} />
-          <path d={BUD} fill="none" stroke={Q.vessel} strokeWidth={4.4} strokeLinecap="round" pathLength={1} strokeDasharray={`${f1(vessel)} 2`} />
+        <Part id="odol-hodiak">
+          {/* It comes from outside the plane: its outer end fades in instead of starting in mid-air. */}
+          <defs>
+            <linearGradient id={`w8-oss-budg${cid}`} gradientUnits="userSpaceOnUse" x1={RX - 150} y1={0} x2={RX - 92} y2={0}>
+              <stop offset="0" stopColor="#fff" stopOpacity={0} />
+              <stop offset="1" stopColor="#fff" />
+            </linearGradient>
+            <mask id={`w8-oss-bud${cid}`} maskUnits="userSpaceOnUse" x={0} y={0} width={1000} height={640}>
+              <rect x={0} y={0} width={1000} height={640} fill={`url(#w8-oss-budg${cid})`} />
+            </mask>
+          </defs>
+          <g mask={`url(#w8-oss-bud${cid})`}>
+            <path d={BUD} fill="none" stroke="#7a1410" strokeWidth={7} strokeLinecap="round" pathLength={1} strokeDasharray={`${f1(vessel)} 2`} />
+            <path d={BUD} fill="none" stroke={Q.vessel} strokeWidth={4.4} strokeLinecap="round" pathLength={1} strokeDasharray={`${f1(vessel)} 2`} />
+          </g>
           {prim > 0.01 &&
             [-1, 1].map((s) => (
               <path
@@ -410,7 +465,7 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
               ))}
             </g>
           )}
-        </g>
+        </Part>
       )}
       <Part id="osteoblastoak" show={prim}>
         {osteo.map((p, i) => (
@@ -418,7 +473,6 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
         ))}
       </Part>
 
-      <path d={smoothPath(MEMBRANE, true, 0.3)} fill="url(#w8-light)" pointerEvents="none" />
 
       <Note x={LX} y={44} size={13}>
         Mintzezko hezurtzapena
@@ -426,11 +480,14 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
       <Note x={RX} y={44} size={13}>
         Hezurtzapen endokondrala
       </Note>
-      <Note x={LX} y={147} size={12.5} tone="dim">
+      <Note x={LX} y={153} size={12.5} tone="dim">
         azala
       </Note>
-      <Note x={LX} y={502} size={12.5} tone="dim">
+      <Note x={LX} y={520} size={12.5} tone="dim">
         entzefaloa
+      </Note>
+      <Note x={96} y={186} size={12} tone="dim">
+        buru-ganga
       </Note>
       <Note x={RX} y={78} size={13} tone="accent" show={vis(t, OSS_T.cartilage + 0.02, OSS_T.centre)}>
         1. fasea: kartilago hialinozko eredua
@@ -461,17 +518,17 @@ export function OssificationTypes({ t, reduced }: SceneProps) {
         Mintzezkoa: buru-gangako hezur lauak · endokondrala: kondrokraneoa, gorputz-adarrak, ornoak
       </Note>
 
-      <Label id="mesenkima" x={190} y={230} ax={L_CELLS[3].p[0]} ay={L_CELLS[3].p[1]} show={1 - 0.7 * spic} />
+      <Label id="mesenkima" x={190} y={230} ax={L_CELLS[3].p[0]} ay={L_CELLS[3].p[1]} />
       <Label id="hezurtzapen-zentroak" text="Hezurtzapen zentroa" x={190} y={318} ax={LC[0] - 20} ay={LC[1]} show={lCentre} />
-      <Label id="osteoblastoak" x={190} y={360} ax={LC[0] - lerp(14, 34, spic) * Math.cos(Math.PI / 9)} ay={LC[1] + 12} show={lCentre} small />
+      <Label id="osteoblastoak" x={190} y={360} ax={LC[0] - lerp(14, 34, spic) * Math.cos(Math.PI / 9) + 2} ay={LC[1] + 9} show={lCentre} small />
       <Label id="hezur-espikulak" x={190} y={420} ax={SPICULES[5][4][0]} ay={SPICULES[5][4][1]} show={spic} />
 
       <Label id="mesenkima" x={810} y={110} ax={cells[MES_I].p[0]} ay={cells[MES_I].p[1]} show={1 - round} />
-      <Label id="kartilago-eredua" x={776} y={150} ax={RX + halfW(TOP + 60) - 2} ay={TOP + 60} show={matrix} />
+      <Label id="kartilago-eredua" x={776} y={150} ax={RX + halfW(TOP + 60) - 8} ay={TOP + 58} show={matrix} />
       <Label id="kondroblastoak" x={810} y={196} ax={RIM[RIM_I][0]} ay={RIM[RIM_I][1]} show={round * (1 - hyper)} small />
       <Label id="kondrozitoak" x={810} y={236} ax={RX + 14} ay={MID - boneR - 22} show={hyper} small />
       <Label id="hezurtzapen-zentroak" text="Hezur lepokoa" x={810} y={276} ax={RX + halfW(MID + 40) + 2} ay={MID + 40} show={collar} small />
-      <Label id="hezurtzapen-zentroak" text="Zentro primarioa" x={810} y={316} ax={RX + 12} ay={MID + 18} show={prim} />
+      <Label id="hezurtzapen-zentroak" text="Zentro primarioa" x={810} y={316} ax={RX + 9} ay={MID + 13} show={prim} />
       <Label id="osteoblastoak" x={810} y={360} ax={osteo.length ? osteo[osteo.length - 2][0] + 3 : RX} ay={osteo.length ? osteo[osteo.length - 2][1] : MID} show={prim} small />
     </g>
   );

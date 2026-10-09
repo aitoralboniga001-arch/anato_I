@@ -313,6 +313,10 @@ function LateralDrawing({ reach, cells, solid, split, canals, levels, eso, ancho
         <clipPath id={`w7-lat-body${cid}`}>
           <path d={bodyD} />
         </clipPath>
+        {/* Inside the skin: what must not show through the (translucent) surface ectoderm. */}
+        <clipPath id={`w7-lat-in${cid}`}>
+          <path d={smoothPath(skinIn, true, 0.3)} />
+        </clipPath>
         <radialGradient id={`w7-lat-heart${cid}`} cx="38%" cy="30%" r="80%">
           <stop offset="0" stopColor="#f06a7e" />
           <stop offset="0.55" stopColor="#c62d42" />
@@ -334,10 +338,12 @@ function LateralDrawing({ reach, cells, solid, split, canals, levels, eso, ancho
       </defs>
 
       {/* Umbilical cord (behind the body): its connective tissue, the umbilical vessels, the vitelline duct and the allantois. */}
-      <path d={tubeD(CORD, CORD_HW, false)} fill="#cdb9a8" stroke="rgba(60,40,30,0.55)" strokeWidth={1} />
-      <path d={tubeD(CORD, CORD_HW, false)} fill="url(#w7-light)" />
-      <path d={smoothPath(offset(CORD, 13), false, 0.3)} fill="none" stroke={C.artery} strokeWidth={3} opacity={0.75} />
-      <path d={smoothPath(offset(CORD, -14), false, 0.3)} fill="none" stroke={C.vein} strokeWidth={3.6} opacity={0.75} />
+      <Part id="hasierako-zilbor-hestea" quiet>
+        <path d={tubeD(CORD, CORD_HW, false)} fill="#cdb9a8" stroke="rgba(60,40,30,0.55)" strokeWidth={1} />
+        <path d={tubeD(CORD, CORD_HW, false)} fill="url(#w7-light)" />
+        <path d={smoothPath(offset(CORD, 13), false, 0.3)} fill="none" stroke={C.artery} strokeWidth={3} opacity={0.75} />
+        <path d={smoothPath(offset(CORD, -14), false, 0.3)} fill="none" stroke={C.vein} strokeWidth={3.6} opacity={0.75} />
+      </Part>
 
       {/* Body: body wall and mesenchyme. */}
       <Part id="gorputz-paretako-mesodermoa" quiet>
@@ -347,13 +353,20 @@ function LateralDrawing({ reach, cells, solid, split, canals, levels, eso, ancho
 
       {/* The septum's level: a soft band from the ventral wall to the C3–C5 somites. */}
       {levels > 0.01 && (
-        <g clipPath={`url(#w7-lat-body${cid})`} opacity={levels} pointerEvents="none">
+        <g clipPath={`url(#w7-lat-in${cid})`} opacity={levels} pointerEvents="none">
           <path d={poly([[300, 452], [360, 432], SEPTUM_A, [500, 366], SEPTUM_B, [700, 282], [800, 240], [800, 196], [700, 236], [612, 276], [500, 324], [389, 371], [360, 386], [300, 410]])} fill={`url(#w7-lat-level${cid})`} />
         </g>
       )}
 
       {/* Coelom: dark space, tinted as one cavity, then as its two halves (each one spreading from its own centre). */}
-      <path d={coelomD} fill={P.space} />
+      {/* Until the halves have spread over it all, the bare space is still the one coelom. */}
+      {split < 0.999 ? (
+        <Part id="enbrioi-barruko-zeloma">
+          <path d={coelomD} fill={P.space} />
+        </Part>
+      ) : (
+        <path d={coelomD} fill={P.space} pointerEvents="none" />
+      )}
       <Part id="enbrioi-barruko-zeloma" show={1 - split}>
         <path d={coelomD} fill={P.coelom} mask={pour < 0.999 ? `url(#w7-lat-pm${cid})` : undefined} />
       </Part>
@@ -368,7 +381,7 @@ function LateralDrawing({ reach, cells, solid, split, canals, levels, eso, ancho
         </g>
       </Part>
       {/* The lining of the coelom (mesothelium): a fine bright edge. */}
-      <path d={coelomD} fill="none" stroke="rgba(255,200,190,0.35)" strokeWidth={1.4} />
+      <path d={coelomD} fill="none" stroke="rgba(255,200,190,0.35)" strokeWidth={1.4} pointerEvents="none" />
 
       {/* Dorsal mesentery: the abdominal gut hangs from the dorsal wall below the septum. */}
       <Part id="mesenterio-dortsala">
@@ -443,6 +456,17 @@ function LateralDrawing({ reach, cells, solid, split, canals, levels, eso, ancho
       </Part>
       <Part id="alantoidea" quiet>
         <path d={tubeD(ALLANTOIS, ALLANTOIS.map((_, i) => lerp(4.2, 2.6, i / ALLANTOIS.length)))} fill="#e9cf7a" stroke="rgba(90,60,10,0.5)" strokeWidth={0.8} />
+      </Part>
+      {/* The cord's cut end: two arteries, the vein, the vitelline duct and the allantois in cross-section. */}
+      <Part id="hasierako-zilbor-hestea" quiet>
+        <g transform="translate(268 582) rotate(156)">
+          <ellipse rx={8} ry={23} fill="#e6cfc8" stroke="#6a4a44" strokeWidth={1.2} />
+          <circle cy={-17} r={2.8} fill={C.artery} />
+          <circle cy={-7} r={2.6} fill="#e5b84a" />
+          <circle cy={2} r={4} fill={C.vein} />
+          <circle cy={11} r={2} fill="#e9cf7a" />
+          <circle cy={17} r={2.8} fill={C.artery} />
+        </g>
       </Part>
 
       {/* Mesenchyme round the oesophagus: where the septum anchors dorsally. */}
@@ -525,7 +549,7 @@ function LateralDrawing({ reach, cells, solid, split, canals, levels, eso, ancho
       )}
       {/* The septum's two anchors glow while they are the point: the ventral body wall and the oesophageal mesenchyme. */}
       {anchors > 0.01 && (
-        <g fill="none" strokeLinecap="round" pointerEvents="none" opacity={anchors}>
+        <g fill="none" strokeLinecap="round" pointerEvents="none" opacity={anchors} clipPath={`url(#w7-lat-in${cid})`}>
           <path d={smoothPath([SEPTUM_TOP[0], [SEPTUM_A[0] + 2, SEPTUM_A[1]], SEPTUM_BOT[0]], false, 0.3)} stroke="#ffe0b8" strokeWidth={6} opacity={0.35} />
           <path d={smoothPath([SEPTUM_TOP[0], [SEPTUM_A[0] + 2, SEPTUM_A[1]], SEPTUM_BOT[0]], false, 0.3)} stroke="#fff4e0" strokeWidth={1.8} />
           <path d={smoothPath([SEPTUM_TOP[4], SEPTUM_B, SEPTUM_BOT[4]], false, 0.3)} stroke="#ffe0b8" strokeWidth={6} opacity={0.35} />
@@ -534,13 +558,15 @@ function LateralDrawing({ reach, cells, solid, split, canals, levels, eso, ancho
       )}
       {/* Liver bud from the duodenum into the septum (with the plate). */}
       {solid > 0.01 && (
-        <g opacity={solid * 0.9} pointerEvents="none" fill="none" stroke={P.gut} strokeLinecap="round">
+        <Part id="gibela" quiet>
+        <g opacity={solid * 0.9} fill="none" stroke={P.gut} strokeLinecap="round">
           <path d="M606,414 C594,404 578,400 560,400" strokeWidth={5} />
           <path d="M576,401 C568,392 558,388 546,388" strokeWidth={3} />
           <path d="M570,403 C560,412 546,416 532,414" strokeWidth={3} />
           <path d="M548,389 C540,384 532,384 522,388" strokeWidth={2} />
           <path d="M546,414 C538,422 526,426 514,426" strokeWidth={2} />
         </g>
+        </Part>
       )}
 
       {/* The canals: passages left on each side of the oesophagus, dorsal to the septum (beside this plane). */}
@@ -607,7 +633,7 @@ function CanalLoupe({ show, reduced, cid }: { show: number; reduced: boolean; ci
   const septum = 'M-60,10 C-48,-6 -30,-4 -22,4 C-12,14 12,14 22,4 C30,-4 48,-6 60,10 C58,40 34,62 0,64 C-34,62 -58,40 -60,10Z';
   const flowD = (k: number) => `M${k * 34},-10 C${k * 40},-26 ${k * 40},-30 ${k * 34},-34`;
   return (
-    <g opacity={show} pointerEvents="none">
+    <g opacity={show}>
       <defs>
         <clipPath id={`w7-loupe${cid}`}>
           <circle cx={cx} cy={cy} r={LR} />
@@ -617,46 +643,67 @@ function CanalLoupe({ show, reduced, cid }: { show: number; reduced: boolean; ci
           <stop offset="1" stopColor="#7fc8e8" stopOpacity={0.04} />
         </linearGradient>
       </defs>
-      <path d={poly([[sx, sy], t1, t2])} fill={`url(#w7-cone${cid})`} />
-      <circle cx={cx} cy={cy} r={LR + 3} fill="#0b0d12" stroke="#7fc8e8" strokeWidth={2} opacity={0.95} />
+      <path d={poly([[sx, sy], t1, t2])} fill={`url(#w7-cone${cid})`} pointerEvents="none" />
+      <circle cx={cx} cy={cy} r={LR + 3} fill="#0b0d12" stroke="#7fc8e8" strokeWidth={2} opacity={0.95} pointerEvents="none" />
+      {/* Every piece of the small section names itself too: the same parts as the big drawing. */}
       <g clipPath={`url(#w7-loupe${cid})`}>
         <g transform={`translate(${cx} ${cy}) scale(1.08)`}>
-          <path d={wallOut} fill={P.wall} />
-          <path d={wallOut} fill="url(#w7-mesench)" />
+          <Part id="gorputz-pareta" quiet>
+            <path d={wallOut} fill={P.wall} />
+            <path d={wallOut} fill="url(#w7-mesench)" />
+          </Part>
           {/* Pericardial cavity side (cut above the septum): dark coelom between the wall and the septum. */}
-          <path d="M-62,-4 C-62,-36 -34,-54 0,-54 C34,-54 62,-36 62,-4 C62,30 40,56 0,58 C-40,56 -62,30 -62,-4Z" fill={P.space} />
-          <path d="M-62,-4 C-62,-36 -34,-54 0,-54 C34,-54 62,-36 62,-4 C62,30 40,56 0,58 C-40,56 -62,30 -62,-4Z" fill={P.peri} />
+          <Part id="hasierako-perikardio-barrunbea">
+            <path d="M-62,-4 C-62,-36 -34,-54 0,-54 C34,-54 62,-36 62,-4 C62,30 40,56 0,58 C-40,56 -62,30 -62,-4Z" fill={P.space} />
+            <path d="M-62,-4 C-62,-36 -34,-54 0,-54 C34,-54 62,-36 62,-4 C62,30 40,56 0,58 C-40,56 -62,30 -62,-4Z" fill={P.peri} />
+          </Part>
           {/* Dorsal block: neural tube, notochord, aorta and the oesophageal mesenchyme. */}
-          <path d="M-26,-74 C-26,-60 -18,-40 -18,-24 C-18,-6 -10,8 0,8 C10,8 18,-6 18,-24 C18,-40 26,-60 26,-74Z" fill={P.wall} />
-          <path d="M-26,-74 C-26,-60 -18,-40 -18,-24 C-18,-6 -10,8 0,8 C10,8 18,-6 18,-24 C18,-40 26,-60 26,-74Z" fill="url(#w7-mesench)" />
-          <circle cx={0} cy={-62} r={10} fill={C.neural} stroke="rgba(10,16,48,0.7)" />
-          <circle cx={0} cy={-62} r={2.6} fill="#101a3a" />
-          <circle cx={0} cy={-46} r={3} fill={C.notochord} />
-          <circle cx={-6} cy={-36} r={3.6} fill={C.artery} />
-          <circle cx={6} cy={-36} r={3.6} fill={C.artery} />
-          <ellipse cx={0} cy={-10} rx={17} ry={15} fill={P.eso} opacity={0.75} />
-          <circle cx={0} cy={-10} r={6.5} fill={P.gut} />
-          <circle cx={0} cy={-10} r={2.4} fill="#3a2a10" />
+          <Part id="gorputz-pareta" quiet>
+            <path d="M-26,-74 C-26,-60 -18,-40 -18,-24 C-18,-6 -10,8 0,8 C10,8 18,-6 18,-24 C18,-40 26,-60 26,-74Z" fill={P.wall} />
+            <path d="M-26,-74 C-26,-60 -18,-40 -18,-24 C-18,-6 -10,8 0,8 C10,8 18,-6 18,-24 C18,-40 26,-60 26,-74Z" fill="url(#w7-mesench)" />
+          </Part>
+          <Part id="hodi-neurala">
+            <circle cx={0} cy={-62} r={10} fill={C.neural} stroke="rgba(10,16,48,0.7)" />
+            <circle cx={0} cy={-62} r={2.6} fill="#101a3a" />
+          </Part>
+          <Part id="notokorda">
+            <circle cx={0} cy={-46} r={3} fill={C.notochord} />
+          </Part>
+          <Part id="aorta-dortsalak">
+            <circle cx={-6} cy={-36} r={3.6} fill={C.artery} />
+            <circle cx={6} cy={-36} r={3.6} fill={C.artery} />
+          </Part>
+          <Part id="hestegorri-inguruko-mesenkima">
+            <ellipse cx={0} cy={-10} rx={17} ry={15} fill={P.eso} opacity={0.75} />
+          </Part>
+          <Part id="aurreko-hestea">
+            <circle cx={0} cy={-10} r={6.5} fill={P.gut} />
+            <circle cx={0} cy={-10} r={2.4} fill="#3a2a10" />
+          </Part>
           {/* The septum: ventral and lateral on the wall, dorsally on the oesophageal mesenchyme… */}
-          <path d={septum} fill={P.septum} />
-          <path d={septum} fill="url(#w7-mesench)" />
-          <path d={septum} fill="none" stroke={P.septumDeep} strokeWidth={1.2} />
+          <Part id="septum-transversum">
+            <path d={septum} fill={P.septum} />
+            <path d={septum} fill="url(#w7-mesench)" />
+            <path d={septum} fill="none" stroke={P.septumDeep} strokeWidth={1.2} />
+          </Part>
           {/* …leaving the two canals open on each side of the oesophagus. */}
-          {[-1, 1].map((k) => (
-            <g key={k}>
-              <ellipse cx={k * 36} cy={-20} rx={12} ry={15} fill={P.space} />
-              <ellipse cx={k * 36} cy={-20} rx={12} ry={15} fill={P.canal} stroke="#7fc8e8" strokeWidth={1.4} />
-              {!reduced &&
-                [0, 1].map((j) => (
-                  <circle key={j} r={2.2} fill="#c8ecff">
-                    <animateMotion dur="1.6s" repeatCount="indefinite" begin={`${(-j * 0.8).toFixed(1)}s`} path={flowD(k)} />
-                  </circle>
-                ))}
-            </g>
-          ))}
+          <Part id="erreten-perikardioperitonealak">
+            {[-1, 1].map((k) => (
+              <g key={k}>
+                <ellipse cx={k * 36} cy={-20} rx={12} ry={15} fill={P.space} />
+                <ellipse cx={k * 36} cy={-20} rx={12} ry={15} fill={P.canal} stroke="#7fc8e8" strokeWidth={1.4} />
+                {!reduced &&
+                  [0, 1].map((j) => (
+                    <circle key={j} r={2.2} fill="#c8ecff">
+                      <animateMotion dur="1.6s" repeatCount="indefinite" begin={`${(-j * 0.8).toFixed(1)}s`} path={flowD(k)} />
+                    </circle>
+                  ))}
+              </g>
+            ))}
+          </Part>
         </g>
       </g>
-      <circle cx={cx} cy={cy} r={LR + 3} fill="none" stroke="#7fc8e8" strokeWidth={2} />
+      <circle cx={cx} cy={cy} r={LR + 3} fill="none" stroke="#7fc8e8" strokeWidth={2} pointerEvents="none" />
       <Note x={cx} y={cy - LR - 14} size={12.5}>
         zeharkako ebakia septumaren mailan
       </Note>
@@ -733,16 +780,16 @@ export function SeptumLateral({ t, reduced }: SceneProps) {
       </Note>
 
       <Label id="enbrioi-barruko-zeloma" x={236} y={372} ax={386} ay={330} show={1 - split} />
-      <Label id="hasierako-perikardio-barrunbea" x={250} y={214} ax={372} ay={300} show={split} />
+      <Label id="hasierako-perikardio-barrunbea" x={250} y={214} ax={376} ay={300} show={split} />
       <Label id="bihotza" x={236} y={268} ax={452} ay={330} />
       <Label id="septum-transversum" x={236} y={420} ax={404} ay={414} show={seg(t, 0.2, 0.24)} />
-      <Label id="peritoneo-barrunbea" x={236} y={470} ax={446} ay={446} show={split} />
+      <Label id="peritoneo-barrunbea" x={236} y={470} ax={446} ay={452} show={split} />
       <Label id="hodi-onfalomesenterikoa" x={236} y={556} ax={320} ay={548} small />
 
       <Label id="hodi-neurala" x={790} y={80} ax={650} ay={88} />
       <Label id="somitak" x={790} y={132} ax={SOMITES[2]?.p[0] ?? 660} ay={SOMITES[2]?.p[1] ?? 140} small />
       <Label id="aurreko-hestea" x={790} y={186} ax={600} ay={184} />
-      <Label id="hestegorri-inguruko-mesenkima" x={790} y={244} ax={658} ay={262} show={eso} small />
+      <Label id="hestegorri-inguruko-mesenkima" x={766} y={244} ax={658} ay={262} show={eso} small />
       <Label id="erreten-perikardioperitonealak" x={790} y={282} ax={CANAL_MID[0] + 6} ay={CANAL_MID[1] - 6} show={canals} small />
       <Label id="mesenterio-dortsala" x={790} y={372} ax={630} ay={420} small />
       <Label id="erdiko-hestea" x={790} y={404} ax={560} ay={478} />

@@ -50,6 +50,15 @@ export const structures8: StructureDef[] = [
     related: ['mesenkima', 'kondrozitoak', 'kartilago-eredua', 'hezurtzapen-endokondrala'],
   },
   {
+    id: 'odol-hodiak',
+    name: 'Odol hodiak',
+    es: 'Vasos sanguíneos',
+    category: 'mesodermoa',
+    color: '#e04a3a',
+    definition: 'Hezurtzapen endokondralean kartilago ereduan sartzen diren odol hodiak: osteoblastoak ekartzen dituzte, eta kartilagoa hezurrak ordezkatzen du.',
+    related: ['osteoblastoak', 'kartilago-eredua', 'hezurtzapen-zentroak'],
+  },
+  {
     id: 'osteoblastoak',
     name: 'Osteoblastoak',
     es: 'Osteoblastos',
