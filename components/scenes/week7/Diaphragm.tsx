@@ -1,8 +1,9 @@
 'use client';
 
 import { useId } from 'react';
-import { Arrow, Label, Mark, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, Mark, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { Defs7, P, Sheet, f1, offset, poly, resample, sm, spline, vis } from './common';
+import { HEART_C, HEART_SINUS, HEART_VENT, LoopHeart, tubeD } from './Lateral';
 
 /**
  * 7:diafragma-eraketa — apunteen 3. atala eta 3.1en hasiera, 25.–26. orriko irudiak.
@@ -41,7 +42,8 @@ interface Trunk {
 function trunkAt(s: number): Trunk {
   const F = lerp(levelAt(iOf('C4'), 0), levelAt(iOf('T6'), 1), s);
   const B = lerp(levelAt(iOf('C4'), 0), levelAt(iOf('T12'), 1), s);
-  return { s, F, B, heartY: F - lerp(58, 84, s), liverY: F + lerp(34, 62, s), ct: levelAt(0, s) - 40, cb: levelAt(iOf('L2'), s) };
+  // The cavity's top follows the heart down: the neck forms above it as the back grows.
+  return { s, F, B, heartY: F - lerp(44, 33, s), liverY: F + lerp(34, 62, s), ct: lerp(levelAt(0, 0) - 74, levelAt(iOf('C8'), 1) + 4, s), cb: levelAt(iOf('L3'), s) + 4 };
 }
 /** Ventral surface: the heart and liver prominences bulge out of it. */
 const ventralX = (T: Trunk, y: number) =>
@@ -82,8 +84,18 @@ function cameraAt(s: number) {
 function cavityOutline(T: Trunk): Pt[] {
   const { ct, cb } = T;
   const left: Pt[] = [];
-  for (let y = cb - 26; y >= ct + 26; y -= 12) left.push([ventralX(T, y) + 20, y]);
-  return spline([...left, [ventralX(T, ct) + 34, ct + 4], [480, ct - 2], [634, ct + 4], [BACK_X, ct + 34], [BACK_X + 2, (ct + cb) / 2], [BACK_X, cb - 26], [620, cb + 2], [460, cb + 8], [ventralX(T, cb) + 34, cb - 6]], 6, true);
+  for (let y = cb - 34; y >= ct + 34; y -= 12) left.push([ventralX(T, y) + 20, y]);
+  // A rounded sac (no corners): it domes over the heart, its dorsal wall bulges a little, its floor curves.
+  return spline(
+    [
+      ...left,
+      [ventralX(T, ct + 14) + 28, ct + 14], [ventralX(T, ct) + 64, ct], [470, ct + 5], [BACK_X - 40, ct + 24], [BACK_X - 8, ct + 52], [BACK_X, ct + 86],
+      [BACK_X + 5, (ct + cb) / 2],
+      [BACK_X, cb - 60], [BACK_X - 16, cb - 22], [BACK_X - 70, cb - 2], [460, cb + 5], [ventralX(T, cb) + 66, cb], [ventralX(T, cb - 12) + 30, cb - 14],
+    ],
+    6,
+    true,
+  );
 }
 const frontX = (T: Trunk, y: number) => ventralX(T, y) + 8;
 /** Point on the septum: u 0 (ventral wall) → 1 (dorsal wall), v −1 (upper surface) → 1 (lower). The plate domes a little as it descends. */
@@ -91,10 +103,12 @@ function onSlab(T: Trunk, u: number, v: number, h = 15): Pt {
   const x0 = frontX(T, T.F);
   const x = lerp(x0, BACK_X + 8, u);
   const mid = lerp(T.F, T.B, u) - 12 * Math.sin(Math.PI * u) * T.s;
-  return [x, mid + v * h];
+  // Rounded ends: the plate is a thick mesenchymal mass, not a cut bar.
+  const e = Math.max(0, Math.abs(u - 0.5) - 0.45) / 0.05;
+  return [x, mid + v * h * Math.sqrt(Math.max(0, 1 - e * e))];
 }
 function slabPoly(T: Trunk): Pt[] {
-  const us = Array.from({ length: 21 }, (_, i) => i / 20);
+  const us = Array.from({ length: 81 }, (_, i) => i / 80);
   return [...us.map((u) => onSlab(T, u, -1)), ...[...us].reverse().map((u) => onSlab(T, u, 1))];
 }
 
@@ -107,35 +121,19 @@ const CELLS = Array.from({ length: 20 }, (_, i) => {
   return { u, v, born, turn };
 });
 
-/** An embryonic heart (ventricle loop, atrium, outflow, sinus venosus into the septum), centred on c, scale k. */
-function Heart4({ c, k, beating, septumY }: { c: Pt; k: number; beating: boolean; septumY: number }) {
-  const [cx, cy] = c;
-  const sinusEnd = (septumY - cy) / k - 4;
-  const sinus = `M30,4 C40,${f1(sinusEnd * 0.5)} 46,${f1(sinusEnd * 0.8)} 44,${f1(sinusEnd)}`;
-  const outflow = 'M-40,8 C-50,-14 -40,-40 -8,-46 C6,-48 18,-46 26,-42';
-  return (
-    <g transform={`translate(${f1(cx)} ${f1(cy)}) scale(${k.toFixed(3)})`}>
-      <g>
-        {beating && <animateTransform attributeName="transform" type="scale" values="1;1.05;0.985;1" keyTimes="0;0.18;0.45;1" dur="0.9s" repeatCount="indefinite" />}
-        <g stroke={P.heartDeep} strokeWidth={3} fill={P.heartDeep}>
-          <path d={sinus} fill="none" strokeWidth={18} strokeLinecap="round" />
-          <ellipse cx={26} cy={-10} rx={28} ry={19} />
-          <ellipse cx={-14} cy={18} rx={36} ry={23} transform="rotate(14 -14 18)" />
-          <path d={outflow} fill="none" strokeWidth={22} strokeLinecap="round" />
-        </g>
-        <path d={sinus} fill="none" stroke="#a52238" strokeWidth={14} strokeLinecap="round" />
-        <ellipse cx={26} cy={-10} rx={28} ry={19} fill="url(#w7-desc-atrium)" />
-        <path d={outflow} fill="none" stroke="#d23a52" strokeWidth={18} strokeLinecap="round" />
-        <ellipse cx={-14} cy={18} rx={36} ry={23} transform="rotate(14 -14 18)" fill="url(#w7-desc-heart)" />
-        <g stroke="#ef6a80" strokeWidth={1.2} opacity={0.5} strokeLinecap="round">
-          {[-36, -24, -12, 0, 12].map((d) => (
-            <line key={d} x1={d} y1={26 + Math.abs(d + 12) * 0.08} x2={d + 2} y2={36 - Math.abs(d + 12) * 0.12} />
-          ))}
-        </g>
-        <path d="M-30,-6 C-34,-24 -22,-38 0,-40" fill="none" stroke="#ffd0d6" strokeWidth={2} opacity={0.35} strokeLinecap="round" />
-      </g>
-    </g>
-  );
+/**
+ * The same looping heart as in the sagittal section of the coelom, resting on the septum: its ventricle
+ * sits on the plate's upper surface, clear of the ventral wall; it grows as the embryo does.
+ */
+function heartPlace(T: Trunk) {
+  const k = lerp(0.64, 0.8, T.s);
+  const u = 0.36;
+  const x = lerp(frontX(T, T.F), BACK_X + 8, u);
+  const c: Pt = [x, onSlab(T, u, -1)[1] - 56 * k];
+  const at = (p: Pt): Pt => [c[0] + (p[0] - HEART_C[0]) * k, c[1] + (p[1] - HEART_C[1]) * k];
+  const sinus = at(HEART_SINUS);
+  const su = (sinus[0] - frontX(T, T.F)) / (BACK_X + 8 - frontX(T, T.F));
+  return { c, k, at, sinus, sinusIn: onSlab(T, su + 0.02, -0.2), transform: `translate(${f1(c[0])} ${f1(c[1])}) scale(${k.toFixed(3)}) translate(${-HEART_C[0]} ${-HEART_C[1]})` };
 }
 
 export function DiaphragmDescent({ t, reduced }: SceneProps) {
@@ -151,7 +149,7 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
   const cav = cavityOutline(T);
   const sep = slabPoly(T);
   const split: Pt[] = [[0, F], ...Array.from({ length: 11 }, (_, i) => onSlab(T, i / 10, 0)), [1000, B]];
-  const heartC: Pt = [452, T.heartY];
+  const H = heartPlace(T);
   const gapOf = (i: number) => levelAt(i + 1, s) - levelAt(i, s);
   // Spinal nerves C3–C5 leave the cord between the vertebrae, join into the phrenic nerve, which enters the septum.
   const J: Pt = [624, levelAt(iOf('C5'), s) + lerp(30, 42, s)];
@@ -167,13 +165,36 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
   const line = (pts: Pt[]) => `M${pts.map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}`;
   const impulsePath = line([...roots[1], ...trunk.slice(1)]);
   const slabAngle = (Math.atan2(B - F, BACK_X - frontX(T, F)) * 180) / Math.PI;
-  // The oesophagus runs down the dorsal side, through the septum's dorsal part, into the stomach.
-  const esoX = 622;
-  const esoHit: Pt = [esoX, B + 6];
-  const stomach: Pt = [598, B + 40];
-  const liverC: Pt = [lerp(400, 420, s), T.liverY];
-  const esoD = `M${esoX},${f1(headY(s) + 60)} C${esoX + 4},${f1((ct + esoHit[1]) / 2)} ${esoX + 2},${f1(esoHit[1] - 10)} ${stomach[0] + 8},${f1(stomach[1] - 22)}`;
   const hy = headY(s);
+  const liverC: Pt = [lerp(400, 420, s), T.liverY];
+  // The umbilical cord leaves the belly below the liver (the vitelline duct in it, from the midgut loop).
+  const cordY = lerp(levelAt(18.5, 0), levelAt(iOf('L2'), 1), s);
+  const cordX = ventralX(T, cordY);
+  const CORD = spline([[cordX + 34, cordY - 2], [cordX - 8, cordY + 2], [cordX - 44, cordY + 14], [cordX - 74, cordY + 32]], 8);
+  const cordEnd = CORD[CORD.length - 1];
+  // The gut tube as in the sagittal section: the oesophagus down the dorsal side through the septum's dorsal
+  // part, the stomach under it, then the midgut hanging from the dorsal mesentery, looping to the yolk stalk.
+  const esoX = 622;
+  const stomach: Pt = [BACK_X - 28, B + 26];
+  const ESO = spline([[esoX, hy + 76], [esoX + 3, (hy + 76 + B) / 2], [esoX - 1, B - 16], [stomach[0] + 18, stomach[1] - 16]], 10);
+  const apex: Pt = [cordX + 44, cordY - 2];
+  // Below the stomach the duodenum runs down near the dorsal wall; the midgut is a hairpin loop pointing
+  // ventrally at the yolk stalk (cranial limb above, caudal limb below), then the hindgut leaves caudally.
+  const up = Math.max(stomach[1] + 6, cordY - 30);
+  const down = cordY + 16;
+  const GUT = spline(
+    [
+      [stomach[0] - 6, stomach[1] + 18], [BACK_X - 50, up - 4], [lerp(BACK_X - 50, apex[0], 0.5), up + 2], [apex[0] + 22, apex[1] - 12], apex,
+      [apex[0] + 22, down - 4], [lerp(BACK_X - 50, apex[0], 0.5), down + 2], [BACK_X - 44, down + 4], [BACK_X - 24, cb - 8], [BACK_X + 12, cb + 30],
+    ],
+    10,
+  );
+  const gutD = tubeD(GUT, GUT.map(() => 6.5));
+  const gutLumen = tubeD(GUT, GUT.map(() => 2.4));
+  // Dorsal mesentery: from the gut below the stomach to the dorsal wall.
+  const gutIn = GUT.filter((q) => q[1] < cb);
+  const mesD = smoothPath([...gutIn, [BACK_X + 6, gutIn[gutIn.length - 1][1]], [BACK_X + 6, stomach[1] + 10]], true, 0.3);
+  const ductD = smoothPath(spline([apex, [cordX + 14, cordY], [cordX - 28, cordY + 9], [cordEnd[0] + 6, cordEnd[1] - 3]], 8), false, 0.3);
   // Brain: a thick tube along the inside of the head, continuous with the spinal cord.
   const brainD = smoothPath(
     BRAIN.map(([x, dy]) => [x, hy + 128 + dy] as Pt),
@@ -186,14 +207,10 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
   const A = cam.at;
   const c1 = levelAt(0, s);
   const l3 = levelAt(iOf('L3'), s);
-  // The umbilical cord leaves the belly below the liver; the limb buds lie on the near flank, opposite their levels.
-  const cordY = lerp(levelAt(iOf('T10'), s), levelAt(iOf('L1'), s), 0.5);
-  const cordX = ventralX(T, cordY);
-  const cordD = `M${f1(cordX + 30)},${f1(cordY - 4)} C${f1(cordX - 10)},${f1(cordY - 2)} ${f1(cordX - 40)},${f1(cordY + 10)} ${f1(cordX - 70)},${f1(cordY + 30)}`;
-  const cordEnd: Pt = [cordX - 70, cordY + 30];
   const eye: Pt = [470, c1 - 128];
   const vertebrae = [...LEVELS.map((l, i) => ({ l, i })), ...TAIL_LEVELS.map((i) => ({ l: '', i }))];
   const KEY = ['C3', 'C4', 'C5', 'T6', 'T12'];
+  const neuralY = Math.min(Y(levelAt(iOf('T11'), s)), Y(stomach[1]) + lerp(104, 4, s) - 30);
 
   return (
     <g>
@@ -206,15 +223,6 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
         <clipPath id={`w7-desc-dn${cid}`}>
           <path d={poly([...split, [1000, 640], [0, 640]])} />
         </clipPath>
-        <radialGradient id="w7-desc-heart" cx="35%" cy="30%" r="80%">
-          <stop offset="0" stopColor="#f06a7e" />
-          <stop offset="0.6" stopColor="#c62d42" />
-          <stop offset="1" stopColor="#7d1527" />
-        </radialGradient>
-        <radialGradient id="w7-desc-atrium" cx="40%" cy="30%" r="80%">
-          <stop offset="0" stopColor="#d9546a" />
-          <stop offset="1" stopColor="#6e1222" />
-        </radialGradient>
         <radialGradient id={`w7-desc-liver${cid}`} cx="40%" cy="35%" r="75%">
           <stop offset="0" stopColor="#b2524a" />
           <stop offset="1" stopColor="#6d2622" />
@@ -232,15 +240,23 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
       </defs>
 
       <g transform={cam.transform}>
-        {/* The umbilical cord, behind the body wall it leaves; its cut end shows the vessels. */}
+        {/* The umbilical cord (as in the sagittal section), behind the body wall it leaves: vessels along it, the cut end. */}
         <Part id="hasierako-zilbor-hestea" quiet>
-          <path d={cordD} fill="none" stroke="#3a2230" strokeWidth={38} strokeLinecap="round" />
-          <path d={cordD} fill="none" stroke="#9a6f7c" strokeWidth={34} strokeLinecap="round" />
-          <path d={cordD} fill="none" stroke="#c49aa4" strokeWidth={14} strokeLinecap="round" opacity={0.5} transform="translate(-3 -6)" />
-          <ellipse cx={f1(cordEnd[0])} cy={f1(cordEnd[1])} rx={13} ry={17} transform={`rotate(-34 ${f1(cordEnd[0])} ${f1(cordEnd[1])})`} fill="#e3c4c6" stroke="#5a3442" strokeWidth={1.4} />
-          <circle cx={f1(cordEnd[0] - 3)} cy={f1(cordEnd[1] - 6)} r={4.6} fill={P.ivc} />
-          <circle cx={f1(cordEnd[0] - 1)} cy={f1(cordEnd[1] + 6)} r={3} fill={P.aorta} />
-          <circle cx={f1(cordEnd[0] + 6)} cy={f1(cordEnd[1] + 2)} r={3} fill={P.aorta} />
+          <path d={tubeD(CORD, CORD.map(() => 17), false)} fill="#cdb9a8" stroke="rgba(60,40,30,0.55)" strokeWidth={1} />
+          <path d={tubeD(CORD, CORD.map(() => 17), false)} fill="url(#w7-light)" />
+          <path d={smoothPath(offset(CORD, 9), false, 0.3)} fill="none" stroke={C.artery} strokeWidth={2.6} opacity={0.75} />
+          <path d={smoothPath(offset(CORD, -10), false, 0.3)} fill="none" stroke={C.vein} strokeWidth={3} opacity={0.75} />
+          <g transform={`translate(${f1(cordEnd[0])} ${f1(cordEnd[1])}) rotate(${f1((Math.atan2(cordEnd[1] - CORD[CORD.length - 2][1], cordEnd[0] - CORD[CORD.length - 2][0]) * 180) / Math.PI)})`}>
+            <ellipse rx={6} ry={17} fill="#e6cfc8" stroke="#6a4a44" strokeWidth={1.2} />
+            <circle cy={-11} r={2.4} fill={C.artery} />
+            <circle cy={-3} r={2.2} fill="#e5b84a" />
+            <circle cy={5} r={3.2} fill={C.vein} />
+            <circle cy={12} r={2.4} fill={C.artery} />
+          </g>
+        </Part>
+        <Part id="hodi-onfalomesenterikoa" quiet>
+          <path d={ductD} fill="none" stroke="rgba(90,60,10,0.6)" strokeWidth={5.6} strokeLinecap="round" />
+          <path d={ductD} fill="none" stroke="#e5b84a" strokeWidth={4} strokeLinecap="round" />
         </Part>
 
         {/* Body: body wall, skin. */}
@@ -286,13 +302,23 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
         </Part>
         <path d={smoothPath(cav, true, 0.3)} fill="none" stroke="rgba(255,200,190,0.3)" strokeWidth={1.3} pointerEvents="none" />
 
-        {/* Oesophagus → stomach (dorsal), and the liver growing in the septum's ventral mesenchyme. */}
+        {/* The gut tube (endoderm wall, lumen): the oesophagus, the stomach, the midgut hung from the dorsal mesentery. */}
+        <Part id="mesenterio-dortsala" quiet>
+          <path d={mesD} fill="#c9707a" opacity={0.22} />
+          <path d={mesD} fill="url(#w7-mesench)" opacity={0.6} />
+        </Part>
+        <Part id="erdiko-hestea" quiet>
+          <path d={gutD} fill={P.gut} stroke="rgba(90,60,10,0.6)" strokeWidth={1} />
+          <path d={gutLumen} fill="#3a2a10" />
+        </Part>
         <Part id="hestegorria">
-          <path d={esoD} fill="none" stroke="#6a4c16" strokeWidth={12} strokeLinecap="round" />
-          <path d={esoD} fill="none" stroke="#d9ab3c" strokeWidth={8.5} strokeLinecap="round" />
+          <path d={tubeD(ESO, ESO.map(() => 5.5))} fill={P.gut} stroke="rgba(90,60,10,0.6)" strokeWidth={1} />
+          <path d={tubeD(ESO, ESO.map(() => 2))} fill="#3a2a10" />
         </Part>
         <Part id="urdaila">
-          <ellipse cx={stomach[0]} cy={stomach[1]} rx={22} ry={30} transform={`rotate(-14 ${stomach[0]} ${f1(stomach[1])})`} fill={P.gut} stroke="#7a5a1c" strokeWidth={2} />
+          <ellipse cx={f1(stomach[0])} cy={f1(stomach[1])} rx={17} ry={23} transform={`rotate(-24 ${f1(stomach[0])} ${f1(stomach[1])})`} fill={P.gut} stroke="rgba(90,60,10,0.7)" strokeWidth={1.2} />
+          <ellipse cx={f1(stomach[0])} cy={f1(stomach[1])} rx={11} ry={17} transform={`rotate(-24 ${f1(stomach[0])} ${f1(stomach[1])})`} fill="#3a2a10" />
+          <ellipse cx={f1(stomach[0] - 4)} cy={f1(stomach[1] - 8)} rx={6} ry={9} transform={`rotate(-24 ${f1(stomach[0])} ${f1(stomach[1])})`} fill="#fff" opacity={0.12} />
         </Part>
         <Part id="gibela" quiet>
           <ellipse cx={liverC[0]} cy={liverC[1]} rx={lerp(56, 104, s)} ry={lerp(20, 40, s)} fill={`url(#w7-desc-liver${cid})`} stroke="#4d1714" strokeWidth={1.4} />
@@ -334,7 +360,12 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
         </Part>
 
         <Part id="bihotza">
-          <Heart4 c={heartC} k={lerp(0.78, 1.04, s)} beating={!reduced} septumY={onSlab(T, 0.42, -1)[1]} />
+          {/* The sinus venosus runs on into the septum (the veins reach the heart through it). */}
+          <path d={`M${f1(H.sinus[0])},${f1(H.sinus[1])} L${f1(H.sinusIn[0])},${f1(H.sinusIn[1])}`} stroke={P.heartDeep} strokeWidth={f1(20 * H.k)} strokeLinecap="round" />
+          <path d={`M${f1(H.sinus[0])},${f1(H.sinus[1])} L${f1(H.sinusIn[0])},${f1(H.sinusIn[1])}`} stroke="#a52238" strokeWidth={f1(15 * H.k)} strokeLinecap="round" />
+          <g transform={H.transform}>
+            <LoopHeart beating={!reduced} />
+          </g>
         </Part>
 
         {/* The septum transversum: mesenchyme in which the muscle cells differentiate. */}
@@ -436,15 +467,16 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
         Atzea gehiago hazten da: septuma aurrean T6, atzean T12 mailara; nerbio frenikoa luzatzen da
       </Note>
 
-      <Label id="hasierako-perikardio-barrunbea" x={226} y={Math.max(60, Y(Math.min(ct + 20, T.heartY - 40)))} ax={X(ventralX(T, ct + 34) + 30)} ay={Y(ct + 34)} small />
-      <Label id="bihotza" x={190} y={Y(T.heartY - 6)} ax={X(heartC[0] - 36)} ay={Y(heartC[1] + 6)} small />
+      <Label id="hasierako-perikardio-barrunbea" x={226} y={Math.min(288, Math.max(60, Y(Math.min(ct + 20, T.heartY - 40))))} ax={X(ventralX(T, ct + 34) + 30)} ay={Y(ct + 34)} small />
+      <Label id="bihotza" x={190} y={Math.min(Y(H.at(HEART_VENT)[1]) - 10, Y(F) - 36)} ax={X(H.at(HEART_VENT)[0])} ay={Y(H.at(HEART_VENT)[1])} small />
       <Label id="septum-transversum" x={190} y={Y(F + 2)} ax={X(frontX(T, F) + 14)} ay={Y(F)} />
       <Label id="mioblastoak" x={190} y={Y(F) + 68} ax={X(onSlab(T, CELLS[1].u, CELLS[1].v * 0.75)[0] - 14)} ay={Y(onSlab(T, CELLS[1].u, CELLS[1].v * 0.75)[1] + 2)} show={mb * (1 - late)} />
       <Label id="miozitoak" x={190} y={Y(F) + lerp(100, 42, s)} ax={X(onSlab(T, CELLS[0].u, CELLS[0].v * 0.75)[0])} ay={Y(onSlab(T, CELLS[0].u, CELLS[0].v * 0.75)[1])} show={mz} />
       <Label id="peritoneo-barrunbea" x={190} y={Math.min(570, Y(cb - 16))} ax={X(ventralX(T, cb - 16) + 34)} ay={Y(cb - 16)} small />
-      <Label id="hestegorria" x={810} y={Math.max(70, Y(hy + 120))} ax={X(esoX + 5)} ay={Y(hy + 120)} small />
-      <Label id="urdaila" x={810} y={Y(stomach[1]) + lerp(60, 4, s)} ax={X(stomach[0] + 20)} ay={Y(stomach[1] + 4)} small />
-      <Label id="hodi-neurala" x={810} y={Y(levelAt(iOf('T9'), s))} ax={X(CORD_X + 9)} ay={Y(levelAt(iOf('T9'), s))} small />
+      <Label id="hestegorria" x={810} y={Math.max(70, Y(hy + 120))} ax={X(esoX + 2)} ay={Y(hy + 120)} small />
+      <Label id="urdaila" x={810} y={Y(stomach[1]) + lerp(104, 4, s)} ax={X(stomach[0] + 8)} ay={Y(stomach[1] + 2)} small />
+      {/* The cord runs the whole column: its name points straight across, clear of the stomach's line. */}
+      <Label id="hodi-neurala" x={810} y={neuralY} ax={X(CORD_X + 9)} ay={neuralY} small />
       <Label id="lepoko-nerbio-espinalak" x={810} y={290} ax={X(668)} ay={Y(levelAt(iOf('C4'), s) + gapOf(iOf('C4')) / 2 + 1)} show={n > 0.01 ? 1 : 0} />
       <Label id="nerbio-frenikoa" x={810} y={356} ax={X(along(trunk, 0.6)[0])} ay={Y(along(trunk, 0.6)[1])} show={seg(n, 0.6, 1)} />
       <Label id="ornoak" x={810} y={Math.min(596, Y(l3) + 36)} ax={X(VERT_X + 17)} ay={Y(l3)} small />
@@ -514,10 +546,6 @@ export function DiaphragmSection({ t, reduced }: SceneProps) {
           <stop offset="0.7" stopColor="#0d1824" stopOpacity={0.55} />
           <stop offset="1" stopColor="#7fc8e8" stopOpacity={0.25} />
         </radialGradient>
-        <radialGradient id={`w7-dia-lung${cid}`} cx="0.45" cy="0.4" r="0.6">
-          <stop offset="0" stopColor="#f6b6c4" stopOpacity={0.55} />
-          <stop offset="1" stopColor="#f6b6c4" stopOpacity={0} />
-        </radialGradient>
         <radialGradient id={`w7-dia-dome${cid}`} cx="0.5" cy="0.3" r="0.75">
           <stop offset="0" stopColor="#fff" stopOpacity={0.22} />
           <stop offset="0.6" stopColor="#fff" stopOpacity={0} />
@@ -557,9 +585,14 @@ export function DiaphragmSection({ t, reduced }: SceneProps) {
       </Part>
 
       {/* Open cavity between the septum and the mesentery: the canals' way through until the membranes fill it. */}
-      <Part id="erreten-perikardioperitonealak">
-        <path d={poly(CAV_X)} fill={P.space} />
-      </Part>
+      {/* Once the membranes have closed them there are no canals: the space under the membranes is no longer one. */}
+      {canalsOpen > 0.5 ? (
+        <Part id="erreten-perikardioperitonealak">
+          <path d={poly(CAV_X)} fill={P.space} />
+        </Part>
+      ) : (
+        <path d={poly(CAV_X)} fill={P.space} pointerEvents="none" />
+      )}
       <clipPath id="w7-dia-cav">
         <path d={poly(CAV_X)} />
       </clipPath>
@@ -580,9 +613,8 @@ export function DiaphragmSection({ t, reduced }: SceneProps) {
             <g clipPath={`url(#w7-dia-open${cid})`}>
               <path d={smoothPath(pts, true, 0.3)} fill={P.space} />
               <path d={smoothPath(pts, true, 0.3)} fill={P.canal} />
-              {/* Looking up the open canal: a deep passage, the lung bud glimpsed in the cavity above. */}
+              {/* Looking up the open canal: a deep passage towards the cavity above. */}
               <path d={smoothPath(pts, true, 0.3)} fill={`url(#w7-dia-hole${cid})`} />
-              <ellipse cx={i ? 1000 - 330 : 330} cy={262} rx={58} ry={46} fill={`url(#w7-dia-lung${cid})`} />
             </g>
           </g>
         ))}
@@ -667,7 +699,7 @@ export function DiaphragmSection({ t, reduced }: SceneProps) {
       <Label id="erreten-perikardioperitonealak" x={226} y={300} ax={Math.max(CANAL_MID[0], front + 24)} ay={lerp(CANAL_MID[1], FOCUS_L[1] - 30, c)} show={canalsOpen} small />
       <Label id="miozitoak" x={190} y={352} ax={366} ay={366} show={migrate} small />
       <Label id="beheko-kaba-zaina" x={190} y={400} ax={IVC_X[0] - 12} ay={IVC_X[1]} small />
-      <Label id="gorputz-paretako-mesodermoa" x={206} y={462} ax={258 + rim * 0.4} ay={462} show={mus} small />
+      <Label id="gorputz-paretako-mesodermoa" x={228} y={470} ax={262 + rim * 0.4} ay={466} show={mus} small />
       <Label id="septum-transversum" x={190} y={540} ax={380} ay={500} />
       <Label id="hodi-neurala" x={810} y={96} ax={524} ay={100} small />
       <Label id="aorta" x={810} y={150} ax={AORTA_X[0] + 12} ay={AORTA_X[1] - 4} small />

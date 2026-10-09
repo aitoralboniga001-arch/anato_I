@@ -24,14 +24,14 @@ import { Defs7, P, Sheet, f1, offset, poly, resample, sm, spline, vis } from './
  *    as the transverse section at the septum).
  */
 
-const cum = (pts: readonly Pt[]) => {
+export const cum = (pts: readonly Pt[]) => {
   const out = [0];
   for (let i = 1; i < pts.length; i++) out.push(out[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
   const L = out[out.length - 1] || 1;
   return out.map((v) => v / L);
 };
 /** Piecewise-linear lookup in a sorted [u, value] table. */
-function table(u: number, tab: readonly [number, number][]) {
+export function table(u: number, tab: readonly [number, number][]) {
   if (u <= tab[0][0]) return tab[0][1];
   for (let i = 1; i < tab.length; i++)
     if (u <= tab[i][0]) {
@@ -67,7 +67,7 @@ function tubePts(pts: readonly Pt[], hw: readonly number[], caps = true): Pt[] {
   const start = cap(pts[0], pts[1], hw[0], b[0]);
   return [...a, ...end, ...b.reverse(), ...start];
 }
-const tubeD = (pts: readonly Pt[], hw: readonly number[], caps = true) => smoothPath(tubePts(pts, hw, caps), true, 0.3);
+export const tubeD = (pts: readonly Pt[], hw: readonly number[], caps = true) => smoothPath(tubePts(pts, hw, caps), true, 0.3);
 
 function inPoly(p: Pt, pts: readonly Pt[]) {
   let inside = false;
@@ -147,9 +147,92 @@ const HEART = spline([[606, 334], [588, 312], [562, 294], [532, 290], [506, 306]
 const HEART_U = cum(HEART);
 const HEART_HW = HEART_U.map((u) => table(u, [[0, 9], [0.12, 12], [0.22, 15], [0.32, 14], [0.4, 11], [0.5, 16], [0.6, 18], [0.7, 16], [0.8, 13], [0.9, 9], [1, 11]]));
 const HEART_C: Pt = [500, 312];
+/**
+ * The head fold (week 4) swung the heart ~180° round the oropharyngeal membrane (the stomodeum): it lay
+ * cranial to the membrane in the flat disc and ends ventral to the foregut, in the cranial coelom.
+ */
+const FOLD_PIVOT: Pt = [418, 252];
+/** Where the heart's centre was before the fold, and the arc it travelled (outside the face, ventrally). */
+const turnAt = (k: number): Pt => {
+  const a = Math.PI * (1 - k);
+  // A little further out at first, so the small heart starts clear of the face.
+  const r = 1 + 0.45 * (1 - k);
+  const dx = (HEART_C[0] - FOLD_PIVOT[0]) * r;
+  const dy = (HEART_C[1] - FOLD_PIVOT[1]) * r;
+  return [FOLD_PIVOT[0] + dx * Math.cos(a) - dy * Math.sin(a), FOLD_PIVOT[1] + dx * Math.sin(a) + dy * Math.cos(a)];
+};
+/** The heart on its way: centred on the arc, turned with it, small at first (the tube was short). */
+const turnTransform = (k: number) => {
+  const c = turnAt(k);
+  return `translate(${f1(c[0])} ${f1(c[1])}) rotate(${f1(180 * (1 - k))}) scale(${lerp(0.42, 1, k).toFixed(3)}) translate(${-HEART_C[0]} ${-HEART_C[1]})`;
+};
+const FOLD_ARC: Pt[] = Array.from({ length: 41 }, (_, i) => turnAt(i / 40));
 /** The chambers swell out of the tube: atrium (dorsal, cranial), ventricle (ventral, caudal). */
 const ATRIUM = { cx: 546, cy: 290, rx: 38, ry: 25, rot: -12 };
 const VENTRICLE = { cx: 444, cy: 338, rx: 44, ry: 28, rot: 14 };
+
+const HEART_D = tubeD(HEART, HEART_HW);
+const HEART_LUMEN_D = tubeD(HEART, HEART_HW.map((h) => Math.max(2, h - 6)));
+const HEART_PATH = smoothPath(HEART, false, 0.3);
+/** Where the sinus venosus enters the septum, and the ventricle's centre (for names), in the heart's own frame. */
+export const HEART_SINUS: Pt = HEART[0];
+export const HEART_VENT: Pt = [VENTRICLE.cx, VENTRICLE.cy];
+export { HEART_C };
+
+/** The looping heart of the sagittal drawings, centred on HEART_C; other views place it with a transform. */
+export function LoopHeart({ beating }: { beating: boolean }) {
+  const cid = useId().replace(/:/g, '');
+  return (
+    <g>
+      <defs>
+        <radialGradient id={`w7-lh-heart${cid}`} cx="38%" cy="30%" r="80%">
+          <stop offset="0" stopColor="#f06a7e" />
+          <stop offset="0.55" stopColor="#c62d42" />
+          <stop offset="1" stopColor="#7d1527" />
+        </radialGradient>
+        <radialGradient id={`w7-lh-atrium${cid}`} cx="40%" cy="30%" r="80%">
+          <stop offset="0" stopColor="#d9546a" />
+          <stop offset="1" stopColor="#6e1222" />
+        </radialGradient>
+      </defs>
+      <g transform={`translate(${HEART_C[0]} ${HEART_C[1]})`}>
+        <g>
+          {beating && <animateTransform attributeName="transform" type="scale" values="1;1.045;0.985;1" keyTimes="0;0.18;0.45;1" dur="0.9s" repeatCount="indefinite" />}
+          <g transform={`translate(${-HEART_C[0]} ${-HEART_C[1]})`}>
+            {/* Outline pass, then fill pass: tube and chambers read as one muscular wall. */}
+            <g fill={P.heartDeep} stroke={P.heartDeep} strokeWidth={3}>
+              <path d={HEART_D} />
+              <ellipse cx={ATRIUM.cx} cy={ATRIUM.cy} rx={ATRIUM.rx} ry={ATRIUM.ry} transform={`rotate(${ATRIUM.rot} ${ATRIUM.cx} ${ATRIUM.cy})`} />
+              <ellipse cx={VENTRICLE.cx} cy={VENTRICLE.cy} rx={VENTRICLE.rx} ry={VENTRICLE.ry} transform={`rotate(${VENTRICLE.rot} ${VENTRICLE.cx} ${VENTRICLE.cy})`} />
+            </g>
+            <ellipse cx={ATRIUM.cx} cy={ATRIUM.cy} rx={ATRIUM.rx} ry={ATRIUM.ry} transform={`rotate(${ATRIUM.rot} ${ATRIUM.cx} ${ATRIUM.cy})`} fill={`url(#w7-lh-atrium${cid})`} />
+            <path d={HEART_D} fill={`url(#w7-lh-heart${cid})`} />
+            <ellipse cx={VENTRICLE.cx} cy={VENTRICLE.cy} rx={VENTRICLE.rx} ry={VENTRICLE.ry} transform={`rotate(${VENTRICLE.rot} ${VENTRICLE.cx} ${VENTRICLE.cy})`} fill={`url(#w7-lh-heart${cid})`} />
+            {/* Lumen (blood) inside each piece. */}
+            <g fill="#4a0a16" opacity={0.5}>
+              <path d={HEART_LUMEN_D} />
+              <ellipse cx={ATRIUM.cx} cy={ATRIUM.cy} rx={ATRIUM.rx - 9} ry={ATRIUM.ry - 8} transform={`rotate(${ATRIUM.rot} ${ATRIUM.cx} ${ATRIUM.cy})`} />
+              <ellipse cx={VENTRICLE.cx} cy={VENTRICLE.cy} rx={VENTRICLE.rx - 11} ry={VENTRICLE.ry - 10} transform={`rotate(${VENTRICLE.rot} ${VENTRICLE.cx} ${VENTRICLE.cy})`} />
+            </g>
+            {/* Trabeculae in the ventricle wall. */}
+            <g stroke="#e8586e" strokeWidth={1.2} opacity={0.45} strokeLinecap="round">
+              {[-28, -16, -4, 8, 20, 30].map((d, k) => (
+                <line key={k} x1={VENTRICLE.cx + d} y1={VENTRICLE.cy + 12 - Math.abs(d) * 0.15} x2={VENTRICLE.cx + d * 1.08} y2={VENTRICLE.cy + 22 - Math.abs(d) * 0.3} />
+              ))}
+            </g>
+            <path d={smoothPath(offset(HEART, (i) => HEART_HW[i] * 0.55), false, 0.3)} fill="none" stroke="#ffd0d6" strokeWidth={1.6} opacity={0.35} strokeLinecap="round" />
+            {beating &&
+              [0, 1, 2, 3, 4].map((k) => (
+                <circle key={k} r={2.6} fill="#ff9aa8" opacity={0.85}>
+                  <animateMotion dur="1.8s" repeatCount="indefinite" begin={`${(-k * 0.36).toFixed(2)}s`} path={HEART_PATH} />
+                </circle>
+              ))}
+          </g>
+        </g>
+      </g>
+    </g>
+  );
+}
 
 // ——— Septum transversum: a thick plate from the ventral body wall to the mesenchyme round the oesophagus. ———
 const SEPTUM_TOP: Pt[] = [[384, 404], [440, 390], [500, 370], [560, 344], [618, 314]];
@@ -266,19 +349,18 @@ interface Look {
   anchors: number;
   /** 0..1 the undivided coelom's tint filling from cranial to caudal (1 = full). */
   pour?: number;
+  /** 0..1 the heart brought in by the head fold (0 = where it lay before the fold, 1 = in place). */
+  heartTurn?: number;
   reduced: boolean;
 }
 
-function LateralDrawing({ reach, cells, solid, split, canals, levels, eso, anchors, pour = 1, reduced }: Look) {
+function LateralDrawing({ reach, cells, solid, split, canals, levels, eso, anchors, pour = 1, heartTurn = 1, reduced }: Look) {
   const cid = useId().replace(/:/g, '');
   const sep = septumPoly(Math.max(0.02, reach));
   const sepD = smoothPath(sep, true, 0.25);
-  const heartD = tubeD(HEART, HEART_HW);
-  const heartLumen = tubeD(HEART, HEART_HW.map((h) => Math.max(2, h - 6)));
   const skinIn = offset(BODY, -8, true);
   const bodyD = smoothPath(BODY, true, 0.3);
   const coelomD = smoothPath(COELOM, true, 0.3);
-  const heartPath = smoothPath(HEART, false, 0.3);
   const beating = !reduced;
   return (
     <g>
@@ -317,15 +399,6 @@ function LateralDrawing({ reach, cells, solid, split, canals, levels, eso, ancho
         <clipPath id={`w7-lat-in${cid}`}>
           <path d={smoothPath(skinIn, true, 0.3)} />
         </clipPath>
-        <radialGradient id={`w7-lat-heart${cid}`} cx="38%" cy="30%" r="80%">
-          <stop offset="0" stopColor="#f06a7e" />
-          <stop offset="0.55" stopColor="#c62d42" />
-          <stop offset="1" stopColor="#7d1527" />
-        </radialGradient>
-        <radialGradient id={`w7-lat-atrium${cid}`} cx="40%" cy="30%" r="80%">
-          <stop offset="0" stopColor="#d9546a" />
-          <stop offset="1" stopColor="#6e1222" />
-        </radialGradient>
         <radialGradient id={`w7-lat-brain${cid}`} cx="40%" cy="30%" r="75%">
           <stop offset="0" stopColor="#5b7fe8" />
           <stop offset="1" stopColor="#2c46a8" />
@@ -485,40 +558,12 @@ function LateralDrawing({ reach, cells, solid, split, canals, levels, eso, ancho
 
       {/* Heart: the looping tube in the cranial coelom, beating; blood runs from the sinus venosus to the aortic sac. */}
       <Part id="bihotza">
-        <g transform={`translate(${HEART_C[0]} ${HEART_C[1]})`}>
-          <g>
-            {beating && <animateTransform attributeName="transform" type="scale" values="1;1.045;0.985;1" keyTimes="0;0.18;0.45;1" dur="0.9s" repeatCount="indefinite" />}
-            <g transform={`translate(${-HEART_C[0]} ${-HEART_C[1]})`}>
-              {/* Outline pass, then fill pass: tube and chambers read as one muscular wall. */}
-              <g fill={P.heartDeep} stroke={P.heartDeep} strokeWidth={3}>
-                <path d={heartD} />
-                <ellipse cx={ATRIUM.cx} cy={ATRIUM.cy} rx={ATRIUM.rx} ry={ATRIUM.ry} transform={`rotate(${ATRIUM.rot} ${ATRIUM.cx} ${ATRIUM.cy})`} />
-                <ellipse cx={VENTRICLE.cx} cy={VENTRICLE.cy} rx={VENTRICLE.rx} ry={VENTRICLE.ry} transform={`rotate(${VENTRICLE.rot} ${VENTRICLE.cx} ${VENTRICLE.cy})`} />
-              </g>
-              <ellipse cx={ATRIUM.cx} cy={ATRIUM.cy} rx={ATRIUM.rx} ry={ATRIUM.ry} transform={`rotate(${ATRIUM.rot} ${ATRIUM.cx} ${ATRIUM.cy})`} fill={`url(#w7-lat-atrium${cid})`} />
-              <path d={heartD} fill={`url(#w7-lat-heart${cid})`} />
-              <ellipse cx={VENTRICLE.cx} cy={VENTRICLE.cy} rx={VENTRICLE.rx} ry={VENTRICLE.ry} transform={`rotate(${VENTRICLE.rot} ${VENTRICLE.cx} ${VENTRICLE.cy})`} fill={`url(#w7-lat-heart${cid})`} />
-              {/* Lumen (blood) inside each piece. */}
-              <g fill="#4a0a16" opacity={0.5}>
-                <path d={heartLumen} />
-                <ellipse cx={ATRIUM.cx} cy={ATRIUM.cy} rx={ATRIUM.rx - 9} ry={ATRIUM.ry - 8} transform={`rotate(${ATRIUM.rot} ${ATRIUM.cx} ${ATRIUM.cy})`} />
-                <ellipse cx={VENTRICLE.cx} cy={VENTRICLE.cy} rx={VENTRICLE.rx - 11} ry={VENTRICLE.ry - 10} transform={`rotate(${VENTRICLE.rot} ${VENTRICLE.cx} ${VENTRICLE.cy})`} />
-              </g>
-              {/* Trabeculae in the ventricle wall. */}
-              <g stroke="#e8586e" strokeWidth={1.2} opacity={0.45} strokeLinecap="round">
-                {[-28, -16, -4, 8, 20, 30].map((d, k) => (
-                  <line key={k} x1={VENTRICLE.cx + d} y1={VENTRICLE.cy + 12 - Math.abs(d) * 0.15} x2={VENTRICLE.cx + d * 1.08} y2={VENTRICLE.cy + 22 - Math.abs(d) * 0.3} />
-                ))}
-              </g>
-              <path d={smoothPath(offset(HEART, (i) => HEART_HW[i] * 0.55), false, 0.3)} fill="none" stroke="#ffd0d6" strokeWidth={1.6} opacity={0.35} strokeLinecap="round" />
-              {beating &&
-                [0, 1, 2, 3, 4].map((k) => (
-                  <circle key={k} r={2.6} fill="#ff9aa8" opacity={0.85}>
-                    <animateMotion dur="1.8s" repeatCount="indefinite" begin={`${(-k * 0.36).toFixed(2)}s`} path={heartPath} />
-                  </circle>
-                ))}
-            </g>
-          </g>
+        {/* Swung in by the head fold: turned round the stomodeum, a ghost until it settles in place. */}
+        <g
+          opacity={lerp(0.55, 1, sm(heartTurn))}
+          transform={heartTurn < 0.999 ? turnTransform(sm(heartTurn)) : undefined}
+        >
+          <LoopHeart beating={beating} />
         </g>
       </Part>
 
@@ -711,34 +756,62 @@ function CanalLoupe({ show, reduced, cid }: { show: number; reduced: boolean; ci
   );
 }
 
-/** 7:zeloma:sagitala — the coelom runs inside the whole body, from the future thorax to the future abdomen. */
+/**
+ * 7:zeloma:sagitala — shown from the stage's last two steps:
+ *  - .86 where the heart in the cranial coelom came from: the head fold swung it in from in front of the
+ *    head (a small dot marks where it lay, the arc the way it went: the topic-4 convention);
+ *  - .93 the coelom is one cavity, from the future thorax (round the heart) to the future abdomen.
+ */
 export function CoelomExtent({ t, reduced }: SceneProps) {
-  // The view is shown from the stage's last step (.86): its own small animation runs there.
-  const sweep = t < 0.84 ? 1 : seg(t, 0.87, 0.95);
+  const late = t >= 0.84;
+  const turn = late ? seg(t, 0.87, 0.915) : 1;
+  const trail = late ? vis(t, 0.862, 0.93, 0.012) : 0;
+  const sweep = late ? seg(t, 0.94, 0.985) : 1;
+  const one = late ? seg(t, 0.93, 0.945) : 1;
+  const start = FOLD_ARC[0];
+  const head = turnAt(sm(turn));
+  const done = FOLD_ARC.filter((_, i) => i / 40 <= sm(turn) + 1e-6);
   return (
     <g>
-      <LateralDrawing reach={0} cells={0} solid={0} split={0} canals={0} levels={0} eso={0} anchors={0} pour={t < 0.84 ? 1 : seg(t, 0.865, 0.94)} reduced={reduced} />
+      <LateralDrawing reach={0} cells={0} solid={0} split={0} canals={0} levels={0} eso={0} anchors={0} pour={late ? seg(t, 0.935, 0.975) : 1} heartTurn={turn} reduced={reduced} />
+      {/* The head fold's path for the heart: from in front of the head round the face to the cranial coelom. */}
+      {trail > 0.01 && (
+        <g opacity={trail} pointerEvents="none">
+          <path d={smoothPath(FOLD_ARC, false, 0.3)} fill="none" stroke="#ffd29a" strokeWidth={1.6} strokeDasharray="3 6" opacity={0.5} />
+          {done.length > 1 && <path d={smoothPath([...done, head], false, 0.3)} fill="none" stroke="#ffd29a" strokeWidth={3} strokeLinecap="round" />}
+          <circle cx={f1(start[0])} cy={f1(start[1])} r={6} fill="#0f0f11" stroke="#ffd29a" strokeWidth={2.2} />
+          <circle cx={f1(head[0])} cy={f1(head[1])} r={4.5} fill="#ffd29a" />
+        </g>
+      )}
+      <Note x={start[0] - 6} y={start[1] - 40} size={12.5} tone="accent" show={trail}>
+        hasieran (3. astea)
+      </Note>
+      <Note x={500} y={616} tone="accent" show={late ? vis(t, 0.862, 0.93, 0.012) : 0}>
+        Buruaren tolespenak (4. astea) bihotza buruaren aurretik hona ekarri zuen: aurreko hestearen aurrera
+      </Note>
       {/* The plane of the transverse view (midgut level, at the yolk stalk). */}
-      <path d="M392,456L690,456" stroke="#0f0f11" strokeWidth={4.4} strokeLinecap="round" opacity={0.8} />
-      <path d="M392,456L690,456" stroke="#ffb86b" strokeWidth={2} strokeLinecap="round" opacity={0.85} />
-      <Note x={760} y={580} size={13}>
+      <g opacity={one} pointerEvents="none">
+        <path d="M392,456L690,456" stroke="#0f0f11" strokeWidth={4.4} strokeLinecap="round" opacity={0.8} />
+        <path d="M392,456L690,456" stroke="#ffb86b" strokeWidth={2} strokeLinecap="round" opacity={0.85} />
+      </g>
+      <Note x={760} y={580} size={13} show={one}>
         marra laranja: zeharkako ebakiaren maila
       </Note>
-      {/* The heart was not in the transverse cut: say what it is the moment this view opens. */}
-      <Note x={500} y={616} tone="accent" show={t < 0.84 ? 1 : seg(t, 0.865, 0.89)}>
-        Albotik: bihotza zelomaren goiko aldean dago, geroko toraxean
+      <Note x={500} y={616} tone="accent" show={one}>
+        Barrunbe bakarra: geroko toraxetik (bihotza) geroko abdomenera (hestea)
       </Note>
       <Arrow from={[392, 392]} to={[lerp(392, 396, sweep), lerp(392, 296, sweep)]} color="#c4a8ff" width={2.6} show={sweep > 0.05 ? 1 : 0} bend={-0.06} />
       <Arrow from={[420, 432]} to={[lerp(420, 560, sweep), lerp(432, 494, sweep)]} color="#c4a8ff" width={2.6} show={sweep > 0.05 ? 1 : 0} bend={0.1} />
-      <Note x={292} y={318} tone="accent">
+      <Note x={292} y={318} tone="accent" show={one}>
         geroko toraxa
       </Note>
-      <Note x={296} y={452} tone="accent">
+      <Note x={296} y={452} tone="accent" show={one}>
         geroko abdomena
       </Note>
 
       <Label id="enbrioi-barruko-zeloma" x={236} y={372} ax={386} ay={330} />
-      <Label id="bihotza" x={236} y={262} ax={452} ay={330} />
+      {/* On its way the name points at the heart's middle; in place, at the ventricle as elsewhere. */}
+      <Label id="bihotza" x={236} y={262} ax={lerp(head[0], 452, sm(turn) ** 3)} ay={lerp(head[1], 330, sm(turn) ** 3)} />
       <Label id="hodi-onfalomesenterikoa" x={236} y={556} ax={320} ay={548} small />
       <Label id="hodi-neurala" x={790} y={80} ax={650} ay={88} />
       <Label id="somitak" x={790} y={132} ax={SOMITES[2]?.p[0] ?? 660} ay={SOMITES[2]?.p[1] ?? 140} small />

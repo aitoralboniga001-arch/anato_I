@@ -136,7 +136,10 @@ const SH: Record<string, Shape> = {
 function recess(z: number, S: State, s: 1 | -1): Ell | null {
   if (z < ZS || z > 0.9) return null;
   const top = prof(z, ZS, 0.9, 0.28, true, false);
-  const full: Ell = { cu: s * (0.48 + 0.04 * S.lung), cv: -0.27, ru: 0.22 + 0.1 * S.lung, rv: 0.24 + 0.08 * S.lung };
+  // Until the pleuropericardial membranes part them, the recess opens ventrally into the pericardial
+  // part: one cavity round the heart and the foregut, as in the thorax section.
+  const join = 1 - S.ppm;
+  const full: Ell = { cu: s * (0.48 + 0.04 * S.lung), cv: -0.27 + 0.1 * join, ru: 0.22 + 0.1 * S.lung, rv: 0.24 + 0.08 * S.lung + 0.12 * join };
   const c = canalFull(s);
   // Narrow at the bottom into the canal, so cavity and canal are one passage.
   const b = sm((z - ZS) / 0.07);
@@ -837,12 +840,14 @@ function coelomMap(script: Script): SceneComponent {
         <Part id="aorta">
           <circle cx={SX} cy={f1(SY - 0.58 * SR)} r={0.05 * SR} fill={P.aorta} stroke="#7a0f1e" strokeWidth={1} />
         </Part>
+        {/* The serous lining of the cavities, drawn under them: where two pieces of one cavity overlap, no seam shows. */}
+        {cut.cav.map((p, i) => (
+          <path key={`fl${i}`} d={poly(ringF(p.e))} fill="none" stroke="rgba(255,236,240,0.6)" strokeWidth={2.6} pointerEvents="none" />
+        ))}
         {cut.cav.map((p, i) => (
           <Part key={`fc${i}`} id={p.id}>
             <path d={poly(ringF(p.e))} fill={P.space} />
             <path d={poly(ringF(p.e))} fill={p.fill} opacity={p.o} />
-            {/* The serous lining of the cavity. */}
-            <path d={poly(ringF(p.e))} fill="none" stroke="rgba(255,236,240,0.55)" strokeWidth={1.2} />
           </Part>
         ))}
         {S.zc < ZB && S.zc > 0.08 && (

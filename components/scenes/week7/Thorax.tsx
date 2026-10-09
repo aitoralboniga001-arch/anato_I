@@ -109,7 +109,8 @@ function thorax(t: number): Geo & { grow: number; p: number; d: number; virt: nu
   const mem = spline([base, mid, tip], 14);
   // Pericardial region: both membranes + the ventral wall between their bases.
   const memR = mem.map(mirror);
-  const peri = [...mem, ...[...memR].reverse(), ...wallCut(ub, 0).map(mirror).reverse().slice(1), ...wallCut(0, ub).slice(1)];
+  // Round the ventral wall: right base → ventral midline → left base (one pass, no doubling back).
+  const peri = [...mem, ...[...memR].reverse(), ...wallCut(ub, 0).map(mirror).slice(1), ...wallCut(0, ub).slice(1, -1)];
   // Left pleural region: wall from the base round to the dorsal midline, the mediastinum, the membrane back.
   const pleura = [...wallCut(ub, 1), ...resample(MEDIA, 60).filter((q) => q[0] <= 500 && q[1] > 236).reverse(), ...[...mem].reverse()];
   const lung0 = g2 > 0 ? morph(LUNG_B, LUNG_C, g2, 80) : morph(LUNG_A, LUNG_B, g1, 80);

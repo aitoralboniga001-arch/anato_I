@@ -27,7 +27,7 @@ export const week7: WeekDef = {
       dayRange: [20, 28],
       title: 'Enbrioi barruko zeloma',
       subtitle: 'Alboko mesodermoaren bi orriak eta tolespenen ondorioa',
-      duration: 30,
+      duration: 34,
       source: src('1. Garapenaren 3. astea'),
       views: [
         {
@@ -114,10 +114,19 @@ export const week7: WeekDef = {
         },
         {
           at: 0.86,
+          recall: ['bihotza'],
+          idea: 'Albotik: zelomaren goiko aldean bihotza dago. Ez da hor sortu: buruaren tolespenak ekarri du.',
+          key: 'Bihotz eremua mintz bukofaringeoaren kranealean sortu zen; buruaren tolespenak aurreko hestearen aurrera eraman zuen.',
+          notes: ['w7/1/p4/s5'],
+          view: 'sagitala',
+          text: 'Albotik ikusita, zelomaren goiko aldean bihotza dago. Ez da hor sortu: 3. astean bihotz eremua buruaren aurrean zegoen, mintz bukofaringeoaren kranealean. Tolespen zefalokaudalean buruaren muturra aurrerantz tolesten da, eta bihotza aurreko hestearen aurrera eta behera eramaten du, geroko toraxera.',
+          focus: ['bihotza'],
+        },
+        {
+          at: 0.93,
           idea: 'Zeloma barrunbe bakarra da, geroko toraxetik abdomenera.',
           key: 'Barrunbe bakarra: hurrengo urratsean septumak bitan banatuko du.',
           notes: ['w7/1/p4/s7'],
-          view: 'sagitala',
           text: 'Enbrioi barruko zeloma hori gorputzaren barnean hedatzen da, geroko toraxetik abdomenera: oraindik barrunbe bakarra da.',
           focus: ['enbrioi-barruko-zeloma'],
         },
