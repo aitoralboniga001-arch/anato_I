@@ -57,10 +57,63 @@ function labelBoxes(html: string): Box[] {
   return boxes;
 }
 
+interface Leader {
+  id: string;
+  pts: [number, number][];
+}
+
+/** Each name's leader line (plate edge → elbow → the dot on the structure). */
+function leaders(html: string): Leader[] {
+  const out: Leader[] = [];
+  const re = /<g data-label="([^"]+)" class="[^"]*" opacity="([^"]+)"[^>]*><path class="label-casing" d="([^"]+)"/g;
+  for (const m of html.matchAll(re)) {
+    if (Number(m[2]) < 0.3) continue;
+    const nums = m[3].match(/-?[\d.]+/g)?.map(Number) ?? [];
+    const pts: [number, number][] = [];
+    for (let i = 0; i + 1 < nums.length; i += 2) pts.push([nums[i], nums[i + 1]]);
+    out.push({ id: m[1], pts });
+  }
+  return out;
+}
+
+/** Does the segment a→b pass through the box (shrunk a little, so grazing a corner is allowed)? */
+function crosses(a: [number, number], b: [number, number], box: Box) {
+  const x0 = box.x0 + 3;
+  const x1 = box.x1 - 3;
+  const y0 = box.y0 + 2;
+  const y1 = box.y1 - 2;
+  let t0 = 0;
+  let t1 = 1;
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  for (const [p, q] of [
+    [-dx, a[0] - x0],
+    [dx, x1 - a[0]],
+    [-dy, a[1] - y0],
+    [dy, y1 - a[1]],
+  ]) {
+    if (p === 0) {
+      if (q < 0) return false;
+    } else {
+      const r = q / p;
+      if (p < 0) t0 = Math.max(t0, r);
+      else t1 = Math.min(t1, r);
+      if (t0 > t1) return false;
+    }
+  }
+  return true;
+}
+
 const hit = (b: Box, x0: number, x1: number, y0: number, y1: number) => b.x0 < x1 && b.x1 > x0 && b.y0 < y1 && b.y1 > y0;
 
-function problems(boxes: Box[], o: Orientation | undefined): string[] {
+function problems(boxes: Box[], o: Orientation | undefined, lines: Leader[] = []): string[] {
   const out: string[] = [];
+  // A leader must never run behind another name: the eye reads it as crossing the word.
+  for (const l of lines)
+    for (const b of boxes) {
+      if (b.id === l.id) continue;
+      for (let i = 0; i + 1 < l.pts.length; i++) if (crosses(l.pts[i], l.pts[i + 1], b)) { out.push(`${l.id}: lerroak "${b.id}" izena zeharkatzen du`); break; }
+    }
   for (const b of boxes) {
     if (b.x0 < 2 || b.x1 > 998 || b.y0 < 2 || b.y1 > 638) out.push(`${b.id}: frametik kanpo`);
     // Zones measured in the browser at 1440×900 (SVG units): toolbar column and the edge pills.
@@ -95,7 +148,7 @@ for (const w of weeks)
                   </LabelScaleContext.Provider>
                 </SceneContext.Provider>,
               );
-              for (const p of problems(labelBoxes(html), v.orientation)) found.set(p, [...(found.get(p) ?? []), k === 1 ? `${t}` : `${t}×${k}`]);
+              for (const p of problems(labelBoxes(html), v.orientation, leaders(html))) found.set(p, [...(found.get(p) ?? []), k === 1 ? `${t}` : `${t}×${k}`]);
             }
           expect([...found].map(([p, ts]) => `${p} (t=${ts.join(',')})`)).toEqual([]);
         });

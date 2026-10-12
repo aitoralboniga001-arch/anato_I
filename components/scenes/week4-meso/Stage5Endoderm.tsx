@@ -484,6 +484,19 @@ function camera(tm: Tm) {
   };
 }
 
+/**
+ * Screen points along the splanchnic coat of the gut (middle of the coat) from u0 to u1, on the dorsal (1) or
+ * ventral (-1) wall, with the direction of the gut at each: topic 9 grows smooth muscle along it.
+ */
+export function gutCoat(t: number, u0: number, u1: number, n: number, side: 1 | -1): { p: Pt; dir: number }[] {
+  const tm = timing(t);
+  const cam = camera(tm);
+  return range(u0, u1, n).map((u) => {
+    const s = at(GS, u);
+    return { p: cam.at(offAt(GS, u, side * (gutHW(u, tm) + EN + SP * 0.5))), dir: (Math.atan2(s.n[0], -s.n[1]) * 180) / Math.PI };
+  });
+}
+
 export function GutSagittal({ t }: SceneProps) {
   const tm = timing(t);
   const cam = camera(tm);

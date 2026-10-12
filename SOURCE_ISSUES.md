@@ -14,3 +14,14 @@ Lau apunteak simulazioaren ikasketa-esparrua dira. Irudiak eskematikoak dira: ge
 
 Etapa bakoitzak apuntearen fitxategia eta atala edo orrialdea gordetzen ditu. Iturri horiek eta kanpoko erreferentziek ez dute ordezkatzen irakaslearen ebaluazio-irizpidea edo aditu baten azken berrikuspen zientifikoa.
 - Somitomeroak: 3.1 atalak dio alde zefalikoko somitomeroak (okzipitaletik gorantz) ez direla inoiz somita bihurtzen, eta kaudalekoak, aldiz, benetako somitatan antolatzen direla. Leinuan somitomeroak → somitak lotura mantentzen da (kaudalekoentzat zuzena), baina «zein EZ da eratorria?» galdera sortua ez da egiten, bi irakurketak zuzenak izan daitezkeelako.
+
+## 9. gaia: muskulu sistema
+
+- Saihets kartilagoen jatorria: 8. gaiko apunteek paretako orritik zuzenean sortzen direla diote; 9. gaikoek, somitaren alboko muga gurutzatzen duten esklerotoma zeluletatik. 9. gaiko etapan 9. gaiko bertsioa marrazten da, eta bi apunteen arteko aldea ohar gisa agertzen da.
+- Adar primarioak: apunteek (2.2.2 atala) diote atzeko eta aurreko adarrek bi domeinuetako muskuluak inerbatzen dituztela. Zehatzago: aurreko adarrak bi domeinuetakoak (saihets artekoak primaxialak, abdomenekoak abaxialak); atzeko adarrak primaxialak soilik, bizkarreko muskulu sakonak (muskulu epaxialak). Jatorria ≠ inerbazioa ideia ohar gisa erakusten da.
+- Somita okzipitalak: apunteek «5 → 4» diote (lehenengoa desagertzen da), baina gero jatorrizko zenbakiak erabiltzen dituzte (1.–2. laringerako, 2.–5. mihirako). Simulazioak zenbaki horiek mantentzen ditu, eta 1.a itzal gisa marrazten da.
+- Tolestatzaileak eta hedatzaileak: apunteek alderantziz idatzi dute («beheko adarrean tolestatzailea aurrean… goiko adarrean hedatzailea aurrean»). Gorputz-adarrak biratu ondoren goikoan tolestatzaileak daude aurrean eta behekoan hedatzaileak (koadrizepsa); simulazioak anatomia zuzena marrazten du eta oharra erakusten du.
+- Gai grisaren «adarrak» eta nerbioaren «sustraiak»: apunteek bi hitzak nahasten dituzte. Simulazioan adarrak ornomuinaren barruan daude (gai grisa), eta sustraiak kanpoan (aurreko eta atzeko sustraiak).
+- Aortaren paretako muskulu leuna: apunteek «uste da gaur egun» diote (paretako orria eta gandor neurala). Enbrioiaren irudian oraindik bi aorta dortsal daude; heldu baten aorta bakarra geroago sortzen da.
+- Bihotzaren eroapen sistema: noduluak zuntz muskular espezializatuak dira, ez nerbio-ehuna. Horregatik zian kolorez marrazten dira, eta ez nerbioen horiz. Bihotz helduaren irudia (lau ganberako ebakidura koronala) testuingurua da: apunteek ez dute irudirik.
+- Fontanelak: 9. gaiko apunteen sarreran atzeko fontanela «jaio osteko 1. eta 2. lauhilabetetan» ixten dela dio; 8. gaiko apunteek eta simulazioak «1.–2. hilabetean». Ez da aldatu: irakaslearekin egiaztatu beharreko puntua da.

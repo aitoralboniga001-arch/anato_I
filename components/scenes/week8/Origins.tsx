@@ -410,7 +410,7 @@ export function OriginsSection({ t }: SceneProps) {
       <Label id="miotoma" x={810} y={200} ax={a.miotoma[0]} ay={a.miotoma[1]} show={tm.my} small />
       <Label id="paretako-orria" x={810} y={290} ax={a['paretako-orria'][0] - 15} ay={a['paretako-orria'][1] + 10} small />
       <Label id="bitarteko-mesodermoa" x={810} y={560} ax={a['bitarteko-mesodermoa'][0]} ay={a['bitarteko-mesodermoa'][1]} show={1 - cells} small />
-      <Label id="saihetsak" x={810} y={400} ax={a.saihetsak[0]} ay={a.saihetsak[1]} show={tm.fa} />
+      <Label id="saihetsak" x={850} y={400} ax={a.saihetsak[0]} ay={a.saihetsak[1]} align="start" show={tm.fa} />
       <Label id="fibroblastoak" x={cellX[0]} y={CELL_Y + 46} align="middle" show={cells} small />
       <Label id="kondroblastoak" x={cellX[1]} y={CELL_Y + 46} align="middle" show={cells} small />
       <Label id="osteoblastoak" x={cellX[2]} y={CELL_Y + 46} align="middle" show={cells} small />

@@ -107,7 +107,8 @@ export function Label({ id, x, y, ax, ay, align, show = 1, text, small }: LabelP
   const fs = size * k;
   const plate = plateBox(x, y, anchor, textWidth(name, fs, state === 'spot' || state === 'focus' ? 700 : 550, space, measured), fs);
   // Leader starts at the plate edge and bends horizontally first, like textbook call-outs.
-  const lx = x + (anchor === 'end' ? plate.padX : anchor === 'start' ? -plate.padX : 0);
+  // It leaves from the plate edge nearest the anchor, so its bend never lands inside a column of names.
+  const lx = hasLeader && ax! < plate.x ? plate.x : hasLeader && ax! > plate.x + plate.w ? plate.x + plate.w : x + (anchor === 'end' ? plate.padX : anchor === 'start' ? -plate.padX : 0);
   const elbowX = hasLeader ? lx + (ax! - lx) * 0.35 : lx;
   const leader = hasLeader ? `M${lx},${y} L${elbowX},${y} L${ax},${ay}` : '';
   const group = {

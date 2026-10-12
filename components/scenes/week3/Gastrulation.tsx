@@ -77,7 +77,8 @@ export function GastrulationTransverse({ t, reduced }: SceneProps) {
     yolk: z.at(...s.at.yolk),
   };
   const leftY = columnY([anchors.lerro[1], anchors.epi[1], anchors.meso[1], anchors.hypo[1], anchors.endo[1]], 110, 575);
-  const rightY = columnY([anchors.amnion[1], anchors.extra[1], anchors.disc[1], anchors.yolk[1]], 240, 575, 32);
+  // The amnion's name sits above the column so the extraembryonic mesoderm's leader, which rises, never crosses it.
+  const rightY = columnY([anchors.extra[1], anchors.disc[1], anchors.yolk[1]], 240, 575, 32);
   const ok = (p: Pt) => inFrame(p, 70);
 
   return (
@@ -129,7 +130,7 @@ export function GastrulationTransverse({ t, reduced }: SceneProps) {
         Nodo eta hobitxo primitiboa mozketa honetatik kranealago daude (ikus ikuspegi dortsala)
       </Note>
 
-      <Label id="gastrulazioa" x={810} y={130} ax={gastAt[0]} ay={gastAt[1]} show={g.streak * ok(gastAt)} />
+      <Label id="gastrulazioa" x={810} y={104} ax={gastAt[0]} ay={gastAt[1]} show={g.streak * ok(gastAt)} />
       <Label id="lerro-primitiboa" x={190} y={leftY[0]} ax={anchors.lerro[0]} ay={anchors.lerro[1]} show={g.streak * (1 - clamp(g.groove * 2)) * ok(anchors.lerro)} />
       <Label id="ildo-primitiboa" x={190} y={leftY[0]} ax={anchors.ildo[0]} ay={anchors.ildo[1]} show={clamp(g.groove * 2 - 1) * ok(anchors.ildo)} />
       <Label id="epiblastoa" x={190} y={leftY[1]} ax={anchors.epi[0]} ay={anchors.epi[1]} show={(1 - clamp(g.ecto * 2)) * ok(anchors.epi)} />
@@ -137,10 +138,10 @@ export function GastrulationTransverse({ t, reduced }: SceneProps) {
       <Label id="mesodermo-intraenbrionarioa" x={198} y={leftY[2]} ax={anchors.meso[0]} ay={anchors.meso[1]} show={g.meso * ok(anchors.meso)} small />
       <Label id="hipoblastoa" x={190} y={leftY[3]} ax={anchors.hypo[0]} ay={anchors.hypo[1]} show={(1 - clamp((g.endo - 0.8) / 0.17)) * ok(anchors.hypo)} />
       <Label id="endodermoa" x={190} y={leftY[4]} ax={anchors.endo[0]} ay={anchors.endo[1]} show={g.endo * ok(anchors.endo)} />
-      <Label id="amnios-barrunbea" x={810} y={rightY[0]} ax={anchors.amnion[0]} ay={anchors.amnion[1]} show={ok(anchors.amnion)} />
-      <Label id="enbrioi-kanpoko-mesodermoa" x={810} y={rightY[1]} ax={anchors.extra[0]} ay={anchors.extra[1]} show={ok(anchors.extra)} small />
-      <Label id="hiru-orriko-diskoa" x={810} y={rightY[2]} ax={anchors.disc[0]} ay={anchors.disc[1]} show={g.tri * ok(anchors.disc)} />
-      <Label id="bitelo-zaku-sekundarioa" x={810} y={rightY[3]} ax={anchors.yolk[0]} ay={anchors.yolk[1]} show={ok(anchors.yolk)} />
+      <Label id="amnios-barrunbea" x={810} y={158} ax={anchors.amnion[0]} ay={anchors.amnion[1]} show={ok(anchors.amnion)} />
+      <Label id="enbrioi-kanpoko-mesodermoa" x={810} y={rightY[0]} ax={anchors.extra[0]} ay={anchors.extra[1]} show={ok(anchors.extra)} small />
+      <Label id="hiru-orriko-diskoa" x={810} y={rightY[1]} ax={anchors.disc[0]} ay={anchors.disc[1]} show={g.tri * ok(anchors.disc)} />
+      <Label id="bitelo-zaku-sekundarioa" x={810} y={rightY[2]} ax={anchors.yolk[0]} ay={anchors.yolk[1]} show={ok(anchors.yolk)} />
     </g>
   );
 }

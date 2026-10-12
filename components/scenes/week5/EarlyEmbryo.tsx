@@ -189,6 +189,8 @@ export interface EarlyOpts {
   counted?: number;
   /** Lower limb bud size (0..1): it appears 2–3 days after the upper one. */
   legGrow?: number;
+  /** Leave the surface somite beads out (topic 9 draws the somites itself, seen through a window). */
+  hideSomites?: boolean;
 }
 
 /** Heart prominence split into its two visible bulges: the left ventricle below, the left atrium above. */
@@ -198,7 +200,7 @@ export function heartLobes(heart: readonly number[], atrium: Pt) {
   return { vent, atr };
 }
 
-export function EarlyEmbryo({ day, beat = 0, counted = -1, legGrow = 1 }: EarlyOpts) {
+export function EarlyEmbryo({ day, beat = 0, counted = -1, legGrow = 1, hideSomites = false }: EarlyOpts) {
   const g = earlyGeom(day);
   const { S } = g;
   const nSom = Math.round(g.somites[0]);
@@ -320,8 +322,8 @@ export function EarlyEmbryo({ day, beat = 0, counted = -1, legGrow = 1 }: EarlyO
       <Part id="mesonefros-gandorra">
         <path d={smoothPath(g.meso, false)} fill="none" stroke="rgba(255,255,255,0.001)" strokeWidth={18} />
       </Part>
-      <Part id="somitak">
-        {somites.map((s, i) => {
+      <Part id="somitak" show={hideSomites ? 0 : 1}>
+        {!hideSomites && somites.map((s, i) => {
           const c = counted >= 0 && i < counted;
           return (
             <rect

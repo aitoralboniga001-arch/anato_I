@@ -6,6 +6,11 @@ import { LungBudFront, ThoraxSection } from '@/components/scenes/week7/Thorax';
 import { DiaphragmDescent, DiaphragmSection } from '@/components/scenes/week7/Diaphragm';
 import { DiaphragmBelow, DiaphragmProfile } from '@/components/scenes/week7/DiaphragmAdult';
 import { CoelomMapDiaphragm, CoelomMapSeptum, CoelomMapThorax } from '@/components/scenes/week7/CoelomMap';
+import { DiaphragmFate } from '@/components/scenes/week7/DiaphragmFate';
+import { CavitySummary } from '@/components/scenes/week7/CavitySummary';
+import { PeritoneumTypes } from '@/components/scenes/week7/PeritoneumTypes';
+import { FATE, SUMMARY, TYPES } from '@/components/scenes/week7/timing';
+import { retime } from '@/components/scenes/week7/retime';
 import { structures7 } from './week7-structures';
 
 const FILE = '7.GAIA_Gorputzaren barrunbeak (ZUZENDUTA).pdf';
@@ -292,7 +297,7 @@ export const week7: WeekDef = {
       dayRange: [24, 35],
       title: 'Peritoneo barrunbea',
       subtitle: 'Mesenterio dortsala, paretako eta errai peritoneoa; peritoneo barruko, kanpoko eta atzeko egiturak',
-      duration: 34,
+      duration: 39,
       source: src('2.1 Peritoneo barrunbea'),
       views: [
         {
@@ -301,8 +306,17 @@ export const week7: WeekDef = {
           plane: 'zeharkakoa',
           description: 'Apunteetako irudia: abdomenaren zeharkako mozketa (dortsala goian). Hestea mesenterio dortsaletik zintzilik peritoneo barrunbean; giltzurrunak, aorta eta beheko kaba atzeko paretan.',
           orientation: { top: 'Dortsala', bottom: 'Bentrala' },
-          scene: PeritoneumSection,
+          scene: retime(PeritoneumSection, TYPES.at),
           locator: { level: 0.66, note: 'Abdomena' },
+        },
+        {
+          id: 'motak',
+          label: 'Hiru motak',
+          plane: 'eskema',
+          description: 'Abdomeneko hiru organo motak alderatuta, mozketa beraren hiru zatitan (dortsala goian): peritoneo barrukoak, kanpokoak eta atzekoak. Galdera bakarrak bereizten ditu: mesenterioa izan duen ala ez.',
+          orientation: { top: 'Dortsala', bottom: 'Bentrala' },
+          scene: PeritoneumTypes,
+          travel: false,
         },
       ],
       beats: [
@@ -314,7 +328,7 @@ export const week7: WeekDef = {
           focus: ['erdiko-hestea', 'errai-orria'],
         },
         {
-          at: 0.17,
+          at: 0.1496,
           idea: 'Mesenterio dortsala: bi orriko lotura, hestea atzeko paretatik zintzilik uzten duena.',
           key: 'Mesenterio dortsala = paretako orria eta errai orria lotzen dituen atzeko zubia.',
           ask: {
@@ -333,7 +347,7 @@ export const week7: WeekDef = {
           exam: 'Mesenterio dortsala: paretako eta errai orrien arteko lotura, bi orrikoa.',
         },
         {
-          at: 0.33,
+          at: 0.2904,
           idea: 'Paretako peritoneoa barrunbearen pareta da; errai peritoneoa, hestearen estalkia.',
           key: 'Orri bera jarraia da: paretakoa pareta estaltzen du, erraia organoa; mesenterioan elkartzen dira.',
           ask: {
@@ -351,14 +365,14 @@ export const week7: WeekDef = {
           focus: ['paretako-peritoneoa', 'errai-peritoneoa', 'mesenterio-dortsala'],
         },
         {
-          at: 0.48,
+          at: 0.4224,
           idea: 'Hestetik sortutako organoak peritoneo barrunbean daude: peritoneo barrukoak dira.',
           notes: ['w7/2.1/p6/s1-s2', 'w7/2.1/p7/s1-s2', 'w7/2.1/p9/s1'],
           text: 'Peritoneo barrunbean daude aurreko hestearen urrutiko atala, erdiko hestea eta atzeko hestearen zatirik handiena. Hortik sortutako egiturak (urdaila, duodenoa, heste lodia…) errai peritoneoz inguratuta daude: peritoneo barruko egiturak.',
           focus: ['peritoneo-barruko-egiturak', 'erdiko-hestea', 'goranzko-kolona', 'beheranzko-kolona'],
         },
         {
-          at: 0.62,
+          at: 0.5456,
           idea: 'Giltzurrunak, aorta eta beheko kaba peritoneo barrunbetik kanpo daude, atzean.',
           key: 'Peritoneo kanpokoak ez dira inoiz barrunbean egon.',
           ask: {
@@ -377,7 +391,7 @@ export const week7: WeekDef = {
           exam: 'Barrunbearen atzean, mesenteriorik gabe: giltzurrunak, aorta eta beheko kaba.',
         },
         {
-          at: 0.76,
+          at: 0.6688,
           idea: 'Batzuk peritoneo barrukoak ziren, baina mesenterioa atzeko paretarekin fusionatu zaie: atzekoak bihurtu dira.',
           key: 'Atzekoak lehen barrukoak ziren; kanpokoak ez ziren inoiz.',
           ask: {
@@ -396,12 +410,41 @@ export const week7: WeekDef = {
           caution: 'Peritoneo atzekoa ≠ peritoneo kanpokoa: atzekoak hasieran peritoneo barrukoak ziren (mesenterioa fusionatu da).',
         },
         {
-          at: 0.9,
+          at: 0.792,
           idea: 'Peritoneo barrunbeak ez du abdomen osoa betetzen.',
           key: 'Toraxean hasierako barrunbeak dena betetzen zuen; abdomenean ez.',
           notes: ['w7/2.1/p12/s1', 'w7/2.1/p8/s1', 'w7/2.1/p12/s2'],
           text: 'Beraz, peritoneo barrunbeak ez du abdomeneko barrunbe osoa okupatzen: organo batzuk peritoneo kanpokoak dira eta beste batzuk peritoneo atzekoak (adibidez, duodenoa).',
           focus: ['peritoneo-barrunbea', 'peritoneo-kanpoko-egiturak', 'peritoneo-atzeko-egiturak'],
+        },
+        {
+          at: TYPES.at,
+          recall: ['mesenterio-dortsala'],
+          idea: 'Hiru motak alderatuta: mesenterioa izan duen ala ez.',
+          key: 'Barrukoa: mesenteriotik zintzilik. Kanpokoa: inoiz ez du mesenteriorik izan. Atzekoa: izan zuen, baina atzeko paretari fusionatu zaio.',
+          ask: {
+            q: 'Duodenoa eta giltzurruna, biak peritoneo barrunbearen atzean daude. Zein da aldea?',
+            options: [
+              'Duodenoak mesenterioa izan zuen eta atzeko paretari fusionatu zitzaion (atzekoa); giltzurrunak inoiz ez (kanpokoa)',
+              'Biak peritoneo kanpokoak dira',
+              'Giltzurrunak mesenterioa izan zuen; duodenoak ez',
+              'Ez dago alderik: atzekoa eta kanpokoa sinonimoak dira',
+            ],
+            answer: 0,
+            why: [
+              'Hori da: duodenoa hestetik sortzen da (hasieran barrukoa); giltzurruna bitarteko mesodermotik, atzeko paretan.',
+              'Ez: duodenoa hasieran peritoneo barrukoa zen; gero atzekoa bihurtzen da.',
+              'Alderantziz: giltzurrunak ez du inoiz mesenteriorik izan.',
+              'Ez dira sinonimoak: atzekoak barrunbean egon ziren, kanpokoak ez.',
+            ],
+          },
+          notes: ['w7/2.1/p8/s3', 'w7/2.1/p9/s1', 'w7/2.1/p10/s1-s4', 'w7/2.1/p11/s1-s2', 'w7/2.1/p12/s1'],
+          view: 'motak',
+          text: 'Abdomenean hiru organo mota bereizten dira. Peritoneo barruko egiturak hestetik sortzen dira eta errai peritoneoz inguratuta daude, mesenterio batetik zintzilik. Peritoneo kanpoko egiturak (giltzurrunak, aorta, beheko bena kaba) ez daude peritoneo barrunbean, haren atzean baizik. Peritoneo atzeko egiturak hasieran barrukoak ziren, baina haien atzeko mesenterioa atzekaldeko paretako peritoneoarekin fusionatu da: duodenoa eta goranzko eta beheranzko kolona.',
+          focus: ['peritoneo-kanpoko-egiturak', 'peritoneo-atzeko-egiturak'],
+          tour: ['peritoneo-barruko-egiturak', 'peritoneo-kanpoko-egiturak', 'peritoneo-atzeko-egiturak'],
+          tourAt: 0.985,
+          caution: 'Peritoneo atzekoa ≠ peritoneo kanpokoa. Apunteen laburpenak (4. atala) "peritoneo kanpokoak (atzekaldean kokatu)" dio, baina 2.1 atalaren arabera mesenterioa fusionatu zaien organoak peritoneo atzekoak dira.',
         },
       ],
       structures: [
@@ -510,10 +553,20 @@ export const week7: WeekDef = {
         {
           at: 0.24,
           idea: 'Birikak hazi ahala, atze-alboko espazioak betetzen dituzte: pleura barrunbeak hasten dira.',
-          key: 'Birikak ez dira barrunbean sartzen: errai orria bultzatzen dute eta orriak birika estaltzen du.',
+          key: 'Birikak barrunbean sartzen dira errai orria aurretik bultzatuz: orri horrek estaltzen ditu (errai pleura).',
+          ask: {
+            q: 'Birikak hazten direnean, zer egiten diote zelomaren errai orriari?',
+            options: ['Aurretik bultzatzen dute, eta orri horrek estaltzen ditu', 'Zulatu egiten dute, eta barrunbean estalkirik gabe geratzen dira', 'Paretako orriarekin fusionatzen dute'],
+            answer: 0,
+            why: [
+              'Hori da: errai orria bultzatuz sartzen dira barrunbean; orri hori errai pleura bihurtzen da.',
+              'Ez: orria ez da apurtzen; birika beti dago errai orriaz estalita.',
+              'Ez: bi orriak bereizita geratzen dira, eta haien artean pleura barrunbea dago (birtuala).',
+            ],
+          },
           notes: ['w7/2.2/p6/s4-s5'],
           view: 'zeharkakoa',
-          text: 'Birika hastapenak behera, alborantz eta aurrera hazten dira: atzetik zelomaren errai orria bultzatzen dute eta hasierako perikardio barrunbearen atze-alboko aldeak okupatzen hasten dira. Pleura barrunbeak hasten dira.',
+          text: 'Birika hastapenak behera, alborantz eta aurrera hazten dira: atzetik zelomaren errai orria bultzatzen dute, poliki-poliki sartu egiten dira eta hasierako perikardio barrunbearen atze-alboko aldeak okupatzen hasten dira. Pleura barrunbeak hasten dira.',
           focus: ['birika-hastapenak', 'errai-orria'],
         },
         {
@@ -538,6 +591,16 @@ export const week7: WeekDef = {
           at: 0.48,
           idea: 'Mintzak erdirantz hazten dira eta fusionatzen dira: pleura eta perikardio barrunbeak bereizten dira.',
           key: 'Fusioaren ondoren: pleurak alboetan, perikardioa erdian, bakoitza bere aldetik.',
+          ask: {
+            q: '5. astean, zerekin fusionatzen dira mintz pleuroperikardikoak?',
+            options: ['Elkarren artean eta hestegorri inguruko mesenkimarekin', 'Septum transversumarekin', 'Mintz pleuroperitonealekin'],
+            answer: 0,
+            why: [
+              'Hori da: alboetatik erdirantz hazi eta erpinak elkartzen dira, hestegorri inguruko mesenkimarekin batera.',
+              'Ez: septuma beheko muga da; mintz hauek alboetatik erdirantz hazten dira.',
+              'Ez: mintz pleuroperitonealek erretenak ixten dituzte, beherago, pleura eta peritoneoaren artean.',
+            ],
+          },
           notes: ['w7/2.2/p8/s1-s2'],
           text: '5. astean mintzak erdialderantz abiatzen dira, erpinak elkarren artean fusionatu arte, eta hestegorri inguruko mesenkimarekin ere fusionatzen dira. Horrela pleura barrunbeak eta perikardio barrunbea eratzen hasten dira.',
           focus: ['mintz-pleuroperikardikoak', 'hestegorri-inguruko-mesenkima', 'pleura-barrunbea', 'perikardio-barrunbea'],
@@ -579,7 +642,7 @@ export const week7: WeekDef = {
             why: [
               'Hori da: somatopleuratik, bihotz hodiaren inguruan.',
               'Mintzen mesenkimatik perikardio fibrosoa sortzen da.',
-              'Perikardio serosoak paretako orritik datoz (somatopleura).',
+              'Perikardio serosoa paretako orritik (somatopleura) dator, ez errai orritik.',
             ],
           },
           notes: ['w7/2.2/p14/s1-s5'],
@@ -598,7 +661,7 @@ export const week7: WeekDef = {
             why: [
               'Hori da: espazio erreala patologian bakarrik agertzen da (adibidez, airea edo odola pleura barrunbean).',
               'Neurriak ez du zerikusirik: orriak elkarren ondoan daude.',
-              'Organoak ez dira barrunbean sartzen: orriak bultzatzen dituzte.',
+              'Organoak errai orriaz estalita sartzen dira: barrunbea bi orrien arteko tartea da, eta ez dago organorik bertan.',
             ],
           },
           notes: ['w7/2.2/p13/s1-s2'],
@@ -645,7 +708,7 @@ export const week7: WeekDef = {
       dayRange: [22, 35],
       title: 'Diafragmaren eraketa',
       subtitle: 'Septumaren jaitsiera, nerbio frenikoa eta erreten perikardioperitonealen itxiera',
-      duration: 40,
+      duration: 47,
       source: src('3. Diafragmaren eraketa · 3.1'),
       views: [
         {
@@ -656,7 +719,7 @@ export const week7: WeekDef = {
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Bentrala', right: 'Dortsala' },
           // The trunk from the neck to the lumbar spine, not the whole embryo.
           span: [0.18, 0.74],
-          scene: DiaphragmDescent,
+          scene: retime(DiaphragmDescent, FATE.at),
         },
         {
           id: 'zeharkakoa',
@@ -664,7 +727,7 @@ export const week7: WeekDef = {
           plane: 'zeharkakoa',
           description: 'Apunteetako irudiak: diafragmaren mailako zeharkako mozketa (dortsala goian). Septuma aurrean, hestegorri inguruko mesenkima erdian, erretenak atze-alboetan eta mintz pleuroperitonealak.',
           orientation: { top: 'Dortsala', bottom: 'Bentrala' },
-          scene: DiaphragmSection,
+          scene: retime(DiaphragmSection, FATE.at),
           locator: { level: 0.5, note: 'Diafragmaren maila' },
         },
         {
@@ -673,7 +736,17 @@ export const week7: WeekDef = {
           plane: 'eskema',
           description: 'Enborraren zeloma osoa aurretik, bloke garden gisa, eta ondoan plano zuriaren mailako zeharkako mozketa: erreten perikardioperitonealek goiko eta beheko barrunbeak lotzen dituzte, mintz pleuroperitonealek itxi arte. Planoa arrastatu daiteke.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
-          scene: CoelomMapDiaphragm,
+          scene: retime(CoelomMapDiaphragm, FATE.at),
+        },
+        {
+          id: 'patua',
+          label: 'Osagaien patua',
+          plane: 'zeharkakoa',
+          description: 'Lau osagaiak bakoitza bere kolorez, 5. asteko mozketatik diafragma helduraino (goitik ikusita, dortsala goian): non geratzen den bakoitza eta zein zulotatik pasatzen diren aorta, hestegorria eta beheko kaba.',
+          orientation: { top: 'Dortsala', bottom: 'Bentrala', left: 'Eskuina', right: 'Ezkerra' },
+          scene: DiaphragmFate,
+          locator: { level: 0.5, note: 'Diafragmaren maila' },
+          travel: false,
         },
       ],
       beats: [
@@ -688,15 +761,25 @@ export const week7: WeekDef = {
           focus: ['septum-transversum'],
         },
         {
-          at: 0.14,
+          at: 0.1204,
           idea: 'Septumaren mesenkimak muskulu-zelulak sortzen ditu, lepo mailan.',
           key: 'Diafragmaren muskulua LEPOAN hasten da, ez toraxean.',
+          ask: {
+            q: 'Non hasten dira diafragmaren lehen mioblastoak bereizten?',
+            options: ['Septum transversumaren mesenkiman, lepo mailan', 'Mintz pleuroperitonealetan, toraxean', 'Hestegorriaren paretan'],
+            answer: 0,
+            why: [
+              'Hori da: septuma C3–C5 mailan dagoela; gero haren miozitoek mintz pleuroperitonealetara migratzen dute.',
+              'Ez: mintzetara geroago iristen dira miozitoak, septumetik migratuta.',
+              'Ez: hestegorri inguruko mesenkima beste osagai bat da (gerriko atala sortzen du).',
+            ],
+          },
           notes: ['w7/3/p4/s1-s3'],
           text: 'Septum transversuma lepoko C3, C4 eta C5 mailetan agertzen da (oso altu). Haren mesenkiman mioblastoak (zelula muskularren aitzindariak) desberdintzen hasten dira, eta gero miozitoak (zelula muskularrak) bihurtzen dira.',
           focus: ['septum-transversum', 'mioblastoak', 'miozitoak'],
         },
         {
-          at: 0.3,
+          at: 0.258,
           idea: 'C3, C4 eta C5 nerbio espinalen zuntzek nerbio frenikoa osatzen dute.',
           key: 'Nerbioa muskuluarekin joaten da: muskulua C3–C5 mailan sortu zen, beraz nerbioa ere bai.',
           ask: {
@@ -715,7 +798,7 @@ export const week7: WeekDef = {
           exam: 'Nerbio frenikoa: C3, C4 eta C5 (septuma lepo mailan sortzen delako).',
         },
         {
-          at: 0.46,
+          at: 0.3956,
           idea: 'Enbrioia atzetik gehiago hazten da, septuma jaisten da eta nerbio frenikoa luzatzen da.',
           key: 'Nerbioak jaitsiera "marrazten" du: lepotik diafragmara.',
           ask: {
@@ -734,7 +817,7 @@ export const week7: WeekDef = {
           exam: 'Jaitsiera: aurrea T6, atzea T12 (5. astearen bukaera).',
         },
         {
-          at: 0.62,
+          at: 0.5332,
           recall: ['erreten-perikardioperitonealak'],
           idea: 'Goiko eta beheko barrunbeak oraindik komunikatuta daude, atzeko erretenen bidez.',
           key: 'Erretenak irekita daude diafragma osatu arte.',
@@ -744,7 +827,7 @@ export const week7: WeekDef = {
           focus: ['erreten-perikardioperitonealak'],
         },
         {
-          at: 0.74,
+          at: 0.6364,
           idea: 'Mintz pleuroperitonealek erretenak ixten dituzte: pleura eta peritoneo barrunbeak bereizten dira.',
           key: 'Mintz pleuroperitonealak itxi arte, atzean komunikazioa dago.',
           more: 'Mintz pleuroperitonealak behar bezala ixten ez badira, diafragmak atzeko-alboko zulo bat izaten du (diafragma-hernia kongenitoa, Bochdalek-ena) eta abdomeneko organoak toraxera igo daitezke. Gehienetan ezkerrekoa da (testuliburuen datua; apunteetako irudian: "Mintz pleuroperitonealaren eza").',
@@ -765,7 +848,7 @@ export const week7: WeekDef = {
           exam: 'Mintz pleuroperitonealak: 5. astea, erreten perikardioperitonealak ixten dituzte.',
         },
         {
-          at: 0.88,
+          at: 0.7568,
           idea: 'Diafragmak lau osagai ditu.',
           key: 'Septuma, mintz pleuroperitonealak, hestegorri inguruko mesenkima eta gorputz paretako mesodermoa.',
           ask: {
@@ -781,6 +864,31 @@ export const week7: WeekDef = {
           notes: ['w7/3.1/p3/s1', 'w7/3.1/p4/s1', 'w7/3.1/p5/s1-s2', 'w7/3.1/p6/s1'],
           text: 'Diafragmaren lau osagaiak: septum transversuma (haren miozitoak mintz pleuroperitonealetara migratzen dute), mintz pleuroperitonealak, hestegorri inguruko mesenkima (gerriko atal muskularra) eta alde periferikoko atal muskularra (gorputz paretako mesodermoa, paraxialetik).',
           focus: ['septum-transversum', 'mintz-pleuroperitonealak', 'hestegorri-inguruko-mesenkima', 'gorputz-paretako-mesodermoa'],
+        },
+        {
+          at: FATE.at,
+          recall: ['septum-transversum', 'hestegorri-inguruko-mesenkima'],
+          idea: 'Osagai bakoitzak bere tokia gordetzen du diafragma helduan.',
+          key: 'Mozketan zegoen tokian geratzen da: septuma aurrean eta erdian, mesenkima atzean erdian, mintzak atze-alboetan, gorputz pareta ertzean.',
+          ask: {
+            q: 'Diafragma helduan, zein atal dator hestegorri inguruko mesenkimatik?',
+            options: ['Gerriko atala (zutabeekin), atzean erdian', 'Zentro tendinosoa', 'Alde periferikoa', 'Hestegorriaren hiatoa bakarrik'],
+            answer: 0,
+            why: [
+              'Hori da: mozketan ere atzean eta erdian zegoen, hestegorriaren inguruan; hortik gerriko atala eta haren bi zutabeak.',
+              'Zentro tendinosoa septum transversumetik dator (aurrean eta erdian).',
+              'Alde periferikoa gorputz paretako mesodermotik dator.',
+              'Hiatoa zulo bat da gerriko atalean; atala bera mesenkima horretatik dator.',
+            ],
+          },
+          notes: ['w7/3.1/p3/s1', 'w7/3.1/p5/s1-s2', 'w7/3.1/p6/s1', 'w7/3.1/p8/s1-s2'],
+          view: 'patua',
+          text: 'Garapenean lau osagaiak diafragma helduaren kupula bihurtzen dira, eta bakoitzak bere tokia gordetzen du. Septum transversumetik zentro tendinosoa garatzen da; hestegorri inguruko mesenkimatik, gerriko atal muskularra; gorputz paretako mesodermotik, alde periferikoko atal muskularra. Mintz pleuroperitonealak atze-alboetan daude, septumetik migratutako miozitoekin. Tendoiaren inguruko zuntz muskularrak septumetik eta gainontzeko osagaietatik datoz.',
+          focus: ['zentro-tendinosoa', 'gerriko-atala', 'diafragmaren-alde-periferikoa'],
+          tour: ['septum-transversum', 'zentro-tendinosoa', 'hestegorri-inguruko-mesenkima', 'gerriko-atala', 'gorputz-paretako-mesodermoa', 'diafragmaren-alde-periferikoa', 'mintz-pleuroperitonealak'],
+          tourAt: 0.97,
+          exam: 'Zentro tendinosoa ← septum transversuma; gerriko atala ← hestegorri inguruko mesenkima; alde periferikoa ← gorputz paretako mesodermoa.',
+          caution: 'Hiru hodiek ere beren tokia gordetzen dute: beheko kaba septumean zegoen (→ tendoian zeharkatzen du), hestegorria mesenkiman (→ gerriko atalean) eta aorta atzean (→ zutabeen artean, lotailu arkutuaren atzetik).',
         },
       ],
       structures: [
@@ -819,7 +927,7 @@ export const week7: WeekDef = {
       dayRange: [35, 56],
       title: 'Diafragmaren atalak',
       subtitle: 'Zentro tendinosoa, atal muskularrak, zutabeak eta diafragma zeharkatzen duten egiturak',
-      duration: 40,
+      duration: 43,
       source: src('3.1 Diafragmaren atalak · 4. Gogoratu beharrekoa'),
       views: [
         {
@@ -830,7 +938,7 @@ export const week7: WeekDef = {
           orientation: { top: 'Aurrea', bottom: 'Atzea', left: 'Eskuina', right: 'Ezkerra' },
           frame: 'zeharkakoa',
           locator: { level: 0.5 },
-          scene: DiaphragmBelow,
+          scene: retime(DiaphragmBelow, SUMMARY.at / 0.9),
         },
         {
           id: 'sagitala',
@@ -840,7 +948,16 @@ export const week7: WeekDef = {
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Aurrea', right: 'Atzea' },
           // The trunk from the thorax to the lumbar spine.
           span: [0.3, 0.74],
-          scene: DiaphragmProfile,
+          scene: retime(DiaphragmProfile, SUMMARY.at / 0.9),
+        },
+        {
+          id: 'laburpena',
+          label: 'Laburpena: 1 → 4',
+          plane: 'eskema',
+          description: 'Gai osoa irudi bakarrean: enborra aurretik ikusita hiru unetan. Zeloma bakarra (3.–4. astea) → septum transversumak bitan (4. astea, atzean bi erreten) → mintzek lau barrunbe uzten dituzte (5. astetik aurrera).',
+          orientation: { top: 'Kraneala', bottom: 'Kaudala' },
+          scene: CavitySummary,
+          travel: false,
         },
       ],
       beats: [
@@ -866,7 +983,7 @@ export const week7: WeekDef = {
           exam: 'Zentro tendinosoa ← septum transversuma (3 hosto).',
         },
         {
-          at: 0.16,
+          at: 0.1493,
           idea: 'Zentroaren inguruan muskulu-zuntzak daude: bularrezur atala eta saihets-hezur atala.',
           key: 'Izenak adierazten du non lotzen den: bularrezurrean edo saihetsetan.',
           notes: ['w7/3.1/p9/s1-s2'],
@@ -874,7 +991,7 @@ export const week7: WeekDef = {
           focus: ['bularrezur-atala', 'saihets-hezur-atala'],
         },
         {
-          at: 0.32,
+          at: 0.2987,
           idea: 'Gerriko atalak bi zutabe ditu, gerri-ornoetan lotuak.',
           key: 'Eskuineko zutabea L1–L3 (luzeagoa); ezkerrekoa L1–L2.',
           ask: {
@@ -893,7 +1010,7 @@ export const week7: WeekDef = {
           exam: 'Eskuineko zutabea L1–L3; ezkerrekoa L1–L2; tartean erdiko lotailu arkutua.',
         },
         {
-          at: 0.48,
+          at: 0.448,
           idea: 'Hiru egiturak zeharkatzen dute diafragma: aorta, beheko kaba zaina eta hestegorria.',
           key: 'Beheko kaba tendoian zeharkatzen du; aorta zutabeen artean, atzean.',
       more: 'Apunteek beste egitura batzuk ere aipatzen dituzte (nerbio begetatibo desberdinak, toraxeko nerbio esplaknikoak…): zerrenda irekita dago apunteetan.',
@@ -912,38 +1029,68 @@ export const week7: WeekDef = {
           focus: ['aortaren-hiatoa', 'aorta', 'beheko-kabaren-zuloa', 'beheko-kaba-zaina', 'hestegorriaren-hiatoa', 'hestegorria'],
         },
         {
-          at: 0.62,
+          at: 0.5787,
           idea: 'Aurrean askoz gorago insertatzen da atzean baino.',
           key: 'Aurrea (bularrezurra) gora; atzea (gerri-ornoak) behera.',
+          ask: {
+            q: 'Diafragmaren zuntz muskularrak non insertatzen dira gorago?',
+            options: ['Aurrean (bularrezurrean)', 'Atzean (gerri-ornoetan)', 'Maila berean, inguru osoan'],
+            answer: 0,
+            why: [
+              'Hori da: aurrean askoz gorago insertatzen dira atzean baino.',
+              'Ez: atzean (zutabeak, gerri-ornoetan) askoz beherago insertatzen dira.',
+              'Ez: aurrearen eta atzearen artean maila-diferentzia handia dago.',
+            ],
+          },
           notes: ['w7/3.1/p11/s1'],
           view: 'sagitala',
           text: 'Laburpena: diafragmaren zuntz muskularrak aurrean askoz gorago insertatzen dira atzean baino.',
           focus: ['diafragma', 'bularrezur-atala', 'gerriko-atala'],
         },
         {
-          at: 0.78,
+          at: 0.728,
           idea: 'Diafragmaren gainean toraxa (bi pleura barrunbe eta perikardioa); azpian, peritoneo barrunbea.',
           notes: ['w7/3.1/p12/s1', 'w7/3.1/p13/s1'],
           text: 'Diafragmaren goian barrunbe torazikoa dago: enbrioi barruko zelomatik bi pleura barrunbe eta perikardio barrunbe bat. Azpian abdomeneko barrunbea: zelomatik garatutako peritoneo barrunbea, baina ez du abdomen osoa okupatzen.',
           focus: ['pleura-barrunbea', 'perikardio-barrunbea', 'peritoneo-barrunbea'],
         },
         {
-          at: 0.9,
+          at: SUMMARY.at,
           idea: 'Laburpena: zeloma bakarretik lau barrunbe sortu dira.',
-          key: 'Zeloma → (septuma) 2 → pleura ×2, perikardioa eta peritoneoa.',
+          key: 'Zeloma → septumak bitan → goikoa hirutan (mintz pleuroperikardikoak) eta erretenak itxita (mintz pleuroperitonealak). Mintzaren izenak esaten du zein bi barrunbe bereizten dituen.',
           ask: {
-            q: 'Zenbat barrunbe sortu dira azkenean enbrioi barruko zelomatik?',
-            options: ['Lau: bi pleura, perikardio bat eta peritoneoa', 'Hiru', 'Bi'],
+            q: 'Zein bi barrunbe bereizten ditu mintz bakoitzak?',
+            options: [
+              'Pleuroperikardikoak: pleura ↔ perikardioa; pleuroperitonealak: pleura ↔ peritoneoa',
+              'Pleuroperikardikoak: perikardioa ↔ peritoneoa; pleuroperitonealak: pleura ↔ perikardioa',
+              'Biek pleura ↔ peritoneoa',
+              'Biek perikardioa ↔ peritoneoa',
+            ],
             answer: 0,
             why: [
-              'Hori da: atze-alboetan bi pleura barrunbe, erdian perikardio barrunbea, eta diafragmaren azpian peritoneo barrunbea.',
-              'Pleura barrunbeak eta perikardioa kontatuz hiru dira, baina peritoneo barrunbea ere badago.',
-              'Bi hasierako zatiketa da (septumaren gainekoa eta azpikoa); gero goikoa hirutan zatitu da.',
+              'Hori da: izenak berak esaten du (pleuro-perikardikoak, pleuro-peritonealak).',
+              'Perikardioa eta peritoneoa septum transversumak bereizten ditu, ez mintz batek.',
+              'Hori mintz pleuroperitonealek bakarrik egiten dute (erretenak ixtean).',
+              'Perikardioa eta peritoneoa septumak bereizten ditu; mintzek ez.',
             ],
           },
           notes: ['w7/4/p3/s1', 'w7/4/p4/s1', 'w7/4/p5/s1-s2', 'w7/4/p2/s1'],
+          view: 'laburpena',
           text: 'Gogoratu: septumak zeloma bitan banatzen du (goian hasierako perikardio barrunbea, behean peritoneo barrunbea). Hestetik sortutakoak hasieran peritoneo barrukoak dira, batzuk gero atzekaldera. Goiko barrunbean 2 pleura eta perikardio barrunbe bat, paretako eta errai orriekin; espazio birtualak dira.',
           focus: ['pleura-barrunbea', 'perikardio-barrunbea', 'peritoneo-barrunbea', 'diafragma'],
+          tour: [
+            'enbrioi-barruko-zeloma',
+            'septum-transversum',
+            'hasierako-perikardio-barrunbea',
+            'erreten-perikardioperitonealak',
+            'mintz-pleuroperikardikoak',
+            'pleura-barrunbea',
+            'perikardio-barrunbea',
+            'mintz-pleuroperitonealak',
+            'diafragma',
+            'peritoneo-barrunbea',
+          ],
+          tourAt: 0.99,
         },
       ],
       structures: [
@@ -951,6 +1098,7 @@ export const week7: WeekDef = {
         'zentro-tendinosoa',
         'bularrezur-atala',
         'saihets-hezur-atala',
+        'diafragmaren-alde-periferikoa',
         'gerriko-atala',
         'diafragmaren-zutabeak',
         'erdiko-lotailu-arkutua',
@@ -1084,7 +1232,36 @@ export const week7: WeekDef = {
       question: 'Non zeharkatzen du aortak diafragma?',
       options: ['Aortaren hiatoan, zutabeen artean, erdiko lotailu arkutuaren atzetik', 'Zentro tendinosoan', 'Saihets-hezur atalean', 'Bularrezur atalean'],
       answer: 0,
-      explanation: 'Aortaren hiatoa gerriko atalean dago (eskuineko eta ezkerreko zutabeen artean, T12 inguruan); beheko kaba, aldiz, zentro tendinosoan zeharkatzen du.',
+      explanation: 'Aortaren hiatoa gerriko atalean dago (eskuineko eta ezkerreko zutabeen artean, erdiko lotailu arkutuaren atzetik); beheko kaba, aldiz, zentro tendinosoan zeharkatzen du.',
+      stageId: 'diafragma-heldua',
+    },
+    {
+      id: 'w7-q-peritoneo-ez-osoa',
+      question: 'Torax barrunbe osoa hasierako perikardio barrunbeak okupatzen du. Zergatik ez du peritoneo barrunbeak abdomeneko barrunbe osoa okupatzen?',
+      options: [
+        'Organo batzuk peritoneo kanpokoak eta beste batzuk peritoneo atzekoak direlako',
+        'Erreten perikardioperitonealak irekita geratzen direlako',
+        'Diafragmak abdomeneko barrunbearen erdia betetzen duelako',
+        'Heste osoa toraxean geratzen delako',
+      ],
+      answer: 0,
+      explanation: 'Abdomenean organo batzuk peritoneo barrunbetik kanpo daude: kanpokoak (giltzurrunak, aorta, beheko kaba; inoiz ez dute mesenteriorik izan) eta atzekoak (duodenoa, goranzko eta beheranzko kolona; haien mesenterioa atzeko paretako peritoneoarekin fusionatu da).',
+      stageId: 'peritoneo-barrunbea',
+    },
+    {
+      id: 'w7-q-zentro-tendinosoa',
+      question: 'Zertatik garatzen da diafragmaren zentro tendinosoa?',
+      options: ['Septum transversumetik', 'Hestegorri inguruko mesenkimatik', 'Mintz pleuroperitonealetatik', 'Gorputzeko mesodermo paraxialetik'],
+      answer: 0,
+      explanation: 'Septum transversumetik garatzen da erdiko atal tendinosoa (eskuineko, erdiko eta ezkerreko hostoak). Hestegorri inguruko mesenkimatik gerriko atal muskularra sortzen da, eta gorputzeko mesodermo paraxialetik alde periferikoko atal muskularra.',
+      stageId: 'diafragma-eraketa',
+    },
+    {
+      id: 'w7-q-barrunbe-kopurua',
+      question: 'Diafragma osatu ondoren, zenbat barrunbe daude enbrioi barruko zelomatik sortuta?',
+      options: ['Lau: bi pleura, perikardioa (toraxean) eta peritoneoa (abdomenean)', 'Bi: torazikoa eta abdominala', 'Hiru: pleura, perikardioa eta peritoneoa', 'Bost: bi pleura, perikardioa eta bi peritoneo'],
+      answer: 0,
+      explanation: 'Diafragmaren gainean, toraxean, 2 pleura barrunbe eta perikardio barrunbe bat; azpian, abdomenean, peritoneo barrunbea (abdomen osoa okupatu gabe).',
       stageId: 'diafragma-heldua',
     },
   ],

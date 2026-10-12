@@ -151,7 +151,7 @@ export function NeurulationTransverse({ t, reduced }: SceneProps) {
       <Note x={500} y={612} show={seg(t, 0.8, 0.83) * (1 - seg(t, 0.9, 0.92))} tone="accent">
         Bi bide: ektodermoaren azpitik (dortsolaterala) eta hodiaren eta somitaren artetik (bentrala)
       </Note>
-      <Label id="azaleko-ektodermoa" x={190} y={110} ax={ecto[0]} ay={ecto[1]} />
+      <Label id="azaleko-ektodermoa" x={190} y={268} ax={ecto[0]} ay={ecto[1]} />
       <Label id="plaka-neurala" x={190} y={160} ax={plate[0]} ay={plate[1]} show={1 - seg(t, 0.3, 0.45)} />
       <Label id="ildo-neurala" x={190} y={205} ax={groove[0]} ay={groove[1]} show={seg(t, 0.12, 0.16) * (1 - seg(t, 0.5, 0.56))} />
       <Label id="somitak" x={190} y={470} ax={som[0]} ay={som[1]} show={seg(t, 0.15, 0.3)} />

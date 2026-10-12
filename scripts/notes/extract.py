@@ -1,4 +1,4 @@
-"""Extract the eight ORIGINAL PDFs. No spelling, punctuation or content corrections.
+"""Extract the nine ORIGINAL PDFs. No spelling, punctuation or content corrections.
 
 Requires PyMuPDF. --check is read-only and compares both the PDF text and the
 committed TypeScript, including emphasis and ids. Only audited furniture goes.
@@ -25,6 +25,8 @@ FILES = [
     '6. Enbriologia 3. hilabetetik jaiotzara arte_ fetua eta karena (ZUZENDUTA).docx.pdf',
     '7.GAIA_Gorputzaren barrunbeak (ZUZENDUTA).pdf',
     '8. GAIA_ HEZUR SISTEMA (zuzendu gabe).docx.pdf',
+    # Topic 9 came as a DOCX only: exported to PDF with Word (same name + .pdf), text unchanged.
+    '9.GAIA _MUSKULU EDO GIHAR SISTEMA .docx.pdf',
 ]
 
 
@@ -142,6 +144,9 @@ def extract(path, week):
         kind = 'p'
         if 'AURKIBIDEA' in text:
             kind, toc = 'toc', True
+        elif toc and week == 9:
+            # Week 9's TOC numbers its sub-headings in bold capitals too: it ends at the grey note after it.
+            toc = not text.startswith('Grisez dena')
         elif toc and heading and (line['bold'] > .75 and text.upper() == text or text.startswith('0. 2.astearen') or line['size'] >= 15.5):
             # Some last TOC lines have an empty 22pt span: size above ignores it.
             toc = False

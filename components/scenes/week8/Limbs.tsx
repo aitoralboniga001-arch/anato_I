@@ -258,20 +258,12 @@ const zoomAt = (ay: number) => `translate(${WALL_X},${ay}) scale(${K}) translate
 /** `dx`/`dy` nudge the tip in screen pixels, after the zoom. */
 const at = (p: Pt, ay: number, dx = 0, dy = 0) => ({ ax: WALL_X + (p[0] - WALL_X) * K + dx, ay: ay + (p[1] - ay) * K + dy });
 
-export function LimbBuds({ t, reduced }: SceneProps) {
+/** Topic 8's bud drawing (body wall, somites, parietal layer, the two limbs) without its captions and names, for later topics. */
+export function LimbBudsDrawing({ t, reduced }: SceneProps) {
   const su = limbS(t, false);
   const sl = limbS(t, true);
   const up = limb(su, UP_Y);
   const low = limb(sl, LOW_Y);
-  const cart = vis(t, LIMB_T.cart);
-  const week = t < LIMB_T.plates ? '4.–5. astea' : t < LIMB_T.centres ? '6. astea' : '8. astea';
-  const ray = (g: Limb, th: number, u: number) => along([g.X(g.xp - g.R * 0.45), g.ay], g.rim(th), u);
-  // The mesenchyme is loose cells: its name points at the drawn cell nearest the middle of the bud.
-  const mesWant: Pt = [up.X(up.xp * 0.45), UP_Y + 12];
-  const mesAt = CELLS_UP.filter((c) => inPoly(up.outline, c.p[0], c.p[1])).reduce<Pt>(
-    (a, c) => (Math.hypot(c.p[0] - mesWant[0], c.p[1] - mesWant[1]) < Math.hypot(a[0] - mesWant[0], a[1] - mesWant[1]) ? c.p : a),
-    [up.X(0), UP_Y],
-  );
   return (
     <g>
       <Defs8 />
@@ -307,6 +299,35 @@ export function LimbBuds({ t, reduced }: SceneProps) {
         <path d={`M${WALL_X},0L${WALL_X},640`} stroke={Q.skin} strokeWidth={2.4} opacity={0.8} />
       </Part>
 
+    </g>
+  );
+}
+
+/** Screen geometry of the buds at topic-8 time t: outlines and a mapper from limb space to the screen. */
+export function limbBudsScreen(t: number) {
+  const up = limb(limbS(t, false), UP_Y);
+  const low = limb(limbS(t, true), LOW_Y);
+  const map = (p: Pt, ay: number): Pt => [WALL_X + (p[0] - WALL_X) * K, ay + (p[1] - ay) * K];
+  return { up: up.outline.map((p) => map(p, UP_Y)), low: low.outline.map((p) => map(p, LOW_Y)), wallX: WALL_X, upY: UP_Y, lowY: LOW_Y };
+}
+
+export function LimbBuds({ t, reduced }: SceneProps) {
+  const su = limbS(t, false);
+  const sl = limbS(t, true);
+  const up = limb(su, UP_Y);
+  const low = limb(sl, LOW_Y);
+  const cart = vis(t, LIMB_T.cart);
+  const week = t < LIMB_T.plates ? '4.–5. astea' : t < LIMB_T.centres ? '6. astea' : '8. astea';
+  const ray = (g: Limb, th: number, u: number) => along([g.X(g.xp - g.R * 0.45), g.ay], g.rim(th), u);
+  // The mesenchyme is loose cells: its name points at the drawn cell nearest the middle of the bud.
+  const mesWant: Pt = [up.X(up.xp * 0.45), UP_Y + 12];
+  const mesAt = CELLS_UP.filter((c) => inPoly(up.outline, c.p[0], c.p[1])).reduce<Pt>(
+    (a, c) => (Math.hypot(c.p[0] - mesWant[0], c.p[1] - mesWant[1]) < Math.hypot(a[0] - mesWant[0], a[1] - mesWant[1]) ? c.p : a),
+    [up.X(0), UP_Y],
+  );
+  return (
+    <g>
+      <LimbBudsDrawing t={t} reduced={reduced} />
       <Note x={260} y={30} size={13} tone="accent">
         {week}
       </Note>
@@ -607,6 +628,77 @@ function Disc({ l, alpha, turning, label }: { l: L2; alpha: number; turning: num
   );
 }
 
+/**
+ * The 8th-week embryo from the front with its limbs at rotation progress `ru` (upper) / `rl` (lower): trunk, head
+ * and limbs only (no discs, notes or labels). Topic 9 draws its nerves on it.
+ */
+export function FetusFront({ ru = 1, rl = 1 }: { ru?: number; rl?: number }) {
+  const aUp = 90 - 90 * ru;
+  const aLow = 90 + 90 * rl;
+  return (
+    <g>
+        <Defs8 />
+        <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
+        <defs>
+          <radialGradient id="w8-rot-skin" cx="0.42" cy="0.36" r="0.7">
+            <stop offset="0" stopColor="#f8e2cf" />
+            <stop offset="0.65" stopColor="#e7c2a4" />
+            <stop offset="1" stopColor="#b98b6e" />
+          </radialGradient>
+          <radialGradient id="w8-rot-bulge" cx="0.5" cy="0.4" r="0.6">
+            <stop offset="0" stopColor="#fff" stopOpacity={0.22} />
+            <stop offset="1" stopColor="#fff" stopOpacity={0} />
+          </radialGradient>
+        </defs>
+        {/* Trunk: the heart and liver bulges, the umbilical cord cut short (two arteries, one vein), the genital tubercle. */}
+        <Part id="gorputz-pareta" quiet>
+        <path d={smoothPath(TORSO, true, 0.3)} fill="url(#w8-rot-skin)" stroke={EDGE} strokeWidth={1.6} />
+        <ellipse cx={500} cy={248} rx={56} ry={44} fill="url(#w8-rot-bulge)" />
+        <ellipse cx={500} cy={338} rx={82} ry={52} fill="url(#w8-rot-bulge)" />
+        <path d="M454,296 Q500,312 546,296" fill="none" stroke="rgba(120,70,50,0.28)" strokeWidth={1.6} />
+        <ellipse cx={500} cy={446} rx={9} ry={7} fill="#e3b99c" stroke={EDGE} strokeWidth={1.2} />
+        </Part>
+        <Part id="behin-betiko-zilbor-hestea" quiet>
+        <circle cx={500} cy={372} r={25} fill="#e9d6c6" stroke={EDGE} strokeWidth={1.6} />
+        <circle cx={500} cy={372} r={25} fill="url(#w8-rot-bulge)" />
+        </Part>
+        <Part id="zilbor-hodiak" quiet>
+        <circle cx={500} cy={364} r={6.5} fill="#5a4a9a" stroke="#2a1f55" strokeWidth={1} />
+        <circle cx={491} cy={379} r={4.2} fill="#c0392b" stroke="#6b1d14" strokeWidth={1} />
+        <circle cx={509} cy={379} r={4.2} fill="#c0392b" stroke="#6b1d14" strokeWidth={1} />
+        </Part>
+        {/* The head, half the embryo: wide-set eyes under thin lids, a flat nose, a wide mouth, ears still low. */}
+        <Part id="burua" quiet>
+        <path d="M470,168 L530,168 L534,192 L466,192Z" fill="#dcb497" />
+        <ellipse cx={500} cy={104} rx={90} ry={82} fill="url(#w8-rot-skin)" stroke={EDGE} strokeWidth={1.6} />
+        <ellipse cx={470} cy={70} rx={46} ry={30} fill="url(#w8-rot-bulge)" />
+        {[452, 548].map((x) => (
+          <g key={x}>
+            <ellipse cx={x} cy={118} rx={13} ry={9} fill="#2b1d22" opacity={0.78} />
+            <path d={`M${x - 14},116 Q${x},${106} ${x + 14},116`} fill="none" stroke="#9a6a52" strokeWidth={2} strokeLinecap="round" />
+            <ellipse cx={x - 3} cy={116} rx={3} ry={2} fill="#fff" opacity={0.35} />
+          </g>
+        ))}
+        <path d="M492,140 Q500,150 508,140" fill="none" stroke="#a87458" strokeWidth={2} strokeLinecap="round" />
+        <circle cx={494} cy={143} r={1.6} fill="#7a4a36" />
+        <circle cx={506} cy={143} r={1.6} fill="#7a4a36" />
+        <path d="M474,164 Q500,166 526,164" fill="none" stroke="#8a5240" strokeWidth={2.2} strokeLinecap="round" />
+        {[1, -1].map((s) => (
+          <path key={s} d={`M${500 - s * 88},138 C${500 - s * 100},134 ${500 - s * 102},156 ${500 - s * 90},164`} fill="#e2bb9e" stroke={EDGE} strokeWidth={1.4} />
+        ))}
+        </Part>
+        {LIMBS.map((l, i) => (
+          <LimbTube key={i} l={l} alpha={l.lower ? aLow : aUp} r={l.lower ? rl : ru} />
+        ))}
+    </g>
+  );
+}
+/** Root, joint (elbow/knee) and end (wrist/ankle) of each limb at rotation progress r: [right arm, left arm, right leg, left leg]. */
+export function fetusLimb(i: number, r = 1): { root: Pt; joint: Pt; end: Pt; w: number } {
+  const [a, b] = pieces(LIMBS[i], r);
+  return { root: a.p0, joint: a.p1, end: b.p1, w: LIMBS[i].w };
+}
+
 export function LimbRotation({ t }: SceneProps) {
   const ru = seg(t, LIMB_T.rotUp + 0.015, LIMB_T.rotUp + 0.065);
   const rl = seg(t, LIMB_T.rotLow + 0.015, LIMB_T.rotLow + 0.065);
@@ -616,59 +708,7 @@ export function LimbRotation({ t }: SceneProps) {
   const lowTurn = vis(t, LIMB_T.rotLow);
   return (
     <g>
-      <Defs8 />
-      <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
-      <defs>
-        <radialGradient id="w8-rot-skin" cx="0.42" cy="0.36" r="0.7">
-          <stop offset="0" stopColor="#f8e2cf" />
-          <stop offset="0.65" stopColor="#e7c2a4" />
-          <stop offset="1" stopColor="#b98b6e" />
-        </radialGradient>
-        <radialGradient id="w8-rot-bulge" cx="0.5" cy="0.4" r="0.6">
-          <stop offset="0" stopColor="#fff" stopOpacity={0.22} />
-          <stop offset="1" stopColor="#fff" stopOpacity={0} />
-        </radialGradient>
-      </defs>
-      {/* Trunk: the heart and liver bulges, the umbilical cord cut short (two arteries, one vein), the genital tubercle. */}
-      <Part id="gorputz-pareta" quiet>
-      <path d={smoothPath(TORSO, true, 0.3)} fill="url(#w8-rot-skin)" stroke={EDGE} strokeWidth={1.6} />
-      <ellipse cx={500} cy={248} rx={56} ry={44} fill="url(#w8-rot-bulge)" />
-      <ellipse cx={500} cy={338} rx={82} ry={52} fill="url(#w8-rot-bulge)" />
-      <path d="M454,296 Q500,312 546,296" fill="none" stroke="rgba(120,70,50,0.28)" strokeWidth={1.6} />
-      <ellipse cx={500} cy={446} rx={9} ry={7} fill="#e3b99c" stroke={EDGE} strokeWidth={1.2} />
-      </Part>
-      <Part id="behin-betiko-zilbor-hestea" quiet>
-      <circle cx={500} cy={372} r={25} fill="#e9d6c6" stroke={EDGE} strokeWidth={1.6} />
-      <circle cx={500} cy={372} r={25} fill="url(#w8-rot-bulge)" />
-      </Part>
-      <Part id="zilbor-hodiak" quiet>
-      <circle cx={500} cy={364} r={6.5} fill="#5a4a9a" stroke="#2a1f55" strokeWidth={1} />
-      <circle cx={491} cy={379} r={4.2} fill="#c0392b" stroke="#6b1d14" strokeWidth={1} />
-      <circle cx={509} cy={379} r={4.2} fill="#c0392b" stroke="#6b1d14" strokeWidth={1} />
-      </Part>
-      {/* The head, half the embryo: wide-set eyes under thin lids, a flat nose, a wide mouth, ears still low. */}
-      <Part id="burua" quiet>
-      <path d="M470,168 L530,168 L534,192 L466,192Z" fill="#dcb497" />
-      <ellipse cx={500} cy={104} rx={90} ry={82} fill="url(#w8-rot-skin)" stroke={EDGE} strokeWidth={1.6} />
-      <ellipse cx={470} cy={70} rx={46} ry={30} fill="url(#w8-rot-bulge)" />
-      {[452, 548].map((x) => (
-        <g key={x}>
-          <ellipse cx={x} cy={118} rx={13} ry={9} fill="#2b1d22" opacity={0.78} />
-          <path d={`M${x - 14},116 Q${x},${106} ${x + 14},116`} fill="none" stroke="#9a6a52" strokeWidth={2} strokeLinecap="round" />
-          <ellipse cx={x - 3} cy={116} rx={3} ry={2} fill="#fff" opacity={0.35} />
-        </g>
-      ))}
-      <path d="M492,140 Q500,150 508,140" fill="none" stroke="#a87458" strokeWidth={2} strokeLinecap="round" />
-      <circle cx={494} cy={143} r={1.6} fill="#7a4a36" />
-      <circle cx={506} cy={143} r={1.6} fill="#7a4a36" />
-      <path d="M474,164 Q500,166 526,164" fill="none" stroke="#8a5240" strokeWidth={2.2} strokeLinecap="round" />
-      {[1, -1].map((s) => (
-        <path key={s} d={`M${500 - s * 88},138 C${500 - s * 100},134 ${500 - s * 102},156 ${500 - s * 90},164`} fill="#e2bb9e" stroke={EDGE} strokeWidth={1.4} />
-      ))}
-      </Part>
-      {LIMBS.map((l, i) => (
-        <LimbTube key={i} l={l} alpha={l.lower ? aLow : aUp} r={l.lower ? rl : ru} />
-      ))}
+      <FetusFront ru={ru} rl={rl} />
       {LIMBS.map((l, i) => (
         <Disc key={i} l={l} alpha={l.lower ? aLow : aUp} turning={l.lower ? lowTurn : upTurn} label={1} />
       ))}

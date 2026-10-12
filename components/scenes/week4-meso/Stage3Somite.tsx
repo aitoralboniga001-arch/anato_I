@@ -22,7 +22,8 @@ import { AORTA, Aortae, NOTO, NeuralTube, Notochord, SOMITE, TE, TP, TUBE, Trunk
 
 // Step windows (week4b.ts beats): each change happens INSIDE its own step, never before it.
 export const SB = { sclero: 0.12, migrate: 0.26, dermomyo: 0.4, dermato: 0.56, myo: 0.72, fate: 0.88 };
-const E6 = 0.42;
+/** Folding stage of the trunk section in this stage (topic 9 retells the somite on the same section). */
+export const E6 = 0.42;
 
 function timing(t: number) {
   return {
@@ -645,6 +646,16 @@ function anchors(c: Ctx): Record<string, Pt> {
 }
 
 const CTX: Place = { k: 1.16, ox: 500, oy: 190 };
+
+/** Screen points of the two lips of the dorsal plate (dorsomedial, ventrolateral), at their thickened ends. */
+export function somiteLips(pl: Place = CLOSE): [Pt, Pt] {
+  const M = placer(pl);
+  const at = (s: number): Pt => {
+    const q = plateTop(s, 1);
+    return M([q[0], q[1] + plateThk(s, 1) * 0.5]);
+  };
+  return [at(0.04), at(0.96)];
+}
 
 /** The close-up drawing and its label anchors, for other topics that retell the somite (topic 8: bone origins). */
 export function somiteClose(t: number, sids?: SomiteIds, pl: Place = CLOSE) {

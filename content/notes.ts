@@ -102,6 +102,26 @@ export const NOTES: Record<number, NotesSection[]> = {
     { n: '5.3', title: 'Orno zuloa edo orno bertebrala', depth: 1, stages: [], note: 'Orno zuloa: "Ornoa" etapan erakusten da.' },
     { n: '5.4', title: 'Bizkarrezurraren ornoekin lotuta dauden saihetsen eraketa', depth: 1, stages: ['saihetsak'] },
   ],
+  9: [
+    { n: '1', title: 'Sarrera', depth: 0, stages: ['muskulu-motak'] },
+    { n: '2', title: 'Muskulu ildaskatuak (edo borondatezkoak)', depth: 0, stages: ['ildaskatuak'] },
+    {
+      n: '2.1',
+      title: 'Buruko eta lepoko muskulu ildaskatuak',
+      depth: 1,
+      stages: ['somitomeroak-burua', 'okzipitalak', 'ehun-konektiboa'],
+      covers: '2.1.1 Somitomeroak · 2.1.2 Somitak · 2.1.3 Inerbazioa · 2.1.4 Ehun konektibozko patroiak',
+    },
+    {
+      n: '2.2',
+      title: 'Bizkarreko, gorputz paretetako eta gorputz adarretako muskuluen jatorria',
+      depth: 1,
+      stages: ['somitaren-paretak', 'domeinuak', 'nerbio-espinala', 'epaxial-hipaxial'],
+      covers: '2.2.1 Domeinuaren araberako sailkapena · 2.2.2 Inerbazioaren araberako sailkapena',
+    },
+    { n: '3', title: 'Muskulu leuna edo muskulu lisoa', depth: 0, stages: ['muskulu-lisoa'], covers: '3.1 Sistema baskularra' },
+    { n: '4', title: 'Bihotzeko muskulua edo miokardioa', depth: 0, stages: ['bihotz-muskulua'] },
+  ],
 };
 
 /** The notes section a stage belongs to, and its parent heading when it is a sub-heading. */

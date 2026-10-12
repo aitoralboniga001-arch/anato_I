@@ -128,6 +128,13 @@ relation('paretako-orria', 'saihets-kartilagoa', 'origin', `${topic8}#saihets-ka
 relation('paretako-orria', 'esternoi-barrak', 'origin', `${topic8}#esternoi-barrak.origin`);
 relation('esternoi-barrak', 'esternoia', 'origin', `${topic8}#esternoi-barrak.fate`);
 relation('kirtena', 'esternoia', 'composition', `${topic8}#kirtena.fate`);
+
+// 9. gaia: muskulu sistema.
+const topic9 = 'content/weeks/week9-structures.ts';
+relation('errai-orria', 'muskulu-leuna', 'origin', `${topic9}#muskulu-leuna.origin`, 'Orokorrean; salbuespenak: ektodermoa eta aortaren pareta.');
+relation('errai-orria', 'miokardioa', 'origin', `${topic9}#miokardioa.origin`, 'Bi bihotz hodien inguruan.');
+relation('mioblastoak', 'zuntz-muskularrak', 'origin', `${topic9}#zuntz-muskularrak.origin`, 'Mioblastoak fusionatuta.');
+relation('miokardioa', 'eroapen-sistema', 'development', `${topic9}#miokardioa.fate`, 'Zuntz muskular oso espezializatuak, ez nerbioak.');
 relation('esternoiaren-gorputza', 'esternoia', 'composition', `${topic8}#esternoiaren-gorputza.fate`);
 relation('apofisi-xifoidea', 'esternoia', 'composition', `${topic8}#apofisi-xifoidea.fate`);
 relation('paretako-orria', 'gorputz-adarren-mesenkima', 'origin', `${topic8}#gorputz-adarren-mesenkima.origin`);

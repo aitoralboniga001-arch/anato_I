@@ -67,6 +67,8 @@ interface Dest {
   /** label */
   lx: number;
   ly: number;
+  /** label alignment override (default: start for head, end for trunk) */
+  al?: 'start' | 'end';
 }
 
 const ORIGIN = {
@@ -93,8 +95,8 @@ const HEAD: Dest[] = [
 // Trunk: a schematic transverse section (dorsal up), local units, body = ellipse rx 100 × ry 200.
 // ---------------------------------------------------------------------------
 
-const SS = 0.9;
-const S0: Pt = [702, 328];
+const SS = 0.8;
+const S0: Pt = [672, 326];
 const spx = (q: Pt): Pt => [S0[0] + q[0] * SS, S0[1] + q[1] * SS];
 const SEC_VIEW = `translate(${S0[0]} ${S0[1]}) scale(${SS})`;
 const RX = 100;
@@ -127,15 +129,15 @@ const folliclePt: Pt = (() => {
 })();
 
 const TRUNK: Dest[] = [
-  { id: 'gongoil-errakideoak', group: 2, path: [SEC.crest, [16, -172], [32, -156], [42, -140]], at: SEC.drg, lx: 988, ly: 330 },
-  { id: 'glia-zelulak', group: 2, path: [SEC.crest, [18, -176], [40, -160], [56, -138]], at: [57, -124], lx: 988, ly: 285 },
-  { id: 'schwann-zelulak', group: 2, path: [[48, -113], [62, -88], [72, -58]], at: [70, -64], lx: 988, ly: 375 },
-  { id: 'gongoil-sinpatikoak', group: 2, path: [SEC.crest, [14, -170], [26, -150], [27, -112], [30, -92]], at: SEC.chain, lx: 988, ly: 420 },
-  { id: 'giltzurrun-gaineko-muina', group: 2, path: [[31, -76], [36, -50], [41, -26]], at: SEC.adrenal, lx: 988, ly: 510 },
-  { id: 'gongoil-parasinpatikoak', group: 2, path: [[4, -22], [4, 10], [6, 40], [16, 56]], at: [18, 60], lx: 988, ly: 555 },
-  { id: 'melanozitoak', group: 3, path: [SEC.crest, ...under(8, MEL_TH[1] - 3, 4), rim(MEL_TH[1], 0.965)], at: rim(MEL_TH[0], 0.965), lx: 988, ly: 240 },
-  { id: 'ile-folikuluak', group: 3, path: [SEC.crest, ...under(8, FOLL_TH - 4, 14), folliclePt], at: folliclePt, lx: 988, ly: 600 },
-  { id: 'azazkalak', group: 3, path: [SEC.crest, ...under(8, 84, 8), [104, 40], [124, 54]], at: SEC.limbTip, lx: 988, ly: 465 },
+  { id: 'gongoil-errakideoak', group: 2, path: [SEC.crest, [16, -172], [32, -156], [42, -140]], at: SEC.drg, lx: 806, ly: 265 },
+  { id: 'glia-zelulak', group: 2, path: [SEC.crest, [18, -176], [40, -160], [56, -138]], at: [57, -124], lx: 806, ly: 294 },
+  { id: 'schwann-zelulak', group: 2, path: [[48, -113], [62, -88], [72, -58]], at: [70, -64], lx: 806, ly: 352 },
+  { id: 'gongoil-sinpatikoak', group: 2, path: [SEC.crest, [14, -170], [26, -150], [27, -112], [30, -92]], at: SEC.chain, lx: 806, ly: 323 },
+  { id: 'giltzurrun-gaineko-muina', group: 2, path: [[31, -76], [36, -50], [41, -26]], at: SEC.adrenal, lx: 806, ly: 381 },
+  { id: 'gongoil-parasinpatikoak', group: 2, path: [[4, -22], [4, 10], [6, 40], [16, 56]], at: [18, 60], lx: 806, ly: 439 },
+  { id: 'melanozitoak', group: 3, path: [SEC.crest, ...under(8, MEL_TH[1] - 3, 4), rim(MEL_TH[1], 0.965)], at: rim(MEL_TH[0], 0.965), lx: 806, ly: 236 },
+  { id: 'ile-folikuluak', group: 3, path: [SEC.crest, ...under(8, FOLL_TH - 4, 14), folliclePt], at: folliclePt, lx: 806, ly: 468 },
+  { id: 'azazkalak', group: 3, path: [SEC.crest, ...under(8, 84, 8), [104, 40], [124, 54]], at: SEC.limbTip, lx: 806, ly: 410 },
 ];
 
 const ALL = [...HEAD, ...TRUNK];
@@ -184,7 +186,7 @@ function RouteOf({ d, t, u }: { d: Dest; t: number; u: number }) {
   if (prog <= 0.01) return null;
   const on = groupOn(t, d.group);
   const now = groupW(t, d.group);
-  return <Route pts={routeOf(d)} color={routeColor(d)} progress={prog} width={2.6} u={u} head={10} show={on * (0.42 + 0.58 * now)} />;
+  return <Route pts={routeOf(d)} color={routeColor(d)} progress={prog} width={2.6} u={u} head={10} show={on * (0.22 + 0.78 * now)} />;
 }
 
 /** How formed a derivative is (0 before its cells arrive). */
@@ -488,8 +490,8 @@ function labels(t: number) {
         const w = groupOn(t, d.group) * seg(t, travel(d).b - 0.01, travel(d).b + 0.004);
         if (w <= 0.01) return null;
         const [ax, ay] = isHead(d) ? hp(d.at) : spx(d.at);
-        // Trunk names in full size (one ordered column, spaced so no leader crosses another); head names stay small to clear the face.
-        return <Label key={d.id} id={d.id} x={d.lx} y={d.ly} ax={ax} ay={ay} align={isHead(d) ? 'start' : 'end'} small={isHead(d)} show={w} />;
+        // Trunk names in one column right beside the section, in the order of their anchors, so the leaders are short and parallel.
+        return <Label key={d.id} id={d.id} x={d.lx} y={d.ly} ax={ax} ay={ay} align={d.al ?? 'start'} small={isHead(d)} show={w} />;
       })}
     </>
   );
@@ -529,7 +531,7 @@ export function NeuralCrestDerivatives({ t }: SceneProps) {
       <Note x={404} y={470} tone="dim" size={13}>
         Burua eta lepoa (albotik)
       </Note>
-      <Note x={702} y={530} tone="dim" size={13}>
+      <Note x={672} y={512} tone="dim" size={13}>
         Enborra (ebaki zeharkakoa)
       </Note>
       {labels(t)}

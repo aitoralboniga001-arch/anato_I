@@ -161,7 +161,7 @@ export function StructureAtlas() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') ?? '';
   const requestedTopic = Number(searchParams.get('gaia'));
-  const topic = requestedTopic >= 1 && requestedTopic <= 8 && Number.isInteger(requestedTopic) ? requestedTopic : 0;
+  const topic = requestedTopic >= 1 && requestedTopic <= 9 && Number.isInteger(requestedTopic) ? requestedTopic : 0;
   const results = matches(query, topic);
   // Two ways to browse: cards (each structure with its drawing) or the development schemes.
   const schemesView = searchParams.get('ikusi') === 'eskemak';
@@ -298,7 +298,7 @@ export function StructureAtlas() {
       <LandNav current="egiturak" />
       <main className={styles.main}>
         <header className={styles.hero}>
-          <p className="eyebrow">1.–8. gaiak · Egituren atlasa</p>
+          <p className="eyebrow">1.–9. gaiak · Egituren atlasa</p>
           <h1>Egituren garapena, eskema batean</h1>
           <p>Gai guztietako egiturak eta haien garapen-loturak, adarrez adar.</p>
           <Link href="/leinuak" className={styles.related}>Ernetze orrien leinuak ikusi <span aria-hidden="true">↗</span></Link>

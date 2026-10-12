@@ -3,7 +3,7 @@ import { StructureAtlas } from '@/components/shell/StructureAtlas';
 
 export const metadata: Metadata = {
   title: 'Egituren atlasa — EnbrioAtlas',
-  description: '1.–8. gaietako egiturak, haien jatorriak, eraldaketak eta eratorriak.',
+  description: '1.–9. gaietako egiturak, haien jatorriak, eraldaketak eta eratorriak.',
 };
 
 export default async function StructuresPage({ searchParams }: {

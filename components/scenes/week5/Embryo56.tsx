@@ -1,7 +1,7 @@
 'use client';
 
 import { useId } from 'react';
-import { Label, Mark, Note, Part, lerp, lerpPt, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
+import { Label, Mark, Note, Part, clamp, lerp, lerpPt, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
 import { AgeHud, PlateMask, SKIN, SkinDefs, atDay, limbGeom, polar, ramp, win, type LimbGeom, type Num } from './skin';
 
 /**
@@ -645,7 +645,8 @@ export function Embryo42to56({ t }: SceneProps) {
       {L('belarriaren-pabiloia', 770, 235, [ear[0] + g.earR * 0.85, ear[1] + g.earR * 0.2], vis(t, 0.6) * (1 - half))}
       {L('eskumuturra', 770, 400, arm.joints.dist, limb48)}
       {/* In the day-42 limb push-in the cord's name moves under the cord, left of its anchor, so its line and the heart's never cross a name. */}
-      {L('zilborrestea', 250, lerp(462, 490, k48), [g.cordTip[0] - 4, g.cordTip[1]], vis(t, 0.13) * (1 - limbIn42))}
+      {/* When the push-in drives the cord tip to the left edge, its name leaves before its line sweeps across the heart's. */}
+      {L('zilborrestea', 250, lerp(462, 490, k48), [g.cordTip[0] - 4, g.cordTip[1]], vis(t, 0.13) * (1 - limbIn42) * clamp((A([g.cordTip[0] - 4, g.cordTip[1]])[0] - 90) / 50))}
       {L('zilborrestea', 132, 360, lerpPt([g.cordTip[0] - 4, g.cordTip[1]], g.cordRoot, 0.5), vis(t, 0.13) * limbIn42)}
 
       {/* 56. eguna */}

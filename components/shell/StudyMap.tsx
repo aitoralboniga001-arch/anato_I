@@ -68,6 +68,13 @@ const MAP: { days: string; title: string; chain: string[]; idea: string; href: s
     idea: 'Hezurrak hiru jatorritatik datoz (mesodermo paraxiala, paretako orria, gandor neurala); mesenkima zuzenean hezurtzen da (mintzezkoa) edo kartilago-eredua sortzen du (endokondrala); gorputz-adarretako hezur luzeetan zentro primarioak 12. astean.',
     href: '/astea/8',
   },
+  {
+    days: '4. astetik aurrera',
+    title: 'Muskulu sistema',
+    chain: ['Paraxiala · errai orria', 'Domeinu primaxiala / abaxiala', 'Adar primarioak: epaxial / hipaxial', 'Leuna · bihotzekoa: begetatiboa'],
+    idea: 'Muskulu ildaskatuak mesodermo paraxialetik (somitomeroak, somitak) eta nerbio kranialek edo espinalek inerbatuta; leuna eta bihotzekoa errai orritik, inerbazio begetatiboarekin. Somitetatik bi domeinu: primaxiala eta abaxiala.',
+    href: '/astea/9',
+  },
 ];
 
 const questionIds = POOL.map((q) => q.id);

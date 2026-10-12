@@ -488,7 +488,7 @@ const along = (pts: Pt[], u: number): Pt => resample(pts, 101)[Math.round(u * 10
 
 // ——— Transverse section at the level of the diaphragm (dorsal at the top) ———
 
-const BODY_X = spline(
+export const BODY_X = spline(
   [[500, 50], [640, 62], [742, 116], [792, 214], [798, 330], [774, 440], [706, 530], [604, 580], [500, 590], [396, 580], [294, 530], [226, 440], [202, 330], [208, 214], [258, 116], [360, 62]],
   8,
   true,

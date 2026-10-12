@@ -1051,12 +1051,12 @@ export function Day1112Desidua(props: SceneProps) {
       {L('endometrio-estroma', 180, 60, [280, 120])}
       {L('desidua-erreakzioa', 180, 110, k.decidualCell(6), k.decidua)}
       {L('desidua-zelulak', 180, 160, k.decidualCell(4), k.cells)}
-      {L('umetoki-guruina', 180, 210, GLANDS[0][34])}
+      {L('umetoki-guruina', 180, 400, GLANDS[0][34])}
       {L('amaren-odol-hodiak', 800, 60, k.capillary(1))}
       {L('sinusoideak', 800, 110, k.sinusoid(3))}
-      {L('sare-lakunarra', 180, 330, k.channel(3), k.network)}
-      {L('zirkulazio-uteroplazentarioa', 756, 250, k.lacuna(7), k.circ)}
-      {L('sinzitiotrofoblastoa', 800, 400, k.syn(320))}
+      {L('sare-lakunarra', 180, 210, k.channel(3), k.network)}
+      {L('zirkulazio-uteroplazentarioa', 756, 400, k.lacuna(7), k.circ)}
+      {L('sinzitiotrofoblastoa', 800, 250, k.syn(320))}
       {L('bi-orriko-diskoa', 800, 460, [cx + 12, k.g.discY], seg(t, 0.9, 0.93))}
       <Note x={500} y={588} tone="warn" show={seg(k.erosion, 0.5, 1) * (1 - seg(t, 0.8, 0.82))}>
         Sinzitiotrofoblastoak sinusoideen pareta urratu du: amaren odola laku sarean zirkulatzen hasten da
