@@ -133,19 +133,27 @@ export function MyotomeSection({ t }: SceneProps) {
   const plateP: Pt = a.dermatoma;
   return (
     <g>
+      <defs>
+        <radialGradient id="w9-sclglow">
+          <stop offset="0" stopColor="#ffb08a" stopOpacity="0.32" />
+          <stop offset="1" stopColor="#ffb08a" stopOpacity="0" />
+        </radialGradient>
+      </defs>
       {drawing}
       {plate > 0.01 && (
         <Part id="somitaren-atzeko-pareta" show={plate} groups={['mesodermo-paraxiala']}>
-          <path d={smoothPath([dm, plateP, vl], false, 0.4)} fill="none" stroke="#ffe1d2" strokeWidth={5} strokeLinecap="round" opacity={0.35} />
+          <path d={smoothPath([dm, plateP, vl], false, 0.4)} fill="none" stroke="#ffe1d2" strokeWidth={13} strokeLinecap="round" opacity={0.3} />
+        </Part>
+      )}
+      {/* The sclerotome: the loose cells round the neural tube and notochord, glowing while they are named. */}
+      {sclero > 0.01 && (
+        <Part id="esklerotoma" show={sclero} groups={['mesodermo-paraxiala']}>
+          <ellipse cx={f1(a.esklerotoma[0])} cy={f1(a.esklerotoma[1])} rx={46} ry={40} fill="url(#w9-sclglow)" />
         </Part>
       )}
       <Lips show={lips} />
       <Frontier show={frontier} />
       <SomitomereInset show={vis(t, 0.45, 0.56)} myo={seg(t, 0.47, 0.51)} />
-      {/* Where the myotome sits: under the plate, i.e. in front of (ventral to) the dermatome. */}
-      <Note x={a.miotoma[0] + 40} y={a.miotoma[1] + 40} size={12} tone="accent" show={vis(t, 0.62, 0.67)}>
-        miotoma = dermatomaren alde bentralean
-      </Note>
       <Steps
         t={t}
         steps={[
@@ -167,7 +175,7 @@ export function MyotomeSection({ t }: SceneProps) {
       {L('dermatoma', 810, 150, derm)}
       {L('miotoma', 810, 200, myo)}
       {L('somitaren-alboko-muga', 810, 250, frontier, false, frontierMid)}
-      {L('paretako-orria', 810, 370, frontier)}
+      {L('paretako-orria', 810, 370, frontier, false, [a['paretako-orria'][0] + 32, a['paretako-orria'][1] + 51])}
       {L('bitarteko-mesodermoa', 810, 560, 1, true)}
       <Label id="mioblastoak" x={125} y={584} align="middle" show={vis(t, 0.45, 0.56) * seg(t, 0.47, 0.51)} small />
     </g>

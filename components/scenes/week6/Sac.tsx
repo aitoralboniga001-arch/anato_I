@@ -1,8 +1,9 @@
 'use client';
 
-import { C, Flow, Label, Mark, Note, Part, bezier, clamp, lerp, rand, seg, smoothPath, tube, type Pt, type SceneProps } from '@/components/kit';
+import { C, Flow, Label, Mark, Note, Part, bezier, clamp, lerp, mix, rand, seg, smoothPath, tube, type Pt, type SceneProps } from '@/components/kit';
 import type { Curve } from '@/lib/sim/geometry';
 import { CellPaths, Chevron, K, W3bDefs, chevrons, newBatch, pd, wallCells, type P } from '@/components/scenes/week3-villi/art';
+import { FetusFigure, fetusGeom, placeFetus } from '@/components/scenes/week5/FetusFigure';
 
 /**
  * Topic 6 — the chorionic sac as a whole (stage `biloxka-askeak`), drawn with the week-3 villus
@@ -21,12 +22,13 @@ const BLUE = '#3554b8';
 const RED = '#d3283f';
 const CX = 500;
 const CY = 336;
-const R4 = 132; // chorionic cavity
+const R4 = 124; // chorionic cavity
 const R3 = 160; // chorionic plate (outer face)
 const R1 = 232; // villi reach the shell here
 const RS = 244; // shell outer face
-const RA = R4 + 9; // arterial ring in the plate
-const RV = R4 + 19; // venous ring in the plate
+/** The plate's two vessel rings run side by side (one band to point at), leaving a wide band of plate mesoderm outside. */
+const RA = R4 + 10; // arterial ring in the plate
+const RV = R4 + 16.4; // venous ring in the plate
 /** Stem villi (deg, 0 = right, clockwise): ten, the top pair leaving room for the spiral arteries. */
 const STEMS = [-126, -54, -18, 18, 54, 90, 126, 162, 198, 234];
 
@@ -86,15 +88,15 @@ function stemTree(deg: number, g1: number, g2: number, g3: number): Twig[] {
   [0.3, 0.52, 0.72].forEach((u, i) => {
     const side = i % 2 ? -first : first;
     const s = deg * 7 + i * 13;
-    const b1 = branchOff(c, u, side, 0.86 + rand(s) * 0.2, (25 + rand(s + 1) * 10) * g1, 4.8, 1, s);
+    const b1 = branchOff(c, u, side, 0.86 + rand(s) * 0.2, (31 + rand(s + 1) * 12) * g1, 5, 1, s);
     out.push(b1);
     if (g2 <= 0.02) return;
     [0.42, 0.7].forEach((v, k) => {
       const s2 = s * 3 + k * 5;
-      const b2 = branchOff(b1.c, v, k ? -side : side, 0.8 + rand(s2) * 0.3, (12 + rand(s2 + 2) * 5) * g2 * g1, 3.6, 2, s2);
+      const b2 = branchOff(b1.c, v, k ? -side : side, 0.8 + rand(s2) * 0.3, (16 + rand(s2 + 2) * 6) * g2 * g1, 3.8, 2, s2);
       out.push(b2);
       if (g3 <= 0.02 || k) return;
-      out.push(branchOff(b2.c, 0.4, -side, 0.9, (8 + rand(s2 + 4) * 3) * g3 * g2, 2.8, 3, s2 + 9));
+      out.push(branchOff(b2.c, 0.4, -side, 0.9, (11 + rand(s2 + 4) * 4) * g3 * g2, 3, 3, s2 + 9));
     });
   });
   return out;
@@ -160,12 +162,12 @@ function addTwig(L: Layers, tw: Twig, thin: number) {
 }
 
 /** Free villi cut across, floating in the intervillous space (they leave the plane of section). */
-const FLOATERS = Array.from({ length: 44 }, (_, k) => {
+const FLOATERS = Array.from({ length: 150 }, (_, k) => {
   const a = rand(k * 2.3 + 0.4) * 360;
-  const near = STEMS.some((s) => Math.abs(((a - s + 540) % 360) - 180) < 7);
+  const near = STEMS.some((s) => Math.abs(((a - s + 540) % 360) - 180) < 6);
   const r = lerp(R3 + 14, R1 - 10, rand(k * 5.1 + 1));
   const p = polar(a, r);
-  return { x: p[0], y: p[1], r: 4 + rand(k * 3.7) * 2.4, rot: rand(k * 1.9) * 180, near, at: rand(k * 7.3) };
+  return { x: p[0], y: p[1], r: 5.4 + rand(k * 3.7) * 4.2, rot: rand(k * 1.9) * 180, near, at: rand(k * 7.3) };
 }).filter((f) => !f.near && !(f.y < CY - R1 + 40 && Math.abs(f.x - CX) < 50));
 
 /** The cytotrophoblastic shell: one ring of cells. */
@@ -175,13 +177,87 @@ const SHELL = (() => {
   return b;
 })();
 
+/**
+ * Inside the chorionic cavity, months 2 → 4: the amnion grows round the fetus until it nearly fills the
+ * cavity (the chorionic cavity is left as a thin crescent, about to be obliterated), the yolk sac is pushed
+ * to the rim and shrinks, and the connecting stalk becomes the cord. `grow` 0..1.
+ */
+function inner(grow: number) {
+  const amR = lerp(64, R4 - 24, grow);
+  // it grows down and out from under the stalk, so the last of the cavity is a crescent, widest above
+  const amC: Pt = [lerp(CX - 4, CX - 2, grow), lerp(CY - 18, CY + 10, grow)];
+  const week = lerp(9, 14, grow);
+  const crl = amR * lerp(1.22, 1.06, grow);
+  const place = placeFetus(crl, 1, amC[0] - amR * 0.12, amC[1] + amR * 0.04);
+  const fg = fetusGeom(week);
+  const root = place.xf(fg.cordBase);
+  const top: Pt = [CX - 2, CY - R4 + 1];
+  // the cord: from the plate down the right of the head to the belly
+  const c1: Pt = [CX + amR * 0.62, CY - R4 + 40];
+  const c2: Pt = [root[0] + amR * 0.78, root[1] - amR * 0.16];
+  // the yolk sac: beside the amnion at first, then squeezed into the crescent and shrinking
+  const yolkR = lerp(17, 9, grow);
+  const ya = (-20 * Math.PI) / 180;
+  const early: Pt = [amC[0] + Math.cos(ya) * (amR + yolkR + 4), amC[1] + Math.sin(ya) * (amR + yolkR + 4)];
+  const late: Pt = [CX + Math.cos(ya) * (R4 - yolkR - 4), CY + Math.sin(ya) * (R4 - yolkR - 4)];
+  const yolk: Pt = [lerp(early[0], late[0], grow), lerp(early[1], late[1], grow)];
+  return { amR, amC, week, place, fg, root, top, c1, c2, yolk, yolkR };
+}
+type Inner = ReturnType<typeof inner>;
+/** Half-width of the stalk / cord (u from the plate): it flares where it meets the chorionic plate. */
+const stalkHw = (grow: number) => (u: number) => lerp(6.5, 8, grow) + 13 * Math.max(0, 1 - u / 0.3) ** 2;
+/** Umbilical vessel `side` (−1 artery, +1 vein) along the cord, from the fetus up to the plate ring; the two
+ *  run side by side, touching, so together they make one band down the cord's axis. */
+const UMB_O = 2.3;
+const UMB_W = 4.6;
+/** The vessel's centre line: offset from the cord's axis along its normal (so the two always touch, whatever
+ *  the cord's slant), easing onto its own ring of the plate at the top. */
+const umbPts = (q: Inner, side: number, ring: number): P[] => {
+  const b = bezier(q.root, q.c2, q.c1, [q.top[0], CY - ring]);
+  return Array.from({ length: 33 }, (_, i) => {
+    const s = b(i / 32);
+    const o = side * UMB_O * (1 - smooth01((i / 32 - 0.86) / 0.14));
+    return [s.x + s.nx * o, s.y + s.ny * o] as P;
+  });
+};
+const smooth01 = (x: number) => {
+  const c = Math.min(1, Math.max(0, x));
+  return c * c * (3 - 2 * c);
+};
+const umbD = (q: Inner, side: number, ring: number) => smoothPath(umbPts(q, side, ring), false, 0.5);
+
+const artDeg = [-98, -82];
+const veinDeg = -126 + 18;
+/** A spiral artery from above the decidua to its opening in the shell. */
+const artPath = (deg: number, i: number) => {
+  const p0 = polar(deg, RS + 2);
+  const top: Pt = [p0[0] + (i ? 14 : -14), 24];
+  const pts: Pt[] = Array.from({ length: 9 }, (_, k) => {
+    const u = k / 8;
+    return [lerp(top[0], p0[0], u) + Math.sin(u * Math.PI * 3.2 + i) * 7 * (1 - u * 0.6), lerp(top[1], p0[1], u)];
+  });
+  return pts;
+};
+const VEIN: Pt[] = (() => {
+  const p0 = polar(veinDeg, RS + 2);
+  return [p0, [p0[0] - 10, p0[1] - 24], [p0[0] - 6, p0[1] - 48], [p0[0] - 16, 24]] as Pt[];
+})();
+
 /* ------------------------------------------------------------------ */
 /* The sac                                                            */
 /* ------------------------------------------------------------------ */
 
 type Mode = 'sac' | 'circ';
 
-function SacDrawing({ t, reduced, mode, phase = 0 }: SceneProps & { mode: Mode; phase?: number }) {
+/** Fetal vessels before the fetal blood reaches them (the circulation view fills them in, in order). */
+const EMPTY = '#5b4352';
+
+function SacDrawing({ t, reduced, mode, phase = 0, fill = 1, grow = 1 }: SceneProps & { mode: Mode; phase?: number; fill?: number; grow?: number }) {
+  // Circulation view: the fetal blood goes up the umbilical arteries, round the chorionic plate, into the
+  // villi, and back (each stretch takes its colour as the blood reaches it).
+  const fUmb = seg(fill, 0, 0.28);
+  const fRing = seg(fill, 0.22, 0.6);
+  const fVilli = seg(fill, 0.55, 1);
   const g1 = mode === 'circ' ? 1 : seg(t, 0, 0.1);
   const g2 = mode === 'circ' ? 1 : seg(t, 0.05, 0.15);
   const g3 = mode === 'circ' ? 1 : seg(t, 0.16, 0.3);
@@ -205,28 +281,15 @@ function SacDrawing({ t, reduced, mode, phase = 0 }: SceneProps & { mode: Mode; 
       <path d={L.syn + (withFloats ? floatD(1) : '')} fill="url(#w3b-syn)" />
       <path d={L.cyto + (withFloats ? floatD(1 - lerp(0.3, 0.2, floatT)) : '')} fill={K.cytoGround} />
       <path d={L.meso + (withFloats ? floatD(lerp(0.42, 0.75, floatT)) : '')} fill={K.meso} />
-      <path d={L.capA} fill="none" stroke={circ ? BLUE : '#8f3a64'} strokeWidth={circ ? 1.5 : 1.1} strokeLinejoin="round" opacity={circ ? 1 : 0.85} />
-      <path d={L.capV} fill="none" stroke={circ ? RED : '#c2334d'} strokeWidth={circ ? 1.5 : 1.1} strokeLinejoin="round" opacity={circ ? 1 : 0.85} />
+      <path d={L.capA} fill="none" stroke={circ ? mix(EMPTY, BLUE, fVilli) : '#8f3a64'} strokeWidth={circ ? 2.3 : 1.1} strokeLinejoin="round" opacity={circ ? 1 : 0.85} />
+      <path d={L.capV} fill="none" stroke={circ ? mix(EMPTY, RED, fVilli) : '#c2334d'} strokeWidth={circ ? 2.3 : 1.1} strokeLinejoin="round" opacity={circ ? 1 : 0.85} />
       <path d={L.edge + (withFloats ? floatD(1) : '')} fill="none" stroke={K.synEdge} strokeWidth={0.9} />
     </Part>
   );
-  const artDeg = [-98, -82];
-  const veinDeg = -126 + 18;
-  const artPath = (deg: number, i: number) => {
-    const p0 = polar(deg, RS + 2);
-    const top: Pt = [p0[0] + (i ? 14 : -14), 24];
-    const pts: Pt[] = Array.from({ length: 9 }, (_, k) => {
-      const u = k / 8;
-      return [lerp(top[0], p0[0], u) + Math.sin(u * Math.PI * 3.2 + i) * 7 * (1 - u * 0.6), lerp(top[1], p0[1], u)];
-    });
-    return pts;
-  };
-  const vein = (() => {
-    const p0 = polar(veinDeg, RS + 2);
-    return [p0, [p0[0] - 10, p0[1] - 24], [p0[0] - 6, p0[1] - 48], [p0[0] - 16, 24]] as Pt[];
-  })();
-  const stalkTop = polar(-90, R4 - 1);
-  const stalk = tube(bezier([stalkTop[0], stalkTop[1]], [CX, stalkTop[1] + 18], [CX - 4, CY - 92], [CX - 2, CY - 70]), (u) => 7 + 9 * Math.max(0, 1 - u / 0.35) ** 2, 0, 1, 24);
+  const q = inner(grow);
+  const stalk = tube(bezier(q.top, q.c1, q.c2, q.root), stalkHw(grow), 0, 1, 28);
+  const art = umbD(q, -1, RA);
+  const ven = umbD(q, 1, RV);
   return (
     <g>
       {/* Endometrium round the sac: basal decidua over the embryonic pole, capsular decidua over the rest. */}
@@ -254,16 +317,16 @@ function SacDrawing({ t, reduced, mode, phase = 0 }: SceneProps & { mode: Mode; 
           const p = smoothPath(artPath(d, i), false, 0.5);
           return (
             <g key={i} fill="none" strokeLinecap="round">
-              <path d={p} stroke="#5b1222" strokeWidth={8} />
-              <path d={p} stroke="#c9314f" strokeWidth={6} />
-              <path d={p} stroke="#f0566f" strokeWidth={2.6} />
+              <path d={p} stroke="#5b1222" strokeWidth={11} />
+              <path d={p} stroke="#c9314f" strokeWidth={8.6} />
+              <path d={p} stroke="#f0566f" strokeWidth={3.6} />
             </g>
           );
         })}
       </Part>
       <Part id="endometrio-zainak">
-        <path d={smoothPath(vein, false, 0.5)} fill="none" stroke="#1d2a5c" strokeWidth={9} strokeLinecap="round" />
-        <path d={smoothPath(vein, false, 0.5)} fill="none" stroke={C.vein} strokeWidth={7} strokeLinecap="round" />
+        <path d={smoothPath(VEIN, false, 0.5)} fill="none" stroke="#1d2a5c" strokeWidth={11.5} strokeLinecap="round" />
+        <path d={smoothPath(VEIN, false, 0.5)} fill="none" stroke={C.vein} strokeWidth={9} strokeLinecap="round" />
       </Part>
 
       <g fill={K.shadow} transform="translate(2.5 3)" pointerEvents="none">
@@ -271,16 +334,8 @@ function SacDrawing({ t, reduced, mode, phase = 0 }: SceneProps & { mode: Mode; 
       </g>
       {villi(free, freeId, true)}
       {villi(stems, stemId, false)}
-      {meheketa > 0.01 && (
-        <Part id="karena-mugaren-meheketa">
-          <path d={free.edge + floatD(1)} fill="none" stroke="#fde68a" strokeWidth={0.9} opacity={0.6 * meheketa} />
-        </Part>
-      )}
-      {circ && (
-        <Part id="sinzitiotrofoblastoa">
-          <path d={stems.edge + free.edge + floatD(1)} fill="none" stroke="#7fe0ad" strokeWidth={1} opacity={0.55} />
-        </Part>
-      )}
+      {meheketa > 0.01 && <path d={free.edge + floatD(1)} fill="none" stroke="#fde68a" strokeWidth={0.9} opacity={0.6 * meheketa} pointerEvents="none" />}
+      {circ && <path d={stems.edge + free.edge + floatD(1)} fill="none" stroke="#7fe0ad" strokeWidth={1} opacity={0.55} pointerEvents="none" />}
 
       {/* Chorionic plate: mesoderm with the chorionic vessels, its villous face lined by trophoblast. */}
       <Part id="korion-plaka">
@@ -297,7 +352,18 @@ function SacDrawing({ t, reduced, mode, phase = 0 }: SceneProps & { mode: Mode; 
           <g key={v.r} fill="none">
             <circle cx={CX} cy={CY} r={v.r} stroke="#5e1d2f" strokeWidth={circ ? 6.4 : 5} />
             <circle cx={CX} cy={CY} r={v.r} stroke={K.endo} strokeWidth={circ ? 5 : 3.8} />
-            <circle cx={CX} cy={CY} r={v.r} stroke={circ ? v.c : v.c === BLUE ? '#8f3a64' : '#c2334d'} strokeWidth={circ ? 3 : 2.2} />
+            {circ ? (
+              <>
+                <circle cx={CX} cy={CY} r={v.r} stroke={EMPTY} strokeWidth={3} />
+                {/* both halves of the ring fill from the top, where the umbilical vessels join it */}
+                {fRing > 0.005 &&
+                  [90, -270].map((end) => (
+                    <path key={end} d={pd(arcPts(v.r, -90, end, 60))} pathLength={1} strokeDasharray={`${fRing.toFixed(4)} 2`} stroke={v.c} strokeWidth={3} />
+                  ))}
+              </>
+            ) : (
+              <circle cx={CX} cy={CY} r={v.r} stroke={v.c === BLUE ? '#8f3a64' : '#c2334d'} strokeWidth={2.2} />
+            )}
           </g>
         ))}
       </Part>
@@ -308,30 +374,41 @@ function SacDrawing({ t, reduced, mode, phase = 0 }: SceneProps & { mode: Mode; 
         <circle cx={CX} cy={CY} r={R4 - 1} fill="none" stroke="#e9a084" strokeWidth={1.4} opacity={0.55} />
       </Part>
 
-      {/* Embryo in its amnion, hanging from the connecting stalk; the yolk sac below. */}
+      {/* The yolk sac, pushed to the rim of the cavity as the amnion grows (its duct runs up the cord). */}
+      <Part id="bitelo-zaku-sekundarioa">
+        <path d={`M${q.root[0].toFixed(1)},${q.root[1].toFixed(1)} Q${((q.root[0] + q.yolk[0]) / 2 + 6).toFixed(1)},${((q.root[1] + q.yolk[1]) / 2 - 4).toFixed(1)} ${q.yolk[0].toFixed(1)},${(q.yolk[1] - q.yolkR).toFixed(1)}`} fill="none" stroke="#d9a63a" strokeWidth={2} />
+        <circle cx={q.yolk[0]} cy={q.yolk[1]} r={q.yolkR} fill="#f2c14e" stroke="#b9862a" strokeWidth={1.4} />
+        <circle cx={q.yolk[0]} cy={q.yolk[1]} r={q.yolkR} fill="url(#w3b-ball)" />
+      </Part>
+      {/* The amnion, growing round the fetus until only a crescent of chorionic cavity is left. */}
+      <Part id="amnios-barrunbea">
+        <circle cx={q.amC[0]} cy={q.amC[1]} r={q.amR} fill="#16233d" />
+        <circle cx={q.amC[0]} cy={q.amC[1]} r={q.amR} fill={C.amnionCavity} opacity={0.55} />
+        <circle cx={q.amC[0]} cy={q.amC[1]} r={q.amR} fill="none" stroke="#9fc3e6" strokeWidth={2} />
+      </Part>
+      {/* Connecting stalk → cord: chorionic plate down to the fetus's belly, its two vessels inside. */}
       <Part id="finkapen-pedikulua">
         <path d={stalk.d} fill={K.meso} />
+        <path d={stalk.d} fill="url(#p-meso-extra)" opacity={0.6} />
         <g fill="none" stroke={K.mesoEdge} strokeWidth={1}>
           <path d={stalk.left} />
           <path d={stalk.right} />
         </g>
       </Part>
       <Part id="zilbor-hodiak">
-        <path d={`M${CX - 2.4},${CY - RA} C${CX - 2.4},${CY - 110} ${CX - 6},${CY - 92} ${CX - 4.4},${CY - 64}`} fill="none" stroke={circ ? BLUE : '#8f3a64'} strokeWidth={circ ? 2.2 : 1.6} />
-        <path d={`M${CX + 2.4},${CY - RV} C${CX + 2.4},${CY - 110} ${CX - 1},${CY - 92} ${CX + 0.4},${CY - 64}`} fill="none" stroke={circ ? RED : '#c2334d'} strokeWidth={circ ? 2.2 : 1.6} />
+        {/* drawn from the fetus up (the way the blood goes out), so the circulation view can fill them in */}
+        <path d={art} fill="none" stroke={circ ? EMPTY : '#5360d6'} strokeWidth={UMB_W} />
+        <path d={ven} fill="none" stroke={circ ? EMPTY : '#e0303f'} strokeWidth={UMB_W} />
+        {circ && fUmb > 0.005 && (
+          <g fill="none" strokeWidth={UMB_W}>
+            <path d={art} pathLength={1} strokeDasharray={`${fUmb.toFixed(4)} 2`} stroke={BLUE} />
+            <path d={ven} pathLength={1} strokeDasharray={`${fUmb.toFixed(4)} 2`} stroke={RED} />
+          </g>
+        )}
       </Part>
-      <Part id="bitelo-zaku-sekundarioa">
-        <path d={`M${CX + 10},${CY - 18} Q${CX + 18},${CY + 8} ${CX + 22},${CY + 22}`} fill="none" stroke="#d9a63a" strokeWidth={2} />
-        <circle cx={CX + 26} cy={CY + 36} r={17} fill="#f2c14e" stroke="#b9862a" strokeWidth={1.4} />
-        <circle cx={CX + 26} cy={CY + 36} r={17} fill="url(#w3b-ball)" />
-      </Part>
-      <Part id="amnios-barrunbea">
-        <ellipse cx={CX - 4} cy={CY - 36} rx={30} ry={36} fill="#16233d" stroke="#9fc3e6" strokeWidth={2} />
-      </Part>
-      {/* the embryo (C-shaped, 2nd month) */}
-      <g pointerEvents="none">
-        <path d={`M${CX - 2},${CY - 62} C${CX + 18},${CY - 60} ${CX + 20},${CY - 30} ${CX + 8},${CY - 14} C${CX - 2},${CY - 2} ${CX - 22},${CY - 8} ${CX - 22},${CY - 26} C${CX - 22},${CY - 34} ${CX - 14},${CY - 38} ${CX - 10},${CY - 32} C${CX - 6},${CY - 26} ${CX - 2},${CY - 34} ${CX - 8},${CY - 44} C${CX - 12},${CY - 52} ${CX - 10},${CY - 62} ${CX - 2},${CY - 62}Z`} fill="#f2b3a6" stroke="#b9786a" strokeWidth={1.2} />
-        <circle cx={CX - 4} cy={CY - 52} r={2.2} fill="#5b2f2a" opacity={0.7} />
+      {/* The fetus (same figure as topic 5 and the uterus view), months 2 → 4. */}
+      <g pointerEvents="none" transform={q.place.transform}>
+        <FetusFigure id={`w6sac${mode}`} week={q.week} s={q.place.s} hernia={1 - seg(q.week, 11, 12.5)} cord={<g />} />
       </g>
 
       {!reduced && (
@@ -348,11 +425,11 @@ function SacDrawing({ t, reduced, mode, phase = 0 }: SceneProps & { mode: Mode; 
               </g>
             );
           })}
-          <Flow d={smoothPath([...vein].reverse(), false, 0.5)} n={2} dur={5} r={2} color="#93a8ff" reduced={reduced} />
+          <Flow d={smoothPath([...VEIN].reverse(), false, 0.5)} n={2} dur={5} r={2} color="#93a8ff" reduced={reduced} />
           {circ && (
             <>
-              <Flow d={`M${CX - 4.4},${CY - 64} C${CX - 6},${CY - 92} ${CX - 2.4},${CY - 110} ${CX - 2.4},${CY - RA}`} n={2} dur={3} r={1.8} color="#b9c9ff" reduced={reduced} />
-              <Flow d={`M${CX + 2.4},${CY - RV} C${CX + 2.4},${CY - 110} ${CX - 1},${CY - 92} ${CX + 0.4},${CY - 64}`} n={2} dur={3} r={1.8} color="#ffb3be" reduced={reduced} />
+              <Flow d={art} n={2} dur={3} r={1.8} color="#b9c9ff" reduced={reduced} />
+              <Flow d={pd([...umbPts(q, 1, RV)].reverse())} n={2} dur={3} r={1.8} color="#ffb3be" reduced={reduced} />
               <Flow d={pd(arcPts(RA, -90, 270, 72))} n={8} dur={14} r={1.8} color="#b9c9ff" reduced={reduced} />
               <Flow d={pd(arcPts(RV, 270, -90, 72))} n={8} dur={14} r={1.8} color="#ffb3be" reduced={reduced} />
             </>
@@ -379,7 +456,7 @@ function SacDrawing({ t, reduced, mode, phase = 0 }: SceneProps & { mode: Mode; 
             ...chevrons(jet, 30, phase * 0.6 + 10, false).map((c, k) => <Chevron key={`j${i}-${k}`} {...c} color="#ffe1e6" size={0.75} />),
           ];
         })}
-        {chevrons(vein as P[], 30, phase * 0.6, false).map((c, k) => (
+        {chevrons(VEIN as P[], 30, phase * 0.6, false).map((c, k) => (
           <Chevron key={`v${k}`} {...c} color="#d6deff" size={0.7} />
         ))}
         {circ &&
@@ -388,8 +465,8 @@ function SacDrawing({ t, reduced, mode, phase = 0 }: SceneProps & { mode: Mode; 
             { pts: arcPts(RA, -90, -270, 60), c: '#cfe0ff' },
             { pts: arcPts(RV, 90, -90, 60), c: '#ffd2d9' },
             { pts: arcPts(RV, 90, 270, 60), c: '#ffd2d9' },
-            { pts: smoothPts([[CX - 4.4, CY - 64], [CX - 5.4, CY - 92], [CX - 2.4, CY - 110], [CX - 2.4, CY - RA]]), c: '#cfe0ff' },
-            { pts: smoothPts([[CX + 2.4, CY - RV], [CX + 2.4, CY - 110], [CX - 0.4, CY - 92], [CX + 0.4, CY - 64]]), c: '#ffd2d9' },
+            { pts: umbPts(q, -1, RA), c: '#cfe0ff' },
+            { pts: [...umbPts(q, 1, RV)].reverse(), c: '#ffd2d9' },
           ].flatMap((r, i) => chevrons(r.pts, i < 4 ? 46 : 22, phase, false).map((c, k) => <Chevron key={`f${i}-${k}`} {...c} color={r.c} size={i < 4 ? 0.8 : 0.6} />))}
       </g>
     </g>
@@ -422,44 +499,87 @@ function SacDefs() {
 
 /** Anchors shared by the two views. */
 const A = {
-  art: polar(-98, RS + 50),
-  vein: polar(-108, RS + 40),
+  art: artPath(artDeg[0], 0)[3],
+  vein: VEIN[1],
   basal: polar(-150, RS + 16),
-  shell: polar(-168, RS - 6),
+  shell: polar(172, RS - 6),
+  ter: (() => {
+    const s = stemTree(198, 1, 1, 0).find((tw) => tw.gen === 1)!.c(0.55);
+    return [s.x, s.y] as Pt;
+  })(),
   stem: (() => {
     const tw = stemTree(198, 0, 0, 0)[0];
     const s = tw.c(0.55);
     return [s.x, s.y] as Pt;
   })(),
-  plate: polar(150, R3 - 12),
-  cavity: polar(52, R4 - 22),
+  plate: polar(150, 150),
   capsular: polar(40, RS + 6),
 };
+
+/** Names inside the cavity, from the same geometry the drawing uses. */
+function innerAnchors(grow: number) {
+  const q = inner(grow);
+  // the chorionic cavity's widest free stretch: the crescent over the amnion, up and to the left of the stalk
+  const ca = (-128 * Math.PI) / 180;
+  const rIn = Math.hypot(Math.cos(ca) * q.amR + q.amC[0] - CX, Math.sin(ca) * q.amR + q.amC[1] - CY);
+  const rc = (Math.max(rIn, 0) + R4) / 2;
+  // the stalk where it flares into the plate, off its vessels' band
+  const sa = bezier(q.top, q.c1, q.c2, q.root)(0.05);
+  const sw = stalkHw(grow)(0.05) * 0.66;
+  const stalkAt = { x: sa.x - sa.nx * sw, y: sa.y - sa.ny * sw };
+  const ua = umbPts(q, -1, RA)[22];
+  const uv = umbPts(q, 1, RV)[22];
+  const ub = { x: (ua[0] + uv[0]) / 2, y: (ua[1] + uv[1]) / 2 };
+  return {
+    q,
+    amnion: [q.amC[0] - q.amR * 0.62, q.amC[1] - q.amR * 0.42] as Pt,
+    yolk: q.yolk,
+    cavity: [CX + Math.cos(ca) * rc, CY + Math.sin(ca) * rc] as Pt,
+    stalk: [stalkAt.x, stalkAt.y] as Pt,
+    /** the umbilical vessels: on the seam of the two, the middle of their band */
+    vessels: [ub.x, ub.y] as Pt,
+  };
+}
 
 export function ChorionicSac({ t, reduced }: SceneProps) {
   const branch = seg(t, 0, 0.16);
   // a free villus of the right-hand stem (generation 2) for the free-villus / thinning names
-  const fv = stemTree(-18, 1, 1, 1).find((tw) => tw.gen === 2)!.c(0.3);
+  const fv = stemTree(-18, 1, 1, 1).find((tw) => tw.gen === 2)!.c(0.62);
+  const mk = stemTree(-54, 1, 1, 1).find((tw) => tw.gen === 2)!.c(0.4);
   const ivs = polar(-36, R1 - 14);
+  // Months 2 → 4: the amnion grows round the fetus (it ends nearly filling the chorionic cavity).
+  const grow = seg(t, 0.02, 0.76);
+  const IN = innerAnchors(grow);
   return (
     <g>
       <W3bDefs />
       <SacDefs />
-      <SacDrawing t={t} reduced={reduced} mode="sac" phase={t * 34 * 30} />
-      <Label id="arteria-espiralak" x={190} y={40} ax={A.art[0] - 6} ay={A.art[1]} text="Arteria kiribila" />
-      <Label id="endometrio-zainak" x={190} y={72} ax={A.vein[0] - 6} ay={A.vein[1]} text="Itzulera benosoa" />
-      <Label id="dezidua-basala" x={190} y={160} ax={A.basal[0]} ay={A.basal[1]} />
-      <Label id="kanpoko-zorro-zitotrofoblastikoa" x={190} y={210} ax={A.shell[0]} ay={A.shell[1]} text="Zorro zitotrofoblastikoa" />
-      <Label id="biloxka-enborra" x={190} y={400} ax={A.stem[0]} ay={A.stem[1]} text="Enborrezko biloxka" />
-      <Label id="korion-plaka" x={190} y={460} ax={A.plate[0]} ay={A.plate[1]} />
-      <Label id="biloxka-tertziarioa" x={190} y={300} ax={polar(186, R1 - 30)[0]} ay={polar(186, R1 - 30)[1]} show={vis(t, 0, 0.2)} />
-      <Label id="finkapen-pedikulua" x={190} y={112} ax={CX - 9} ay={CY - 108} />
-      <Label id="biloxka-askea" x={810} y={240} ax={fv.x} ay={fv.y} show={Math.max(0.4, branch)} />
-      <Label id="biloxka-arteko-espazioa" x={810} y={272} ax={ivs[0]} ay={ivs[1]} show={vis(t, 0.16)} />
-      <Label id="karena-mugaren-meheketa" x={810} y={304} ax={fv.x + 2} ay={fv.y + 4} show={seg(t, 0.34, 0.4) * (1 - seg(t, 0.66, 0.7))} small />
-      <Label id="amnios-barrunbea" x={810} y={346} ax={CX + 22} ay={CY - 40} />
-      <Label id="bitelo-zaku-sekundarioa" x={810} y={378} ax={CX + 40} ay={CY + 36} />
-      <Label id="korion-barrunbea" x={810} y={410} ax={A.cavity[0]} ay={A.cavity[1]} />
+      <SacDrawing t={t} reduced={reduced} mode="sac" phase={t * 34 * 30} grow={grow} />
+      <Label id="arteria-espiralak" x={190} y={40} ax={A.art[0]} ay={A.art[1]} text="Arteria kiribila" />
+      <Label id="endometrio-zainak" x={190} y={72} ax={A.vein[0]} ay={A.vein[1]} text="Itzulera benosoa" />
+      <Label id="dezidua-basala" x={190} y={A.basal[1]} ax={A.basal[0]} ay={A.basal[1]} />
+      <Label id="biloxka-enborra" x={190} y={A.stem[1]} ax={A.stem[0]} ay={A.stem[1]} text="Enborrezko biloxka" />
+      <Label id="biloxka-tertziarioa" x={190} y={318} ax={A.ter[0]} ay={A.ter[1]} show={vis(t, 0, 0.2)} />
+      <Label id="kanpoko-zorro-zitotrofoblastikoa" x={190} y={386} ax={A.shell[0]} ay={A.shell[1]} text="Zorro zitotrofoblastikoa" />
+      <Label id="korion-plaka" x={190} y={422} ax={A.plate[0]} ay={A.plate[1]} />
+      {/* Right column starts below the scene tools (y ≥ 230), in the anchors' top-to-bottom order. */}
+      <Label id="finkapen-pedikulua" x={810} y={232} ax={IN.stalk[0]} ay={IN.stalk[1]} />
+      <Label id="biloxka-arteko-espazioa" x={810} y={Math.max(ivs[1], 292)} ax={ivs[0]} ay={ivs[1]} show={vis(t, 0.16)} />
+      <Label id="biloxka-askea" x={810} y={Math.max(fv.y, 324)} ax={fv.x} ay={fv.y} show={Math.max(0.4, branch)} />
+      {/* Thinning is a process: a pool of light on the free villi, not a structure's outline. */}
+      <Mark id="karena-mugaren-meheketa" show={seg(t, 0.34, 0.4) * (1 - seg(t, 0.66, 0.7))}>
+        {/* Only the pool of light (no rim): the thinning is on the free villus under it, where its name points. */}
+        <radialGradient id="w6s-thin-glow">
+          <stop offset="0" stopColor="#ffb86b" stopOpacity={0.42} />
+          <stop offset="0.5" stopColor="#ffb86b" stopOpacity={0.24} />
+          <stop offset="1" stopColor="#ffb86b" stopOpacity={0} />
+        </radialGradient>
+        <ellipse className="mark-light" cx={mk.x} cy={mk.y} rx={34} ry={34} fill="url(#w6s-thin-glow)" pointerEvents="none" />
+      </Mark>
+      <Label id="karena-mugaren-meheketa" x={810} y={262} ax={mk.x} ay={mk.y} show={seg(t, 0.34, 0.4) * (1 - seg(t, 0.66, 0.7))} small />
+      <Label id="korion-barrunbea" x={190} y={246} ax={IN.cavity[0]} ay={IN.cavity[1]} />
+      <Label id="amnios-barrunbea" x={190} y={352} ax={IN.amnion[0]} ay={IN.amnion[1]} />
+      <Label id="bitelo-zaku-sekundarioa" x={810} y={IN.yolk[1] + 60} ax={IN.yolk[0]} ay={IN.yolk[1]} />
       <Label id="dezidua-kapsularra" x={810} y={500} ax={A.capsular[0]} ay={A.capsular[1]} />
 
       <Note x={500} y={616} show={1 - seg(t, 0.12, 0.16)} tone="dim">
@@ -487,23 +607,24 @@ export function ChorionicSac({ t, reduced }: SceneProps) {
 export function SacCirculation({ t, reduced }: SceneProps) {
   const ivs = polar(-36, R1 - 14);
   const tv = stemTree(-18, 1, 1, 1)[0].c(0.4);
-  const syn = polar(200, R1 - 6);
-  const plateV = polar(160, RA);
+  const plateV = polar(160, (RA + RV) / 2);
+  const IN = innerAnchors(1);
+  const umbA = IN.vessels;
   return (
     <g>
       <W3bDefs />
       <SacDefs />
-      <SacDrawing t={1} reduced={reduced} mode="circ" phase={t * 34 * 30} />
-      <Label id="finkapen-pedikulua" x={190} y={250} ax={CX - 10} ay={CY - 104} />
-      <Label id="zilbor-hodiak" x={190} y={290} ax={CX - 4} ay={CY - 92} />
-      <Label id="enbrioi-kanpoko-zirkulazioa" x={196} y={340} ax={plateV[0]} ay={plateV[1]} text="Enbrioi kanpoko zirkulazioa" small />
-      <Label id="korion-plaka" x={190} y={390} ax={A.plate[0]} ay={A.plate[1]} text="Korion-orria" />
-      <Label id="sinzitiotrofoblastoa" x={190} y={440} ax={syn[0]} ay={syn[1]} text="Sinzitioa" />
-      <Label id="biloxka-tertziarioa" x={810} y={240} ax={tv.x} ay={tv.y} />
-      <Label id="biloxka-arteko-espazioa" x={810} y={272} ax={ivs[0]} ay={ivs[1]} />
-      <Label id="amnios-barrunbea" x={810} y={346} ax={CX + 22} ay={CY - 40} />
-      <Label id="bitelo-zaku-sekundarioa" x={810} y={378} ax={CX + 40} ay={CY + 36} />
-      <Label id="korion-barrunbea" x={810} y={410} ax={A.cavity[0]} ay={A.cavity[1]} />
+      {/* Filled in during its own step (.8 on); seen at any other time, the whole circuit is shown. */}
+      <SacDrawing t={1} reduced={reduced} mode="circ" phase={t * 34 * 30} fill={t < 0.795 ? 1 : seg(t, 0.8, 0.95)} />
+      <Label id="finkapen-pedikulua" x={810} y={232} ax={IN.stalk[0]} ay={IN.stalk[1]} />
+      <Label id="zilbor-hodiak" x={810} y={262} ax={umbA[0]} ay={umbA[1]} />
+      <Label id="enbrioi-kanpoko-zirkulazioa" x={196} y={390} ax={plateV[0]} ay={plateV[1]} text="Enbrioi kanpoko zirkulazioa" small />
+      <Label id="korion-plaka" x={190} y={426} ax={A.plate[0]} ay={A.plate[1]} text="Korion-orria" />
+      <Label id="biloxka-arteko-espazioa" x={810} y={294} ax={ivs[0]} ay={ivs[1]} />
+      <Label id="biloxka-tertziarioa" x={810} y={Math.max(tv.y, 326)} ax={tv.x} ay={tv.y} />
+      <Label id="korion-barrunbea" x={190} y={IN.cavity[1]} ax={IN.cavity[0]} ay={IN.cavity[1]} />
+      <Label id="amnios-barrunbea" x={190} y={352} ax={IN.amnion[0]} ay={IN.amnion[1]} />
+      <Label id="bitelo-zaku-sekundarioa" x={810} y={IN.yolk[1] + 60} ax={IN.yolk[0]} ay={IN.yolk[1]} />
       {/* Caption hand-off in two halves: never two captions on one spot. */}
       <Note x={500} y={616} show={1 - seg(t, 0.8, 0.83)} tone="dim">
         Fetuaren odola: zilbor-hodiak → korion orriko odol-hodiak → biloxketako kapilarrak

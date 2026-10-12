@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Label, Mark, Note, Part, clamp, dual, lerp, mix, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, Note, Part, clamp, dual, lerp, mix, seg, type Pt, type SceneProps } from '@/components/kit';
 import { f1 } from './common';
 import { DiscDrawing, makeDisc } from './DiscSection';
 import { GB, GastrulationCellsPane } from './GastrulationCells';
@@ -59,11 +59,7 @@ export function GastrulationTransverse({ t, reduced }: SceneProps) {
   const W = s.W;
   const mid = (x: number) => s.map(x, (s.base(x) + s.dEnd(x)) / 2);
   const low = (x: number) => s.map(x, s.dEnd(x) + 5);
-  const outline = `M${[...Array.from({ length: 41 }, (_, i) => s.map(lerp(-W, W, i / 40), s.top(lerp(-W, W, i / 40)) - 1.5)), ...Array.from({ length: 41 }, (_, i) => s.map(lerp(W, -W, i / 40), s.dEnd(lerp(W, -W, i / 40)) + 11.5))]
-    .map((q) => `${f1(q[0])},${f1(q[1])}`)
-    .join('L')}Z`;
 
-  const gastAt = z.at(...s.at.streak);
   const anchors = {
     lerro: z.at(...s.at.streak),
     ildo: z.at(...s.at.groove),
@@ -73,9 +69,11 @@ export function GastrulationTransverse({ t, reduced }: SceneProps) {
     endo: z.at(...s.at.endo),
     amnion: z.at(...s.at.amnion),
     extra: z.at(...s.at.extraMeso),
-    disc: z.at(...s.at.disc),
+    disc: z.at(...s.map(W * 0.62, (s.base(W * 0.62) + s.dEnd(W * 0.62)) / 2)),
     yolk: z.at(...s.at.yolk),
   };
+  const triA = z.at(...s.map(W * 0.62, 4));
+  const triB = z.at(...s.map(W * 0.62, s.dEnd(W * 0.62) + 6));
   const leftY = columnY([anchors.lerro[1], anchors.epi[1], anchors.meso[1], anchors.hypo[1], anchors.endo[1]], 110, 575);
   // The amnion's name sits above the column so the extraembryonic mesoderm's leader, which rises, never crosses it.
   const rightY = columnY([anchors.extra[1], anchors.disc[1], anchors.yolk[1]], 240, 575, 32);
@@ -117,20 +115,14 @@ export function GastrulationTransverse({ t, reduced }: SceneProps) {
           </g>
         ))}
 
-        <Mark id="gastrulazioa" x={s.at.streak[0]} y={s.at.streak[1] + 6} rx={34} ry={26} show={g.streak} />
-
-        <Part id="hiru-orriko-diskoa" show={g.tri}>
-          <path d={outline} fill="none" stroke="rgba(6,8,14,0.6)" strokeWidth={4} />
-          <path d={outline} fill="none" stroke="#f3f6ff" strokeWidth={1.6} />
-        </Part>
       </g>
 
-      <Chips t={t} y={70} />
-      <Note x={500} y={590} show={g.nodeNote} tone="dim" size={11}>
+      {/* The step chip at the bottom (as in the other views); the view's own caveat above, off the tissue. */}
+      <Chips t={t} y={606} />
+      <Note x={500} y={70} show={g.nodeNote} tone="dim" size={11}>
         Nodo eta hobitxo primitiboa mozketa honetatik kranealago daude (ikus ikuspegi dortsala)
       </Note>
 
-      <Label id="gastrulazioa" x={810} y={104} ax={gastAt[0]} ay={gastAt[1]} show={g.streak * ok(gastAt)} />
       <Label id="lerro-primitiboa" x={190} y={leftY[0]} ax={anchors.lerro[0]} ay={anchors.lerro[1]} show={g.streak * (1 - clamp(g.groove * 2)) * ok(anchors.lerro)} />
       <Label id="ildo-primitiboa" x={190} y={leftY[0]} ax={anchors.ildo[0]} ay={anchors.ildo[1]} show={clamp(g.groove * 2 - 1) * ok(anchors.ildo)} />
       <Label id="epiblastoa" x={190} y={leftY[1]} ax={anchors.epi[0]} ay={anchors.epi[1]} show={(1 - clamp(g.ecto * 2)) * ok(anchors.epi)} />
@@ -140,19 +132,30 @@ export function GastrulationTransverse({ t, reduced }: SceneProps) {
       <Label id="endodermoa" x={190} y={leftY[4]} ax={anchors.endo[0]} ay={anchors.endo[1]} show={g.endo * ok(anchors.endo)} />
       <Label id="amnios-barrunbea" x={810} y={158} ax={anchors.amnion[0]} ay={anchors.amnion[1]} show={ok(anchors.amnion)} />
       <Label id="enbrioi-kanpoko-mesodermoa" x={810} y={rightY[0]} ax={anchors.extra[0]} ay={anchors.extra[1]} show={ok(anchors.extra)} small />
-      <Label id="hiru-orriko-diskoa" x={810} y={rightY[1]} ax={anchors.disc[0]} ay={anchors.disc[1]} show={g.tri * ok(anchors.disc)} />
+      {/* The three-layered disc: a bracket across ectoderm, mesoderm and endoderm. */}
+      <Label id="hiru-orriko-diskoa" x={810} y={rightY[1]} span={[triA, triB]} ax={anchors.disc[0]} ay={anchors.disc[1]} show={g.tri * ok(anchors.disc)} />
       <Label id="bitelo-zaku-sekundarioa" x={810} y={rightY[2]} ax={anchors.yolk[0]} ay={anchors.yolk[1]} show={ok(anchors.yolk)} />
     </g>
   );
 }
 
 /**
- * Both at once: the disc from above and the cell-by-cell cross-section through the streak. The section is
- * wide and short, so the right pane gets most of the width (split 380) and shows the central part of it,
- * where the cells go in, much larger; the tall disc keeps a narrower pane.
+ * Both at once: the disc from above and the cell-by-cell cross-section through the streak, side by side
+ * at the same moment. Each pane gets half the frame: the dorsal disc is shown almost at full size, so the
+ * streak, groove, node and pit each have their own spot, and the section shows the cells going in, large.
+ * The panes keep their own step chips and notes out; the stage's one chip is set under both.
  */
-export const GastrulationBoth = dual(
-  { scene: GastrulationDorsalPane, title: 'Goitik · goian kraneala', fx: 500, fy: 320, s: 0.54 },
-  { scene: GastrulationCellsPane, title: 'Zeharkako mozketa · goian dortsala', fx: 500, fy: 272, s: 0.74 },
-  { split: 380 },
+const BothPanes = dual(
+  { scene: GastrulationDorsalPane, title: 'Goitik · goian kraneala', fx: 500, fy: 318, s: 0.92 },
+  { scene: GastrulationCellsPane, title: 'Zeharkako mozketa · goian dortsala', fx: 500, fy: 300, s: 0.62 },
+  { split: 500 },
 );
+
+export function GastrulationBoth(props: SceneProps) {
+  return (
+    <g>
+      <BothPanes {...props} />
+      <Chips t={props.t} y={612} />
+    </g>
+  );
+}

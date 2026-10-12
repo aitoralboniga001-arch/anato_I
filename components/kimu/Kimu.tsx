@@ -1,11 +1,12 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { Fragment, useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent } from 'react';
-import type { KimuReply, KimuTarget, Mood } from '@/lib/kimu/types';
+import { Fragment, useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import type { KimuPractice, KimuReply, KimuSource, KimuTarget } from '@/lib/kimu/types';
+import { recordAnswer, useAnswers } from '@/components/shell/answers';
 import { IconClose, IconPlay } from '@/components/shell/icons';
 import { KimuFace } from './KimuFace';
-import { getKimuHere, kimuHost, onKimuOpen, openKimu, setKimuOpen, toggleKimu, useKimuHere, useKimuOpen } from './store';
+import { getKimuHere, kimuHost, setKimuOpen, toggleKimu, useKimuHere, useKimuOpen } from './store';
 import './kimu.css';
 
 interface Msg {
@@ -13,18 +14,23 @@ interface Msg {
   role: 'user' | 'kimu';
   text: string;
   targets?: KimuTarget[];
+  sources?: KimuSource[];
+  lineage?: KimuReply['lineage'];
   followups?: string[];
-  mood?: Mood;
-  /** The question to ask again when the connection failed. */
+  practice?: KimuPractice[];
+  /** The option picked for each practice question (null = not answered yet). */
+  picked?: (number | null)[];
+  from?: KimuReply['source'];
+  /** The question to ask again when something failed. */
   retry?: string;
 }
 
-const STORE = 'enbrioatlas:kimu';
-const MET = 'enbrioatlas:kimu-met';
+const STORE = 'enbrioatlas:kimu:v2';
 const MAX_MSGS = 20;
 
-const WELCOME_ASKS = ['Noiz sortzen da notokorda?', 'Non ikusten da lerro primitiboa?', 'Zer dira somitak?', 'Nola ixten da hodi neurala?'];
-const THINKING = ['Apunteak arakatzen…', 'Simulagailuan bila…', 'Pentsatzen…'];
+/** First questions: what students actually ask, answered straight from the notes. */
+const HOME_ASKS = ['Zein atalek osatzen dute diafragma?', 'Noiz ixten da hodi neurala?', 'Nondik datoz somitak?', 'Galdetu niri'];
+const SIM_ASKS = ['Azaldu urrats hau', 'Zergatik gertatzen da hau?', 'Galdetu niri urrats honi buruz'];
 
 const readSaved = (): Msg[] => {
   if (typeof window === 'undefined') return [];
@@ -40,10 +46,24 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 
 const deepLink = (t: KimuTarget) => {
   const q = new URLSearchParams({ etapa: t.stage, une: String(Math.min(1, t.at + 0.001)) });
-  if (t.formation) { q.set('eraketa', t.formation); q.set('apunteak', '1'); }
-  else if (t.structure) q.set('egitura', t.structure);
+  if (t.formation) {
+    q.set('eraketa', t.formation);
+    q.set('apunteak', '1');
+  } else if (t.structure) q.set('egitura', t.structure);
+  if (t.notes) q.set('apunteak', '1');
   if (t.view) q.set('ikuspegia', t.view);
   return `/astea/${t.week}?${q.toString()}`;
+};
+
+/** Load the engine and build its indexes before the first question, when the browser is idle. */
+let warming: Promise<unknown> | null = null;
+const warm = () => {
+  warming ??= import('@/lib/kimu/engine').then((m) => {
+    const run = () => m.warmKimu();
+    if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 2500 });
+    else setTimeout(run, 300);
+  });
+  return warming;
 };
 
 /** **bold** is the only formatting Kimu uses. */
@@ -58,13 +78,13 @@ function Rich({ text }: { text: string }) {
 }
 
 const Send = () => (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" />
   </svg>
 );
 
 const Fresh = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5" />
   </svg>
 );
@@ -73,16 +93,85 @@ function GoCard({ t, primary, onGo }: { t: KimuTarget; primary: boolean; onGo: (
   return (
     <button type="button" className={`kimu-go${primary ? ' is-primary' : ''}`} onClick={() => onGo(t)}>
       <span className="kimu-go-ic">
-        <IconPlay size={13} />
+        <IconPlay size={11} />
       </span>
       <span className="kimu-go-tx">
         <b>{t.label}</b>
-        <small>{t.formation ? 'Eraketa ikusi · ' : 'Azalpena · '}{t.where}</small>
-      </span>
-      <span className="kimu-go-ar" aria-hidden>
-        →
+        <small>
+          {t.formation ? 'Eraketa ikusi' : t.notes ? 'Urratsa eta apunteak' : 'Azalpena'} · {t.where}
+        </small>
       </span>
     </button>
+  );
+}
+
+function Source({ s, onGo }: { s: KimuSource; onGo: (t: KimuTarget) => void }) {
+  return (
+    <figure className="kimu-src">
+      <figcaption>
+        <span className="kimu-src-k">Apunteak</span>
+        <span className="kimu-src-ref">{s.ref}</span>
+      </figcaption>
+      {s.quote && <blockquote>{s.quote}</blockquote>}
+      {s.open && (
+        <button type="button" className="kimu-src-open" onClick={() => onGo(s.open!)}>
+          Ireki apunteetan <span aria-hidden>→</span>
+        </button>
+      )}
+    </figure>
+  );
+}
+
+/** One practice question at a time; the answer goes to the same history as the Galderak panel. */
+function Practice({ m, onPick, onMore }: { m: Msg; onPick: (msg: string, i: number, option: number) => void; onMore: () => void }) {
+  const items = m.practice!;
+  const picked = m.picked ?? items.map(() => null);
+  const at = picked.findIndex((p) => p === null);
+  const shown = at === -1 ? items.length - 1 : at;
+  const right = picked.filter((p, i) => p !== null && p === items[i].answer).length;
+  const [open, setOpen] = useState(shown);
+  const i = Math.min(open, items.length - 1);
+  const q = items[i];
+  const choice = picked[i];
+  const done = at === -1;
+  return (
+    <div className="kimu-quiz" aria-live="polite">
+      <p className="kimu-quiz-k">
+        Galdera {i + 1}/{items.length}
+      </p>
+      <p className="kimu-quiz-q">{q.question}</p>
+      <div className="kimu-quiz-opts" role="group" aria-label="Aukerak">
+        {q.options.map((o, k) => {
+          const state = choice === null ? '' : k === q.answer ? ' is-right' : k === choice ? ' is-wrong' : ' is-dim';
+          return (
+            <button key={k} type="button" className={`kimu-opt${state}`} disabled={choice !== null} onClick={() => onPick(m.id, i, k)}>
+              {o}
+            </button>
+          );
+        })}
+      </div>
+      {choice !== null && (
+        <div className={`kimu-quiz-why${choice === q.answer ? ' is-right' : ' is-wrong'}`}>
+          <b>{choice === q.answer ? 'Ondo.' : 'Ez da hori.'}</b> {q.why?.[choice] && choice !== q.answer ? `${q.why[choice]} ` : ''}
+          {q.why?.[q.answer] ?? q.explanation}
+        </div>
+      )}
+      {choice !== null && i < items.length - 1 && (
+        <button type="button" className="kimu-quiz-next" onClick={() => setOpen(i + 1)}>
+          Hurrengo galdera <span aria-hidden>→</span>
+        </button>
+      )}
+      {done && i === items.length - 1 && (
+        <div className="kimu-quiz-end">
+          <span>
+            {right}/{items.length} ondo · Galderak ataleko errepasoan gordeta
+          </span>
+          <button type="button" onClick={onMore}>
+            Beste hiru
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -91,18 +180,13 @@ export function Kimu() {
   const pathname = usePathname();
   const open = useKimuOpen();
   const here = useKimuHere();
+  const answers = useAnswers();
   const inSim = pathname.startsWith('/astea');
 
   // This tab's conversation. Only rendered once Kimu is opened, so reading storage here cannot mismatch the server.
   const [msgs, setMsgs] = useState<Msg[]>(readSaved);
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
-  const [think, setThink] = useState(0);
-  const [reveal, setReveal] = useState<{ id: string; n: number; len: number } | null>(null);
-  const [peek, setPeek] = useState<string | null>(null);
-  const [nudge, setNudge] = useState(false);
-  // In the simulator the nudge hangs under Kimu's top-bar button instead of the floating launcher.
-  const [nudgeAt, setNudgeAt] = useState<{ x: number; y: number; tip: number } | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const reduced = useRef(false);
@@ -116,76 +200,16 @@ export function Kimu() {
     } catch {}
   }, [msgs]);
 
-  // A first-time nudge, once per session, until Kimu has been opened once.
+  // In the simulator Kimu is one key away: get the notes ready while the student watches.
   useEffect(() => {
-    let timer = 0;
-    try {
-      if (window.localStorage.getItem(MET) || window.sessionStorage.getItem('enbrioatlas:kimu-nudged')) return;
-    } catch {
-      return;
-    }
-    const show = window.setTimeout(() => {
-      setNudge(true);
-      try {
-        window.sessionStorage.setItem('enbrioatlas:kimu-nudged', '1');
-      } catch {}
-      timer = window.setTimeout(() => setNudge(false), 8000);
-    }, 4500);
-    return () => {
-      window.clearTimeout(show);
-      window.clearTimeout(timer);
-    };
-  }, []);
-
-  // The nudge hangs over the view tabs: the student's first click or key anywhere puts it away.
-  useEffect(() => {
-    if (!nudge) return;
-    const away = (e: Event) => {
-      // A click on the nudge itself opens Kimu (its own handler).
-      if (e.target instanceof Element && e.target.closest('.kimu-nudge')) return;
-      setNudge(false);
-    };
-    window.addEventListener('pointerdown', away, true);
-    window.addEventListener('keydown', away, true);
-    return () => {
-      window.removeEventListener('pointerdown', away, true);
-      window.removeEventListener('keydown', away, true);
-    };
-  }, [nudge]);
-
-  // Keep the in-simulator nudge under the top-bar button (and on screen) while it shows.
-  useEffect(() => {
-    if (!nudge || !inSim) return;
-    const place = () => {
-      // On narrow screens Kimu lives in the Tresnak menu, so the nudge points there instead.
-      const own = document.querySelector('.kimu-tool')?.getBoundingClientRect();
-      const r = own && own.width > 0 ? own : document.querySelector('button[aria-label="Tresnak"]')?.getBoundingClientRect();
-      if (!r || r.width === 0) return setNudgeAt(null);
-      const mid = r.left + r.width / 2;
-      const x = Math.min(window.innerWidth - 120, Math.max(120, mid));
-      setNudgeAt({ x, y: r.bottom + 10, tip: mid - x });
-    };
-    place();
-    window.addEventListener('resize', place);
-    return () => window.removeEventListener('resize', place);
-  }, [nudge, inSim]);
-
-  // Opening Kimu dismisses the nudge and the toast, however it was opened.
-  useEffect(
-    () =>
-      onKimuOpen(() => {
-        setNudge(false);
-        setPeek(null);
-      }),
-    [],
-  );
+    if (!inSim) return;
+    const id = window.setTimeout(() => void warm(), 4000);
+    return () => window.clearTimeout(id);
+  }, [inSim]);
 
   useEffect(() => {
     if (!open) return;
-    try {
-      window.localStorage.setItem(MET, '1');
-    } catch {}
-    void import('@/lib/kimu/engine');
+    void warm();
     const id = window.setTimeout(() => {
       if (!window.matchMedia('(pointer: coarse)').matches) inputRef.current?.focus();
     }, 60);
@@ -207,30 +231,10 @@ export function Kimu() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  // The little toast that follows a jump fades on its own.
-  useEffect(() => {
-    if (!peek) return;
-    const id = window.setTimeout(() => setPeek(null), 9000);
-    return () => window.clearTimeout(id);
-  }, [peek]);
-
-  // Typewriter for a fresh answer; a click on the bubble skips it.
-  useEffect(() => {
-    if (!reveal) return;
-    const id = window.setInterval(() => setReveal((r) => (r && r.n + 3 < r.len ? { ...r, n: r.n + 3 } : null)), 22);
-    return () => window.clearInterval(id);
-  }, [reveal]);
-
-  useEffect(() => {
-    if (!busy) return;
-    const id = window.setInterval(() => setThink((n) => (n + 1) % THINKING.length), 1800);
-    return () => window.clearInterval(id);
-  }, [busy]);
-
   useEffect(() => {
     const el = bodyRef.current;
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: reduced.current ? 'auto' : 'smooth' });
-  }, [msgs, busy, reveal?.n, open]);
+  }, [msgs, busy, open]);
 
   const go = useCallback(
     (t: KimuTarget) => {
@@ -238,7 +242,6 @@ export function Kimu() {
       const host = kimuHost();
       if (host) host.go(t);
       else router.push(deepLink(t));
-      setPeek(t.label);
     },
     [router],
   );
@@ -247,25 +250,40 @@ export function Kimu() {
     async (raw: string) => {
       const question = raw.replace(/\s+/g, ' ').trim().slice(0, 400);
       if (!question || busy) return;
-      const history = msgs.filter((m) => !m.retry).map((m) => ({ role: m.role, text: m.text }));
+      const history = msgs.filter((m) => !m.retry && !m.practice).map((m) => ({ role: m.role, text: m.text }));
       setMsgs((m) => [...m.filter((x) => !x.retry), { id: uid(), role: 'user', text: question }]);
       setDraft('');
       if (inputRef.current) inputRef.current.style.height = '';
       setBusy(true);
       try {
         const { askKimu } = await import('@/lib/kimu/engine');
-        const data = await askKimu(question, history, getKimuHere());
-        const id = uid();
-        setMsgs((m) => [...m, { id, role: 'kimu', text: data.reply, targets: data.targets, followups: data.followups, mood: data.mood }]);
-        if (!reduced.current) setReveal({ id, n: 0, len: data.reply.length });
+        const r = await askKimu(question, history, getKimuHere(), { answers });
+        setMsgs((m) => [
+          ...m,
+          { id: uid(), role: 'kimu', text: r.reply, targets: r.targets, sources: r.sources, lineage: r.lineage, followups: r.followups, practice: r.practice, picked: r.practice?.map(() => null), from: r.source },
+        ]);
       } catch {
-        setMsgs((m) => [...m, { id: uid(), role: 'kimu', text: 'Ups! Zerbait gaizki atera da. Saiatuko gara berriro?', mood: 'sorry', retry: question }]);
+        setMsgs((m) => [...m, { id: uid(), role: 'kimu', text: 'Ezin izan dut erantzuna prestatu. Saiatu berriro?', retry: question }]);
       } finally {
         setBusy(false);
       }
     },
-    [busy, msgs],
+    [busy, msgs, answers],
   );
+
+  const pick = (id: string, i: number, option: number) => {
+    setMsgs((all) =>
+      all.map((m) => {
+        if (m.id !== id || !m.practice) return m;
+        const q = m.practice[i];
+        const picked = [...(m.picked ?? m.practice.map(() => null))];
+        if (picked[i] !== null) return m;
+        picked[i] = option;
+        recordAnswer(q.id, option === q.answer, q.options[option]);
+        return { ...m, picked };
+      }),
+    );
+  };
 
   const submit = (e?: FormEvent) => {
     e?.preventDefault();
@@ -283,62 +301,32 @@ export function Kimu() {
   };
   const reset = () => {
     setMsgs([]);
-    setReveal(null);
     inputRef.current?.focus();
   };
 
-  const lastKimu = [...msgs].reverse().find((m) => m.role === 'kimu');
-  const talking = !!reveal;
-  const mood: Mood = busy ? 'thinking' : (lastKimu?.mood ?? 'happy');
   const last = msgs[msgs.length - 1];
-  const idle = !busy && !reveal;
-  const asks = here ? ['Azaldu urrats hau', ...WELCOME_ASKS.slice(0, 3)] : WELCOME_ASKS;
+  const asks = inSim && here ? SIM_ASKS : HOME_ASKS;
+  const usedModel = msgs.some((m) => m.from === 'ai');
 
   return (
     <>
       {!open && !inSim && (
-        <div className="kimu-fab-wrap">
-          {nudge && (
-            <button type="button" className="kimu-nudge" onClick={openKimu}>
-              Kaixo! Galderarik? 🌱
-            </button>
-          )}
-          <button type="button" className="kimu-fab" onClick={openKimu} aria-label="Ireki Kimu, enbriologia-laguna" data-tip="Kimu · K" data-tip-pos="left">
-            <KimuFace size={54} mood="happy" />
-          </button>
-        </div>
-      )}
-
-      {!open && inSim && nudge && nudgeAt && (
-        <button type="button" className="kimu-nudge is-sim" style={{ left: nudgeAt.x, top: nudgeAt.y, '--nudge-tip': `calc(50% + ${Math.round(nudgeAt.tip)}px)` } as CSSProperties} onClick={openKimu}>
-          Zalantzarik? Galdetu niri 🌱
+        <button type="button" className="kimu-launch" data-tour="kimu" onClick={() => setKimuOpen(true)} onPointerEnter={() => void warm()} onFocus={() => void warm()} aria-label="Galdetu Kimuri (K)">
+          <KimuFace size={16} still />
+          <span>Galdetu</span>
+          <kbd aria-hidden>K</kbd>
         </button>
       )}
 
-      {!open && peek && (
-        <div className="kimu-peek" role="status">
-          <KimuFace size={34} mood="proud" still />
-          <span>
-            Hemen gaude! <b>{peek}</b>
-          </span>
-          <button type="button" onClick={openKimu}>
-            Galdetu gehiago
-          </button>
-          <button type="button" className="kimu-peek-x" onClick={() => setPeek(null)} aria-label="Itxi">
-            <IconClose size={14} />
-          </button>
-        </div>
-      )}
-
       {open && (
-        <section className={`kimu-panel${inSim ? ' is-sim' : ''}`} role="dialog" aria-label="Kimu, enbriologia-laguna">
+        <section className={`kimu-panel${inSim ? ' is-sim' : ''}`} role="dialog" aria-label="Kimu, apunteetako laguna">
           <header className="kimu-head">
-            <span className="kimu-head-face">
-              <KimuFace size={46} mood={mood} talking={talking} />
+            <span className="kimu-head-mark">
+              <KimuFace size={18} mood={busy ? 'thinking' : 'happy'} />
             </span>
             <div className="kimu-head-tx">
               <b>Kimu</b>
-              <small>{busy ? THINKING[think] : 'Zure enbriologia-laguna'}</small>
+              <small>{busy ? 'Apunteak arakatzen…' : 'Apunteetatik erantzuten du'}</small>
             </div>
             {msgs.length > 0 && (
               <button type="button" className="kimu-icon" onClick={reset} aria-label="Elkarrizketa berria" data-tip="Berria" data-tip-pos="bottom">
@@ -346,16 +334,17 @@ export function Kimu() {
               </button>
             )}
             <button type="button" className="kimu-icon" onClick={() => setKimuOpen(false)} aria-label="Itxi" data-tip="Itxi · Esc" data-tip-pos="bottom">
-              <IconClose size={16} />
+              <IconClose size={15} />
             </button>
           </header>
 
           <div className="kimu-body" ref={bodyRef} aria-live="polite">
             {msgs.length === 0 ? (
               <div className="kimu-welcome">
-                <KimuFace size={112} mood="happy" />
-                <h2>Kaixo! Kimu naiz 🌱</h2>
-                <p>Galdetu zer edo noiz sortzen den, eta simulagailuan azalpena hasten den unera eramango zaitut. Euskaraz, castellano edo English.</p>
+                <h2>Galdetu apunteei</h2>
+                <p>
+                  Erantzuna zure apunteetatik dator, gaiaren eta atalaren zenbakiarekin, eta simulagailuan non ikusten den erakusten dizut. {inSim ? 'Pantailan duzun urratsa ere badakit.' : ''}
+                </p>
                 <div className="kimu-chips">
                   {asks.map((q) => (
                     <button key={q} type="button" onClick={() => void ask(q)}>
@@ -365,61 +354,56 @@ export function Kimu() {
                 </div>
               </div>
             ) : (
-              msgs.map((m) => {
-                const typing = reveal?.id === m.id;
-                const text = typing ? m.text.slice(0, reveal.n) : m.text;
-                return m.role === 'user' ? (
+              msgs.map((m) =>
+                m.role === 'user' ? (
                   <div key={m.id} className="kimu-msg is-user">
                     <p>{m.text}</p>
                   </div>
                 ) : (
                   <div key={m.id} className="kimu-msg is-kimu">
-                    <span className="kimu-av">
-                      <KimuFace size={32} mood={m.mood ?? 'happy'} talking={typing} still={!typing} />
-                    </span>
-                    <div className="kimu-col">
-                      <p onClick={() => typing && setReveal(null)}>
-                        <Rich text={text} />
-                        {typing && <i className="kimu-caret" aria-hidden />}
+                    <p className="kimu-answer">
+                      <Rich text={m.text} />
+                    </p>
+                    {m.practice && m.practice.length > 0 && <Practice m={m} onPick={pick} onMore={() => void ask(inSim ? 'Galdetu niri urrats honi buruz' : 'Galdetu niri')} />}
+                    {m.lineage && (
+                      <p className="kimu-line">
+                        <span>{m.lineage.kind === 'from' ? 'Leinua' : 'Eratorriak'}</span>
+                        {m.lineage.names.join(m.lineage.kind === 'from' ? ' → ' : ' · ')}
                       </p>
-                      {!typing && m.targets && m.targets.length > 0 && (
-                        <div className="kimu-targets">
-                          {m.targets.map((t, i) => (
-                            <GoCard key={t.id} t={t} primary={i === 0} onGo={go} />
-                          ))}
-                        </div>
-                      )}
-                      {!typing && m.retry && (
-                        <button type="button" className="kimu-retry" onClick={() => void ask(m.retry!)}>
-                          <Fresh /> Saiatu berriro
-                        </button>
-                      )}
-                      {idle && m === last && m.followups && m.followups.length > 0 && (
-                        <div className="kimu-chips is-inline">
-                          {m.followups.map((q) => (
-                            <button key={q} type="button" onClick={() => void ask(q)}>
-                              {q}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    )}
+                    {m.sources?.map((s) => <Source key={`${s.ref}${s.quote}`} s={s} onGo={go} />)}
+                    {m.targets && m.targets.length > 0 && (
+                      <div className="kimu-targets">
+                        {m.targets.map((t, i) => (
+                          <GoCard key={t.id} t={t} primary={i === 0} onGo={go} />
+                        ))}
+                      </div>
+                    )}
+                    {m.retry && (
+                      <button type="button" className="kimu-retry" onClick={() => void ask(m.retry!)}>
+                        <Fresh /> Saiatu berriro
+                      </button>
+                    )}
+                    {!busy && m === last && m.followups && m.followups.length > 0 && (
+                      <div className="kimu-chips is-inline">
+                        {m.followups.map((q) => (
+                          <button key={q} type="button" onClick={() => void ask(q)}>
+                            {q}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                );
-              })
+                ),
+              )
             )}
             {busy && (
               <div className="kimu-msg is-kimu">
-                <span className="kimu-av">
-                  <KimuFace size={32} mood="thinking" still />
-                </span>
-                <div className="kimu-col">
-                  <p className="kimu-dots" aria-label="Kimu pentsatzen ari da">
-                    <i />
-                    <i />
-                    <i />
-                  </p>
-                </div>
+                <p className="kimu-dots" aria-label="Kimu apunteak arakatzen ari da">
+                  <i />
+                  <i />
+                  <i />
+                </p>
               </div>
             )}
           </div>
@@ -430,7 +414,7 @@ export function Kimu() {
               value={draft}
               rows={1}
               maxLength={400}
-              placeholder="Galdetu edozer…"
+              placeholder="Galdetu apunteei buruz…"
               aria-label="Zure galdera Kimuri"
               onChange={(e) => {
                 setDraft(e.target.value);
@@ -442,7 +426,7 @@ export function Kimu() {
               <Send />
             </button>
           </form>
-          <p className="kimu-foot">IAk akatsak egin ditzake: egiaztatu apunteekin.</p>
+          <p className="kimu-foot">{usedModel ? 'IAk apunteetan oinarrituta idazten du: egiaztatu iturria.' : 'Euskaraz, gaztelaniaz edo ingelesez · K irekitzeko eta ixteko'}</p>
         </section>
       )}
     </>

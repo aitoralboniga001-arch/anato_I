@@ -137,7 +137,7 @@ function DorsalDrawing({ t }: SceneProps) {
         <path d={`M${f1(D.cx - 5.5)},${f1(nodeY + 2)} Q${f1(D.cx)},${f1(nodeY + 8)} ${f1(D.cx + 5.5)},${f1(nodeY + 2)}`} fill="none" stroke="#e3ecff" strokeWidth={1} opacity={0.7} />
       </Part>
       <Part id="kloaka-mintza" show={cloaca}>
-        <ellipse cx={D.cx} cy={caudal + 22} rx={17} ry={8.5} fill="url(#w3g-memb)" stroke="#eef2ff" strokeWidth={1.2} />
+        <ellipse cx={D.cx} cy={caudal + 22} rx={18} ry={10} fill="url(#w3g-memb)" stroke="#eef2ff" strokeWidth={1.2} />
       </Part>
 
       {/* Regression: the streak shortens towards the caudal end. */}
@@ -203,7 +203,7 @@ function dorsalLabels(t: number) {
       {L('mesodermo-intraenbrionarioa', 804, 280, [(WX1 + WX2) / 2, WY[0] + 30], 1, true)}
       {L('endodermoa', 810, 330, [WX2 + 18, WY2[0] + 56], 1, true)}
       {L('nodo-primitiboa', 810, 420, [D.cx + 14, nodeY + 4])}
-      {L('kloaka-mintza', 810, 500, [D.cx + 14, caudal + 22], cloaca)}
+      {L('kloaka-mintza', 810, 500, [D.cx + 6, caudal + 22], cloaca)}
     </>
   );
 }
@@ -280,7 +280,6 @@ export function AllantoisSagittal({ t }: SceneProps) {
   const cr = { cx: 500, cy: 320, rx: lerp(505, 535, g.thin), ry: lerp(318, 340, g.thin) };
   const ring = (dr: number): P2[] =>
     Array.from({ length: 97 }, (_, i) => [cr.cx + (cr.rx + dr) * Math.cos((i / 96) * 2 * Math.PI), cr.cy + (cr.ry + dr) * Math.sin((i / 96) * 2 * Math.PI)]);
-  const onChorion = (deg: number): P2 => [cr.cx + cr.rx * Math.cos((deg * Math.PI) / 180), cr.cy + cr.ry * Math.sin((deg * Math.PI) / 180)];
   // Connecting stalk: an organic tube from the dorso-caudal margin (its root hidden under the embryo's
   // mesoderm coat) up and caudally to the chorion, flaring where it joins each so neither end is a cut.
   const ca = (-58 * Math.PI) / 180;
@@ -332,8 +331,28 @@ export function AllantoisSagittal({ t }: SceneProps) {
     return <Label key={id} id={id} x={x} y={y} ax={q[0]} ay={q[1]} show={show * inFrame(q, 36)} small={small} />;
   };
   const yolkNear: P2 = [s.p.cx + s.rx * Math.cos(0.75), s.cyY + s.p.yolkH * K * Math.sin(0.75) - 10];
-  const xs = Array.from({ length: 41 }, (_, i) => lerp(-W, W, i / 40));
-  const outline = pathD([...xs.map((x) => s.map(x, s.top(x) - 1.5)), ...xs.slice().reverse().map((x) => s.map(x, s.dEnd(x) + 11.5))]) + 'Z';
+  // The stalk is named where it is thickest clear of the allantois inside it (and in the frame).
+  const stalkAt = (() => {
+    let best: P2 = stalkLine[18];
+    let score = -Infinity;
+    for (let i = 0; i <= 14; i++)
+      for (let j = -2; j <= 2; j++) {
+        const u = 0.18 + (i / 14) * 0.7;
+        const c = stalk(u);
+        const w = stalkW(u);
+        const p: P2 = [c.x + c.nx * w * j * 0.3, c.y + c.ny * w * j * 0.3];
+        const q = z.at(p[0], p[1]);
+        if (!inFrame(q, 50)) continue;
+        const edge = (w - Math.abs(j * 0.3 * w)) * z.s;
+        const allo = g.bud > 0.01 ? Math.min(...allPart.map((a) => Math.hypot(a[0] - p[0], a[1] - p[1]) - 13)) * z.s : Infinity;
+        const sc = Math.min(edge, allo);
+        if (sc > score) {
+          score = sc;
+          best = p;
+        }
+      }
+    return best;
+  })();
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
@@ -385,11 +404,6 @@ export function AllantoisSagittal({ t }: SceneProps) {
           <ellipse cx={nx} cy={ny + 7 * K} rx={19 * K} ry={14 * K} fill="url(#w3al-node)" />
           <path d={`M${f1(nx - 17 * K)},${f1(ny - 1)} Q${f1(nx)},${f1(ny - 12 * K)} ${f1(nx + 17 * K)},${f1(ny - 1)}`} fill="none" stroke="#d6e2ff" strokeWidth={1.5} strokeLinecap="round" opacity={0.85} />
         </Part>
-        <Part id="hiru-orriko-diskoa" show={0.9}>
-          {/* The disc's outline as a solid casing (light line on a dark one), not a dashed pointer. */}
-          <path d={outline} fill="none" stroke="#0b1020" strokeWidth={3} opacity={0.6} />
-          <path d={outline} fill="none" stroke="#f3f6ff" strokeWidth={1.1} opacity={0.6} />
-        </Part>
         <Arrow from={mid(-W * 0.2)} to={mid(-W * 0.2 - 110)} bend={0} color="#fde68a" width={1.8} head={7} show={g.grow * (1 - seg(t, 0.69, 0.72))} />
       </g>
 
@@ -397,12 +411,18 @@ export function AllantoisSagittal({ t }: SceneProps) {
         Polaritatea finkatuta: kraneo-kaudala, dortso-bentrala eta ezker-eskuina
       </Note>
 
-      {L('korion-plaka', 300, 60, onChorion(-122), 1, true)}
+      {L('korion-plaka', 300, 60, [cr.cx + (cr.rx + 9.5) * Math.cos((-122 * Math.PI) / 180), cr.cy + (cr.ry + 9.5) * Math.sin((-122 * Math.PI) / 180)], 1, true)}
       {L('korion-barrunbea', 300, 100, [190, 190], 1, true)}
       {L('nodo-primitiboa', 470, 140, [nx, ny + 2], far)}
       {L('amnios-barrunbea', 470, 178, s.at.amnion, far)}
-      {L('finkapen-pedikulua', 760, 110, stalkLine[close ? 9 : 18])}
-      {L('hiru-orriko-diskoa', 190, 270, s.map(-W * 0.6, 4))}
+      {L('finkapen-pedikulua', 760, 110, stalkAt)}
+      {/* The three-layered disc: a bracket across ectoderm, mesoderm and endoderm. */}
+      {(() => {
+        const a = z.at(...s.map(-W * 0.6, 4));
+        const b = z.at(...s.map(-W * 0.6, s.dEnd(-W * 0.6) + 6.5));
+        const m: Pt = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+        return <Label key="hiru-orriko-diskoa" id="hiru-orriko-diskoa" x={190} y={270} span={[a, b]} ax={m[0]} ay={m[1]} show={inFrame(m, 36)} />;
+      })()}
       {L('bitelo-zaku-sekundarioa', 190, 470, close ? yolkNear : s.at.yolk)}
       {L('ildo-primitiboa', 810, 400, s.at.groove)}
       {L('kloaka-mintza', 810, 440, s.map(W - 22, s.dEnd(W - 22) + 8), g.cloaca)}

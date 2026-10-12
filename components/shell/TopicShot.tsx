@@ -5,6 +5,7 @@ import { Defs } from '@/components/kit/Defs';
 import { SceneContext } from '@/components/kit/context';
 import { getWeek } from '@/content/registry';
 import { QUIET_CTX } from './HeroFold';
+import { SceneView } from '@/components/kit';
 
 /**
  * The picture on each topic card: a frame of the topic's own simulator scene (not a sketch), at the
@@ -19,7 +20,9 @@ const SHOTS: Record<number, { stage: string; view: string; rest: number }> = {
   6: { stage: 'korion-hostotsua', view: 'sagitala', rest: 0.9 },
   7: { stage: 'diafragma-heldua', view: 'azpitik', rest: 0.9 },
   8: { stage: 'buru-ganga', view: 'albotik', rest: 0.9 },
-  9: { stage: 'bihotz-muskulua', view: 'eroapena', rest: 0.66 },
+  9: { stage: 'ildaskatuak', view: 'miotoma', rest: 0.73 },
+  10: { stage: 'bihotz-hodia', view: 'zeharkakoa', rest: 0.9 },
+  11: { stage: 'zulo-obala', view: 'frontala', rest: 0.9 },
 };
 
 const PLAY_S = 4.5;
@@ -80,7 +83,7 @@ export function TopicShot({ week, hot }: { week: number; hot: boolean }) {
         <svg viewBox="70 45 860 550">
           <Defs />
           <SceneContext.Provider value={QUIET_CTX}>
-            <Scene t={t} reduced />
+            <SceneView Scene={Scene} t={t} reduced />
           </SceneContext.Provider>
         </svg>
       )}

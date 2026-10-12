@@ -287,12 +287,20 @@ export interface TreeIds {
 }
 
 /** Everything but the fetal vessels: decidua, shell, maternal blood, the villous tree, plate, cavity, stalk. */
-export function TreeTissue({ tree, ids, reduced, framed = true }: { tree: Tree; ids: TreeIds; reduced?: boolean; framed?: boolean }) {
+/** Optional scene groups: the maternal tissue (decidua, its arteries) and the fetal tissue (trophoblast,
+ *  mesoderm, villi) can be named as wholes, e.g. the two parts of the placenta. */
+export interface TreeGroups {
+  maternal?: string[];
+  fetal?: string[];
+}
+
+export function TreeTissue({ tree, ids, reduced, framed = true, groups = {} }: { tree: Tree; ids: TreeIds; reduced?: boolean; framed?: boolean; groups?: TreeGroups }) {
   const { Y } = tree;
+  const { maternal: gm, fetal: gf } = groups;
   const closeDown = (pts: P[]) => pd([...pts, [1040, Y.plateB], [-40, Y.plateB]], true);
   return (
     <g mask={framed ? 'url(#m-slab)' : undefined}>
-      <Part id={ids.decidua} quiet>
+      <Part id={ids.decidua} groups={gm} quiet>
         <rect x={0} y={0} width={1000} height={Y.decB + 1} fill="url(#p-decidua)" />
         <rect x={0} y={0} width={1000} height={Y.decB + 1} fill="url(#w3b-vshade)" />
       </Part>
@@ -316,7 +324,7 @@ export function TreeTissue({ tree, ids, reduced, framed = true }: { tree: Tree; 
       </g>
 
       {ids.villus && (
-        <Part id={ids.villus}>
+        <Part id={ids.villus} groups={gf}>
           {tree.trunkSides.map((d, i) => (
             <path key={i} d={d} fill="none" stroke="#eef3ff" strokeWidth={3.4} opacity={0.24} />
           ))}
@@ -326,7 +334,7 @@ export function TreeTissue({ tree, ids, reduced, framed = true }: { tree: Tree; 
         </Part>
       )}
 
-      <Part id="sinzitiotrofoblastoa" quiet>
+      <Part id="sinzitiotrofoblastoa" groups={gf} quiet>
         <g fill="none">
           <path d={fringe(tree.synTop, 4.4, 3)} stroke={K.fringe} strokeWidth={0.9} />
           <path d={fringe([...tree.roof].reverse(), 4.4, 3)} stroke={K.fringe} strokeWidth={0.9} />
@@ -357,7 +365,7 @@ export function TreeTissue({ tree, ids, reduced, framed = true }: { tree: Tree; 
           <path key={i} d={pd(p, true)} />
         ))}
       </g>
-      <Part id="zitotrofoblastoa" quiet>
+      <Part id="zitotrofoblastoa" groups={gf} quiet>
         <path d={closeDown(tree.cytoTop)} fill={K.cytoGround} />
         {[...tree.brCyto, ...tree.sections.map((s) => s.cyto)].map((p, i) => (
           <path key={i} d={pd(p, true)} fill={K.cytoGround} />
@@ -368,7 +376,7 @@ export function TreeTissue({ tree, ids, reduced, framed = true }: { tree: Tree; 
           <CellPaths key={i} b={s.cells} />
         ))}
       </Part>
-      <Part id={ids.shell} quiet>
+      <Part id={ids.shell} groups={gf} quiet>
         <rect x={0} y={Y.decB} width={1000} height={Y.shellB - Y.decB} fill={K.cytoGround} />
         <CellPaths b={tree.cells.shell} />
       </Part>
@@ -379,7 +387,7 @@ export function TreeTissue({ tree, ids, reduced, framed = true }: { tree: Tree; 
           <path key={i} d={pd(p, true)} />
         ))}
       </g>
-      <Part id={ids.meso} quiet>
+      <Part id={ids.meso} groups={gf} quiet>
         <path d={closeDown(tree.mesoTop)} fill={K.meso} />
         {[...tree.brMeso, ...tree.sections.map((s) => s.meso)].map((p, i) => (
           <path key={i} d={pd(p, true)} fill={K.meso} />
@@ -403,7 +411,7 @@ export function TreeTissue({ tree, ids, reduced, framed = true }: { tree: Tree; 
         </g>
       </Part>
 
-      <Part id={ids.arteries}>
+      <Part id={ids.arteries} groups={gm}>
         {tree.arteries.map((a, i) => {
           const m = a[a.length - 1];
           return (
@@ -454,7 +462,7 @@ function TreeFlows({ tree }: { tree: Tree }) {
  * The fetal vessels of a finished tree (umbilical → plate → capillary loops and back), lumen colours by
  * direction. Pieces are drawn stalk → villi → plate so every junction meets without a wall across it.
  */
-export function TreeVessels({ tree, cA, cV, plateId, detail = false }: { tree: Tree; cA: string; cV: string; plateId: string; detail?: boolean }) {
+export function TreeVessels({ tree, cA, cV, plateId, detail = false, groups }: { tree: Tree; cA: string; cV: string; plateId: string; detail?: boolean; groups?: string[] }) {
   const v = tree.vessels;
   const umb = [
     { p: v.umbA, c: cA },
@@ -485,7 +493,7 @@ export function TreeVessels({ tree, cA, cV, plateId, detail = false }: { tree: T
       <Part id="zilbor-hodiak">
         <VesselSet segs={umb.map((q) => q.p)} lumens={umb.map((q) => q.c)} w={6.2} detail={detail} />
       </Part>
-      <Part id="biloxka-kapilarrak">
+      <Part id="biloxka-kapilarrak" groups={groups}>
         <VesselSet segs={caps.map((q) => q.p)} lumens={caps.map((q) => q.c)} w={6.4} detail={detail} />
         {tree.sections.map((s, i) => (
           <g key={i}>
@@ -499,11 +507,11 @@ export function TreeVessels({ tree, cA, cV, plateId, detail = false }: { tree: T
           </g>
         ))}
       </Part>
-      <Part id={plateId}>
+      <Part id={plateId} groups={groups}>
         <VesselSet segs={plate.map((q) => q.p)} lumens={plate.map((q) => q.c)} w={7} detail={detail} />
       </Part>
       {stubs.map((q, i) => (
-        <Part key={i} id={q.id}>
+        <Part key={i} id={q.id} groups={q.id === 'biloxka-kapilarrak' ? groups : undefined}>
           <g fill="none" strokeLinecap="butt">
             <path d={pd([q.a, q.b])} stroke={K.endo} strokeWidth={q.w} />
             <path d={pd([q.a, [q.b[0], q.b[1] + Math.sign(q.b[1] - q.a[1]) * 1.4]])} stroke={q.c} strokeWidth={q.w * 0.6} />

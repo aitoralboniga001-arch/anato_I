@@ -3,7 +3,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { LabelScaleContext, SceneContext, type SceneContextValue } from '@/components/kit/context';
 import { partsOf, structures, weeks } from '@/content/registry';
-import type { StageDef } from '@/lib/sim/types';
+import { SceneView } from '@/components/kit/columns';
+import type { SceneComponent, StageDef } from '@/lib/sim/types';
 
 /**
  * What a step talks about must be on screen when the step shows it: drawn, named, and inside the
@@ -45,6 +46,8 @@ const GONE: Record<string, string> = {
   '6/korion-hostotsua/6/dezidua-kapsularra': 'endekatzen da urrats honetan',
   '6/korion-hostotsua/6/umetoki-barrunbea': 'ixten da urrats honetan',
   '6/korion-hostotsua/7/korion-barrunbea': 'amniosak betetzen du urrats honetan',
+  '10/bihotz-hodia/3/orri-epimiokardikoa': 'urrats honetan miokardio eta epikardio bihurtzen da',
+  '10/bihotz-hodia/5/mesokardio-dortsala': 'urrats honetan desagertzen da: zeharkako sinua geratzen da',
 };
 
 /** A structure's name as the text uses it (case and the final article aside). */
@@ -52,6 +55,9 @@ const stem = (n: string) => n.toLowerCase().replace(/[()]/g, '').replace(/a$/, '
 
 /** Names a step's text says without showing them, on purpose: `week/stage/step/id` → why. */
 const MENTION_ONLY: Record<string, string> = {
+  '10/eskualde-kardiogenikoa/2/errai-orria': 'diskoa goitik: errai orria zeharkako mozketan ikusten da',
+  '10/eskualde-kardiogenikoa/3/errai-orria': 'diskoa goitik: errai orria zeharkako mozketan ikusten da',
+  '10/eskualde-kardiogenikoa/3/ferra-formako-plexua': '"ferra formako egitura": irlatxoak; plexua 5. urratsean',
   '1/blastozistoa/2/blastozistoa': 'eraketa hasten da: oraindik morula da',
   '1/ernalkuntza/1/obulua': '"ez da obulua": ezeztapena',
   '1/ernalkuntza/6/obozito-sekundarioa': 'urrats honetan obulu bihurtzen da',
@@ -118,7 +124,7 @@ function render(Scene: unknown, t: number): Seen {
     createElement(
       SceneContext.Provider,
       { value: ctx },
-      createElement(LabelScaleContext.Provider, { value: { k: 1, left: false, right: false } }, createElement(Scene as never, { t, reduced: true })),
+      createElement(LabelScaleContext.Provider, { value: { k: 1, left: false, right: false } }, createElement(SceneView, { Scene: Scene as SceneComponent, t, reduced: true })),
     ),
   );
   const parts = new Map<string, number>();

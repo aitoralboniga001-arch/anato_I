@@ -1,7 +1,7 @@
 'use client';
 
 import { Label, Mark, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
-import { Defs7, P, Serosa, Sheet, arc, f1, offset, poly, resample, spline, vis } from './common';
+import { CavityKey, Defs7, KEY7, P, Serosa, Sheet, arc, f1, offset, poly, resample, spline, vis } from './common';
 
 /**
  * 7:peritoneo-barrunbea — apunteen 2.1 atala eta 24. orriko irudiak: abdomenaren zeharkako mozketa
@@ -295,6 +295,7 @@ export function PeritoneumSection({ t }: SceneProps) {
       </Note>
 
       {/* Left gutter. */}
+      <CavityKey rows={[KEY7.perito]} quiet />
       <Label id="beheko-kaba-zaina" x={190} y={150} ax={IVC[0] - 10} ay={IVC[1] - 6} small />
       <Label id="giltzurruna" x={190} y={196} ax={KIDNEY_L[0] - 20} ay={KIDNEY_L[1]} />
       <Label id="peritoneo-atzeko-egiturak" x={190} y={290} ax={colonL[0] - 18} ay={colonL[1] - 8} show={k} small />

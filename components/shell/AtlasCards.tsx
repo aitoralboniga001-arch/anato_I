@@ -9,6 +9,7 @@ import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { StructureDef } from '@/lib/sim/types';
 import { frameAround, shotsOf, type Box } from './AtlasFigure';
 import styles from './structure-atlas.module.css';
+import { SceneView } from '@/components/kit';
 
 const W = 1000;
 const H = 640;
@@ -85,7 +86,7 @@ function AtlasMini({ id }: { id: string }) {
           <Defs />
           <SceneContext.Provider value={ctx}>
             <LabelScaleContext.Provider value={{ k: 1, left: false, right: false }}>
-              <Scene t={shot.t} reduced />
+              <SceneView Scene={Scene} t={shot.t} reduced />
             </LabelScaleContext.Provider>
           </SceneContext.Provider>
         </svg>

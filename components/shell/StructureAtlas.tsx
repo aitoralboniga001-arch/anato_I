@@ -298,7 +298,7 @@ export function StructureAtlas() {
       <LandNav current="egiturak" />
       <main className={styles.main}>
         <header className={styles.hero}>
-          <p className="eyebrow">1.–9. gaiak · Egituren atlasa</p>
+          <p className="eyebrow">1.–{weeks.length}. gaiak · Egituren atlasa</p>
           <h1>Egituren garapena, eskema batean</h1>
           <p>Gai guztietako egiturak eta haien garapen-loturak, adarrez adar.</p>
           <Link href="/leinuak" className={styles.related}>Ernetze orrien leinuak ikusi <span aria-hidden="true">↗</span></Link>

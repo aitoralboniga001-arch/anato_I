@@ -37,6 +37,9 @@ export interface NarrationRequest {
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const isId = (v: unknown): v is string => typeof v === 'string' && /^[a-z0-9][a-z0-9-]{0,99}$/.test(v);
+/** The highest topic number the course has (this module takes no imports: keep in step with the registry). */
+const MAX_WEEK = 11;
+
 const isIndex = (v: unknown): v is number => Number.isInteger(v) && Number(v) >= 0 && Number(v) <= 999;
 
 /** Arbitrary text, model settings and unknown fields are deliberately not accepted. */
@@ -45,7 +48,7 @@ export function parseNarrationRequest(value: unknown): NarrationRequest {
   if (!isRecord(value)) throw bad();
   const allowed = ['week', 'stage', 'kind', 'beat', 'structure', 'view', 'segment'];
   if (Object.keys(value).some(k => !allowed.includes(k))) throw bad();
-  if (!Number.isInteger(value.week) || Number(value.week) < 1 || Number(value.week) > 9 || !isId(value.stage)) throw bad();
+  if (!Number.isInteger(value.week) || Number(value.week) < 1 || Number(value.week) > MAX_WEEK || !isId(value.stage)) throw bad();
   if (typeof value.kind !== 'string' || !['intro', 'beat', 'structure', 'bridge'].includes(value.kind)) throw bad();
   if (value.segment !== undefined && !isIndex(value.segment)) throw bad();
   if (value.beat !== undefined && !isIndex(value.beat)) throw bad();

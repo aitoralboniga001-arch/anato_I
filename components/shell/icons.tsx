@@ -256,64 +256,65 @@ export const IconImage = ({ size }: P) => (
   </svg>
 );
 
-/** Small glyph describing how the specimen is cut/viewed. */
+/**
+ * The way of looking, as one family of glyphs: the specimen is always the same disc drawn in the
+ * text colour, and the plane (or the part looked at) is the one stroke in the plane colour. Same box,
+ * same two stroke weights, no arrowheads, so a row of them reads as a set.
+ */
 export function PlaneGlyph({ plane, size = 22 }: { plane: PlaneKind; size?: number }) {
-  const s = { width: size, height: size, viewBox: '0 0 32 32', fill: 'none', strokeWidth: 1.6, strokeLinecap: 'round' as const };
-  const disc = <ellipse cx="16" cy="18" rx="11" ry="6" stroke="currentColor" opacity={0.55} />;
+  const s = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true };
+  const hue = 'var(--plane, #fbbf24)';
+  const disc = <ellipse cx="12" cy="13.5" rx="8.5" ry="4.6" stroke="currentColor" opacity={0.6} />;
   switch (plane) {
     case 'sagitala':
       return (
         <svg {...s}>
           {disc}
-          <path d="M16 5v26" stroke="#fbbf24" strokeWidth={2.2} />
-          <path d="M12 7l4-3 4 3" stroke="#fbbf24" />
+          <path d="M12 3.5v17" stroke={hue} strokeWidth={1.9} />
         </svg>
       );
     case 'zeharkakoa':
       return (
         <svg {...s}>
           {disc}
-          <path d="M3 18h26" stroke="#fbbf24" strokeWidth={2.2} />
-          <path d="M6 14l-3 4 3 4" stroke="#fbbf24" />
+          <path d="M2.5 13.5h19" stroke={hue} strokeWidth={1.9} />
         </svg>
       );
     case 'koronala':
       return (
         <svg {...s}>
           {disc}
-          <path d="M5 26L27 10" stroke="#fbbf24" strokeWidth={2.2} />
+          <path d="M4.5 19.5l15-12" stroke={hue} strokeWidth={1.9} />
         </svg>
       );
     case 'dortsala':
       return (
         <svg {...s}>
           {disc}
-          <path d="M10 6c2-2 10-2 12 0M16 4v8" stroke="#fbbf24" strokeWidth={2} />
-          <circle cx="16" cy="18" r="2" fill="#fbbf24" stroke="none" />
+          <path d="M12 3.5v5" stroke={hue} strokeWidth={1.9} />
+          <circle cx="12" cy="13.5" r="1.7" fill={hue} stroke="none" />
         </svg>
       );
     case 'kanpokoa':
       return (
         <svg {...s}>
-          <path d="M9 24c-3-6 0-15 7-16 6 0 9 6 7 11-1 4-6 6-9 5" stroke="currentColor" opacity={0.7} />
-          <circle cx="24" cy="8" r="3" stroke="#fbbf24" strokeWidth={2} />
+          <path d="M7.5 18.5c-2.6-4.4-.6-11 4.9-11.6 4.5-.3 6.9 4 5.4 7.7-.9 2.6-4.1 4-6.3 3.3" stroke="currentColor" opacity={0.6} />
+          <circle cx="17.6" cy="6.4" r="2.1" stroke={hue} strokeWidth={1.9} />
         </svg>
       );
     case 'xehetasuna':
       return (
         <svg {...s}>
-          <circle cx="14" cy="14" r="7.5" stroke="#fbbf24" strokeWidth={2} />
-          <path d="M20 20l7 7" stroke="#fbbf24" strokeWidth={2.4} />
-          <circle cx="12" cy="13" r="2" fill="currentColor" opacity={0.7} stroke="none" />
-          <circle cx="16.5" cy="15" r="1.6" fill="currentColor" opacity={0.7} stroke="none" />
+          {disc}
+          <circle cx="14.5" cy="12" r="4" stroke={hue} strokeWidth={1.9} />
         </svg>
       );
     default:
       return (
         <svg {...s}>
-          <rect x="4" y="6" width="9" height="7" rx="2" stroke="currentColor" opacity={0.7} />
-          <rect x="19" y="19" width="9" height="7" rx="2" stroke="currentColor" opacity={0.7} />
-          <path d="M13 9.5h4a2 2 0 0 1 2 2v7.5" stroke="#fbbf24" strokeWidth={2} />
+          <rect x="3.5" y="5" width="7" height="5.5" rx="1.5" stroke="currentColor" opacity={0.6} />
+          <rect x="13.5" y="13.5" width="7" height="5.5" rx="1.5" stroke="currentColor" opacity={0.6} />
+          <path d="M10.5 7.75h3.5a1.75 1.75 0 0 1 1.75 1.75v4" stroke={hue} strokeWidth={1.9} />
         </svg>
       );
   }

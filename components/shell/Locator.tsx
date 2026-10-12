@@ -127,7 +127,7 @@ export function Locator({
             : '';
 
   return (
-    <div className="loc">
+    <div className="loc" data-tour="non-nago">
       <button
         key={absorb ? `${viewKey}/${absorb}` : viewKey}
         className={`loc-btn${shown ? ' is-on' : ''}${absorb ? ' is-absorb' : ''}`}
@@ -144,13 +144,6 @@ ${view}` : ''}`}
         <span className="loc-txt">
           <small>Non nago?</small>
           <b>{info.name}</b>
-        </span>
-        <span className="loc-q" aria-hidden>
-          ?
-        </span>
-        {/* The thumbnail alone does not say it opens an explanation: a small "?" badge on its corner. */}
-        <span className="loc-badge" aria-hidden>
-          ?
         </span>
       </button>
       {shown && (

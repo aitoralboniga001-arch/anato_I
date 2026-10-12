@@ -1,0 +1,354 @@
+/* ——— Gida laburra: the guide over the live page ———————————————————————————————————————————————
+   One dim over everything, the stop's own elements left clear and lit in their own shape (their
+   corner radius, a hairline of the signal colour and a soft glow), and one card beside them in the
+   shell's floating-card surface. Built on the tokens of globals.css only. */
+
+.gida {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  pointer-events: none;
+}
+
+.gida-dim {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+}
+
+.gida-shade {
+  fill: rgba(4, 4, 5, 0.66);
+  animation: gida-fade 0.28s ease both;
+}
+
+.gida-hole,
+.gida-lit,
+.gida-card {
+  transition-duration: 0.42s;
+  transition-timing-function: var(--ease);
+}
+
+.gida-hole {
+  transition-property: x, y, width, height, rx, ry;
+}
+
+/* The element itself lit: a hairline on its own edge and a soft light around it, nothing drawn apart. */
+.gida-lit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-shadow:
+    0 0 0 1px rgba(255, 106, 61, 0.7),
+    0 0 0 4px rgba(255, 106, 61, 0.12),
+    0 0 26px 2px rgba(255, 106, 61, 0.22);
+  transition-property: transform, width, height, border-radius;
+  animation: gida-fade 0.3s ease both;
+}
+
+.gida-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: min(340px, calc(100vw - 32px));
+  padding: 14px 14px 12px 16px;
+  border-radius: var(--r-lg);
+  background: var(--float);
+  border: 1px solid var(--float-edge);
+  box-shadow: var(--float-shadow);
+  pointer-events: auto;
+  opacity: 0;
+  visibility: hidden;
+  transition-property: opacity;
+}
+
+.gida-card.is-gliding {
+  transition-property: transform, opacity;
+}
+
+.gida-card.is-placed {
+  opacity: 1;
+  visibility: visible;
+}
+
+.gida-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: -4px -6px 4px 0;
+}
+
+.gida-kicker {
+  font: var(--kicker);
+  letter-spacing: var(--eyebrow-track);
+  text-transform: uppercase;
+  color: var(--focus);
+}
+
+.gida-kicker b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.gida-x {
+  width: 28px;
+  height: 28px;
+}
+
+.gida-card h3 {
+  margin: 0 0 4px;
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--text);
+  animation: gida-rise 0.32s var(--ease) both;
+}
+
+.gida-card p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-2);
+  text-wrap: pretty;
+  animation: gida-rise 0.32s var(--ease) 0.03s both;
+}
+
+.gida-keys {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 14px;
+  margin: 12px 0 0;
+}
+
+.gida-keys div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.gida-keys dt,
+.gida-keys dd {
+  margin: 0;
+}
+
+.gida-keys dd {
+  font-size: 12.5px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gida-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.gida-dots {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+}
+
+.gida-dots i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--line-3);
+  transition: background 0.2s, width 0.3s var(--ease);
+}
+
+.gida-dots i.is-past {
+  background: var(--text-4);
+}
+
+.gida-dots i.is-on {
+  width: 14px;
+  border-radius: 3px;
+  background: var(--signal);
+}
+
+.gida-hint {
+  display: inline-flex;
+  gap: 3px;
+  margin-right: 4px;
+  opacity: 0.8;
+}
+
+.gida-hint kbd {
+  min-width: 18px;
+  height: 18px;
+  font-size: 10px;
+}
+
+.gida-next {
+  gap: 5px;
+}
+
+.gida-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@keyframes gida-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes gida-rise {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+/* ——— The quiet first-visit offer: one line under the "?" (or on the bottom bar), never on the picture ——— */
+
+.gida-offer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 44;
+  display: flex;
+  /* Narrow enough to sit over the right column, under "?", clear of the view switch at 1440. */
+  max-width: 332px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 6px 8px 8px;
+  border-radius: var(--r-lg);
+  background: var(--float);
+  border: 1px solid var(--float-edge);
+  box-shadow: var(--float-shadow);
+  visibility: hidden;
+}
+
+.gida-offer.is-placed {
+  visibility: visible;
+  animation: gida-offer-in 0.45s var(--ease) both;
+}
+
+.gida-offer-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(255, 184, 107, 0.14);
+  color: var(--focus);
+}
+
+.gida-offer-text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  margin-right: 4px;
+  line-height: 1.3;
+  /* The small line may wrap inside the capped card. */
+  text-wrap: balance;
+}
+
+.gida-offer-text b {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.gida-offer-text small {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.gida-offer-x {
+  width: 28px;
+  height: 28px;
+}
+
+@keyframes gida-offer-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ——— In the help sheet: the guide comes first ——— */
+
+.help-tour {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin: 0 20px 4px;
+  padding: 12px 12px 12px 14px;
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.help-tour-text {
+  display: grid;
+  gap: 2px;
+  line-height: 1.3;
+}
+
+.help-tour-text b {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.help-tour-text small {
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+
+.help-tour .btn kbd {
+  min-width: 18px;
+  height: 18px;
+  margin-right: -4px;
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.14);
+  color: #3a3a3a;
+}
+
+/* The home bar's "?", the same key as the simulator's. */
+.gida-help {
+  width: 34px;
+  height: 34px;
+  margin-left: -4px;
+  color: var(--text-3);
+}
+
+.gida-help:hover {
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gida-hole,
+  .gida-lit,
+  .gida-card {
+    transition: none;
+  }
+  .gida-shade,
+  .gida-lit,
+  .gida-card h3,
+  .gida-card p,
+  .gida-offer {
+    animation: none;
+  }
+}
+
+.gida.is-still .gida-hole,
+.gida.is-still .gida-lit,
+.gida.is-still .gida-card {
+  transition: none;
+}

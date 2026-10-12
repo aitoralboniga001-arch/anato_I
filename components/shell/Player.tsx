@@ -4,7 +4,7 @@ import { firstSentence } from '@/content/generate';
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Beat, MicroQuestion, StageDef, StructureDef } from '@/lib/sim/types';
 import { structures } from '@/content/registry';
-import { IconBolt, IconCalendar, IconQuiz, IconCaptions, IconGuide, IconLoop, IconNext, IconNotes, IconPause, IconPlay, IconPrev, IconRestart, IconSkipNext, IconSkipPrev, IconSliders, IconVoice, IconVoiceOff } from './icons';
+import { IconBolt, IconCalendar, IconChevron, IconQuiz, IconCaptions, IconGuide, IconLoop, IconNext, IconNotes, IconPause, IconPlay, IconPrev, IconRestart, IconSkipNext, IconSkipPrev, IconVoice, IconVoiceOff } from './icons';
 import { Popover } from './Popover';
 import { categoryColor } from '@/lib/sim/palette';
 import type { AudioSnapshot } from './narrate';
@@ -58,6 +58,8 @@ interface PlayerProps {
   onVoice: (v: boolean) => void;
   onContinue: () => void;
   onNextStage: () => void;
+  /** The stage has not started: the play key names itself ("Erreproduzitu"), the one way in. */
+  cue?: boolean;
   /** After the topic's last stage: where the study goes next (the next topic, or the questions). */
   finish?: { label: string; tip: string; onClick: () => void };
   onPick: (id: string) => void;
@@ -396,11 +398,9 @@ export function Player(p: PlayerProps) {
 
   return (
     <div className={`dock${p.guided ? ' is-guided' : ''}${p.mode === 'azkarra' ? ' is-quick' : ''}`}>
+      {/* The step's text takes the card's whole width: the pager lives in the control row below, so it
+          never moves and the text wraps (and reserves) fewer lines. */}
       <div className="cap" aria-live="polite">
-        <span className="cap-n">
-          {pad(p.activeBeat + 1)}
-          <i>/{pad(n)}</i>
-        </span>
         <div className="cap-body">
           {!p.voice && p.voiceConfigured !== false && (
             <button className="voice-cta" onClick={() => p.onVoice(true)} title="Urrats bakoitza ahoz azaldu, irudiari begira">
@@ -430,52 +430,10 @@ export function Player(p: PlayerProps) {
             </div>
           )}
         </div>
-        {/* Step pager: one Next key whose state says what happens next, pinned to the card's bottom edge
-            at a fixed width, so it never moves under the pointer. */}
-        <div className="cap-nav">
-          <span className="cap-nav-l">
-            Urratsa{' '}
-            <b key={p.activeBeat} className="cap-tick">
-              {pad(p.activeBeat + 1)}
-            </b>
-            <i>/{pad(n)}</i>
-          </span>
-          <div className="cap-nav-row">
-            <button className="icon-btn" onClick={() => p.onBeat(-1)} aria-label="Aurreko urratsa" data-tip="Aurreko urratsa · ←" data-tip-pos="top">
-              <IconPrev />
-            </button>
-            <button
-              className={`cap-next${next.tone === 'go' ? ' is-wait' : next.tone === 'timed' ? ' is-timed' : next.tone === 'stage' ? ' is-stage' : ''}`}
-              onClick={next.onClick}
-              disabled={next.disabled}
-              aria-label={next.seconds ? `${next.label} (${next.seconds} s barru)` : next.label}
-              data-tip={next.tip}
-              data-tip-pos="top-end"
-            >
-              {next.tone === 'go' && <span className="cap-wait-dot" aria-hidden />}
-              <span>{next.label}</span>
-              {next.seconds !== undefined && <em>{next.seconds} s</em>}
-              <IconNext size={15} />
-            </button>
-          </div>
-        </div>
       </div>
 
-      <div className="transport">
-        <div className="tp-buttons">
-          <button className="tp-stage" onClick={() => p.onStage(-1)} disabled={p.stageIndex === 0} data-tip="Aurreko etapa · Shift + ←" data-tip-pos="top" aria-label="Aurreko etapa">
-            <IconSkipPrev size={15} />
-            <span>Etapa</span>
-          </button>
-          <button className={`play${p.playing ? ' is-playing' : ''}`} onClick={p.onTogglePlay} data-tip={p.playing ? 'Pausatu · Zuriunea' : 'Erreproduzitu · Zuriunea'} data-tip-pos="top" aria-label={p.playing ? 'Pausatu' : 'Erreproduzitu'}>
-            {p.playing ? <IconPause size={16} /> : <IconPlay size={16} />}
-          </button>
-          <button className="tp-stage" onClick={() => p.onStage(1)} disabled={p.stageIndex === p.stageCount - 1} data-tip="Hurrengo etapa · Shift + →" data-tip-pos="top" aria-label="Hurrengo etapa">
-            <span>Etapa</span>
-            <IconSkipNext size={15} />
-          </button>
-        </div>
-
+      <div className="transport" data-tour="erreprodukzioa">
+        {/* The stage's chapters run along the card's seam, one per step (like chapters on a video). */}
         <div
           className="scrub"
           ref={bar}
@@ -533,81 +491,140 @@ export function Player(p: PlayerProps) {
           )}
         </div>
 
-        <span className="tp-tc" title="Garapenaren eguna">
-          {p.day}
-        </span>
-
-        {!p.voice && p.voiceConfigured !== false && (
-          <button className="voice-cta tp-voice" onClick={() => p.onVoice(true)} aria-label="Ahotsarekin ikasi" data-tip="Urrats bakoitza ahoz azaldu, irudiari begira" data-tip-pos="top">
-            <IconVoice size={15} /> <span className="tp-voice-l">Ahotsarekin ikasi</span>
-            <span className="tp-voice-s" aria-hidden>Ahotsa</span>
-          </button>
-        )}
-
-        <Popover
-          up
-          className="tp-set"
-          trigger={({ open, toggle }) => (
-            <button className={`tp-set-btn${open ? ' is-on' : ''}`} onClick={toggle} aria-expanded={open} aria-haspopup="dialog" data-tip="Erreprodukzio modua, abiadura eta ahotsa · G" data-tip-pos="top-end">
-              <ModeIcon mode={p.mode} />
-              <span>{MODES.find((m) => m.id === p.mode)?.label}</span>
-              {p.voice && <IconVoice size={14} />}{p.speed !== 1 && <em>{p.speed}×</em>}
-              <IconSliders size={14} />
+        <div className="tp-bar">
+          <div className="tp-buttons">
+            <button className="tp-stage" onClick={() => p.onStage(-1)} disabled={p.stageIndex === 0} data-tip="Aurreko etapa · Shift + ←" data-tip-pos="top" aria-label="Aurreko etapa">
+              <IconSkipPrev size={15} />
+              <span>Etapa</span>
             </button>
-          )}
-        >
-          {() => (
-            <div className="menu tp-menu">
-              <p className="menu-h">Erreprodukzio modua</p>
-              <div role="radiogroup" aria-label="Erreprodukzio modua" className="tp-modes">
-                {MODES.map((m) => (
-                  <button key={m.id} role="radio" aria-checked={p.mode === m.id} className={p.mode === m.id ? 'is-on' : ''} onClick={() => p.onMode(m.id)} title={m.title}>
-                    <ModeIcon mode={m.id} />
-                    <span>
-                      <b>{m.label}</b>
-                      <small>{m.hint}</small>
-                    </span>
-                  </button>
-                ))}
-              </div>
-              <hr />
-              <div className="tp-row">
-                <span>Abiadura</span>
-                <span className="tp-speeds" role="radiogroup" aria-label="Abiadura">
-                  {SPEEDS.map((v) => (
-                    <button key={v} role="radio" aria-checked={p.speed === v} className={p.speed === v ? 'is-on' : ''} onClick={() => p.onSpeed(v)}>
-                      {v}×
-                    </button>
-                  ))}
-                </span>
-              </div>
-              {(
-                <button className="tp-row tp-switch" role="switch" aria-checked={p.voice} onClick={() => p.onVoice(!p.voice)}>
-                  <span>
-                    <IconVoice size={15} /> Ahotsarekin ikasi
-                  </span>
-                  <i aria-hidden />
-                </button>
-              )}
-              <button className="tp-row tp-switch" role="switch" aria-checked={p.autoContinue} onClick={() => p.onAutoContinue(!p.autoContinue)} title="Etapa bukatzean hurrengora pasatzen da">
-                <span>
-                  <IconLoop size={15} /> Etapak jarraian
-                </span>
-                <i aria-hidden />
+            {/* Before the stage has started, the play key names itself: the one way in, never over the specimen. */}
+            <button data-tour="play" className={`play${p.playing ? ' is-playing' : ''}${p.cue ? ' is-cue' : ''}`} onClick={p.onTogglePlay} data-tip={p.playing ? 'Pausatu · Zuriunea' : 'Erreproduzitu etapa · Zuriunea'} data-tip-pos="top" aria-label={p.playing ? 'Pausatu' : 'Erreproduzitu'}>
+              {p.playing ? <IconPause size={16} /> : <IconPlay size={16} />}
+              {p.cue && <span className="play-l">Erreproduzitu</span>}
+            </button>
+            <button className="tp-stage" onClick={() => p.onStage(1)} disabled={p.stageIndex === p.stageCount - 1} data-tip="Hurrengo etapa · Shift + →" data-tip-pos="top" aria-label="Hurrengo etapa">
+              <span>Etapa</span>
+              <IconSkipNext size={15} />
+            </button>
+          </div>
+
+          {/* Where the playhead is: the step (the only step counter on screen) and the embryo's age. */}
+          <p className="tp-read">
+            <span className="tp-step" title={`${p.activeBeat + 1}. urratsa ${n}etik`}>
+              Urratsa{' '}
+              <b key={p.activeBeat} className="cap-tick">
+                {p.activeBeat + 1}
+              </b>
+              <i>/{n}</i>
+            </span>
+            <span className="tp-tc" title="Garapenaren eguna">
+              {p.day}
+            </span>
+          </p>
+
+          <div className="tp-end">
+            {/* How the stage plays, as one group: the voice on/off key and the mode sheet (mode, speed,
+                voice, auto-continue, mini-questions). */}
+            <div className="tp-group" role="group" aria-label="Erreprodukzioa">
+            {p.voiceConfigured !== false && (
+              <button
+                className={`tp-voice${p.voice ? ' is-on' : ''}`}
+                onClick={() => p.onVoice(!p.voice)}
+                aria-pressed={p.voice}
+                aria-label="Ahotsarekin ikasi"
+                data-tip={p.voice ? 'Ahotsa itzali eta testuarekin jarraitu' : 'Ahotsarekin ikasi: urrats bakoitza ahoz azaldu, irudiari begira'}
+                data-tip-pos="top"
+              >
+                <IconVoice size={15} />
+                <span className="tp-voice-l">Ahotsa</span>
               </button>
-              {p.guided && (
-                <button className="tp-row tp-switch" role="switch" aria-checked={p.asks} onClick={() => p.onAsks(!p.asks)} title="Urrats bakoitzaren amaierako galdera txikia: piztuta, erantzun edo saltatu dezakezu; itzalita, urratsak jarraian doaz">
-                  <span>
-                    <IconQuiz size={15} /> Galdera txikiak
-                  </span>
-                  <i aria-hidden />
+            )}
+            <Popover
+              up
+              className="tp-set"
+              trigger={({ open, toggle }) => (
+                <button className={`tp-set-btn${open ? ' is-on' : ''}`} onClick={toggle} aria-expanded={open} aria-haspopup="dialog" data-tip="Erreprodukzio modua, abiadura eta ahotsa · G" data-tip-pos="top-end">
+                  <ModeIcon mode={p.mode} />
+                  <span>{MODES.find((m) => m.id === p.mode)?.label}</span>
+                  {p.speed !== 1 && <em>{p.speed}×</em>}
+                  <IconChevron size={12} className="tp-set-caret" />
                 </button>
               )}
+            >
+              {() => (
+                <div className="menu tp-menu">
+                  <p className="menu-h">Erreprodukzio modua</p>
+                  <div role="radiogroup" aria-label="Erreprodukzio modua" className="tp-modes">
+                    {MODES.map((m) => (
+                      <button key={m.id} role="radio" aria-checked={p.mode === m.id} className={p.mode === m.id ? 'is-on' : ''} onClick={() => p.onMode(m.id)} title={m.title}>
+                        <ModeIcon mode={m.id} />
+                        <span>
+                          <b>{m.label}</b>
+                          <small>{m.hint}</small>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  <hr />
+                  <div className="tp-row">
+                    <span>Abiadura</span>
+                    <span className="tp-speeds" role="radiogroup" aria-label="Abiadura">
+                      {SPEEDS.map((v) => (
+                        <button key={v} role="radio" aria-checked={p.speed === v} className={p.speed === v ? 'is-on' : ''} onClick={() => p.onSpeed(v)}>
+                          {v}×
+                        </button>
+                      ))}
+                    </span>
+                  </div>
+                  <button className="tp-row tp-switch" role="switch" aria-checked={p.voice} onClick={() => p.onVoice(!p.voice)}>
+                    <span>
+                      <IconVoice size={15} /> Ahotsarekin ikasi
+                    </span>
+                    <i aria-hidden />
+                  </button>
+                  <button className="tp-row tp-switch" role="switch" aria-checked={p.autoContinue} onClick={() => p.onAutoContinue(!p.autoContinue)} title="Etapa bukatzean hurrengora pasatzen da">
+                    <span>
+                      <IconLoop size={15} /> Etapak jarraian
+                    </span>
+                    <i aria-hidden />
+                  </button>
+                  {p.guided && (
+                    <button className="tp-row tp-switch" role="switch" aria-checked={p.asks} onClick={() => p.onAsks(!p.asks)} title="Urrats bakoitzaren amaierako galdera txikia: piztuta, erantzun edo saltatu dezakezu; itzalita, urratsak jarraian doaz">
+                      <span>
+                        <IconQuiz size={15} /> Galdera txikiak
+                      </span>
+                      <i aria-hidden />
+                    </button>
+                  )}
+                </div>
+              )}
+            </Popover>
             </div>
-          )}
-        </Popover>
+
+            {/* Step pager: one Next key whose state says what happens next, in the card's bottom-right
+                corner at a fixed width, so it never moves under the pointer. */}
+            <div className="tp-pager" role="group" aria-label="Urratsak">
+              <button className="tp-prev" onClick={() => p.onBeat(-1)} aria-label="Aurreko urratsa" data-tip="Aurreko urratsa · ←" data-tip-pos="top">
+                <IconPrev />
+              </button>
+              <button
+                className={`cap-next${next.tone === 'go' ? ' is-wait' : next.tone === 'timed' ? ' is-timed' : next.tone === 'stage' ? ' is-stage' : ''}`}
+                onClick={next.onClick}
+                disabled={next.disabled}
+                aria-label={next.seconds ? `${next.label} (${next.seconds} s barru)` : next.label}
+                data-tip={next.tip}
+                data-tip-pos="top-end"
+              >
+                {next.tone === 'go' && <span className="cap-wait-dot" aria-hidden />}
+                <span>{next.label}</span>
+                {next.seconds !== undefined && <em>{next.seconds} s</em>}
+                <IconNext size={15} />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-      <nav className="mobile-study-nav" aria-label="Urratsen nabigazioa">
+      <nav className="mobile-study-nav" aria-label="Urratsen nabigazioa" data-tour="erreprodukzioa-mugikorra">
         <div className="mobile-study-status">
           <span>Urratsa {p.activeBeat + 1}/{n}</span>
           {p.ask && p.askState === 'open' && <span>Erantzun edo saltatu galdera</span>}
@@ -633,9 +650,9 @@ export function Player(p: PlayerProps) {
  * Guided tour card, floating over the scene: the structure lit right now, in its colour, with its
  * definition. It sits on the viewport so the dock (and the scene size) does not jump while it runs.
  */
-export function TourCard({ item, idx, n, onSkip, onPick, compact = false }: { item: StructureDef; idx: number; n: number; onSkip: () => void; onPick: (id: string) => void; compact?: boolean }) {
+export function TourCard({ item, idx, n, onSkip, onPick, compact = false, side = 'left' }: { item: StructureDef; idx: number; n: number; onSkip: () => void; onPick: (id: string) => void; compact?: boolean; side?: 'left' | 'right' }) {
   return (
-    <div className="tour" role="status">
+    <div className={`tour is-${side}`} role="status">
       <div className="tour-top">
         <span className="tour-kicker">
           Ezagutu egiturak · {idx + 1}/{n}

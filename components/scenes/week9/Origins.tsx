@@ -1,8 +1,8 @@
 'use client';
 
-import { Arrow, Label, Note, Part, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Label, Note, Part, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { Cells } from '@/components/scenes/section/Section';
-import { Defs9, Spindle, Steps, W, arc, f1, offset, resample, spline, vis } from './common';
+import { Defs9, Spindle, Steps, W, along, arc, f1, offset, resample, spline, vis } from './common';
 
 /**
  * 9:muskulu-motak `jatorria` — 4. asteko enbrioiaren zeharkako mozketa bihotzaren mailan (dortsala goian).
@@ -10,7 +10,9 @@ import { Defs9, Spindle, Steps, W, arc, f1, offset, resample, spline, vis } from
  * muskulu ildaskatuak; aurreko hestearen inguruko errai orria → muskulu leuna; bihotz hodiaren
  * (endokardioaren) inguruko errai orria → miokardioa. Ehun bakoitzak bere jatorriaren lekuan hartzen
  * du bere kolorea (ildaskatua crimson, leuna eztia, miokardioa magenta), eta kolore horiek gai osoan
- * mantentzen dira.
+ * mantentzen dira. 1. urratsean hiru iturriak batera argitzen dira (denak mesodermoa); 2.ean mioblastoak
+ * somitetatik gorputz paretara abiatzen dira; 3.–4. urratsetan kamera hestera eta bihotz hodira hurbiltzen da,
+ * errai orria muskulu leun eta miokardio bihurtzen den lekura.
  */
 
 const BODY: Pt[] = spline(
@@ -55,12 +57,42 @@ function somiteRing(c: Pt, sd: 1 | -1) {
   return { outer, inner };
 }
 
-/** The section with its names, without the caption (other stages of this topic reuse it). */
-export function OriginsArt({ t }: { t: number }) {
+/** Where the close-up on the gut and the heart tube looks (frame units of the whole section), and how much it magnifies. */
+const ZF: Pt = [500, 392];
+const ZT: Pt = [500, 326];
+const ZS = 1.75;
+/** The close-up camera: k = 0 the whole section, 1 the gut and heart tube filling the frame. */
+export function originsCam(k: number) {
+  const s = 1 + (ZS - 1) * k;
+  const tx = ZF[0] + (ZT[0] - ZF[0]) * k;
+  const ty = ZF[1] + (ZT[1] - ZF[1]) * k;
+  return {
+    transform: `translate(${f1(tx)} ${f1(ty)}) scale(${s.toFixed(4)}) translate(${-ZF[0]} ${-ZF[1]})`,
+    at: (p: Pt): Pt => [tx + (p[0] - ZF[0]) * s, ty + (p[1] - ZF[1]) * s],
+  };
+}
+
+/** Myoblasts leave each somite's ventrolateral lip down the body wall (between the ectoderm and the parietal layer). */
+const STREAM_L: Pt[] = spline([[334, 190], [302, 220], [274, 260], [257, 308], [251, 360], [253, 410], [259, 452]], 8);
+const STREAM: Pt[][] = [STREAM_L, STREAM_L.map(([x, y]) => [1000 - x, y] as Pt)];
+const N_STREAM = 24;
+
+/** Leader dots, each well inside its structure (the middle of a band, of a ring). */
+const ECTO_MID = offset(BODY, 5.5, true);
+const ectoDot = ECTO_MID.reduce((b, p) => (Math.hypot(p[0] - 300, p[1] - 540) < Math.hypot(b[0] - 300, b[1] - 540) ? p : b));
+const WALL_MID = offset(WALL, 7.5);
+const wallDot = WALL_MID.reduce((b, p) => (p[0] < 500 && Math.abs(p[1] - 430) < Math.abs(b[1] - 430) ? p : b));
+
+const ptsD = (pts: readonly Pt[]) => `M${pts.map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}Z`;
+
+/** The section with its names, without the caption (other stages of this topic reuse it). `zoom` closes in on the gut and the heart tube. */
+export function OriginsArt({ t, zoom = 0 }: { t: number; zoom?: number }) {
   const striated = seg(t, 0.14, 0.26);
-  const smooth = seg(t, 0.32, 0.44);
+  const smooth = seg(t, 0.34, 0.46);
   const cardiac = seg(t, 0.5, 0.6);
-  const glowMeso = vis(t, 0.04, 0.14);
+  // Step 1: the three sources light up together as one germ layer, the mesoderm.
+  const meso = vis(t, 0.015, 0.15);
+  const cam = originsCam(zoom);
 
   const somites = ([[SOM_L, -1], [SOM_R, 1]] as const).map(([c, sd]) => ({ c, sd, ...somiteRing(c, sd) }));
   // The dorsal (dermomyotome) half of each somite turns into muscle: a crimson cap with fibres.
@@ -77,139 +109,189 @@ export function OriginsArt({ t }: { t: number }) {
   const heartInner = arc(HEART[0], HEART[1], 60, 46, 0, 360, 44);
   const endoOuter = arc(HEART[0], HEART[1], 36, 26, 0, 360, 36);
   const endoInner = arc(HEART[0], HEART[1], 28, 19, 0, 360, 36);
-  const meso = `M490,346 C492,370 490,382 486,${HEART[1] - 58} L514,${HEART[1] - 58} C510,382 508,370 510,346Z`;
+  const mesoCardium = `M490,346 C492,370 490,382 486,${HEART[1] - 58} L514,${HEART[1] - 58} C510,382 508,370 510,346Z`;
+  const ring = (o: Pt[], i: Pt[]) => `${smoothPath(o, true, 0.3)} ${smoothPath(i.slice().reverse(), true, 0.3)}`;
+  /** Step 1's mesoderm light over one source (drawn inside its own Part). */
+  const wash = (d: string, key: string, rule: 'evenodd' | 'nonzero' = 'nonzero') =>
+    meso > 0.01 ? <path key={key} d={d} fill="#ff5a6a" fillOpacity={0.42 * meso} fillRule={rule} stroke="#ffe0e4" strokeOpacity={0.85 * meso} strokeWidth={2.2} /> : null;
+
+  // Names: in the whole section, then (zoom) in the close-up on the gut and the heart tube. a = the dot, in section units.
+  type Name = { id: string; x: number; y: number; a: Pt; zy?: number; zoomOut?: boolean; show?: number; small?: boolean };
+  const names: Name[] = [
+    { id: 'hodi-neurala', x: 200, y: 84, a: [482, 92], zoomOut: true },
+    { id: 'somitak', x: 200, y: 146, a: [336, 150], zoomOut: true },
+    { id: 'muskulu-ildaskatuak', x: 200, y: 196, a: [360, 118], zoomOut: true, show: striated },
+    { id: 'aorta-dortsalak', x: 200, y: 250, a: [446, 240], zy: 60, small: true },
+    { id: 'paretako-orria', x: 200, y: 392, a: wallDot, zoomOut: true },
+    { id: 'perikardio-barrunbea', x: 200, y: 470, a: [350, 470], zy: 462, small: true },
+    { id: 'azaleko-ektodermoa', x: 200, y: 560, a: ectoDot, zoomOut: true, small: true },
+    { id: 'notokorda', x: 800, y: 196, a: [503, 198], zoomOut: true, small: true },
+    { id: 'aurreko-hestea', x: 800, y: 258, a: [517, 278], zy: 120 },
+    { id: 'muskulu-leuna', x: 800, y: 330, a: [538, 324], zy: 200, show: smooth },
+    { id: 'errai-orria', x: 800, y: 392, a: [500, 376], zy: 296 },
+    { id: 'endokardioa', x: 800, y: 452, a: [532, 455], zy: 436, small: true },
+    { id: 'miokardioa', x: 800, y: 512, a: [552, 489], zy: 500, show: cardiac },
+  ];
 
   return (
     <g>
       <Defs9 />
-      {/* Body: mesenchyme under the surface ectoderm. */}
-      <path d={smoothPath(BODY, true, 0.3)} fill="#4a2a35" />
-      <path d={smoothPath(BODY, true, 0.3)} fill="url(#w9-mes)" />
+      <g transform={cam.transform}>
+        {/* Body: mesenchyme under the surface ectoderm. */}
+        <path d={smoothPath(BODY, true, 0.3)} fill="#4a2a35" />
+        <path d={smoothPath(BODY, true, 0.3)} fill="url(#w9-mes)" />
 
-      {/* Lateral mesoderm: parietal layer along the body wall, visceral layer under the gut. */}
-      <Part id="paretako-orria">
-        <Cells outer={WALL_OUT} inner={WALL} n={52} fill={W.parietal} nucleus="rgba(120,20,30,0.7)" edge="rgba(120,20,30,0.35)" seed={11} />
-      </Part>
-      <Part id="perikardio-barrunbea">
-        <path d={smoothPath(CAV, true, 0.3)} fill={W.space} />
-        <path d={smoothPath(CAV, true, 0.3)} fill={W.cavity} />
-      </Part>
+        {/* Lateral mesoderm: parietal layer along the body wall, visceral layer under the gut. */}
+        <Part id="perikardio-barrunbea">
+          <path d={smoothPath(CAV, true, 0.3)} fill={W.space} />
+          <path d={smoothPath(CAV, true, 0.3)} fill={W.cavity} />
+        </Part>
+        <Part id="paretako-orria">
+          <Cells outer={WALL_OUT} inner={WALL} n={52} fill={W.parietal} nucleus="rgba(120,20,30,0.7)" edge="rgba(120,20,30,0.35)" seed={11} />
+          {wash(ptsD([...WALL_OUT, ...WALL.slice().reverse()]), 'w')}
+        </Part>
 
-      {/* Neural tube and notochord. */}
-      <Part id="hodi-neurala">
-        <ellipse cx={NT[0]} cy={NT[1]} rx={34} ry={54} fill={W.neural} stroke="#0e1d5c" strokeWidth={1.4} />
-        <ellipse cx={NT[0]} cy={NT[1]} rx={34} ry={54} fill="url(#w9-ball)" />
-        <path d={`M${NT[0]},${NT[1] - 34} Q${NT[0] + 5},${NT[1]} ${NT[0]},${NT[1] + 34} Q${NT[0] - 5},${NT[1]} ${NT[0]},${NT[1] - 34}Z`} fill={W.neuralLumen} />
-      </Part>
-      <Part id="notokorda">
-        <circle cx={NOTO[0]} cy={NOTO[1]} r={14} fill={W.noto} stroke="#4c1d95" strokeWidth={1.2} />
-        <circle cx={NOTO[0]} cy={NOTO[1]} r={14} fill="url(#w9-ball)" />
-      </Part>
+        {/* Neural tube and notochord. */}
+        <Part id="hodi-neurala">
+          <ellipse cx={NT[0]} cy={NT[1]} rx={34} ry={54} fill={W.neural} stroke="#0e1d5c" strokeWidth={1.4} />
+          <ellipse cx={NT[0]} cy={NT[1]} rx={34} ry={54} fill="url(#w9-ball)" />
+          <path d={`M${NT[0]},${NT[1] - 34} Q${NT[0] + 5},${NT[1]} ${NT[0]},${NT[1] + 34} Q${NT[0] - 5},${NT[1]} ${NT[0]},${NT[1] - 34}Z`} fill={W.neuralLumen} />
+        </Part>
+        <Part id="notokorda">
+          <circle cx={NOTO[0]} cy={NOTO[1]} r={14} fill={W.noto} stroke="#4c1d95" strokeWidth={1.2} />
+          <circle cx={NOTO[0]} cy={NOTO[1]} r={14} fill="url(#w9-ball)" />
+        </Part>
 
-      {/* Somites (paraxial mesoderm): epithelial ring; their dorsal half becomes striated muscle. */}
-      {somites.map(({ c, sd, outer, inner }) => {
-        const cap = capOf(c, sd);
-        return (
-          <g key={sd}>
-            <Part id="somitak" groups={['mesodermo-paraxiala']}>
-              <ellipse cx={c[0]} cy={c[1]} rx={64} ry={44} fill={W.paraxial} opacity={0.35} />
-              <Cells outer={outer} inner={inner} n={30} fill={W.paraxial} pseudo seed={21 + sd} nucleus="rgba(80,6,18,0.7)" />
-              {glowMeso > 0.01 && <ellipse cx={c[0]} cy={c[1]} rx={70} ry={50} fill="none" stroke="#ffd5d5" strokeOpacity={0.5 * glowMeso} strokeWidth={3} />}
-            </Part>
-            <Part id="muskulu-ildaskatuak" show={striated}>
-              <path d={`M${cap.top.map((p) => `${f1(p[0])},${f1(p[1])}`).join('L')}L${cap.bot.slice().reverse().map((p) => `${f1(p[0])},${f1(p[1])}`).join('L')}Z`} fill={W.striated} stroke="#5a0a18" strokeWidth={1} />
-              {[0.22, 0.4, 0.58, 0.76].map((u) => {
-                const a = resample(cap.top, 41)[Math.round(u * 40)];
-                const b = resample(cap.bot, 41)[Math.round(u * 40)];
-                return <path key={u} d={`M${f1(a[0])},${f1(a[1] + 2)} L${f1(b[0])},${f1(b[1] - 2)}`} stroke="#ffc2cc" strokeWidth={1} opacity={0.6} />;
-              })}
-            </Part>
-          </g>
-        );
+        {/* Somites (paraxial mesoderm): epithelial ring; their dorsal half becomes striated muscle. */}
+        {somites.map(({ c, sd, outer, inner }) => {
+          const cap = capOf(c, sd);
+          return (
+            <g key={sd}>
+              <Part id="somitak" groups={['mesodermo-paraxiala']}>
+                <ellipse cx={c[0]} cy={c[1]} rx={64} ry={44} fill={W.paraxial} opacity={0.35} />
+                <Cells outer={outer} inner={inner} n={30} fill={W.paraxial} pseudo seed={21 + sd} nucleus="rgba(80,6,18,0.7)" />
+                {wash(`M${c[0] - 64},${c[1]}a64,44 0 1,0 128,0a64,44 0 1,0 -128,0Z`, 's')}
+              </Part>
+              <Part id="muskulu-ildaskatuak" show={striated}>
+                <path d={`M${cap.top.map((p) => `${f1(p[0])},${f1(p[1])}`).join('L')}L${cap.bot.slice().reverse().map((p) => `${f1(p[0])},${f1(p[1])}`).join('L')}Z`} fill={W.striated} stroke="#5a0a18" strokeWidth={1} />
+                {[0.22, 0.4, 0.58, 0.76].map((u) => {
+                  const a = resample(cap.top, 41)[Math.round(u * 40)];
+                  const b = resample(cap.bot, 41)[Math.round(u * 40)];
+                  return <path key={u} d={`M${f1(a[0])},${f1(a[1] + 2)} L${f1(b[0])},${f1(b[1] - 2)}`} stroke="#ffc2cc" strokeWidth={1} opacity={0.6} />;
+                })}
+              </Part>
+            </g>
+          );
+        })}
+        {/* Myoblasts stream out of each somite into the body wall: the back and body-wall muscles to come. */}
+        {striated > 0.01 && (
+          <Part id="muskulu-ildaskatuak">
+            {STREAM.map((path, sd) =>
+              Array.from({ length: N_STREAM }, (_, i) => {
+                // A loose stream, not a bead chain: cells at uneven spacing, in two staggered lanes.
+                const u = Math.min(0.98, (i + 0.3 + rand(i * 5.1 + sd * 9) * 0.7) / N_STREAM);
+                const a = 0.14 + 0.06 * (1 - u);
+                const k = seg(t, a, a + 0.06);
+                if (k <= 0.01) return null;
+                const p = along(path, u * k);
+                const q = along(path, Math.min(1, u * k + 0.02));
+                const ang = Math.atan2(q[1] - p[1], q[0] - p[0]);
+                const lane = (i % 2 ? 1 : -1) * (3.5 + rand(i * 3.7 + sd) * 4);
+                const rot = (ang * 180) / Math.PI + (rand(i * 2.3 + sd) - 0.5) * 40;
+                return (
+                  <g key={`${sd}-${i}`} transform={`translate(${f1(p[0] - Math.sin(ang) * lane)} ${f1(p[1] + Math.cos(ang) * lane)}) rotate(${f1(rot)})`}>
+                    <ellipse rx={6.6} ry={4.2} fill={W.striated} stroke="#5a0a18" strokeWidth={1} />
+                    <ellipse rx={2.2} ry={1.7} fill="#4a0a18" />
+                  </g>
+                );
+              }),
+            )}
+          </Part>
+        )}
+
+        {/* Paired dorsal aortae. */}
+        <Part id="aorta-dortsalak">
+          {[AO_L, AO_R].map((c, i) => (
+            <g key={i}>
+              <circle cx={c[0]} cy={c[1]} r={21} fill={W.aorta} stroke={W.aortaDeep} strokeWidth={1.4} />
+              <circle cx={c[0]} cy={c[1]} r={15} fill={W.blood} />
+              <circle cx={c[0]} cy={c[1]} r={21} fill="url(#w9-ball)" />
+            </g>
+          ))}
+        </Part>
+
+        {/* Foregut: endoderm tube, wrapped by the visceral layer (→ smooth muscle). */}
+        <Part id="errai-orria">
+          <path d={smoothPath(splOuter, true, 0.3)} fill={W.visceral} stroke="rgba(90,10,24,0.5)" strokeWidth={1} />
+          <Cells outer={splOuter} inner={gutOuter} n={30} fill={W.visceral} nucleus="rgba(90,10,24,0.75)" edge="rgba(90,10,24,0.35)" seed={41} />
+          <Cells outer={offset(ROOF_L, -12)} inner={ROOF_L} n={8} fill={W.visceral} nucleus="rgba(90,10,24,0.75)" edge="rgba(90,10,24,0.35)" seed={43} />
+          <Cells outer={offset(ROOF_R, -12)} inner={ROOF_R} n={8} fill={W.visceral} nucleus="rgba(90,10,24,0.75)" edge="rgba(90,10,24,0.35)" seed={45} />
+          <path d={mesoCardium} fill={W.visceral} stroke="rgba(90,10,24,0.45)" strokeWidth={1} />
+          {/* Around the heart the visceral layer is the future myocardium (cardiac jelly between it and the endocardium). */}
+          <Cells outer={heartOuter} inner={heartInner} n={34} fill={W.visceral} nucleus="rgba(90,10,24,0.75)" edge="rgba(90,10,24,0.35)" seed={47} />
+          {wash(ring(splOuter, gutOuter), 'v1', 'evenodd')}
+          {wash(mesoCardium, 'v2')}
+          {wash(ring(heartOuter, heartInner), 'v3', 'evenodd')}
+          {[ROOF_L, ROOF_R].map((r, i) => wash(ptsD([...offset(r, -12), ...r.slice().reverse()]), `r${i}`))}
+        </Part>
+        {/* The visceral coat round the gut turns into smooth muscle: spindle cells appear one by one, round the tube. */}
+        <Part id="muskulu-leuna" show={smooth}>
+          <path d={ring(splOuter, gutOuter)} fill={W.smooth} fillRule="evenodd" stroke="#7a4a06" strokeWidth={1} />
+          {Array.from({ length: 16 }, (_, i) => {
+            const a = (i / 16) * Math.PI * 2;
+            const k = seg(t, 0.36 + (i / 16) * 0.07, 0.39 + (i / 16) * 0.07);
+            return k > 0.01 ? (
+              <g key={i} opacity={k}>
+                <Spindle x={GUT[0] + Math.cos(a) * 50} y={GUT[1] + Math.sin(a) * 38} len={20} h={6} rot={(a * 180) / Math.PI + 90} />
+              </g>
+            ) : null;
+          })}
+        </Part>
+        <Part id="aurreko-hestea">
+          <Cells outer={gutOuter} inner={gutInner} n={22} fill={W.endo} nucleus="rgba(90,60,10,0.7)" edge="rgba(90,60,10,0.4)" seed={51} />
+          <path d={smoothPath(gutInner, true, 0.3)} fill="#2c2010" />
+        </Part>
+
+        {/* Heart tube: endocardium inside, cardiac jelly, visceral layer → myocardium. */}
+        <path d={smoothPath(heartInner, true, 0.3)} fill="#5a2a3a" />
+        <path d={smoothPath(heartInner, true, 0.3)} fill="url(#w9-mes)" opacity={0.5} />
+        <Part id="miokardioa" show={cardiac}>
+          <path d={ring(heartOuter, heartInner)} fill={W.cardiac} fillRule="evenodd" stroke="#5a0a30" strokeWidth={1.2} />
+          {Array.from({ length: 22 }, (_, i) => {
+            const a = (i / 22) * Math.PI * 2;
+            const p0: Pt = [HEART[0] + Math.cos(a) * 61, HEART[1] + Math.sin(a) * 47];
+            const p1: Pt = [HEART[0] + Math.cos(a) * 75, HEART[1] + Math.sin(a) * 59];
+            return <path key={i} d={`M${f1(p0[0])},${f1(p0[1])} L${f1(p1[0])},${f1(p1[1])}`} stroke="#fde68a" strokeWidth={1.4} opacity={0.75} />;
+          })}
+        </Part>
+        <Part id="endokardioa">
+          <Cells outer={endoOuter} inner={endoInner} n={18} fill="#f9a8d4" nucleus="rgba(120,20,70,0.7)" edge="rgba(120,20,70,0.4)" seed={61} />
+          <path d={smoothPath(endoInner, true, 0.3)} fill={W.blood} />
+        </Part>
+
+        {/* Surface ectoderm. */}
+        <Part id="azaleko-ektodermoa">
+          <Cells outer={BODY} inner={ECTO_IN} n={120} fill={W.ecto} nk={0.5} seed={71} />
+        </Part>
+        <path d={smoothPath(BODY, true, 0.3)} fill="url(#w9-light)" pointerEvents="none" />
+      </g>
+
+      {names.map((n) => {
+        const [ax, ay] = cam.at(n.a);
+        const show = (n.show ?? 1) * (n.zoomOut ? 1 - seg(zoom, 0, 0.5) : 1);
+        return <Label key={n.id} id={n.id} x={n.x} y={n.y + ((n.zy ?? n.y) - n.y) * zoom} ax={ax} ay={ay} show={show} small={n.small} />;
       })}
-
-      {/* Paired dorsal aortae. */}
-      <Part id="aorta-dortsalak">
-        {[AO_L, AO_R].map((c, i) => (
-          <g key={i}>
-            <circle cx={c[0]} cy={c[1]} r={21} fill={W.aorta} stroke={W.aortaDeep} strokeWidth={1.4} />
-            <circle cx={c[0]} cy={c[1]} r={15} fill={W.blood} />
-            <circle cx={c[0]} cy={c[1]} r={21} fill="url(#w9-ball)" />
-          </g>
-        ))}
-      </Part>
-
-      {/* Foregut: endoderm tube, wrapped by the visceral layer (→ smooth muscle). */}
-      <Part id="errai-orria">
-        <path d={smoothPath(splOuter, true, 0.3)} fill={W.visceral} stroke="rgba(90,10,24,0.5)" strokeWidth={1} />
-        <Cells outer={splOuter} inner={gutOuter} n={30} fill={W.visceral} nucleus="rgba(90,10,24,0.75)" edge="rgba(90,10,24,0.35)" seed={41} />
-        <Cells outer={offset(ROOF_L, -12)} inner={ROOF_L} n={8} fill={W.visceral} nucleus="rgba(90,10,24,0.75)" edge="rgba(90,10,24,0.35)" seed={43} />
-        <Cells outer={offset(ROOF_R, -12)} inner={ROOF_R} n={8} fill={W.visceral} nucleus="rgba(90,10,24,0.75)" edge="rgba(90,10,24,0.35)" seed={45} />
-        <path d={meso} fill={W.visceral} stroke="rgba(90,10,24,0.45)" strokeWidth={1} />
-        {/* Around the heart the visceral layer is the future myocardium (cardiac jelly between it and the endocardium). */}
-        <Cells outer={heartOuter} inner={heartInner} n={34} fill={W.visceral} nucleus="rgba(90,10,24,0.75)" edge="rgba(90,10,24,0.35)" seed={47} />
-      </Part>
-      <Part id="muskulu-leuna" show={smooth}>
-        <path d={`${smoothPath(splOuter, true, 0.3)} ${smoothPath(gutOuter.slice().reverse(), true, 0.3)}`} fill={W.smooth} fillRule="evenodd" stroke="#7a4a06" strokeWidth={1} />
-        {Array.from({ length: 16 }, (_, i) => {
-          const a = (i / 16) * Math.PI * 2;
-          return <Spindle key={i} x={GUT[0] + Math.cos(a) * 50} y={GUT[1] + Math.sin(a) * 38} len={20} h={6} rot={(a * 180) / Math.PI + 90} />;
-        })}
-      </Part>
-      <Part id="aurreko-hestea">
-        <Cells outer={gutOuter} inner={gutInner} n={22} fill={W.endo} nucleus="rgba(90,60,10,0.7)" edge="rgba(90,60,10,0.4)" seed={51} />
-        <path d={smoothPath(gutInner, true, 0.3)} fill="#2c2010" />
-      </Part>
-
-      {/* Heart tube: endocardium inside, cardiac jelly, visceral layer → myocardium. */}
-      <path d={smoothPath(heartInner, true, 0.3)} fill="#5a2a3a" />
-      <path d={smoothPath(heartInner, true, 0.3)} fill="url(#w9-mes)" opacity={0.5} />
-      <Part id="miokardioa" show={cardiac}>
-        <path d={`${smoothPath(heartOuter, true, 0.3)} ${smoothPath(heartInner.slice().reverse(), true, 0.3)}`} fill={W.cardiac} fillRule="evenodd" stroke="#5a0a30" strokeWidth={1.2} />
-        {Array.from({ length: 22 }, (_, i) => {
-          const a = (i / 22) * Math.PI * 2;
-          const p0: Pt = [HEART[0] + Math.cos(a) * 61, HEART[1] + Math.sin(a) * 47];
-          const p1: Pt = [HEART[0] + Math.cos(a) * 75, HEART[1] + Math.sin(a) * 59];
-          return <path key={i} d={`M${f1(p0[0])},${f1(p0[1])} L${f1(p1[0])},${f1(p1[1])}`} stroke="#fde68a" strokeWidth={1.4} opacity={0.75} />;
-        })}
-      </Part>
-      <Part id="endokardioa">
-        <Cells outer={endoOuter} inner={endoInner} n={18} fill="#f9a8d4" nucleus="rgba(120,20,70,0.7)" edge="rgba(120,20,70,0.4)" seed={61} />
-        <path d={smoothPath(endoInner, true, 0.3)} fill={W.blood} />
-      </Part>
-
-      {/* Surface ectoderm. */}
-      <Part id="azaleko-ektodermoa">
-        <Cells outer={BODY} inner={ECTO_IN} n={120} fill={W.ecto} nk={0.5} seed={71} />
-      </Part>
-      <path d={smoothPath(BODY, true, 0.3)} fill="url(#w9-light)" pointerEvents="none" />
-
-      {/* Where the striated muscle goes next: from the somites into the back and the body wall. */}
-      <Arrow from={[338, 186]} to={[262, 300]} color={W.striated} width={3} bend={0.18} show={vis(t, 0.16, 0.3)} progress={seg(t, 0.16, 0.24)} />
-      <Arrow from={[662, 186]} to={[738, 300]} color={W.striated} width={3} bend={-0.18} show={vis(t, 0.16, 0.3)} progress={seg(t, 0.16, 0.24)} />
-
-      <Label id="hodi-neurala" x={200} y={84} ax={474} ay={96} />
-      <Label id="somitak" x={200} y={146} ax={334} ay={150} />
-      <Label id="muskulu-ildaskatuak" x={200} y={196} ax={360} ay={118} show={striated} />
-      <Label id="aorta-dortsalak" x={200} y={250} ax={434} ay={244} small />
-      <Label id="paretako-orria" x={200} y={392} ax={292} ay={410} />
-      <Label id="perikardio-barrunbea" x={200} y={470} ax={344} ay={500} small />
-      <Label id="azaleko-ektodermoa" x={200} y={560} ax={318} ay={556} small />
-      <Label id="notokorda" x={800} y={196} ax={514} ay={198} small />
-      <Label id="aurreko-hestea" x={800} y={258} ax={528} ay={292} />
-      <Label id="muskulu-leuna" x={800} y={362} ax={552} ay={326} show={smooth} />
-      <Label id="errai-orria" x={800} y={404} ax={510} ay={372} />
-      <Label id="endokardioa" x={800} y={452} ax={534} ay={452} small />
-      <Label id="miokardioa" x={800} y={512} ax={566} ay={492} show={cardiac} />
     </g>
   );
 }
 
 /** 9:muskulu-motak `jatorria`. */
 export function OriginsSection({ t }: SceneProps) {
+  // Steps 3–4 close in on the gut and the heart tube (where the visceral layer makes smooth muscle and myocardium); back out for the summary.
+  const zoom = seg(t, 0.3, 0.36) * (1 - seg(t, 0.64, 0.7));
   return (
     <g>
-      <OriginsArt t={t} />
+      <OriginsArt t={t} zoom={zoom} />
       <Note x={500} y={22} size={12.5} tone="dim">
         4. astea · bihotzaren mailako zeharkako mozketa
       </Note>
@@ -223,7 +305,6 @@ export function OriginsSection({ t }: SceneProps) {
           [0.64, 'Hiru muskulu motak, hiru jatorri: kolore bakoitza gai osoan bera da'],
         ]}
       />
-
     </g>
   );
 }

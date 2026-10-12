@@ -1,10 +1,10 @@
 'use client';
 
-import { Arrow, C, Journey, Label, Mark, Note, Part, clamp, lerp, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Journey, Label, Note, Part, clamp, lerp, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
 import { discOutline, f1 } from './common';
 import { GB } from './GastrulationCells';
 import { Callout, LitCell, LitDefs, columnY, ellipsePath, frameAt, inFrame, type Key } from './gastroKit';
-import { DorsalDefs, Stellate } from './dorsalKit';
+import { DorsalDefs, StellateField } from './dorsalKit';
 
 /**
  * 15–16. egunak — gastrulation seen from above (amnion cut at its edge, Langman fig. 5.2A).
@@ -24,7 +24,7 @@ const NODE_END = D.cy - 55;
 const CAUDAL = D.cy + D.ryB - 22;
 
 const OUTLINE = discOutline(D.cx, D.cy, D.rxT, D.rxB, D.ryT, D.ryB, 96);
-const RIM = discOutline(D.cx, D.cy, D.rxT + 9, D.rxB + 9, D.ryT + 9, D.ryB + 9, 96);
+const RIM = discOutline(D.cx, D.cy, D.rxT + 12, D.rxB + 12, D.ryT + 12, D.ryB + 12, 96);
 const poly = (pts: Pt[]) => `M${pts.map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}Z`;
 const OUT_D = poly(OUTLINE);
 /** Half-width of the disc at height y (for keeping things inside it). */
@@ -38,16 +38,20 @@ function halfW(y: number) {
   return best;
 }
 
+/**
+ * A calm camera: the whole disc, then a gentle push in on the streak, the groove and the node (the disc
+ * stays almost whole, nothing jumps), and back out for the cells.
+ */
 const DORSAL_KEYS: Key[] = [
   [0, 500, 320, 1.16],
   [0.08, 500, 320, 1.16],
-  [0.125, 500, 392, 1.5],
-  [0.16, 500, 392, 1.5],
-  [0.19, 500, 380, 1.62],
-  [0.23, 500, 380, 1.62],
-  [0.265, 500, 300, 2],
-  [0.31, 500, 300, 2],
-  [0.355, 500, 320, 1.16],
+  [0.12, 500, 352, 1.3],
+  [0.16, 500, 352, 1.3],
+  [0.195, 500, 345, 1.4],
+  [0.23, 500, 345, 1.4],
+  [0.265, 500, 312, 1.5],
+  [0.31, 500, 312, 1.5],
+  [0.35, 500, 320, 1.16],
   [1, 500, 320, 1.16],
 ];
 /** In the dual's narrow pane the camera stays calm: the whole disc in view, a slight close-up on the node only. */
@@ -152,7 +156,7 @@ function Dorsal({ t, reduced, pane }: SceneProps & { pane?: boolean }) {
   const z = frameAt(t, pane ? PANE_KEYS : DORSAL_KEYS);
   const growth = seg(t, GB.streak, GB.streak + 0.04);
   const nodeY = lerp(CAUDAL, NODE_END, growth);
-  const streakW = lerp(5, 12, growth);
+  const streakW = lerp(5, 16, growth);
   const grooveOn = seg(t, GB.groove, GB.groove + 0.03);
   const node = seg(t, GB.node, GB.node + 0.022);
   const pit = seg(t, GB.node + 0.01, GB.node + 0.04);
@@ -166,17 +170,22 @@ function Dorsal({ t, reduced, pane }: SceneProps & { pane?: boolean }) {
   const tri = seg(t, GB.tri, GB.tri + 0.04);
   const endoArrow = seg(t, GB.endo + 0.01, GB.endo + 0.05) * (1 - seg(t, GB.meso - 0.02, GB.meso + 0.01));
   const mesoArrow = seg(t, GB.meso + 0.01, GB.meso + 0.06) * (1 - seg(t, GB.ecto - 0.02, GB.ecto + 0.01));
-  const gast = seg(t, GB.streak, GB.streak + 0.05);
   const surfaceId = t >= GB.ecto ? 'ektodermoa' : 'epiblastoa';
 
   const streakPath = `M${f1(D.cx - streakW)},${f1(CAUDAL + 6)} Q${f1(D.cx - streakW * 1.35)},${f1((CAUDAL + nodeY) / 2)} ${f1(D.cx - streakW * 0.5)},${f1(nodeY + 8)} L${f1(D.cx + streakW * 0.5)},${f1(nodeY + 8)} Q${f1(D.cx + streakW * 1.35)},${f1((CAUDAL + nodeY) / 2)} ${f1(D.cx + streakW)},${f1(CAUDAL + 6)} Z`;
   const gw = streakW * 0.42 * grooveOn;
   const groovePath = `M${f1(D.cx - gw)},${f1(CAUDAL - 2)} Q${f1(D.cx - gw * 1.3)},${f1((CAUDAL + nodeY) / 2)} ${f1(D.cx - gw * 0.45)},${f1(nodeY + 13)} L${f1(D.cx + gw * 0.45)},${f1(nodeY + 13)} Q${f1(D.cx + gw * 1.3)},${f1((CAUDAL + nodeY) / 2)} ${f1(D.cx + gw)},${f1(CAUDAL - 2)} Z`;
   const win = `M${f1(wx)},${f1(D.cy - D.ryT - 30)}H${f1(D.cx + D.rxT + 30)}V${f1(D.cy + D.ryB + 30)}H${f1(wx)}Z`;
-  const endoRx = lerp(12, D.rxT * 1.02, endoZ);
-  const endoRy = lerp(50, D.ryT * 0.98, endoZ);
+  // The endoderm spreads from the midline and pushes the hypoblast out to a rim at the margin.
+  const endoRx = lerp(12, D.rxT * 0.86, endoZ);
+  const endoRy = lerp(50, D.ryT * 0.88, endoZ);
   const endoCy = lerp((NODE_END + CAUDAL) / 2 + 20, D.cy + 6, endoZ);
   const endoD = `M${f1(D.cx - endoRx)},${f1(endoCy)}a${f1(endoRx)},${f1(endoRy)} 0 1,0 ${f1(2 * endoRx)},0a${f1(endoRx)},${f1(endoRy)} 0 1,0 ${f1(-2 * endoRx)},0Z`;
+
+  const endoEdge = (y: number) => endoRx * Math.sqrt(Math.max(0, 1 - ((y - endoCy) / endoRy) ** 2));
+  // The mesoderm spreads as a sheet round the streak (a little slower cranially), its cells scattered in it.
+  const mesoR = mesoZ * MESO_MAX * 0.72;
+  const mesoSheet = `M${f1(D.cx - mesoR)},${f1(NODE_END)}A${f1(mesoR)},${f1(mesoR / 0.85)} 0 0,1 ${f1(D.cx + mesoR)},${f1(NODE_END)}V${f1(CAUDAL)}A${f1(mesoR)},${f1(mesoR / 1.1)} 0 0,1 ${f1(D.cx - mesoR)},${f1(CAUDAL)}Z`;
 
   const cells = TRACK.map((c) => ({ c, s: cellAt(c, t) }));
   const showCells = seg(t, GB.converge - 0.02, GB.converge + 0.02);
@@ -195,25 +204,29 @@ function Dorsal({ t, reduced, pane }: SceneProps & { pane?: boolean }) {
   const A = (x: number, y: number) => z.at(x, y);
   const midY = (nodeY + CAUDAL) / 2;
   const at = {
-    lerro: A(D.cx - streakW * 0.9, midY + 52),
-    ildo: A(D.cx - gw * 0.4, midY - 14),
-    nodo: A(D.cx - lerp(5, 17, node) * 0.85, nodeY + 3),
-    pit: A(D.cx + (pane ? -2 : 3), nodeY),
+    // On the ridge, between the groove's edge and the ridge's edge (both ~1.05× their end width at mid-height).
+    lerro: A(D.cx - (grooveOn > 0.01 ? (gw + streakW) * 0.52 : 0), midY),
+    ildo: A(D.cx, midY - 30),
+    // The node is named on its mound, halfway between the pit and its edge; the pit at its centre.
+    nodo: A(D.cx - (6.5 + lerp(5, 19, node)) / 2, nodeY),
+    pit: A(D.cx, nodeY + 0.5),
     epi: A(D.cx - D.rxT * 0.5, D.cy - D.ryT * 0.42),
-    rim: A(D.cx - (D.rxT + 4) * Math.cos(0.5), D.cy - (D.ryT + 4) * Math.sin(0.5)),
-    gast: A(D.cx + streakW + 2, midY + 30),
-    endo: A(D.cx + D.rxT * 0.5, D.cy + D.ryB * 0.42),
-    hypo: A(D.cx + halfW(D.cy + D.ryB * 0.62) - 6, D.cy + D.ryB * 0.62),
+    rim: A(D.cx - (D.rxT + 6) * Math.cos(0.5), D.cy - (D.ryT + 6) * Math.sin(0.5)),
+    // Endoderm: where it is not under the mesoderm sheet (between the sheet's front and its own edge).
+    endo: A(D.cx + (mesoZ > 0.01 ? (Math.max(mesoR, 40) + endoEdge(D.cy + 40)) / 2 : D.rxT * 0.5), mesoZ > 0.01 ? D.cy + 40 : D.cy + D.ryB * 0.42),
+    // Hypoblast: on the rim the endoderm leaves it, level with the endoderm's centre.
+    hypo: A(D.cx + (halfW(endoCy) + (endoZ > 0.01 ? endoRx : 24)) / 2, endoCy),
     meso: A(D.cx + D.rxT * 0.42, D.cy - D.ryT * 0.18),
     tri: A(D.cx + D.rxT * 0.62, D.cy - D.ryT * 0.62),
   };
   const lerroOn = seg(t, GB.streak, GB.streak + 0.03);
+  const own = pane ? 0 : 1;
   const mesoLab = seg(t, GB.meso + 0.04, GB.meso + 0.08);
   const endoLab = seg(t, GB.endo + 0.04, GB.endo + 0.08);
   const hypoLab = peel * (1 - seg(t, GB.ecto, GB.ecto + 0.03));
   const rimLab = 1 - seg(t, GB.converge - 0.03, GB.converge);
   const leftY = columnY([at.rim[1], at.epi[1], at.nodo[1], at.ildo[1], at.lerro[1]], 90, 575);
-  const rightY = columnY([at.tri[1], at.pit[1], at.meso[1], at.gast[1], at.endo[1], at.hypo[1]], 240, 575);
+  const rightY = columnY([at.tri[1], at.pit[1], at.meso[1], at.endo[1], at.hypo[1]], 240, 575);
 
   return (
     <g>
@@ -247,9 +260,8 @@ function Dorsal({ t, reduced, pane }: SceneProps & { pane?: boolean }) {
           )}
           {mesoZ > 0.01 && (
             <Part id="mesodermo-intraenbrionarioa">
-              {MESO_PTS.filter((m) => m.d < mesoZ * MESO_MAX * 0.72).map((m, i) => (
-                <Stellate key={i} x={m.p[0]} y={m.p[1]} r={3.2} a={m.a} color={C.mesoIntra} />
-              ))}
+              <path d={mesoSheet} fill={C.mesoIntra} opacity={0.3} />
+              <StellateField cells={MESO_PTS.filter((m) => m.d < mesoZ * MESO_MAX * 0.72).map((m) => ({ x: m.p[0], y: m.p[1], a: m.a }))} r={3.2} color={C.mesoIntra} />
             </Part>
           )}
           {/* Fate-coloured movement under the surface: endoderm from the midline outward, mesoderm laterally and cranially. */}
@@ -297,8 +309,8 @@ function Dorsal({ t, reduced, pane }: SceneProps & { pane?: boolean }) {
         )}
         {node > 0.01 && (
           <Part id="nodo-primitiboa" show={node}>
-            <ellipse cx={D.cx + 2.5} cy={nodeY + 3} rx={lerp(5, 17, node)} ry={lerp(5, 14, node)} fill="rgba(6,10,30,0.5)" />
-            <ellipse cx={D.cx} cy={nodeY} rx={lerp(5, 17, node)} ry={lerp(5, 14, node)} fill="url(#w3g-node)" />
+            <ellipse cx={D.cx + 2.5} cy={nodeY + 3} rx={lerp(5, 19, node)} ry={lerp(5, 15, node)} fill="rgba(6,10,30,0.5)" />
+            <ellipse cx={D.cx} cy={nodeY} rx={lerp(5, 19, node)} ry={lerp(5, 15, node)} fill="url(#w3g-node)" />
           </Part>
         )}
         {pit > 0.01 && (
@@ -332,7 +344,6 @@ function Dorsal({ t, reduced, pane }: SceneProps & { pane?: boolean }) {
           ))}
         </g>
 
-        <Mark id="gastrulazioa" x={D.cx} y={(NODE_END + CAUDAL) / 2 + 6} rx={34} ry={(CAUDAL - NODE_END) / 2 + 22} show={gast * (1 - 0.6 * peel)} />
         {/* The three-layered disc as a whole: its own edge drawn in light (no pointer over the anatomy). */}
         <Part id="hiru-orriko-diskoa" show={tri}>
           <path d={OUT_D} fill="none" stroke="rgba(6,8,14,0.6)" strokeWidth={5 * u} />
@@ -340,10 +351,13 @@ function Dorsal({ t, reduced, pane }: SceneProps & { pane?: boolean }) {
         </Part>
       </g>
 
-      <Chips t={t} />
-      <Note x={500} y={588} tone="dim" size={11}>
-        {peel < 0.5 ? 'Goitik ikusita · amniosa ertzean moztuta' : 'Eskuinean epiblastoa kenduta: azpian sortzen diren geruzak'}
-      </Note>
+      {/* One message at a time, at the bottom: the step chip (the dual sets its own); the cut-away is said once, beside it, off the disc. */}
+      {!pane && <Chips t={t} y={606} />}
+      {!pane && (
+        <Note x={760} y={92} tone="dim" size={11} show={peel}>
+          Eskuinean epiblastoa kenduta
+        </Note>
+      )}
 
       <Label id="amnioblastoak" x={190} y={leftY[0]} ax={at.rim[0]} ay={at.rim[1]} show={rimLab * inFrame(at.rim)} small />
       <Label id="epiblastoa" x={190} y={leftY[1]} ax={at.epi[0]} ay={at.epi[1]} show={(1 - ecto) * inFrame(at.epi)} />
@@ -351,12 +365,12 @@ function Dorsal({ t, reduced, pane }: SceneProps & { pane?: boolean }) {
       <Label id="nodo-primitiboa" x={190} y={leftY[2]} ax={at.nodo[0]} ay={at.nodo[1]} show={node * inFrame(at.nodo)} />
       <Label id="ildo-primitiboa" x={190} y={leftY[3]} ax={at.ildo[0]} ay={at.ildo[1]} show={grooveOn * inFrame(at.ildo)} />
       <Label id="lerro-primitiboa" x={190} y={leftY[4]} ax={at.lerro[0]} ay={at.lerro[1]} show={lerroOn * inFrame(at.lerro)} />
-      <Label id="hiru-orriko-diskoa" x={810} y={rightY[0]} ax={at.tri[0]} ay={at.tri[1]} show={tri * inFrame(at.tri)} small />
+      {/* In the dual the section pane names the new layers; this pane keeps the surface's own names and the hypoblast rim (pushed out of the section pane's frame). */}
+      <Label id="hiru-orriko-diskoa" x={810} y={rightY[0]} ax={at.tri[0]} ay={at.tri[1]} show={tri * inFrame(at.tri) * own} small />
       <Label id="hobitxo-primitiboa" x={810} y={rightY[1]} ax={at.pit[0]} ay={at.pit[1]} show={pit * inFrame(at.pit)} />
-      <Label id="mesodermo-intraenbrionarioa" x={810} y={rightY[2]} ax={at.meso[0]} ay={at.meso[1]} show={mesoLab * inFrame(at.meso)} small />
-      <Label id="gastrulazioa" x={810} y={rightY[3]} ax={at.gast[0]} ay={at.gast[1]} show={gast * inFrame(at.gast)} />
-      <Label id="endodermoa" x={810} y={rightY[4]} ax={at.endo[0]} ay={at.endo[1]} show={endoLab * inFrame(at.endo)} />
-      <Label id="hipoblastoa" x={810} y={rightY[5]} ax={at.hypo[0]} ay={at.hypo[1]} show={hypoLab * inFrame(at.hypo)} />
+      <Label id="mesodermo-intraenbrionarioa" x={810} y={rightY[2]} ax={at.meso[0]} ay={at.meso[1]} show={mesoLab * inFrame(at.meso) * own} small />
+      <Label id="endodermoa" x={810} y={rightY[3]} ax={at.endo[0]} ay={at.endo[1]} show={endoLab * inFrame(at.endo) * own} />
+      <Label id="hipoblastoa" x={810} y={rightY[4]} ax={at.hypo[0]} ay={at.hypo[1]} show={hypoLab * inFrame(at.hypo)} />
     </g>
   );
 }

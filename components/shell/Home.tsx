@@ -7,12 +7,13 @@ import { POOL, compKey } from '@/content/pool';
 import { isDue, useAnswers } from './answers';
 import { Chronicle } from './Chronicle';
 import { HeroReel } from './HeroReel';
-import { StudyMap } from './StudyMap';
+import { StudyMap, countWord, shelfCols } from './StudyMap';
 import { INTRO_KEY, Intro } from './intro/Intro';
-import { LandFoot, LandNav, firstReady, isWip } from './LandNav';
+import { LandFoot, LandNav, firstReady, inPrep, isWip } from './LandNav';
 import { IconPlay } from './icons';
 import { useLastPlace, useVisited } from './progress';
 import { TopicShot } from './TopicShot';
+import { GuideButton, TourHost } from './tour/TourHost';
 import { CountUp, useReveal } from './landing-fx';
 import './landing.css';
 import { spanOf } from '@/lib/sim/age';
@@ -45,7 +46,7 @@ function TopicCard({ w, i }: { w: (typeof weeks)[number]; i: number }) {
       <span className="lp-card-fig">
         <TopicShot week={w.week} hot={hot} />
         <span className="lp-card-n">{pad(w.week)}</span>
-        {w.week >= NEWEST && !wip && <span className="lp-card-new">Berria</span>}
+        {!wip && inPrep(w) ? <span className="lp-card-new is-prep">Prestatzen</span> : w.week >= NEWEST && !wip && <span className="lp-card-new">Berria</span>}
       </span>
       <span className="lp-card-body">
         <span className="lp-card-days">{days}</span>
@@ -104,12 +105,12 @@ function ContinueCta() {
   const st = w?.stages.find((s) => s.id === last?.stage);
   if (!w || !st)
     return (
-      <Link className="btn btn-light lg" href={`/astea/${firstReady.week}`}>
+      <Link className="btn btn-light lg" data-tour="hasi" href={`/astea/${firstReady.week}`}>
         <IconPlay size={14} /> Hasi simulagailua
       </Link>
     );
   return (
-    <Link className="btn btn-light lg cta-continue" href={`/astea/${w.week}?etapa=${st.id}`}>
+    <Link className="btn btn-light lg cta-continue" data-tour="hasi" href={`/astea/${w.week}?etapa=${st.id}`}>
       <IconPlay size={14} />
       <span className="cta-continue-t">
         Jarraitu
@@ -141,6 +142,8 @@ export function Home() {
   const [intro, setIntro] = useState(true);
   // The page reveals as the opening lifts (not after it is gone), so the two cross-dissolve.
   const [lifting, setLifting] = useState(false);
+  // Asked for again from the footer: the whole sequence, not the short signature.
+  const [replayed, setReplayed] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const ready = !intro || lifting;
   useReveal(root, true);
@@ -152,13 +155,15 @@ export function Home() {
     delete document.documentElement.dataset.intro;
     window.scrollTo({ top: 0 });
     setLifting(false);
+    setReplayed(true);
     setIntro(true);
   };
 
   return (
     <div ref={root} className={`landing${ready ? ' is-ready' : ' is-intro'}`}>
-      {intro && <Intro onDone={() => setIntro(false)} onOut={() => setLifting(true)} />}
-      <LandNav />
+      {intro && <Intro full={replayed} onDone={() => setIntro(false)} onOut={() => setLifting(true)} />}
+      <LandNav help={<GuideButton tour="home" />} />
+      <TourHost tour="home" ready={ready} />
 
       <section className="hero lp-hero">
         <div className="lp-aurora" aria-hidden />
@@ -175,7 +180,7 @@ export function Home() {
             </span>
           </h1>
           <p className="hero-lead rv">
-            Ernalkuntzatik enbrioiaren tolespenetara, diafragmaren jaitsieratik hezurren hezurtzapenera: prozesu bakoitza animatuta eta zure apunteetako izen guztiekin, euskaraz. Eten, atzera egin, mozketa aldatu eta egitura bakoitza klikatu.
+            Ernalkuntzatik gorputzaren sistemak eratu arte (barrunbeak, hezurrak, muskuluak…): prozesu bakoitza animatuta eta zure apunteetako izen guztiekin, euskaraz. Eten, atzera egin, mozketa aldatu eta egitura bakoitza klikatu.
           </p>
           <div className="hero-cta rv">
             <ContinueCta />
@@ -220,11 +225,11 @@ export function Home() {
             <p className="kicker" id="shelf-h">
               Gaiak · aukeratu nondik hasi
             </p>
-            <h2>Zortzi gai, garapenaren ordenan</h2>
+            <h2>{countWord(weeks.length)} gai, garapenaren ordenan</h2>
           </div>
           <p className="shelf-note">Etapatan banatuta, eta bakoitza bere eszenarekin. Pasatu sagua gainetik eta ikusiko duzu mugitzen. Ikusitako etapak nabigatzaile honetan gordetzen dira.</p>
         </header>
-        <ol className="lp-cards">
+        <ol className="lp-cards" data-tour="gaiak" style={{ '--cols': shelfCols(weeks.length) } as CSSProperties}>
           {weeks.map((w, i) => (
             <TopicCard key={w.week} w={w} i={i} />
           ))}

@@ -10,6 +10,7 @@ import { CranialWiring, HeadTable, OccipitalHead } from '@/components/scenes/wee
 import { ConnectivePatterns, LimbMuscles, LimbTurn } from '@/components/scenes/week9/Connective';
 import { SomiteWalls } from '@/components/scenes/week9/Walls';
 import { DomainSection, DomainTable } from '@/components/scenes/week9/Domains';
+import { Domains3D } from '@/components/scenes/week9/Domains3D';
 import { EpaxialColumn, RamiTable, SpinalColumn, SpinalCord, SpinalRami, SpinalVertebra } from '@/components/scenes/week9/Spinal';
 import { FetusNerves } from '@/components/scenes/week9/Plexus';
 import { SmoothGut, SmoothSection, TissuesDone } from '@/components/scenes/week9/Smooth';
@@ -1014,6 +1015,14 @@ export const week9: WeekDef = {
       source: src('2.2.1. Domeinuaren araberako sailkapena'),
       views: [
         {
+          id: 'domeinuak-3d',
+          label: 'Domeinuak 3D',
+          plane: 'eskema',
+          description: 'Enborraren xerra bat 3Dn, hiru somita luze: aurrealdeko ebakia 4. gaiko irudia bera da. Muga berdea gortina bat da enbor osoan zehar; somita bakoitzaren aurre-alboko ertzetik zelulak muga gurutzatu eta paretako orrira doaz. Gero bi domeinuak bolumen gisa: primaxiala (urdina) barrualdean, abaxiala (laranja) paretako orrian.',
+          scene: Domains3D,
+          travel: false,
+        },
+        {
           id: 'domeinuak',
           label: 'Bi domeinuak',
           plane: 'zeharkakoa',
@@ -1038,7 +1047,7 @@ export const week9: WeekDef = {
           idea: 'Somita-zelula batzuk (muskulu zelulak eta esklerotoma zelula batzuk) paretako orrira migratzen dute.',
           text: 'Somitetako zelula batzuk (zelula muskularrak eta esklerotomako zelula batzuk) alboko mesodermoaren paretako orrira migratzen dute.',
           focus: ['aurre-alboko-muskulu-zelulak', 'paretako-orria'],
-          view: 'domeinuak',
+          view: 'domeinuak-3d',
         },
         {
           at: 0.1,
@@ -1076,6 +1085,7 @@ export const week9: WeekDef = {
           idea: 'Bi domeinuetatik muskulu ildaskatu desberdinak. Bizkarraren sakoneko muskulu zutitzaileak: primaxialak, miotomatik. Lepoan, toraxean/abdomenean eta goiko gorputz-adarrean: batzuk primaxialak, beste batzuk abaxialak.',
           text: 'Bi domeinu hauetatik eskualde desberdinetan muskulu ildaskatu ezberdinak garatuko dira. Bizkarreko muskuluen jatorria: bizkarraren sakontasunean bizkarraren muskulu zutitzaileak daude, domeinu primaxialetik sortuak, miotomatik. Lepoan, toraxean/abdomenean eta goiko gorputz-adarrean dauden muskulu batzuk domeinu primaxialetik sortzen dira, eta besteak abaxialetik.',
           focus: ['bizkarreko-muskulu-sakonak', 'miotoma', 'domeinu-primaxiala'],
+          view: 'domeinuak',
         },
         {
           at: 0.5,
@@ -1122,7 +1132,7 @@ export const week9: WeekDef = {
           key: 'Muga gurutzatzen duten aurre-alboko zelulak = domeinu abaxiala = paretetako eta gorputz-adarretako muskulu gehienak.',
           text: 'Gogoratu: alboko mesodermoaren paretako orrira migratzen duten alboko ertzeko zelulek, orokorrean, gorputz paretako eta goiko eta beheko gorputz-adarretako muskulu gehienak sortzen dituzte.',
           focus: ['aurre-alboko-muskulu-zelulak', 'domeinu-abaxiala'],
-          view: 'domeinuak',
+          view: 'domeinuak-3d',
           ask: {
             q: 'Abdomeneko kanpoko laprana eta saihets arteko muskulu bat: zein domeinutatik dator bakoitza?',
             options: ['Laprana abaxiala; saihets artekoa primaxiala', 'Biak primaxialak', 'Biak abaxialak', 'Laprana primaxiala; saihets artekoa abaxiala'],

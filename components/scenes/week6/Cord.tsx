@@ -3,6 +3,7 @@
 import { C, Label, Mark, Note, Part, bezier, lerp, mix, rand, seg, smoothPath, tube, type Curve, type Pt, type SceneProps } from '@/components/kit';
 import { useId } from 'react';
 import { EarlyEmbryo, earlyGeom } from '@/components/scenes/week5/EarlyEmbryo';
+import { FA, FV } from './placentaSection';
 
 /**
  * Stage `zilbor-hestea` (content/weeks/week6.ts) — reference: notes figure img_p08_0 panels A–D.
@@ -102,7 +103,7 @@ const EMB_S = 0.5;
 const EMB = earlyGeom(EMB_DAY);
 /** The amnios around the embryo: at first, after it widens (.48), and fused with the chorion (.74–.82). */
 const AM0 = { cx: 385, cy: 318, rx: 154, ry: 163 };
-const AM1 = { cx: 387, cy: 317, rx: 164, ry: 172 };
+const AM1 = { cx: 416, cy: 314, rx: 198, ry: 206 };
 const AM2 = { cx: SAC.cx, cy: SAC.cy, rx: SAC.rx - 5, ry: SAC.ry - 5 };
 const RING: Pt = [417, 327];
 const FORK: Pt = [570, 300];
@@ -300,9 +301,9 @@ function CordFormationDrawing({ t }: SceneProps) {
       <Part id="zilbor-hodiak">
         <g clipPath={sacClip}>
           {ART_OFF.map((off) => (
-            <path key={off} d={cordLine(off)} fill="none" stroke={C.artery} strokeWidth={2.8} strokeLinecap="round" />
+            <path key={off} d={cordLine(off)} fill="none" stroke={FA} strokeWidth={2.8} strokeLinecap="round" />
           ))}
-          <path d={cordLine(VEIN_OFF)} fill="none" stroke={C.vein} strokeWidth={3.6} strokeLinecap="round" />
+          <path d={cordLine(VEIN_OFF)} fill="none" stroke={FV} strokeWidth={3.6} strokeLinecap="round" />
         </g>
       </Part>
 
@@ -323,8 +324,8 @@ function CordFormationDrawing({ t }: SceneProps) {
       <Part id="zilbor-hodiak" quiet>
         {[-1, 1].map((dir) => (
           <g key={dir} fill="none" strokeLinecap="round">
-            <path d={smoothPath(arcPts(INS_A, INS_A + dir * 30, (a) => 2.2 * plateTaper(a), 12), false)} stroke={C.artery} strokeWidth={1.7} />
-            <path d={smoothPath(arcPts(INS_A, INS_A + dir * 24, (a) => 4.4 * plateTaper(a), 10), false)} stroke={C.vein} strokeWidth={1.7} />
+            <path d={smoothPath(arcPts(INS_A, INS_A + dir * 30, (a) => 2.2 * plateTaper(a), 12), false)} stroke={FA} strokeWidth={1.7} />
+            <path d={smoothPath(arcPts(INS_A, INS_A + dir * 24, (a) => 4.4 * plateTaper(a), 10), false)} stroke={FV} strokeWidth={1.7} />
           </g>
         ))}
         <circle cx={ins[0]} cy={ins[1]} r={3} fill="#a03a48" />
@@ -444,10 +445,11 @@ export function CordSections({ t }: SceneProps) {
           <stop offset="0.8" stopColor="#d97c7c" />
           <stop offset="1" stopColor="#9d3a40" />
         </radialGradient>
+        {/* Vessels coloured by their blood, as in every topic-6 view: arteries deoxygenated (blue-violet), the vein oxygenated (red); walls in the tone of vascular muscle. */}
         <radialGradient id={`${uid}-vein`} cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0.74" stopColor="#1f3a7a" />
-          <stop offset="0.8" stopColor="#8aa0d6" />
-          <stop offset="1" stopColor="#5b74b6" />
+          <stop offset="0.74" stopColor="#6e1a2a" />
+          <stop offset="0.8" stopColor="#d98a96" />
+          <stop offset="1" stopColor="#a8566a" />
         </radialGradient>
         <radialGradient id={`${uid}-lumen`} cx="0.38" cy="0.34" r="0.7">
           <stop offset="0" stopColor="#fff" stopOpacity={0.35} />
@@ -518,12 +520,12 @@ export function CordSections({ t }: SceneProps) {
         {[0, 1].map((i) => (
           <g key={i}>
             <circle cx={vpos(i)[0]} cy={vpos(i)[1]} r={14.5} fill={`url(#${uid}-art)`} stroke="#6e1a20" strokeWidth={1.1} />
-            <circle cx={vpos(i)[0]} cy={vpos(i)[1]} r={5.8} fill={C.artery} />
+            <circle cx={vpos(i)[0]} cy={vpos(i)[1]} r={5.8} fill={FA} />
             <circle cx={vpos(i)[0]} cy={vpos(i)[1]} r={14.5} fill={`url(#${uid}-lumen)`} />
           </g>
         ))}
-        <circle cx={vpos(2)[0]} cy={vpos(2)[1]} r={16.5} fill={`url(#${uid}-vein)`} stroke="#1f3a7a" strokeWidth={1.1} />
-        <circle cx={vpos(2)[0]} cy={vpos(2)[1]} r={12.2} fill={C.vein} />
+        <circle cx={vpos(2)[0]} cy={vpos(2)[1]} r={16.5} fill={`url(#${uid}-vein)`} stroke="#6e1a2a" strokeWidth={1.1} />
+        <circle cx={vpos(2)[0]} cy={vpos(2)[1]} r={12.2} fill={FV} />
         <circle cx={vpos(2)[0]} cy={vpos(2)[1]} r={16.5} fill={`url(#${uid}-lumen)`} />
       </Part>
 
@@ -544,16 +546,16 @@ export function CordSections({ t }: SceneProps) {
       <Label id="wharton-gelatina" x={800} y={250} ax={SEC_C[0] + SEC_R * 0.55} ay={SEC_C[1]} show={vis(t, 0.86)} />
       <Label id="behin-betiko-zilbor-hestea" x={800} y={300} ax={SEC_C[0]} ay={SEC_C[1] + SEC_R - 20} show={vis(t, 0.74)} />
 
-      <Note x={40} y={470} align="start" tone="accent" show={seg(t, 0.86, 0.89)}>
+      <Note x={352} y={512} align="start" tone="accent" show={seg(t, 0.86, 0.89)}>
         1) Bitelo-zakua eta hodi onfalomesenterikoa desagertu
       </Note>
-      <Note x={40} y={505} align="start" tone="accent" show={seg(t, 0.89, 0.92)}>
+      <Note x={352} y={537} align="start" tone="accent" show={seg(t, 0.89, 0.92)}>
         2) Heste lakioak abdomenera itzuli (12. astetik)
       </Note>
-      <Note x={40} y={540} align="start" tone="accent" show={seg(t, 0.92, 0.95)}>
+      <Note x={352} y={562} align="start" tone="accent" show={seg(t, 0.92, 0.95)}>
         3) Alantoidea itxi
       </Note>
-      <Note x={40} y={575} align="start" tone="accent" show={seg(t, 0.95, 0.98)}>
+      <Note x={352} y={587} align="start" tone="accent" show={seg(t, 0.95, 0.98)}>
         4) Zelomen arteko komunikazioa itxi
       </Note>
     </g>

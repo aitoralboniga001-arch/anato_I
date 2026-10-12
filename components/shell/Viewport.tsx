@@ -2,7 +2,7 @@
 
 import { forwardRef, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from 'react';
 import { Defs } from '@/components/kit/Defs';
-import { LabelScaleContext, TextLayerContext } from '@/components/kit/context';
+import { LabelScaleContext, TextLayerContext, UnderlayContext, type Underlay } from '@/components/kit/context';
 import type { Orientation } from '@/lib/sim/types';
 import { IconFit, IconZoomIn, IconZoomOut } from './icons';
 
@@ -34,6 +34,8 @@ interface ViewportProps {
    * unnamed. Off while names are hidden on purpose (labels off, the find quiz).
    */
   hoverNames?: boolean;
+  /** The viewer turned a 3D view by dragging it (once is enough: the shell stops explaining how). */
+  onTurn?: () => void;
 }
 
 interface Zoom {
@@ -134,7 +136,7 @@ const sameMarks = (a: Mark[], b: Mark[]) =>
 
 /** SVG stage with wheel/drag zoom-pan, orientation edges and a feathered specimen backdrop. */
 export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewport(
-  { orientation, children, resetKey, onBackgroundClick, overlay, marks, nameOf, fullscreenRef, onFullscreenChange, makeRoom, hoverNames },
+  { orientation, children, resetKey, onBackgroundClick, overlay, marks, nameOf, fullscreenRef, onFullscreenChange, makeRoom, hoverNames, onTurn },
   svgRef,
 ) {
   const [tag, setTag] = useState<{ id: string; x: number; y: number } | null>(null);
@@ -178,11 +180,20 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   }, []);
   useEffect(() => () => cancelAnimationFrame(zRaf.current), []);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
-  const drag = useRef<{ x: number; y: number; zx: number; zy: number; moved: boolean } | null>(null);
+  const drag = useRef<{ x: number; y: number; zx: number; zy: number; moved: boolean; turned?: boolean } | null>(null);
   const wrap = useRef<HTMLDivElement>(null);
   const scene = useRef<SVGGElement>(null);
   const [rings, setRings] = useState<Mark[]>([]);
   const [textLayer, setTextLayer] = useState<SVGGElement | null>(null);
+  // 3D views draw their shaded tissue here, behind the SVG that keeps the names and the pointing.
+  const [underHost, setUnderHost] = useState<HTMLDivElement | null>(null);
+  const [sceneEl, setSceneEl] = useState<SVGGElement | null>(null);
+  const sceneRef = useCallback((el: SVGGElement | null) => {
+    scene.current = el;
+    setSceneEl(el);
+  }, []);
+  const zoomed = z.k > 1.01;
+  const underlay = useMemo<Underlay | null>(() => (underHost ? { host: underHost, scene: sceneEl, zoomed } : null), [underHost, sceneEl, zoomed]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenError, setFullscreenError] = useState('');
   const markKey = (marks ?? []).join('|');
@@ -307,6 +318,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   return (
     <div
       ref={wrap}
+      data-tour="eszena"
       className={`viewport${z.k > 1 ? ' is-zoomed' : ''}`}
       onPointerDown={(e) => {
         if (e.button !== 0) return;
@@ -325,6 +337,10 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
           setTag((p) => (!next ? null : p && p.id === next.id && Math.abs(p.x - next.x) + Math.abs(p.y - next.y) < 3 ? p : next));
         }
         const d = drag.current;
+        if (d && !d.turned && onTurn && e.target instanceof Element && e.target.closest('.stage3d') && Math.hypot(e.clientX - d.x, e.clientY - d.y) >= 5) {
+          d.turned = true;
+          onTurn();
+        }
         if (!d || z.k === 1) return;
         const dx = e.clientX - d.x;
         const dy = e.clientY - d.y;
@@ -345,6 +361,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
       }}
       onDoubleClick={() => glideZoom(HOME)}
     >
+      <div ref={setUnderHost} className="viewport-underlay" aria-hidden />
       <svg
         ref={svgRef}
         className="viewport-svg"
@@ -356,10 +373,12 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
         <Defs />
         <g transform={`translate(${z.x} ${z.y}) scale(${z.k})`}>
           <g className="scene-room" style={{ transform: `translate(${room.x}px, ${room.y}px) scale(${room.k})` }}>
-          <g ref={scene}>
-            <TextLayerContext.Provider value={textLayer}>
-              <LabelScaleContext.Provider value={labelScale}>{children}</LabelScaleContext.Provider>
-            </TextLayerContext.Provider>
+          <g ref={sceneRef}>
+            <UnderlayContext.Provider value={underlay}>
+              <TextLayerContext.Provider value={textLayer}>
+                <LabelScaleContext.Provider value={labelScale}>{children}</LabelScaleContext.Provider>
+              </TextLayerContext.Provider>
+            </UnderlayContext.Provider>
           </g>
           {rings.length > 0 && (
             <defs>
@@ -416,13 +435,13 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
             );
           })}
           {/* Names, notes and call-outs land here (kit OnTop): above every leader, arrow and marker. */}
-          <g ref={setTextLayer} className="text-layer" />
+          <g ref={setTextLayer} className="text-layer" data-tour="etiketak" />
           </g>
         </g>
       </svg>
 
       {orientation && (
-        <div className="orient" aria-hidden>
+        <div className="orient" data-tour="norabideak" aria-hidden>
           {orientation.top && <span className="orient-top">▲ {orientation.top}</span>}
           {orientation.bottom && <span className="orient-bottom">▼ {orientation.bottom}</span>}
           {orientation.left && <span className="orient-left">◀ {orientation.left}</span>}

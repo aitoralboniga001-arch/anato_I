@@ -12,6 +12,7 @@ import { recordAnswer } from './answers';
 import { LandFoot, LandNav, isWip } from './LandNav';
 import { PLANE_TEXT } from './Locator';
 import { PrivateImages, PrivateTab } from './PrivateImages';
+import { SceneView } from '@/components/kit';
 
 /**
  * Image lab: our own scenes shown as plain figures (black and white, no labels, sometimes turned or
@@ -596,7 +597,7 @@ export function ImageLab() {
                       <g transform={f.turn}>
                         <g transform={f.flip}>
                           <g key={figKey} className="scene-enter">
-                            <Scene t={item.t} reduced />
+                            <SceneView Scene={Scene} t={item.t} reduced />
                           </g>
                         </g>
                       </g>

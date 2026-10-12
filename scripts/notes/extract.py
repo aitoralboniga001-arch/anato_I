@@ -1,4 +1,4 @@
-"""Extract the nine ORIGINAL PDFs. No spelling, punctuation or content corrections.
+"""Extract the ten ORIGINAL PDFs. No spelling, punctuation or content corrections.
 
 Requires PyMuPDF. --check is read-only and compares both the PDF text and the
 committed TypeScript, including emphasis and ids. Only audited furniture goes.
@@ -27,6 +27,8 @@ FILES = [
     '8. GAIA_ HEZUR SISTEMA (zuzendu gabe).docx.pdf',
     # Topic 9 came as a DOCX only: exported to PDF with Word (same name + .pdf), text unchanged.
     '9.GAIA _MUSKULU EDO GIHAR SISTEMA .docx.pdf',
+    '10. GAIA_ ZIRKULAZIO APARATUA (ZUZENDUTA).pdf',
+    '11. GAIA. ZIRKULAZIO-SISTEMA (II) (zuzenduta).pdf',
 ]
 
 
@@ -147,6 +149,9 @@ def extract(path, week):
         elif toc and week == 9:
             # Week 9's TOC numbers its sub-headings in bold capitals too: it ends at the grey note after it.
             toc = not text.startswith('Grisez dena')
+        elif toc and week == 11:
+            # Week 11's TOC sets each number ("2.1.") on its own bold line: it ends at the first body heading.
+            toc = not text.startswith('1. SARRERA')
         elif toc and heading and (line['bold'] > .75 and text.upper() == text or text.startswith('0. 2.astearen') or line['size'] >= 15.5):
             # Some last TOC lines have an empty 22pt span: size above ignores it.
             toc = False
@@ -163,7 +168,11 @@ def extract(path, week):
                 kind = 'h2'
         elif re.match(r'^(?:[●•➔\-]|\d+\.\u200b)', text):
             kind = 'li'
-        elif (line['italic'] and line['size'] <= 11.2 and len(text) < 110 and line['box'][0] > 100) or re.match(r'^\d+\.?\s*irudia', text, re.I) or (line['box'][0] > 150 and len(text) < 100 and not line['bold']):
+        # Week 11 wraps body text beside its figures (indented lines) and has no printed captions.
+        elif (line['italic'] and line['size'] <= 11.2 and len(text) < 110 and line['box'][0] > 100) or re.match(r'^\d+\.?\s*irudia', text, re.I) or (week != 11 and line['box'][0] > 150 and len(text) < 100 and not line['bold']):
+            kind = 'caption'
+        elif week == 10 and line['italic'] and line['size'] <= 10.5:
+            # Week 10 sets two figure captions side by side on one 10 pt italic row (wider than a caption).
             kind = 'caption'
         # TOC entries receive their target section without changing body context.
         gap = line['box'][1] - previous['box'][3] if previous else 999
@@ -172,7 +181,7 @@ def extract(path, week):
         continuation = blocks and block_section == blocks[-1]['section'] and (
             (kind == 'p' and blocks[-1]['kind'] in {'p', 'li'} and ((line['page'] == previous['page'] and gap < max(9, line['size'] * .55)) or (line['page'] != previous['page'] and not re.search(r'[.!?:]$', previous['text']))))
             or (same_row and kind in {'p', 'li', 'caption', 'toc'} and blocks[-1]['kind'] in {'p', 'li', 'caption', 'toc'})
-            or (kind in {'p', 'caption'} and blocks[-1]['kind'] == 'caption' and line['page'] == previous['page'] and gap < 9)
+            or (kind in {'p', 'caption'} and blocks[-1]['kind'] == 'caption' and line['page'] == previous['page'] and gap < 9 and not (week == 10 and kind == 'p' and not line['italic']))
             or (kind == 'title' and blocks[-1]['kind'] == 'title')
             or (kind == 'p' and blocks[-1]['kind'] in {'h1', 'h2'} and line['size'] >= 13.5 and line['bold'] > .7)
         )

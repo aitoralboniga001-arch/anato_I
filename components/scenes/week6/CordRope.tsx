@@ -1,6 +1,7 @@
 'use client';
 
-import { C, polyline, smoothPath, tube, type Pt } from '@/components/kit';
+import { polyline, smoothPath, tube, type Pt } from '@/components/kit';
+import { FA, FV } from './placentaSection';
 
 const f1 = (v: number) => v.toFixed(1);
 
@@ -45,9 +46,9 @@ export function CordRope({ pts, w, turns = 7, opacity = 1 }: { pts: Pt[]; w: num
   return (
     <g opacity={opacity}>
       <path d={T.d} fill="#e2b3c3" />
-      <path d={vessel(Math.PI)} fill="none" stroke={C.vein} strokeWidth={f1(w * 0.26)} strokeLinecap="round" opacity={0.85} />
+      <path d={vessel(Math.PI)} fill="none" stroke={FV} strokeWidth={f1(w * 0.26)} strokeLinecap="round" opacity={0.85} />
       {[0, Math.PI * 0.5].map((ph) => (
-        <path key={ph} d={vessel(ph)} fill="none" stroke={C.artery} strokeWidth={f1(w * 0.17)} strokeLinecap="round" opacity={0.85} />
+        <path key={ph} d={vessel(ph)} fill="none" stroke={FA} strokeWidth={f1(w * 0.17)} strokeLinecap="round" opacity={0.85} />
       ))}
       {/* Wharton's jelly sheen over the vessels, then the amnion-covered surface */}
       <path d={T.d} fill="#f6e3ea" opacity={0.28} />

@@ -63,11 +63,40 @@ export function DorsalDefs() {
 
 /** A loose mesenchymal cell seen from above: a small body with processes, lit from the top left. */
 export function Stellate({ x, y, r, a, color }: { x: number; y: number; r: number; a: number; color: string }) {
+  return <StellateField cells={[{ x, y, a }]} r={r} color={color} />;
+}
+
+/** Rotated ellipse as path data (rx along the angle `a`, in degrees). */
+export function ellipseD(x: number, y: number, rx: number, ry: number, a = 0) {
+  const c = Math.cos((a * Math.PI) / 180);
+  const s = Math.sin((a * Math.PI) / 180);
+  return `M${f1(x + rx * c)},${f1(y + rx * s)}A${f1(rx)},${f1(ry)} ${f1(a)} 1,0 ${f1(x - rx * c)},${f1(y - rx * s)}A${f1(rx)},${f1(ry)} ${f1(a)} 1,0 ${f1(x + rx * c)},${f1(y + rx * s)}Z`;
+}
+
+/**
+ * Many stellate mesenchymal cells drawn as three paths (processes, bodies, highlights) instead of one
+ * group per cell: the same picture, a fraction of the elements.
+ */
+export function StellateField({ cells, r, color }: { cells: { x: number; y: number; a: number }[]; r: number; color: string }) {
+  let procs = '';
+  let bodies = '';
+  let shine = '';
+  for (const { x, y, a } of cells) {
+    const c = Math.cos((a * Math.PI) / 180);
+    const s = Math.sin((a * Math.PI) / 180);
+    const P = (px: number, py: number) => `${f1(x + px * c - py * s)},${f1(y + px * s + py * c)}`;
+    procs += `M${P(-r * 2.6, -r * 0.5)}L${P(r * 2.4, r * 0.6)}M${P(-r * 0.7, -r * 2.2)}L${P(r * 0.5, r * 2.3)}`;
+    bodies += ellipseD(x, y, r * 1.25, r, a);
+    const h = r * 0.45;
+    const [hx, hy] = [x - r * 0.25 * c + r * 0.25 * s, y - r * 0.25 * s - r * 0.25 * c];
+    shine += `M${f1(hx - h)},${f1(hy)}a${f1(h)},${f1(h)} 0 1,0 ${f1(2 * h)},0a${f1(h)},${f1(h)} 0 1,0 ${f1(-2 * h)},0Z`;
+  }
+  if (!cells.length) return null;
   return (
-    <g transform={`translate(${f1(x)} ${f1(y)}) rotate(${f1(a)})`}>
-      <path d={`M${f1(-r * 2.6)},${f1(-r * 0.5)}L${f1(r * 2.4)},${f1(r * 0.6)}M${f1(-r * 0.7)},${f1(-r * 2.2)}L${f1(r * 0.5)},${f1(r * 2.3)}`} stroke={color} strokeWidth={1.3} strokeLinecap="round" opacity={0.9} />
-      <ellipse rx={f1(r * 1.25)} ry={f1(r)} fill={color} stroke="rgba(70,8,14,0.6)" strokeWidth={0.6} />
-      <circle cx={f1(-r * 0.25)} cy={f1(-r * 0.25)} r={f1(r * 0.45)} fill="rgba(255,255,255,0.28)" />
+    <g>
+      <path d={procs} stroke={color} strokeWidth={1.3} strokeLinecap="round" opacity={0.9} fill="none" />
+      <path d={bodies} fill={color} stroke="rgba(70,8,14,0.6)" strokeWidth={0.6} />
+      <path d={shine} fill="rgba(255,255,255,0.28)" />
     </g>
   );
 }

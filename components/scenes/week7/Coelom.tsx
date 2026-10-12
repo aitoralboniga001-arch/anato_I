@@ -2,7 +2,7 @@
 
 import { Arrow, C, Label, Mark, Note, Part, lin, seg, type Pt, type SceneProps } from '@/components/kit';
 import { FoldXDrawing, foldXAnchors, foldXGeo, foldXScreen } from '@/components/scenes/week4/FoldTransverse';
-import { f1, vis } from './common';
+import { CavityKey, KEY7, P, f1, poly, vis } from './common';
 
 /**
  * 7:zeloma:zeharkakoa — apunteen 1. atala eta 23. orriko irudiak (A–D eta A–C): hiru orriko diskoaren
@@ -14,6 +14,38 @@ import { f1, vis } from './common';
  */
 
 const mirrorL = (p: Pt): Pt => [-p[0], p[1]];
+/** Topic 4's lateral edge of the intermediate mesoderm (FoldTransverse's U_RIB): where the coelom begins. */
+const U_RIB = 134;
+
+type FoldX = ReturnType<typeof foldXGeo>;
+/** The right half of the intra-embryonic coelom, as topic 4's drawing outlines it (body coordinates). */
+function coelomHalf(g: FoldX): Pt[] {
+  const off = (sp: FoldX['topSp'], i: number, d: number): Pt => [sp.pts[i][0] + sp.n[i][0] * d, sp.pts[i][1] + sp.n[i][1] * d];
+  const { topSp, botSp } = g;
+  const iRib = Math.round(U_RIB / g.top.ds);
+  return [
+    ...Array.from({ length: topSp.iBody - iRib + 1 }, (_, j) => off(topSp, iRib + j, topSp.a[iRib + j] + topSp.b[iRib + j])),
+    ...Array.from({ length: botSp.iBody - g.iRoot + 1 }, (_, j) => {
+      const i = botSp.iBody - j;
+      return off(botSp, i, botSp.a[i] + botSp.b[i]);
+    }),
+    ...g.closing.slice().reverse(),
+  ];
+}
+
+/**
+ * Topic 4's placement, enlarged: this topic is about the section's cavities, so the embryo fills the
+ * space between the two columns of names (about 600 of the 1000 units) instead of under half of it.
+ */
+function bigScreen(g: FoldX) {
+  const { X: X0, k: k0 } = foldXScreen(g);
+  const pts = g.topSp.pts.map(X0);
+  const half = Math.max(...pts.map((p) => Math.abs(p[0] - 500)));
+  const y0 = Math.min(...pts.map((p) => p[1]));
+  const s = Math.max(1, Math.min(1.34, 300 / half));
+  const top = 34;
+  return { k: k0 * s, X: (p: Pt): Pt => { const q = X0(p); return [500 + (q[0] - 500) * s, top + (q[1] - y0) * s + Math.max(0, y0 - top) * 0.4]; } };
+}
 
 /** Fold 0 → 0.9 (walls at the vitelline duct), then the section slides just below the umbilical region. */
 export function coelomTiming(t: number) {
@@ -25,13 +57,17 @@ export function coelomTiming(t: number) {
 export function CoelomFold({ t }: SceneProps) {
   const { f, lam } = coelomTiming(t);
   const g = foldXGeo(f, lam);
-  const { X, k } = foldXScreen(g);
+  const { X, k } = bigScreen(g);
   const A = foldXAnchors(g);
   const R = (p: Pt) => X(p);
   const L = (p: Pt) => X(mirrorL(p));
 
   // Intermediate mesoderm: the small cord between the somite and the lateral plate.
   const im = g.mapT(118, 64);
+  const ectoOver = g.mapT(74, 4);
+  // The parietal layer named a little further down the wall than topic 4 does, clear of the intermediate mesoderm's leader.
+  const iPar = Math.min(g.topSp.iBody, Math.round((U_RIB + 0.6 * g.lw) / g.top.ds));
+  const parietal: Pt = [g.topSp.pts[iPar][0] + g.topSp.n[iPar][0] * (g.topSp.a[iPar] + g.topSp.b[iPar] * 0.5), g.topSp.pts[iPar][1] + g.topSp.n[iPar][1] * (g.topSp.a[iPar] + g.topSp.b[iPar] * 0.5)];
   const imRot = (Math.atan2(g.mapT(122, 64)[1] - g.mapT(114, 64)[1], g.mapT(122, 64)[0] - g.mapT(114, 64)[0]) * 180) / Math.PI;
 
   // Continuity: until the walls meet, the coelom opens at each edge straight into the chorionic cavity.
@@ -58,6 +94,18 @@ export function CoelomFold({ t }: SceneProps) {
   return (
     <g>
       <FoldXDrawing g={g} X={X} k={k} ghost={lam} />
+      {/* The coelom is this topic's subject: the topic's coelom violet over topic 4's dark space (the colour key of topic 7). */}
+      <g pointerEvents="none">
+        {[1, -1].map((s) => {
+          const d = poly(coelomHalf(g).map((p) => X(s > 0 ? p : mirrorL(p))));
+          return (
+            <g key={s}>
+              <path d={d} fill={P.coelomSolid} opacity={0.5} />
+              <path d={d} fill="none" stroke={P.coelomEdge} strokeWidth={1.6} opacity={0.85} />
+            </g>
+          );
+        })}
+      </g>
 
       <Part id="bitarteko-mesodermoa">
         {[1, -1].map((s) => {
@@ -95,20 +143,22 @@ export function CoelomFold({ t }: SceneProps) {
         Zeloma hau gorputz osoan hedatzen da: geroko toraxetik abdomenera
       </Note>
 
+      <CavityKey rows={[KEY7.zeloma]} />
       <Label id="amnios-barrunbea" x={190} y={78} ax={L(A.amnion)[0]} ay={L(A.amnion)[1]} />
-      <Label id="ektodermoa" x={190} y={114} ax={L(A.ecto)[0]} ay={L(A.ecto)[1]} />
+      {/* The surface ectoderm named over the somite (medial to it and above): the leaders to the somite and the intermediate mesoderm pass under it. */}
+      <Label id="ektodermoa" x={190} y={114} ax={L(ectoOver)[0]} ay={L(ectoOver)[1]} />
       {/* Follows the fold: the left edge while it moves, then the midline where the two walls meet. */}
       <Label id="tolestura-laterala" x={190} y={150} ax={t < 0.68 ? L(g.E0)[0] + 21 : meet[0] + 26} ay={t < 0.68 ? L(g.E0)[1] + 16 : meet[1]} show={vis(t, 0.5, 0.84)} />
-      <Label id="paretako-orria" x={190} y={232} ax={L(A.parietal)[0]} ay={L(A.parietal)[1]} />
-      <Label id="errai-orria" x={190} y={268} ax={L(A.visceral)[0]} ay={L(A.visceral)[1]} />
+      <Label id="somitak" x={190} y={186} ax={L(A.somite)[0]} ay={L(A.somite)[1]} small />
+      <Label id="bitarteko-mesodermoa" x={190} y={222} ax={L(im)[0]} ay={L(im)[1]} small />
+      <Label id="paretako-orria" x={190} y={258} ax={L(parietal)[0]} ay={L(parietal)[1]} />
+      <Label id="errai-orria" x={190} y={294} ax={L(A.visceral)[0]} ay={L(A.visceral)[1]} />
       <Label id="korion-barrunbea" x={190} y={380} ax={L(A.chorion)[0] - 5} ay={L(A.chorion)[1] - 4} small />
       <Label id="bitelo-zaku-sekundarioa" x={190} y={430} ax={L(A.yolk)[0]} ay={Math.min(L(A.yolk)[1], 600)} show={1 - 0.75 * lam} />
 
       <Label id="hodi-neurala" x={810} y={78} ax={R(A.tube)[0]} ay={R(A.tube)[1]} />
-      <Label id="somitak" x={810} y={112} ax={R(A.somite)[0]} ay={R(A.somite)[1]} small />
       <Label id="notokorda" x={810} y={150} ax={R(A.noto)[0]} ay={R(A.noto)[1]} small />
       <Label id="aorta-dortsalak" x={810} y={190} ax={R(A.aorta)[0]} ay={R(A.aorta)[1]} small />
-      <Label id="bitarteko-mesodermoa" x={810} y={238} ax={R(im)[0]} ay={R(im)[1]} small />
       <Label id="alboko-mesodermoa" x={810} y={272} ax={R(A.parietal)[0]} ay={R(A.parietal)[1]} small />
       <Label id="enbrioi-barruko-zeloma" x={810} y={310} ax={R(A.coelom)[0]} ay={R(A.coelom)[1]} />
       <Label id="mesenterio-dortsala" x={810} y={354} ax={R(A.mesentery)[0] - 3} ay={R(A.mesentery)[1] - 9} show={seg(g.mes, 8, 20)} small />

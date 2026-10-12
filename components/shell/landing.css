@@ -209,6 +209,11 @@
   mask-image: radial-gradient(ellipse 78% 76% at 50% 50%, #000 60%, transparent 100%);
 }
 
+/* The reel's own HUD names the moment; a scene's colour key would sit under it in the corner. */
+.lp-reel-svg [data-key] {
+  display: none;
+}
+
 .lp-reel-tilt .vf {
   width: 20px;
   height: 20px;
@@ -372,7 +377,7 @@
 
 .lp-cards {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
   gap: 18px;
   margin: 0;
   padding: 0;
@@ -584,18 +589,19 @@ a.lp-card-in:hover .lp-card-go span {
   opacity: 0.5;
 }
 
-/* ——— Map: eight phases in two rows of four ——— */
+/* ——— Map: the phases in full rows (the count decides the columns) ——— */
 
 @media (min-width: 1101px) {
   .landing .map-row {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
     gap: 16px;
   }
-  .landing .map-row li:nth-child(4n) .map-card::after {
-    display: none;
-  }
-  .landing .map-row li:nth-child(6n) .map-card::after {
+  /* The arrow leads along a row; the row's last phase has none (the next row starts below). */
+  .landing .map-row li .map-card::after {
     display: block;
+  }
+  .landing .map-row li.is-row-end .map-card::after {
+    display: none;
   }
   .landing .map-row li:last-child .map-card::after {
     display: none;
@@ -619,6 +625,12 @@ a.lp-card-in:hover .lp-card-go span {
   .lp-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  /* An odd last card sits centred under the pair above it, not stranded on the left. */
+  .lp-cards > li:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc(50% - 9px);
+  }
   .lp-shelf-head {
     grid-template-columns: 1fr;
   }
@@ -639,6 +651,10 @@ a.lp-card-in:hover .lp-card-go span {
   .lp-cards {
     grid-template-columns: minmax(0, 1fr);
   }
+  .lp-cards > li:last-child:nth-child(odd) {
+    grid-column: auto;
+    width: auto;
+  }
   .lp-stats > div {
     padding: 0 18px;
   }
@@ -657,5 +673,65 @@ a.lp-card-in:hover .lp-card-go span {
   .lp-live::after,
   .lp-reel-hud {
     animation: none;
+  }
+}
+
+/* ——— Showreel, fitted: the frame's line and the strip never cut a word ——— */
+
+.lp-reel {
+  container: reel / inline-size;
+}
+
+/* Clear of the corner brackets (20px, 12px in) on both sides. */
+.lp-reel-hud {
+  left: 44px;
+  right: 44px;
+  white-space: nowrap;
+}
+
+.lp-reel-gaia {
+  display: none;
+}
+
+/* Every strip name is a short one written for it: one line, whole. */
+.lp-reel-strip button > span {
+  display: block;
+  overflow: visible;
+  white-space: nowrap;
+  -webkit-line-clamp: none;
+}
+
+@container reel (max-width: 600px) {
+  /* The frame line keeps the day and the topic number. */
+  .lp-reel-topic {
+    display: none;
+  }
+  .lp-reel-gaia {
+    display: inline;
+  }
+}
+
+@container reel (max-width: 620px) {
+  /* Narrow frame: the current scene keeps its name, the others their number. */
+  .lp-reel-strip {
+    gap: 10px;
+  }
+  .lp-reel-strip button {
+    flex: 0 0 auto;
+    min-width: 30px;
+  }
+  .lp-reel-strip button.is-on {
+    flex: 1 1 auto;
+  }
+  .lp-reel-strip button:not(.is-on) > span {
+    display: none;
+  }
+}
+
+/* The first screen ends on the start of the topics (their heading peeks in), not on empty space. */
+@media (min-width: 961px) {
+  .landing .lp-hero {
+    min-height: min(820px, calc(100svh - 60px - 120px));
+    padding-bottom: 28px;
   }
 }

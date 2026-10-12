@@ -41,7 +41,10 @@ export function ViewSwitch({ views, current, onChoose }: { views: readonly ViewD
       for (const c of Array.from(side.children)) if (c !== el && c !== full && (c as HTMLElement).offsetWidth) others += (c as HTMLElement).offsetWidth + gapOf(side);
       // Heading and views on separate rows (narrow layouts): the views have the whole row.
       const stacked = !!heading && side.getBoundingClientRect().top >= heading.getBoundingClientRect().bottom - 1;
-      const title = stacked || !h2 ? 0 : h2.scrollWidth + (chip ? chip.offsetWidth + gapOf(h2.parentElement!) : 0) + gapOf(bar);
+      // The stage navigator shares the title's line on short screens.
+      const nav = bar.querySelector('.snav') as HTMLElement | null;
+      const navW = nav && h2 && nav.offsetWidth && Math.abs(nav.getBoundingClientRect().top - h2.getBoundingClientRect().top) < 24 ? nav.offsetWidth + 12 : 0;
+      const title = stacked || !h2 ? 0 : h2.scrollWidth + (chip ? chip.offsetWidth + gapOf(h2.parentElement!) : 0) + gapOf(bar) + navW;
       const room = bar.clientWidth - title - others;
       const items = Array.from(full.children) as HTMLElement[];
       const frame = full.offsetWidth - items.reduce((w, it) => w + it.offsetWidth, 0);
@@ -61,7 +64,7 @@ export function ViewSwitch({ views, current, onChoose }: { views: readonly ViewD
   }, [labels, current]);
 
   return (
-    <div ref={seg} className={`seg view-switch${fit === 'full' ? '' : ' is-compact'}`} role="tablist" aria-label="Ikuspegiak">
+    <div ref={seg} data-tour="ebakiak" className={`seg view-switch${fit === 'full' ? '' : ' is-compact'}`} role="tablist" aria-label="Ikuspegiak">
       {views.map((v, k) => {
         const on = v.id === current;
         const iconOnly = fit === 'icons' || (fit === 'compact' && !on);

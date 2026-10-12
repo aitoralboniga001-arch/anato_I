@@ -2,7 +2,7 @@
 
 import { Arrow, C, Journey, Label, Mark, Note, Part, clamp, dual, lerp, rand, seg, zoom, type Pt, type SceneProps } from '@/components/kit';
 import { discOutline, f1 } from './common';
-import { DorsalDefs, Stellate } from './dorsalKit';
+import { DorsalDefs, StellateField, ellipseD } from './dorsalKit';
 import { CellCluster, DiscDrawing, MembraneMark, makeDisc } from './DiscSection';
 import { frameAt, inFrame, type Key } from './gastroKit';
 
@@ -43,6 +43,10 @@ const WIN_D = (() => {
   const sx = D.cx + STREAK_W + 12;
   return `M${BX},${top}H${R}V${bot}H${BX}V${b + 14}Q${BX},${b} ${BX + 14},${b}H${sx - 12}Q${sx},${b} ${sx},${b - 12}V${a + 12}Q${sx},${a} ${sx - 12},${a}H${BX + 14}Q${BX},${a} ${BX},${a - 14}Z`;
 })();
+/** Deeper window (caudal right): the mesoderm is lifted too, so the endoderm floor shows — ectoderm | mesoderm | endoderm in steps. */
+const W2 = { x0: D.cx + 62, y0: D.cy + 46, y1: D.cy + 142 };
+const WIN2_D = `M${W2.x0 + 12},${W2.y0}H${D.cx + D.rxT + 40}V${W2.y1}H${W2.x0 + 12}Q${W2.x0},${W2.y1} ${W2.x0},${W2.y1 - 12}V${W2.y0 + 12}Q${W2.x0},${W2.y0} ${W2.x0 + 12},${W2.y0}Z`;
+const inWin2 = (p: Pt) => p[0] > W2.x0 - 6 && p[1] > W2.y0 - 6 && p[1] < W2.y1 + 6;
 const STREAK_D = `M${f1(D.cx - STREAK_W)},${f1(STREAK_END)} Q${f1(D.cx - STREAK_W * 1.3)},${f1((NODE_Y + STREAK_END) / 2)} ${f1(D.cx - STREAK_W * 0.5)},${f1(NODE_Y + 8)} L${f1(D.cx + STREAK_W * 0.5)},${f1(NODE_Y + 8)} Q${f1(D.cx + STREAK_W * 1.3)},${f1((NODE_Y + STREAK_END) / 2)} ${f1(D.cx + STREAK_W)},${f1(STREAK_END)} Q${f1(D.cx)},${f1(STREAK_END + 8)} ${f1(D.cx - STREAK_W)},${f1(STREAK_END)}Z`;
 const GW = STREAK_W * 0.42;
 const GROOVE_D = `M${f1(D.cx - GW)},${f1(STREAK_END - 3)} Q${f1(D.cx - GW * 1.3)},${f1((NODE_Y + STREAK_END) / 2)} ${f1(D.cx - GW * 0.45)},${f1(NODE_Y + 13)} L${f1(D.cx + GW * 0.45)},${f1(NODE_Y + 13)} Q${f1(D.cx + GW * 1.3)},${f1((NODE_Y + STREAK_END) / 2)} ${f1(D.cx + GW)},${f1(STREAK_END - 3)} Z`;
@@ -66,7 +70,7 @@ const MESO_PTS = (() => {
       i++;
       const px = x + (rand(i * 2.3) - 0.5) * 12;
       const py = y + (rand(i * 5.1) - 0.5) * 10;
-      if (Math.abs(px - D.cx) > halfW(py) - 7 || px < BX - 8) continue;
+      if (Math.abs(px - D.cx) > halfW(py) - 7 || px < BX - 8 || inWin2([px, py])) continue;
       if (Math.hypot((px - BUCCO[0]) / 27, (py - BUCCO[1]) / 19) < 1 || Math.hypot((px - CLOACA[0]) / 25, (py - CLOACA[1]) / 18) < 1) continue;
       const sy = clamp(py, NODE_Y, STREAK_END);
       out.push({ p: [px, py], d: Math.hypot(px - D.cx, (py - sy) * (py < sy ? 0.82 : 1.15)), a: rand(i * 9.7) * 180 });
@@ -75,7 +79,7 @@ const MESO_PTS = (() => {
 })();
 const MESO_MAX = Math.max(...MESO_PTS.map((m) => m.d));
 /** Where the mesoderm front stands (fraction of the farthest reach): gastrulation ended near 0.72; this stage spreads it to the edges. */
-const frontAt = (t: number) => lerp(0.62, 1.03, seg(t, 0.16, 0.4));
+const frontAt = (t: number) => lerp(0.4, 1.03, seg(t, 0.16, 0.4));
 
 function dorsalWindows(t: number) {
   return {
@@ -136,14 +140,10 @@ function DorsalDrawing({ t }: SceneProps) {
           </Part>
           <Part id="mesodermo-intraenbrionarioa">
             {/* A sheet of mesenchyme: each cell's territory joins the next, so the sheet's edge is the front itself. */}
-            <g fill="#c23a3f">
-              {shown.map((m, i) => (
-                <circle key={i} cx={f1(m.p[0])} cy={f1(m.p[1])} r={12.5} />
-              ))}
-            </g>
-            {shown.map((m, i) => (
-              <Stellate key={i} x={m.p[0]} y={m.p[1]} r={3.1} a={m.a} color="#ff7676" />
-            ))}
+            <path fill="#c23a3f" d={shown.map((m) => ellipseD(m.p[0], m.p[1], 12.5, 12.5)).join('')} />
+            <StellateField cells={shown.map((m) => ({ x: m.p[0], y: m.p[1], a: m.a }))} r={3.1} color="#ff7676" />
+            {/* Cut edge of the mesoderm round the deeper window, once the sheet has spread that far. */}
+            <path d={WIN2_D} fill="none" stroke="#6e1c22" strokeWidth={5} opacity={clamp((front * MESO_MAX - 70) / 40)} />
           </Part>
           {/* Fate-coloured movement: the mesoderm spreads laterally and cranially from the streak. */}
           <Arrow from={[D.cx + 26, STREAK_END - 34]} to={[D.cx + 118, STREAK_END - 44]} bend={0} color={C.mesoIntra} width={2.6} head={9} show={spread} progress={spread} />
@@ -157,6 +157,8 @@ function DorsalDrawing({ t }: SceneProps) {
           </Part>
           {prechordal > 0.01 && (
             <Part id="plaka-prekordala">
+              {/* The cells pack into one plate as they arrive. */}
+              <ellipse cx={PRE[0] + 2} cy={PRE[1] + 1} rx={17} ry={12.5} fill={C.prechordal} opacity={0.8 * seg(t, 0.88, 0.93)} stroke="rgba(60,10,50,0.6)" strokeWidth={0.8} />
               <Journey pts={lead} color={C.prechordal} head={10} width={2.4} route={0.5} origin={false} u={1 / DZ_S} />
               {preCells.map((c, i) =>
                 c.k > 0.01 ? (
@@ -182,11 +184,11 @@ function DorsalDrawing({ t }: SceneProps) {
           <path d={GROOVE_D} fill="#132453" />
         </Part>
         <Part id="nodo-primitiboa">
-          <ellipse cx={D.cx + 2.5} cy={NODE_Y + 3} rx={16} ry={13} fill="rgba(6,10,30,0.5)" />
-          <ellipse cx={D.cx} cy={NODE_Y} rx={16} ry={13} fill="url(#w3g-node)" />
+          <ellipse cx={D.cx + 2.5} cy={NODE_Y + 3} rx={20} ry={16} fill="rgba(6,10,30,0.5)" />
+          <ellipse cx={D.cx} cy={NODE_Y} rx={20} ry={16} fill="url(#w3g-node)" />
         </Part>
         <Part id="hobitxo-primitiboa">
-          <ellipse cx={D.cx} cy={NODE_Y + 0.5} rx={6} ry={5} fill="#081230" />
+          <ellipse cx={D.cx} cy={NODE_Y + 0.5} rx={7.5} ry={6.5} fill="#081230" />
         </Part>
 
         {/* Where the two mesoderms meet at the disc edge. */}
@@ -213,13 +215,13 @@ function dorsalLabels(t: number) {
     <>
       {L('enbrioi-kanpoko-mesodermoa', 200, 112, [D.cx - (D.rxT + 20) * Math.cos(0.9), D.cy - (D.ryT + 20) * Math.sin(0.9)], exMeso, true)}
       {L('ektodermoa', 190, 200, [D.cx - D.rxT * 0.6, D.cy - D.ryT * 0.3])}
-      {L('nodo-primitiboa', 190, 300, [D.cx - 13, NODE_Y + 2])}
-      {L('ildo-primitiboa', 190, 400, [D.cx - STREAK_W * 0.9, (NODE_Y + STREAK_END) / 2 + 20])}
-      {L('endodermoa', 190, 470, [D.cx - 30, CLOACA[1] + 2], 1, true)}
-      {L('mintz-bukofaringeoa', 190, 156, [BUCCO[0] - 13, BUCCO[1] - 2], bucco)}
-      {L('plaka-prekordala', 810, 168, [PRE[0] + 12, PRE[1]], prechordal)}
+      {L('nodo-primitiboa', 190, 300, [D.cx - 14, NODE_Y + 1])}
+      {L('ildo-primitiboa', 190, 400, [D.cx, (NODE_Y + STREAK_END) / 2 + 20])}
+      {L('endodermoa', 810, 470, [(W2.x0 + D.cx + halfW((W2.y0 + W2.y1) / 2)) / 2, (W2.y0 + W2.y1) / 2], 1, true)}
+      {L('mintz-bukofaringeoa', 190, 156, [BUCCO[0] - 6, BUCCO[1]], bucco)}
+      {L('plaka-prekordala', 810, 168, [PRE[0] + 3, PRE[1] + 1], prechordal)}
       {L('mesodermo-intraenbrionarioa', 792, 250, [D.cx + D.rxT * 0.5, D.cy - D.ryT * 0.2], g, true)}
-      {L('hobitxo-primitiboa', 810, 320, [D.cx + 3, NODE_Y])}
+      {L('hobitxo-primitiboa', 810, 320, [D.cx, NODE_Y + 0.5])}
       {L('kloaka-mintza', 810, 530, [CLOACA[0] + 10, CLOACA[1] + 2], cloaca)}
     </>
   );
@@ -280,15 +282,34 @@ function sagittalDisc(t: number) {
  */
 function Transverse({ t, pane }: SceneProps & { pane?: boolean }) {
   const grow = seg(t, 0.16, 0.44);
-  const s = makeDisc({ k: 1.08, endo: 1, ecto: 1, meso: lerp(0.12, 1, grow), streak: 1, groove: 1, invag: 1, phase: t * 14 });
+  const s = makeDisc({ k: 1.08, endo: 1, ecto: 1, meso: lerp(0.12, 1, grow), meet: seg(t, 0.44, 0.52), streak: 1, groove: 1, invag: 1, phase: t * 14 });
   const mid = (x: number) => s.map(x, (s.base(x) + s.dEnd(x)) / 2);
   const front = Math.min(s.spread * 0.6, s.W * 0.45);
   const join = seg(t, 0.42, 0.46) * (1 - seg(t, 0.58, 0.6));
-  const edge = (sd: 1 | -1): Pt => [s.p.cx + sd * (s.rx + 6 * s.k), (s.cyA + s.cyY) / 2];
-  const L = (id: string, x: number, y: number, p: Pt, show = 1, small = false) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} small={small} />;
+  // Middle of the salmon coat at each margin (never on its seam with the amnion wall).
+  const edge = (sd: 1 | -1): Pt => [s.p.cx + sd * (s.at.margin[0] - s.p.cx), s.at.margin[1]];
+  // Continuity step: the camera pushes in on the right edge, where the red sheet runs into the salmon coat of
+  // the amnion and the yolk sac, then pulls back. In the dual pane the edge lands right of the pane's centre.
+  const E = edge(1);
+  const ZS = 2.3;
+  const ex = E[0] - (pane ? 150 : 190) / ZS;
+  const z = frameAt(t, [
+    [0, 500, 320, 1],
+    [0.43, 500, 320, 1],
+    [0.47, ex, E[1] + 4, ZS],
+    [0.555, ex, E[1] + 4, ZS],
+    [0.59, 500, 320, 1],
+    [1, 500, 320, 1],
+  ]);
+  const close = z.s > 1.3;
+  const L = (id: string, x: number, y: number, p: Pt, show = 1, small = false) => {
+    const q = z.at(p[0], p[1]);
+    return <Label key={id} id={id} x={x} y={y} ax={q[0]} ay={q[1]} show={show * inFrame(q, 30)} small={small} />;
+  };
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
+      <g transform={z.transform}>
       <DiscDrawing s={s} ids={{ epiblast: 'ektodermoa' }} />
       {([1, -1] as const).map((sd) => (
         <Arrow key={sd} from={mid(sd * 30)} to={mid(sd * lerp(60, 230, grow))} bend={0} color={C.mesoIntra} width={2.4} head={8} show={grow > 0.02 ? 1 - seg(t, 0.46, 0.52) : 0} progress={Math.max(0.2, grow)} />
@@ -296,14 +317,16 @@ function Transverse({ t, pane }: SceneProps & { pane?: boolean }) {
       {/* Where the two mesoderms meet, at both edges of the disc. */}
       <Mark id="enbrioi-kanpoko-mesodermoa" x={edge(-1)[0]} y={edge(-1)[1]} rx={30} show={join} />
       <Mark id="enbrioi-kanpoko-mesodermoa" x={edge(1)[0]} y={edge(1)[1]} rx={30} show={join} />
+      </g>
 
       {/* In the dual pane only the right half is framed (the section is mirror-symmetric): anchors sit on that half. */}
       {L('amnios-barrunbea', 190, 120, s.at.amnion)}
-      {L('ektodermoa', 190, 190, pane ? s.map(s.W * 0.32, s.top(s.W * 0.32) + 10) : s.at.epiblast)}
-      {L('mesodermo-intraenbrionarioa', 198, 300, mid(pane ? front * 0.7 : -front), seg(t, 0.12, 0.16), true)}
-      {L('endodermoa', 190, 380, pane ? s.map(160, s.dEnd(160) + 6) : s.map(-120, s.dEnd(-120) + 6))}
+      {L('ektodermoa', 190, 190, close ? s.map(s.W * 0.82, s.top(s.W * 0.82) + 6) : pane ? s.map(s.W * 0.32, s.top(s.W * 0.32) + 10) : s.at.epiblast)}
+      {L('mesodermo-intraenbrionarioa', 198, 300, close ? mid(s.W * 0.86) : mid(pane ? front * 0.7 : -front), seg(t, 0.12, 0.16), true)}
+      {L('endodermoa', 190, 380, close ? s.map(s.W * 0.84, s.dEnd(s.W * 0.84) + 4) : pane ? s.map(160, s.dEnd(160) + 6) : s.map(-120, s.dEnd(-120) + 6))}
       {L('ildo-primitiboa', 810, 240, s.at.groove)}
-      {L('enbrioi-kanpoko-mesodermoa', pane ? 810 : 200, 245, edge(pane ? 1 : -1), 1, true)}
+      {/* Named on the right margin's coat, from the right column (short leader, clear of the layer names on the left). */}
+      {L('enbrioi-kanpoko-mesodermoa', 810, close || pane ? 245 : 280, close ? E : edge(1), 1, true)}
       {L('bitelo-zaku-sekundarioa', 810, 470, s.at.yolk)}
       {pane && (
         <Note x={500} y={606} tone="dim" size={11}>
@@ -368,9 +391,10 @@ function Sagittal({ t, pane }: SceneProps & { pane?: boolean }) {
     return <Label key={id} id={id} x={x} y={y} ax={q[0]} ay={q[1]} show={show * inFrame(q, 40)} small={small} />;
   };
   // In the dual pane all names sit in the right column: anchors that can be anywhere go on the caudal (right) side.
-  const exL: Pt = [s.p.cx + (pane ? 1 : -1) * (s.rx + 8 * s.k) * Math.cos(0.55), s.cyA - (s.p.amnionH * s.k + 8 * s.k) * Math.sin(0.55)];
+  const cm = s.lay.wallA + s.lay.coatA / 2;
+  const exL: Pt = [s.p.cx + (pane ? 1 : -1) * (s.rx + cm) * Math.cos(0.55), s.cyA - (s.p.amnionH * s.k + cm) * Math.sin(0.55)];
   // Free anchors (ectoderm, endoderm, mesoderm) stay on whatever part of the disc is in view.
-  const near = (fallback: number) => (z.s > 1.2 ? (z.fx < 500 ? X_BUCCO + 60 : X_CLOACA - 60) : fallback);
+  const near = (fallback: number) => (z.s > 1.2 ? (z.fx < 500 ? X_BUCCO + 88 : X_CLOACA - 60) : fallback);
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
@@ -392,12 +416,12 @@ function Sagittal({ t, pane }: SceneProps & { pane?: boolean }) {
       </Note>
 
       {L('enbrioi-kanpoko-mesodermoa', 200, 130, exL, 1, true)}
-      {L('ektodermoa', 190, 175, pane ? s.map(near(150), s.top(near(150)) + 10) : s.map(near(-s.W * 0.55), s.top(near(-s.W * 0.55)) + 8))}
-      {L('mintz-bukofaringeoa', 190, 215, s.map(X_BUCCO, s.top(X_BUCCO) + 6), g.bucco)}
+      {L('ektodermoa', 190, 175, pane ? s.map(near(30), s.top(near(30)) + 10) : s.map(near(-s.W * 0.55), s.top(near(-s.W * 0.55)) + 8))}
+      {L('mintz-bukofaringeoa', 190, 215, s.map(X_BUCCO, s.base(X_BUCCO)), g.bucco)}
       {L('plaka-prekordala', 190, 250, pre, g.prechordal)}
       {L('mesodermo-intraenbrionarioa', 198, 430, mid(z.s > 1.2 ? near(0) : pane ? 110 : lerp(120, -150, g.growth)), g.growth, true)}
-      {L('endodermoa', 190, 470, s.map(near(150), s.dEnd(near(150)) + 6))}
-      {L('kloaka-mintza', 810, 430, s.map(X_CLOACA, s.dEnd(X_CLOACA) + 8), g.cloaca)}
+      {L('endodermoa', 190, 470, s.map(near(150), s.dEnd(near(150)) + 6.5))}
+      {L('kloaka-mintza', 810, 430, s.map(X_CLOACA, s.base(X_CLOACA)), g.cloaca)}
     </g>
   );
 }

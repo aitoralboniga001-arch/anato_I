@@ -41,17 +41,17 @@ export function FusionScene({ t }: SceneProps) {
       <Note x={128} y={350} size={12} tone="dim" align="start" show={fibrils}>
         3
       </Note>
-      {/* Zoomed band of the same fibre: myofibrils and then the striations. */}
+      {/* Zoomed band of the same fibre: myofibrils, then the striations over them (the cut end on the left keeps the bare fibrils). */}
       <Part id="miofibrillak" show={fibrils}>
         <rect x={190} y={338} width={400} height={74} rx={14} fill="#7f1d2d" stroke="rgba(60,6,16,0.75)" />
         {[356, 375, 394].map((y) => (
-          <path key={y} d={`M206,${y} H${206 + 368 * fibrils}`} stroke="#ffc0c8" strokeWidth={9} strokeLinecap="round" opacity={0.8} />
+          <path key={y} d={`M206,${y} H${206 + 368 * fibrils}`} stroke="#ffc0c8" strokeWidth={11} strokeLinecap="round" opacity={0.8} />
         ))}
       </Part>
       <Part id="ildaskak" show={striae}>
-        <rect x={204} y={346} width={372} height={58} rx={10} fill="url(#w9-striae)" />
+        <rect x={246} y={346} width={330} height={58} rx={10} fill="url(#w9-striae)" />
         {Array.from({ length: 16 }, (_, i) => (
-          <path key={i} d={`M${214 + i * 23},344 V406`} stroke="#2a0710" strokeWidth={2.4} opacity={0.75 * striae} />
+          <path key={i} d={`M${254 + i * 21},344 V406`} stroke="#2a0710" strokeWidth={2.4} opacity={0.75 * striae} />
         ))}
       </Part>
       <Note x={390} y={428} size={12} tone="dim" show={fibrils}>
@@ -88,7 +88,7 @@ export function FusionScene({ t }: SceneProps) {
       </Part>
       <Part id="disko-interkalarrak" show={cardiac}>
         {[150, 214, 278].map((y, r) =>
-          [770, 829].map((x) => <path key={`${r}${x}`} d={`M${x + (r % 2) * 6},${y - 16} l3,5 l-3,5 l3,5 l-3,5 l3,5 l-3,5`} fill="none" stroke="#fde68a" strokeWidth={2.6} />),
+          [770, 829].map((x) => <path key={`${r}${x}`} d={`M${x + (r % 2) * 6 - 4.5},${y - 18} h9 v16 h5 v20 h-9 v-16 h-5Z`} fill="#fde68a" stroke="#7a4a06" strokeWidth={0.8} />),
         )}
       </Part>
 
@@ -101,12 +101,12 @@ export function FusionScene({ t }: SceneProps) {
         ]}
       />
 
-      <Label id="mioblastoak" x={390} y={116} ax={390} ay={136} align="middle" />
-      <Label id="zuntz-muskularrak" x={540} y={212} ax={540} ay={240} align="middle" show={vis(t, 0.78, 2)} />
-      <Label id="miofibrillak" x={150} y={318} ax={214} ay={356} show={fibrils} small />
+      <Label id="mioblastoak" x={390} y={116} ax={390} ay={150} align="middle" />
+      <Label id="zuntz-muskularrak" x={540} y={212} ax={540} ay={262} align="middle" show={vis(t, 0.78, 2)} />
+      <Label id="miofibrillak" x={150} y={318} ax={222} ay={375} show={fibrils} small />
       <Label id="ildaskak" x={630} y={318} ax={566} ay={378} show={striae} small />
-      <Label id="miokardioa" x={760} y={330} ax={740} ay={296} align="middle" show={cardiac} />
-      <Label id="disko-interkalarrak" x={826} y={376} ax={835} ay={290} align="middle" show={cardiac} small />
+      <Label id="miokardioa" x={760} y={330} ax={740} ay={278} align="middle" show={cardiac} />
+      <Label id="disko-interkalarrak" x={826} y={376} ax={829} ay={268.5} align="middle" show={cardiac} small />
     </g>
   );
 }

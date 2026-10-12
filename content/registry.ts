@@ -8,8 +8,10 @@ import { week6 } from './weeks/week6';
 import { week7 } from './weeks/week7';
 import { week8 } from './weeks/week8';
 import { week9 } from './weeks/week9';
+import { week10 } from './weeks/week10';
+import { week11 } from './weeks/week11';
 
-export const weeks: WeekDef[] = [week1, week2, week3, week4, week5, week6, week7, week8, week9];
+export const weeks: WeekDef[] = [week1, week2, week3, week4, week5, week6, week7, week8, week9, week10, week11];
 
 /** All structures, deduplicated by id. The week that introduces a structure owns its definition. */
 export const structures: Map<string, StructureDef> = (() => {
@@ -43,7 +45,10 @@ export const getWeek = (n: number) => weeks.find((w) => w.week === n);
 export const nameOf = (id: string) => structures.get(id)?.name ?? id;
 
 /** The drawn structures a whole is made of (none for an ordinary structure). */
-export const partsOf = (id: string): readonly string[] => structures.get(id)?.parts ?? [];
+export const partsOf = (id: string): readonly string[] => structures.get(id)?.parts ?? structures.get(id)?.spans ?? [];
+
+/** A layered whole's layers in order (its name takes a span bracket across them); none for anything else. */
+export const spansOf = (id: string): readonly string[] => structures.get(id)?.spans ?? [];
 
 /** A space (cavity / lacuna) rather than a tissue. */
 export const isSpace = (id: string) => {

@@ -24,7 +24,7 @@ test('export exact canonical narration for offline synthesis', () => {
     stage.structures.forEach((structure) => add('structure', { structure }));
     stage.views.forEach(({ id: view }) => add('bridge', { view }));
   }
-  expect(weeks).toHaveLength(9);
+  expect(weeks.length).toBeGreaterThanOrEqual(10);
   expect(entries.size).toBeGreaterThan(1000);
   const output = resolve(process.env.NARRATION_CATALOG_PATH ?? '.narration-tools/catalog.json');
   mkdirSync(dirname(output), { recursive: true });

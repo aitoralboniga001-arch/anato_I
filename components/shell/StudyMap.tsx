@@ -8,10 +8,24 @@ import { competenceLevel, isDue, useAnswers } from './answers';
 import { useVisitedAll } from './progress';
 
 /**
- * The whole subject on one screen: eight phases, each as a chain of steps that can be read in a few
- * seconds (the 20-second test); the sentence behind each chain is its tooltip.
+ * The whole subject on one screen: one card per topic, each as a chain of steps that can be read in a
+ * few seconds (the 20-second test); the sentence behind each chain is its tooltip.
  */
-const MAP: { days: string; title: string; chain: string[]; idea: string; href: string }[] = [
+/** The topic count as a word (the heading must follow the registry, not a number typed once). */
+const WORDS = ['Zero', 'Bat', 'Bi', 'Hiru', 'Lau', 'Bost', 'Sei', 'Zazpi', 'Zortzi', 'Bederatzi', 'Hamar', 'Hamaika', 'Hamabi'];
+export const countWord = (n: number) => WORDS[n] ?? String(n);
+
+/** Columns for the topic shelf and the map on wide screens: full rows whatever the count (9 → 3×3, 10 → 5×2), 4 when no count divides evenly. */
+export const shelfCols = (n: number) => {
+  if (n <= 4) return n;
+  const empty = (c: number) => (c - (n % c)) % c;
+  return [4, 3, 5].reduce((best, c) => (empty(c) < empty(best) ? c : best), 4);
+};
+
+type MapCard = { days: string; title: string; chain: string[]; idea: string; href: string };
+
+/** Hand-written chains, by topic. A topic without one yet still gets its card, from the registry. */
+const WRITTEN: MapCard[] = [
   {
     days: '0–6. egunak',
     title: 'Ernalkuntzatik habiratzera',
@@ -75,7 +89,26 @@ const MAP: { days: string; title: string; chain: string[]; idea: string; href: s
     idea: 'Muskulu ildaskatuak mesodermo paraxialetik (somitomeroak, somitak) eta nerbio kranialek edo espinalek inerbatuta; leuna eta bihotzekoa errai orritik, inerbazio begetatiboarekin. Somitetatik bi domeinu: primaxiala eta abaxiala.',
     href: '/astea/9',
   },
+  {
+    days: '3.–4. asteak',
+    title: 'Zirkulazio aparatua',
+    chain: ['Odol irlatxoak (errai orrian)', 'Ferra formako tutua: plaka kardiogenikoa + endokardio hodiak', 'Zeharkako tolespena: hodi bakarra', 'Endokardioa · miokardioa · epikardioa'],
+    idea: 'Lerro primitibotik migratutako zelulek errai orrian ferra formako odol irlatxoak sortzen dituzte; hodi bihurtu eta ferra formako tutua osatzen dute. Zeharkako tolespenak bi endokardio hodiak fusionatzen ditu; errai orritik miokardioa eta epikardioa, eta haien artean bihotz gelatina.',
+    href: '/astea/10',
+  },
 ];
+
+const byHref = new Map(WRITTEN.map((m) => [m.href, m]));
+const MAP: MapCard[] = weeks.map(
+  (w) =>
+    byHref.get(`/astea/${w.week}`) ?? {
+      days: w.span?.long ?? `${w.dayRange[0]}–${w.dayRange[1]}. egunak`,
+      title: w.title,
+      chain: w.stages.slice(0, 4).map((s) => s.title),
+      idea: w.subtitle,
+      href: `/astea/${w.week}`,
+    },
+);
 
 const questionIds = POOL.map((q) => q.id);
 const competenceKeys = [...KEY_IDS.keys()];
@@ -101,17 +134,18 @@ export function StudyMap() {
     { n: '6', title: 'Menderatu', text: 'Gaitasun bat menderatuta dago azken 3 saiakerak ondo daudenean, galdera desberdinekin eta egun desberdinetan. Huts egindakoak «Errepasoa» moduan itzultzen dira.', href: '/astea/1', state: `${mastered}/${competenceKeys.length} gaitasun${missed ? ` · ${missed} errepasatzeko` : ''}` },
   ];
 
+  const cols = shelfCols(MAP.length);
   return (
     <>
       <section id="mapa" className="land-section map">
         <header className="section-head" data-rv>
           <p className="kicker">Mapa · 20 segundotan</p>
           <h2>Gai osoa, begirada batean</h2>
-          <p>Zortzi gai, ordenan. Hau buruan izanda, xehetasun bakoitzak badu bere lekua.</p>
+          <p>{countWord(MAP.length)} gai, ordenan. Hau buruan izanda, xehetasun bakoitzak badu bere lekua.</p>
         </header>
-        <ol className="map-row">
+        <ol className="map-row" style={{ '--cols': cols } as CSSProperties}>
           {MAP.map((m, k) => (
-            <li key={m.title} data-rv style={{ '--d': `${(k % 4) * 80}ms` } as CSSProperties}>
+            <li key={m.title} className={(k + 1) % cols === 0 ? 'is-row-end' : undefined} data-rv style={{ '--d': `${(k % cols) * 80}ms` } as CSSProperties}>
               <Link href={m.href} className="map-card">
                 <span className="map-n">{String(k + 1).padStart(2, '0')}</span>
                 <span className="map-days">{m.days}</span>

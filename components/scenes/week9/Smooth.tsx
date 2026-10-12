@@ -117,6 +117,7 @@ export function SmoothSection({ t }: SceneProps) {
 export function SmoothGut({ t, reduced }: SceneProps) {
   const grow = seg(t, 0.56, 0.66);
   const coat = [...gutCoat(1, 0.04, 0.98, 46, 1), ...gutCoat(1, 0.04, 0.98, 46, -1)];
+  const tip = coat.reduce((a, b) => (b.p[1] < a.p[1] ? b : a));
   return (
     <g>
       <GutSagittal t={1} reduced={reduced} />
@@ -134,7 +135,8 @@ export function SmoothGut({ t, reduced }: SceneProps) {
       <Note x={500} y={24} size={12.5} tone="accent" show={vis(t, 0.56, 2)}>
         Eratorri guztien inguruko errai orritik: muskulu leuna (gernu- eta ugal-aparatuko erraiak ere badira)
       </Note>
-      <Label id="muskulu-leuna" x={500} y={60} align="middle" ax={coat[30].p[0]} ay={coat[30].p[1]} show={grow} />
+      {/* Pointing at the top of the coat, so the leader does not cross the names in either column. */}
+      <Label id="muskulu-leuna" x={500} y={60} align="middle" ax={tip.p[0]} ay={tip.p[1]} show={grow} />
     </g>
   );
 }

@@ -122,6 +122,14 @@ export const NOTES: Record<number, NotesSection[]> = {
     { n: '3', title: 'Muskulu leuna edo muskulu lisoa', depth: 0, stages: ['muskulu-lisoa'], covers: '3.1 Sistema baskularra' },
     { n: '4', title: 'Bihotzeko muskulua edo miokardioa', depth: 0, stages: ['bihotz-muskulua'] },
   ],
+  10: [
+    { n: '1', title: 'Eskualde kardiogenikoaren eraketa', depth: 0, stages: ['eskualde-kardiogenikoa', 'bihotz-hodia'] },
+  ],
+  11: [
+    { n: '2', title: 'Aurikula komunaren trenkadak', depth: 0, stages: [] },
+    { n: '2.1', title: 'Septum Primum-aren sorrera', depth: 1, stages: ['septum-primum'] },
+    { n: '2.2', title: 'Septum secundum-aren sorrera', depth: 1, stages: ['zulo-obala', 'jaiotza'] },
+  ],
 };
 
 /** The notes section a stage belongs to, and its parent heading when it is a sub-heading. */
@@ -136,4 +144,6 @@ export function sectionOf(week: number, stageId: string): { section: NotesSectio
 }
 
 /** "3.1 Mesodermo paraxialean…" — the heading as the notes write it. */
-export const sectionLabel = (s: NotesSection) => `${s.n}. ${s.title}`.replace(/^(\d+\.\d+(?:–\d+\.\d+)?)\. /, '$1 ');
+// A section numbered 0 (a recap before the first numbered section) is named by its title alone.
+export const sectionLabel = (s: NotesSection) =>
+  s.n === '0' ? s.title : `${s.n}. ${s.title}`.replace(/^(\d+\.\d+(?:–\d+\.\d+)?)\. /, '$1 ');

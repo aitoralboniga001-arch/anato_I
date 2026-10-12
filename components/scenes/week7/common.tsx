@@ -1,6 +1,6 @@
 'use client';
 
-import { C, clamp, lerp, seg, type Pt } from '@/components/kit';
+import { C, Part, clamp, lerp, seg, type Pt } from '@/components/kit';
 import { Cells } from '@/components/scenes/section/Section';
 
 /**
@@ -17,6 +17,12 @@ export const P = {
   pleura: 'rgba(110,180,255,0.24)',
   perito: 'rgba(120,220,140,0.20)',
   canal: 'rgba(127,200,232,0.30)',
+  /** The same cavities as solid key colours (legend swatches, strong fills, edges). */
+  coelomSolid: '#a77cff',
+  coelomEdge: '#cdb4ff',
+  periSolid: '#ff7d9c',
+  pleuraSolid: '#6fb6ff',
+  peritoSolid: '#7bdc8e',
   skin: C.surfaceEcto,
   wall: '#5a3644',
   wallDeep: '#46293a',
@@ -197,5 +203,52 @@ export function Defs7() {
         <circle cx="11" cy="10" r="2" fill="rgba(140,40,70,0.24)" />
       </pattern>
     </defs>
+  );
+}
+
+/** The rows of topic 7's colour key: each cavity (and the septum) with the one colour it has in every view. */
+export const KEY7 = {
+  zeloma: { id: 'enbrioi-barruko-zeloma', color: P.coelomSolid, text: 'zeloma' },
+  hperi: { id: 'hasierako-perikardio-barrunbea', color: P.periSolid, text: 'hasierako perikardioa' },
+  peri: { id: 'perikardio-barrunbea', color: P.periSolid, text: 'perikardioa' },
+  pleura: { id: 'pleura-barrunbea', color: P.pleuraSolid, text: 'pleura' },
+  canal: { id: 'erreten-perikardioperitonealak', color: '#7fc8e8', text: 'erretenak' },
+  perito: { id: 'peritoneo-barrunbea', color: P.peritoSolid, text: 'peritoneoa' },
+  septum: { id: 'septum-transversum', color: P.septum, text: 'septuma' },
+} as const;
+export type KeyRow = (typeof KEY7)[keyof typeof KEY7];
+
+/**
+ * Topic 7's colour key, the same in every view: one row across the top left, a swatch and a name per
+ * cavity. Each row is the cavity itself (resting on it names and lights it in the drawing); `quiet`
+ * draws the rows without that (a view whose parts carry other ids).
+ */
+export function CavityKey({ rows, x = 24, y = 22, show = 1, quiet }: { rows: (KeyRow | false | null | undefined)[]; x?: number; y?: number; show?: number; quiet?: boolean }) {
+  if (show <= 0.02) return null;
+  const live = rows.filter((r): r is KeyRow => !!r);
+  const items = live.map((r, i) => ({ r, x: x + live.slice(0, i).reduce((w, q) => w + 26 + q.text.length * 6.9, 0) }));
+  return (
+    <g data-key opacity={show} fontSize={12.5} fontWeight={600} fill="rgba(244,247,255,0.95)" style={{ paintOrder: 'stroke' }} stroke="rgba(11,12,15,0.9)" strokeWidth={3}>
+      {items.map(({ r, x: rx }) => {
+        const row = (
+          <g transform={`translate(${f1(rx)} ${y})`}>
+            <rect x={-3} y={-10} width={22 + r.text.length * 6.9} height={20} fill="transparent" stroke="none" />
+            <rect x={0} y={-6} width={14} height={12} rx={3} fill={r.color} stroke="rgba(255,255,255,0.55)" strokeWidth={1} />
+            <text x={20} y={4.5}>
+              {r.text}
+            </text>
+          </g>
+        );
+        return quiet ? (
+          <g key={r.text} pointerEvents="none">
+            {row}
+          </g>
+        ) : (
+          <Part key={r.text} id={r.id}>
+            {row}
+          </Part>
+        );
+      })}
+    </g>
   );
 }

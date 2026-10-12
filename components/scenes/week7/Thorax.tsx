@@ -1,7 +1,7 @@
 'use client';
 
 import { Label, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
-import { Defs7, P, Serosa, Sheet, f1, morph, offset, poly, resample, sm, spline, vis } from './common';
+import { CavityKey, Defs7, KEY7, P, Serosa, Sheet, f1, morph, offset, poly, resample, sm, spline, vis } from './common';
 
 /**
  * 7:pleura-perikardioa — apunteen 2.2 atala eta 24. orriko irudiak. Hasierako perikardio barrunbeak torax
@@ -463,6 +463,7 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
       <Label id="perikardio-fibrosoa" x={190} y={260} ax={along(G.mem, 0.62)[0]} ay={along(G.mem, 0.62)[1]} show={periNamed} />
       <Label id="nerbio-frenikoa" x={190} y={360} ax={nerve[0]} ay={nerve[1]} show={memShow} />
       <Label id="bena-kardinal-komuna" x={190} y={400} ax={vein[0]} ay={vein[1]} show={memShow} small />
+      <CavityKey rows={fused < 0.5 ? [KEY7.hperi] : [KEY7.peri, KEY7.pleura]} quiet />
       <Label id="pleura-barrunbea" x={190} y={450} ax={pleuraAt[0]} ay={pleuraAt[1]} show={fused} />
       <Label id="paretako-pleura" x={190} y={492} ax={307} ay={487} show={pleuraNamed} />
 

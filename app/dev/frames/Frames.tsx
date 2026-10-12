@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { Defs } from '@/components/kit/Defs';
+import { SceneView } from '@/components/kit/columns';
 import { SceneContext, type SceneContextValue } from '@/components/kit/context';
 import { isSpace, partsOf, nameOf, weeks } from '@/content/registry';
+import { Anchors } from './Anchors';
 import { Audit } from './Audit';
+import { Silent } from './Silent';
 import { Travels } from './Travels';
 
 const noop = () => {};
@@ -27,6 +30,8 @@ export function Frames() {
   }, []);
   if (!q) return null;
   if (q.get('audit')) return <Audit q={q} />;
+  if (q.get('anchors')) return <Anchors q={q} />;
+  if (q.get('silent')) return <Silent q={q} />;
   if (q.get('travel')) return <Travels q={q} />;
   if (q.get('index'))
     return (
@@ -48,6 +53,8 @@ export function Frames() {
   return (
     <div style={{ background: '#0a0a0b', color: '#eee', padding: 8, fontFamily: 'system-ui' }}>
       <style>{'.kimu-root,.kimu-fab,[class*="kimu"],nextjs-portal{display:none!important}'}</style>
+      {/* Names the label layer moved to another slot of their column (see arrangeLabels). */}
+      <style>{'[data-moved] .label-plate{stroke:#f5d90a;stroke-width:1.6px}'}</style>
       {stages.map((st) =>
         st.views
           .filter((v) => !vId || v.id === vId)
@@ -90,7 +97,7 @@ export function Frames() {
                         <svg viewBox="0 0 1000 640" style={{ width: '100%', display: 'block' }} className="viewport-svg">
                           <Defs />
                           <SceneContext.Provider value={ctx}>
-                            <Scene t={f.t} reduced />
+                            <SceneView Scene={Scene} t={f.t} reduced />
                           </SceneContext.Provider>
                         </svg>
                         <figcaption style={{ position: 'absolute', left: 4, top: 2, fontSize: 11, background: '#000a', padding: '0 4px' }}>

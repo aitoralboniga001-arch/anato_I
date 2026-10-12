@@ -1,9 +1,10 @@
 'use client';
 
-import { Arrow, C, Flow, Label, Mark, Note, OnTop, Part, lerp, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Flow, Label, Mark, Note, OnTop, Part, lerp, mix, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { fetusGeom, FetusFigure, placeFetus } from '@/components/scenes/week5/FetusFigure';
 import { useId } from 'react';
 import { CordRope } from './CordRope';
+import { FA, FV } from './placentaSection';
 
 const vis = (t: number, a: number, b = 2) => Math.min(a <= 0 ? 1 : seg(t, a, a + 0.03), 1 - seg(t, b - 0.03, b));
 const f1 = (v: number) => v.toFixed(1);
@@ -46,9 +47,9 @@ function Decidua({ c, r }: { c: Pt; r: Pt }) {
 
 /** Amniotic fluid: a clear blue body of liquid with a few cells and vernix flecks drifting in it. */
 const FLECKS = Array.from({ length: 24 }, (_, i) => ({ a: rand(i * 2.7 + 5) * Math.PI * 2, r: Math.sqrt(rand(i * 4.1 + 7)) * 0.86, s: 1 + rand(i * 1.3 + 2) * 1.4, ph: rand(i * 3.3) * 6.28 }));
-function Fluid({ uid, c, r, t }: { uid: string; c: Pt; r: Pt; t: number }) {
+function Fluid({ uid, c, r, t, amount = 1 }: { uid: string; c: Pt; r: Pt; t: number; amount?: number }) {
   return (
-    <g>
+    <g opacity={lerp(0.3, 1, amount)}>
       <ellipse cx={c[0]} cy={c[1]} rx={r[0]} ry={r[1]} fill={`url(#${uid}-fluid)`} />
       <g fill="#dbeeff" opacity={0.32}>
         {FLECKS.map((p, i) => (
@@ -204,8 +205,20 @@ function volumeAt(t: number) {
   return { ml: Math.round(ml), week: b > 0.98 ? '37.–38. asteak' : `${Math.round(wk)}. astea` };
 }
 
-// Graduated cylinder in the lower-left gutter (clear of the labels above and the uterus).
-const GAUGE = { x: 34, w: 30, y0: 556, h: 160 };
+// Graduated cylinder in the lower-right gutter (clear of the labels above, the uterus and the scene tools).
+const GAUGE = { x: 944, w: 30, y0: 556, h: 160 };
+/** A placed fetus turned by `deg` round `c`: points, inverse and transform stay consistent. */
+function turned(pl: ReturnType<typeof placeFetus>, deg: number, c: Pt) {
+  const a = (deg * Math.PI) / 180;
+  const rot = (p: Pt, k: number): Pt => {
+    const dx = p[0] - c[0];
+    const dy = p[1] - c[1];
+    return [c[0] + dx * Math.cos(k * a) - dy * Math.sin(k * a), c[1] + dx * Math.sin(k * a) + dy * Math.cos(k * a)];
+  };
+  return { ...pl, xf: (p: readonly number[]) => rot(pl.xf(p), 1), inv: (p: readonly number[]) => pl.inv(rot([p[0], p[1]], -1)), transform: `rotate(${f1(deg)} ${f1(c[0])} ${f1(c[1])}) ${pl.transform}` };
+}
+/** Step 1: droplets the amnion cells secrete into the cavity (angle round the wall, start offset). */
+const DROPS = Array.from({ length: 16 }, (_, i) => ({ a: (i / 16) * Math.PI * 2 + rand(i * 3.3) * 0.3, k: rand(i * 5.1) * 0.5 }));
 const gaugeY = (ml: number) => GAUGE.y0 - (Math.min(ml, 1000) / 1000) * GAUGE.h;
 
 export function AmnioticFluid({ t, reduced }: SceneProps) {
@@ -224,13 +237,18 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
     nod: 6 * Math.sin(t * 17),
   };
   const week5 = 24;
-  const place = placeFetus(19, 9, 560, 372);
+  // Step 4 (functions: the fluid lets the fetus move): it turns and drifts in the fluid, and stays there.
+  const swim = seg(t, 0.47, 0.56);
+  const place = turned(placeFetus(19, 9, lerp(560, 538, swim), lerp(372, 350, swim)), lerp(0, -16, swim), [lerp(560, 538, swim), lerp(372, 350, swim)]);
   const g = fetusGeom(week5, pose);
   const mouth = place.xf(g.mouth);
   const cordBase = place.xf(g.cordBase);
   const hip = place.xf(g.hip);
 
   const sourcesA = seg(t, 0.14, 0.2) * (1 - seg(t, 0.3, 0.34));
+  // Step 1 (0–.14): the fluid is secreted by the amnion; seen later, the cavity is simply full.
+  const secrete = seg(t, 0.005, 0.12);
+  const drops = 1 - seg(t, 0.13, 0.16);
   const functionsA = vis(t, 0.46, 0.58);
   const swallowA = vis(t, 0.58, 1);
 
@@ -278,7 +296,15 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
         <ellipse cx={cavC[0]} cy={cavC[1]} rx={cavRx} ry={cavRy} fill={C.amnionCavity} />
       </Part>
       <Part id="likido-amniotikoa">
-        <Fluid uid={uid} c={cavC} r={cavR} t={t} />
+        <Fluid uid={uid} c={cavC} r={cavR} t={t} amount={secrete} />
+        {/* Step 1: the amnion's own cells secrete the first fluid: droplets leave the wall and the cavity fills. */}
+        {drops > 0.02 &&
+          DROPS.map((d, i) => {
+            const u = Math.max(0, Math.min(1, secrete * 1.6 - d.k));
+            if (u <= 0) return null;
+            const rr = lerp(1, 0.8, u);
+            return <circle key={i} cx={f1(cavC[0] + Math.cos(d.a) * cavRx * rr)} cy={f1(cavC[1] + Math.sin(d.a) * cavRy * rr)} r={lerp(2.5, 5, u)} fill="#bfe3ff" opacity={drops * (1 - 0.6 * u)} />;
+          })}
       </Part>
       <Part id="amniosa">
         <Membranes c={cavC} r={cavR} />
@@ -320,7 +346,9 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
       {sourcesA > 0.02 &&
         sources.map(([from, to], i) => (
           <g key={i}>
-            <Arrow from={from} to={to} bend={0.12} color="#8ecae6" width={2} head={8} show={sourcesA} progress={reduced ? 1 : seg(t, 0.14 + i * 0.012, 0.19 + i * 0.012)} />
+            {/* where each source pours in: a soft cloud of new fluid at the arrow's end */}
+            <circle cx={to[0]} cy={to[1]} r={6 + 16 * seg(t, 0.17 + i * 0.012, 0.26 + i * 0.012)} fill="#8ecae6" opacity={0.28 * sourcesA} />
+            <Arrow from={from} to={to} bend={0.12} color="#8ecae6" width={3} head={10} show={sourcesA} progress={reduced ? 1 : seg(t, 0.14 + i * 0.012, 0.19 + i * 0.012)} />
             <g opacity={sourcesA}>
               <circle cx={from[0]} cy={from[1]} r={8} fill="#0b1626" stroke="#8ecae6" strokeWidth={1.4} />
               <text x={from[0]} y={from[1]} dy="0.35em" textAnchor="middle" fontSize={10} fontWeight={700} fill="#cfe6f5">
@@ -352,7 +380,7 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
       )}
       <Mark id="degluzioa" x={mouth[0]} y={mouth[1]} rx={14} show={swallowA} />
 
-      {/* Volume gauge: a graduated cylinder, bottom-left, clear of the toolbar/pill zones */}
+      {/* Volume gauge: a graduated cylinder, bottom-right, clear of the toolbar/pill zones */}
       <g>
         <rect x={GAUGE.x} y={GAUGE.y0 - GAUGE.h - 8} width={GAUGE.w} height={GAUGE.h + 8} rx={4} fill="#0b1626" stroke="#8ecae6" strokeWidth={1.4} opacity={0.9} />
         {ml > 1 && (
@@ -367,7 +395,7 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
             <line key={i} x1={GAUGE.x} x2={GAUGE.x + (i % 5 === 0 ? 10 : 5)} y1={gaugeY(i * 100)} y2={gaugeY(i * 100)} />
           ))}
         </g>
-        <text x={GAUGE.x - 4} y={gaugeY(1000) + 3.5} textAnchor="end" fontSize={9} fill="#8fa3c4">
+        <text x={GAUGE.x + GAUGE.w / 2} y={gaugeY(1000) - 12} textAnchor="middle" fontSize={9} fill="#8fa3c4">
           1 L
         </text>
         <text x={GAUGE.x + GAUGE.w / 2} y={GAUGE.y0 + 18} textAnchor="middle" fontSize={14} fontWeight={700} fill="#cfe6f5">
@@ -383,8 +411,8 @@ export function AmnioticFluid({ t, reduced }: SceneProps) {
           const y1 = gaugeY(m.lo);
           return (
             <g key={m.text} opacity={o}>
-              <path d={`M${GAUGE.x + GAUGE.w + 2},${y0} h6 V${Math.max(y1, y0 + 1)} h-6`} fill="none" stroke="#fbbf24" strokeWidth={1.3} />
-              <text x={GAUGE.x + GAUGE.w + 12} y={(y0 + y1) / 2 + 3.5} fontSize={10.5} fill="#fde68a">
+              <path d={`M${GAUGE.x - 2},${y0} h-6 V${Math.max(y1, y0 + 1)} h6`} fill="none" stroke="#fbbf24" strokeWidth={1.3} />
+              <text x={GAUGE.x - 12} y={(y0 + y1) / 2 + 3.5} textAnchor="end" fontSize={10.5} fill="#fde68a">
                 {m.text}
               </text>
             </g>
@@ -460,6 +488,8 @@ export function PrenatalTests({ t }: SceneProps) {
   const uid = useId().replace(/:/g, '');
   const probeA = seg(t, 0.68, 0.76) * (1 - seg(t, 0.94, 1));
   const bloodA = vis(t, 0.78);
+  const tubeFill = seg(t, 0.8, 0.83);
+  const tubeSep = seg(t, 0.825, 0.845);
   const needleA = seg(t, 0.86, 0.94);
   const cvsA = seg(t, 0.9, 0.98);
 
@@ -611,11 +641,17 @@ export function PrenatalTests({ t }: SceneProps) {
 
       {/* Amaren serumaren azterketa: the mother's blood sample, its serum tested for α-fetoproteina */}
       <Part id="alfa-fetoproteina" show={bloodA}>
-        <g transform={`translate(${TUBE[0]} ${TUBE[1]})`}>
+        <g transform={`translate(${TUBE[0]} ${TUBE[1]}) scale(1.5)`}>
           <rect x={-11} y={0} width={22} height={58} rx={7} fill="rgba(226,232,240,0.25)" stroke="#94a3b8" strokeWidth={1.3} />
-          {/* clotted cells below, pale serum above */}
-          <rect x={-9.5} y={30} width={19} height={26.5} rx={6} fill="#b91c3c" />
-          <rect x={-9.5} y={16} width={19} height={15} fill="#f5d77a" opacity={0.85} />
+          {/* the tube fills with the mother's blood, then it separates: clotted cells below, pale serum (tested) above */}
+          <clipPath id={`${uid}-tube`}>
+            <rect x={-9.5} y={56.5 - 40.5 * tubeFill} width={19} height={40.5 * tubeFill} />
+          </clipPath>
+          <g clipPath={`url(#${uid}-tube)`}>
+            <rect x={-9.5} y={16} width={19} height={40.5} rx={6} fill="#8f1730" />
+            <rect x={-9.5} y={30} width={19} height={26.5} rx={6} fill="#b91c3c" />
+            <rect x={-9.5} y={16} width={19} height={15} fill={mix('#9b1b35', '#f5d77a', tubeSep)} opacity={0.9} />
+          </g>
           <rect x={-14} y={-9} width={28} height={11} rx={3} fill="#8b5cf6" stroke="#5b3fb8" strokeWidth={1} />
           <rect x={-8} y={36} width={16} height={12} rx={1.5} fill="#f8fafc" opacity={0.9} />
           <text x={0} y={42} dy="0.35em" textAnchor="middle" fontSize={7.5} fontWeight={700} fill="#334155">
@@ -646,7 +682,7 @@ export function PrenatalTests({ t }: SceneProps) {
 
       {/* Labels */}
       <Label id="ekografia" x={200} y={100} ax={PROBE[0] - 12} ay={PROBE[1] - 30} show={probeA} />
-      <Label id="alfa-fetoproteina" x={TUBE[0]} y={TUBE[1] - 36} align="middle" ax={TUBE[0]} ay={TUBE[1] - 10} show={bloodA} />
+      <Label id="alfa-fetoproteina" x={TUBE[0]} y={TUBE[1] - 40} align="middle" ax={TUBE[0]} ay={TUBE[1] - 15} show={bloodA} />
       <Label id="amniozentesia" x={200} y={400} ax={needleTip[0]} ay={needleTip[1]} show={needleA} />
       <Label id="biloxka-korionikoen-biopsia" x={204} y={460} small ax={cvsEnd[0]} ay={cvsEnd[1]} show={cvsA} />
       <Label id="karena" x={200} y={200} ax={pl.c[0] - 14} ay={pl.c[1] - 10} />

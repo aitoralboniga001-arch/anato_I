@@ -1,8 +1,8 @@
 'use client';
 
-import { useContext, useSyncExternalStore, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
+import { useContext, useId, useLayoutEffect, useSyncExternalStore, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import { OnTop } from './OnTop';
-import { PaneContext, partState, useLabelScale, useScene, type LabelScale } from './context';
+import { LabelCollectorContext, PaneContext, partState, useLabelScale, useScene, type LabelScale } from './context';
 
 /** Semibold text width per character at 1px font size (13.5px ≈ 7.1 frame units per character). */
 const CHAR_W = 7.1 / 13.5;
@@ -86,10 +86,99 @@ interface LabelProps {
   /** Override the registry name (e.g. to add a day). Prefer the registry name. */
   text?: string;
   small?: boolean;
+  /**
+   * A name for a layered whole (a structure with `spans` in the registry, e.g. the bilaminar disc): the
+   * leader ends in a thin bracket across the whole thickness, from the first layer to the last, instead
+   * of a dot inside one of them. Give the two ends inside the outer layers; the leader meets the middle
+   * (ax, ay default to it).
+   */
+  span?: [[number, number], [number, number]];
+  /** Hand-placed: the view's label layer never moves this name to another slot (see arrangeLabels). */
+  noArrange?: boolean;
+  /** Set by the label layer when it moved the name (dev sheets tint it). */
+  moved?: boolean;
 }
 
 /** Textbook-style label with a leader line. Render labels after the geometry so they sit on top. */
-export function Label({ id, x, y, ax, ay, align, show = 1, text, small }: LabelProps) {
+export function Label(given: LabelProps) {
+  const { span } = given;
+  // A bracket's leader meets its middle unless the scene says otherwise.
+  const props = span && given.ax === undefined ? { ...given, ax: (span[0][0] + span[1][0]) / 2, ay: (span[0][1] + span[1][1]) / 2 } : given;
+  const col = useContext(LabelCollectorContext);
+  const inPane = useContext(PaneContext);
+  const key = useId();
+  // Mounted inside a SceneView: the view's label layer draws this name (see LabelCollector).
+  useLayoutEffect(() => {
+    if (!col || inPane) return;
+    col.restore(key);
+    col.notify();
+    return () => {
+      col.drop(key);
+      col.notify();
+    };
+  }, [col, inPane, key]);
+  if (!col || inPane) return <LabelDraw {...props} />;
+  col.put(key, props);
+  return null;
+}
+
+/** A name's drawn font size before any growth: the step's own names are bigger than the rest. */
+export const labelSize = (state: ReturnType<typeof partState>, small?: boolean) =>
+  state === 'spot' ? 16 : state === 'focus' ? (small ? 13.5 : 15) : small ? 12 : 13.5;
+
+type Pt = [number, number];
+
+/** Where a name is drawn: its font size, plate, text box and leader (the label layer lays names out with it). */
+export interface LabelGeom {
+  anchor: 'start' | 'middle' | 'end';
+  /** Growth over the drawn size (see fitScale). */
+  k: number;
+  fs: number;
+  plate: ReturnType<typeof plateBox>;
+  /** The text's box as the layout rules judge it (tests/labels.test): x0, x1, y0, y1. */
+  box: [number, number, number, number];
+  /** Plate edge → elbow → the dot (empty without a leader). */
+  leader: Pt[];
+}
+
+export function labelGeom(
+  { x, y, ax, ay, align, small }: Pick<LabelProps, 'x' | 'y' | 'ax' | 'ay' | 'align' | 'small'>,
+  chars: number,
+  size: number,
+  scale: LabelScale,
+  measure?: (fs: number) => number,
+): LabelGeom {
+  const anchor = align ?? (ax !== undefined && ax > x ? 'end' : 'start');
+  const k = fitScale(scale, x, y, anchor, chars, size);
+  const fs = size * k;
+  const plate = plateBox(x, y, anchor, measure ? measure(fs) : chars * CHAR_W * fs, fs);
+  // The rules' estimate: 7.1 units a character at 13.5px (6.4 at the small 12px), 15 units a line.
+  const drawn = small ? 12 : 13.5;
+  const w = (chars * (small ? 6.4 : 7.1) * fs) / drawn;
+  const h = (15 * fs) / drawn;
+  const x0 = anchor === 'end' ? x - w : anchor === 'middle' ? x - w / 2 : x;
+  const box: LabelGeom['box'] = [x0, x0 + w, y - h / 2, y + h / 2];
+  if (ax === undefined || ay === undefined) return { anchor, k, fs, plate, box, leader: [] };
+  // Leader starts at the plate edge and bends horizontally first, like textbook call-outs.
+  // It leaves from the plate edge nearest the anchor, so its bend never lands inside a column of names.
+  const lx = ax < plate.x ? plate.x : ax > plate.x + plate.w ? plate.x + plate.w : x + (anchor === 'end' ? plate.padX : anchor === 'start' ? -plate.padX : 0);
+  const elbowX = lx + (ax - lx) * 0.35;
+  return { anchor, k, fs, plate, box, leader: [[lx, y], [elbowX, y], [ax, ay]] };
+}
+
+/** A bracket from one end of a span to the other, with 4-unit end bars pointing away from `from`. */
+function bracket([[x1, y1], [x2, y2]]: [[number, number], [number, number]], from: Pt) {
+  const len = Math.hypot(x2 - x1, y2 - y1) || 1;
+  let nx = -(y2 - y1) / len;
+  let ny = (x2 - x1) / len;
+  // The bars point away from the leader's elbow (into the structure, not back at the name).
+  if (nx * ((x1 + x2) / 2 - from[0]) + ny * ((y1 + y2) / 2 - from[1]) < 0) [nx, ny] = [-nx, -ny];
+  const r = (v: number) => Math.round(v * 10) / 10;
+  return `M${r(x1 + nx * 4)},${r(y1 + ny * 4)}L${r(x1)},${r(y1)}L${r(x2)},${r(y2)}L${r(x2 + nx * 4)},${r(y2 + ny * 4)}`;
+}
+
+/** Draws one label where its props say (the label layer calls it with the laid-out position). */
+export function LabelDraw({ id, x, y, ax, ay, align, show = 1, text, small, span, moved }: LabelProps) {
   const ctx = useScene();
   const scale = useLabelScale();
   const measured = useMeasured();
@@ -97,24 +186,18 @@ export function Label({ id, x, y, ax, ay, align, show = 1, text, small }: LabelP
   const inPane = useContext(PaneContext);
   if (!ctx.showLabels || ctx.quiz || show <= 0.02 || inPane) return null;
   const state = partState(ctx, id);
-  const anchor = align ?? (ax !== undefined && ax > x ? 'end' : 'start');
-  const hasLeader = ax !== undefined && ay !== undefined;
   const space = !!ctx.isSpace?.(id);
   const name = text ?? ctx.nameOf(id);
-  // The step's own names are bigger and bolder than the rest, so the eye goes straight to them.
-  const size = state === 'spot' ? 16 : state === 'focus' ? (small ? 13.5 : 15) : small ? 12 : 13.5;
-  const k = fitScale(scale, x, y, anchor, name.length, size);
-  const fs = size * k;
-  const plate = plateBox(x, y, anchor, textWidth(name, fs, state === 'spot' || state === 'focus' ? 700 : 550, space, measured), fs);
-  // Leader starts at the plate edge and bends horizontally first, like textbook call-outs.
-  // It leaves from the plate edge nearest the anchor, so its bend never lands inside a column of names.
-  const lx = hasLeader && ax! < plate.x ? plate.x : hasLeader && ax! > plate.x + plate.w ? plate.x + plate.w : x + (anchor === 'end' ? plate.padX : anchor === 'start' ? -plate.padX : 0);
-  const elbowX = hasLeader ? lx + (ax! - lx) * 0.35 : lx;
-  const leader = hasLeader ? `M${lx},${y} L${elbowX},${y} L${ax},${ay}` : '';
+  const size = labelSize(state, small);
+  const weight = state === 'spot' || state === 'focus' ? 700 : 550;
+  const { anchor, k, fs, plate, leader: pts } = labelGeom({ x, y, ax, ay, align, small }, name.length, size, scale, (f) => textWidth(name, f, weight, space, measured));
+  const hasLeader = pts.length > 0;
+  const leader = hasLeader ? `M${pts[0][0]},${pts[0][1]} L${pts[1][0]},${pts[1][1]} L${ax},${ay}` : '';
   const group = {
     'data-label': id,
     className: `label label-${state}${small ? ' label-small' : ''}${space ? ' label-space' : ''}`,
     opacity: show,
+    'data-moved': moved ? '' : undefined,
     onClick: (e: ReactMouseEvent) => {
       e.stopPropagation();
       ctx.onSelect(id);
@@ -131,7 +214,15 @@ export function Label({ id, x, y, ax, ay, align, show = 1, text, small }: LabelP
           {/* A dark casing under the light leader keeps it visible on pale and dark tissue alike. */}
           <path className="label-casing" d={leader} />
           <path className="label-leader" d={leader} />
-          <circle className="label-dot" cx={ax} cy={ay} r={space ? 3.8 : 3.1} />
+          {span ? (
+            // Across the whole: a thin bracket, its short end bars turned away from the name.
+            <g className="label-span">
+              <path className="label-casing" d={bracket(span, pts[1])} />
+              <path className="label-leader" d={bracket(span, pts[1])} />
+            </g>
+          ) : (
+            <circle className="label-dot" cx={ax} cy={ay} r={space ? 3.8 : 3.1} />
+          )}
         </g>
       )}
       <OnTop>

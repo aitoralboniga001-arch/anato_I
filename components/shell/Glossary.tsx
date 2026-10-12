@@ -24,7 +24,18 @@ export function Glossary({ onClose, onPick }: GlossaryProps) {
 
   return (
     <div className="drawer-backdrop" onClick={onClose}>
-      <aside className="drawer" onClick={(e) => e.stopPropagation()} aria-label="Glosarioa">
+      {/* Escape closes it like every other window, even while typing in its search box. */}
+      <aside
+        className="drawer"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.stopPropagation();
+            onClose();
+          }
+        }}
+        aria-label="Glosarioa"
+      >
         <header className="drawer-head">
           <div>
             <p className="eyebrow">Glosarioa</p>

@@ -1,6 +1,7 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
+import { ellipseD } from './dorsalKit';
 import { C, Part, clamp, lerp, mix, rand, type Pt } from '@/components/kit';
 import { Cells } from '@/components/scenes/section/Section';
 
@@ -51,6 +52,8 @@ export interface DiscParams {
   mesoMask?: (x: number, d: number) => boolean;
   /** Only draw intra-embryonic mesoderm on [x0, x1] (the rest of the gap is cell-free matrix). */
   mesoRange?: [number, number];
+  /** 0..1: the sheet reaches the disc margin and runs into the extra-embryonic mesoderm there (continuity). */
+  meet?: number;
 }
 
 const ss = (v: number) => {
@@ -62,13 +65,13 @@ const range = (a: number, b: number, n: number) => Array.from({ length: n + 1 },
 const poly = (pts: Pt[]) => `M${pts.map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}Z`;
 
 const MT = 40; // full mesoderm thickness
-const TEN = 11; // endoderm (cuboidal)
+const TEN = 13; // endoderm (cuboidal)
 const THY = 8; // hypoblast (flatter)
 const R_ROD = 15;
 const HYPO = '#c4a86e'; // hypoblast: paler, flatter than the endoderm that replaces it
 
 export function makeDisc(params: DiscParams) {
-  const p = { cx: 500, y: 290, k: 1.15, w: 270, amnionH: 140, yolkH: 170, streak: 0, groove: 0, invag: 0, phase: 0, endo: 0, meso: 0, pre: 0, plate: 0, rod: 0, close: 0, ecto: 0, ...params };
+  const p = { cx: 500, y: 290, k: 1.15, w: 270, amnionH: 140, yolkH: 170, streak: 0, groove: 0, invag: 0, phase: 0, endo: 0, meso: 0, pre: 0, plate: 0, rod: 0, close: 0, ecto: 0, meet: 0, ...params };
   const W = p.w;
   const bow = (x: number) => 16 * (x / W) ** 2;
   const map = (x: number, d: number): Pt => [p.cx + p.k * x, p.y + p.k * (d + bow(x))];
@@ -85,13 +88,20 @@ export function makeDisc(params: DiscParams) {
   const memb = (x: number) => (p.membranes ?? []).reduce((m, xm) => m * ss((Math.abs(x - xm) - 12) / 18), 1);
   const gap = (x: number) => {
     if (p.gapFn) return p.gapFn(x) * memb(x);
-    const sheet = MT * Math.min(1, p.meso * 2.5) * ss((spread - Math.abs(x)) / 60);
+    // Once it meets the extra-embryonic mesoderm the sheet keeps most of its thickness out to the margin.
+    const prof = Math.max(ss((spread - Math.abs(x)) / 60), p.meet * 0.78 * ss((W + 14 - Math.abs(x)) / 26));
+    const sheet = MT * Math.min(1, p.meso * 2.5) * prof;
     const cluster = 14 * Math.max(p.invag, noto ? 1 : 0) * (sa ? box(x, sa[0] - 10, sa[1] + 10, 25) : Math.exp(-((x / 44) ** 2)));
     return Math.max(sheet, cluster) * memb(x);
   };
   const dEnd = (x: number) => base(x) + gap(x);
   const midGap = (base(0) + dEnd(0)) / 2;
   const rx = W * p.k;
+  // Sac walls and their extra-embryonic mesoderm coat: thick enough (in screen units) that a name's dot can sit
+  // well inside each layer, never on the seam between the amnion (or yolk-sac lining) and its coat.
+  // (Small overview embryos, k < 0.9, keep the proportions: their scene pushes in before naming these layers.)
+  const fl = Math.min(1, p.k / 0.9);
+  const lay = { wallA: Math.max(7 * p.k, 8 * fl), coatA: Math.max(12 * p.k, 12 * fl), wallY: Math.max(7 * p.k, 8 * fl), coatY: Math.max(13 * p.k, 13 * fl) };
   const cyA = map(W, tEpi(W) / 2)[1];
   // The yolk sac's rim follows the lining thickness smoothly (hypoblast → endoderm) instead of snapping at the end.
   const cyY = map(W, dEnd(W) + lerp(THY, TEN, ss((p.endo - 0.8) / 0.2)) / 2)[1];
@@ -100,22 +110,26 @@ export function makeDisc(params: DiscParams) {
   const eW = clamp(p.endo) * (W + 1);
   const at = {
     epiblast: map(-W * 0.55, tEpi(W * 0.55) / 2),
-    groove: map(streakMid, top(streakMid) + 2),
-    streak: map(streakMid, base(streakMid) - 5),
+    // Middle of the dark furrow (between the groove floor and the disc surface), not on its floor.
+    groove: map(streakMid, (top(streakMid) - 3) / 2),
+    // Inside the thickened midline epiblast (below the furrow, above the sheet's base).
+    streak: map(streakMid, (top(streakMid) + base(streakMid)) / 2 + 2),
     meso: map(-W * 0.45, base(W * 0.45) + gap(W * 0.45) / 2),
     endo: map(-Math.min(eW * 0.6, W * 0.4), dEnd(Math.min(eW * 0.6, W * 0.4)) + TEN / 2),
     hypo: map(-lerp(W * 0.4, W * 0.92, clamp(p.endo)), dEnd(lerp(W * 0.4, W * 0.92, clamp(p.endo))) + TEN / 2),
     amnion: [p.cx + rx * 0.3, cyA - p.amnionH * p.k * 0.55] as Pt,
-    amnionWall: [p.cx - rx * Math.cos(0.9), cyA - (p.amnionH * p.k + 3 * p.k) * Math.sin(0.9)] as Pt,
+    amnionWall: [p.cx - (rx + lay.wallA / 2) * Math.cos(0.9), cyA - (p.amnionH * p.k + lay.wallA / 2) * Math.sin(0.9)] as Pt,
     yolk: [p.cx + rx * 0.3, cyY + p.yolkH * p.k * 0.55] as Pt,
-    extraMeso: [p.cx + (rx + 8 * p.k) * Math.cos(0.5), cyA - (p.amnionH * p.k + 8 * p.k) * Math.sin(0.5)] as Pt,
-    extraMesoYolk: [p.cx + (rx + 10 * p.k) * Math.cos(0.45), cyY + (p.yolkH * p.k + 10 * p.k) * Math.sin(0.45)] as Pt,
+    extraMeso: [p.cx + (rx + lay.wallA + lay.coatA / 2) * Math.cos(0.5), cyA - (p.amnionH * p.k + lay.wallA + lay.coatA / 2) * Math.sin(0.5)] as Pt,
+    extraMesoYolk: [p.cx + (rx + lay.wallY + lay.coatY / 2) * Math.cos(0.45), cyY + (p.yolkH * p.k + lay.wallY + lay.coatY / 2) * Math.sin(0.45)] as Pt,
+    /** Middle of the coat at the disc margin (right side), level with the disc. */
+    margin: [p.cx + rx + lay.wallA + lay.coatA / 2, (cyA + cyY) / 2] as Pt,
     noto: map(0, midGap),
     plate: map(0, dEnd(0) + 3),
     pre: map(0, lerp(midGap, dEnd(0) - 3, p.plate)),
     disc: map(W * 0.62, 0),
   };
-  return { p, W, map, top, tEpi, base, gap, dEnd, midGap, spread, rx, cyA, cyY, arc, eW, at, k: p.k, streakMid };
+  return { p, W, map, top, tEpi, base, gap, dEnd, midGap, spread, rx, cyA, cyY, arc, eW, at, k: p.k, streakMid, lay };
 }
 
 export type Disc = ReturnType<typeof makeDisc>;
@@ -154,7 +168,9 @@ const DEFAULT_IDS: Required<Omit<DiscIds, 'amnionWall'>> = {
 
 /** Stellate mesenchymal cells scattered where `inside(x, d)`. */
 function Mesenchyme({ s, inside, color, seed = 5, step = 13 }: { s: Disc; inside: (x: number, d: number) => boolean; color: string; seed?: number; step?: number }) {
-  const out: ReactNode[] = [];
+  // All cells in two paths (processes, bodies): the same picture with a fraction of the elements.
+  let procs = '';
+  let bodies = '';
   let i = 0;
   for (let x = -s.W; x <= s.W; x += step)
     for (let d = 0; d <= 90; d += step * 0.72) {
@@ -165,19 +181,32 @@ function Mesenchyme({ s, inside, color, seed = 5, step = 13 }: { s: Disc; inside
       const [X, Y] = s.map(jx, jd);
       const a = rand(seed + i * 9.1) * 180;
       const r = 2 * s.k;
-      out.push(
-        <g key={i} transform={`translate(${f1(X)} ${f1(Y)}) rotate(${f1(a)})`}>
-          <path d={`M${f1(-r * 2.7)},0L${f1(r * 2.7)},0M0,${f1(-r * 1.8)}L0,${f1(r * 1.8)}`} stroke={color} strokeWidth={0.8} opacity={0.6} />
-          <ellipse rx={f1(r * 1.3)} ry={f1(r)} fill={color} stroke="rgba(60,8,12,0.5)" strokeWidth={0.5} />
-        </g>,
-      );
+      const c = Math.cos((a * Math.PI) / 180);
+      const sn = Math.sin((a * Math.PI) / 180);
+      const P = (px: number, py: number) => `${f1(X + px * c - py * sn)},${f1(Y + px * sn + py * c)}`;
+      procs += `M${P(-r * 2.7, 0)}L${P(r * 2.7, 0)}M${P(0, -r * 1.8)}L${P(0, r * 1.8)}`;
+      bodies += ellipseD(X, Y, r * 1.3, r, a);
     }
-  return <g>{out}</g>;
+  return (
+    <g>
+      <path d={procs} stroke={color} strokeWidth={0.8} opacity={0.6} fill="none" />
+      <path d={bodies} fill={color} stroke="rgba(60,8,12,0.5)" strokeWidth={0.5} />
+    </g>
+  );
 }
 
-export function DiscDrawing({ s, ids = {} }: { s: Disc; ids?: DiscIds }) {
+/** Opacity of each group of the drawing, for scenes that set their own emphasis per step (1 = as drawn). */
+export interface DiscTone {
+  amnion?: number;
+  yolk?: number;
+  coat?: number;
+  disc?: number;
+}
+
+export function DiscDrawing({ s, ids = {}, tone = {} }: { s: Disc; ids?: DiscIds; tone?: DiscTone }) {
+  const gid = useId();
   const id = { ...DEFAULT_IDS, ...ids };
-  const { p, W, map, top, base, gap, dEnd, rx, cyA, cyY, arc, k } = s;
+  const { p, W, map, top, base, gap, dEnd, rx, cyA, cyY, arc, k, lay } = s;
   const A = p.amnionH * k;
   const Y = p.yolkH * k;
   const cellN = (len: number, w: number) => Math.max(3, Math.round((len * k) / w));
@@ -185,11 +214,11 @@ export function DiscDrawing({ s, ids = {} }: { s: Disc; ids?: DiscIds }) {
 
   // --- sacs
   const amnionIn = arc(cyA, rx, A, true);
-  const amnionMid = arc(cyA, rx + 5 * k, A + 5 * k, true);
-  const amnionOut = arc(cyA, rx + 11 * k, A + 11 * k, true);
+  const amnionMid = arc(cyA, rx + lay.wallA, A + lay.wallA, true);
+  const amnionOut = arc(cyA, rx + lay.wallA + lay.coatA, A + lay.wallA + lay.coatA, true);
   const yolkIn = arc(cyY, rx, Y, false);
-  const yolkMid = arc(cyY, rx + 7 * k, Y + 7 * k, false);
-  const yolkOut = arc(cyY, rx + 13 * k, Y + 13 * k, false);
+  const yolkMid = arc(cyY, rx + lay.wallY, Y + lay.wallY, false);
+  const yolkOut = arc(cyY, rx + lay.wallY + lay.coatY, Y + lay.wallY + lay.coatY, false);
   // The sacs' walls run on round the disc's edge to meet at its mid-height, so the amnion and yolk-sac
   // cell sheets close the margin instead of stopping flat on a bare block of mesoderm.
   const midY = (cyA + cyY) / 2;
@@ -204,8 +233,8 @@ export function DiscDrawing({ s, ids = {} }: { s: Disc; ids?: DiscIds }) {
   const margin = (sd: 1 | -1) =>
     poly([
       [p.cx + sd * (rx - 1), cyA],
-      [p.cx + sd * (rx + 11 * k), cyA],
-      [p.cx + sd * (rx + 13 * k), cyY],
+      [p.cx + sd * (rx + lay.wallA + lay.coatA), cyA],
+      [p.cx + sd * (rx + lay.wallY + lay.coatY), cyY],
       [p.cx + sd * (rx - 1), cyY],
     ]);
 
@@ -267,27 +296,54 @@ export function DiscDrawing({ s, ids = {} }: { s: Disc; ids?: DiscIds }) {
   return (
     <g>
       {/* Yolk sac: cavity, hypoblast-derived lining, extra-embryonic mesoderm. */}
+      <g opacity={tone.yolk ?? 1}>
       <Part id={id.yolk} quiet>
         <path d={yolkCavity} fill="#3a3218" />
         <path d={yolkCavity} fill="url(#g-cavity)" opacity={0.6} />
       </Part>
+      </g>
+      <g opacity={tone.amnion ?? 1}>
       <Part id={id.amnion} quiet>
         <path d={amnionCavity} fill="#15294a" />
         <path d={amnionCavity} fill="url(#g-cavity)" opacity={0.5} />
       </Part>
+      </g>
+      <g opacity={tone.coat ?? 1}>
       <Part id={id.extraMeso}>
         <path d={margin(1)} fill={C.mesoExtra} opacity={0.85} />
         <path d={margin(-1)} fill={C.mesoExtra} opacity={0.85} />
         <Cells outer={toMid(amnionOut)} inner={toMid(amnionMid)} n={cellN(Math.PI * (rx / k + A / k) * 0.5, 30)} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={21} />
         <Cells outer={toMid(yolkOut)} inner={toMid(yolkMid)} n={cellN(Math.PI * (rx / k + Y / k) * 0.5, 30)} fill={C.mesoExtra} nucleus="rgba(150,70,50,0.6)" edge="rgba(150,70,50,0.25)" seed={22} />
       </Part>
+      </g>
+      {/* Once the intra-embryonic mesoderm meets the coat, the amnion and yolk-sac walls end on the ectoderm and the
+          endoderm (their continuations) and only the mesoderm closes the margin. */}
+      <g opacity={tone.amnion ?? 1}>
       <Part id={ids.amnionWall ?? id.amnion}>
-        <Cells outer={toMid(amnionMid)} inner={toMid(amnionIn)} n={cellN(Math.PI * (rx / k + A / k) * 0.5, 22)} fill={C.amnioblast} nk={0.5} seed={23} />
+        <g opacity={1 - p.meet}>
+          <Cells outer={toMid(amnionMid)} inner={toMid(amnionIn)} n={cellN(Math.PI * (rx / k + A / k) * 0.5, 22)} fill={C.amnioblast} nk={0.5} seed={23} />
+        </g>
+        {p.meet > 0.01 && (
+          <g opacity={p.meet}>
+            <Cells outer={amnionMid} inner={amnionIn} n={cellN(Math.PI * (rx / k + A / k) * 0.5, 22)} fill={C.amnioblast} nk={0.5} seed={23} />
+          </g>
+        )}
       </Part>
+      </g>
+      <g opacity={tone.yolk ?? 1}>
       <Part id={id.yolk}>
-        <Cells outer={toMid(yolkMid)} inner={toMid(yolkIn)} n={cellN(Math.PI * (rx / k + Y / k) * 0.5, 16)} fill={HYPO} nucleus="rgba(90,70,20,0.6)" seed={24} />
+        <g opacity={1 - p.meet}>
+          <Cells outer={toMid(yolkMid)} inner={toMid(yolkIn)} n={cellN(Math.PI * (rx / k + Y / k) * 0.5, 16)} fill={HYPO} nucleus="rgba(90,70,20,0.6)" seed={24} />
+        </g>
+        {p.meet > 0.01 && (
+          <g opacity={p.meet}>
+            <Cells outer={yolkMid} inner={yolkIn} n={cellN(Math.PI * (rx / k + Y / k) * 0.5, 16)} fill={HYPO} nucleus="rgba(90,70,20,0.6)" seed={24} />
+          </g>
+        )}
       </Part>
 
+      </g>
+      <g opacity={tone.disc ?? 1}>
       {/* Cell-free matrix between the epithelia wherever they are apart. */}
       <path d={mesoRegion(-W, W)} fill="#22182a" pointerEvents="none" />
       {/* Intra-embryonic mesoderm: loose mesenchyme between epiblast and hypoblast/endoderm. */}
@@ -297,6 +353,24 @@ export function DiscDrawing({ s, ids = {} }: { s: Disc; ids?: DiscIds }) {
             <path key={i} d={d} fill={C.mesoIntra} opacity={0.3} />
           ))}
           <Mesenchyme s={s} inside={mesoIn} color="#f25555" />
+          {/* At the margin the red sheet turns into the salmon coat of the amnion and the yolk sac: one continuous mesoderm. */}
+          {p.meet > 0.01 &&
+            ([1, -1] as const).map((sd) => {
+              const x0 = sd * (W - 64);
+              const [X0] = map(x0, 0);
+              const X1 = p.cx + sd * (rx + 4 * k);
+              return (
+                <g key={sd} pointerEvents="none">
+                  <defs>
+                    <linearGradient id={`${gid}m${sd}`} gradientUnits="userSpaceOnUse" x1={X0} y1={0} x2={X1} y2={0}>
+                      <stop offset="0" stopColor={C.mesoExtra} stopOpacity={0} />
+                      <stop offset="1" stopColor={C.mesoExtra} stopOpacity={0.9 * p.meet} />
+                    </linearGradient>
+                  </defs>
+                  <path d={sd > 0 ? mesoRegion(x0, W) : mesoRegion(-W, x0)} fill={`url(#${gid}m${sd})`} />
+                </g>
+              );
+            })}
         </Part>
       )}
 
@@ -353,6 +427,12 @@ export function DiscDrawing({ s, ids = {} }: { s: Disc; ids?: DiscIds }) {
       </Part>
       {p.streak > 0.01 && (
         <Part id={id.streak} show={ss(p.streak)}>
+          {/* The streak is the thickened midline of the sheet itself: its cells are tinted, then its crowded cells drawn. */}
+          {(() => {
+            const [x0, x1] = p.streakAt ? [p.streakAt[0], p.streakAt[1]] : [-34, 34];
+            const xs2 = range(x0, x1, 24);
+            return <path d={poly([...xs2.map((x) => map(x, top(x) + 1.5)), ...xs2.slice().reverse().map((x) => map(x, base(x) - 0.5))])} fill="#8fb2ff" opacity={0.3} />;
+          })()}
           {range(-1, 1, p.streakAt ? 14 : 6).map((u, i) => {
             const x = p.streakAt ? lerp(p.streakAt[0] + 8, p.streakAt[1] - 8, (u + 1) / 2) : u * 16;
             const [X, Yy] = map(x, base(x) - 4 - (i % 2) * 5);
@@ -381,6 +461,7 @@ export function DiscDrawing({ s, ids = {} }: { s: Disc; ids?: DiscIds }) {
           </g>
         ))}
       </g>
+      </g>
     </g>
   );
 }
@@ -406,6 +487,10 @@ export function MembraneMark({ s, x }: { s: Disc; x: number }) {
 /** A compact cluster of round cells centred in the ecto–endo gap at x (e.g. the prechordal plate). */
 export function CellCluster({ s, x, n = 9, color, span = 16 }: { s: Disc; x: number; n?: number; color: string; span?: number }) {
   const cells: ReactNode[] = [];
+  // A packed plate: the cells sit on a common body of the same tissue, so there is no background between them.
+  const xs = range(x - span - 5, x + span + 5, 16);
+  const c = (xx: number) => (s.base(xx) + s.dEnd(xx)) / 2;
+  cells.push(<path key="body" d={poly([...xs.map((xx) => s.map(xx, c(xx) - 8.5)), ...xs.slice().reverse().map((xx) => s.map(xx, c(xx) + 8.5))])} fill={color} opacity={0.75} stroke="rgba(50,10,50,0.5)" strokeWidth={0.8} strokeLinejoin="round" />);
   for (let i = 0; i < n; i++) {
     const row = i % 2;
     const xx = x + lerp(-span, span, n > 1 ? i / (n - 1) : 0.5);

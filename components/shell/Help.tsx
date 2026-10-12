@@ -1,56 +1,18 @@
 'use client';
 
-import { useState, useSyncExternalStore, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { StructureCategory } from '@/lib/sim/types';
 import { KimuFace } from '@/components/kimu/KimuFace';
 import { IconCalendar, IconClose, IconExpand, IconGuide, IconHelp, IconLayers, IconMore, IconNext, IconNotes, IconPlay, IconQuiz, IconSkipNext, IconTag, IconTarget, IconVoice, IconZoomIn, PlaneGlyph } from './icons';
 import { IconRail } from './SidePanel';
+import { startTour } from './tour/store';
+import './tour/tour.css';
 
-const SEEN = 'enbrioatlas:help-seen';
-const listeners = new Set<() => void>();
-const subscribe = (cb: () => void) => {
-  listeners.add(cb);
-  return () => {
-    listeners.delete(cb);
-  };
-};
-const readSeen = () => {
-  try {
-    return window.localStorage.getItem(SEEN) === '1';
-  } catch {
-    return true;
-  }
-};
-const markSeen = () => {
-  try {
-    window.localStorage.setItem(SEEN, '1');
-  } catch {
-    // Storage unavailable: the guide simply opens again next time.
-  }
-  listeners.forEach((l) => l());
-};
-
-/** A short welcome opens by itself on the first visit; the full sheet only from "?". Third value: first visit. */
-export function useHelpOnce(): [boolean, (v: boolean) => void, boolean] {
-  const seen = useSyncExternalStore(subscribe, readSeen, () => true);
-  const [open, setOpen] = useState(false);
-  return [
-    open || !seen,
-    (v: boolean) => {
-      if (!v) markSeen();
-      setOpen(v);
-    },
-    !seen,
-  ];
+/** The help sheet opens only when asked ("?", the menu). The first visit gets the guide's quiet offer instead. */
+export function useHelp(): [boolean, (v: boolean) => void] {
+  return useState(false);
 }
-
-/** First visit: three things to know, nothing more (the rest is one click away). */
-const WELCOME: [string, string][] = [
-  ['Ikusi', 'Sakatu ▶. Etapa bakoitza urratsez urrats doa: testua eta animazioa batera, eta urrats bakoitzaren amaieran galdera txiki bat.'],
-  ['Ulertu', 'Klikatu edozein egitura haren fitxa ikusteko. Irudiaren gaineko koadroak ebakia non dagoen erakusten du, eta egun-txipak zer dagoen une horretan.'],
-  ['Frogatu', '«Aurkitu» eta «Galderak»: zure burua frogatzeko. Beste tresnak (glosarioa, kronologia, leinuak, irudiak) «Tresnak» menuan daude, eta goiko «?» botoiak botoi bakoitzak zer egiten duen azaltzen du.'],
-];
 
 /** What every control on the study screen does, grouped by where it sits, each with the icon it shows. */
 const CONTROLS: { area: string; items: { icon: ReactNode; name: string; text: string; key?: string }[] }[] = [
@@ -63,7 +25,7 @@ const CONTROLS: { area: string; items: { icon: ReactNode; name: string; text: st
       { icon: <IconRail open side="right" />, name: 'Laburpena', text: 'Eskuineko zutabea: etaparen gakoak, data garrantzitsuak eta egiturak. Berriro sakatuta, ezkutatzen da.', key: ']' },
       { icon: <IconNotes size={16} />, name: 'Apunteak', text: 'Eskuineko zutabea: jatorrizko apunteak, simulazioarekin batera argituta. Esaldi bat klikatuta, hara joaten da simulazioa.', key: 'N' },
       { icon: <IconMore size={16} />, name: 'Tresnak', text: 'Glosarioa, kronologia, leinuak, etiketarik gabeko irudiak eta foku modua.' },
-      { icon: <IconHelp size={16} />, name: 'Laguntza', text: 'Orri hau.', key: '?' },
+      { icon: <IconHelp size={16} />, name: 'Laguntza', text: 'Gida laburra eta orri hau.', key: '?' },
     ],
   },
   {
@@ -125,47 +87,14 @@ const KEYS: [string, string][] = [
   ['[  ]', 'Etapen zerrenda / azalpen-panela tolestu'],
   ['N', 'Apunteak erakutsi / ezkutatu'],
   ['K', 'Galdetu Kimuri'],
-  ['?', 'Laguntza hau'],
+  ['?', 'Laguntza eta gida laburra'],
   ['Esc', 'Itxi fitxa edo leihoa'],
 ];
 
 const LAYERS: StructureCategory[] = ['ektodermoa', 'mesodermoa', 'endodermoa', 'enbrioblastoa', 'trofoblastoa', 'enbrioi-kanpokoa', 'barrunbea', 'amarena'];
 
-export function Help({ onClose, welcome }: { onClose: () => void; welcome?: boolean }) {
-  const [full, setFull] = useState(!welcome);
+export function Help({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<HelpTab>('botoiak');
-  if (!full)
-    return (
-      <div className="modal-backdrop" onClick={onClose}>
-        <div className="modal help help-welcome" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Ongi etorri">
-          <header className="help-head">
-            <div>
-              <p className="kicker">Ongi etorri</p>
-              <h2>Hiru gauza, eta hasi</h2>
-            </div>
-            <button className="icon-btn" onClick={onClose} aria-label="Itxi" title="Itxi (Esc)">
-              <IconClose size={16} />
-            </button>
-          </header>
-          <ol className="help-steps">
-            {WELCOME.map(([h, t]) => (
-              <li key={h}>
-                <b>{h}</b>
-                <span>{t}</span>
-              </li>
-            ))}
-          </ol>
-          <footer className="help-foot">
-            <button className="btn ghost small" onClick={() => setFull(true)}>
-              Botoi bakoitza zertarako den
-            </button>
-            <button className="btn btn-light" onClick={onClose} autoFocus>
-              Hasi
-            </button>
-          </footer>
-        </div>
-      </div>
-    );
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal help" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Laguntza">
@@ -178,6 +107,26 @@ export function Help({ onClose, welcome }: { onClose: () => void; welcome?: bool
             <IconClose size={16} />
           </button>
         </header>
+        {/* The guide first: the screen itself, shown stop by stop; the sheet below is the reference. */}
+        <div className="help-tour">
+          <span className="gida-offer-icon" aria-hidden>
+            <IconHelp size={16} />
+          </span>
+          <span className="help-tour-text">
+            <b>Gida laburra</b>
+            <small>Minutu bat: pantaila bera, atalez atal, eta nola ikasi.</small>
+          </span>
+          <button
+            className="btn small btn-light"
+            autoFocus
+            onClick={() => {
+              onClose();
+              startTour('sim');
+            }}
+          >
+            Hasi gida <kbd>↵</kbd>
+          </button>
+        </div>
         <div className="tabs help-tabs" role="tablist" aria-label="Laguntza">
           {(
             [

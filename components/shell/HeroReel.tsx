@@ -8,19 +8,26 @@ import { getWeek } from '@/content/registry';
 import type { SceneComponent } from '@/lib/sim/types';
 import { QUIET_CTX } from './HeroFold';
 
-/** The simulator's own scenes, played back to back as a showreel: what the app does, shown rather than told. */
-const PICKS: { week: number; stage: string; view: number }[] = [
-  { week: 3, stage: 'gastrulazioa', view: 3 },
-  { week: 4, stage: 'tolespenak', view: 0 },
-  { week: 7, stage: 'diafragma-eraketa', view: 0 },
-  { week: 8, stage: 'hezurtzapena', view: 0 },
-  { week: 8, stage: 'bizkarrezurra', view: 2 },
+/**
+ * The simulator's own scenes, played back to back as a showreel: what the app does, shown rather than
+ * told. Each has a name written for this strip (one or two words, never cut); it opens on topic 7.
+ * A new topic joins with one line here.
+ */
+const PICKS: { week: number; stage: string; view: number; label: string }[] = [
+  { week: 3, stage: 'gastrulazioa', view: 3, label: 'Gastrulazioa' },
+  { week: 4, stage: 'tolespenak', view: 0, label: 'Tolespenak' },
+  { week: 7, stage: 'diafragma-eraketa', view: 0, label: 'Diafragma' },
+  { week: 8, stage: 'hezurtzapena', view: 0, label: 'Hezurtzapena' },
+  { week: 9, stage: 'muskulu-motak', view: 0, label: 'Muskuluak' },
 ];
+const FIRST_WEEK = 7;
 
 interface Reel {
+  week: number;
   n: string;
   topic: string;
   title: string;
+  label: string;
   day: string;
   scene: SceneComponent;
   href: string;
@@ -31,8 +38,9 @@ const REEL: Reel[] = PICKS.flatMap((p) => {
   const s = w?.stages.find((x) => x.id === p.stage);
   const v = s?.views[p.view];
   if (!w || !s || !v) return [];
-  return [{ n: String(p.week).padStart(2, '0'), topic: w.title, title: s.title, day: s.day, scene: v.scene, href: `/astea/${p.week}?etapa=${p.stage}&ikuspegia=${v.id}` }];
+  return [{ week: p.week, n: String(p.week).padStart(2, '0'), topic: w.title, title: s.title, label: p.label, day: s.day, scene: v.scene, href: `/astea/${p.week}?etapa=${p.stage}&ikuspegia=${v.id}` }];
 });
+const START = Math.max(0, REEL.findIndex((r) => r.week === FIRST_WEEK));
 
 /** Seconds each scene gets: it plays through, rests on its last frame, and dissolves into the next. */
 const HOLD = 9.5;
@@ -66,9 +74,9 @@ interface Frame {
 export function HeroReel({ playing = true }: { playing?: boolean }) {
   const reduced = useSyncExternalStore(subscribe, () => window.matchMedia(REDUCED).matches, () => false);
   const mounted = useSyncExternalStore(subscribe, () => true, () => false);
-  const [f, setF] = useState<Frame>({ i: 0, local: PLAY_FROM + PLAY_FOR * 0.62, prev: null, fade: 1 });
+  const [f, setF] = useState<Frame>({ i: START, local: PLAY_FROM + PLAY_FOR * 0.62, prev: null, fade: 1 });
   const box = useRef<HTMLElement>(null);
-  const live = useRef({ i: 0, local: PLAY_FROM + PLAY_FOR * 0.62, prev: null as number | null, fade: 1 });
+  const live = useRef({ i: START, local: PLAY_FROM + PLAY_FOR * 0.62, prev: null as number | null, fade: 1 });
 
   useEffect(() => {
     if (reduced || !playing) return;
@@ -170,8 +178,10 @@ export function HeroReel({ playing = true }: { playing?: boolean }) {
         <figcaption className="lp-reel-hud" key={f.i}>
           <span className="rec" />
           <span className="lp-reel-day">{cur.day}</span>
-          <span className="lp-reel-cap">
-            <b>{cur.n}</b> {cur.topic}
+          {/* The topic's name where the frame has room for it; its number always. */}
+          <span className="lp-reel-cap" title={cur.topic}>
+            <b>{cur.n}</b> <span className="lp-reel-topic">{cur.topic}</span>
+            <span className="lp-reel-gaia">gaia</span>
           </span>
         </figcaption>
         <div className="hv-scrub" aria-hidden>
@@ -181,12 +191,12 @@ export function HeroReel({ playing = true }: { playing?: boolean }) {
 
       <nav className="lp-reel-strip" aria-label="Simulagailuko eszenak">
         {REEL.map((r, k) => (
-          <button key={r.n + r.title} className={k === f.i ? 'is-on' : ''} onClick={() => go(k)} aria-current={k === f.i ? 'true' : undefined} title={`${r.n} · ${r.title}`}>
+          <button key={r.n + r.title} className={k === f.i ? 'is-on' : ''} onClick={() => go(k)} aria-current={k === f.i ? 'true' : undefined} aria-label={`${r.week}. gaia: ${r.title}`} title={`${r.week}. gaia · ${r.title}`}>
             <i aria-hidden>
               <span style={{ transform: `scaleX(${k === f.i ? clamp(f.local / HOLD) : k < f.i ? 1 : 0})` }} />
             </i>
             <small>{r.n}</small>
-            <span>{r.title}</span>
+            <span>{r.label}</span>
           </button>
         ))}
         <Link className="lp-reel-open" href={cur.href}>

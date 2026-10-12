@@ -60,6 +60,7 @@ const structures: StructureDef[] = [
   {
     id: 'bi-orriko-diskoa',
     name: 'Bi orriko ernetze diskoa',
+    spans: ['epiblastoa', 'hipoblastoa'],
     es: 'Disco germinativo bilaminar',
     aka: ['Disko germinatiboa'],
     category: 'enbrioblastoa',

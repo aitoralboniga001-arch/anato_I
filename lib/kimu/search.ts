@@ -10,7 +10,7 @@ import { firstSentence } from '@/content/generate';
 import { structures, weeks } from '@/content/registry';
 import { formationOf } from '@/content/formation';
 import type { KimuTarget } from './types';
-import { dice, queryTokens, tokens } from './text';
+import { match, queryTokens, tokens } from './text';
 
 interface Doc {
   kind: KimuTarget['kind'];
@@ -169,18 +169,6 @@ function build(): { docs: Doc[]; idf: Map<string, number> } {
 let built: ReturnType<typeof build> | null = null;
 const index = () => (built ??= build());
 
-/** How well a query word matches a document word (1 = same, 0 = unrelated). */
-function match(q: string, w: string, fuzzy: boolean): number {
-  if (q === w) return 1;
-  const [short, long] = q.length <= w.length ? [q, w] : [w, q];
-  if (short.length >= 4 && long.startsWith(short) && short.length / long.length >= 0.6) return 0.85;
-  if (fuzzy && short.length >= 5) {
-    const d = dice(q, w);
-    if (d >= 0.6) return d * 0.8;
-  }
-  return 0;
-}
-
 const FORMATION = /(noiz|nola|sort|erak|forma|cuando|cuándo|como|cómo|when|how|aparec|surge|empie|hasi)/i;
 export const isFormationQuestion = (question: string) => FORMATION.test(question);
 
@@ -264,14 +252,15 @@ export const factsOf = (h: Hit) => h.doc.facts;
 export const blurbOf = (h: Hit) => h.doc.blurb;
 
 /** The step the student is looking at, described for the model. */
-export function describeHere(here: { week: number; stage: string; beat: number; structure?: string | null }) {
+export function describeHere(here: { week: number; stage: string; beat: number; structure?: string | null; view?: string }) {
   const week = weeks.find((w) => w.week === here.week);
   const stage = week?.stages.find((s) => s.id === here.stage);
   if (!week || !stage) return null;
   const beat = stage.beats[Math.max(0, Math.min(stage.beats.length - 1, here.beat))];
   const picked = here.structure ? structures.get(here.structure) : null;
+  const view = here.view ? stage.views.find((v) => v.id === here.view)?.label : undefined;
   return {
-    title: `${week.week}. gaia · ${stage.title}`,
+    title: `${week.week}. gaia · ${stage.title}${view ? ` (${view})` : ''}`,
     step: beat ? clip(oneLine(`${beat.idea ?? ''} ${beat.text}`), 320) : '',
     picked: picked ? clip(oneLine(`${picked.name}${picked.es ? ` (${picked.es})` : ''}: ${picked.definition}`), 260) : '',
   };

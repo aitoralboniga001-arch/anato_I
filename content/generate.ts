@@ -131,7 +131,8 @@ function orderQuestions(): GenQuestion[] {
     const wrong = pick(`${qid}-w`, swaps, 3);
     const dated4 = chosen.map((m) => `${m.short} (${dayLabel(m.day, m.to)})`).join(' → ');
     const p = place(qid, { text: right, why: `Bai: ${dated4}.` }, wrong.map((w) => ({ text: w, why: `Ez: ordena zuzena ${dated4} da.` })));
-    out.push({ id: qid, skill: 'ordena', question: 'Zein da ordena kronologiko zuzena?', ...p, explanation: dated4, week: chosen[chosen.length - 1].week, stageId: chosen[chosen.length - 1].stage });
+    // The id follows the four events, not the slot: when the milestones change, a changed question never inherits another's review history.
+    out.push({ id: `ordena-${Math.floor(hash(sig) * 36 ** 6).toString(36)}`, skill: 'ordena', question: 'Zein da ordena kronologiko zuzena?', ...p, explanation: dated4, week: chosen[chosen.length - 1].week, stageId: chosen[chosen.length - 1].stage });
   }
   return out;
 }

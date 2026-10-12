@@ -64,6 +64,13 @@ export function NotochordSagittal({ t }: SceneProps) {
   const nodeTop = s.map(X_NODE, s.top(X_NODE));
   const canal = `M${[s.map(X_NODE - 4, s.top(X_NODE) - 3), s.map(X_NODE + 4, s.top(X_NODE) - 3), s.map(X_NODE + 4, s.dEnd(X_NODE) + 13), s.map(X_NODE - 4, s.dEnd(X_NODE) + 13)].map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}Z`;
   const pit = `M${[s.map(X_NODE - 9, s.top(X_NODE - 9) - 1), s.map(X_NODE, s.top(X_NODE) + 10), s.map(X_NODE + 9, s.top(X_NODE + 9) - 1)].map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}Z`;
+  // A prenotochordal cell's centre nearest x (the cells are spaced along the cord).
+  const preCell = (x: number): Pt => {
+    const n = Math.max(1, Math.round((X_NODE - front) / 10));
+    const i = clamp(Math.round((X_NODE - 8 - x) / 10), 0, n - 1);
+    const cx = X_NODE - 8 - i * 10;
+    return s.map(cx, (s.base(cx) + s.dEnd(cx)) / 2 + (i % 2 ? 3 : -3));
+  };
   const notoSlot = g.plate >= 0.5 ? 'notokorda-plaka' : 'zelula-prenotokordalak';
   const L = (id: string, x: number, y: number, p: Pt, show = 1) => <Label key={id} id={id} x={x} y={y} ax={p[0]} ay={p[1]} show={show} />;
   return (
@@ -86,7 +93,7 @@ export function NotochordSagittal({ t }: SceneProps) {
           {Array.from({ length: Math.max(1, Math.round((X_NODE - front) / 10)) }, (_, i) => {
             const x = X_NODE - 8 - i * 10;
             const [X, Y] = s.map(x, (s.base(x) + s.dEnd(x)) / 2 + (i % 2 ? 3 : -3));
-            return <ellipse key={i} cx={X} cy={Y} rx={4.6 * s.k} ry={3.8 * s.k} fill={C.notochord} stroke="rgba(40,10,70,0.7)" strokeWidth={0.8} />;
+            return <ellipse key={i} cx={X} cy={Y} rx={5.2 * s.k} ry={4.6 * s.k} fill={C.notochord} stroke="rgba(40,10,70,0.7)" strokeWidth={0.8} />;
           })}
         </Part>
       )}
@@ -114,14 +121,15 @@ export function NotochordSagittal({ t }: SceneProps) {
         <ellipse cx={nodeTop[0]} cy={nodeTop[1] + 8 * s.k} rx={20 * s.k} ry={15 * s.k} fill="url(#w3n-node)" />
         <path d={`M${f1(nodeTop[0] - 18 * s.k)},${f1(nodeTop[1] - 1)} Q${f1(nodeTop[0])},${f1(nodeTop[1] - 13 * s.k)} ${f1(nodeTop[0] + 18 * s.k)},${f1(nodeTop[1] - 1)}`} fill="none" stroke="#d6e2ff" strokeWidth={1.5} strokeLinecap="round" opacity={0.85} />
       </Part>
-      <Part id="hobitxo-primitiboa">
-        <path d={pit} fill="#15294a" stroke="#0b1530" strokeWidth={1.2} />
-      </Part>
+      {/* The canal runs down from the pit, drawn under it so the pit stays its own opening. */}
       {g.canal > 0.01 && (
         <Part id="hodi-neuroenterikoa" show={g.canal}>
           <path d={canal} fill="#2a3a5c" stroke="#9fb6e8" strokeWidth={1.2} />
         </Part>
       )}
+      <Part id="hobitxo-primitiboa">
+        <path d={pit} fill="#15294a" stroke="#0b1530" strokeWidth={1.2} />
+      </Part>
       <Note x={500} y={606} show={seg(t, NB.extent, NB.extent + 0.04)} tone="accent" size={11}>
         Notokorda: hobitxo primitibotik alde zefalikora, plaka prekordaleraino; hobitxotik behera ez dago notokordarik
       </Note>
@@ -129,12 +137,12 @@ export function NotochordSagittal({ t }: SceneProps) {
       {L('ektodermoa', 190, 110, s.map(-120, 8))}
       {L('mintz-bukofaringeoa', 190, 160, s.map(X_BUCCO, s.top(X_BUCCO) + 6))}
       {L('plaka-prekordala', 190, 205, mid(X_PRE))}
-      {L(notoSlot, 190, 250, g.plate >= 0.5 ? s.map(-80, s.dEnd(-80) + 3) : mid((front + X_NODE) / 2), notoSlot === 'notokorda-plaka' ? 1 - g.rod : seg(t, NB.migrate, NB.migrate + 0.05))}
+      {L(notoSlot, 190, 250, g.plate >= 0.5 ? s.map(-80, s.dEnd(-80) + 3) : preCell((front + X_NODE) / 2), notoSlot === 'notokorda-plaka' ? 1 - g.rod : seg(t, NB.migrate, NB.migrate + 0.05))}
       {L('notokorda', 190, 430, mid(-80), g.rod)}
-      {L('endodermoa', 190, 470, s.map(-214, s.dEnd(-214) + 6))}
+      {L('endodermoa', 190, 470, s.map(-150, s.dEnd(-150) + 6.5))}
       {L('nodo-primitiboa', 810, 150, [nodeTop[0] + 14 * s.k, nodeTop[1] + 6 * s.k])}
       {L('hobitxo-primitiboa', 810, 235, [nodeTop[0], nodeTop[1] + 6])}
-      {L('hodi-neuroenterikoa', 810, 415, s.map(X_NODE, s.dEnd(X_NODE) + 12), g.canal)}
+      {L('hodi-neuroenterikoa', 810, 415, mid(X_NODE), g.canal)}
       {L('ildo-primitiboa', 810, 455, s.at.groove)}
       {L('kloaka-mintza', 810, 495, s.map(X_CLOACA, s.dEnd(X_CLOACA) + 8))}
     </g>

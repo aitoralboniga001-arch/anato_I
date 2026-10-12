@@ -1,14 +1,15 @@
 'use client';
 
 import { Label, Note, Part, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
-import { Defs9, Fibre, Spindle, Steps, W, f1, vis } from './common';
+import { Defs9, Fibre, Spindle, Steps, W, f1 } from './common';
 
 /**
  * 9:muskulu-motak `ehunak` — hiru muskulu motak mikroskopioan, elkarren ondoan, jatorriaren kolorearekin:
  * ildaskatua (zuntz luze nukleo anitzekoak, nukleoak periferian, ildaskak), leuna (zelula ardatz-itxurakoak,
  * nukleo bakarra erdian, ildaskarik gabe) eta miokardioa (zelula adarkatuak, nukleo bakarra, ildaskak eta
- * disko interkalarrak). Behean, ektodermotik datozen salbuespenak: begi-niniko muskuluak, hodi
- * galaktoforoetako zelula mioepitelialak eta izerdi guruinetako muskulu lisoa.
+ * disko interkalarrak). Panel bakoitzaren azpian, nola bereizi (nukleoak, ildaskak, zelulak); gero, leku
+ * berean, ektodermotik datozen salbuespenak: begi-niniko muskuluak, hodi galaktoforoetako zelula
+ * mioepitelialak eta izerdi guruinetako muskulu lisoa.
  */
 
 /** Cardiac cells: two rows of branched cells joined end to end by intercalated discs. */
@@ -18,15 +19,46 @@ const CARD: { x: number; y: number; w: number; branch?: 1 | -1 }[] = [
   { x: 814, y: 128, w: 58 },
   { x: 682, y: 196, w: 62, branch: -1 },
   { x: 750, y: 196, w: 72 },
-  { x: 828, y: 196, w: 48 },
+  { x: 818, y: 196, w: 48 },
+];
+/** Intercalated discs: where two cardiac cells meet end to end (a stepped band across the junction). */
+const DISCS: Pt[] = [
+  [703, 128],
+  [776, 128],
+  [711, 196],
+  [787, 196],
+];
+
+/** When each piece is drawn: the view plays steps 5 (the three tissues, compared) and 6 (the exceptions). */
+export const TISSUE_T = { a: [0.645, 0.69], b: [0.68, 0.725], c: [0.715, 0.76], cmp: [0.75, 0.79], exc: [0.835, 0.88] } as const;
+
+/** How to tell them apart, under each panel: nuclei, striations, cells. */
+const KEYS: [string, string][][] = [
+  [
+    ['Nukleoak', 'ugari, periferian'],
+    ['Ildaskak', 'bai'],
+    ['Zelulak', 'fusionatuta: zuntz luzea'],
+  ],
+  [
+    ['Nukleoak', 'bakarra, erdian'],
+    ['Ildaskak', 'ez'],
+    ['Zelulak', 'bereizita, ardatz-itxurakoak'],
+  ],
+  [
+    ['Nukleoak', 'bakarra, erdian'],
+    ['Ildaskak', 'bai'],
+    ['Zelulak', 'bereizita: disko interkalarrak'],
+  ],
 ];
 
 export function MuscleTissues({ t }: SceneProps) {
-  const a = seg(t, 0.12, 0.2);
-  const b = seg(t, 0.3, 0.38);
-  const c = seg(t, 0.48, 0.56);
-  const compare = vis(t, 0.64, 2);
-  const exc = seg(t, 0.82, 0.9);
+  const a = seg(t, ...TISSUE_T.a);
+  const b = seg(t, ...TISSUE_T.b);
+  const c = seg(t, ...TISSUE_T.c);
+  const exc = seg(t, ...TISSUE_T.exc);
+  const cmp = seg(t, ...TISSUE_T.cmp) * (1 - seg(t, 0.82, 0.845));
+  const coilPts = coil();
+  const coilDot = coilPts[3 + 9];
 
   return (
     <g>
@@ -36,7 +68,7 @@ export function MuscleTissues({ t }: SceneProps) {
         [110, 'Muskulu ildaskatua', 'mesodermo paraxiala', W.striated, a],
         [370, 'Muskulu leuna', 'errai orria (hestearen inguruan)', W.smooth, b],
         [630, 'Miokardioa', 'errai orria (bihotz hodiaren inguruan)', W.cardiac, c],
-      ].map(([x, title, origin, col, s]) => (
+      ].map(([x, title, origin, col, s], i) => (
         <g key={title as string}>
           <rect x={x as number} y={56} width={252} height={262} rx={16} fill="#1b1520" stroke={col as string} strokeOpacity={0.25 + 0.5 * (s as number)} strokeWidth={1.6} />
           <Note x={(x as number) + 126} y={74} size={14} tone="accent" show={0.35 + 0.65 * (s as number)}>
@@ -45,6 +77,28 @@ export function MuscleTissues({ t }: SceneProps) {
           <Note x={(x as number) + 126} y={300} size={11.5} show={s as number}>
             {`jatorria: ${origin as string}`}
           </Note>
+          {/* How to tell it apart: a card under the panel, in the tissue's colour. */}
+          {cmp > 0.01 && (
+            <g opacity={cmp}>
+              <rect x={x as number} y={338} width={252} height={240} rx={16} fill={col as string} fillOpacity={0.1} stroke={col as string} strokeOpacity={0.55} strokeWidth={1.4} />
+              {KEYS[i].map(([k, v], j) => (
+                <g key={k}>
+                  <rect x={(x as number) + 14} y={356 + j * 74} width={224} height={60} rx={10} fill="#1b1520" fillOpacity={0.85} />
+                  <rect x={(x as number) + 14} y={356 + j * 74} width={6} height={60} rx={3} fill={col as string} />
+                </g>
+              ))}
+            </g>
+          )}
+          {KEYS[i].map(([k, v], j) => (
+            <g key={k}>
+              <Note x={(x as number) + 32} y={374 + j * 74} align="start" size={11.5} show={cmp}>
+                {k}
+              </Note>
+              <Note x={(x as number) + 32} y={396 + j * 74} align="start" size={13} tone="accent" show={cmp}>
+                {v}
+              </Note>
+            </g>
+          ))}
         </g>
       ))}
 
@@ -52,17 +106,16 @@ export function MuscleTissues({ t }: SceneProps) {
       <Part id="muskulu-ildaskatuak" show={a}>
         <Fibre x0={124} x1={348} y={130} h={40} n={6} fuse={1} fibrils={1} striae={0} seed={3} />
         <Fibre x0={130} x1={354} y={190} h={40} n={6} fuse={1} fibrils={1} striae={0} seed={9} />
+        <rect x={144} y={175} width={196} height={30} rx={12} fill="url(#w9-striae)" />
       </Part>
       <Part id="ildaskak" show={a}>
-        {[130, 190].map((y) => (
-          <rect key={y} x={y === 130 ? 138 : 144} y={y - 15} width={196} height={30} rx={12} fill="url(#w9-striae)" />
-        ))}
+        <rect x={138} y={115} width={196} height={30} rx={12} fill="url(#w9-striae)" />
       </Part>
       <Part id="miofibrillak" show={a}>
-        {/* The cut end of the lower fibre: myofibrils seen end-on. */}
-        <ellipse cx={354} cy={190} rx={9} ry={20} fill="#9b2335" stroke="#5a0a18" strokeWidth={1} />
+        {/* The cut end of the upper fibre: myofibrils seen end-on. */}
+        <ellipse cx={348} cy={130} rx={10} ry={20} fill="#9b2335" stroke="#5a0a18" strokeWidth={1} />
         {Array.from({ length: 9 }, (_, i) => (
-          <circle key={i} cx={f1(350 + (rand(i * 3.1) - 0.5) * 8)} cy={f1(176 + i * 3.4)} r={1.5} fill="#ffc0c8" />
+          <circle key={i} cx={f1(345 + (rand(i * 3.1) - 0.5) * 8)} cy={f1(116 + i * 3.4)} r={1.5} fill="#ffc0c8" />
         ))}
       </Part>
 
@@ -87,31 +140,16 @@ export function MuscleTissues({ t }: SceneProps) {
         ))}
       </Part>
       <Part id="disko-interkalarrak" show={c}>
-        {[
-          [705, 128],
-          [779, 128],
-          [713, 196],
-          [794, 196],
-        ].map(([x, y]) => (
-          <path key={`${x}${y}`} d={`M${x},${y - 20} l4,6 l-4,6 l4,6 l-4,6 l4,6 l-4,6`} fill="none" stroke="#fde68a" strokeWidth={3} strokeLinejoin="round" />
+        {/* A stepped band across each junction (transverse parts and a short longitudinal step), as in histology. */}
+        {DISCS.map(([x, y]) => (
+          <path key={`${x}${y}`} d={`M${x - 4.5},${y - 21} h9 v19 h5 v23 h-9 v-19 h-5Z`} fill="#fde68a" stroke="#7a4a06" strokeWidth={0.8} />
         ))}
       </Part>
 
-      {/* What tells them apart (the comparison step). */}
-      {[
-        [236, 'nukleo ugari, periferian · ildaskak'],
-        [496, 'nukleo bakarra, erdian · ildaskarik ez'],
-        [756, 'nukleo bakarra · ildaskak · disko interkalarrak'],
-      ].map(([x, txt]) => (
-        <Note key={txt as string} x={x as number} y={270} size={11.5} tone="accent" show={compare}>
-          {txt as string}
-        </Note>
-      ))}
-
-      {/* Exceptions: smooth muscle of ectodermal origin. */}
+      {/* Exceptions: smooth muscle of ectodermal origin (in the cards' place). */}
       <g opacity={exc > 0.01 ? 1 : 0}>
-        <rect x={110} y={352} width={772} height={232} rx={16} fill="#141a2a" stroke={W.ecto} strokeOpacity={0.5 * exc} strokeWidth={1.6} opacity={exc} />
-        <Note x={496} y={372} size={13.5} tone="accent" show={exc}>
+        <rect x={110} y={338} width={772} height={246} rx={16} fill="#141a2a" stroke={W.ecto} strokeOpacity={0.5 * exc} strokeWidth={1.6} opacity={exc} />
+        <Note x={496} y={360} size={13.5} tone="accent" show={exc}>
           Salbuespenak: ektodermotik datozen muskuluak
         </Note>
       </g>
@@ -146,9 +184,9 @@ export function MuscleTissues({ t }: SceneProps) {
       <Part id="izerdi-guruinak" show={exc}>
         {/* A sweat gland coiled in the dermis, its duct rising to the skin surface. */}
         <path d="M660,404 H860" stroke="#e9b8a0" strokeWidth={8} />
-        <path d={smoothPath(coil(), false, 0.4)} fill="none" stroke="#c7d7f5" strokeWidth={12} strokeLinecap="round" />
-        <path d={smoothPath(coil(), false, 0.4)} fill="none" stroke="#1f2a44" strokeWidth={4} strokeLinecap="round" />
-        {coil()
+        <path d={smoothPath(coilPts, false, 0.4)} fill="none" stroke="#c7d7f5" strokeWidth={12} strokeLinecap="round" />
+        <path d={smoothPath(coilPts, false, 0.4)} fill="none" stroke="#1f2a44" strokeWidth={4} strokeLinecap="round" />
+        {coilPts
           .filter((_, i) => i > 3 && i % 2 === 0)
           .map((p, i) => (
             <circle key={i} cx={p[0]} cy={p[1]} r={3.4} fill={W.ecto} stroke="#1e3a8a" strokeWidth={0.8} />
@@ -159,23 +197,22 @@ export function MuscleTissues({ t }: SceneProps) {
         t={t}
         steps={[
           [0, 'Hiru muskulu mota: ildaskatua, leuna eta miokardioa'],
-          [0.12, 'Ildaskatua: mioblastoak fusionatuta → zuntz luzeak, nukleo ugari, ildaskak'],
-          [0.3, 'Leuna: zelula ardatz-itxurakoak, nukleo bakarra, ildaskarik gabe'],
-          [0.48, 'Miokardioa: ildaskatua, baina zelulak ez dira fusionatzen (disko interkalarrak)'],
-          [0.64, 'Nola bereizi: nukleoak, ildaskak eta zelulen arteko loturak'],
+          [0.64, 'Muskulu ildaskatua: mioblastoak fusionatzen dira → zuntz luzeak, nukleo ugari periferian'],
+          [0.68, 'Muskulu leuna: zelula bereiziak, ardatz-itxurakoak, ildaskarik gabe'],
+          [0.715, 'Miokardioa ildaskatua da, baina zelulak ez dira fusionatzen: disko interkalarrak'],
           [0.82, 'Salbuespenak (ektodermoa): begi-ninia, hodi galaktoforoak, izerdi guruinak'],
         ]}
       />
 
-      <Label id="muskulu-ildaskatuak" x={236} y={236} ax={236} ay={208} align="middle" show={a} />
-      <Label id="ildaskak" x={200} y={98} ax={250} ay={118} show={a} small />
-      <Label id="miofibrillak" x={352} y={98} ax={354} ay={176} align="middle" show={a} small />
-      <Label id="muskulu-leuna" x={496} y={236} ax={496} ay={212} align="middle" show={b} />
-      <Label id="miokardioa" x={738} y={250} ax={750} ay={214} align="middle" show={c} />
-      <Label id="disko-interkalarrak" x={756} y={98} ax={779} ay={114} show={c} small align="middle" />
-      <Label id="begi-niniko-muskuluak" x={240} y={566} ax={240} ay={536} align="middle" show={exc} />
-      <Label id="zelula-mioepitelialak" x={488} y={566} ax={440} ay={548} align="middle" show={exc} />
-      <Label id="izerdi-guruinak" x={760} y={566} ax={760} ay={530} align="middle" show={exc} small />
+      <Label id="ildaskak" x={136} y={98} ax={200} ay={130} show={a} small />
+      <Label id="miofibrillak" x={356} y={98} ax={348} ay={130} align="end" show={a} small />
+      <Label id="muskulu-ildaskatuak" x={236} y={240} ax={236} ay={192} align="middle" show={a} />
+      <Label id="muskulu-leuna" x={496} y={240} ax={496} ay={212} align="middle" show={b} />
+      <Label id="miokardioa" x={750} y={256} ax={748} ay={196} align="middle" show={c} />
+      <Label id="disko-interkalarrak" x={779} y={98} ax={776} ay={117} show={c} small align="middle" />
+      <Label id="begi-niniko-muskuluak" x={240} y={566} ax={240} ay={512} align="middle" show={exc} />
+      <Label id="zelula-mioepitelialak" x={488} y={566} ax={436} ay={536} align="middle" show={exc} />
+      <Label id="izerdi-guruinak" x={760} y={566} ax={coilDot[0]} ay={coilDot[1]} align="middle" show={exc} small />
     </g>
   );
 }

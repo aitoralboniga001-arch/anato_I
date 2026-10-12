@@ -1,5 +1,7 @@
 export { Part } from './Part';
 export { Label, Note } from './Label';
+export { Callouts, layoutCallouts, type Callout } from './callouts';
+export { SceneView, arrangeLabels } from './columns';
 export { Mark } from './Mark';
 export { CellBand, Cell, Arrow, Flow, scatterInEllipse } from './tissue';
 export { Journey, FollowRing, Destination } from './journey';

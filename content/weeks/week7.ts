@@ -10,6 +10,7 @@ import { DiaphragmFate } from '@/components/scenes/week7/DiaphragmFate';
 import { CavitySummary } from '@/components/scenes/week7/CavitySummary';
 import { PeritoneumTypes } from '@/components/scenes/week7/PeritoneumTypes';
 import { FATE, SUMMARY, TYPES } from '@/components/scenes/week7/timing';
+import { DiaphragmDome3D } from '@/components/scenes/week7/DiaphragmDome3D';
 import { retime } from '@/components/scenes/week7/retime';
 import { structures7 } from './week7-structures';
 
@@ -708,7 +709,7 @@ export const week7: WeekDef = {
       dayRange: [22, 35],
       title: 'Diafragmaren eraketa',
       subtitle: 'Septumaren jaitsiera, nerbio frenikoa eta erreten perikardioperitonealen itxiera',
-      duration: 47,
+      duration: 50,
       source: src('3. Diafragmaren eraketa · 3.1'),
       views: [
         {
@@ -737,6 +738,15 @@ export const week7: WeekDef = {
           description: 'Enborraren zeloma osoa aurretik, bloke garden gisa, eta ondoan plano zuriaren mailako zeharkako mozketa: erreten perikardioperitonealek goiko eta beheko barrunbeak lotzen dituzte, mintz pleuroperitonealek itxi arte. Planoa arrastatu daiteke.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: retime(CoelomMapDiaphragm, FATE.at),
+        },
+        {
+          id: 'kupula',
+          label: 'Kupula 3D',
+          plane: 'eskema',
+          description: 'Diafragma 3Dn, enborraren xerra bat aurretik eta goitik ikusita (apunteetako zeharkako mozketaren marra berberak): mintz pleuroperitonealek erretenak ixten dituzte, gorputz paretak ertza gehitzen du eta lau osagaiek kupula osatzen dute, bakoitza bere kolorez. Arrastatu edozein aldetik ikusteko.',
+          orientation: { top: 'Kraneala', bottom: 'Kaudala' },
+          scene: DiaphragmDome3D,
+          travel: false,
         },
         {
           id: 'patua',
@@ -862,6 +872,7 @@ export const week7: WeekDef = {
             ],
           },
           notes: ['w7/3.1/p3/s1', 'w7/3.1/p4/s1', 'w7/3.1/p5/s1-s2', 'w7/3.1/p6/s1'],
+          view: 'kupula',
           text: 'Diafragmaren lau osagaiak: septum transversuma (haren miozitoak mintz pleuroperitonealetara migratzen dute), mintz pleuroperitonealak, hestegorri inguruko mesenkima (gerriko atal muskularra) eta alde periferikoko atal muskularra (gorputz paretako mesodermoa, paraxialetik).',
           focus: ['septum-transversum', 'mintz-pleuroperitonealak', 'hestegorri-inguruko-mesenkima', 'gorputz-paretako-mesodermoa'],
         },

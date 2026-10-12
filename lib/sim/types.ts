@@ -168,6 +168,12 @@ export interface StructureDef {
   space?: boolean;
   /** A whole made of other drawn structures (e.g. lateral mesoderm = its two layers): naming it lights them. */
   parts?: string[];
+  /**
+   * A layered whole (e.g. the bilaminar disc = epiblast over hypoblast), its layers in order from one
+   * face to the other. Its name is drawn with a span bracket across all of them (Label `span`), never a
+   * dot in one layer; naming it lights them all (as `parts`, which it stands in for when unset).
+   */
+  spans?: string[];
 }
 
 export interface QuizQuestion {
@@ -184,7 +190,7 @@ export interface QuizQuestion {
 }
 
 export interface WeekDef {
-  week: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+  week: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
   slug: string;
   title: string;
   subtitle: string;
@@ -195,4 +201,9 @@ export interface WeekDef {
   structures: StructureDef[];
   quiz: QuizQuestion[];
   source: SourceRef;
+  /**
+   * The topic is still being built: only some sections of its notes have stages yet. The shelf and the
+   * topic switcher can show it as "prestatzen" while its finished stages stay reachable.
+   */
+  inPreparation?: boolean;
 }

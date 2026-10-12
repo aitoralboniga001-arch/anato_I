@@ -259,8 +259,7 @@ export const structures7: StructureDef[] = [
     aka: ['B. kardinal komuna'],
     category: 'mesodermoa',
     color: '#5b8def',
-    definition: 'Apunteetako irudian mintz pleuroperikardikoaren barnean nerbio frenikoarekin batera agertzen den zaina.',
-    caution: 'Irudiko egitura; apunteen testuak ez du aipatzen.',
+    definition: 'Aurreko eta atzeko zain kardinalak (alde zefalikotik eta kaudaletik itzultzen direnak) elkartzean sortzen den zaina; bikoitza da (ezker eta eskuin) eta zain-sinuaren alboko adarrera isurtzen da. Mintz pleuroperikardikoek, nerbio frenikoarekin batera, eramaten dute.',
     related: ['mintz-pleuroperikardikoak', 'nerbio-frenikoa'],
   },
   {

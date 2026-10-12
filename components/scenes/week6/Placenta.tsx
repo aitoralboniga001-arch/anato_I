@@ -119,8 +119,10 @@ function TermNotes({ t }: { t: number }) {
 /* ---------------------------------------------------------------------------------------------- */
 
 /** The magnified barrier card (bottom left, over the neighbouring cotyledon). */
-const CARD = { x: 210, y: 300, w: 176, h: 196 };
-const STRIP = { syn0: CARD.x + 70, syn1: CARD.x + 80, lam: CARD.x + 81.5, endo1: CARD.x + 86 };
+const CARD = { x: 210, y: 290, w: 190, h: 236 };
+/** The card's lower strip: the umbilical vessels' colour key (one box, not two). */
+const KEY_H = 42;
+const STRIP = { syn0: CARD.x + 60, syn1: CARD.x + 76, lam: CARD.x + 77.5, endo1: CARD.x + 88 };
 
 export function PlacentaCirculation({ t, reduced }: SceneProps) {
   const uid = useId().replace(/:/g, '');
@@ -150,24 +152,25 @@ export function PlacentaCirculation({ t, reduced }: SceneProps) {
           Karena muga, bukaeran
         </text>
         <clipPath id={`${uid}-card`}>
-          <rect x={CARD.x + 8} y={CARD.y + 28} width={CARD.w - 16} height={CARD.h - 62} rx={6} />
+          <rect x={CARD.x + 8} y={CARD.y + 28} width={CARD.w - 16} height={CARD.h - 62 - KEY_H} rx={6} />
         </clipPath>
         <g clipPath={`url(#${uid}-card)`}>
           <Part id="biloxka-arteko-espazioa" quiet>
             <rect x={CARD.x} y={CARD.y + 20} width={STRIP.syn0 - CARD.x} height={CARD.h} fill="url(#w3b-blood)" />
           </Part>
+          {/* The barrier's two layers, each its own part and both members of the barrier (named with a span). */}
+          <Part id="sinzitiotrofoblastoa" groups={['karena-muga']}>
+            <rect x={STRIP.syn0} y={CARD.y + 20} width={STRIP.syn1 - STRIP.syn0} height={CARD.h} fill="url(#w3b-syn)" />
+            <path d={Array.from({ length: 16 }, (_, i) => `M${STRIP.syn0},${CARD.y + 30 + i * 9} l-3,1.6`).join('')} stroke={K.fringe} strokeWidth={1} />
+          </Part>
           <Part id="karena-muga">
-            <Part id="sinzitiotrofoblastoa">
-              <rect x={STRIP.syn0} y={CARD.y + 20} width={STRIP.syn1 - STRIP.syn0} height={CARD.h} fill="url(#w3b-syn)" />
-              <path d={Array.from({ length: 16 }, (_, i) => `M${STRIP.syn0},${CARD.y + 30 + i * 9} l-3,1.6`).join('')} stroke={K.fringe} strokeWidth={1} />
-            </Part>
             <rect x={STRIP.syn1} y={CARD.y + 20} width={STRIP.lam - STRIP.syn1} height={CARD.h} fill={C.fibrin} opacity={0.8} />
-            <Part id="endotelioa">
-              <rect x={STRIP.lam} y={CARD.y + 20} width={STRIP.endo1 - STRIP.lam} height={CARD.h} fill={K.endo} />
-              {[0, 1, 2].map((i) => (
-                <ellipse key={i} cx={STRIP.endo1 - 1} cy={CARD.y + 52 + i * 52} rx={3} ry={7} fill={K.endoNuc} />
-              ))}
-            </Part>
+          </Part>
+          <Part id="endotelioa" groups={['karena-muga']}>
+            <rect x={STRIP.lam} y={CARD.y + 20} width={STRIP.endo1 - STRIP.lam} height={CARD.h} fill={K.endo} />
+            {[0, 1, 2].map((i) => (
+              <ellipse key={i} cx={STRIP.endo1 - 2.5} cy={CARD.y + 52 + i * 52} rx={2.6} ry={7} fill={K.endoNuc} />
+            ))}
           </Part>
           {/* fetal capillary blood with its red cells */}
           <rect x={STRIP.endo1} y={CARD.y + 20} width={CARD.x + CARD.w - STRIP.endo1} height={CARD.h} fill="#5a1430" />
@@ -189,27 +192,24 @@ export function PlacentaCirculation({ t, reduced }: SceneProps) {
         <text x={CARD.x + 16} y={yRows[2] - 7} fontSize={10.5} fontWeight={700} fill="#fde68a">
           elikagaiak
         </text>
-        <text x={CARD.x + 38} y={CARD.y + CARD.h - 22} textAnchor="middle" fontSize={9.5} fill="#ffb4bf">
+        <text x={CARD.x + 38} y={CARD.y + CARD.h - 22 - KEY_H} textAnchor="middle" fontSize={9.5} fill="#ffb4bf">
           ama
         </text>
-        <text x={CARD.x + CARD.w - 40} y={CARD.y + CARD.h - 22} textAnchor="middle" fontSize={9.5} fill="#ffb4bf">
+        <text x={CARD.x + CARD.w - 40} y={CARD.y + CARD.h - 22 - KEY_H} textAnchor="middle" fontSize={9.5} fill="#ffb4bf">
           fetua
         </text>
-        <text x={CARD.x + CARD.w / 2} y={CARD.y + CARD.h - 8} textAnchor="middle" fontSize={10.5} fontWeight={700} fill="#fbbf24">
+        <text x={CARD.x + CARD.w / 2} y={CARD.y + CARD.h - 8 - KEY_H} textAnchor="middle" fontSize={10.5} fontWeight={700} fill="#fbbf24">
           Bi odolak ez dira nahasten
         </text>
-      </g>
-
-      {/* Umbilical vessels: arteries carry deoxygenated blood to the placenta, the vein oxygenated blood back */}
-      <g>
-        <rect x={CARD.x} y={CARD.y + CARD.h + 8} width={250} height={46} rx={10} fill="#0b1020" stroke="#3b4a6b" strokeWidth={1.2} opacity={0.96} />
-        <path d={`M${CARD.x + 12},${CARD.y + CARD.h + 23} h22`} stroke={FA} strokeWidth={5} strokeLinecap="round" />
-        <path d={`M${CARD.x + 12},${CARD.y + CARD.h + 41} h22`} stroke={FV} strokeWidth={5} strokeLinecap="round" />
-        <text x={CARD.x + 42} y={CARD.y + CARD.h + 23} dy="0.35em" fontSize={10.5} fill="#c7d2fe">
-          Zilbor-arteriak: odol desoxigenatua
+        {/* Umbilical vessels: arteries carry deoxygenated blood to the placenta, the vein oxygenated blood back */}
+        <path d={`M${CARD.x + 12},${CARD.y + CARD.h - KEY_H + 4} h${CARD.w - 24}`} stroke="#3b4a6b" strokeWidth={1} />
+        <path d={`M${CARD.x + 14},${CARD.y + CARD.h - 27} h18`} stroke={FA} strokeWidth={5} strokeLinecap="round" />
+        <path d={`M${CARD.x + 14},${CARD.y + CARD.h - 12} h18`} stroke={FV} strokeWidth={5} strokeLinecap="round" />
+        <text x={CARD.x + 40} y={CARD.y + CARD.h - 27} dy="0.35em" fontSize={10} fill="#c7d2fe">
+          Zilbor-arteriak: desoxigenatua
         </text>
-        <text x={CARD.x + 42} y={CARD.y + CARD.h + 41} dy="0.35em" fontSize={10.5} fill="#fecaca">
-          Zilbor-zaina: odol oxigenatua
+        <text x={CARD.x + 40} y={CARD.y + CARD.h - 12} dy="0.35em" fontSize={10} fill="#fecaca">
+          Zilbor-zaina: oxigenatua
         </text>
       </g>
 
@@ -219,9 +219,9 @@ export function PlacentaCirculation({ t, reduced }: SceneProps) {
       <Label id="karenaren-zirkulazioa" x={190} y={200} ax={z.at(470, Y.ivs + 120)[0]} ay={z.at(470, Y.ivs + 120)[1]} show={vis(t, 0.4)} />
       <Label id="biloxka-askea" x={190} y={250} ax={zat(branchAt(1, -1, 0.6))[0] - 34} ay={zat(branchAt(1, -1, 0.6))[1] + 8} show={vis(t, 0)} />
       {/* horizontal leaders between the card's arrows and words */}
-      <Label id="karena-muga" x={190} y={CARD.y + 40} ax={STRIP.syn1} ay={CARD.y + 40} show={vis(t, 0)} />
+      <Label id="karena-muga" x={190} y={CARD.y + 40} span={[[STRIP.syn0 + 4, CARD.y + 40], [STRIP.endo1 - 3, CARD.y + 40]]} show={vis(t, 0)} />
       <Label id="sinzitiotrofoblastoa" x={190} y={CARD.y + 76} ax={(STRIP.syn0 + STRIP.syn1) / 2} ay={CARD.y + 76} show={vis(t, 0)} small />
-      <Label id="endotelioa" x={190} y={CARD.y + 140} ax={STRIP.endo1 - 2} ay={CARD.y + 140} show={vis(t, 0)} />
+      <Label id="endotelioa" x={190} y={CARD.y + 140} ax={(STRIP.lam + STRIP.endo1) / 2 - 1} ay={CARD.y + 140} show={vis(t, 0)} />
       <Label id="korion-plaka" x={190} y={560} ax={z.at(420, Y.plate + 6)[0]} ay={z.at(420, Y.plate + 6)[1]} show={vis(t, 0)} />
 
       {/* Right gutter */}
@@ -409,6 +409,21 @@ function Movers({ y, dir, t, glyphs, n = 3, speed = 0.9, x0 = MOM[0] + 22, x1 = 
   );
 }
 
+/** What has crossed, gathering at the receiving end of a row (k 0..1): the step's result stays on screen. */
+function Pile({ y, dir, k, glyph, n = 6, end }: { y: number; dir: 1 | -1; k: number; glyph: Glyph; n?: number; end?: number }) {
+  const x0 = end ?? (dir > 0 ? FET[1] - 40 : MOM[0] + 56);
+  return (
+    <g pointerEvents="none">
+      {Array.from({ length: n }, (_, i) => {
+        const o = clamp01(k * n - i);
+        if (o <= 0) return null;
+        return <GlyphAt key={i} g={glyph} x={x0 - dir * i * 15} y={y + (i % 2 ? 5 : -5)} o={o} />;
+      })}
+    </g>
+  );
+}
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+
 /** One function row: a soft band (lit as one part) holding its arrows and molecules. */
 function Row({ id, y, show, tint, children }: { id: string; y: number; show: number; tint: string; children: React.ReactNode }) {
   return (
@@ -459,18 +474,18 @@ export function PlacentaFunctions({ t, reduced }: SceneProps) {
       </defs>
       <rect x={FET[0] - 8} y={TOP} width={FET[1] - FET[0] + 8} height={BOT - TOP} rx={16} fill="url(#pf-fetal)" />
       <rect x={FET[0] - 8} y={TOP} width={FET[1] - FET[0] + 8} height={BOT - TOP} rx={16} fill="none" stroke="#5360d6" strokeOpacity={0.45} strokeWidth={1.2} />
+      <Part id="sinzitiotrofoblastoa" groups={['karena-muga']}>
+        <rect x={BAR[0]} y={TOP} width={SYN1 - BAR[0]} height={BOT - TOP} fill="url(#w3b-syn)" />
+        <path d={Array.from({ length: 50 }, (_, i) => `M${BAR[0]},${TOP + 6 + i * 10} l-4,2`).join('')} stroke={K.fringe} strokeWidth={1.1} />
+      </Part>
       <Part id="karena-muga">
-        <Part id="sinzitiotrofoblastoa">
-          <rect x={BAR[0]} y={TOP} width={SYN1 - BAR[0]} height={BOT - TOP} fill="url(#w3b-syn)" />
-          <path d={Array.from({ length: 50 }, (_, i) => `M${BAR[0]},${TOP + 6 + i * 10} l-4,2`).join('')} stroke={K.fringe} strokeWidth={1.1} />
-        </Part>
         <rect x={SYN1} y={TOP} width={3} height={BOT - TOP} fill={C.fibrin} opacity={0.8} />
-        <Part id="endotelioa">
-          <rect x={SYN1 + 3} y={TOP} width={BAR[1] - SYN1 - 3} height={BOT - TOP} fill={K.endo} />
-          {Array.from({ length: 7 }, (_, i) => (
-            <ellipse key={i} cx={BAR[1] - 2} cy={TOP + 40 + i * 72} rx={4} ry={10} fill={K.endoNuc} />
-          ))}
-        </Part>
+      </Part>
+      <Part id="endotelioa" groups={['karena-muga']}>
+        <rect x={SYN1 + 3} y={TOP} width={BAR[1] - SYN1 - 3} height={BOT - TOP} fill={K.endo} />
+        {Array.from({ length: 7 }, (_, i) => (
+          <ellipse key={i} cx={BAR[1] - 3} cy={TOP + 40 + i * 72} rx={3} ry={10} fill={K.endoNuc} />
+        ))}
       </Part>
       {/* Ambient blood flow on both sides */}
       <Flow d={`M${MOM[0] + 40},${TOP + 4} L${MOM[0] + 40},${BOT - 4}`} n={6} dur={5} r={2.8} color="#ff8a9b" reduced={reduced} />
@@ -485,6 +500,8 @@ export function PlacentaFunctions({ t, reduced }: SceneProps) {
         <Arrow from={[FET[1] - 24, ROWS.gas + 12]} to={[MOM[0] + 40, ROWS.gas + 12]} bend={0} color="#93b4ff" width={2.2} progress={seg(t, 0.69, 0.73)} />
         <Movers y={ROWS.gas - 10} dir={1} t={tt} glyphs={['o2']} />
         <Movers y={ROWS.gas + 12} dir={-1} t={tt} glyphs={['co2']} />
+        <Pile y={ROWS.gas - 10} dir={1} k={seg(t, 0.7, 0.75)} glyph="o2" />
+        <Pile y={ROWS.gas + 12} dir={-1} k={seg(t, 0.71, 0.76)} glyph="co2" />
       </Row>
       <Chip n="1" y={ROWS.gas} show={g} />
       <Note x={FET[0] + 24} y={ROWS.gas + 29} align="start" show={g} tone="accent">O₂ fetura</Note>
@@ -495,6 +512,7 @@ export function PlacentaFunctions({ t, reduced }: SceneProps) {
       <Row id="elikagaien-elkartrukea" y={ROWS.food} show={food} tint="#fbbf24">
         <Arrow from={[MOM[0] + 40, ROWS.food - 4]} to={[FET[1] - 24, ROWS.food - 4]} bend={0} color="#fbbf24" width={2.2} progress={seg(t, 0.71, 0.75)} />
         <Movers y={ROWS.food - 4} dir={1} t={tt} glyphs={['food']} n={4} speed={0.75} />
+        <Pile y={ROWS.food - 4} dir={1} k={seg(t, 0.73, 0.77)} glyph="food" />
       </Row>
       <Chip n="2" y={ROWS.food} show={food} />
       <Note x={MID} y={ROWS.food + 20} show={food} size={11.5}>aminoazidoak · karbohidratoak · gantz-azido askeak · bitaminak</Note>
@@ -505,6 +523,7 @@ export function PlacentaFunctions({ t, reduced }: SceneProps) {
         <ellipse cx={(BAR[0] + SYN1) / 2} cy={ROWS.horm - 4} rx={16} ry={20 + 3 * Math.sin(t * 60)} fill="#c084fc" opacity={0.3} />
         <Arrow from={[BAR[0] - 4, ROWS.horm - 4]} to={[MOM[0] + 40, ROWS.horm - 4]} bend={0} color="#c084fc" width={2.2} progress={seg(t, 0.78, 0.82)} />
         <Movers y={ROWS.horm - 4} dir={-1} t={tt} glyphs={['horm']} x0={MOM[0] + 40} x1={BAR[0] - 4} speed={0.6} />
+        <Pile y={ROWS.horm - 4} dir={-1} k={seg(t, 0.79, 0.84)} glyph="horm" />
       </Row>
       <Chip n="3" y={ROWS.horm} show={horm} />
       <Note x={MID} y={ROWS.horm + 20} show={horm} size={11}>estrogenoa · progesterona · gonadotropina · hazkuntza hormonaren antzekoa · somatomamotropina</Note>
@@ -514,6 +533,7 @@ export function PlacentaFunctions({ t, reduced }: SceneProps) {
       <Row id="igg-antigorputzak" y={ROWS.igg} show={igg} tint="#7ed492">
         <Arrow from={[MOM[0] + 40, ROWS.igg - 4]} to={[FET[1] - 24, ROWS.igg - 4]} bend={0} color="#7ed492" width={2.2} progress={seg(t, 0.81, 0.85)} />
         <Movers y={ROWS.igg - 4} dir={1} t={tt} glyphs={['igg']} speed={0.6} />
+        <Pile y={ROWS.igg - 4} dir={1} k={seg(t, 0.82, 0.86)} glyph="igg" />
       </Row>
       <Chip n="4" y={ROWS.igg} show={igg} />
       <Note x={FET[0] + 24} y={ROWS.igg + 20} align="start" show={igg} size={11.5}>amarengandik fetura: babesa</Note>
@@ -523,6 +543,7 @@ export function PlacentaFunctions({ t, reduced }: SceneProps) {
       <Row id="eritroblastosi-fetala" y={ROWS.rh} show={rh} tint="#ff7b72">
         <Arrow from={[MOM[0] + 40, ROWS.rh - 4]} to={[FET[1] - 70, ROWS.rh - 4]} bend={0} color="#ff7b72" width={2.2} progress={seg(t, 0.88, 0.92)} />
         <Movers y={ROWS.rh - 4} dir={1} t={tt} glyphs={['rh']} x1={FET[1] - 70} speed={0.6} />
+        <Pile y={ROWS.rh - 4} dir={1} k={seg(t, 0.89, 0.93)} glyph="rh" n={5} end={FET[1] - 72} />
         {[0, 1].map((k) => {
           const cx = FET[1] - 48 + k * 18;
           const cy = ROWS.rh - 4 + k * 6;
@@ -542,6 +563,8 @@ export function PlacentaFunctions({ t, reduced }: SceneProps) {
       <Row id="karena-zeharkatzen-duten-kalteak" y={ROWS.bad} show={bad} tint="#ff7b72">
         <Arrow from={[MOM[0] + 40, ROWS.bad - 4]} to={[FET[1] - 24, ROWS.bad - 4]} bend={0} color="#ff7b72" width={2.2} progress={seg(t, 0.91, 0.95)} />
         <Movers y={ROWS.bad - 4} dir={1} t={tt} glyphs={['virus', 'drug']} n={4} speed={0.7} />
+        <Pile y={ROWS.bad - 4} dir={1} k={seg(t, 0.92, 0.96)} glyph="virus" n={3} />
+        <Pile y={ROWS.bad - 4} dir={1} k={seg(t, 0.93, 0.96)} glyph="drug" n={3} end={FET[1] - 88} />
       </Row>
       <Chip n="!" y={ROWS.bad} show={bad} warn />
       <Note x={MID} y={ROWS.bad + 20} show={bad} tone="warn" size={11.5}>biruela · barizela · poliomielitisa · errubeola · drogak · alkohola</Note>
@@ -549,8 +572,8 @@ export function PlacentaFunctions({ t, reduced }: SceneProps) {
 
       {/* The barrier named once the rows are on, from the right gutter */}
       {/* Leaders run along the gaps between the rows, so they cross no words */}
-      <Label id="karena-muga" x={810} y={TOP + 8} ax={BAR[1] + 1} ay={TOP + 8} show={g} />
-      <Label id="endotelioa" x={810} y={ROWS.food - 35} ax={BAR[1] - 3} ay={ROWS.food - 35} show={g} />
+      <Label id="karena-muga" x={810} y={TOP + 14} span={[[BAR[0] + 5, TOP + 14], [BAR[1] - 4, TOP + 14]]} show={g} />
+      <Label id="endotelioa" x={810} y={ROWS.food - 35} ax={(SYN1 + 3 + BAR[1]) / 2 - 1} ay={ROWS.food - 35} show={g} />
       <Label id="sinzitiotrofoblastoa" x={810} y={(ROWS.food + ROWS.horm) / 2} ax={(BAR[0] + SYN1) / 2} ay={(ROWS.food + ROWS.horm) / 2} show={g} small />
       <Note x={(FET[0] + FET[1]) / 2} y={BOT + 16} show={g} size={11}>4. hilabetetik: endotelioa + sinzitiotrofoblastoa (muga mehea)</Note>
 

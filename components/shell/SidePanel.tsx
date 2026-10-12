@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent, type ReactNode } from 'react';
 import { structures } from '@/content/registry';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import { spanOf } from '@/lib/sim/age';
@@ -123,82 +123,14 @@ function NotesList({ week, current, visited, onStage }: Omit<OutlineProps, 'coll
 
 /**
  * Left column: the topic's notes (AURKIBIDEA) with the stages under each heading, so the student reads
- * the simulation in the order and with the numbering of the notes. Folded, it keeps the headings'
- * numbers with one dot per stage, and shows the whole list while the pointer rests on it.
+ * the simulation in the order and with the numbering of the notes. Folded, it is gone (no cryptic rail):
+ * the stage navigator in the stage heading opens the same list.
  */
 export function Outline(p: OutlineProps) {
-  const { week, current, visited, onStage, collapsed, onToggle } = p;
-  const [peek, setPeek] = useState(false);
-  const timer = useRef<number | null>(null);
-  const later = (v: boolean, ms: number) => {
-    if (timer.current) window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setPeek(v), ms);
-  };
-  useEffect(
-    () => () => {
-      if (timer.current) window.clearTimeout(timer.current);
-    },
-    [],
-  );
+  const { week, current, visited, collapsed, onToggle } = p;
   const seen = week.stages.filter((s) => visited.includes(s.id)).length;
-  if (collapsed) {
-    const groups = groupsOf(week).filter((g) => g.items.length);
-    return (
-      <aside
-        className={`outline is-rail${peek ? ' is-peek' : ''}`}
-        aria-label="Apunteen aurkibidea"
-        onPointerEnter={(e) => e.pointerType === 'mouse' && later(true, 260)}
-        onPointerLeave={() => later(false, 180)}
-      >
-        <button className="icon-btn rail-toggle" onClick={onToggle} data-tip="Aurkibidea zabaldu · [" data-tip-pos="right" aria-label="Zabaldu aurkibidea" aria-expanded={false}>
-          <IconRail open={false} />
-        </button>
-        <ol className="rail">
-          {groups.map(({ sec, items }) => (
-            <li key={sec.n + sec.title} className={`rail-sec${items.includes(current) ? ' is-cur' : ''}${sec.depth ? ' is-sub' : ''}`}>
-              <button className="rail-n" onClick={() => onStage(items[0])} title={sectionLabel(sec)}>
-                {/* A range ("3.2–3.3") breaks after its dash, as in the open list, instead of spilling out of the rail. */}
-                {sec.n.replace('–', '–​')}
-              </button>
-              <span className="rail-dots">
-                {items.map((i) => {
-                  const s = week.stages[i];
-                  const cur = i === current;
-                  const done = visited.includes(s.id) && !cur;
-                  return (
-                    <button
-                      key={s.id}
-                      className={`rail-dot${cur ? ' is-cur' : ''}${done ? ' is-done' : ''}`}
-                      onClick={() => onStage(i)}
-                      title={`${s.title} · ${s.day}`}
-                      aria-label={s.title}
-                      aria-current={cur ? 'step' : undefined}
-                    />
-                  );
-                })}
-              </span>
-            </li>
-          ))}
-        </ol>
-        {/* What the folded rail is: the notes' index of this topic (the full list opens on hover or "["). */}
-        <button className="rail-label" onClick={onToggle} tabIndex={-1} aria-hidden>
-          {week.week}. gaia · Aurkibidea
-        </button>
-        {peek && (
-          <div className="rail-peek">
-            <p className="kicker nt-kicker">{week.week}. gaia · Apunteen aurkibidea</p>
-            <NotesList
-              {...p}
-              onStage={(i) => {
-                setPeek(false);
-                onStage(i);
-              }}
-            />
-          </div>
-        )}
-      </aside>
-    );
-  }
+  // Folded, the column is gone: the stage navigator in the stage heading lists the same index.
+  if (collapsed) return null;
   return (
     <aside className="outline" aria-label="Apunteen aurkibidea">
       <button className="icon-btn rail-toggle" onClick={onToggle} data-tip="Aurkibidea tolestu · [" data-tip-pos="bottom-end" aria-label="Tolestu aurkibidea" aria-expanded>
@@ -221,6 +153,108 @@ export function Outline(p: OutlineProps) {
       <p className="kicker nt-kicker">Apunteen aurkibidea</p>
       <NotesList {...p} />
     </aside>
+  );
+}
+
+/**
+ * The stage navigator of the stage heading: where this stage sits in the notes ("3.2 Notokorda ·
+ * Etapa 3/8") as one key that opens the notes' index with every stage named, its days and a seen
+ * tick. It is the outline's job when the column is folded, and it takes the keyboard (arrows, Home/End,
+ * Enter, Escape back to the key).
+ */
+export function StageNav({ week, current, visited, onStage, label, outlineShown, onToggleOutline }: Omit<OutlineProps, 'collapsed' | 'onToggle'> & { label: string; outlineShown: boolean; onToggleOutline: () => void }) {
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  const btn = useRef<HTMLButtonElement>(null);
+  const sheet = useRef<HTMLDivElement>(null);
+  const seen = week.stages.filter((s) => visited.includes(s.id)).length;
+  useEffect(() => {
+    if (!open) return;
+    sheet.current?.querySelector<HTMLElement>('.ol-stage[aria-current]')?.focus();
+    sheet.current?.querySelector<HTMLElement>('.ol-stage[aria-current]')?.scrollIntoView({ block: 'nearest' });
+    const away = (e: PointerEvent) => {
+      if (!root.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', away);
+    return () => document.removeEventListener('pointerdown', away);
+  }, [open]);
+  const onKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      setOpen(false);
+      btn.current?.focus();
+      return;
+    }
+    const items = Array.from(sheet.current?.querySelectorAll<HTMLElement>('.ol-stage') ?? []);
+    const at = items.indexOf(document.activeElement as HTMLElement);
+    let to = -1;
+    if (e.key === 'ArrowDown') to = Math.min(items.length - 1, at + 1);
+    else if (e.key === 'ArrowUp') to = Math.max(0, at - 1);
+    else if (e.key === 'Home') to = 0;
+    else if (e.key === 'End') to = items.length - 1;
+    if (to >= 0) {
+      e.preventDefault();
+      items[to]?.focus();
+    }
+    // The simulator's keys (Space, arrows, numbers) must not act on the stage while the list is open.
+    if (e.key !== 'Tab') e.stopPropagation();
+  };
+  return (
+    <div className={`snav${open ? ' is-open' : ''}`} ref={root}>
+      <button
+        ref={btn}
+        className="snav-btn"
+        data-tour="etapak"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        aria-label={`${label}. Etapa ${current + 1}/${week.stages.length}. Etapen zerrenda ireki`}
+        title={open ? undefined : 'Apunteen aurkibidea: etapa guztiak'}
+      >
+        <IconList size={14} />
+        <span className="snav-sec">{label}</span>
+        {week.stages.length > 1 && (
+          <span className="snav-count">
+            Etapa <b>{current + 1}</b>/{week.stages.length}
+          </span>
+        )}
+        <IconChevron size={12} className="snav-caret" />
+      </button>
+      {open && (
+        <div className="snav-sheet" ref={sheet} role="dialog" aria-label="Apunteen aurkibidea" onKeyDown={onKey}>
+          <div className="snav-head">
+            <p className="kicker">
+              {week.week}. gaia · Apunteen aurkibidea
+            </p>
+            <span className="snav-seen">
+              {seen}/{week.stages.length} etapa ikusita
+            </span>
+            <button
+              className="btn small ghost snav-pin"
+              onClick={() => {
+                setOpen(false);
+                onToggleOutline();
+              }}
+              title={outlineShown ? 'Aurkibidearen zutabea itxi · [' : 'Aurkibidea zutabe gisa ireki, beti ikusgai · ['}
+            >
+              <IconRail open={outlineShown} /> {outlineShown ? 'Zutabea itxi' : 'Zutabean ireki'} <kbd>[</kbd>
+            </button>
+          </div>
+          <div className="snav-list">
+            <NotesList
+              week={week}
+              current={current}
+              visited={visited}
+              onStage={(i) => {
+                setOpen(false);
+                onStage(i);
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

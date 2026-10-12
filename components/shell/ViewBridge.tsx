@@ -46,11 +46,12 @@ function compass(o?: Orientation) {
 }
 
 /** How long the centred view name stays over the picture (ms). */
-export const FLASH_MS = 2200;
+export const FLASH_MS = 3000;
 
 /**
- * Over the middle of the picture, for a moment, whenever the simulation changes the view: the new view's
- * name, so nobody keeps reading the new drawing as the old one. It lets the pointer through and goes by itself.
+ * For a moment, whenever the simulation changes the view: the new view's name, so nobody keeps reading
+ * the new drawing as the old one. It is the same chip, in the same corner, as the view-change card
+ * folded (one place for everything about the view); it lets the pointer through and goes by itself.
  */
 export function ViewFlash({ label, plane, onDone }: { label: string; plane: PlaneKind; onDone: () => void }) {
   const done = useEffectEvent(onDone);
@@ -62,6 +63,7 @@ export function ViewFlash({ label, plane, onDone }: { label: string; plane: Plan
   const said = label.toLowerCase().includes(plane) || label.toLowerCase() === kind.toLowerCase();
   return (
     <div className="view-flash" role="status" aria-live="polite">
+      <span className="bridge-chip-dot" aria-hidden />
       <span className="view-flash-k">Ikuspegi berria</span>
       <b>{label}</b>
       {!said && <small>{kind}</small>}

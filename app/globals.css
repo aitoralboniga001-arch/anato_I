@@ -2940,14 +2940,12 @@ kbd {
 }
 
 /* Viewfinder frame shared by the hero and the chronicle */
-.hv,
-.chron-frame {
+.hv {
   position: relative;
   margin: 0;
 }
 
-.hv svg,
-.chron-svg {
+.hv svg {
   display: block;
   width: 100%;
   height: auto;
@@ -3088,92 +3086,7 @@ kbd {
 }
 
 /* Chronicle: scroll-scrubbed film */
-.chron {
-  position: relative;
-  padding: 0 var(--gutter);
-  border-top: 1px solid var(--line);
-}
 
-.chron-sticky {
-  position: sticky;
-  top: 0;
-  display: grid;
-  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.5fr);
-  align-items: center;
-  gap: 48px;
-  height: 100svh;
-  padding-top: 60px;
-}
-
-.chron-index {
-  list-style: none;
-  margin: 18px 0 0;
-  padding: 0;
-  font-size: 13px;
-}
-
-.chron-index li {
-  display: flex;
-  gap: 14px;
-  padding: 5px 0 5px 12px;
-  border-left: 1px solid var(--line-2);
-  color: var(--text-4);
-  transition: color 0.3s, border-color 0.3s;
-}
-
-.chron-index li .n {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  line-height: 19px;
-}
-
-.chron-index li.is-past {
-  color: var(--text-3);
-}
-
-.chron-index li.is-on {
-  color: var(--text);
-  border-left-color: var(--signal);
-}
-
-.chron-index li.is-on .n {
-  color: var(--signal);
-}
-
-.chron-body {
-  margin-top: 40px;
-  animation: cap-in 0.5s var(--ease) both;
-}
-
-.chron-days {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  color: var(--signal);
-}
-
-.chron-body h3 {
-  margin: 10px 0 12px;
-  font-size: clamp(28px, 3vw, 40px);
-  font-weight: 600;
-  letter-spacing: -0.035em;
-  line-height: 1.05;
-}
-
-.chron-body p:not(.chron-days) {
-  max-width: 420px;
-  margin: 0 0 22px;
-  font-size: 15.5px;
-  line-height: 1.6;
-  color: var(--text-2);
-  text-wrap: pretty;
-}
-
-.chron-svg {
-  aspect-ratio: 1000 / 640;
-  animation: scene-in 0.5s ease both;
-}
 
 /* Table of contents */
 .land-section {
@@ -3358,7 +3271,6 @@ a.toc-row:hover .toc-go span {
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: #050505;
   color: var(--text);
   cursor: default;
 }
@@ -3371,6 +3283,11 @@ html:not([data-intro="seen"]) body:has(.intro) {
   overflow: hidden;
 }
 
+/* While the opening's lockup flies into the bar, the bar's own wordmark waits for it (no double). */
+html:not([data-intro="seen"]) .landing .land-nav .wordmark {
+  opacity: 0;
+}
+
 /* The opening hides the page scrollbar; reserving its gutter keeps the layout from shifting when it returns. */
 html:has(.landing) {
   scrollbar-gutter: stable;
@@ -3378,10 +3295,17 @@ html:has(.landing) {
 
 .intro.is-leaving {
   opacity: 0 !important;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.4s ease;
 }
 
-.intro::after {
+/* The dark field: everything but the lockup lifts with it. */
+.intro-veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 45%, #0b0a0a 0%, #050505 60%);
+}
+
+.intro-veil::after {
   content: "";
   position: absolute;
   inset: -50%;
@@ -3400,25 +3324,8 @@ html:has(.landing) {
   }
 }
 
-.intro-bars::before,
-.intro-bars::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.intro-bars::before {
-  top: var(--bar);
-}
-
-.intro-bars::after {
-  bottom: var(--bar);
-}
-
 .intro-stage {
+  position: absolute;
   width: min(76vh, 88vw);
   aspect-ratio: 1;
   will-change: transform, opacity;
@@ -3430,41 +3337,62 @@ html:has(.landing) {
   height: 100%;
 }
 
-.intro-title {
+/* The lockup has the bar wordmark's exact proportions (22 : 15 : 9), so one scale lands it there. */
+.intro-lock {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 57%;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  font-size: clamp(46px, 5.6vw, 84px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  transform-origin: 0 50%;
+  will-change: transform;
   pointer-events: none;
 }
 
-.intro-title h1 {
-  margin: 0;
-  font-size: clamp(44px, 8vw, 116px);
-  font-weight: 600;
-  letter-spacing: -0.055em;
-  line-height: 1;
+.intro-mark {
+  flex: none;
+  display: block;
+  width: var(--mark-em, 1.4667em);
+  height: var(--mark-em, 1.4667em);
+  overflow: visible;
 }
 
-.intro-title h1 span {
-  font-weight: 300;
+.intro-name {
+  display: block;
+}
+
+.intro-name > span {
+  display: block;
+}
+
+.intro-name b {
+  font-weight: 400;
   color: var(--text-2);
 }
 
-.intro-title p {
-  margin: 18px 0 0;
+.intro-tag {
+  position: absolute;
+  top: calc(50% + clamp(46px, 5.6vw, 84px) * 0.95);
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
   font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--text-3);
+  pointer-events: none;
 }
 
 .intro-hud {
   position: absolute;
   left: 5vw;
-  bottom: calc(7vh + 22px);
+  bottom: 36px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -3481,24 +3409,24 @@ html:has(.landing) {
 }
 
 .intro-step {
-  color: var(--text-3);
+  color: var(--text-2);
 }
 
 .intro-src {
   position: absolute;
   right: 5vw;
-  bottom: calc(7vh + 22px);
+  bottom: 36px;
   margin: 0;
   font-family: var(--font-mono);
   font-size: 11.5px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-4);
+  color: var(--text-3);
 }
 
 .intro-skip {
   position: absolute;
-  top: calc(7vh + 18px);
+  top: 30px;
   right: 5vw;
   display: inline-flex;
   align-items: center;
@@ -3719,21 +3647,8 @@ a.ln-chip:hover {
   .hero-visual {
     max-width: 760px;
   }
-  .chron-sticky {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    align-content: center;
-    gap: 16px;
-  }
-  .chron-index {
-    display: none;
-  }
-  .chron-body {
-    margin-top: 12px;
-  }
-  .chron-body p:not(.chron-days) {
-    max-width: 640px;
-  }
+
+
   .toc-row {
     grid-template-columns: 44px minmax(0, 1fr) 130px 110px;
   }
@@ -3888,12 +3803,8 @@ a.ln-chip:hover {
   .hero-lead {
     font-size: 15.5px;
   }
-  .chron-body h3 {
-    font-size: 26px;
-  }
-  .chron-body p:not(.chron-days) {
-    font-size: 14px;
-  }
+
+
   .tb-tools .tool {
     padding: 0 8px;
   }
@@ -3910,7 +3821,7 @@ a.ln-chip:hover {
   .pulse,
   .scene-enter,
   .rec,
-  .intro::after {
+  .intro-veil::after {
     animation: none;
   }
   .view-desc {
@@ -4971,327 +4882,6 @@ a.ln-chip:hover {
 
 /* ——— Kronologia: zer dago orain? ——— */
 
-.kr {
-  padding: 48px var(--gutter) 0;
-}
-
-.kr-now {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.kr-day {
-  margin: 6px 0 0;
-  font-size: clamp(44px, 5vw, 64px);
-  font-weight: 600;
-  letter-spacing: -0.05em;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.kr-day small {
-  font-size: 0.45em;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  color: var(--text-3);
-}
-
-.kr-meta {
-  margin: 8px 0 0;
-  font-size: 14px;
-  color: var(--text-3);
-}
-
-.kr-meta b {
-  color: var(--signal);
-  font-weight: 600;
-}
-
-.kr-steps {
-  display: flex;
-  gap: 6px;
-}
-
-.kr-steps .btn {
-  min-width: 46px;
-  font-family: var(--font-mono);
-}
-
-.kr-ruler {
-  position: relative;
-  margin-top: 26px;
-  padding: 0 0 26px;
-  cursor: pointer;
-  touch-action: none;
-  outline: none;
-}
-
-.kr-ruler:focus-visible .kr-head {
-  box-shadow: 0 0 0 4px rgba(255, 106, 61, 0.35);
-}
-
-.kr-bands {
-  position: relative;
-  height: 24px;
-}
-
-.kr-band {
-  position: absolute;
-  top: 0;
-  height: 22px;
-  padding: 0 8px;
-  overflow: hidden;
-  border-left: 1px solid var(--line-3);
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  line-height: 22px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: var(--text-4);
-}
-
-.kr-band.is-on {
-  color: var(--signal);
-}
-
-.kr-track {
-  position: relative;
-  height: 14px;
-  border-radius: 7px;
-  background: var(--surface-3);
-}
-
-.kr-fill {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  border-radius: 7px;
-  background: linear-gradient(90deg, rgba(255, 106, 61, 0.25), rgba(255, 106, 61, 0.55));
-}
-
-.kr-mile {
-  position: absolute;
-  top: 50%;
-  z-index: 1;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--text-4);
-}
-
-.kr-mile.is-gakoa {
-  width: 8px;
-  height: 8px;
-  background: var(--text-2);
-}
-
-.kr-mile.is-past {
-  background: var(--text);
-}
-
-.kr-head {
-  position: absolute;
-  top: 50%;
-  z-index: 2;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--signal);
-  border: 3px solid var(--bg);
-  box-shadow: 0 0 0 1px var(--signal);
-}
-
-.kr-ticks {
-  position: relative;
-  height: 16px;
-  margin-top: 8px;
-}
-
-.kr-ticks small {
-  position: absolute;
-  transform: translateX(-50%);
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  color: var(--text-4);
-  white-space: nowrap;
-}
-
-.kr-ticks small:first-child {
-  transform: none;
-}
-
-.kr-ticks small:last-child {
-  transform: translateX(-100%);
-}
-
-.kr-last {
-  display: flex;
-  gap: 12px;
-  align-items: baseline;
-  margin: 0 0 22px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  font-size: 14.5px;
-  line-height: 1.5;
-}
-
-.kr-last span {
-  flex: none;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--signal);
-}
-
-.kr-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.kr-group {
-  padding: 16px;
-  border-radius: 14px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-}
-
-.kr-group header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.kr-group h2 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.kr-group small {
-  font-size: 11.5px;
-  color: var(--text-4);
-  text-align: right;
-}
-
-.kr-group.is-berria {
-  border-color: rgba(255, 106, 61, 0.45);
-  background: linear-gradient(180deg, rgba(255, 106, 61, 0.08), var(--surface) 60%);
-}
-
-.kr-group.is-berria h2 {
-  color: var(--signal);
-}
-
-.kr-group.is-desagertua .ln-chip span {
-  text-decoration: line-through;
-  text-decoration-color: rgba(255, 255, 255, 0.35);
-}
-
-.kr-group.is-oraindik-ez {
-  opacity: 0.75;
-}
-
-.kr-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.kr-list {
-  padding-top: 80px;
-}
-
-.kr-miles {
-  display: grid;
-  gap: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--line);
-}
-
-.kr-miles li {
-  display: grid;
-  grid-template-columns: 150px minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 16px;
-  padding: 12px 8px;
-  border-bottom: 1px solid var(--line);
-}
-
-.kr-miles li.is-now {
-  background: var(--signal-soft);
-}
-
-.kr-miles li.is-xehetasuna p {
-  color: var(--text-3);
-}
-
-.kr-mile-day {
-  justify-self: start;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--signal);
-}
-
-.kr-mile-day:hover {
-  text-decoration: underline;
-}
-
-.kr-miles p {
-  margin: 0;
-  font-size: 14.5px;
-  line-height: 1.5;
-  color: var(--text);
-}
-
-.kr-key {
-  margin-left: 8px;
-  padding: 1px 6px;
-  border-radius: 5px;
-  background: var(--surface-3);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-style: normal;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--focus);
-  vertical-align: 1px;
-}
-
-@media (max-width: 1100px) {
-  .kr-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 640px) {
-  .kr-grid {
-    grid-template-columns: 1fr;
-  }
-  .kr-miles li {
-    grid-template-columns: 1fr auto;
-  }
-  .kr-miles p {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-  .kr-band {
-    font-size: 11px;
-  }
-}
 
 /* ——— Questions: modes, types, feedback ——— */
 
@@ -8543,6 +8133,34 @@ button.tp-switch:hover {
   border: 1px solid var(--line-2);
   backdrop-filter: blur(10px);
   pointer-events: none;
+  animation: focus-title-out 5.5s ease forwards;
+}
+
+@keyframes focus-title-out {
+  0%,
+  75% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focus-title {
+    animation-name: focus-title-out-calm;
+  }
+  @keyframes focus-title-out-calm {
+    0%,
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
 }
 
 .focus-title span {
@@ -9583,11 +9201,7 @@ button.tp-switch:hover {
 }
 
 /* Chronology ruler: the 12-week label steps aside where it would run into day 56. */
-@media (max-width: 1280px) {
-  .kr-ticks small.is-minor {
-    display: none;
-  }
-}
+
 
 /* The summary column eases in when it opens or the stage changes (opacity and a short slide only). */
 @media (min-width: 1321px) {
@@ -11023,72 +10637,7 @@ a.tc-in:hover .tc-go span {
 }
 
 /* Kronologia: key dates under the ruler, each a jump to its day. */
-.kr-marks {
-  position: relative;
-  height: 20px;
-  margin: -22px 0 12px;
-}
 
-.kr-mark {
-  position: absolute;
-  top: 0;
-  width: 18px;
-  height: 18px;
-  margin-left: -9px;
-  padding: 0;
-  border-radius: 4px;
-  display: grid;
-  place-items: center;
-}
-
-.kr-mark::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  rotate: 45deg;
-  border: 1px solid var(--text-3);
-  background: var(--bg);
-  transition: background-color 0.15s, border-color 0.15s, scale 0.15s var(--ease);
-}
-
-.kr-mark:hover::before {
-  border-color: var(--text);
-  scale: 1.25;
-}
-
-.kr-mark.is-on::before {
-  background: var(--signal);
-  border-color: var(--signal);
-}
-
-.kr-last {
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.kr-last .kr-last-go {
-  margin-left: auto;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-2);
-  white-space: nowrap;
-}
-
-.kr-last .kr-last-go span {
-  display: inline-block;
-  font-family: inherit;
-  font-size: inherit;
-  color: inherit;
-  transition: translate 0.2s var(--ease);
-}
-
-.kr-last .kr-last-go:hover {
-  color: var(--text);
-}
-
-.kr-last .kr-last-go:hover span {
-  translate: 3px 0;
-}
 
 /* Leinuak: three germ-layer columns in the Langman colours; the connectors carry the layer's colour. */
 @media (min-width: 821px) and (max-width: 1320px) {
@@ -11266,18 +10815,7 @@ a.ln-chip:focus-visible {
 
 /* Kronologia, "Jada desagertu / eraldatu": what it became reads on its own line under the crossed-out
    name (side by side, both broke into narrow three-line columns). */
-.kr-group.is-desagertua .ln-chip:has(em) {
-  display: grid;
-  grid-template-columns: 9px minmax(0, 1fr);
-  column-gap: 8px;
-  row-gap: 1px;
-  width: 100%;
-}
 
-.kr-group.is-desagertua .ln-chip:has(em) em {
-  grid-column: 2;
-  line-height: 1.35;
-}
 
 /* What the current view shows: in the "Non nago?" card and on the view tabs (hover / focus), never
    over the scene, where it hid the labels the student was reading. */
@@ -12051,33 +11589,7 @@ a.ln-chip:focus-visible {
 }
 
 /* Chronology: the day steps are one segmented control (as the simulator's switches), not loose text. */
-.kr-steps {
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--line-2);
-  border-radius: 10px;
-  background: var(--surface);
-}
 
-.kr-steps .btn {
-  min-width: 46px;
-  height: 30px;
-  border-radius: 7px;
-  color: var(--text-2);
-}
-
-.kr-steps .btn:hover {
-  color: var(--text);
-  background: var(--surface-3);
-}
-
-.kr-steps .btn:nth-child(2) {
-  margin-right: 5px;
-}
-
-.kr-steps .btn:nth-child(3) {
-  margin-left: 5px;
-}
 
 /* Question topics, one-line tiles (laptop heights): the "to review" count rides the tile's corner, so
    number, bar and score fit even in the narrowest tile (inline, "0/106" ran out of it). */
@@ -12268,19 +11780,7 @@ kbd {
 }
 
 /* The key dates on the timeline ruler are small drawings: their hit area is not. */
-.kr-mark {
-  top: -5px;
-  width: 28px;
-  height: 28px;
-  margin-left: -14px;
-}
 
-.kr-empty {
-  margin: 4px 0 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--text-3);
-}
 
 /* While an exam figure is being prepared, the frame shimmers instead of sitting black. */
 .lab-fig:not(:has(.lab-svg))::after {
@@ -12306,11 +11806,6 @@ kbd {
   }
 }
 
-@media (max-width: 1100px) {
-  .kr-grid {
-    align-items: start;
-  }
-}
 
 /* A portrait tablet keeps the whole site bar: it only folds away on a phone. */
 @media (min-width: 641px) and (max-width: 820px) {
@@ -12322,6 +11817,10 @@ kbd {
   }
   .land-nav nav {
     gap: 14px;
+  }
+  /* The links are 44px tall here: the page marker still sits on the bar's bottom edge. */
+  .land-nav nav a[aria-current="page"]::after {
+    bottom: -8px;
   }
 }
 
@@ -12499,6 +11998,13 @@ kbd {
   min-width: 0;
 }
 
+/* The step on show sits at the bottom of the reserved cell, by the pager and the transport: the spare
+   room of a short step opens under the scene, not as a hole between the text and the controls. */
+.cap-stack > :not(.cap-sizer) {
+  /* "safe": a step taller than the reservation still overflows downward, into the card's scroll. */
+  align-self: safe end;
+}
+
 .cap-sizer {
   max-height: var(--cap-max, none);
   overflow: hidden;
@@ -12557,4 +12063,2187 @@ kbd {
   .mobile-study-actions .mobile-study-next.is-go svg {
     color: currentColor;
   }
+}
+
+/* 3D views: the shaded tissue is drawn here, under the SVG that keeps names, leaders and pointing. */
+.viewport > .viewport-underlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.viewport-underlay canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.viewport-underlay canvas.is-ready {
+  opacity: 1;
+}
+
+/* The projected outlines a 3D view keeps for pointing: invisible while WebGL draws the tissue. */
+.stage3d-hit {
+  fill: transparent;
+  transition: fill-opacity 0.35s ease;
+}
+
+.stage3d.is-gl .stage3d-flat {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.stage3d-orbit {
+  cursor: grab;
+}
+
+.stage3d-orbit:active {
+  cursor: grabbing;
+}
+
+/* The 3D views' orientation key: a plate of the same family as the picture's tool columns (dark
+   glass, hairline edge), the directions drawn, their names as a legend beside them. */
+.axes3d-plate {
+  fill: rgba(21, 21, 24, 0.86);
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+.axes3d-name {
+  fill: var(--text-2);
+  font-weight: 600;
+}
+.axes3d-hint {
+  fill: var(--text-3);
+  font-weight: 500;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════════════════════════
+   ONE PRODUCT — the final layer. Every screen draws from the same few decisions, so nothing reads as
+   an add-on from another iteration. It comes last on purpose: where an earlier rule disagrees, this
+   one is the decision.
+
+   SHAPE   Controls are rounded rectangles: 34px tall with a 10px corner (md), 28px with 8px (sm),
+           42px with 12px (lg). Pills (999px) are only for chips and tags — things you read, not
+           press — and the round play key. Cards and popovers 14px, frames (picture, dock, panels) 16px.
+   BUTTONS primary   = light fill: the one thing to press next in a given place (Hasi, Ulertuta, the
+                       next stage). The guided "go on" key is the signal colour (the app is waiting).
+           secondary = surface fill + hairline: ordinary actions (Kimu, Aurkitu…, mode, voice).
+           ghost     = no fill: dismissals and tools in a row (Saltatu, Orain ez, Tresnak, ?).
+           icon      = a square ghost (32px; 30px inside the picture's tool columns).
+           segmented = a dark well with the current key raised (topics, right column, views, speeds).
+   TYPE    UI sans for everything that is read. Mono for exactly two things: KICKERS (short uppercase
+           labels that say what a block is) and COUNTERS (01/08, 3/10, 1×) — never for a phrase with
+           words, so dates ("3.-4. asteak", "20. eguna") are sans with tabular figures.
+           Scale: 11 kicker · 12.5 meta · 13 controls · 14.5 body · 16.5 lead · 20 title.
+   NOTICES Over the picture, one card at a time, each kind always in the same place:
+           · the stage preview on the left (the specimen makes room for it), exclusive;
+           · everything about the VIEW in the top-right corner, under the view tabs: the view-change
+             card, its folded chip, the "new view" chip and "Non nago?" — one at a time;
+           · the structure tour and the full-screen offer at the foot of the picture, in the bottom
+             corner away from what is being pointed at; the focus-mode title waits for both;
+           · the find quiz banner at the top centre.
+           Starting the stage is the play key itself (it says "Erreproduzitu" until the stage has
+           started) — nothing covers the specimen to ask for it. The way back after a jump lives in
+           the stage heading.
+   ════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 16px;
+  --h-sm: 28px;
+  --h-md: 34px;
+  --h-lg: 42px;
+  --fs-kicker: 11px;
+  --fs-meta: 12.5px;
+  --fs-ui: 13px;
+  --fs-body: 14.5px;
+  --fs-lead: 16.5px;
+  --fs-title: 20px;
+  --kicker: 600 var(--fs-kicker) / 1.2 var(--font-mono);
+  --eyebrow: var(--kicker);
+  --eyebrow-track: 0.1em;
+  /* Floating surfaces (popovers, cards over the picture, tooltips): opaque, so nothing shows through. */
+  --float: #151518;
+  --float-edge: rgba(255, 255, 255, 0.1);
+  --float-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 22px 56px -18px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.35);
+  --card-bg: var(--float);
+  --card-radius: var(--r-lg);
+  --card-shadow: var(--float-shadow);
+  /* Frames (picture, dock, side panels). */
+  --frame: #111114;
+  --frame-edge: rgba(255, 255, 255, 0.075);
+  /* Control fills. */
+  --ctl: var(--surface-2);
+  --ctl-hover: var(--surface-3);
+  --ctl-edge: var(--line-2);
+  --ctl-edge-hover: var(--line-3);
+}
+
+/* ——— Buttons ——————————————————————————————————————————————————————————————————————————————— */
+.btn {
+  height: var(--h-md);
+  padding: 0 14px;
+  gap: 7px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--ctl-edge);
+  background: var(--ctl);
+  color: var(--text);
+  font: 600 var(--fs-ui) / 1 var(--font-ui);
+  letter-spacing: -0.005em;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--ctl-hover);
+  border-color: var(--ctl-edge-hover);
+}
+
+.btn.small {
+  height: var(--h-sm);
+  padding: 0 11px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-meta);
+}
+
+.btn.lg {
+  height: var(--h-lg);
+  padding: 0 18px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.btn-light,
+.btn.primary {
+  background: var(--text);
+  border-color: var(--text);
+  color: #0b0b0c;
+}
+
+.btn-light:hover:not(:disabled),
+.btn.primary:hover:not(:disabled) {
+  background: #fff;
+  border-color: #fff;
+}
+
+.btn.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-2);
+}
+
+.btn.ghost:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: transparent;
+  color: var(--text);
+}
+
+.btn.ghost.is-on {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.icon-btn {
+  border-radius: var(--r-sm);
+}
+
+/* ——— Kickers and counters: one recipe ———————————————————————————————————————————————————— */
+.kicker,
+.eyebrow,
+.menu-h,
+.pv-kicker,
+.tour-kicker,
+.bridge-chip-k,
+.view-flash-k,
+.fresh-tag,
+.cap-note > b,
+.find-text small,
+.focus-title span {
+  font: var(--kicker);
+  letter-spacing: var(--eyebrow-track);
+  text-transform: uppercase;
+}
+
+/* ——— Floating surfaces: popovers, menus, tooltips ———————————————————————————————————————— */
+.pop-panel {
+  border-radius: var(--r-lg);
+  border: 1px solid var(--float-edge);
+  background: var(--float);
+  box-shadow: var(--float-shadow);
+  backdrop-filter: none;
+}
+
+.menu > a,
+.menu > button {
+  min-height: var(--h-md);
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  font-size: 13.5px;
+}
+
+.menu-h {
+  margin: 6px 10px 6px;
+  color: var(--text-4);
+}
+
+.menu kbd {
+  font: 500 11px var(--font-mono);
+}
+
+/* ——— App frame and top bar —————————————————————————————————————————————————————————————— */
+.app > .topbar {
+  background: var(--bg);
+  border-bottom-color: var(--line);
+}
+
+/* Every tool in the bar is a quiet ghost key of one size; Kimu is the one secondary key (the
+   assistant reads as a companion, by its face, not by a different border). */
+.topbar .tb-tools .tool,
+.topbar .tb-tools .tool-main,
+.topbar .tb-tools > .pop > .tool {
+  height: var(--h-md);
+  padding: 0 11px;
+  gap: 7px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--text-2);
+  font: 550 var(--fs-ui) / 1 var(--font-ui);
+}
+
+.topbar .tb-tools .tool svg,
+.topbar .tb-tools .tool-main svg {
+  color: var(--text-3);
+  transition: color 0.15s;
+}
+
+.topbar .tb-tools .tool:hover,
+.topbar .tb-tools .tool-main:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.topbar .tb-tools .tool:hover svg {
+  color: var(--text);
+}
+
+.topbar .tb-tools .tool.is-on,
+.topbar .tb-tools .tool-main.is-on {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.topbar .tb-tools .tool.is-on svg {
+  color: var(--signal);
+}
+
+.topbar .tb-tools .tool-main.kimu-tool {
+  padding: 0 12px 0 7px;
+  border-color: var(--ctl-edge);
+  background: var(--ctl);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.topbar .tb-tools .tool-main.kimu-tool:hover {
+  border-color: var(--ctl-edge-hover);
+  background: var(--ctl-hover);
+}
+
+.topbar .tb-tools .tool-main.kimu-tool.is-on {
+  border-color: rgba(255, 106, 61, 0.55);
+  background: var(--surface-3);
+}
+
+.topbar .tb-tools .tool-icon {
+  width: var(--h-md);
+  padding: 0;
+  justify-content: center;
+}
+
+.tb-sep {
+  height: 18px;
+  margin: 0 4px;
+  background: var(--line);
+}
+
+/* Segmented controls: a dark well; the current key is raised. Topics, the right column, the views. */
+.tb-panels,
+.seg.view-switch,
+.tp-speeds {
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg-1);
+}
+
+.topbar .tb-tools .tb-panels > .tool {
+  height: var(--h-sm);
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+}
+
+.topbar .tb-tools .tb-panels > .tool.is-on,
+.seg.view-switch > button.is-on,
+.tp-speeds button.is-on {
+  background: var(--surface-3);
+  color: var(--text);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.tb-weeks {
+  gap: 2px;
+}
+
+.tb-week {
+  height: 32px;
+  border-radius: var(--r-sm);
+  line-height: 32px;
+}
+
+.tb-week.is-on {
+  background: var(--surface-3);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+/* The current topic's span is words, not a number: sans. */
+.tb-week .tb-week-d {
+  font: 500 11.5px / 1 var(--font-ui);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ——— Stage heading: where you are (one kicker line), the title and its days ———————————————— */
+.stage {
+  gap: 12px;
+}
+
+.stage-bar {
+  align-items: flex-end;
+}
+
+.crumbs-row {
+  gap: 10px;
+  min-height: 16px;
+}
+
+.stage-heading .crumbs,
+.stage-count {
+  font: var(--kicker);
+  letter-spacing: var(--eyebrow-track);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.stage-heading .crumbs {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-2);
+}
+
+.stage-count {
+  flex: none;
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
+}
+
+.stage-count::before {
+  content: "·";
+  margin-right: 10px;
+  color: var(--text-4);
+}
+
+.stage-count b {
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.stage-heading .stage-title {
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.stage-heading .stage-title h2 {
+  margin: 0;
+  font-size: var(--fs-title);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+/* The days: a quiet secondary key (it opens "Zer dago orain?"), sans with tabular figures. */
+.stage-heading .day-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--h-sm);
+  padding: 0 9px 0 9px;
+  border: 1px solid var(--ctl-edge);
+  border-radius: var(--r-sm);
+  background: var(--ctl);
+  color: var(--text-2);
+  font: 550 var(--fs-meta) / 1 var(--font-ui);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  text-transform: none;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.stage-heading .day-chip svg {
+  color: var(--signal);
+}
+
+.stage-heading .day-chip i {
+  font-style: normal;
+  font-size: 10px;
+  color: var(--text-4);
+}
+
+.stage-heading .day-chip:hover,
+.stage-heading .day-chip[aria-expanded="true"] {
+  border-color: var(--ctl-edge-hover);
+  background: var(--ctl-hover);
+  color: var(--text);
+}
+
+/* The way back after a jump: a small secondary key on the kicker line. */
+.crumbs-row .back-chip {
+  position: static;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 340px;
+  height: 22px;
+  margin-block: -3px;
+  padding: 0 10px 0 8px;
+  gap: 6px;
+  border: 1px solid rgba(255, 106, 61, 0.45);
+  border-radius: var(--r-xs);
+  background: var(--signal-soft);
+  color: var(--text);
+  font: 600 12px / 1 var(--font-ui);
+  box-shadow: none;
+  transform: none;
+  animation: none;
+}
+
+.crumbs-row .back-chip:hover {
+  background: rgba(255, 106, 61, 0.24);
+}
+
+.crumbs-row .back-chip b {
+  font-weight: 450;
+  color: var(--text-2);
+}
+
+/* Short screens hide the kicker line, but never the way back. */
+@media (max-height: 820px) and (min-width: 821px) {
+  .stage-bar .crumbs-row:has(.back-chip) {
+    display: flex;
+  }
+  .stage-bar .crumbs-row:has(.back-chip) > :not(.back-chip) {
+    display: none;
+  }
+}
+
+/* "Non nago?" and the views: the same 34px well height as everything on the row. */
+.stage-side {
+  align-items: stretch;
+}
+
+.stage-side .loc-btn,
+.stage-side .loc-btn.is-absorb {
+  border-radius: var(--r-md);
+  border-color: var(--line);
+  background: var(--bg-1);
+}
+
+.seg.view-switch > button {
+  height: 30px;
+  border-radius: 7px;
+  color: var(--text-3);
+  font: 550 var(--fs-ui) / 1 var(--font-ui);
+}
+
+.seg.view-switch > button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* ——— The picture ———————————————————————————————————————————————————————————————————————— */
+.viewport {
+  border-radius: var(--r-xl);
+  border: 1px solid var(--frame-edge);
+}
+
+/* Tool columns inside the picture: one floating recipe. */
+.viewport .view-tools,
+.viewport .zoom-controls,
+.viewport .focus-exit {
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--float-edge);
+  border-radius: 12px;
+  background: rgba(21, 21, 24, 0.92);
+  box-shadow: 0 10px 28px -14px rgba(0, 0, 0, 0.85);
+}
+
+.viewport .view-tools .icon-btn,
+.viewport .zoom-controls .icon-btn,
+.viewport .focus-exit .icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+}
+
+/* Cards over the picture share one surface. */
+.viewport .tour,
+.viewport .bridge,
+.viewport .pv-card,
+.viewport .fs-offer,
+.viewport .find-bar,
+.viewport .legend,
+.loc-card,
+.now-card {
+  border-radius: var(--r-lg);
+  background: var(--float);
+  box-shadow: var(--float-shadow);
+  backdrop-filter: none;
+}
+
+.viewport .tour,
+.viewport .pv-card,
+.viewport .fs-offer,
+.viewport .legend,
+.now-card {
+  border: 1px solid var(--float-edge);
+}
+
+/* Chips over the picture: one line, one recipe (the view chips, the focus-mode way back). */
+.viewport .bridge-chip,
+.viewport .view-flash,
+.viewport .back-chip.is-float {
+  height: 32px;
+  border-radius: 999px;
+  background: var(--float);
+  box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.9);
+}
+
+/* The NEW-VIEW chip: the folded view card's twin, in its corner (it used to sit mid-picture). */
+.viewport .view-flash {
+  position: absolute;
+  z-index: 30;
+  top: 12px;
+  right: 58px;
+  left: auto;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 132px);
+  padding: 0 14px 0 12px;
+  border: 1px solid var(--plane-edge);
+  text-align: left;
+  white-space: nowrap;
+  transform: none;
+  transform-origin: top right;
+  animation: view-chip 3s var(--ease) both;
+}
+
+.viewport .view-flash .view-flash-k {
+  color: var(--text-3);
+}
+
+.viewport .view-flash b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--fs-ui);
+  font-weight: 600;
+  color: var(--plane);
+}
+
+.viewport .view-flash small {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+@keyframes view-chip {
+  0% {
+    opacity: 0;
+    transform: scale(0.88);
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.5);
+  }
+  10% {
+    opacity: 1;
+    transform: none;
+  }
+  40% {
+    box-shadow: 0 0 0 10px rgba(251, 191, 36, 0);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewport .view-flash {
+    animation-name: view-flash-calm;
+  }
+}
+
+@media (max-width: 1100px) {
+  .viewport .view-flash .view-flash-k,
+  .viewport .view-flash small {
+    display: none;
+  }
+}
+
+/* "Non nago?" open on purpose: the other view chips in its corner wait behind it. */
+.app:has(.loc-card) .viewport .view-flash {
+  visibility: hidden;
+}
+
+/* The way back in focus mode (the stage heading is hidden there). */
+.viewport .back-chip.is-float {
+  top: 12px;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 106, 61, 0.5);
+  color: var(--text);
+  font-size: var(--fs-ui);
+  font-weight: 600;
+}
+
+/* The view-change card: compact, in its corner. */
+.viewport .bridge {
+  border: 1px solid var(--plane-edge);
+}
+
+.viewport .bridge-text h4,
+.loc-card h4 {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+/* The tour (and the full-screen offer) at the foot of the picture, away from what is lit. */
+.viewport .tour,
+.viewport .fs-offer {
+  left: 14px;
+  right: auto;
+  bottom: 14px;
+}
+
+.viewport .tour.is-right,
+.viewport .fs-offer.is-right {
+  left: auto;
+  right: 14px;
+}
+
+.viewport .tour {
+  width: min(400px, calc(100% - 28px));
+  padding: 10px 12px 12px;
+}
+
+.viewport .tour .tour-top {
+  gap: 10px;
+}
+
+.viewport .tour .tour-kicker {
+  color: var(--focus);
+}
+
+.viewport .tour .tour-top .btn {
+  margin-left: auto;
+}
+
+/* The focus-mode title says where you are for a moment, then steps out of the bottom-left names. */
+.viewport .focus-title {
+  border: 1px solid var(--float-edge);
+  border-radius: var(--r-md);
+  background: var(--float);
+  box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.9);
+}
+
+.viewport .focus-title span {
+  color: var(--text-3);
+}
+
+/* Find quiz banner. */
+.viewport .find-bar {
+  border: 1px solid rgba(255, 184, 107, 0.45);
+  border-radius: var(--r-lg);
+}
+
+.find-score {
+  border-radius: var(--r-xs);
+}
+
+/* Stage preview card. */
+.viewport .pv-card h3 {
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+/* The old mid-picture start pill is gone; nothing else uses .start. */
+.viewport > .start {
+  display: none;
+}
+
+/* ——— The dock: the step's text across the card, then one control row ———————————————————————— */
+.stage > .dock {
+  border-radius: var(--r-xl);
+  border: 1px solid var(--frame-edge);
+  background: linear-gradient(180deg, #19191c, #141417);
+  box-shadow: 0 18px 44px -28px rgba(0, 0, 0, 0.9);
+}
+
+@media (min-width: 821px) {
+  .dock .cap {
+    display: block;
+    min-height: 0;
+    padding: 14px 22px 6px;
+    border-bottom: 0;
+  }
+  .dock .cap > .cap-n,
+  .dock .cap > .cap-nav {
+    display: none;
+  }
+  .cap-text.cap-v2.has-side {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    column-gap: 24px;
+  }
+  .dock .cap .cap-side {
+    padding-left: 20px;
+    border-left: 1px solid var(--line);
+  }
+}
+
+.dock .cap .cap-main .cap-idea {
+  margin-bottom: 4px;
+  font-size: var(--fs-lead);
+  font-weight: 650;
+  line-height: 1.38;
+  letter-spacing: -0.016em;
+  color: var(--text);
+}
+
+.dock .cap .cap-main .cap-idea + p,
+.dock .cap .cap-main > p:only-child {
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.dock .cap .cap-side .cap-note {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+/* The note's label runs in before its text (a line saved per note, read as one unit). */
+.dock .cap .cap-side .cap-note > b {
+  display: inline;
+  margin: 0 7px 0 0;
+  font-size: 10.5px;
+  vertical-align: 1px;
+}
+
+/* The step on show sits at the top of its reserved cell, where reading starts; a short step leaves
+   its spare room under the text, by the controls, not as a hole under the picture. */
+.cap-stack > :not(.cap-sizer) {
+  align-self: start;
+}
+
+/* Exam dates in front of the idea: a quiet tag in the signal colour, sans. */
+.cap-date {
+  border-radius: var(--r-xs);
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* "BERRIA" chips: pills (they are tags you can open). */
+.cap .fresh .fresh-tag {
+  color: var(--signal);
+}
+
+/* ——— Control row ————————————————————————————————————————————————————————————————————————— */
+.dock .transport {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding: 0 12px 8px;
+}
+
+/* The chapters run along the seam between the text and the controls. */
+.dock .transport > .scrub {
+  height: 16px;
+  margin: 0 8px 2px;
+  min-width: 0;
+}
+
+.dock .transport > .scrub .scrub-seg {
+  height: 3px;
+  margin-top: -1.5px;
+}
+
+.dock .transport > .scrub .scrub-seg.is-on {
+  height: 5px;
+  margin-top: -2.5px;
+}
+
+.dock .transport > .scrub:hover .scrub-seg {
+  height: 6px;
+  margin-top: -3px;
+}
+
+.dock .transport > .scrub .scrub-head {
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  box-shadow: 0 0 0 3px #161619, 0 0 0 5px rgba(255, 106, 61, 0.25);
+}
+
+.scrub-tip {
+  border-radius: var(--r-md);
+  background: var(--float);
+  border: 1px solid var(--float-edge);
+  box-shadow: var(--float-shadow);
+}
+
+.tp-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.tp-buttons {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.dock .tp-stage {
+  height: var(--h-md);
+  padding: 0 10px;
+  gap: 6px;
+  border-radius: var(--r-md);
+  color: var(--text-3);
+  font: 550 var(--fs-meta) / 1 var(--font-ui);
+}
+
+.dock .tp-stage:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* Play: the one round key. Before the stage has started it names itself and asks to be pressed. */
+.dock .play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--text);
+  color: #0b0b0c;
+  transition: background 0.15s, transform 0.15s var(--ease), width 0.25s var(--ease), padding 0.25s var(--ease);
+}
+
+.dock .play.is-cue {
+  width: auto;
+  padding: 0 16px 0 13px;
+  box-shadow: 0 0 0 0 rgba(245, 242, 236, 0.4);
+  animation: play-cue 2.4s ease-out 1s 3;
+}
+
+.dock .play-l {
+  font: 650 var(--fs-ui) / 1 var(--font-ui);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+}
+
+@keyframes play-cue {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 242, 236, 0.38);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 12px rgba(245, 242, 236, 0);
+  }
+}
+
+.dock .play:hover {
+  background: #fff;
+  transform: none;
+}
+
+.dock .play:active {
+  transform: scale(0.96);
+}
+
+/* Where the playhead is: the step counter (the only one) and the embryo's age. */
+/* The day never shows cut ("13. e…"): when the row has no room for it, it wraps onto a hidden second line. */
+.tp-read {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: flex-start;
+  gap: 0 14px;
+  height: 18px;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.tp-step {
+  font: var(--kicker);
+  letter-spacing: var(--eyebrow-track);
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.tp-step b {
+  display: inline-block;
+  margin-left: 2px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--signal);
+}
+
+.tp-step i {
+  font-style: normal;
+  letter-spacing: 0.02em;
+  color: var(--text-4);
+}
+
+.tp-step .cap-tick {
+  animation: cap-tick 0.3s var(--ease) both;
+}
+
+.dock .tp-read .tp-tc {
+  flex: none;
+  font: 500 var(--fs-meta) / 18px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+  text-align: left;
+}
+
+.tp-end {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Voice and mode: two secondary keys of one recipe; the accent is only in their icons. */
+.dock .voice-cta.tp-voice,
+.dock .tp-set-btn {
+  height: var(--h-md);
+  gap: 7px;
+  padding: 0 12px 0 10px;
+  border: 1px solid var(--ctl-edge);
+  border-radius: var(--r-md);
+  background: var(--ctl);
+  color: var(--text);
+  font: 550 var(--fs-ui) / 1 var(--font-ui);
+}
+
+.dock .voice-cta.tp-voice:hover,
+.dock .tp-set-btn:hover,
+.dock .tp-set-btn.is-on {
+  border-color: var(--ctl-edge-hover);
+  background: var(--ctl-hover);
+}
+
+.dock .voice-cta.tp-voice svg,
+.dock .tp-set-btn svg:first-child {
+  color: var(--signal);
+}
+
+.dock .tp-set-btn svg:last-child {
+  color: var(--text-4);
+}
+
+/* The pager: the Next key in the card's bottom-right corner, at one width in every state. */
+.tp-pager {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+  padding-left: 14px;
+  border-left: 1px solid var(--line);
+}
+
+.tp-prev {
+  display: inline-grid;
+  place-items: center;
+  width: var(--h-md);
+  height: var(--h-md);
+  border: 1px solid var(--ctl-edge);
+  border-radius: var(--r-md);
+  background: var(--ctl);
+  color: var(--text-2);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.tp-prev:hover:not(:disabled) {
+  border-color: var(--ctl-edge-hover);
+  background: var(--ctl-hover);
+  color: var(--text);
+}
+
+.tp-pager .cap-next {
+  width: 164px;
+  min-width: 164px;
+  height: var(--h-md);
+  border-radius: var(--r-md);
+  border-color: var(--ctl-edge);
+  background: var(--ctl);
+}
+
+.tp-pager .cap-next:hover:not(:disabled) {
+  border-color: var(--ctl-edge-hover);
+  background: var(--ctl-hover);
+}
+
+.tp-pager .cap-next.is-wait,
+.tp-pager .cap-next.is-wait:hover:not(:disabled) {
+  border-color: var(--signal);
+  background: var(--signal);
+  color: #170a05;
+}
+
+.tp-pager .cap-next.is-wait:hover:not(:disabled) {
+  border-color: #ff805b;
+  background: #ff805b;
+}
+
+.tp-pager .cap-next.is-stage,
+.tp-pager .cap-next.is-stage:hover:not(:disabled) {
+  border-color: var(--text);
+  background: var(--text);
+  color: #0b0b0c;
+}
+
+.tp-pager .cap-next.is-stage:hover:not(:disabled) {
+  background: #fff;
+}
+
+/* Narrower docks (notes open, tablets): words give way in order of least loss — the stage keys'
+   word, the voice key's long name, then the mode's name; the Next key and the counter always stay. */
+@container dock (max-width: 1080px) {
+  .dock .tp-end > .tp-voice > span.tp-voice-l {
+    display: none;
+  }
+  .dock .tp-end > .tp-voice > span.tp-voice-s {
+    display: inline;
+  }
+}
+
+@container dock (max-width: 960px) {
+  .dock .tp-stage span {
+    display: none;
+  }
+  .dock .tp-stage {
+    width: var(--h-md);
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+@container dock (max-width: 880px) {
+  .dock .tp-set-btn > span,
+  .dock .tp-set-btn > svg:last-child {
+    display: none;
+  }
+  .dock .tp-set-btn {
+    padding: 0 10px;
+  }
+}
+
+@container dock (max-width: 760px) {
+  .dock .tp-read .tp-tc {
+    display: none;
+  }
+  .dock .transport > .tp-bar > .tp-end > .tp-voice > span.tp-voice-s {
+    display: none;
+  }
+  .dock .transport > .tp-bar > .tp-end > .tp-voice {
+    width: var(--h-md);
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+/* Phones keep their own step bar. */
+@media (max-width: 820px) {
+  .tp-pager,
+  .tp-read {
+    display: none;
+  }
+}
+
+@media (max-height: 820px) and (min-width: 821px) {
+  .dock .cap {
+    padding: 11px 20px 8px;
+  }
+  .dock .transport {
+    padding: 0 10px 7px;
+  }
+  .dock .transport > .scrub {
+    height: 14px;
+    margin-bottom: 3px;
+  }
+}
+
+@media (max-height: 980px) and (min-width: 1101px) {
+  .dock .cap .cap-main .cap-idea {
+    font-size: 16px;
+  }
+  .dock .cap .cap-main .cap-idea + p {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock .play.is-cue,
+  .tp-step .cap-tick {
+    animation: none;
+  }
+}
+
+/* How to turn a 3D view: said once, as a chip in the view corner (never on the drawing), until the
+   viewer has turned one. It fades by itself; the next 3D view says it again until then. */
+.viewport .turn-hint {
+  position: absolute;
+  z-index: 29;
+  top: 12px;
+  right: 58px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 132px);
+  height: 32px;
+  margin: 0;
+  padding: 0 14px 0 6px;
+  border: 1px solid var(--float-edge);
+  border-radius: 999px;
+  background: var(--float);
+  box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.9);
+  font-size: var(--fs-meta);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: turn-hint 10s var(--ease) 0.6s both;
+}
+
+.turn-hint-i {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.turn-hint b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.turn-hint small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.turn-hint small::before {
+  content: "· ";
+}
+
+@keyframes turn-hint {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  6%,
+  88% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.app:has(.loc-card) .viewport .turn-hint {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewport .turn-hint {
+    animation-name: view-flash-calm;
+  }
+}
+
+/* ——— Stage row, refined: the days are a quiet chip, "Non nago?" and the views one family ——————————— */
+
+/* The days: a soft tinted chip (no border, no form-control look); its caret turns when the card is open. */
+.stage-heading .day-chip {
+  height: 26px;
+  padding: 0 8px 0 9px;
+  gap: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--text-2);
+  font: 550 var(--fs-meta) / 1 var(--font-ui);
+  box-shadow: none;
+}
+
+.stage-heading .day-chip > svg:first-child {
+  color: var(--text-3);
+}
+
+.stage-heading .day-chip .day-chip-caret {
+  color: var(--text-4);
+  transition: transform 0.2s var(--ease), color 0.15s;
+}
+
+.stage-heading .day-chip:hover,
+.stage-heading .day-chip[aria-expanded="true"] {
+  border: 0;
+  background: rgba(255, 255, 255, 0.095);
+  color: var(--text);
+}
+
+.stage-heading .day-chip:hover .day-chip-caret,
+.stage-heading .day-chip[aria-expanded="true"] .day-chip-caret {
+  color: var(--text-2);
+}
+
+.stage-heading .day-chip[aria-expanded="true"] .day-chip-caret {
+  transform: rotate(180deg);
+}
+
+/* "Non nago?": a larger, framed thumbnail and the top bar's own help glyph, quiet until hovered. */
+.stage-side .loc-btn,
+.stage-side .loc-btn.is-absorb {
+  gap: 7px;
+  padding: 3px 9px 3px 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg-1);
+}
+
+.stage-side .loc-btn .loc-svg {
+  width: 52px;
+  height: 32px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.stage-side .loc-btn .loc-q {
+  display: grid;
+  place-items: center;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  color: var(--text-3);
+  font: inherit;
+  transition: color 0.15s;
+}
+
+.stage-side .loc-btn:hover,
+.stage-side .loc-btn.is-on {
+  border-color: var(--ctl-edge-hover);
+  background: var(--surface-2);
+}
+
+.stage-side .loc-btn.is-on {
+  border-color: var(--plane-edge);
+}
+
+.stage-side .loc-btn:hover .loc-q,
+.stage-side .loc-btn.is-on .loc-q {
+  color: var(--text);
+}
+
+/* The views: one glyph size, names never wrap (the switch drops names to glyphs before that). */
+.seg.view-switch > button {
+  gap: 7px;
+  padding: 0 11px 0 9px;
+  white-space: nowrap;
+}
+
+.seg.view-switch > button > svg,
+.view-switch-ghost .vs-ghost-item > svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.seg.view-switch > button > span,
+.view-switch-ghost .vs-ghost-item,
+.view-switch-ghost .vs-ghost-item > span {
+  white-space: nowrap;
+}
+
+.seg.view-switch > button:not(.is-on) > svg {
+  opacity: 0.85;
+}
+
+/* Tablet: the topic picker is one refined key (kicker, topic, caret), not a bare native box. */
+@media (max-width: 820px) {
+  .mobile-topic {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 0 0 13px;
+    border: 1px solid var(--ctl-edge);
+    border-radius: var(--r-md);
+    background: var(--ctl);
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .mobile-topic:hover {
+    border-color: var(--ctl-edge-hover);
+    background: var(--ctl-hover);
+  }
+  .mobile-topic:focus-within {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+  .mobile-topic > span {
+    font: var(--kicker);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .mobile-topic select {
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 0;
+    height: 100%;
+    max-width: min(260px, 52vw);
+    padding: 0 34px 0 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text);
+    font: 600 var(--fs-ui) / 1 var(--font-ui);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .mobile-topic select:focus-visible {
+    outline: none;
+  }
+  .mobile-topic select option {
+    background: var(--float);
+    color: var(--text);
+  }
+  .mobile-topic .mobile-topic-caret {
+    position: absolute;
+    right: 12px;
+    color: var(--text-3);
+    pointer-events: none;
+  }
+}
+
+/* Tablet portrait: the stage heading reads from the left like every other heading, the days chip
+   wraps under a long title instead of running off the edge, and the views start under it. */
+@media (max-width: 820px) {
+  .stage-bar {
+    align-items: stretch;
+    gap: 10px;
+  }
+  .stage-bar > .stage-heading {
+    width: 100%;
+    min-width: 0;
+  }
+  .stage-heading .stage-title {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    min-width: 0;
+  }
+  .stage-heading .stage-title h2 {
+    min-width: 0;
+  }
+  .stage-bar > .stage-side {
+    max-width: none;
+    justify-content: flex-start;
+  }
+}
+
+/* The top orientation tag takes the top-left corner, as the bottom one takes the bottom-right: the
+   scene's own caption line is centred along the top edge, and the two never overprint. */
+.viewport .orient-top {
+  top: 12px;
+  left: 14px;
+  transform: none;
+}
+
+/* ═══ Simulator, redesigned: one product, calm ════════════════════════════════════════════════════
+   Rules: the scene and the reading are the study surface; every area has one primary action (white,
+   filled) and it is whatever the app is waiting for; one button family (32px quiet keys, a 36px
+   round play key); mono caps only for eyebrows and the orientation on the picture. */
+
+/* ——— Top bar: brand · topic switcher · practise | ask | the right column | more | help ——— */
+.topbar {
+  gap: 16px;
+}
+.tb-tools {
+  margin-left: auto;
+  gap: 6px;
+}
+.tb-group,
+.tb-panels {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.tb-tools .tool {
+  height: 32px;
+  padding: 0 11px;
+  gap: 7px;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-2);
+  font: 600 var(--fs-ui) / 1 var(--font-ui);
+}
+.tb-tools .tool:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.tb-tools .tool.is-on {
+  background: var(--surface-3);
+  border-color: var(--line-2);
+  color: var(--text);
+}
+.tb-tools .tool svg {
+  flex: none;
+  opacity: 0.9;
+}
+.tb-tools .tb-sep {
+  width: 1px;
+  height: 18px;
+  margin: 0 4px;
+  background: var(--line-2);
+}
+.tb-tools .tb-help {
+  width: 32px;
+  padding: 0;
+  justify-content: center;
+}
+
+/* The topic switcher: the current topic by number and name, one click from every other. */
+.tsw {
+  position: relative;
+  min-width: 0;
+}
+.tsw-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 34px;
+  max-width: min(420px, 34vw);
+  padding: 0 10px 0 5px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line-2);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  font: 600 var(--fs-ui) / 1 var(--font-ui);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tsw-btn:hover,
+.tsw.is-open .tsw-btn {
+  background: var(--surface-2);
+  border-color: var(--line-3);
+}
+.tsw-n {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 5px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--signal) 16%, transparent);
+  color: var(--signal);
+  font: 700 12.5px / 1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+.tsw-t {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tsw-caret {
+  flex: none;
+  color: var(--text-3);
+  transition: transform 0.18s var(--ease);
+}
+.tsw.is-open .tsw-caret {
+  transform: rotate(180deg);
+}
+.tsw-sheet {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 40;
+  width: min(720px, calc(100vw - 32px));
+  padding: 16px 16px 14px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--float-edge);
+  background: var(--float);
+  box-shadow: var(--float-shadow);
+  animation: tsw-in 0.16s var(--ease) both;
+}
+@keyframes tsw-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+.tsw-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 4px 12px;
+}
+.tsw-head .kicker {
+  margin: 0;
+}
+.tsw-here {
+  color: var(--text-3);
+  font-size: var(--fs-meta);
+}
+.tsw-here b {
+  color: var(--text-2);
+  font-weight: 600;
+}
+.tsw-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(var(--rows, 5), auto);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tsw-item {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 10px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  color: var(--text);
+  text-decoration: none;
+  transition: background 0.12s, border-color 0.12s;
+}
+.tsw-item:hover,
+.tsw-item:focus-visible {
+  background: var(--surface-2);
+  outline: none;
+}
+.tsw-item:focus-visible {
+  border-color: var(--line-3);
+}
+.tsw-item.is-on {
+  background: color-mix(in srgb, var(--signal) 9%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--signal) 38%, transparent);
+}
+.tsw-item-n {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--surface-3);
+  color: var(--text-2);
+  font: 700 13px / 1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+.tsw-item.is-on .tsw-item-n {
+  background: var(--signal);
+  color: #120a06;
+}
+.tsw-item-body {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.tsw-item-body b {
+  overflow: hidden;
+  font: 600 13.5px / 1.25 var(--font-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tsw-item-meta {
+  display: flex;
+  /* The topic's span and "Hemen zaude · stage" share a line when they fit; otherwise the stage drops below. */
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-3);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.tsw-item-meta em {
+  max-width: 100%;
+  overflow: hidden;
+  font-style: normal;
+  text-overflow: ellipsis;
+  color: var(--text-3);
+}
+.tsw-item-meta em.is-here {
+  color: var(--signal);
+}
+.tsw-item.is-wip {
+  opacity: 0.55;
+}
+.tsw-item-prog {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-3);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+.tsw-item.is-done .tsw-item-prog {
+  color: var(--ok, #6fcf97);
+}
+.tsw-bar {
+  position: relative;
+  width: 34px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.tsw-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 50%;
+  transform: scaleX(var(--p, 0));
+  background: var(--text-2);
+}
+.tsw-item.is-on .tsw-bar::after {
+  background: var(--signal);
+}
+
+/* ——— Stage heading: navigator · title · days | the views ——— */
+.stage-bar .crumbs-row {
+  min-width: 0;
+}
+.snav {
+  position: relative;
+  min-width: 0;
+}
+.snav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  /* The pull to the left (-7px) is given back, or the label would lose those 7px to an ellipsis. */
+  max-width: calc(100% + 7px);
+  height: 24px;
+  margin-left: -7px;
+  padding: 0 7px;
+  border-radius: 7px;
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  font: 500 var(--fs-meta) / 1 var(--font-ui);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.snav-btn:hover,
+.snav.is-open .snav-btn {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.snav-btn svg {
+  flex: none;
+}
+.snav-sec {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.snav-count {
+  flex: none;
+  padding-left: 8px;
+  border-left: 1px solid var(--line-2);
+  font-variant-numeric: tabular-nums;
+}
+.snav-count b {
+  color: var(--text);
+  font-weight: 600;
+}
+.snav-caret {
+  flex: none;
+  transition: transform 0.18s var(--ease);
+}
+.snav.is-open .snav-caret {
+  transform: rotate(180deg);
+}
+.snav-sheet {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: -7px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, calc(100vw - 32px));
+  max-height: min(560px, calc(100dvh - 180px));
+  border-radius: var(--r-lg);
+  border: 1px solid var(--float-edge);
+  background: var(--float);
+  box-shadow: var(--float-shadow);
+  animation: tsw-in 0.16s var(--ease) both;
+}
+.snav-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 10px;
+  padding: 14px 14px 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.snav-head .kicker {
+  margin: 0;
+}
+.snav-seen {
+  grid-row: 2;
+  color: var(--text-3);
+  font-size: var(--fs-meta);
+}
+.snav-pin {
+  grid-row: 1 / 3;
+  grid-column: 2;
+  gap: 6px;
+}
+.snav-pin kbd {
+  margin-left: 2px;
+}
+.snav-list {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 8px 10px;
+  overscroll-behavior: contain;
+}
+.snav-list .nt {
+  margin: 0;
+}
+.snav-list .ol-stage:focus-visible {
+  outline: 2px solid var(--line-3);
+  outline-offset: -2px;
+}
+/* The old mono counter is now the navigator's. */
+.stage-bar .stage-count {
+  display: none;
+}
+
+/* "Non nago?": the thumbnail is the key (no extra "?"): it opens its explanation. */
+.stage-side .loc-btn .loc-q,
+.stage-side .loc-btn .loc-badge {
+  display: none;
+}
+
+/* ——— Orientation: each pill at the middle of the edge it names. Top and bottom sit ON the frame
+   line (the scene's own captions keep the band inside); left and right inside, at mid-height (the
+   zones the label lint keeps clear). One pill style for all four. ——— */
+.viewport {
+  overflow: visible;
+}
+.viewport > svg {
+  clip-path: inset(0 round var(--r-xl));
+}
+.viewport .orient {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.viewport .orient span,
+.app.is-focus .viewport .orient span {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 19px;
+  padding: 0 9px;
+  border-radius: 10px;
+  border: 1px solid var(--frame-edge);
+  background: var(--bg);
+  color: var(--text-2);
+  font: 600 10.5px / 1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: none;
+  opacity: 1;
+  transform: none;
+}
+.viewport .orient .orient-top {
+  top: 0;
+  bottom: auto;
+  left: 50%;
+  right: auto;
+  /* Hangs from the frame line, clear of the scene's own top and bottom captions (which sit at the centre). */
+  transform: translate(-50%, -92%);
+}
+.viewport .orient .orient-bottom {
+  top: auto;
+  bottom: 0;
+  left: 50%;
+  right: auto;
+  transform: translate(-50%, 92%);
+}
+/* Outside the picture: the notch hangs into the gap above the reading card, so keep room for it. */
+.stage > .viewport {
+  margin-bottom: 9px;
+}
+.viewport .orient .orient-left {
+  top: 50%;
+  bottom: auto;
+  left: 12px;
+  right: auto;
+  transform: translateY(-50%);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+}
+.viewport .orient .orient-right {
+  top: 50%;
+  bottom: auto;
+  left: auto;
+  right: 12px;
+  transform: translateY(-50%);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+}
+/* A short frame brings mid-height up to the zoom keys: the right pill steps left of them (the picture is
+   then narrower than the frame, so it stands in the empty band beside it). */
+@media (max-height: 820px) {
+  .viewport .orient .orient-right {
+    right: 56px;
+  }
+}
+
+/* ——— Transport: one family ——— */
+.dock .tp-bar {
+  gap: 14px;
+}
+.dock .tp-buttons {
+  gap: 4px;
+}
+.dock .tp-stage,
+.dock .tp-prev,
+.dock .tp-set-btn,
+.dock .tp-voice,
+.dock .cap-next {
+  height: 32px;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-2);
+  font: 600 var(--fs-ui) / 1 var(--font-ui);
+  box-shadow: none;
+}
+.dock .tp-stage {
+  padding: 0 8px;
+  gap: 5px;
+}
+.dock .tp-stage:hover:not(:disabled),
+.dock .tp-prev:hover:not(:disabled),
+.dock .tp-set-btn:hover,
+.dock .tp-set-btn.is-on,
+.dock .tp-voice:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.dock .tp-stage:disabled {
+  opacity: 0.4;
+}
+/* Play: a 36px round key, quiet while playing; white (the primary) while the stage waits to start. */
+.dock .play,
+.dock .play.is-playing {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 18px;
+  border: 1px solid var(--line-2);
+  background: var(--surface-2);
+  color: var(--text);
+  box-shadow: none;
+}
+.dock .play svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.dock .play:hover {
+  background: var(--surface-3);
+}
+.dock .play.is-cue {
+  width: auto;
+  padding: 0 16px 0 13px;
+  gap: 7px;
+  border-color: var(--text);
+  background: var(--text);
+  color: #0b0b0c;
+}
+.dock .play.is-cue:hover {
+  background: #fff;
+}
+.dock .play .play-l {
+  font: 600 var(--fs-ui) / 1 var(--font-ui);
+}
+/* Where the playhead is, in words: sans with tabular figures. */
+.dock .tp-read,
+.dock .tp-read .tp-step {
+  font: 500 var(--fs-meta) / 18px var(--font-ui);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.dock .tp-read .tp-step {
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.dock .tp-read .tp-step b {
+  color: var(--text);
+  font-weight: 600;
+}
+.dock .tp-read .tp-step i {
+  font-style: normal;
+  color: var(--text-3);
+}
+.dock .tp-read .tp-tc {
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+/* Voice and mode: one group. */
+.dock .tp-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+.dock .tp-voice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: 7px;
+}
+.dock .tp-voice.is-on {
+  background: color-mix(in srgb, var(--signal) 14%, transparent);
+  color: var(--signal);
+}
+.dock .tp-set-btn {
+  height: 28px;
+  padding: 0 8px 0 9px;
+  gap: 6px;
+  border-radius: 7px;
+}
+.dock .tp-set-caret {
+  color: var(--text-3);
+}
+.dock .tp-pager {
+  gap: 4px;
+}
+.dock .tp-prev {
+  width: 32px;
+  padding: 0;
+  justify-content: center;
+  border-color: var(--line-2);
+}
+/* The Next key: a quiet key by default; white (the primary) when the app is waiting for it. */
+.dock .cap-next {
+  min-width: 132px;
+  padding: 0 12px 0 14px;
+  gap: 8px;
+  justify-content: space-between;
+  border-color: var(--line-2);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.dock .cap-next:hover:not(:disabled) {
+  background: var(--surface-3);
+}
+.dock .cap-next.is-wait,
+.dock .cap-next.is-stage {
+  border-color: var(--text);
+  background: var(--text);
+  color: #0b0b0c;
+}
+.dock .cap-next.is-wait:hover,
+.dock .cap-next.is-stage:hover {
+  background: #fff;
+}
+.dock .cap-next.is-wait .cap-wait-dot {
+  background: var(--signal);
+}
+.dock .cap-next:disabled {
+  opacity: 0.45;
+}
+
+/* ——— Tablet portrait ——— */
+@media (max-width: 820px) {
+  .tsw {
+    flex: 1;
+  }
+  .tsw-btn {
+    width: 100%;
+    max-width: none;
+    height: 40px;
+  }
+  .tsw-caret {
+    margin-left: auto;
+  }
+  .tsw-sheet {
+    position: fixed;
+    top: 60px;
+    left: 16px;
+    right: 16px;
+    width: auto;
+    max-height: calc(100dvh - 80px);
+    overflow-y: auto;
+  }
+  .tb-tools .mobile-questions,
+  .tb-tools .tb-panels {
+    display: none;
+  }
+}
+
+/* The folded outline is gone (no rail): its column goes with it. */
+.workspace.no-outline {
+  grid-template-columns: minmax(0, 1fr) 344px;
+}
+.workspace.notes-mode.no-outline {
+  grid-template-columns: minmax(0, 1fr) clamp(380px, 34vw, 600px);
+}
+@media (min-width: 1321px) {
+  .workspace.no-outline.no-info {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (min-width: 1800px) {
+  .workspace.no-outline {
+    grid-template-columns: minmax(0, 1fr) 400px;
+  }
+}
+@media (max-width: 1320px) {
+  .workspace.no-outline,
+  .workspace.notes-mode.no-outline {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Short screens: the navigator joins the title line (the kicker line goes, the stage list stays). */
+@media (max-height: 820px) and (min-width: 821px) {
+  .stage-bar .stage-heading {
+    display: flex;
+    align-items: center;
+    gap: 6px 12px;
+    min-width: 0;
+  }
+  .stage-bar .crumbs-row,
+  .stage-bar .crumbs-row:has(.back-chip) {
+    display: flex;
+    flex: none;
+    min-width: 0;
+  }
+  .stage-bar .crumbs-row:has(.back-chip) > :not(.back-chip) {
+    display: revert;
+  }
+  .stage-bar .crumbs-row .snav-sec {
+    display: none;
+  }
+  .stage-bar .crumbs-row .snav-count {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .stage-bar .crumbs-row .snav-btn {
+    height: 30px;
+    margin-left: 0;
+    border: 1px solid var(--line-2);
+  }
+  .stage-bar .stage-heading .stage-title {
+    min-width: 0;
+  }
+}
+
+/* Tablet portrait: one bar (brand · topic · more), the practice and column keys live in "more". */
+@media (max-width: 820px) {
+  .topbar {
+    flex-wrap: nowrap;
+  }
+  .tb-tools {
+    flex: none;
+    width: auto;
+  }
+  .tb-tools > .pop,
+  .tb-tools > .tool {
+    flex: none;
+  }
+  .tb-tools .tool {
+    width: auto;
+    height: 40px;
+    padding: 0 12px;
+  }
+}
+
+/* A topic built in part: named "prestatzen", still openable. */
+.tsw-item-meta em.is-prep {
+  color: var(--warn, #e0b25a);
+}
+.lp-card-new.is-prep {
+  background: rgba(224, 178, 90, 0.16);
+  color: #e8c27a;
 }

@@ -9,6 +9,7 @@ import { appearances, isSpace, partsOf, nameOf } from '@/content/registry';
 import type { StageDef } from '@/lib/sim/types';
 import { IconClose, IconExpand } from './icons';
 import styles from './structure-atlas.module.css';
+import { SceneView } from '@/components/kit';
 
 interface Shot {
   week: number;
@@ -163,7 +164,7 @@ export function AtlasFigure({ id }: { id: string }) {
           {mounted && (
             <SceneContext.Provider value={ctx}>
               <LabelScaleContext.Provider value={{ k: big ? 1 : (pick?.k ?? 1), left: false, right: false }}>
-                <Scene t={shot.t} reduced />
+                <SceneView Scene={Scene} t={shot.t} reduced />
               </LabelScaleContext.Provider>
             </SceneContext.Provider>
           )}

@@ -14,6 +14,7 @@ const structuresA: StructureDef[] = [
   {
     id: 'hiru-orriko-diskoa',
     name: 'Hiru orriko ernetze diskoa',
+    spans: ['ektodermoa', 'mesodermo-intraenbrionarioa', 'endodermoa'],
     es: 'Disco germinativo trilaminar',
     aka: ['Disko germinatiboa (trilaminarra)'],
     category: 'anatomia',
@@ -259,9 +260,11 @@ const stagesA: StageDef[] = [
         id: 'diskoa',
         label: 'Diskoa gertutik',
         plane: 'xehetasuna',
-        description: 'Bi orriko ernetze diskoa handituta: epiblastoa (dortsala) eta hipoblastoa (bentrala), oraindik gastrulatu gabe.',
-        orientation: { top: 'Amnios barrunbea', bottom: 'Bitelo zakua' },
+        description: 'Bi orriko ernetze diskoa handituta, urratsez urrats: bi zakuen artean, korion barrunbearen erdian, mesodermo estalkia eta finkapen pedikuluaren sustraia; gero amnioa, bi orrien zelulak eta bitelo zakua.',
+        orientation: { top: 'Amnios barrunbea', bottom: 'Bitelo zakua', left: 'Kraneala', right: 'Kaudala' },
         scene: Stage1Disc,
+        // Its own story per step (steps 1–4 tell the chorion in the sagittal view): it sets its own emphasis.
+        ownFocus: true,
       },
     ],
     beats: [

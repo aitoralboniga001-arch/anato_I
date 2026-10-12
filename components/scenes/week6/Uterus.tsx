@@ -156,9 +156,11 @@ export function UterusSagittal({ t }: SceneProps) {
   const w0 = wallMid - lerp(92, 100, k);
   const w1 = wallMid + lerp(92, 88, k);
 
-  const villLen = lerp(lerp(11, 15, seg(t, 0.12, 0.22)), 34, k) + 4 * seg(t, 0.56, 0.66);
+  // Step 2: the villi of the embryonic pole grow long and bushy (more of them, between the first ones).
+  const frond = seg(t, 0.12, 0.24);
+  const villLen = lerp(lerp(12, 22, frond), 34, k) + 4 * seg(t, 0.56, 0.66);
   const basal = lerp(12, 26, k);
-  const leunaVilli = 1 - 0.3 * seg(t, 0.12, 0.22) - 0.7 * seg(t, 0.26, 0.36); // abembryonic villi degenerate
+  const leunaVilli = 1 - 0.15 * seg(t, 0.12, 0.22) - 0.85 * seg(t, 0.26, 0.38); // abembryonic villi degenerate
   const caps = lerp(11, 2, seg(t, 0.7, 0.8));
   const capsShow = 1 - seg(t, 0.72, 0.82);
   const cavityShow = 1 - seg(t, 0.72, 0.82);
@@ -198,11 +200,20 @@ export function UterusSagittal({ t }: SceneProps) {
     dense.syn += v.syn;
     dense.meso += v.meso;
     dense.cap += v.cap;
+    // the extra villi that make the frondosum dense, growing in between (step 2)
+    const extra = Math.max(frond, k);
+    if (i < nW && extra > 0.03) {
+      const e = villus(sac, a + (w1 - w0) / nW / 2, villLen * 0.82 * extra * (0.75 + 0.25 * edge), i + 70, hwV * 0.92);
+      dense.syn += e.syn;
+      dense.meso += e.meso;
+      dense.cap += e.cap;
+    }
   }
+  // Abembryonic villi: as long and as many as the others at first (villi all round), then they regress (step 3).
   if (leunaVilli > 0.02) {
-    for (let i = 1; i < 12; i++) {
-      const a = w1 + ((360 - (w1 - w0)) * i) / 12;
-      const v = villus(sac, a, 12 * leunaVilli, i + 40, 1.9 * Math.max(0.5, leunaVilli));
+    for (let i = 1; i < 24; i++) {
+      const a = w1 + ((360 - (w1 - w0)) * i) / 24;
+      const v = villus(sac, a, 18 * leunaVilli * (0.85 + 0.15 * Math.sin(i * 1.7)), i + 40, 2.6 * Math.max(0.5, leunaVilli));
       sparse.syn += v.syn;
       sparse.meso += v.meso;
     }
@@ -213,7 +224,7 @@ export function UterusSagittal({ t }: SceneProps) {
   // Camera: push in on the small chorionic sac for beats 1–5 (poles, chorion types, deciduae), then pull
   // back out while the sac grows to fill the uterus (beat 6), so the whole organ is in view for B.
   const push = seg(t, 0.01, 0.07) * (1 - k);
-  const z = zoom(lerp(500, 538, push), lerp(320, 226, push), lerp(1, 1.5, push), lerp(500, 515, push), lerp(320, 296, push));
+  const z = zoom(lerp(500, 538, push), lerp(320, 226, push), lerp(1, 1.7, push), lerp(500, 512, push), lerp(320, 300, push));
 
   const rightLabels: StackItem[] = [
     { id: 'mutur-enbrionarioa', a: z.at(wallA(wallMid, villLen + basal)[0], wallA(wallMid, villLen + basal)[1]), show: vis(t, 0.12, 0.4), small: true },

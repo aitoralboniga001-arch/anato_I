@@ -10,11 +10,13 @@ import { ageLabel, spanOf } from '@/lib/sim/age';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { PlaneKind, StageDef, StructureCategory, StructureDef, WeekDef } from '@/lib/sim/types';
 import { Glossary } from './Glossary';
-import { IconBook, IconCalendar, IconNotes, IconClock, IconExpand, IconHelp, IconImage, IconLayers, IconMore, IconPlay, IconQuiz, IconShrink, IconTag, IconTarget, IconTree } from './icons';
+import { IconBook, IconCalendar, IconChevron, IconNotes, IconClock, IconExpand, IconHelp, IconImage, IconLayers, IconMore, IconQuiz, IconShrink, IconTag, IconTarget, IconTree } from './icons';
 import { Popover } from './Popover';
 import { Wordmark, isWip } from './LandNav';
 import { AskCard, Player, TourCard, ideaOf } from './Player';
-import { Help, useHelpOnce } from './Help';
+import { Help, useHelp } from './Help';
+import { TourHost } from './tour/TourHost';
+import { useTourBusy } from './tour/store';
 import { Questions } from './Questions';
 import { Inspector } from './Inspector';
 import { NotesPanel } from './NotesPanel';
@@ -24,7 +26,7 @@ import { Locator } from './Locator';
 import { ViewBridge, ViewFlash, needsBridge, type ViewSnap } from './ViewBridge';
 import { ViewTravel, travelPlan, type TravelPlan } from './ViewTravel';
 import { CavityRoad } from './CavityRoad';
-import { IconRail, Outline, StageInfo } from './SidePanel';
+import { IconRail, Outline, StageInfo, StageNav } from './SidePanel';
 import { Viewport } from './Viewport';
 import { ViewSwitch } from './ViewSwitch';
 import { WeekNav } from './WeekNav';
@@ -40,6 +42,7 @@ import { sectionLabel, sectionOf } from '@/content/notes';
 import { examDatesAt } from '@/content/examDates';
 import { formationFrame, formationOf, type Formation } from '@/content/formation';
 import type { KimuTarget } from '@/lib/kimu/types';
+import { SceneView } from '@/components/kit';
 
 interface Pos {
   i: number;
@@ -308,6 +311,15 @@ function legendOf(ids: readonly string[]) {
 
 /** Full screen was accepted earlier in this tab: later playbacks enter it without asking. */
 const FS_ACCEPTED = 'enbrioatlas:fs-accepted';
+/** The viewer has turned a 3D view once: the shell no longer explains how. */
+const TURNED_KEY = 'enbrioatlas:turned-3d';
+const readTurned = () => {
+  try {
+    return window.localStorage.getItem(TURNED_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
 const fsAccepted = () => {
   try {
     return window.sessionStorage.getItem(FS_ACCEPTED) === '1';
@@ -347,7 +359,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const [print, setPrint] = useState(false);
   const [back, setBack] = useState<Back | null>(null);
   const [formation, setFormation] = useState<Formation | null>(null);
-  const [helpOpen, setHelpOpen, firstVisit] = useHelpOnce();
+  const [helpOpen, setHelpOpen] = useHelp();
+  const tourBusy = useTourBusy();
   const [nowOpen, setNowOpen] = useState(false);
   const guidedPref = usePref('guided');
   const quick = usePref('quick');
@@ -480,6 +493,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     setManualView((m) => ({ ...m, [stage.id]: true }));
     setViewByStage((m) => ({ ...m, [stage.id]: id }));
   };
+  // One card over the picture at a time: when the structure tour starts, an open view card folds into its chip.
+  if (tour && bridge && !bridge.small) setBridge({ ...bridge, small: true });
   // Guided mode asks the step's micro-question once its animation is done, before moving on.
   const askNow = !formation && guided && playing && waiting && intro === null && (!tour || (voice && audioState.status === 'done')) && asksOn && !!beat?.ask && !asked.includes(askKey);
 
@@ -1120,9 +1135,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       if (f) { q.set('eraketa', f.structure); q.set('apunteak', '1'); }
       else if (t.structure) q.set('egitura', t.structure);
       if (f?.view ?? t.view) q.set('ikuspegia', (f?.view ?? t.view)!);
+      if (t.notes) q.set('apunteak', '1');
       router.push(`/astea/${t.week}?${q}`);
       return;
     }
+    if (t.notes) setPref('notes', true);
     setBack(origin);
     place({ i: week.stages.indexOf(destination), t: f?.start ?? t.at });
     const vid = f?.view ?? t.view;
@@ -1136,9 +1153,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   });
   useEffect(() => registerKimuHost({ go: (t) => kimuGo(t) }), []);
   useEffect(() => {
-    setKimuHere({ week: week.week, stage: stage.id, beat: activeBeat, structure: selected ?? formation?.structure });
+    setKimuHere({ week: week.week, stage: stage.id, beat: activeBeat, structure: selected ?? formation?.structure, view: view.id });
     return () => setKimuHere(null);
-  }, [week.week, stage.id, activeBeat, selected, formation]);
+  }, [week.week, stage.id, activeBeat, selected, formation, view.id]);
   const kimuOpen = useKimuOpen();
 
   const goBack = () => {
@@ -1360,6 +1377,44 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     return () => cancelAnimationFrame(raf);
   }, [focusKey, beat, mounted]);
 
+  // Cards at the foot of the picture (the structure tour, the full-screen offer) take the bottom corner
+  // away from what is being pointed at, so a card never covers the structure it names.
+  const [noticeSide, setNoticeSide] = useState<'left' | 'right'>('left');
+  const sideOf = tour ? tour.items[tour.idx] : null;
+  useEffect(() => {
+    if (!sideOf) return;
+    const raf = requestAnimationFrame(() => {
+      const svg = svgRef.current;
+      if (!svg) return;
+      const sel = `[data-label="${CSS.escape(sideOf)}"], [data-part="${CSS.escape(sideOf)}"]`;
+      const boxes = [...svg.querySelectorAll(sel)].map((el) => el.getBoundingClientRect()).filter((r) => r.width + r.height > 0);
+      if (!boxes.length) return;
+      const f = svg.getBoundingClientRect();
+      const w = Math.min(440, f.width * 0.46);
+      const h = 160;
+      const cover = (x0: number) => boxes.reduce((a, r) => a + Math.max(0, Math.min(r.right, x0 + w) - Math.max(r.left, x0)) * Math.max(0, Math.min(r.bottom, f.bottom) - Math.max(r.top, f.bottom - h)), 0);
+      const left = cover(f.left);
+      const right = cover(f.right - w);
+      setNoticeSide(left > right ? 'right' : 'left');
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [sideOf, view.id]);
+
+  // 3D views turn by dragging: said once, as a chip in the view corner, until the viewer has done it.
+  const [turned3d, setTurned3d] = useState<boolean | null>(null);
+  if (mounted && turned3d === null) setTurned3d(readTurned());
+  const [turnable, setTurnable] = useState('');
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setTurnable(svgRef.current?.querySelector('.stage3d-orbit') ? sceneKey : ''));
+    return () => cancelAnimationFrame(raf);
+  }, [sceneKey, mounted]);
+  const onTurn = () => {
+    setTurned3d(true);
+    try {
+      window.localStorage.setItem(TURNED_KEY, '1');
+    } catch {}
+  };
+
   const inScene = (id: string) => !!svgRef.current?.querySelector(`[data-part="${CSS.escape(id)}"]`);
   const pick = (id: string) => {
     setSelected(id);
@@ -1477,7 +1532,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const snap: ViewSnap = { key: sceneKey, week: week.week, stageTitle: stage.title, label: view.label, plane: view.plane, day, level: view.locator?.level, orientation: view.orientation };
   const [seenView, setSeenView] = useState<ViewSnap | null>(null);
   const [viewFlash, setViewFlash] = useState<{ key: string; label: string; plane: PlaneKind } | null>(null);
-  if (mounted && seenView?.key !== sceneKey) {
+  // Only once the deep link has been applied: the view a link replaces was never on screen.
+  if (mounted && linkedWeek === week.week && seenView?.key !== sceneKey) {
     const from = seenView ?? readLastView(week.week);
     setSeenView(snap);
     // When the view of the same body changes (by the simulation or by the viewer), the camera travels from the old plane to the new one.
@@ -1487,10 +1543,12 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     if (plan) setTravel({ key: sceneKey, plan });
     else if (travel) setTravel(null);
     // After a camera move the card is only its chip (reopen to read it); narrated, it is read out as before.
-    if (!formation && from && pickedView !== sceneKey && needsBridge(from, snap)) setBridge({ from, to: snap, small: !!plan && !voice });
+    const bridged = !formation && !!from && pickedView !== sceneKey && needsBridge(from, snap);
+    if (bridged) setBridge({ from, to: snap, small: !!plan && !voice });
     else if (bridge) setBridge(null);
-    // Every other view change the simulation makes is announced over the picture itself, briefly.
-    if (!plan && !formation && seenView && pickedView !== sceneKey && seenView.label !== snap.label) setViewFlash({ key: sceneKey, label: view.label, plane: view.plane });
+    // Every other view change the simulation makes is announced over the picture itself, briefly
+    // (one message at a time: when the card opens, it already names the new view).
+    if (!plan && !bridged && !formation && seenView && pickedView !== sceneKey && seenView.label !== snap.label) setViewFlash({ key: sceneKey, label: view.label, plane: view.plane });
   }
   const saveView = useEffectEvent(() => {
     try {
@@ -1524,37 +1582,30 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         <Link href="/" className="tb-brand" title="Hasiera">
           <Wordmark size={20} />
         </Link>
-        <label className="mobile-topic">
-          <span>Gaia</span>
-          <select aria-label="Gaia aukeratu" value={week.week} onChange={(e) => router.push(`/astea/${e.target.value}`)}>
-            {weeks.map((w) => <option key={w.week} value={w.week}>{w.week}. gaia{isWip(w) ? ' · prestatzen' : ''}</option>)}
-          </select>
-        </label>
-        <span className="tb-weeks-l" aria-hidden>
-          Gaia
-        </span>
         <WeekNav current={week} stageId={stage.id} />
         <div className="tb-tools">
-          {/* Ask (Kimu) · test yourself (Aurkitu, Galderak) · what the right column shows · more · help. */}
-          <button className={`tool tool-main kimu-tool mobile-tool-hidden${kimuOpen ? ' is-on' : ''}`} onClick={toggleKimu} aria-label="Galdetu Kimuri" aria-expanded={kimuOpen} data-tip="Galdetu Kimuri: lekura eramango zaitu · K" data-tip-pos="bottom">
+          {/* Test yourself (Aurkitu, Galderak) · ask (Kimu) · what the right column shows · more · the one help. */}
+          <div className="tb-group" role="group" aria-label="Frogatu">
+            <button data-tour="aurkitu" className={`tool tool-main mobile-tool-hidden${find ? ' is-on' : ''}`} aria-label={find ? 'Aurkitu amaitu' : 'Aurkitu'} aria-pressed={!!find} onClick={() => (find ? setFind(null) : startFind())} data-tip={find ? 'Aurkitzeko jokoa amaitu · Esc' : 'Frogatu: irudian galdetzen zaizun egitura klikatu'} data-tip-pos="bottom">
+              <IconTarget size={16} /> <span>Aurkitu</span>
+            </button>
+            <button
+              className="tool tool-main mobile-questions"
+              data-tour="galderak"
+              aria-label="Galderak"
+              onClick={() => {
+                setQuestionsConcept(undefined);
+                setQuestionsOpen(true);
+              }}
+              data-tip="Frogatu: aukera anitzeko galderak, azalpenarekin"
+              data-tip-pos="bottom"
+            >
+              <IconQuiz size={16} /> <span>Galderak</span>
+            </button>
+          </div>
+          <button data-tour="kimu" className={`tool tool-main kimu-tool mobile-tool-hidden${kimuOpen ? ' is-on' : ''}`} onClick={toggleKimu} aria-label="Galdetu Kimuri" aria-expanded={kimuOpen} data-tip="Galdetu Kimuri: lekura eramango zaitu · K" data-tip-pos="bottom">
             <KimuFace size={26} mood="happy" still /> <span className="tb-l">Galdetu Kimuri</span>
             <span className="tb-s" aria-hidden>Kimu</span>
-          </button>
-          <span className="tb-sep mobile-tool-hidden" aria-hidden />
-          <button className={`tool tool-main mobile-tool-hidden${find ? ' is-on' : ''}`} aria-label={find ? 'Aurkitu amaitu' : 'Aurkitu'} aria-pressed={!!find} onClick={() => (find ? setFind(null) : startFind())} data-tip={find ? 'Aurkitzeko jokoa amaitu · Esc' : 'Frogatu: irudian galdetzen zaizun egitura klikatu'} data-tip-pos="bottom">
-            <IconTarget size={16} /> <span>Aurkitu</span>
-          </button>
-          <button
-            className="tool tool-main mobile-questions"
-            aria-label="Galderak"
-            onClick={() => {
-              setQuestionsConcept(undefined);
-              setQuestionsOpen(true);
-            }}
-            data-tip="Frogatu: aukera anitzeko galderak, azalpenarekin"
-            data-tip-pos="bottom"
-          >
-            <IconQuiz size={16} /> <span>Galderak</span>
           </button>
           <span className="tb-sep mobile-tool-hidden" aria-hidden />
           {/* The right column shows the stage summary or the original notes (or nothing): one switch. */}
@@ -1562,13 +1613,13 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             <button className={`tool mobile-tool-hidden${summaryShown ? ' is-on' : ''}`} aria-label="Laburpena" onClick={togglePanel} data-tip={summaryShown ? 'Laburpena ezkutatu · ]' : 'Etaparen laburpena: gakoak, datak eta egiturak · ]'} data-tip-pos="bottom" aria-pressed={summaryShown}>
               <IconRail open={summaryShown} side="right" /> <span>Laburpena</span>
             </button>
-            <button className={`tool mobile-notes${notesShown ? ' is-on' : ''}`} aria-label="Apunteak" onClick={toggleNotes} aria-pressed={notesShown} data-tip={notesShown ? 'Apunteak ezkutatu · N' : 'Jatorrizko apunteak, simulazioarekin batera · N'} data-tip-pos="bottom-end">
+            <button data-tour="apunteak" className={`tool mobile-notes${notesShown ? ' is-on' : ''}`} aria-label="Apunteak" onClick={toggleNotes} aria-pressed={notesShown} data-tip={notesShown ? 'Apunteak ezkutatu · N' : 'Jatorrizko apunteak, simulazioarekin batera · N'} data-tip-pos="bottom-end">
               <IconNotes size={16} /> <span>Apunteak</span>
             </button>
           </div>
           <Popover
             trigger={({ open, toggle }) => (
-              <button className={`tool${open ? ' is-on' : ''}`} aria-label="Tresnak" onClick={toggle} aria-expanded={open} aria-haspopup="menu" data-tip="Glosarioa, kronologia, leinuak, irudiak…" data-tip-pos="bottom">
+              <button data-tour="tresnak" className={`tool${open ? ' is-on' : ''}`} aria-label="Tresnak" onClick={toggle} aria-expanded={open} aria-haspopup="menu" data-tip="Glosarioa, kronologia, leinuak, irudiak…" data-tip-pos="bottom">
                 <IconMore size={16} /> <span>Tresnak</span>
               </button>
             )}
@@ -1580,6 +1631,12 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                 </button>
                 <button className="mobile-menu-item" role="menuitem" onClick={() => { close(); if (find) setFind(null); else startFind(); }}>
                   <IconTarget size={16} /> {find ? 'Aurkitu amaitu' : 'Aurkitu'}
+                </button>
+                <button className="mobile-menu-item" role="menuitem" onClick={() => { close(); setQuestionsConcept(undefined); setQuestionsOpen(true); }}>
+                  <IconQuiz size={16} /> Galderak
+                </button>
+                <button className="mobile-menu-item" role="menuitem" onClick={() => { close(); toggleNotes(); }}>
+                  <IconNotes size={16} /> Apunteak
                 </button>
                 <button className="mobile-menu-item" role="menuitem" onClick={() => { close(); togglePanel(); }}>
                   <IconRail open={summaryShown} side="right" /> Laburpena
@@ -1628,7 +1685,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               </div>
             )}
           </Popover>
-          <button className="tool tool-icon tb-help mobile-tool-hidden" aria-label="Laguntza" onClick={() => setHelpOpen(true)} data-tip="Laguntza: botoi bakoitzak zer egiten duen, teklak eta koloreak · ?" data-tip-pos="bottom-end">
+          <button className="tool tool-icon tb-help mobile-tool-hidden" data-tour="laguntza" aria-label="Laguntza" onClick={() => setHelpOpen(true)} data-tip="Laguntza: gida laburra, botoiak, teklak eta koloreak · ?" data-tip-pos="bottom-end">
             <IconHelp size={17} />
           </button>
         </div>
@@ -1649,36 +1706,30 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             <div className="stage-heading">
               {/* Where this stage sits in the notes: topic › heading, numbered as the notes number it. */}
               <div className="crumbs-row">
-                <p className="kicker crumbs" title={[notesAt?.parent && sectionLabel(notesAt.parent), notesAt?.section.covers].filter(Boolean).join(' · ') || undefined}>
-                  {/* The topic is lit in the top bar and named under the index: the room goes to the notes' heading. */}
-                  {notesAt ? <span className="crumb-sec">{sectionLabel(notesAt.section)}</span> : <span>{week.week}. gaia</span>}
-                </p>
-                {/* Where this stage sits among the topic's stages: a counter and one pip per stage. */}
-                {week.stages.length > 1 && (
-                  <nav className="stage-map" aria-label="Gaiaren etapak">
-                    <span className="stage-map-n">
-                      Etapa <b>{pos.i + 1}</b>/{week.stages.length}
-                    </span>
-                    {week.stages.map((s, i) => (
-                      <button
-                        key={s.id}
-                        className={`stage-pip${i === pos.i ? ' is-cur' : visited.includes(s.id) ? ' is-done' : ''}`}
-                        onClick={() => i !== pos.i && openStage(i)}
-                        aria-label={`Etapa ${i + 1}/${week.stages.length}: ${s.title}`}
-                        aria-current={i === pos.i ? 'step' : undefined}
-                        data-tip={`${s.title} · ${s.day}`}
-                        data-tip-pos="bottom"
-                      />
-                    ))}
-                  </nav>
+                {/* Where this stage sits in the notes and among the topic's stages: one key that opens the
+                    notes' index (the outline's job when its column is folded). */}
+                <StageNav
+                  week={week}
+                  current={pos.i}
+                  visited={visited}
+                  onStage={openStage}
+                  label={notesAt ? sectionLabel(notesAt.section) : `${week.week}. gaia`}
+                  outlineShown={outlineShown}
+                  onToggleOutline={toggleOutline}
+                />
+                {/* After a jump to where something formed: the way back, beside "where am I", never over the picture. */}
+                {back && (
+                  <button className="back-chip" onClick={goBack} title={`Itzuli: ${back.title}`}>
+                    <span aria-hidden>←</span> Bueltatu <b>{back.title}</b>
+                  </button>
                 )}
               </div>
               <div className="stage-title">
                 <h2 title={stage.title}>{stage.title}</h2>
-                <button className="day-chip" onClick={() => setNowOpen((v) => !v)} aria-expanded={nowOpen} title={`${weekOfDay(day)}. astea · ${periodOf(day).name} — zer dago orain, zer den berria, zer desagertu den`}>
+                <button className="day-chip" data-tour="eguna" onClick={() => setNowOpen((v) => !v)} aria-expanded={nowOpen} title={`${weekOfDay(day)}. astea · ${periodOf(day).name} — zer dago orain, zer den berria, zer desagertu den`}>
                   <IconCalendar size={13} />
-                  {stage.day}
-                  <i aria-hidden>▾</i>
+                  <span>{stage.day}</span>
+                  <IconChevron size={12} className="day-chip-caret" />
                 </button>
               </div>
               {nowOpen && (
@@ -1706,7 +1757,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                 note={view.locator?.note}
                 view={view.description}
                 viewKey={`${stage.id}/${view.id}`}
-                hold={(drawer && panelOpen) || helpOpen || questionsOpen || glossaryOpen || !!bridge || playing || intro !== null || !!find || nowOpen || kimuOpen || !!formation}
+                hold={(drawer && panelOpen) || helpOpen || tourBusy || questionsOpen || glossaryOpen || !!bridge || playing || intro !== null || !!find || nowOpen || kimuOpen || !!formation}
                 onOpen={() => setNowOpen(false)}
               />
               {stage.views.length > 1 && <ViewSwitch views={stage.views} current={view.id} onChoose={chooseView} />}
@@ -1725,6 +1776,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               onFullscreenChange={setFocusMode}
               makeRoom={intro !== null}
               hoverNames={showLabels && !find && intro === null && !travel}
+              onTurn={turned3d ? undefined : onTurn}
               overlay={
                 <>
                   <div className="view-tools">
@@ -1749,13 +1801,15 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       </span>
                     </div>
                   )}
-                  {back && (
-                    <button className="back-chip" onClick={goBack} title={`Itzuli: ${back.title}`}>
+                  {back && focusMode && (
+                    // Focus mode hides the stage heading, so the way back floats at the top of the picture.
+                    <button className="back-chip is-float" onClick={goBack} title={`Itzuli: ${back.title}`}>
                       <span aria-hidden>←</span> Bueltatu <b>{back.title}</b>
                     </button>
                   )}
-                  {focusMode && (
-                    <p className="focus-title">
+                  {focusMode && !tour && !fsOffer && (
+                    // Says where we are, then steps out of the way: the bottom-left corner holds names.
+                    <p className="focus-title" key={`ft-${stage.id}`}>
                       <span>
                         {week.week}. gaia{notesAt ? ` › ${sectionLabel(notesAt.section)}` : ''}
                       </span>
@@ -1774,9 +1828,16 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                     </div>
                   )}
                   {viewFlash && viewFlash.key === sceneKey && intro === null && <ViewFlash key={`flash-${viewFlash.key}`} label={viewFlash.label} plane={viewFlash.plane} onDone={() => setViewFlash(null)} />}
+                  {turnable === sceneKey && turned3d === false && !bridge && !(viewFlash && viewFlash.key === sceneKey) && intro === null && !find && !travel && (
+                    <p className="turn-hint" key={`turn-${sceneKey}`} role="status">
+                      <span className="turn-hint-i" aria-hidden>↻</span>
+                      <b>Arrastatu biratzeko</b>
+                      <small>klik bikoitza: hasierara</small>
+                    </p>
+                  )}
                   {bridge && intro === null && !travel && <ViewBridge autoClose={!voice} key={bridge.to.key} from={bridge.from} to={bridge.to} small={!!bridge.small} onSmall={(v) => setBridge((b) => (b ? { ...b, small: v } : b))} onClose={() => { transport.cancel(); setBridge(null); }} />}
                   {tour && intro === null && structures.get(tour.items[tour.idx]) && (
-                    <TourCard compact={voice} item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} onSkip={skipTour} onPick={onSelect} />
+                    <TourCard compact={voice} side={noticeSide} item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} onSkip={skipTour} onPick={onSelect} />
                   )}
                   {intro !== null && (
                     <div className="pv-card" key={`intro-${stage.id}`}>
@@ -1832,17 +1893,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       </div>
                     </div>
                   )}
-                  {!playing && pos.t === 0 && !find && intro === null && !travel && (
-                    <button className="start" onClick={togglePlay}>
-                      <span className="start-icon">
-                        <IconPlay size={14} />
-                      </span>
-                      Erreproduzitu etapa
-                      <kbd>Zuriunea</kbd>
-                    </button>
-                  )}
-                  {fsOffer && playing && !focusMode && (
-                    <div className="fs-offer" role="group" aria-label="Pantaila osoa">
+                  {fsOffer && playing && !focusMode && !tour && (
+                    <div className={`fs-offer is-${noticeSide}`} role="group" aria-label="Pantaila osoa">
                       <span className="fs-offer-icon" aria-hidden>
                         <IconExpand size={15} />
                       </span>
@@ -1904,23 +1956,23 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                 <ViewTravel
                   key={`travel-${travel.key}`}
                   plan={travel.plan}
-                  old={<GhostScene t={ghost.t} reduced={reduced} />}
+                  old={<SceneView Scene={GhostScene} t={ghost.t} reduced={reduced} />}
                   onDone={() => {
                     setTravel(null);
                     setGhost(null);
                     setArrived(sceneKey);
                   }}
                 >
-                  {mounted && <Scene t={sceneT} reduced={reduced} />}
+                  {mounted && <SceneView Scene={Scene} t={sceneT} reduced={reduced} />}
                 </ViewTravel>
               ) : (
                 <>
                   <g key={`${stage.id}/${view.id}`} className={arrived === sceneKey ? 'scene-arrived' : 'scene-enter'}>
-                    {mounted && <Scene t={sceneT} reduced={reduced} />}
+                    {mounted && <SceneView Scene={Scene} t={sceneT} reduced={reduced} />}
                   </g>
                   {ghost && GhostScene && (
                     <g key={`ghost-${ghost.key}`} className="scene-ghost" pointerEvents="none" aria-hidden>
-                      <GhostScene t={ghost.t} reduced={reduced} />
+                      <SceneView Scene={GhostScene} t={ghost.t} reduced={reduced} />
                     </g>
                   )}
                 </>
@@ -1991,6 +2043,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             onVoice={(v) => { transport.cancel(); setVoiceStarted(true); setPref('voice', v); if (v) { setPlayMode('gidatua'); setPref('panel', false); setPanelOpen(false); setSelected(null); endIntro(); place({ i: pos.i, t: beat.at + .000001 }); setPlaying(true); } }}
             onContinue={continueHold}
             onNextStage={continueNext}
+            cue={!playing && pos.t === 0 && !find && intro === null && !formation}
             finish={finish}
             onPick={onSelect}
             onTermHover={(id) => setHovered(id && inScene(id) ? id : null)}
@@ -2012,7 +2065,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           />
         </main>
 
-        <aside className="info" aria-label="Azalpena">
+        <aside className="info" aria-label="Azalpena" data-tour="eskuineko-zutabea">
           {notesOpen && selected && <button className="notes-back" onClick={() => setSelected(null)}>← Apunteak</button>}
           {selected ? (
             <Inspector id={selected} week={week} currentStageId={stage.id} onClose={() => setSelected(null)} onSelect={pick} onGoto={(w, sid) => gotoWeekStage(w, sid, selected)} onReplay={replay}
@@ -2058,7 +2111,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           }}
         />
       )}
-      {helpOpen && <Help welcome={firstVisit} onClose={() => setHelpOpen(false)} />}
+      {helpOpen && <Help onClose={() => setHelpOpen(false)} />}
+      <TourHost tour="sim" />
       {questionsOpen && <Questions week={week.week} concept={questionsConcept} review={questionsReview} onClose={() => { setQuestionsOpen(false); setQuestionsReview(false); }} onGoto={(w, sid, c) => gotoWeekStage(w, sid, c)} onFind={findConcept} />}
     </div>
   );

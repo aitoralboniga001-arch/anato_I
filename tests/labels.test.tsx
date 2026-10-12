@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { LabelScaleContext, SceneContext, type SceneContextValue } from '@/components/kit/context';
 import { structures, weeks } from '@/content/registry';
+import { SceneView } from '@/components/kit/columns';
 import type { Orientation } from '@/lib/sim/types';
 
 /**
@@ -143,7 +144,7 @@ for (const w of weeks)
                 <SceneContext.Provider value={ctx}>
                   <LabelScaleContext.Provider value={{ k, left: !!v.orientation?.left, right: !!v.orientation?.right }}>
                     <svg viewBox="0 0 1000 640">
-                      <Scene t={t} reduced={false} />
+                      <SceneView Scene={Scene} t={t} reduced={false} />
                     </svg>
                   </LabelScaleContext.Provider>
                 </SceneContext.Provider>,

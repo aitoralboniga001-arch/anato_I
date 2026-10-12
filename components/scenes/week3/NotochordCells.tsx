@@ -203,6 +203,8 @@ function Strip({ t, reduced }: { t: number; reduced?: boolean }) {
         <rect x={X_BUCCO - 7} y={ECTO_Y + 2} width={14} height={ENDO_Y - ECTO_Y + 8} rx={6} fill="rgba(238,242,255,0.32)" stroke="#eef2ff" strokeWidth={1.1} />
       </Part>
       <Part id="plaka-prekordala">
+        {/* The plate is a compact tissue: its cells sit on a common body. */}
+        <ellipse cx={X_PRE - 1} cy={MID_Y - 3} rx={19} ry={12} fill={C.prechordal} opacity={0.5} />
         {Array.from({ length: 7 }, (_, i) => (
           <g key={i}>
             <circle cx={f1(X_PRE - 12 + (i % 4) * 8 + rand(i) * 3)} cy={f1(MID_Y - 10 + Math.floor(i / 4) * 12 + rand(i + 9) * 4)} r={5.2} fill={C.prechordal} stroke="rgba(10,14,28,0.5)" strokeWidth={0.7} />
@@ -216,11 +218,12 @@ function Strip({ t, reduced }: { t: number; reduced?: boolean }) {
         <ellipse cx={X_NODE} cy={ECTO_Y + 4} rx={21} ry={16} fill="url(#nc-node)" />
         <path d={`M${X_NODE - 20},${ECTO_Y - 4} Q${X_NODE},${ECTO_Y - 17} ${X_NODE + 20},${ECTO_Y - 4}`} fill="none" stroke="#d6e2ff" strokeWidth={1.4} strokeLinecap="round" opacity={0.8} />
       </Part>
-      <Part id="hobitxo-primitiboa">
-        <path d={`M${X_NODE - 7},${ECTO_Y - 7} L${X_NODE},${ECTO_Y + 10} L${X_NODE + 7},${ECTO_Y - 7} Z`} fill="#0c1730" />
-      </Part>
+      {/* The canal runs down from the pit (drawn under it, so the pit stays its own opening). */}
       <Part id="hodi-neuroenterikoa" show={canal}>
-        <rect x={X_NODE - 4} y={ECTO_Y - 8} width={8} height={ENDO_Y - ECTO_Y + 24} rx={3} fill="#2a3a5c" stroke="#9fb6e8" strokeWidth={1.1} />
+        <rect x={X_NODE - 5} y={ECTO_Y - 2} width={10} height={ENDO_Y - ECTO_Y + 18} rx={3} fill="#2a3a5c" stroke="#9fb6e8" strokeWidth={1.1} />
+      </Part>
+      <Part id="hobitxo-primitiboa">
+        <path d={`M${X_NODE - 8.5},${ECTO_Y - 8} L${X_NODE},${ECTO_Y + 11} L${X_NODE + 8.5},${ECTO_Y - 8} Z`} fill="#0c1730" />
       </Part>
       <Part id="ildo-primitiboa" quiet>
         <path d={`M${X_NODE + 16},${ECTO_Y - 1} Q${X_NODE + 70},${ECTO_Y + 6} ${SX1 - 20},${ECTO_Y + 1}`} fill="none" stroke="#0c1730" strokeWidth={2.6} strokeLinecap="round" opacity={0.75} />
@@ -357,6 +360,8 @@ function Section({ t, reduced }: { t: number; reduced?: boolean }) {
         })}
       </Part>
       <Part id="mesodermo-intraenbrionarioa">
+        {/* Loose matrix between the layers, with its stellate cells. */}
+        <rect x={MIDX - BHALF} y={B_ECTO + B_ECTO_H + 1} width={BHALF * 2} height={B_ENDO - B_ENDO_H / 2 - B_ECTO - B_ECTO_H - 2} fill={C.mesoIntra} opacity={0.16} />
         {[-1, 1].flatMap((s) =>
           Array.from({ length: 5 }, (_, i) => {
             const x = MIDX + s * (78 + i * 46 + rand(i + (s > 0 ? 7 : 0)) * 10);
@@ -477,6 +482,24 @@ export function NotochordCells({ t, reduced }: SceneProps) {
   const on = (a: number, b: number) => seg(t, a, a + 0.02) * (1 - seg(t, b - 0.01, b + 0.01));
   const cordSlot = t >= NB.rod + 0.04 ? 'notokorda' : t >= NB.plate + 0.04 ? 'notokorda-plaka' : 'zelula-prenotokordalak';
   const f = front(t);
+  // Panel A's cord name sits on a cell (or, once rolled, on the rod's middle), a third of the way from the head.
+  const cordA: Pt = (() => {
+    const want = lerp(X_HEAD + 40, X_NODE - 60, 0.3);
+    if (t >= NB.rod + 0.04) {
+      const rod = seg(t, NB.rod, NB.rod + 0.08);
+      return [want, lerp(ENDO_Y, MID_Y - 8, rod) + lerp(12, 18, rod) / 2];
+    }
+    let best: Pt = [X_NODE - 20, MID_Y];
+    let d = Infinity;
+    for (let i = 0; i < N_CORD; i++) {
+      const x = cordX(i, t);
+      if (x !== null && Math.abs(x - want) < d) {
+        d = Math.abs(x - want);
+        best = [x, cordY(i, t)];
+      }
+    }
+    return best;
+  })();
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
@@ -531,17 +554,17 @@ export function NotochordCells({ t, reduced }: SceneProps) {
       <Callout x={560} y={252} text="notokorda: hobitxotik plaka prekordalera · kaudalean EZ" show={on(NB.extent, NB.induce)} color="#ffb86b" />
       <Callout x={MIDX} y={530} text="notokorda → ektodermoa: indukzioa (plaka neurala)" show={seg(t, NB.induce, NB.induce + 0.03)} />
 
-      <Label id={cordSlot} x={190} y={140} ax={cordSlot === 'zelula-prenotokordalak' ? Math.max(lerp(X_HEAD + 40, X_NODE - 60, 0.3), f + 4) : lerp(X_HEAD + 40, X_NODE - 60, 0.3)} ay={cordSlot === 'notokorda-plaka' ? ENDO_Y + 6 : cordSlot === 'notokorda' ? lerp(ENDO_Y + 6, MID_Y + 1, seg(t, NB.rod, NB.rod + 0.08)) : MID_Y} show={seg(t, NB.migrate + 0.04, NB.migrate + 0.07)} small />
-      <Label id="plaka-prekordala" x={190} y={172} ax={X_PRE - 6} ay={MID_Y} small />
-      <Label id="mintz-bukofaringeoa" x={190} y={204} ax={X_BUCCO - 6} ay={ENDO_Y - 20} small />
-      <Label id="nodo-primitiboa" x={690} y={75} ax={X_NODE - 14} ay={ECTO_Y - 8} align="end" small />
-      <Label id="hobitxo-primitiboa" x={780} y={75} ax={X_NODE + 3} ay={ECTO_Y - 4} align="start" small />
-      <Label id="hodi-neuroenterikoa" x={890} y={250} ax={X_NODE + 4} ay={ENDO_Y + 10} align="end" small show={seg(t, NB.canal, NB.canal + 0.04) * (1 - seg(t, NB.close, NB.close + 0.06))} />
+      <Label id={cordSlot} x={190} y={140} ax={cordA[0]} ay={cordA[1]} show={seg(t, NB.migrate + 0.04, NB.migrate + 0.07)} small />
+      <Label id="plaka-prekordala" x={190} y={172} ax={X_PRE - 2} ay={MID_Y - 3} small />
+      <Label id="mintz-bukofaringeoa" x={190} y={204} ax={X_BUCCO} ay={ENDO_Y - 30} small />
+      <Label id="nodo-primitiboa" x={690} y={75} ax={X_NODE - 14} ay={ECTO_Y + 6} align="end" small />
+      <Label id="hobitxo-primitiboa" x={780} y={75} ax={X_NODE} ay={ECTO_Y - 3} align="start" small />
+      <Label id="hodi-neuroenterikoa" x={890} y={250} ax={X_NODE} ay={MID_Y + 10} align="end" small show={seg(t, NB.canal, NB.canal + 0.04) * (1 - seg(t, NB.close, NB.close + 0.06))} />
 
       <Label id="ektodermoa" x={190} y={B_ECTO + 20} ax={MIDX - BHALF + 10} ay={B_ECTO + 20} small />
-      <Label id="mesodermo-intraenbrionarioa" x={190} y={B_LANE} ax={MIDX - BHALF + 30} ay={B_LANE} small />
+      <Label id="mesodermo-intraenbrionarioa" x={190} y={B_LANE} ax={MIDX - BHALF + 40} ay={B_LANE} small />
       <Label id="endodermoa" x={190} y={B_ENDO} ax={MIDX - BHALF + 10} ay={B_ENDO} small />
-      <Label id={cordSlot} x={810} y={410} ax={MIDX + 30} ay={t >= NB.rod + 0.04 ? B_LANE + 10 : t >= NB.plate + 0.04 ? B_ENDO : B_LANE} align="start" small show={arriveAt(t)} />
+      <Label id={cordSlot} x={810} y={410} ax={bCell(3, t)[0]} ay={bCell(3, t)[1]} align="start" small show={arriveAt(t)} />
     </g>
   );
 }

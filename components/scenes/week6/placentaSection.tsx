@@ -1,6 +1,6 @@
 'use client';
 
-import { Arrow, C, Flow, Part, clamp, lerp, rand, smoothPath, type Pt } from '@/components/kit';
+import { Arrow, C, Flow, Part, clamp, lerp, mix, rand, smoothPath, type Pt } from '@/components/kit';
 import { K } from '@/components/scenes/week3-villi/art';
 
 /**
@@ -250,6 +250,19 @@ function SectionDefs({ id }: { id: string }) {
         <stop offset="0" stopColor="#1a2440" />
         <stop offset="1" stopColor="#0d1222" />
       </linearGradient>
+      <radialGradient id={`${id}-ven`} cx="0.5" cy="0.15" r="0.85">
+        <stop offset="0" stopColor="#8aa0ff" stopOpacity="0.85" />
+        <stop offset="0.5" stopColor="#5b74d8" stopOpacity="0.4" />
+        <stop offset="1" stopColor="#3b4fa8" stopOpacity="0" />
+      </radialGradient>
+      {[0, 1].map((i) => (
+        <linearGradient key={i} id={`${id}-mix${i}`} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stopColor={TINT[i]} stopOpacity="0" />
+          <stop offset="0.3" stopColor={TINT[i]} />
+          <stop offset="0.7" stopColor={TINT[i + 1]} />
+          <stop offset="1" stopColor={TINT[i + 1]} stopOpacity="0" />
+        </linearGradient>
+      ))}
       <linearGradient id={`${id}-cord`} x1="0" x2="1" y1="0" y2="0">
         <stop offset="0" stopColor="#fff" stopOpacity="0.28" />
         <stop offset="0.35" stopColor="#fff" stopOpacity="0" />
@@ -307,6 +320,15 @@ export function PlacentaSection({ id, branch, septa, tint, cross, jets, veins, c
             const pts: Pt[] = [...Array.from({ length: 9 }, (_, k) => at(lerp(x0, x1, k / 8), Y.ivs + 2)), ...Array.from({ length: 9 }, (_, k) => at(lerp(x1, x0, k / 8), Y.plate - 4))];
             return <path key={`g${c}`} d={smoothPath(pts, true, 0.12)} fill={`url(#${id}-cot)`} opacity={0.1} />;
           })}
+          {/* Under the septa (which never reach the plate) the blood of two cotyledons runs together: their colours mix. */}
+          {cross > 0.02 &&
+            SEPTA.slice(1, 3).map((sx, i) => {
+              const y0 = Y.shell + L + 6;
+              const y1 = Y.plate - 8;
+              const w = 70 + 40 * cross;
+              const pts: Pt[] = [...Array.from({ length: 7 }, (_, k) => at(lerp(sx - w, sx + w, k / 6), y0)), ...Array.from({ length: 7 }, (_, k) => at(lerp(sx + w, sx - w, k / 6), y1))];
+              return <path key={sx} d={smoothPath(pts, true, 0.15)} fill={`url(#${id}-mix${i})`} opacity={0.55 * cross} />;
+            })}
         </Part>
       )}
 
@@ -331,6 +353,13 @@ export function PlacentaSection({ id, branch, septa, tint, cross, jets, veins, c
         })}
       </Part>
 
+      {/* Venous return: blood that has given up its oxygen gathers at the vein openings beside the septa. */}
+      <g pointerEvents="none">
+        {VEIN_X.map((x) => {
+          const m = at(x, Y.ivs);
+          return <ellipse key={x} cx={m[0]} cy={m[1] + 14 + 30 * veins} rx={10 + 18 * veins} ry={14 + 46 * veins} fill={`url(#${id}-ven)`} opacity={0.12 + 0.7 * veins} />;
+        })}
+      </g>
       {/* Outer cytotrophoblastic shell under the decidual plate */}
       <Part id="kanpoko-zorro-zitotrofoblastikoa">
         <path d={band(Y.shell, Y.ivs)} fill={K.cytoGround} />
@@ -350,12 +379,13 @@ export function PlacentaSection({ id, branch, septa, tint, cross, jets, veins, c
         {VEIN_X.map((x, i) => {
           const top = at(x, Y.dec + 14);
           const bot = at(x, Y.ivs + 1);
+          const lumen = mix('#34488f', '#6f8cff', veins);
           return (
             <g key={x}>
               <path d={`M${f1(top[0])},${f1(top[1])} L${f1(bot[0])},${f1(bot[1])}`} stroke="#1d2a5c" strokeWidth={9} strokeLinecap="round" />
-              <path d={`M${f1(top[0])},${f1(top[1])} L${f1(bot[0])},${f1(bot[1])}`} stroke="#4f6fd8" strokeWidth={6} strokeLinecap="round" />
+              <path d={`M${f1(top[0])},${f1(top[1])} L${f1(bot[0])},${f1(bot[1])}`} stroke={lumen} strokeWidth={6} strokeLinecap="round" />
               <path d={lineAt(Y.dec + 14 + (i % 2) * 6, x - 34, x + 34)} fill="none" stroke="#1d2a5c" strokeWidth={10} strokeLinecap="round" />
-              <path d={lineAt(Y.dec + 14 + (i % 2) * 6, x - 34, x + 34)} fill="none" stroke="#4f6fd8" strokeWidth={7} strokeLinecap="round" />
+              <path d={lineAt(Y.dec + 14 + (i % 2) * 6, x - 34, x + 34)} fill="none" stroke={lumen} strokeWidth={7} strokeLinecap="round" />
             </g>
           );
         })}
@@ -495,7 +525,7 @@ export function PlacentaSection({ id, branch, septa, tint, cross, jets, veins, c
         const o = at(c, Y.ivs + 14);
         return (
           <g key={`a${i}`} opacity={jets}>
-            {[-0.5, -0.18, 0.18, 0.5].map((k) => (
+            {[-0.34, 0.34].map((k) => (
               <Arrow key={k} from={[o[0] + k * 16, o[1] + 6]} to={[o[0] + k * 120, o[1] + 150 - Math.abs(k) * 40]} bend={k * 0.18} color="#ffb3bf" width={2.2} head={9} />
             ))}
           </g>

@@ -109,7 +109,7 @@
 .hint kbd { font: 600 11px/1 var(--font-mono); padding: 2px 6px; border: 1px solid var(--line-2); border-radius: 4px; color: var(--text-2); }
 .topics { display: flex; gap: 4px; padding: 3px; border: 1px solid var(--line-2); border-radius: 9px; background: var(--bg-1); }
 .topics button { flex: 1 1 0; min-height: 38px; border-radius: 6px; color: var(--text-3); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.topics button:first-child { flex: 1.6 1 0; }
+.topics button:first-child { flex: 0 0 auto; padding: 0 14px; }
 .topics button:hover { color: var(--text); background: var(--surface-2); }
 .topics button[aria-pressed='true'] { color: var(--text); background: var(--surface-3); box-shadow: inset 0 0 0 1px var(--line-3); }
 /* Detail: where it comes from, and ways to study it. */
@@ -139,7 +139,8 @@
   .nav { padding: 0 12px; }
   .nav nav { gap: 12px; }
   .nav nav a.entry { display: inline-flex; align-items: center; min-height: 44px; font-size: 12px; }
-  .nav nav :global(.btn) { font-size: 11px; padding: 10px; min-height: 44px; }
+  .nav nav :global(.btn) { position: relative; font-size: 12px; padding: 0 11px; }
+  .nav nav :global(.btn)::before { content: ''; position: absolute; inset: -8px -4px; }
   .nav :global(.wordmark) { font-size: 16px; gap: 6px; }
   .nav :global(.wordmark) svg { width: 18px; height: 18px; }
   .main { padding: 20px 16px 48px; }

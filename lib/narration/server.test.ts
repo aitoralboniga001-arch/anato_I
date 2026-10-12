@@ -35,7 +35,7 @@ describe('canonical narration boundary', () => {
   it.each([
     { week: 1, stage: 'etapa', kind: 'intro', text: 'Arbitrary paid synthesis' },
     { week: 1, stage: 'etapa', kind: 'intro', model: 'other' },
-    { week: 10, stage: 'etapa', kind: 'intro' },
+    { week: 12, stage: 'etapa', kind: 'intro' },
     { week: '1', stage: 'etapa', kind: 'intro' },
     { week: 1, stage: '../etapa', kind: 'intro' },
     { week: 1, stage: 'etapa', kind: 'beat', beat: -1 },

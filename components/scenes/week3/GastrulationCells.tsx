@@ -1,6 +1,6 @@
 'use client';
 
-import { C, Journey, Label, Mark, Note, OnTop, Part, clamp, easeInOut, lerp, lin, mix, rand, seg, useScene, type Pt, type SceneProps } from '@/components/kit';
+import { C, Journey, Label, Mark, Note, OnTop, Part, clamp, easeInOut, lerp, lin, mix, rand, seg, type Pt, type SceneProps } from '@/components/kit';
 import type { ReactNode } from 'react';
 import { f1 } from './common';
 import { Callout, LitCell, LitDefs, ellipsePath, frameAt, tint, type Key } from './gastroKit';
@@ -294,14 +294,14 @@ export function GastrulationCellsPane(props: SceneProps) {
 export function GastrulationCells({ t, reduced, pane }: SceneProps & { pane?: boolean }) {
   /** Anchor side for names whose spot is free (either half shows the same tissue). */
   const R = pane ? -1 : 1;
-  const ctx = useScene();
   const em = emphasis(t);
   const ectoName = t >= GB.ecto;
   const hypPush = [-1, 1].map((s) => pushedOf(s, t));
   const trackOn = seg(t, GB.converge, GB.converge + 0.03);
 
   // Epiblast / ectoderm surface cells (those still on top).
-  const surfaceCells: { key: string; d: string; nx: number; ny: number; nr: number; tracked: boolean; fate?: Fate }[] = [];
+  const surfaceCells: { key: string; d: string; nx: number; ny: number; nr: number; tracked: boolean; fate?: Fate; streak: boolean }[] = [];
+  const streakOn = t >= GB.streak;
   for (const s of [-1, 1])
     for (let r = 0; r < RANKS; r++) {
       if (r < K && t >= leaveAt(r, s)) continue;
@@ -315,7 +315,7 @@ export function GastrulationCells({ t, reduced, pane }: SceneProps & { pane?: bo
       const y1 = EPI_BOT + thickAt(o, t) + bottle * 8;
       const nk = 0.35 + 0.35 * rand(r * 7 + (s > 0 ? 3 : 0));
       const tr = TRACKED.find((q) => q.s === s && q.k === r);
-      surfaceCells.push({ key: `${s}:${r}`, d: column(x, y0, y1, wt, wb), nx: x, ny: lerp(y0, y1, nk), nr: Math.min(wb * 0.32, 5.5), tracked: !!tr, fate: tr?.fate });
+      surfaceCells.push({ key: `${s}:${r}`, d: column(x, y0, y1, wt, wb), nx: x, ny: lerp(y0, y1, nk), nr: Math.min(wb * 0.32, 5.5), tracked: !!tr, fate: tr?.fate, streak: streakOn && Math.abs(x - MID) < 2.2 * W });
     }
 
   // Cells that have gone in, split by fate.
@@ -331,7 +331,6 @@ export function GastrulationCells({ t, reduced, pane }: SceneProps & { pane?: bo
   const stepIdx = STEPS.reduce((acc, st, i) => (t >= st[0] - 1e-6 ? i : acc), 0);
   const step = STEPS[stepIdx];
 
-  const conv = seg(t, GB.converge, GB.converge + 0.03) * (1 - seg(t, GB.invag + 0.03, GB.invag + 0.06));
   const triOn = seg(t, GB.tri, GB.tri + 0.03);
   const trailOn = trackOn;
   const win = (a: number, b: number) => seg(t, a, a + 0.03) * (1 - seg(t, b, b + 0.03));
@@ -349,6 +348,19 @@ export function GastrulationCells({ t, reduced, pane }: SceneProps & { pane?: bo
   const stMeso = quiet(win(GB.meso, GB.ecto)) * ectoQuiet;
 
   const z = frameAt(t, CELL_KEYS);
+  // The furrow: from the surface line down to the dipped tops of the midline cells.
+  const grooveOn = seg(t, GB.groove, GB.groove + 0.025);
+  const furrow = Array.from({ length: 41 }, (_, i): Pt => {
+    const o = lerp(-84, 84, i / 40);
+    return [MID + Math.sign(o) * (squeeze(Math.abs(o), t) + 1), EPI_TOP + Math.max(0, dipAt(o, t) - 0.6)];
+  });
+  const groovePath = `M${furrow.map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}Z`;
+  // The mesoderm's extent on each side: out to its farthest cell that is below the epiblast.
+  const ext = [-1, 1].map((sd) => Math.max(0, ...bCells.filter((c) => c.s === sd && c.m.dive > 0.5).map((c) => Math.abs(c.m.x - MID) + 12)));
+  const mesoBand =
+    Math.max(...ext) > 14
+      ? `M${f1(MID - Math.max(ext[0], 14))},${EPI_BOT + 2}H${f1(MID + Math.max(ext[1], 14))}V${HYP_Y - HYP_H / 2 - 1}H${f1(MID - Math.max(ext[0], 14))}Z`
+      : null;
   const A = (x: number, y: number) => z.at(x, y);
 
   return (
@@ -419,6 +431,20 @@ export function GastrulationCells({ t, reduced, pane }: SceneProps & { pane?: bo
           );
         })}
 
+        {/* The groove is the furrow itself: the space the dipping surface leaves along the midline. */}
+        {grooveOn > 0.01 && (
+          <Part id="ildo-primitiboa" show={grooveOn}>
+            <path d={groovePath} fill="rgba(120,150,232,0.2)" />
+            <path d={groovePath} fill="url(#gc-shine)" opacity={0.5} />
+          </Part>
+        )}
+        {/* Intra-embryonic mesoderm as a tissue: loose matrix between the layers, as far as its cells have spread. */}
+        {mesoBand && (
+          <Part id="mesodermo-intraenbrionarioa">
+            <path d={mesoBand} fill={C.mesoIntra} opacity={0.2 * em.b} />
+          </Part>
+        )}
+
         {/* Endoderm: first cells in, diving then inserting into the row. */}
         <Part id="endodermoa" show={aCells.length ? 1 : 0}>
           <g opacity={em.a}>
@@ -452,18 +478,23 @@ export function GastrulationCells({ t, reduced, pane }: SceneProps & { pane?: bo
         </Part>
 
         {/* Epiblast → ectoderm: the sheet that flows to the groove; what never goes in stays on top. */}
-        <Part id={ectoName ? 'ektodermoa' : 'epiblastoa'}>
-          <g opacity={em.epi}>
-            {surfaceCells.map((c) => (
-              <g key={c.key}>
-                <path d={c.d} fill={ectoName ? mix(C.epiblast, '#7aa2ff', seg(t, GB.ecto, GB.ecto + 0.04)) : C.epiblast} stroke="rgba(10,14,28,0.55)" strokeWidth={0.9} />
-                <path d={c.d} fill="url(#gc-shine)" />
-                <ellipse cx={f1(c.nx)} cy={f1(c.ny)} rx={f1(c.nr)} ry={5.5} fill="rgba(30,20,50,0.55)" />
-                <circle cx={f1(c.nx - c.nr * 0.25)} cy={f1(c.ny - 1.5)} r={1.3} fill="rgba(255,255,255,0.35)" />
-              </g>
-            ))}
-          </g>
-        </Part>
+        {/* The primitive streak is the crowded, thickened midline of this same sheet: its cells belong to both. */}
+        {[false, true].map((inStreak) => (
+          <Part key={String(inStreak)} id={ectoName ? 'ektodermoa' : 'epiblastoa'} groups={inStreak ? ['lerro-primitiboa'] : undefined}>
+            <g opacity={em.epi}>
+              {surfaceCells
+                .filter((c) => c.streak === inStreak)
+                .map((c) => (
+                  <g key={c.key}>
+                    <path d={c.d} fill={ectoName ? mix(C.epiblast, '#7aa2ff', seg(t, GB.ecto, GB.ecto + 0.04)) : C.epiblast} stroke="rgba(10,14,28,0.55)" strokeWidth={0.9} />
+                    <path d={c.d} fill="url(#gc-shine)" />
+                    <ellipse cx={f1(c.nx)} cy={f1(c.ny)} rx={f1(c.nr)} ry={5.5} fill="rgba(30,20,50,0.55)" />
+                    <circle cx={f1(c.nx - c.nr * 0.25)} cy={f1(c.ny - 1.5)} r={1.3} fill="rgba(255,255,255,0.35)" />
+                  </g>
+                ))}
+            </g>
+          </Part>
+        ))}
         {/* Where the streak / groove is: a soft pool of light on the midline cells (no ring drawn over them). */}
         <Mark id={t < GB.groove ? 'lerro-primitiboa' : 'ildo-primitiboa'} x={MID} y={(EPI_TOP + EPI_BOT) / 2 + 8} rx={30} ry={40} show={seg(t, GB.streak, GB.streak + 0.04) * Math.max(0.35, 1 - trackOn)} />
       </g>
@@ -541,25 +572,16 @@ export function GastrulationCells({ t, reduced, pane }: SceneProps & { pane?: bo
         </g>
       )}
 
-      {/* The process ring marks where it happens while the cells converge, then steps aside so the followed cells stay clear (it returns whenever gastrulation is the subject). */}
-      <Mark id="gastrulazioa" x={MID} y={276} rx={40} ry={82} show={Math.max(conv, ['gastrulazioa'].some((id) => ctx.focus.includes(id) || ctx.selected === id || ctx.hovered === id || ctx.spotlight === id) ? trackOn : 0)} />
       </g>
 
       {/* One call-out per step on the same spot: the outgoing one is gone before the incoming one fades in. */}
-      {CALLOUTS.map(([a, b, text, color]) => (
+      {!pane && CALLOUTS.map(([a, b, text, color]) => (
         <Callout key={text} x={500} y={565} text={text} show={seg(t, a + 0.02, a + 0.045) * (1 - seg(t, b, b + 0.018))} color={color} />
       ))}
 
-      {/* A bracket is a real, clickable representation of the three-layer disc. */}
-      <Mark id="hiru-orriko-diskoa" show={triOn}>
-        <g fill="none" strokeLinejoin="round" strokeLinecap="round">
-          <path d={`M${A(MID + 156, EPI_TOP - 4).join(',')}h12V${A(0, HYP_Y + 19)[1]}h-12`} stroke="rgba(6,8,14,0.7)" strokeWidth={5} />
-          <path d={`M${A(MID + 156, EPI_TOP - 4).join(',')}h12V${A(0, HYP_Y + 19)[1]}h-12`} stroke="#e8eefc" strokeWidth={2.2} />
-        </g>
-      </Mark>
 
-      {/* Step chip. */}
-      <OnTop>
+      {/* Step chip (in the dual the stage sets one for both panes). */}
+      {!pane && <OnTop>
         <g pointerEvents="none">
           <rect x={MID - 100} y={34} width={200} height={26} rx={13} fill="rgba(12,12,16,0.86)" stroke="rgba(232,238,252,0.16)" />
           <circle cx={MID - 84} cy={47} r={5} fill={step[2]} />
@@ -567,30 +589,43 @@ export function GastrulationCells({ t, reduced, pane }: SceneProps & { pane?: bo
             {step[1]}
           </text>
         </g>
-      </OnTop>
+      </OnTop>}
 
-      <Legend t={t} />
+      {!pane && <Legend t={t} />}
 
       {(() => {
         const label = (id: string, x: number, y: number, p: Pt, show = 1, text?: string) => {
           const [ax, ay] = A(...p);
           return <Label key={id} id={id} x={x} y={y} ax={ax} ay={ay} align={x < 500 ? 'end' : 'start'} show={show * (ay > 35 && ay < 580 ? 1 : 0)} text={text} small />;
         };
-        const currentMeso = bCells.at(-1)?.m;
+        // Names on the left column point at tissue on the left half (and the pane's right-column names at the right
+        // half), each at a cell well inside its layer: a short leader that never runs across the section.
+        const side = -R;
+        const mine = bCells.filter((c) => c.s === side);
+        const settled = mine.filter((c) => c.m.settle > 0.6);
+        const pick = settled.length ? settled.reduce((a, c) => (Math.abs(Math.abs(c.m.x - MID) - 100) < Math.abs(Math.abs(a.m.x - MID) - 100) ? c : a)) : mine.at(-1);
+        const currentMeso = pick?.m;
+        const mesoX = MID + side * clamp(ext[side > 0 ? 1 : 0] * 0.55, 30, 100);
+        const endoX = MID + side * Math.max(WH / 2, Math.min(WH * 4.5, 0.6 * Math.abs(endoSlot(0, side, t) - MID)));
         const hypoX = MID + (0.5 + hypPush[1]) * WH;
         return <>
-          {label('gastrulazioa', 192, 81, [MID - R * 8, EPI_BOT - 4], trackOn)}
           {/* Renamed names on the same spot hand over: the old one fades out first, then the new one fades in. */}
-          {label('lerro-primitiboa', 790, 92, [MID + 3, EPI_TOP + 23], seg(t, GB.streak, GB.streak + 0.025) * (1 - seg(t, GB.groove, GB.groove + 0.012)))}
-          {label('ildo-primitiboa', 790, 92, [MID + 3, EPI_TOP + 23], seg(t, GB.groove + 0.012, GB.groove + 0.03))}
+          {label('lerro-primitiboa', 790, 92, [MID, EPI_TOP + 30], seg(t, GB.streak, GB.streak + 0.025) * (1 - seg(t, GB.groove, GB.groove + 0.012)))}
+          {label('ildo-primitiboa', 790, 92, [MID, EPI_TOP + 8], seg(t, GB.groove + 0.012, GB.groove + 0.03))}
           {label('epiblastoa', 192, 170, [MID - R * (pane ? 66 : 100), 218], 1 - seg(t, GB.ecto, GB.ecto + 0.012))}
           {label('ektodermoa', 192, 170, [MID - R * (pane ? 66 : 100), 218], seg(t, GB.ecto + 0.012, GB.ecto + 0.03))}
-          {label('mesodermo-intraenbrionarioa', 198, 368, currentMeso ? [currentMeso.x, currentMeso.y] : [MID, LANE_Y], currentMeso ? 1 : 0)}
-          {label('endodermoa', 192, 469, [MID - R * (pane ? WH * 2.5 : WH / 2), HYP_Y], seg(t, GB.endo + 0.015, GB.endo + 0.035))}
+          {label('mesodermo-intraenbrionarioa', 198, 368, mesoBand ? [mesoX, (EPI_BOT + HYP_Y - HYP_H / 2) / 2] : currentMeso ? [currentMeso.x, currentMeso.y] : [MID, LANE_Y], currentMeso ? 1 : 0)}
+          {label('endodermoa', 192, 469, [endoX, HYP_Y], seg(t, GB.endo + 0.015, GB.endo + 0.035))}
           {label('hipoblastoa', 790, 506, [hypoX, HYP_Y], 1 - seg(t, GB.meso, GB.meso + 0.02))}
           {label('amnios-barrunbea', 790, 241, [MID + 85, EPI_TOP - 24])}
           {label('bitelo-zaku-sekundarioa', 790, 566, [MID + 85, HYP_Y + 35])}
-          {label('hiru-orriko-diskoa', 790, 401, [MID + 156, 290], triOn, 'Hiru orriko diskoa')}
+          {(() => {
+            // The three-layered disc: a bracket across all three layers (ectoderm cell, mesoderm, endoderm cell).
+            const a = A(MID + 108, EPI_TOP + 30);
+            const b = A(MID + 108, HYP_Y + 4);
+            const m: Pt = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+            return <Label key="hiru-orriko-diskoa" id="hiru-orriko-diskoa" x={790} y={401} span={[a, b]} ax={m[0]} ay={m[1]} align="start" show={triOn} text="Hiru orriko diskoa" small />;
+          })()}
         </>;
       })()}
     </g>

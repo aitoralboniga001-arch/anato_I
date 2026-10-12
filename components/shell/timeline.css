@@ -1,0 +1,1100 @@
+/* ——— Kronologia (/kronologia) and the home page's chronicle: one day ruler, one live specimen ——— */
+
+.tl {
+  padding: 24px var(--gutter) 0;
+}
+
+.tl-top {
+  padding: 16px 20px 10px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  scroll-margin-top: 76px;
+}
+
+.tl-now {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-bottom: 6px;
+}
+
+.tl-day {
+  margin: 0;
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-day small {
+  font-size: 0.42em;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text-3);
+}
+
+.tl-meta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.tl-meta b {
+  font-weight: 600;
+  color: var(--signal);
+}
+
+.tl-steps {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.tl-sys-off {
+  height: 28px;
+  margin-left: 6px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 106, 61, 0.45);
+  background: var(--signal-soft);
+  font-size: 12.5px;
+  font-weight: 550;
+  color: var(--text);
+}
+
+/* The chart: a label column and a time column; every row shares the same scale. */
+.tl-chart {
+  --lab: 140px;
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--lab) minmax(0, 1fr);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  outline: none;
+}
+
+.tl-chart:focus-visible .tl-head::before {
+  box-shadow: 0 0 0 4px rgba(255, 106, 61, 0.4);
+}
+
+.tl-row {
+  display: contents;
+}
+
+.tl-track {
+  position: relative;
+  height: 26px;
+}
+
+.tl-bands .tl-track {
+  height: 24px;
+}
+
+.tl-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+  border-left: 1px solid var(--line-2);
+}
+
+.tl-band span {
+  display: block;
+  padding: 0 8px;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 24px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text-4);
+}
+
+.tl-band.is-on span {
+  color: var(--signal);
+}
+
+.tl-lane .tl-track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--line);
+}
+
+.tl-lane-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 26px;
+  padding: 0 12px 0 0;
+  text-align: left;
+  font-size: 12.5px;
+  font-weight: 550;
+  color: var(--text-2);
+  white-space: nowrap;
+  transition: color 0.15s, opacity 0.15s;
+}
+
+.tl-lane-name small {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--text-4);
+}
+
+.tl-lane-name:hover {
+  color: var(--text);
+}
+
+.tl-lane.is-on .tl-lane-name {
+  color: var(--signal);
+}
+
+.tl-lane.is-dim .tl-lane-name,
+.tl-lane.is-dim .tl-track {
+  opacity: 0.32;
+}
+
+.tl-ev {
+  position: absolute;
+  top: 50%;
+  height: 0;
+  width: calc(var(--w, 0) * 1%);
+}
+
+.tl-ev-span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1.5px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--line-3);
+}
+
+.tl-ev.is-past .tl-ev-span {
+  background: rgba(207, 203, 194, 0.55);
+}
+
+.tl-ev.is-now .tl-ev-span {
+  background: rgba(255, 106, 61, 0.6);
+}
+
+.tl-ev-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 1.5px solid var(--text-4);
+  background: var(--surface);
+}
+
+.tl-ev.is-gakoa .tl-ev-dot {
+  width: 9px;
+  height: 9px;
+  border-color: var(--text-2);
+}
+
+.tl-ev.is-xehetasuna .tl-ev-dot {
+  width: 6px;
+  height: 6px;
+}
+
+.tl-ev.is-past .tl-ev-dot {
+  border-color: var(--text-2);
+  background: var(--text-2);
+}
+
+.tl-ev.is-now .tl-ev-dot {
+  z-index: 2;
+  width: 11px;
+  height: 11px;
+  border-color: var(--signal);
+  background: var(--signal);
+  box-shadow: 0 0 0 4px var(--signal-soft);
+}
+
+/* Names: after the dot (or its span), else before it; written over the lane line, never under it. */
+.tl-ev-name {
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 0;
+  z-index: 3;
+  transform: translateY(-50%);
+  padding: 0 3px;
+  border-radius: 4px;
+  background: var(--surface);
+  font-size: 11.5px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+.tl-ev.is-past .tl-ev-name {
+  color: var(--text-2);
+}
+
+.tl-ev.is-now .tl-ev-name {
+  padding: 1px 7px;
+  background: var(--surface-3);
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--text);
+}
+
+.tl-ev-name.is-left {
+  left: auto;
+  right: calc(100% + 6px);
+}
+
+.tl-axis .tl-track {
+  height: 22px;
+  border-top: 1px solid var(--line-2);
+}
+
+.tl-axis small {
+  position: absolute;
+  top: 8px;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--text-4);
+}
+
+.tl-axis small.is-first {
+  transform: none;
+}
+
+.tl-axis small.is-last {
+  transform: translateX(-100%);
+}
+
+/* The playhead: one line through every lane. */
+.tl-play {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--lab);
+  right: 0;
+  pointer-events: none;
+}
+
+.tl-past {
+  position: absolute;
+  left: 0;
+  top: 24px;
+  bottom: 22px;
+  width: calc(var(--x) * 100%);
+  background: linear-gradient(90deg, rgba(255, 106, 61, 0), rgba(255, 106, 61, 0.07));
+}
+
+.tl-head {
+  position: absolute;
+  top: 24px;
+  bottom: 22px;
+  left: calc(var(--x) * 100%);
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--signal);
+}
+
+/* The knob sits on the axis, clear of the period names. */
+.tl-head::before {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: var(--signal);
+  border: 2px solid var(--surface);
+}
+
+/* Home: one track of key dates, no lane names. */
+.tl-chart.is-compact {
+  --lab: 0px;
+}
+
+.tl-chart.is-compact .tl-track {
+  height: 30px;
+}
+
+.tl-chart.is-compact .tl-bands .tl-track {
+  height: 24px;
+}
+
+/* ——— The specimen and the day ——— */
+
+.tl-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(330px, 1fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 20px;
+}
+
+.tl-figure {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--bg-1);
+}
+
+.tl-scene {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1000 / 640;
+}
+
+.tl-figure figcaption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 8px 10px 8px 16px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.tl-figure figcaption b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tl-fig-view {
+  color: var(--text-4);
+}
+
+.tl-fig-go {
+  margin-left: auto;
+}
+
+.tl-card-now {
+  display: grid;
+  gap: 12px;
+}
+
+.tl-event {
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.tl-when {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--signal);
+}
+
+.tl-when em {
+  font-style: normal;
+  color: var(--text-4);
+}
+
+.tl-sys {
+  margin-left: auto;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+
+.tl-event h2 {
+  margin: 10px 0 6px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.tl-event > p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+
+.tl-cite {
+  margin-top: 12px;
+  font-size: 12.5px;
+}
+
+.tl-cite summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--text-3);
+}
+
+.tl-cite summary:hover {
+  color: var(--text);
+}
+
+.tl-cite blockquote {
+  margin: 8px 0 0;
+  padding: 6px 0 6px 12px;
+  border-left: 2px solid var(--line-3);
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.tl-also {
+  display: grid;
+  gap: 4px;
+  margin: 14px 0 0;
+  padding: 12px 0 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.tl-also button {
+  font-size: 13px;
+  text-align: left;
+  color: var(--text);
+}
+
+.tl-also button span {
+  display: inline-block;
+  min-width: 104px;
+  font-size: 11.5px;
+  color: var(--text-4);
+}
+
+.tl-also button:hover {
+  color: var(--signal);
+}
+
+/* ——— The day's structures, by name ——— */
+
+.tl-map {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.tl-map-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.tl-col {
+  min-width: 0;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.tl-col header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin-bottom: 10px;
+}
+
+.tl-col h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tl-col h3 b {
+  margin-left: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+}
+
+.tl-col header small {
+  font-size: 12px;
+  color: var(--text-4);
+}
+
+.tl-col.is-berria h3 {
+  color: var(--ok);
+}
+
+.tl-col.is-desagertua .ln-chip > span {
+  text-decoration: line-through;
+  text-decoration-color: var(--text-4);
+  color: var(--text-2);
+}
+
+.tl-col.is-oraindik-ez .ln-chip {
+  border-style: dashed;
+  color: var(--text-2);
+}
+
+.tl-col-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-4);
+}
+
+.tl-groups {
+  display: grid;
+  gap: 8px;
+}
+
+.tl-group {
+  display: grid;
+  gap: 5px;
+}
+
+.tl-group-k {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+/* The inventory: one row per system, its name on the left. */
+.tl-col.is-badago .tl-groups {
+  gap: 6px;
+}
+
+.tl-col.is-badago .tl-group {
+  grid-template-columns: 128px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+}
+
+.tl-col.is-badago .tl-group:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.tl-col .tl-more {
+  margin-top: 10px;
+}
+
+.tl-more-n {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-4);
+}
+
+/* A name that just changed column glows once. */
+.ln-chip.tl-chip.is-moved {
+  animation: tl-moved 1.6s ease-out;
+}
+
+@keyframes tl-moved {
+  0%,
+  30% {
+    border-color: var(--signal);
+    box-shadow: 0 0 0 3px var(--signal-soft);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-chip.tl-chip.is-moved {
+    animation: none;
+    border-color: var(--signal);
+  }
+}
+
+.tl-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.ln-chip.tl-chip {
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 7px;
+  font-size: 12.5px;
+}
+
+.ln-chip.tl-chip i {
+  width: 8px;
+  height: 8px;
+}
+
+.tl-more {
+  padding: 3px 9px;
+  border: 1px dashed var(--line-3);
+  border-radius: 7px;
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+
+.tl-more:hover {
+  color: var(--text);
+  border-color: var(--text-3);
+}
+
+.tl-present summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.tl-present summary b {
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.tl-present .tl-chips {
+  max-height: 240px;
+  margin-top: 10px;
+  overflow: auto;
+}
+
+.tl-next {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 1px dashed var(--line-2);
+  border-radius: 14px;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.tl-next:hover {
+  border-color: var(--line-3);
+  background: var(--surface);
+}
+
+.tl-next span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+.tl-next b {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tl-next em {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-style: normal;
+  color: var(--text-3);
+}
+
+.tl-empty {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-3);
+}
+
+/* ——— The sequence: list, hidden dates, ordering ——— */
+
+.tl-seq {
+  padding-top: 64px;
+}
+
+.tl-seq-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.tl-seq-head h2 {
+  margin: 10px 0 0;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.tl-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.tl-list li {
+  display: grid;
+  grid-template-columns: 178px minmax(0, 1fr) 112px auto;
+  align-items: baseline;
+  gap: 16px;
+  padding: 11px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tl-list li.is-now {
+  background: var(--signal-soft);
+}
+
+.tl-list-day {
+  justify-self: start;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--signal);
+}
+
+.tl-list-day:hover {
+  text-decoration: underline;
+}
+
+.tl-list-day.is-veiled {
+  padding: 1px 10px;
+  border: 1px dashed var(--line-3);
+  border-radius: 6px;
+  font-family: var(--font-ui);
+  color: var(--text-3);
+}
+
+.tl-list-day.is-veiled:hover {
+  border-color: var(--signal);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.tl-list p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.tl-list p b {
+  margin-right: 4px;
+  font-weight: 600;
+}
+
+.tl-list p span {
+  color: var(--text-2);
+}
+
+.tl-list li.is-xehetasuna p span {
+  color: var(--text-3);
+}
+
+.tl-list-sys {
+  font-size: 12px;
+  color: var(--text-4);
+}
+
+.tl-veil-bar {
+  margin: 12px 0 0;
+  text-align: right;
+}
+
+.tl-game-q {
+  margin: 0;
+  font-size: 14.5px;
+  color: var(--text-2);
+}
+
+.tl-game-q b {
+  color: var(--text);
+}
+
+.tl-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tl-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 74px;
+  padding: 14px 16px;
+  border: 1px solid var(--line-2);
+  border-radius: 14px;
+  background: var(--surface);
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.tl-card:hover:not(:disabled) {
+  border-color: var(--line-3);
+  background: var(--surface-2);
+}
+
+.tl-card-n {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 1.5px dashed var(--line-3);
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tl-card.is-picked {
+  border-color: rgba(255, 106, 61, 0.45);
+}
+
+.tl-card.is-picked .tl-card-n {
+  border-style: solid;
+  border-color: var(--signal);
+  background: var(--signal);
+  color: #0b0b0c;
+}
+
+.tl-card.is-ok {
+  border-color: rgba(126, 212, 146, 0.55);
+}
+
+.tl-card.is-ok .tl-card-n {
+  border-color: var(--ok);
+  background: var(--ok);
+}
+
+.tl-card.is-bad {
+  border-color: rgba(255, 123, 114, 0.5);
+}
+
+.tl-card.is-bad .tl-card-n {
+  border-color: var(--bad);
+  background: var(--bad);
+}
+
+.tl-card-t {
+  display: grid;
+  gap: 2px;
+}
+
+.tl-card-t b {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.tl-card-t small {
+  font-size: 12px;
+  color: var(--text-4);
+}
+
+.tl-card-a {
+  margin-left: auto;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.tl-card-a i {
+  font-style: normal;
+  color: var(--text);
+}
+
+.tl-card-go {
+  display: inline-block;
+  margin: 6px 0 0 4px;
+}
+
+.tl-game-bar {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 1100px) {
+  .tl-stage {
+    grid-template-columns: minmax(0, 1.2fr) minmax(300px, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .tl-chart {
+    --lab: 116px;
+  }
+  .tl-map-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tl-col.is-oraindik-ez {
+    grid-column: 1 / -1;
+  }
+  .tl-col.is-badago .tl-group {
+    grid-template-columns: 104px minmax(0, 1fr);
+  }
+  .tl-stage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tl-card-now {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .tl-event {
+    grid-column: 1 / -1;
+  }
+  .tl-list li {
+    grid-template-columns: 150px minmax(0, 1fr) auto;
+  }
+  .tl-list-sys {
+    display: none;
+  }
+  .tl-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ——— Home: the chronicle, one screen ——— */
+
+.chr-head {
+  max-width: 720px;
+}
+
+.chr-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.chr-figure {
+  align-self: start;
+}
+
+.chr-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 22px 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.chr-day {
+  font-size: 56px;
+}
+
+.chr-event {
+  flex: 1;
+  animation: chr-in 420ms ease both;
+}
+
+.chr-event h3 {
+  margin: 10px 0 8px;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+}
+
+.chr-event > p:not(.tl-when) {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+
+.chr-ctl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.chr-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.chr-ruler {
+  margin-top: 18px;
+  padding: 10px 18px 6px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+@keyframes chr-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chr-event {
+    animation: none;
+  }
+}
+
+@media (max-width: 1000px) {
+  .chr-stage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .chr-side {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px 22px;
+    align-items: start;
+  }
+  .chr-ctl {
+    grid-column: 1 / -1;
+  }
+}
+
+/* In the narrow columns, a chip's date or successor goes under its name rather than squeezing it. */
+.tl-map-cols .ln-chip.tl-chip {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+
+.ln-chip.tl-chip em {
+  white-space: nowrap;
+}

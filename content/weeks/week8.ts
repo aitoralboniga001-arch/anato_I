@@ -2,9 +2,11 @@ import type { WeekDef } from '@/lib/sim/types';
 import { OriginsMap, OriginsSection } from '@/components/scenes/week8/Origins';
 import { OssificationTypes } from '@/components/scenes/week8/Ossification';
 import { CalvariaSide, CalvariaTop } from '@/components/scenes/week8/Calvaria';
+import { Calvaria3D } from '@/components/scenes/week8/Calvaria3D';
 import { CranialBase } from '@/components/scenes/week8/CranialBase';
 import { FaceArches, FaceSkull } from '@/components/scenes/week8/Viscero';
 import { LimbBuds, LimbRotation } from '@/components/scenes/week8/Limbs';
+import { LimbRotation3D } from '@/components/scenes/week8/LimbRotation3D';
 import { LongBone } from '@/components/scenes/week8/LongBones';
 import { VertebraBack, VertebraTop } from '@/components/scenes/week8/Vertebra';
 import { ColumnCoronal, ColumnSection, Curvatures } from '@/components/scenes/week8/Column';
@@ -307,6 +309,14 @@ export const week8: WeekDef = {
           orientation: { left: 'Atzea', right: 'Aurrea' },
           scene: CalvariaSide,
         },
+        {
+          id: 'kupula',
+          label: 'Kupula 3D',
+          plane: 'kanpokoa',
+          description: 'Buru-ganga osoa 3Dn, entzefaloaren gaineko kupula bat: hezur bakoitza bere hezurtzapen zentrotik hazten da mintzean zehar; bi hezur elkartzen diren lekuan joskura, gehiago elkartzen diren lekuan fontanela. Sei fontanelak irudi berean; erditzean parietalak ondokoen gainera.',
+          scene: Calvaria3D,
+          travel: false,
+        },
       ],
       beats: [
         {
@@ -323,7 +333,7 @@ export const week8: WeekDef = {
           notes: ['w8/3.1.1/p2/s1-s2'],
           text: 'Buru-ganga entzefaloaren goikaldeko eta alboko mesenkimatik sortzen da. Mintzezko hezurtzapena du: hezurtzapen zentro bakoitzetik hezur espikulak hazten dira eta zuzenean hezurtzen da; hezur lauak eta zapalak dira.',
           focus: ['hezurtzapen-zentroak', 'hezur-espikulak'],
-          view: 'goitik',
+          view: 'kupula',
         },
         {
           at: 0.28,
@@ -395,7 +405,7 @@ export const week8: WeekDef = {
           notes: ['w8/3.1.1/p20/s2-s3'],
           text: 'Joskurek eta fontanelek entzefaloaren hazkuntza ahalbidetzen dute. Gainera, erditzean burua fetuaren zatirik handiena denez, hezur plakak gainjarri egiten dira kraneoaren tamaina txikiagotzeko.',
           focus: ['joskurak', 'fontanelak'],
-          view: 'goitik',
+          view: 'kupula',
         },
         {
           at: 0.9,
@@ -790,7 +800,16 @@ export const week8: WeekDef = {
         },
         {
           id: 'biraketa',
-          label: 'Biraketa',
+          label: 'Biraketa 3D',
+          plane: 'kanpokoa',
+          description: '8. asteko biraketak 3Dn, enbrioia ezker aldetik eta aurretik ikusita: muskulu tolestatzaileak (gorria) eta hedatzaileak (urdina) gorputz-adar bakoitzaren ardatzaren inguruan biratzen. Arrastatu edozein aldetik ikusteko.',
+          orientation: { top: 'Kraneala', bottom: 'Kaudala' },
+          scene: LimbRotation3D,
+          travel: false,
+        },
+        {
+          id: 'ebakiak',
+          label: 'Ebakiak',
           plane: 'koronala',
           description: '8. asteko biraketak aurretik: gorputz-adar bakoitzean muskulu tolestatzaileak (gorria) eta hedatzaileak (urdina); ondoan zeharkako ebakidura, goian aurrea.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },

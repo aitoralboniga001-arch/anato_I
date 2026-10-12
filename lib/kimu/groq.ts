@@ -1,6 +1,6 @@
 import type { ChatMessage } from './prompt';
 import { REPLY_SCHEMA } from './prompt';
-import { MOODS, type Mood } from './types';
+
 
 const ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
 const DEFAULT_MODEL = 'qwen/qwen3.8-27b';
@@ -9,17 +9,19 @@ export const groqConfigured = () => !!process.env.GROQ_API_KEY;
 
 export interface ModelAnswer {
   reply: string;
+  /** Notes passages the reply rests on ("n1"…). */
+  cite: string[];
+  /** Simulator places to open ("c1"…). */
   go: string[];
   followups: string[];
-  mood: Mood;
 }
 
 async function call(messages: ChatMessage[], structured: boolean, signal: AbortSignal) {
   const body: Record<string, unknown> = {
     model: process.env.KIMU_MODEL || DEFAULT_MODEL,
     messages,
-    temperature: 0.6,
-    max_tokens: 320,
+    temperature: 0.3,
+    max_tokens: 360,
     // Instruct mode: no hidden reasoning, so the answer is fast and the tokens go to the reply.
     reasoning_effort: 'none',
   };
@@ -35,7 +37,7 @@ async function call(messages: ChatMessage[], structured: boolean, signal: AbortS
 /** The model's raw text, or null when it could not answer (no key, limit reached, error, timeout). */
 export async function askGroq(messages: ChatMessage[]): Promise<string | null> {
   if (!groqConfigured()) return null;
-  const signal = AbortSignal.timeout(9000);
+  const signal = AbortSignal.timeout(8000);
   try {
     let res = await call(messages, true, signal);
     // A model or account that rejects structured output still answers when asked in plain words.
@@ -63,14 +65,14 @@ export function parseAnswer(raw: string): ModelAnswer | null {
         const list = (v: unknown, n: number, len: number) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string' && !!x.trim()).slice(0, n).map((x) => clip(x.trim(), len)) : []);
         return {
           reply: clip(j.reply.trim(), 800),
+          cite: list(j.cite, 3, 8),
           go: list(j.go, 2, 8),
           followups: list(j.followups, 3, 70),
-          mood: MOODS.includes(j.mood as Mood) ? (j.mood as Mood) : 'happy',
         };
       }
     } catch {
       // Fall through: treat the text as the reply.
     }
   }
-  return { reply: clip(text.replace(/[{}"]/g, '').trim(), 800), go: [], followups: [], mood: 'happy' };
+  return { reply: clip(text.replace(/[{}"]/g, '').trim(), 800), cite: [], go: [], followups: [] };
 }

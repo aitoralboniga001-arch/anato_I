@@ -28,13 +28,14 @@ const subscribe = (cb: () => void) => {
   };
 };
 
-const readPref = (k: PrefKey) => {
+const readPref = (k: PrefKey): boolean => {
   let v = cache.get(k);
   if (v === undefined) {
     try {
       const saved = window.localStorage.getItem(KEY(k));
-      // The stage list starts folded on narrower screens, so the scene gets the room; it opens with "[".
-      v = saved === null ? (k === 'outline' ? window.innerWidth >= 1500 : DEFAULTS[k]) : saved === '1';
+      // The stage list starts folded unless the screen has room for it beside the summary (the stage
+      // navigator in the heading lists the same index); it opens with "[".
+      v = saved === null ? (k === 'outline' ? window.innerWidth >= (readPref('panel') ? 1600 : 1280) : DEFAULTS[k]) : saved === '1';
     } catch {
       v = DEFAULTS[k];
     }
