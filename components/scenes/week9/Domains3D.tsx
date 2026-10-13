@@ -1,15 +1,15 @@
 'use client';
 
 import { Callouts, Note, rand, type SceneProps } from '@/components/kit';
-import { Stage3D } from '@/components/kit/three/Stage3D';
+import { Loading3D, Stage3D } from '@/components/kit/three/Stage3D';
 import { C } from '@/lib/sim/palette';
 import { seg } from '@/lib/sim/anim';
 import { add, deg, mix3, type M4, type V3 } from '@/lib/three-d/math';
 import { blob, type Mesh } from '@/lib/three-d/mesh';
 import type { Item3, Scene3 } from '@/lib/three-d/scene';
 import { flyIn, reveal } from '@/lib/three-d/flyin';
-import { embryo5 } from '@/lib/three-d/embryo5';
-import { prewarm } from '@/lib/three-d/prewarm';
+import { EMBRYO5 } from '@/lib/three-d/embryo5';
+import { geoOf, geoSlot, useGeoReady } from '@/lib/three-d/offthread';
 import { deform, ellipsoid, mirrorX, polyline2, prismZ, smin, surfaceMesh, type SDF } from '@/lib/three-d/sdf';
 import { HUE, W, vis } from './common';
 
@@ -222,9 +222,7 @@ function build(): Geo {
   return { neural, noto, sclero, dermato, myo, inter, aorta, gut, parietal, visceral, ecto, frontier, prim, abax, cell: blob({ center: [0, 0, 0], radii: [0.04, 0.04, 0.04], rings: 6, sides: 8 }) };
 }
 
-let geo: Geo | null = null;
-
-prewarm(embryo5, () => (geo ??= build()));
+const GEO = geoSlot('domains', build);
 
 const at3 = (p: V3): M4 => {
   const m = new Float32Array(16);
@@ -261,7 +259,7 @@ function cellAt(c: (typeof CELLS)[number], k: number): V3 {
 }
 
 export function buildDomains(t: number, reduced: boolean) {
-  const G = (geo ??= build());
+  const G = geoOf(GEO);
   const k1 = reduced ? 1 : seg(t, DOM3_T.migrate[0], DOM3_T.migrate[1], (q) => q);
   const k2 = seg(t, DOM3_T.recall[0], DOM3_T.recall[1], (q) => q);
   // In the last step the crossing plays again (the rule to remember).
@@ -322,7 +320,7 @@ export function buildDomains(t: number, reduced: boolean) {
   return { scene, cellPts, front, prim, abax, F };
 }
 
-export function Domains3D({ t, reduced }: SceneProps) {
+function Domains3DView({ t, reduced }: SceneProps) {
   const { scene, cellPts, front, prim, abax, F } = buildDomains(t, reduced);
   const L = F.labels;
   const recall = vis(t, DOM3_T.recall[0], 2);
@@ -396,3 +394,9 @@ export function Domains3D({ t, reduced }: SceneProps) {
     </g>
   );
 }
+
+/** The view waits (without freezing the page) until its geometry has been built off the main thread. */
+export function Domains3D(props: SceneProps) {
+  return useGeoReady([EMBRYO5, GEO]) ? <Domains3DView {...props} /> : <Loading3D />;
+}
+Domains3D.geo = ['embryo5', 'domains'];

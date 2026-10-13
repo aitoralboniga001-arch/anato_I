@@ -314,19 +314,27 @@ export function trunkRegions(g: Trunk) {
 const both = (R: Pt[], map: (p: Pt, sd: 1 | -1) => Pt) => [...R.map((p) => map(p, 1)), ...R.slice().reverse().map((p) => map(p, -1))];
 
 /** Mesenchymal cells over a region (deterministic jittered grid, screen space): small rotated ovals. */
-export function mesenchyme(inside: (x: number, y: number) => boolean, box: [number, number, number, number], step: number, seed: number, color: string, r = 1.9): ReactNode[] {
-  const out: ReactNode[] = [];
+export function mesenchyme(inside: (x: number, y: number) => boolean, box: [number, number, number, number], step: number, seed: number, color: string, r = 1.9): ReactNode {
+  // Every cell is a turned ellipse, all in one path (two half-arcs each): hundreds of cells, one element.
+  let d = '';
   let i = 0;
   const [x0, y0, x1, y1] = box;
+  const rx = f1(r * 1.5);
+  const ry = f1(r * 0.8);
+  const f2 = (v: number) => Math.round(v * 100) / 100;
   for (let y = y0; y <= y1; y += step * 0.84)
     for (let x = x0; x <= x1; x += step) {
       i++;
       const jx = f1(x + (rand(seed + i * 2.3) - 0.5) * step * 0.9);
       const jy = f1(y + (rand(seed + i * 5.9) - 0.5) * step * 0.7);
       if (!inside(jx, jy)) continue;
-      out.push(<ellipse key={i} cx={jx} cy={jy} rx={f1(r * 1.5)} ry={f1(r * 0.8)} transform={`rotate(${f1(rand(seed + i * 9.1) * 180)} ${jx} ${jy})`} />);
+      const deg = f1(rand(seed + i * 9.1) * 180);
+      const ex = rx * Math.cos((deg * Math.PI) / 180);
+      const ey = rx * Math.sin((deg * Math.PI) / 180);
+      const arc = `A${rx} ${ry} ${deg} 1 0 `;
+      d += `M${f2(jx + ex)},${f2(jy + ey)}${arc}${f2(jx - ex)},${f2(jy - ey)}${arc}${f2(jx + ex)},${f2(jy + ey)}Z`;
     }
-  return out;
+  return d ? <path d={d} /> : null;
 }
 
 /** Point-in-polygon (even-odd). */

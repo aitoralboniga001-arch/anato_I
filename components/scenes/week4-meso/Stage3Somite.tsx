@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { C, Journey, Label, Note, Part, clamp, lerp, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { LitCell, LitDefs, ellipsePath } from '@/components/scenes/week3/gastroKit';
 import { Cells } from '@/components/scenes/section/Section';
@@ -411,8 +411,13 @@ function SomiteWalls({ c }: { c: Ctx }) {
   );
 }
 
-/** One stellate mesenchymal (sclerotome) cell. */
-function SCellShape({ p, r, o, col = SCLERO, seed }: { p: Pt; r: number; o: number; col?: string; seed: number }) {
+type SCellProps = { p: Pt; r: number; o: number; col?: string; seed: number };
+/** One stellate mesenchymal (sclerotome) cell; redrawn only when it changes as drawn (to 0.1). */
+const SCellShape = memo(
+  SCellDraw,
+  (a: SCellProps, b: SCellProps) => a.col === b.col && a.seed === b.seed && f1(a.r) === f1(b.r) && f1(a.o) === f1(b.o) && f1(a.p[0]) === f1(b.p[0]) && f1(a.p[1]) === f1(b.p[1]),
+);
+function SCellDraw({ p, r, o, col = SCLERO, seed }: SCellProps) {
   if (o <= 0.02) return null;
   const a = f1(rand(seed * 3.1) * 180);
   return (

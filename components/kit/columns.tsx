@@ -46,6 +46,8 @@ export type Pos = { x: number; y: number; align: 'start' | 'middle' | 'end' };
 /** A name's text box and leader at a place, at each of ARRANGE_SCALES. */
 export type Shape = (e: LabelEntry, p: Pos) => { box: Box; leader: P[] }[];
 
+/** A point's place for reusing a seating (see LabelLayer). */
+const q = (v: number | undefined) => (v === undefined ? '' : Math.round(v / 3));
 const alignOf = (e: LabelEntry): Pos['align'] => e.align ?? (e.ax !== undefined && e.ax > e.x ? 'end' : 'start');
 
 /**
@@ -192,6 +194,9 @@ export function arrangeLabels(entries: LabelEntry[], shape: Shape, o: { pillL?: 
   return moved;
 }
 
+/** The last seating of each label layer (see LabelLayer). */
+const seatings = new WeakMap<LabelCollector, { sig: string; moved: Map<string, Pos> }>();
+
 /** Draws every collected name, laid out by `arrangeLabels`. */
 function LabelLayer({ col, fixed }: { col: LabelCollector; fixed?: boolean }) {
   const ctx = useScene();
@@ -207,17 +212,38 @@ function LabelLayer({ col, fixed }: { col: LabelCollector; fixed?: boolean }) {
     const size = labelSize(partState(ctx, e.id), e.small);
     return ARRANGE_SCALES.map((k) => labelGeom({ ...e, ...p }, chars, size, { ...scale, k }));
   };
-  const moved = fixed
-    ? new Map<LabelEntry, Pos>()
-    : arrangeLabels(
+  // The seating depends only on what the rules judge (which names are drawn, where, their size and
+  // the scale), not on how faint each is: while a view plays, that rarely changes from one frame to
+  // the next, so the last seating is reused until it does (the search is the costly part of a frame).
+  // Points that drift with the drawing count once they have moved a few units: who sits where only
+  // changes when the order of the points does, never for a fraction of a unit.
+  let moved = new Map<string, Pos>();
+  if (!fixed) {
+    const sig =
+      `${scale.k},${scale.left},${scale.right}|` +
+      list
+        .filter(([, e]) => (e.show ?? 1) > 0.02)
+        .map(([k, e]) => [k, e.id, e.text ?? ctx.nameOf(e.id), e.x, e.y, q(e.ax), q(e.ay), e.align, e.small, e.noArrange, labelSize(partState(ctx, e.id), e.small)].join(','))
+        .join(';');
+    const last = seatings.get(col);
+    if (last?.sig === sig) moved = last.moved;
+    else {
+      const byEntry = arrangeLabels(
         list.map(([, e]) => e),
         shape,
         { pillL: scale.left, pillR: scale.right },
       );
+      for (const [k, e] of list) {
+        const m = byEntry.get(e);
+        if (m) moved.set(k, m);
+      }
+      seatings.set(col, { sig, moved });
+    }
+  }
   return (
     <>
       {list.map(([k, e]) => {
-        const m = moved.get(e);
+        const m = moved.get(k);
         return <LabelDraw key={k} {...e} x={m?.x ?? e.x} y={m?.y ?? e.y} align={m?.align ?? e.align} moved={!!m && (m.x !== e.x || m.y !== e.y)} />;
       })}
     </>

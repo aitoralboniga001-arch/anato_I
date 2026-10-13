@@ -182,6 +182,8 @@ export const week9: WeekDef = {
           id: 'paraxiala',
           label: 'Enbrioia albotik',
           plane: 'kanpokoa',
+          // The side view of the body: moves to and from its cuts travel through the sagittal plane.
+          frame: 'sagitala',
           description: '5. gaiko 32. eguneko enbrioia bera, ezkerreko aldetik (aurpegia ezkerrean, bizkarra eskuinean), larruazalean leiho bat: barruan mesodermo paraxiala, buruan somitomeroak eta enborrean somitak.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Bentrala', right: 'Dortsala' },
           scene: ParaxialMap,
@@ -202,6 +204,8 @@ export const week9: WeekDef = {
           description: 'Mioblastoetatik zuntz muskular ildaskatura: fusioa, miofibrillak eta ildaskak; eskuinean miokardioa (fusiorik gabe).',
           scene: FusionScene,
           travel: false,
+          // The right-hand miotome, where its name points (the part is drawn on both sides).
+          zoom: { from: 'miotoma', part: 'miotoma', at: [540, 200, 320] },
         },
       ],
       beats: [
@@ -361,6 +365,8 @@ export const week9: WeekDef = {
           id: 'burua',
           label: 'Enbrioiaren burua',
           plane: 'kanpokoa',
+          // The side view of the body: moves to and from its cuts travel through the sagittal plane.
+          frame: 'sagitala',
           description: '5. gaiko 32. eguneko enbrioia bera, buruari hurbilduta (aurpegia ezkerrean), larruazaleko leihotik: 7 somitomero, somita okzipitalak, begia eta faringe arkuak.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Bentrala', right: 'Dortsala' },
           scene: HeadEmbryo,
@@ -373,6 +379,7 @@ export const week9: WeekDef = {
           orientation: { top: 'Goikoa', bottom: 'Behekoa', left: 'Albokoa', right: 'Erdialdea' },
           scene: OrbitScene,
           travel: false,
+          zoom: { from: 'burua', part: 'begia' },
         },
         {
           id: 'heldua',
@@ -451,7 +458,7 @@ export const week9: WeekDef = {
           idea: 'Beste somitomeroak faringe arkuetan kokatzen dira: 4 → 1. arkua, 6 → 2. arkua, 7 → 3. arkua.',
           text: 'Beste somitomero batzuetako mesodermoa lepo mailako faringe arkuetan (egitura bilateralak) kokatzen da: 4. somitomeroa 1. arkuan, 6.a 2. arkuan (hioide arkua) eta 7.a 3. arkuan. Arku bakoitzean muskulu jakin batzuk sortuko dira.',
           focus: ['lehen-faringe-arkua', 'hioide-arkua', 'hirugarren-faringe-arkua'],
-          view: 'burua',
+          view: 'heldua',
         },
         {
           at: 0.66,
@@ -554,6 +561,8 @@ export const week9: WeekDef = {
           id: 'burua',
           label: 'Enbrioiaren burua',
           plane: 'kanpokoa',
+          // The side view of the body: moves to and from its cuts travel through the sagittal plane.
+          frame: 'sagitala',
           description: '5. gaiko 32. eguneko enbrioiaren burua, larruazaleko leihotik: 5 somita okzipital (lehenengoa desagertzen da), laringea eta mihia, X eta XII nerbioak.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Bentrala', right: 'Dortsala' },
           scene: OccipitalHead,
@@ -756,6 +765,8 @@ export const week9: WeekDef = {
           id: 'patroiak',
           label: 'Enbrioia: patroiak',
           plane: 'kanpokoa',
+          // The side view of the body: moves to and from its cuts travel through the sagittal plane.
+          frame: 'sagitala',
           description: '5. gaiko 32. eguneko enbrioia, larruazaleko leihoarekin: buruko patroiak (gandor neurala, turkesa), lepokoak (somitak, gorria) eta paretetakoak eta gorputz-adarretakoak (paretako orria, arrosa argia).',
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Bentrala', right: 'Dortsala' },
           scene: ConnectivePatterns,
@@ -767,6 +778,7 @@ export const week9: WeekDef = {
           description: '8. gaiko hasikinak bizkarretik (gorputz pareta ezkerrean, somitekin) eta bakoitzaren zeharkako ebakidura: masa dortsala (hedatzaileak, urdina) eta bentrala (tolestatzaileak, gorria).',
           scene: LimbMuscles,
           travel: false,
+          zoom: { from: 'patroiak', part: 'gorputz-adarren-mesenkima' },
         },
         {
           id: 'biraketa',

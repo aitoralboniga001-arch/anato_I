@@ -1,7 +1,8 @@
 'use client';
 
 import { Callouts, Note, type SceneProps } from '@/components/kit';
-import { Stage3D } from '@/components/kit/three/Stage3D';
+import { Loading3D, Stage3D } from '@/components/kit/three/Stage3D';
+import { geoOf, geoSlot, useGeoReady } from '@/lib/three-d/offthread';
 import { mix, seg } from '@/lib/sim/anim';
 import { add, cross, deg, dot, mix3, mul, norm, perp, rotate, rotateAbout, sub, type M4, type V3 } from '@/lib/three-d/math';
 import { blob, curve3, merge, tube, type Mesh } from '@/lib/three-d/mesh';
@@ -228,9 +229,7 @@ function body() {
   return { skin, skinHit, eyes, lids, mouth, cord };
 }
 
-let cache: { limbs: { side: 1 | -1; lower: boolean; g: LimbGeo }[]; body: ReturnType<typeof body> } | null = null;
-const geometry = () =>
-  (cache ??= {
+const GEO = geoSlot('limbs', (): { limbs: { side: 1 | -1; lower: boolean; g: LimbGeo }[]; body: ReturnType<typeof body> } => ({
     limbs: [
       { side: 1, lower: false, g: limb(1, false) },
       { side: -1, lower: false, g: limb(-1, false) },
@@ -238,7 +237,8 @@ const geometry = () =>
       { side: -1, lower: true, g: limb(-1, true) },
     ],
     body: body(),
-  });
+  }));
+const geometry = () => geoOf(GEO);
 
 /** Signed 90° that takes the flexor side to the front (upper limbs) or to the back (lower limbs). */
 function turnSign(g: LimbGeo, lower: boolean) {
@@ -298,7 +298,7 @@ export function buildLimbRotation(t: number): { scene: Scene3; turn: { up: numbe
 const apply = (m: M4, p: V3): V3 => [m[0] * p[0] + m[4] * p[1] + m[8] * p[2] + m[12], m[1] * p[0] + m[5] * p[1] + m[9] * p[2] + m[13], m[2] * p[0] + m[6] * p[1] + m[10] * p[2] + m[14]];
 const applyDir = (m: M4, d: V3): V3 => [m[0] * d[0] + m[4] * d[1] + m[8] * d[2], m[1] * d[0] + m[5] * d[1] + m[9] * d[2], m[2] * d[0] + m[6] * d[1] + m[10] * d[2]];
 
-export function LimbRotation3D({ t }: SceneProps) {
+function LimbRotation3DView({ t }: SceneProps) {
   const { scene, mats, geo } = buildLimbRotation(t);
   const upTurn = seg(t, LIMB_T.rotUp, LIMB_T.rotUp + 0.02) * (1 - seg(t, LIMB_T.rotLow - 0.01, LIMB_T.rotLow));
   const lowTurn = seg(t, LIMB_T.rotLow, LIMB_T.rotLow + 0.02);
@@ -382,3 +382,9 @@ export function LimbRotation3D({ t }: SceneProps) {
     </g>
   );
 }
+
+/** The view waits (without freezing the page) until its geometry has been built off the main thread. */
+export function LimbRotation3D(props: SceneProps) {
+  return useGeoReady([GEO]) ? <LimbRotation3DView {...props} /> : <Loading3D />;
+}
+LimbRotation3D.geo = ['limbs'];

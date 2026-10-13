@@ -146,7 +146,18 @@ export function resample(pts: readonly Pt[], n: number): Pt[] {
 
 /** Point a fraction u along a polyline. */
 export function along(pts: readonly Pt[], u: number): Pt {
-  return resample(pts, 201)[Math.round(clamp(u) * 200)];
+  // The point `resample(pts, 201)` would give at u (on its 1/200 grid), without resampling the rest.
+  if (pts.length < 2) return pts[0] ?? [0, 0];
+  const want = (length(pts) * Math.round(clamp(u) * 200)) / 200;
+  let i = 0;
+  let acc = 0;
+  while (i < pts.length - 2 && acc + Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]) < want) {
+    acc += Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]);
+    i++;
+  }
+  const seg = Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]) || 1;
+  const r = clamp((want - acc) / seg);
+  return [lerp(pts[i][0], pts[i + 1][0], r), lerp(pts[i][1], pts[i + 1][1], r)];
 }
 
 /** Morph two point lists of possibly different length (both resampled to n). */

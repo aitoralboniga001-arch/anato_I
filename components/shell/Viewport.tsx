@@ -198,14 +198,26 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   const [fullscreenError, setFullscreenError] = useState('');
   const markKey = (marks ?? []).join('|');
 
-  // Re-measured after every render (the scene moves while it plays); state changes only when a ring moves.
+  // Re-measured after renders (the scene moves while it plays), but at most four times a second while
+  // it plays (measuring reads the styles of every marked part): new marks or a new zoom are measured
+  // at once. State changes only when a ring moves.
+  const lastMarks = useRef({ t: -1e9, key: '', k: 0 });
   useEffect(() => {
-    const raf = requestAnimationFrame(() => {
+    const last = lastMarks.current;
+    const fresh = last.key !== markKey || last.k !== z.k;
+    const wait = fresh ? 0 : Math.max(0, 250 - (performance.now() - last.t));
+    const measure = () => {
       const svg = scene.current?.ownerSVGElement;
       const next = svg && scene.current && markKey ? measureMarks(svg, scene.current, markKey.split('|'), z.k) : [];
+      lastMarks.current = { t: performance.now(), key: markKey, k: z.k };
       setRings((prev) => (sameMarks(prev, next) ? prev : next));
-    });
-    return () => cancelAnimationFrame(raf);
+    };
+    let raf = 0;
+    const timer = window.setTimeout(() => (raf = requestAnimationFrame(measure)), wait);
+    return () => {
+      clearTimeout(timer);
+      cancelAnimationFrame(raf);
+    };
   });
 
   useEffect(() => {

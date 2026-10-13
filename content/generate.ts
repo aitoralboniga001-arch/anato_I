@@ -248,12 +248,38 @@ function parentQuestions(): GenQuestion[] {
 // A sentence ends at . ! ? — not after a number ("3.") or a Roman numeral ("I. meiosia").
 export const firstSentence = (t: string) => t.match(/^.+?(?<!\d)(?<![\s(][IVX]{1,4})[.!?](?=\s|$)/)?.[0] ?? t;
 /** Word-initial stems of a structure's names (Basque adds endings: "trofoblasto-tik"). */
+const stemsCache = new Map<string, string[]>();
 const stemsOf = (id: string) => {
-  const s = structures.get(id)!;
-  return [s.name, ...(s.aka ?? [])].map((n) => n.toLowerCase().replace(/(ak|a)$/, '')).filter((n) => n.length >= 3);
+  let hit = stemsCache.get(id);
+  if (!hit) {
+    const s = structures.get(id)!;
+    hit = [s.name, ...(s.aka ?? [])].map((n) => n.toLowerCase().replace(/(ak|a)$/, '')).filter((n) => n.length >= 3);
+    stemsCache.set(id, hit);
+  }
+  return hit;
 };
 const escape = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const mentions = (text: string, id: string) => stemsOf(id).some((n) => new RegExp(`(^|[^a-zñ])${escape(n)}`, 'i').test(text));
+// One pattern per structure, compiled once: picking rivals asks it of every other structure (N² tests).
+const mentionCache = new Map<string, RegExp | null>();
+const mentions = (text: string, id: string) => {
+  let re = mentionCache.get(id);
+  if (re === undefined) {
+    const stems = stemsOf(id);
+    re = stems.length ? new RegExp(`(^|[^a-zñ])(${stems.map(escape).join('|')})`, 'i') : null;
+    mentionCache.set(id, re);
+  }
+  return !!re && re.test(text);
+};
+const firstDefCache = new Map<string, string>();
+/** The first sentence of a structure's definition (asked again for every rival). */
+const firstDef = (id: string) => {
+  let hit = firstDefCache.get(id);
+  if (hit === undefined) {
+    hit = firstSentence(structures.get(id)!.definition ?? '');
+    firstDefCache.set(id, hit);
+  }
+  return hit;
+};
 /** Hide every mention of the structure's names (the whole inflected word). */
 const mask = (text: string, id: string) => stemsOf(id).reduce((t, n) => t.replace(new RegExp(`(^|[^a-zñA-ZÑ])${escape(n)}[a-zñ-]*`, 'gi'), '$1___'), text);
 
@@ -261,8 +287,9 @@ const mask = (text: string, id: string) => stemsOf(id).reduce((t, n) => t.replac
 function rivals(id: string, ok: (o: string) => boolean) {
   const s = structures.get(id)!;
   const w = weekOf(id);
-  const all = [...structures.keys()].filter((o) => o !== id && ok(o));
   const same = (o: string) => structures.get(o)!.category === s.category;
+  // Only structures that can be a rival at all are tested with `ok` (it is the costly check).
+  const all = [...structures.keys()].filter((o) => o !== id && (weekOf(o) === w || (same(o) && Math.abs(weekOf(o) - w) === 1)) && ok(o));
   const close = all.filter((o) => same(o) && weekOf(o) === w);
   const kin = all.filter((o) => same(o) && Math.abs(weekOf(o) - w) === 1);
   const near = all.filter((o) => weekOf(o) === w && !same(o));
@@ -277,7 +304,7 @@ function definitionQuestions(): GenQuestion[] {
     // Too short to recognise, or the name still shows through.
     if (text.replace(/___/g, '').trim().length < 45 || mentions(text, id) || text.startsWith('Ikus')) continue;
     // Structures named in the definition are part of it, so they cannot be the rival answer.
-    const pool = rivals(id, (o) => !mentions(text, o) && !mentions(firstSentence(structures.get(o)!.definition ?? ''), id) && structures.get(o)!.name !== s.name);
+    const pool = rivals(id, (o) => !mentions(text, o) && !mentions(firstDef(o), id) && structures.get(o)!.name !== s.name);
     const wrong = [...new Set(pool)].slice(0, 3);
     if (wrong.length < 3) continue;
     const qid = `zer-${id}`;

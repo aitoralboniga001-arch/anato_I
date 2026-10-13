@@ -294,6 +294,34 @@ function setClip(u: Record<string, { value: any }>, c: Clip3 | undefined) {
 
 const deepOf = (c: Color) => new Color().copy(c).multiplyScalar(0.42).lerp(new Color('#2a1420'), 0.25);
 
+const bodyMaterial = () =>
+  new ShaderMaterial({
+    vertexShader: VERT,
+    fragmentShader: CLIP + FRAG,
+    uniforms: {
+      uOutline: { value: 0 },
+      uColor: { value: new Color() },
+      uDeep: { value: new Color() },
+      uLight: { value: new Vector3() },
+      uGlow: { value: new Color() },
+      uGlowAmt: { value: 0 },
+      uSat: { value: 1 },
+      uBright: { value: 1 },
+      uOpacity: { value: 1 },
+      uKind: { value: 0 },
+      ...clipUniforms(),
+    },
+    side: FrontSide,
+  });
+
+const edgeMaterial = () =>
+  new ShaderMaterial({
+    vertexShader: VERT,
+    fragmentShader: CLIP + OUT_FRAG,
+    uniforms: { uOutline: { value: 0.003 }, uColor: { value: new Color('#2a1317') }, uOpacity: { value: 0.75 }, ...clipUniforms() },
+    side: BackSide,
+  });
+
 export function createGL(host: HTMLDivElement, onReady: () => void): GLApi | null {
   const canvas = document.createElement('canvas');
   let renderer: WebGLRenderer;
@@ -330,6 +358,32 @@ export function createGL(host: HTMLDivElement, onReady: () => void): GLApi | nul
 
   const lightV = new Vector3();
 
+  // The shader programs are compiled before the first picture, without blocking the page where the
+  // browser can compile in parallel (until then the SVG draws the flat picture): linking them in the
+  // first render froze the page for a moment every time a 3D view opened.
+  let compiled = false;
+  // Kept until the layer goes: a program lives while some material uses it.
+  const warmMats = [bodyMaterial(), edgeMaterial(), bodyMaterial(), edgeMaterial()];
+  const warmTri = new BufferGeometry();
+  {
+    const warm = new Scene();
+    const tri = warmTri;
+    tri.setAttribute('position', new BufferAttribute(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]), 3));
+    tri.setAttribute('normal', new BufferAttribute(new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1]), 3));
+    tri.setAttribute('uv', new BufferAttribute(new Float32Array([0, 0, 1, 0, 0, 1]), 2));
+    const mats = warmMats;
+    mats.slice(2).forEach((m) => {
+      m.transparent = true;
+      m.depthWrite = false;
+    });
+    mats.forEach((m) => warm.add(new TMesh(tri, m)));
+    const done = () => {
+      compiled = true;
+      dirty = true;
+    };
+    renderer.compileAsync(warm, camera).then(done, done);
+  }
+
   function sync(f: GLFrame) {
     tick++;
     for (const it of f.items) {
@@ -351,30 +405,8 @@ export function createGL(host: HTMLDivElement, onReady: () => void): GLApi | nul
       }
       if (!s) {
         const geo = geometryOf(it.mesh);
-        const mat = new ShaderMaterial({
-          vertexShader: VERT,
-          fragmentShader: CLIP + FRAG,
-          uniforms: {
-            uOutline: { value: 0 },
-            uColor: { value: new Color() },
-            uDeep: { value: new Color() },
-            uLight: { value: new Vector3() },
-            uGlow: { value: new Color() },
-            uGlowAmt: { value: 0 },
-            uSat: { value: 1 },
-            uBright: { value: 1 },
-            uOpacity: { value: 1 },
-            uKind: { value: 0 },
-            ...clipUniforms(),
-          },
-          side: FrontSide,
-        });
-        const edgeMat = new ShaderMaterial({
-          vertexShader: VERT,
-          fragmentShader: CLIP + OUT_FRAG,
-          uniforms: { uOutline: { value: 0.003 }, uColor: { value: new Color('#2a1317') }, uOpacity: { value: 0.75 }, ...clipUniforms() },
-          side: BackSide,
-        });
+        const mat = bodyMaterial();
+        const edgeMat = edgeMaterial();
         const body = new TMesh(geo, mat);
         const edge = new TMesh(geo, edgeMat);
         for (const m of [body, edge]) {
@@ -422,7 +454,7 @@ export function createGL(host: HTMLDivElement, onReady: () => void): GLApi | nul
   }
 
   function draw(dt: number) {
-    if (!frame) return false;
+    if (!frame || !compiled) return false;
     const m = ctmNow();
     if (!m || !size.w) return false;
     const key = `${m.a.toFixed(4)},${m.d.toFixed(4)},${m.e.toFixed(2)},${m.f.toFixed(2)},${size.w},${size.h}`;
@@ -514,6 +546,8 @@ export function createGL(host: HTMLDivElement, onReady: () => void): GLApi | nul
         s.edgeMat.dispose();
       }
       slots.clear();
+      warmMats.forEach((m) => m.dispose());
+      warmTri.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
       canvas.remove();

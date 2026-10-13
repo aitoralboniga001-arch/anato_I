@@ -122,13 +122,14 @@ function leaderY(y: number, a: Pt, x: number, lx: number) {
   if (x <= a[0]) return null;
   return y + ((a[1] - y) * (ex - x)) / (ex - a[0]);
 }
-const crosses = (y: number, a: Pt, bands: Band[], lx: number) =>
-  bands.some((b) =>
-    Array.from({ length: 9 }, (_, i) => b.x0 + ((b.x1 - b.x0) * i) / 8).some((x) => {
-      const ly = leaderY(y, a, x, lx);
-      return ly !== null && ly > b.y0 && ly < b.y1;
-    }),
-  );
+function crosses(y: number, a: Pt, bands: Band[], lx: number) {
+  for (const b of bands)
+    for (let i = 0; i <= 8; i++) {
+      const ly = leaderY(y, a, b.x0 + ((b.x1 - b.x0) * i) / 8, lx);
+      if (ly !== null && ly > b.y0 && ly < b.y1) return true;
+    }
+  return false;
+}
 const cut = (p: Pt, q: Pt, r: Pt, s: Pt) => {
   const d = (a: Pt, b: Pt, c: Pt) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
   return d(p, q, r) * d(p, q, s) < 0 && d(r, s, p) * d(r, s, q) < 0;
@@ -150,11 +151,27 @@ function crossings(out: { y: number; a: Pt }[], lx: number) {
  * the column come first at about the same height: their leaders pass over the nearer anchors), each clear of the
  * bands. The names keep these places (noArrange): the view's label layer would not know the bands.
  */
+/**
+ * The last seatings found (the search tries many orders, too slow to repeat every frame): while the
+ * anchors stand still, or move less than a tenth of a unit, the names keep their places.
+ */
+const seated = new Map<string, { i: number; y: number }[]>();
 function column(items: Item[], top = 64, bottom = 560, gap = 34, x = 790, bands: Band[] = []) {
+  const live = items.filter((r) => (r.show ?? 1) > 0);
+  const key = [top, bottom, gap, x, ...bands.map((b) => [b.x0, b.x1, b.y0, b.y1].map((v) => v.toFixed(1)).join(' ')), '|', ...live.map((r) => `${r.id} ${r.a[0].toFixed(1)} ${r.a[1].toFixed(1)} ${r.small ? 1 : 0}`)].join(',');
+  let seats = seated.get(key);
+  if (!seats) {
+    const out = search(live, top, bottom, gap, x, bands);
+    seats = out.map((r) => ({ i: live.indexOf(r.src), y: r.y }));
+    if (seated.size > 300) seated.delete(seated.keys().next().value!);
+    seated.set(key, seats);
+  }
+  return seats.map(({ i, y }) => ({ ...live[i], y }));
+}
+function search(live: Item[], top: number, bottom: number, gap: number, x: number, bands: Band[]) {
   const lx = x - 6;
   let best: ReturnType<typeof columnAt> = [];
   let bestN = Infinity;
-  const live = items.filter((r) => (r.show ?? 1) > 0);
   const score = (order: Item[]) => {
     const out = columnAt(order, top, bottom, gap, x, bands);
     return { out, n: crossings(out, lx) * 10 + out.filter((r) => crosses(r.y, r.a, bands, lx)).length };
@@ -176,7 +193,7 @@ function column(items: Item[], top = 64, bottom = 560, gap = 34, x = 790, bands:
   return best;
 }
 function columnAt(order: Item[], top: number, bottom: number, gap: number, x: number, bands: Band[]) {
-  const out = order.map((r) => ({ ...r, y: 0 }));
+  const out = order.map((r) => ({ ...r, src: r, y: 0 }));
   const lx = x - 6;
   // A name's right end (the rules' estimate): long ones keep out of the orientation pill and the toolbar.
   const ok = (r: Item, y: number) => {

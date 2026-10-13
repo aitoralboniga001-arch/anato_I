@@ -4,6 +4,7 @@ import { Defs } from '@/components/kit/Defs';
 import { SceneContext, type SceneContextValue } from '@/components/kit/context';
 import { isSpace, partsOf, nameOf, weeks } from '@/content/registry';
 import { ViewTravel, travelPlan } from '@/components/shell/ViewTravel';
+import { ViewZoom, zoomPlan } from '@/components/shell/ViewZoom';
 import type { StageDef, ViewDef } from '@/lib/sim/types';
 
 const noop = () => {};
@@ -51,6 +52,7 @@ export function Travels({ q }: { q: URLSearchParams }) {
         const dayA = (h.a.st.dayRange[0] + h.a.st.dayRange[1]) / 2;
         const dayB = (h.b.st.dayRange[0] + h.b.st.dayRange[1]) / 2;
         const plan = travelPlan(w.week, dayB, h.a.v, h.b.v, dayA);
+        const zoom = !plan && h.a.st === h.b.st ? zoomPlan(h.a.v, h.b.v) : null;
         const ctx = (st: StageDef, t: number, v: ViewDef): SceneContextValue => ({
           selected: null,
           hovered: null,
@@ -70,9 +72,9 @@ export function Travels({ q }: { q: URLSearchParams }) {
         return (
           <section key={i} style={{ marginBottom: 14 }}>
             <h2 style={{ fontSize: 14, margin: '4px 0' }}>
-              #{i} {h.a.st.id}/{h.a.v.id} → {h.b.st.id}/{h.b.v.id} {plan ? '' : '— (no travel)'}
+              #{i} {h.a.st.id}/{h.a.v.id} → {h.b.st.id}/{h.b.v.id} {plan ? '' : zoom ? '— zoom' : '— (no travel)'}
             </h2>
-            {plan && (
+            {(plan || zoom) && (
               <div
                 style={{
                   display: 'grid',
@@ -91,20 +93,39 @@ export function Travels({ q }: { q: URLSearchParams }) {
                   >
                     <svg viewBox="0 0 1000 640" style={{ width: '100%', display: 'block' }} className="viewport-svg">
                       <Defs />
-                      <ViewTravel
-                        plan={plan}
-                        progress={p}
-                        onDone={noop}
-                        old={
-                          <SceneContext.Provider value={ctx(h.a.st, h.a.t, h.a.v)}>
-                            <A t={h.a.t} reduced />
+                      {plan ? (
+                        <ViewTravel
+                          plan={plan}
+                          progress={p}
+                          onDone={noop}
+                          old={
+                            <SceneContext.Provider value={ctx(h.a.st, h.a.t, h.a.v)}>
+                              <A t={h.a.t} reduced />
+                            </SceneContext.Provider>
+                          }
+                        >
+                          <SceneContext.Provider value={ctx(h.b.st, h.b.t, h.b.v)}>
+                            <B t={h.b.t} reduced />
                           </SceneContext.Provider>
-                        }
-                      >
-                        <SceneContext.Provider value={ctx(h.b.st, h.b.t, h.b.v)}>
-                          <B t={h.b.t} reduced />
-                        </SceneContext.Provider>
-                      </ViewTravel>
+                        </ViewTravel>
+                      ) : (
+                        zoom && (
+                          <ViewZoom
+                            plan={zoom}
+                            progress={p}
+                            onDone={noop}
+                            old={
+                              <SceneContext.Provider value={ctx(h.a.st, h.a.t, h.a.v)}>
+                                <A t={h.a.t} reduced />
+                              </SceneContext.Provider>
+                            }
+                          >
+                            <SceneContext.Provider value={ctx(h.b.st, h.b.t, h.b.v)}>
+                              <B t={h.b.t} reduced />
+                            </SceneContext.Provider>
+                          </ViewZoom>
+                        )
+                      )}
                     </svg>
                     <figcaption
                       style={{

@@ -1,13 +1,13 @@
 'use client';
 
 import { Callouts, Note, type SceneProps } from '@/components/kit';
-import { Stage3D } from '@/components/kit/three/Stage3D';
+import { Loading3D, Stage3D } from '@/components/kit/three/Stage3D';
 import { seg } from '@/lib/sim/anim';
 import { add, cross, deg, dot, mix3, mul, norm, sub, type M4, type V3 } from '@/lib/three-d/math';
 import { merge, tube, type Mesh } from '@/lib/three-d/mesh';
 import type { Clip3, Hole3, Item3, Scene3 } from '@/lib/three-d/scene';
 import { capsule, ellipsoid, mirrorX, smin, surfaceAlong, surfaceMesh, type SDF } from '@/lib/three-d/sdf';
-import { prewarm } from '@/lib/three-d/prewarm';
+import { geoOf, geoSlot, useGeoReady } from '@/lib/three-d/offthread';
 import { CAL_T } from './Calvaria';
 import { Q, vis } from './common';
 
@@ -392,8 +392,7 @@ function build(): Geo {
   return part as Geo;
 }
 
-let geo: Geo | null = null;
-prewarm(buildBones, buildMarks, buildSutures, buildFonts, buildContext);
+const GEO = geoSlot('calvaria', build);
 
 const shift = (d: V3): M4 => {
   const m = new Float32Array(16);
@@ -438,7 +437,7 @@ function camAt(t: number) {
 }
 
 export function buildCalvaria(t: number, reduced: boolean) {
-  const G = (geo ??= build());
+  const G = geoOf(GEO);
   const grow = reduced ? (t >= CAL_T.grow + 0.01 ? 1 : 0) : seg(t, CAL_T.grow + 0.01, CAL_T.bones + 0.03);
   const growing = vis(t, CAL_T.grow, CAL_T.bones + 0.04);
   const mold = seg(t, CAL_T.birth + 0.01, CAL_T.birth + 0.05) * (1 - seg(t, CAL_T.after, CAL_T.after + 0.02));
@@ -490,7 +489,7 @@ export function buildCalvaria(t: number, reduced: boolean) {
 /** A point on the vault surface in a direction (for name tips), shifted with the moulding like the bones. */
 const onVault = (q: V3, out = 0.006): V3 => add(surfaceAlong(head, O, norm(q), 2).p, mul(norm(q), out));
 
-export function Calvaria3D({ t, reduced }: SceneProps) {
+function Calvaria3DView({ t, reduced }: SceneProps) {
   const { scene, eye, grow, growing, mold, pfClose, afClose, sutures, fontSize, calm } = buildCalvaria(t, reduced);
   const view = norm(sub(eye, O));
   /** The side (x sign) facing the camera, for the names of paired structures. */
@@ -599,3 +598,9 @@ function c3Name(t: number) {
   if (t >= CAL_T.after) return 'goitik eta atzetik';
   return 'goitik eta aurretik';
 }
+
+/** The view waits (without freezing the page) until its geometry has been built off the main thread. */
+export function Calvaria3D(props: SceneProps) {
+  return useGeoReady([GEO]) ? <Calvaria3DView {...props} /> : <Loading3D />;
+}
+Calvaria3D.geo = ['calvaria'];

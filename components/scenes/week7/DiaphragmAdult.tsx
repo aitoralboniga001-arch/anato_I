@@ -33,7 +33,16 @@ const TENDON = spline(
 );
 
 /** The point of a closed curve in a given direction from C0 (degrees, 0 = right, 90 = down = posterior). */
+const hits = new WeakMap<Pt[], Map<number, Pt>>();
 function rayHit(curve: Pt[], deg: number): Pt {
+  // The curves are fixed: each direction is searched once.
+  let m = hits.get(curve);
+  if (!m) hits.set(curve, (m = new Map()));
+  let p = m.get(deg);
+  if (!p) m.set(deg, (p = rayHitAt(curve, deg)));
+  return p;
+}
+function rayHitAt(curve: Pt[], deg: number): Pt {
   const want = (deg * Math.PI) / 180;
   let best = curve[0];
   let err = Infinity;

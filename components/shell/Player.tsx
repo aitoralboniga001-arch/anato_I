@@ -681,15 +681,22 @@ export function TourCard({ item, idx, n, onSkip, onPick, compact = false, side =
 /**
  * Guided mode's check at the end of a step: one tap, then the reason, then on. It takes the caption's
  * place in the dock so the scene stays visible; answers are kept with the rest (`mikro:` ids). Skipping
- * and going on are the pager's Next key ("Saltatu", then a lit "Jarraitu"), never a second button.
+ * one and going on are the pager's Next key ("Saltatu", then a lit "Jarraitu"); "Saltatu guztiak" turns
+ * the questions off for every step at once.
  */
-export function AskCard({ id, ask, onAnswer }: { id: string; ask: MicroQuestion; onAnswer: () => void }) {
+export function AskCard({ id, ask, onAnswer, onSkipAll }: { id: string; ask: MicroQuestion; onAnswer: () => void; onSkipAll?: () => void }) {
   const [picked, setPicked] = useState<number | null>(null);
   const ok = picked === ask.answer;
   return (
     <div className="tour ask" role="dialog" aria-label="Galdera txikia">
       <div className="tour-top">
         <span className="tour-kicker">Egiaztatu · galdera txikia</span>
+        {/* One press stops them all (not one "Saltatu" per step); the mode menu turns them back on. */}
+        {onSkipAll && picked === null && (
+          <button className="btn small ghost ask-skip-all" onClick={onSkipAll} title="Galdera txikirik gabe jarraitu urrats guztietan (moduaren menuan berriro piztu daitezke)">
+            Saltatu guztiak <span aria-hidden>→</span>
+          </button>
+        )}
       </div>
       <p className="ask-q">{ask.q}</p>
       <div className="ask-options">

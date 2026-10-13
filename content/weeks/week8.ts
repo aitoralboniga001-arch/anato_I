@@ -405,7 +405,7 @@ export const week8: WeekDef = {
           notes: ['w8/3.1.1/p20/s2-s3'],
           text: 'Joskurek eta fontanelek entzefaloaren hazkuntza ahalbidetzen dute. Gainera, erditzean burua fetuaren zatirik handiena denez, hezur plakak gainjarri egiten dira kraneoaren tamaina txikiagotzeko.',
           focus: ['joskurak', 'fontanelak'],
-          view: 'kupula',
+          view: 'goitik',
         },
         {
           at: 0.9,
@@ -413,7 +413,6 @@ export const week8: WeekDef = {
           notes: ['w8/3.1.1/p21/s1-s3'],
           text: 'Jaio ondoren joskurak zabalik mantentzen dira entzefaloa hazteko, eta tamaina egokia hartzean ixten dira. Fontanelak lehenago ixten dira: atzekoa 1.–2. hilabetean, aurrekoa 18. hilabetean. Joskura batzuk helduaro arte zabalik.',
           focus: ['aurreko-fontanela'],
-          view: 'goitik',
         },
       ],
       structures: [

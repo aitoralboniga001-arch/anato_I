@@ -23,8 +23,10 @@ import { NotesPanel } from './NotesPanel';
 import type { NotesAnchor } from '@/content/notes-text';
 import { NowCard } from './NowCard';
 import { Locator } from './Locator';
+import { warmGeo } from '@/lib/three-d/geo-client';
 import { ViewBridge, ViewFlash, needsBridge, type ViewSnap } from './ViewBridge';
 import { ViewTravel, travelPlan, type TravelPlan } from './ViewTravel';
+import { ViewZoom, zoomPlan, type ZoomPlan } from './ViewZoom';
 import { CavityRoad } from './CavityRoad';
 import { IconRail, Outline, StageInfo, StageNav } from './SidePanel';
 import { Viewport } from './Viewport';
@@ -523,7 +525,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     setShown({ key: sceneKey, w: week.week, i: pos.i, view: view.id });
   }
   /** The camera move between two views (see ViewTravel), while it plays; playback waits for it. */
-  const [travel, setTravel] = useState<{ key: string; plan: TravelPlan } | null>(null);
+  const [travel, setTravel] = useState<{ key: string; plan?: TravelPlan; zoom?: ZoomPlan } | null>(null);
   const travelRef = useRef(false);
   useEffect(() => {
     travelRef.current = !!travel;
@@ -579,6 +581,19 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     if (linkPos) live.current = linkPos;
   }, [linkPos]);
 
+  // The topic's 3D views: their geometry is built off the main thread as soon as the topic opens (the
+  // current stage first), and the WebGL layer's code is fetched while the page is idle, so opening one
+  // never freezes the page.
+  useEffect(() => {
+    const order = [week.stages[pos.i], ...week.stages.filter((_, i) => i !== pos.i)];
+    const keys = order.flatMap((s) => s.views.flatMap((v) => (v.scene as { geo?: string[] }).geo ?? []));
+    if (!keys.length) return;
+    warmGeo(keys);
+    const idle = window.requestIdleCallback ?? ((fn: () => void) => window.setTimeout(fn, 1500));
+    idle(() => void import('@/components/kit/three/gl').catch(() => {}));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per topic; the stage only orders the queue
+  }, [week]);
+
   // Narrated pauses retain the current audio sample and observation interval.
   useEffect(() => {
     if (voice && voiceStarted) { if (playing) transport.resume(); else transport.pause(); return; }
@@ -599,8 +614,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     let raf = 0;
     let last = performance.now();
     const step = (now: number) => {
-      const dt = Math.min(0.1, (now - last) / 1000);
-      last = now;
+      // A frame's timestamp is when the frame began, which can be earlier than `last` when the loop
+      // restarts after a long render (a view change): never step backwards, or the time slips back
+      // under the step's start, the previous view returns, and the two views take turns for ever.
+      const dt = Math.max(0, Math.min(0.1, (now - last) / 1000));
+      last = Math.max(last, now);
       raf = requestAnimationFrame(step);
 
       // Speech samples drive scene movement; observation time only advances while playing.
@@ -1539,16 +1557,21 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     // When the view of the same body changes (by the simulation or by the viewer), the camera travels from the old plane to the new one.
     const [fw, fs, fv] = seenView?.key.split('/') ?? [];
     const fromView = Number(fw) === week.week ? week.stages.find((x) => x.id === fs)?.views.find((x) => x.id === fv) : undefined;
-    const plan = !formation && !reduced && !travel && intro === null && fromView && seenView ? travelPlan(week.week, day, fromView, view, seenView.day) : null;
+    const may = !formation && !reduced && !travel && intro === null && fromView && seenView;
+    const plan = may ? travelPlan(week.week, day, fromView, view, seenView.day) : null;
+    // A close-up of the same stage's other view: the camera dives into where it is (or pulls back out).
+    const zoom = may && !plan && fs === stage.id ? zoomPlan(fromView, view) : null;
     if (plan) setTravel({ key: sceneKey, plan });
+    else if (zoom) setTravel({ key: sceneKey, zoom });
     else if (travel) setTravel(null);
+    const moved = !!plan || !!zoom;
     // After a camera move the card is only its chip (reopen to read it); narrated, it is read out as before.
     const bridged = !formation && !!from && pickedView !== sceneKey && needsBridge(from, snap);
-    if (bridged) setBridge({ from, to: snap, small: !!plan && !voice });
+    if (bridged) setBridge({ from, to: snap, small: moved && !voice });
     else if (bridge) setBridge(null);
     // Every other view change the simulation makes is announced over the picture itself, briefly
     // (one message at a time: when the card opens, it already names the new view).
-    if (!plan && !bridged && !formation && seenView && pickedView !== sceneKey && seenView.label !== snap.label) setViewFlash({ key: sceneKey, label: view.label, plane: view.plane });
+    if (!moved && !bridged && !formation && seenView && pickedView !== sceneKey && seenView.label !== snap.label) setViewFlash({ key: sceneKey, label: view.label, plane: view.plane });
   }
   const saveView = useEffectEvent(() => {
     try {
@@ -1952,7 +1975,20 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                 </>
               }
             >
-              {travel?.key === sceneKey && ghost && GhostScene ? (
+              {travel?.key === sceneKey && travel.zoom && ghost && GhostScene ? (
+                <ViewZoom
+                  key={`zoom-${travel.key}`}
+                  plan={travel.zoom}
+                  old={<SceneView Scene={GhostScene} t={ghost.t} reduced={reduced} />}
+                  onDone={() => {
+                    setTravel(null);
+                    setGhost(null);
+                    setArrived(sceneKey);
+                  }}
+                >
+                  {mounted && <SceneView Scene={Scene} t={sceneT} reduced={reduced} />}
+                </ViewZoom>
+              ) : travel?.key === sceneKey && travel.plan && ghost && GhostScene ? (
                 <ViewTravel
                   key={`travel-${travel.key}`}
                   plan={travel.plan}
@@ -2059,7 +2095,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             }}
             ask={
               askNow && beat.ask ? (
-                <AskCard key={askKey} id={`mikro:${week.week}/${askKey}`} ask={beat.ask} onAnswer={() => setAnswered(askKey)} />
+                <AskCard key={askKey} id={`mikro:${week.week}/${askKey}`} ask={beat.ask} onAnswer={() => setAnswered(askKey)} onSkipAll={() => { setPref('asks', false); doneAsk(); }} />
               ) : undefined
             }
           />

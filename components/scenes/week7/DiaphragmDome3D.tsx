@@ -1,14 +1,15 @@
 'use client';
 
 import { Callouts, Note, type SceneProps } from '@/components/kit';
-import { Stage3D } from '@/components/kit/three/Stage3D';
+import { Loading3D, Stage3D } from '@/components/kit/three/Stage3D';
+import { partState, useScene } from '@/components/kit/context';
 import { seg } from '@/lib/sim/anim';
 import { add, deg, mix3, type M4, type V3 } from '@/lib/three-d/math';
 import { blob, curve3, tube, type Mesh } from '@/lib/three-d/mesh';
 import type { Item3, Scene3 } from '@/lib/three-d/scene';
-import { embryo5, sectionMatrix } from '@/lib/three-d/embryo5';
+import { EMBRYO5, sectionMatrix } from '@/lib/three-d/embryo5';
 import { flyIn, reveal } from '@/lib/three-d/flyin';
-import { prewarm } from '@/lib/three-d/prewarm';
+import { geoOf, geoSlot, useGeoReady } from '@/lib/three-d/offthread';
 import { deform, polygon2, slab, surfaceMesh, type SDF } from '@/lib/three-d/sdf';
 import { AORTA_X, BODY_X, CANAL_L, CAV_X, ESO_X, IVC_X, MES, SEPTUM_X } from './Diaphragm';
 import { CavityKey, KEY7, P, resample, vis } from './common';
@@ -186,12 +187,12 @@ function build(): Geo {
   };
 }
 
-let geo: Geo | null = null;
+const GEO = geoSlot('diaphragm', build);
 let last: { t: number; out: ReturnType<typeof frameAt> } | null = null;
 
 
 function frameAt(t: number) {
-  const G = (geo ??= build());
+  const G = geoOf(GEO);
   const memK = seg(t, DOME_T.memIn[0], DOME_T.memIn[1]);
   const c = seg(t, DOME_T.close[0], DOME_T.close[1]);
   // The membrane's free edge sweeps from the wall to the middle: the grown part is squeezed against the wall.
@@ -306,12 +307,12 @@ const EMBRYO_AT = sectionMatrix(0.95, [0, 0, 0.05], [1, 0, 0], [0, 0, -1], 0.8);
 /** The slice's cut faces (above and below), for the fly-in. */
 const PLANES = [-0.5, 0.5].map((y) => ({ center: [0, y, 0.05] as V3, a: [1.7, 0, 0] as V3, b: [0, 0, 1.6] as V3 }));
 
-prewarm(embryo5, () => buildDiaphragm(DOME_T.dome[1], false));
 
-export function buildDiaphragm(t: number, reduced: boolean) {
+/** `canalLit`: the canals are what is being studied, so their glass is denser (otherwise they barely read). */
+export function buildDiaphragm(t: number, reduced: boolean, canalLit = false) {
   if (!last || last.t !== t) last = { t, out: frameAt(t) };
   const F = last.out;
-  const G = geo!;
+  const G = geoOf(GEO);
   const M = F.meshes;
   const canalShow = 1 - seg(F.c, 0.82, 1);
   const crusK = seg(t, DOME_T.dome[0] + 0.01, DOME_T.dome[1] + 0.01);
@@ -330,8 +331,8 @@ export function buildDiaphragm(t: number, reduced: boolean) {
   ];
   if (canalShow > 0.02)
     items.push(
-      { key: 'canalR', id: 'erreten-perikardioperitonealak', mesh: M.canalR, hit: M.canalRHit, color: '#7fc8e8', deep: '#2a5a78', tissue: 'membrane', opacity: 0.32 * canalShow, outline: false },
-      { key: 'canalL', id: 'erreten-perikardioperitonealak', mesh: M.canalL, hit: M.canalLHit, color: '#7fc8e8', deep: '#2a5a78', tissue: 'membrane', opacity: 0.32 * canalShow, outline: false },
+      { key: 'canalR', id: 'erreten-perikardioperitonealak', mesh: M.canalR, hit: M.canalRHit, color: '#7fc8e8', deep: '#2a5a78', tissue: 'membrane', opacity: (canalLit ? 0.58 : 0.32) * canalShow, outline: false },
+      { key: 'canalL', id: 'erreten-perikardioperitonealak', mesh: M.canalL, hit: M.canalLHit, color: '#7fc8e8', deep: '#2a5a78', tissue: 'membrane', opacity: (canalLit ? 0.58 : 0.32) * canalShow, outline: false },
     );
   const cr = crura(F.lift, crusK);
   if (cr) items.push({ key: 'crura', id: 'hestegorri-inguruko-mesenkima', groups: ['gerriko-atala'], mesh: cr, color: P.eso, deep: '#2a6a60', tissue: 'muscle' });
@@ -369,8 +370,10 @@ export function buildDiaphragm(t: number, reduced: boolean) {
   return { scene, F, myoAt, canalShow, FI };
 }
 
-export function DiaphragmDome3D({ t, reduced }: SceneProps) {
-  const { scene, F, myoAt, canalShow, FI } = buildDiaphragm(t, reduced);
+function DiaphragmDome3DView({ t, reduced }: SceneProps) {
+  const ctx = useScene();
+  const lit = ['focus', 'spot', 'active'].includes(partState(ctx, 'erreten-perikardioperitonealak'));
+  const { scene, F, myoAt, canalShow, FI } = buildDiaphragm(t, reduced, lit);
   const L = FI.labels;
   const top = (x: number, z: number, up = 0.06) => F.lift([x, up, z]);
   const adult = seg(t, DOME_T.adult[0], DOME_T.adult[1]);
@@ -446,3 +449,9 @@ export function DiaphragmDome3D({ t, reduced }: SceneProps) {
     </g>
   );
 }
+
+/** The view waits (without freezing the page) until its geometry has been built off the main thread. */
+export function DiaphragmDome3D(props: SceneProps) {
+  return useGeoReady([EMBRYO5, GEO]) ? <DiaphragmDome3DView {...props} /> : <Loading3D />;
+}
+DiaphragmDome3D.geo = ['embryo5', 'diaphragm'];

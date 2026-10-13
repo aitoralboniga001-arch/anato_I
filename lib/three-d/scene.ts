@@ -110,8 +110,11 @@ export interface Projected {
 
 const f1 = (v: number) => (Math.round(v * 10) / 10).toString();
 
-/** Project an item's coarse mesh: its visible triangles and how lit each is. */
-export function projectItem(item: Item3, v: View3, light: V3): Projected {
+/**
+ * Project an item's coarse mesh: its visible triangles and how lit each is. Without `flat` (WebGL draws
+ * the tissue) only the pointing outline is made: the lit bands are left empty.
+ */
+export function projectItem(item: Item3, v: View3, light: V3, flat = true): Projected {
   const mesh = item.hit ?? item.mesh;
   const m = item.matrix ? mulM(v.vp, item.matrix) : v.vp;
   const mv = item.matrix ? mulM(v.view, item.matrix) : v.view;
@@ -148,6 +151,7 @@ export function projectItem(item: Item3, v: View3, light: V3): Projected {
     if (area >= 0) continue;
     const tri = `M${f1(sx[a])},${f1(sy[a])}L${f1(sx[b])},${f1(sy[b])}L${f1(sx[c])},${f1(sy[c])}Z`;
     parts.push(tri);
+    if (!flat) continue;
     // Lit band from the face normal in camera space.
     const nx = mesh.nrm[a * 3] + mesh.nrm[b * 3] + mesh.nrm[c * 3];
     const ny = mesh.nrm[a * 3 + 1] + mesh.nrm[b * 3 + 1] + mesh.nrm[c * 3 + 1];

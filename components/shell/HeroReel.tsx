@@ -88,7 +88,7 @@ export function HeroReel({ playing = true }: { playing?: boolean }) {
     let acc = 0;
     const step = (now: number) => {
       raf = requestAnimationFrame(step);
-      const dt = Math.min(0.1, (now - last) / 1000);
+      const dt = Math.max(0, Math.min(0.1, (now - last) / 1000));
       last = now;
       if (!visible || document.hidden) return;
       const s = live.current;

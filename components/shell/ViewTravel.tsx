@@ -124,7 +124,7 @@ export interface Frame {
 const PLANES: PlaneKind[] = ['sagitala', 'zeharkakoa', 'koronala'];
 
 export function frameOf(view: ViewDef, m: Model): Frame | null {
-  const plane = view.plane === 'eskema' ? view.frame : view.plane;
+  const plane = view.plane === 'eskema' || view.plane === 'kanpokoa' ? view.frame : view.plane;
   if (!plane || !PLANES.includes(plane)) return null;
   const cut = cutOf(plane, m, view.locator?.level ?? 0.5);
   if (!cut) return null;
@@ -207,7 +207,7 @@ export function travelPlan(week: number, day: number, from: ViewDef, to: ViewDef
     if (b.free) b = turned(b);
     else if (a.free) a = turned(a);
   }
-  const kind = (v: ViewDef) => (v.plane === 'eskema' ? v.frame : v.plane) ?? v.plane;
+  const kind = (v: ViewDef) => (v.plane === 'eskema' || v.plane === 'kanpokoa' ? v.frame : v.plane) ?? v.plane;
   return { shape, day, from: a, to: b, fromLabel: from.label, toLabel: to.label, fromPlane: kind(from), toPlane: kind(to), words: { ...to.orientation } };
 }
 

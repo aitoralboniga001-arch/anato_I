@@ -3,7 +3,7 @@
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { mix } from '@/lib/sim/anim';
 import { add, cross, mul, norm, rotate, sub, viewOf, project, type M4, type V3, type View3 } from '@/lib/three-d/math';
-import { KEY_LIGHT, projectItem, type Scene3 } from '@/lib/three-d/scene';
+import { KEY_LIGHT, projectItem, type Item3, type Projected, type Scene3 } from '@/lib/three-d/scene';
 import { Part } from '../Part';
 import { UnderlayContext, partState, useLabelScale, useScene } from '../context';
 import type { GLApi, GLState } from './gl';
@@ -61,9 +61,10 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
   const view = viewOf(cam);
   const light = scene.light ?? KEY_LIGHT;
 
+  // Once WebGL draws the tissue, the flat fallback is not drawn (only the outlines for pointing).
   const drawn = scene.items
     .filter((it) => (it.show ?? 1) * (it.opacity ?? 1) > 0.01)
-    .map((it) => ({ it, pr: projectItem(it, view, light) }))
+    .map((it) => ({ it, pr: projectCached(it, view, light, !ready) }))
     .sort((a, b) => b.pr.depth - a.pr.depth);
 
   const host = ul?.host ?? null;
@@ -150,7 +151,7 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
         if (!pr.any) return null;
         const deep = it.deep ?? mix(it.color, '#000000', 0.55);
         const lit = mix(it.color, '#ffffff', 0.22);
-        const flat = (
+        const flat = !ready && (
           <g className="stage3d-flat" opacity={it.opacity ?? 1}>
             <path d={pr.bands[0]} fill={deep} stroke={deep} strokeWidth={0.6} strokeLinejoin="round" />
             <path d={pr.bands[1]} fill={it.color} stroke={it.color} strokeWidth={0.6} strokeLinejoin="round" />
@@ -172,6 +173,36 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
       })}
       {axes && <Axes view={view} axes={axes} hint={canTurn && ready && !turnedOnce} />}
       {children?.(at, view)}
+    </g>
+  );
+}
+
+/**
+ * The last projection of each item: while the camera, the item's matrix and its cut stay the same (most
+ * frames of a played view: only highlights and visibility change), its outlines are not projected again.
+ */
+const projections = new Map<string, { mesh: object; sig: string; pr: Projected }>();
+function projectCached(it: Item3, view: View3, light: V3, flat: boolean) {
+  const mesh = it.hit ?? it.mesh;
+  const sig = `${flat ? 1 : 0}|${Array.prototype.join.call(view.vp, ',')}|${it.matrix ? Array.prototype.join.call(it.matrix, ',') : ''}|${light.join(',')}|${it.clip ? JSON.stringify(it.clip) : ''}`;
+  const last = projections.get(it.key);
+  if (last && last.mesh === mesh && last.sig === sig) return last.pr;
+  const pr = projectItem(it, view, light, flat);
+  projections.set(it.key, { mesh, sig, pr });
+  return pr;
+}
+
+/** Shown for the moment a 3D view's geometry is still being built (off the main thread). */
+export function Loading3D() {
+  return (
+    <g className="stage3d-loading" pointerEvents="none" aria-label="3D eredua prestatzen">
+      <circle cx={500} cy={300} r={22} fill="none" stroke="rgba(232,238,252,0.16)" strokeWidth={4} />
+      <path d="M500,278 A22,22 0 0 1 522,300" fill="none" stroke="rgba(232,238,252,0.7)" strokeWidth={4} strokeLinecap="round">
+        <animateTransform attributeName="transform" type="rotate" from="0 500 300" to="360 500 300" dur="0.9s" repeatCount="indefinite" />
+      </path>
+      <text x={500} y={350} textAnchor="middle" fontSize={15} fill="rgba(232,238,252,0.72)">
+        3D eredua prestatzen…
+      </text>
     </g>
   );
 }

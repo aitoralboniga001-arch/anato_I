@@ -189,6 +189,8 @@ export const week7: WeekDef = {
           id: 'mapa',
           label: 'Barrunbeen mapa',
           plane: 'eskema',
+          // The map's embryo is the side view: moves in and out of it travel through the body's sagittal plane.
+          frame: 'sagitala',
           description: 'Enborraren zeloma osoa aurretik, bloke garden gisa, eta ondoan plano zuriaren mailako zeharkako mozketa. Septumaren gainean hasierako perikardio barrunbea, azpian peritoneo barrunbea, eta atzean bi erreten. Planoa arrastatu daiteke.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: CoelomMapSeptum,
@@ -506,6 +508,8 @@ export const week7: WeekDef = {
           id: 'mapa',
           label: 'Barrunbeen mapa',
           plane: 'eskema',
+          // The map's embryo is the side view: moves in and out of it travel through the body's sagittal plane.
+          frame: 'sagitala',
           description: 'Enborraren zeloma osoa aurretik, bloke garden gisa, eta ondoan plano zuriaren mailako zeharkako mozketa: birika hastapenak atze-alboko aldeetan, mintz pleuroperikardikoak eta perikardio barrunbea aurrean. Planoa arrastatu daiteke.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: CoelomMapThorax,
@@ -735,6 +739,8 @@ export const week7: WeekDef = {
           id: 'mapa',
           label: 'Barrunbeen mapa',
           plane: 'eskema',
+          // The map's embryo is the side view: moves in and out of it travel through the body's sagittal plane.
+          frame: 'sagitala',
           description: 'Enborraren zeloma osoa aurretik, bloke garden gisa, eta ondoan plano zuriaren mailako zeharkako mozketa: erreten perikardioperitonealek goiko eta beheko barrunbeak lotzen dituzte, mintz pleuroperitonealek itxi arte. Planoa arrastatu daiteke.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: retime(CoelomMapDiaphragm, FATE.at),

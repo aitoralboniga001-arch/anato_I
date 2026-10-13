@@ -14247,3 +14247,26 @@ kbd {
   background: rgba(224, 178, 90, 0.16);
   color: #e8c27a;
 }
+
+/* ——— The picture first ———
+   The step card reserved the height of the stage's longest step for every step, so one long step
+   (with its key, trap and "new" chips) shrank the scene to a strip. The reservation now stops at a
+   few lines; a longer step scrolls inside the card, and the scene keeps the rest of the column.
+   A micro-question keeps its full height (its options must all be in sight). */
+@media (min-width: 821px) {
+  .dock {
+    --cap-max: clamp(104px, 17vh, 172px);
+  }
+  .dock .cap-stack:not(:has(> .ask)) {
+    max-height: var(--cap-max);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(232, 238, 252, 0.22) transparent;
+  }
+}
+
+/* "Saltatu guztiak" on the step's micro-question: at the card's right end, beside its kicker. */
+.ask .ask-skip-all {
+  margin-left: auto;
+}

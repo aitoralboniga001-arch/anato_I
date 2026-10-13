@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, type ReactNode } from 'react';
+import { memo, useId, type ReactNode } from 'react';
 import { C, Part, clamp, lerp, rand, smoothPath, type Pt } from '@/components/kit';
 
 /**
@@ -323,7 +323,7 @@ const LIGHT: Pt = [-Math.SQRT1_2, -Math.SQRT1_2];
  * Rendering cost is constant per sheet (9 paths, however many cells): borders, rims, lights, nuclei and
  * nucleoli are each one path with one subpath per cell — no per-cell elements, filters or gradients.
  */
-export function Cells({ outer, inner, n, fill, edge = 'rgba(8,12,26,0.55)', nucleus = 'rgba(16,20,44,0.62)', nk = 0.5, pseudo, seed = 1, opacity = 1 }: CellsOpts & { outer: Pt[]; inner: Pt[]; n: number }) {
+function CellsDraw({ outer, inner, n, fill, edge = 'rgba(8,12,26,0.55)', nucleus = 'rgba(16,20,44,0.62)', nk = 0.5, pseudo, seed = 1, opacity = 1 }: CellsOpts & { outer: Pt[]; inner: Pt[]; n: number }) {
   const base = `M${outer.map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}L${inner
     .slice()
     .reverse()
@@ -395,6 +395,19 @@ export function Cells({ outer, inner, n, fill, edge = 'rgba(8,12,26,0.55)', nucl
     </g>
   );
 }
+
+type CellsProps = CellsOpts & { outer: Pt[]; inner: Pt[]; n: number };
+/** Same outline as drawn (to the 0.1 unit the path is written at). */
+const samePts = (a: Pt[], b: Pt[]) =>
+  a === b || (a.length === b.length && a.every((p, i) => Math.round(p[0] * 10) === Math.round(b[i][0] * 10) && Math.round(p[1] * 10) === Math.round(b[i][1] * 10)));
+/**
+ * A sheet is redrawn only when its outline or its options change: while a view plays, most sheets
+ * stand still, and building and writing their paths was the costliest part of a frame.
+ */
+export const Cells = memo(CellsDraw, (a: CellsProps, b: CellsProps) => {
+  for (const k of Object.keys(b) as (keyof CellsProps)[]) if (k !== 'outer' && k !== 'inner' && a[k] !== b[k]) return false;
+  return Object.keys(a).length === Object.keys(b).length && samePts(a.outer, b.outer) && samePts(a.inner, b.inner);
+});
 
 /** Band along a disc-space centre-line with thickness t (outer = -d side). */
 function bandPts(s: Section, line: Pt[], t0: number, t1: number): { outer: Pt[]; inner: Pt[] } {

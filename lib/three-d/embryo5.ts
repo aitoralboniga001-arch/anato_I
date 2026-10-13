@@ -1,6 +1,7 @@
 import { add, cross, mul, norm, sub, type M4, type V3 } from './math';
 import { blob, type Mesh } from './mesh';
 import { ellipsoid, smin, surfaceAlong, surfaceMesh, type SDF } from './sdf';
+import { geoOf, geoSlot } from './offthread';
 
 /**
  * A 5-week embryo (C-shaped, head folded over the heart bulge, limb buds, pharyngeal arches, a row of
@@ -97,10 +98,7 @@ export interface Embryo5 {
   tail: V3;
 }
 
-let cache: Embryo5 | null = null;
-
-export function embryo5(): Embryo5 {
-  if (cache) return cache;
+function build(): Embryo5 {
   const field = makeField();
   const lo: V3 = [-1.65, -6.35, -3.75];
   const hi: V3 = [1.65, 1.15, 4.25];
@@ -111,8 +109,17 @@ export function embryo5(): Embryo5 {
     const { p, n } = surfaceAlong(field, onBody(2.55, -0.6, 0.3 * s), [s, -0.1, 0.25]);
     return blob({ center: add(p, mul(norm(n), -0.07)), radii: [0.13, 0.13, 0.13], rings: 8, sides: 10 });
   });
-  cache = { field, body, hit, eyes, head: onBody(2.3, 1.4), tail: onBody(T_TAIL - 0.1, 0.2) };
-  return cache;
+  return { field, body, hit, eyes, head: onBody(2.3, 1.4), tail: onBody(T_TAIL - 0.1, 0.2) };
+}
+
+/** Built once, off the main thread in the browser (the field is a function: it is made again on arrival). */
+export const EMBRYO5 = geoSlot('embryo5', build, {
+  pack: ({ field: _field, ...rest }) => rest,
+  unpack: (d) => ({ ...(d as Omit<Embryo5, 'field'>), field: makeField() }),
+});
+
+export function embryo5(): Embryo5 {
+  return geoOf(EMBRYO5);
 }
 
 /**

@@ -55,13 +55,14 @@ function leaderY(y: number, a: Pt, x: number, lx: number) {
   if (x <= a[0]) return null;
   return y + ((a[1] - y) * (ex - x)) / (ex - a[0]);
 }
-const crosses = (y: number, a: Pt, bands: Band[], lx: number) =>
-  bands.some((b) =>
-    Array.from({ length: 9 }, (_, i) => b.x0 + ((b.x1 - b.x0) * i) / 8).some((x) => {
-      const ly = leaderY(y, a, x, lx);
-      return ly !== null && ly > b.y0 && ly < b.y1;
-    }),
-  );
+function crosses(y: number, a: Pt, bands: Band[], lx: number) {
+  for (const b of bands)
+    for (let i = 0; i <= 8; i++) {
+      const ly = leaderY(y, a, b.x0 + ((b.x1 - b.x0) * i) / 8, lx);
+      if (ly !== null && ly > b.y0 && ly < b.y1) return true;
+    }
+  return false;
+}
 const cut = (p: Pt, q: Pt, r: Pt, s: Pt) => {
   const d = (a: Pt, b: Pt, c: Pt) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
   return d(p, q, r) * d(p, q, s) < 0 && d(r, s, p) * d(r, s, q) < 0;
