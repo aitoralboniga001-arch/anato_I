@@ -210,6 +210,8 @@ const stalkHw = (grow: number) => (u: number) => lerp(6.5, 8, grow) + 13 * Math.
  *  run side by side, touching, so together they make one band down the cord's axis. */
 const UMB_O = 2.3;
 const UMB_W = 4.6;
+/** The umbilical arteries and veins are both the umbilical vessels: naming those lights both. */
+const UMB = ['zilbor-hodiak'];
 /** The vessel's centre line: offset from the cord's axis along its normal (so the two always touch, whatever
  *  the cord's slant), easing onto its own ring of the plate at the top. */
 const umbPts = (q: Inner, side: number, ring: number): P[] => {
@@ -395,16 +397,15 @@ function SacDrawing({ t, reduced, mode, phase = 0, fill = 1, grow = 1 }: ScenePr
           <path d={stalk.right} />
         </g>
       </Part>
-      <Part id="zilbor-hodiak">
-        {/* drawn from the fetus up (the way the blood goes out), so the circulation view can fill them in */}
+      {/* The two kinds of umbilical vessel, each its own structure (naming the umbilical vessels lights both).
+          Drawn from the fetus up (the way the blood goes out), so the circulation view can fill them in. */}
+      <Part id="zilbor-arteriak" groups={UMB}>
         <path d={art} fill="none" stroke={circ ? EMPTY : '#5360d6'} strokeWidth={UMB_W} />
+        {circ && fUmb > 0.005 && <path d={art} pathLength={1} strokeDasharray={`${fUmb.toFixed(4)} 2`} stroke={BLUE} fill="none" strokeWidth={UMB_W} />}
+      </Part>
+      <Part id="zilbor-zainak" groups={UMB}>
         <path d={ven} fill="none" stroke={circ ? EMPTY : '#e0303f'} strokeWidth={UMB_W} />
-        {circ && fUmb > 0.005 && (
-          <g fill="none" strokeWidth={UMB_W}>
-            <path d={art} pathLength={1} strokeDasharray={`${fUmb.toFixed(4)} 2`} stroke={BLUE} />
-            <path d={ven} pathLength={1} strokeDasharray={`${fUmb.toFixed(4)} 2`} stroke={RED} />
-          </g>
-        )}
+        {circ && fUmb > 0.005 && <path d={ven} pathLength={1} strokeDasharray={`${fUmb.toFixed(4)} 2`} stroke={RED} fill="none" strokeWidth={UMB_W} />}
       </Part>
       {/* The fetus (same figure as topic 5 and the uterus view), months 2 → 4. */}
       <g pointerEvents="none" transform={q.place.transform}>
@@ -614,8 +615,8 @@ export function SacCirculation({ t, reduced }: SceneProps) {
     <g>
       <W3bDefs />
       <SacDefs />
-      {/* Filled in during its own step (.8 on); seen at any other time, the whole circuit is shown. */}
-      <SacDrawing t={1} reduced={reduced} mode="circ" phase={t * 34 * 30} fill={t < 0.795 ? 1 : seg(t, 0.8, 0.95)} />
+      {/* Filled in during its own step (.8–.9); seen at any other time, the whole circuit is shown. */}
+      <SacDrawing t={1} reduced={reduced} mode="circ" phase={t * 34 * 30} fill={t < 0.795 ? 1 : seg(t, 0.8, 0.87)} />
       <Label id="finkapen-pedikulua" x={810} y={232} ax={IN.stalk[0]} ay={IN.stalk[1]} />
       <Label id="zilbor-hodiak" x={810} y={262} ax={umbA[0]} ay={umbA[1]} />
       <Label id="enbrioi-kanpoko-zirkulazioa" x={196} y={390} ax={plateV[0]} ay={plateV[1]} text="Enbrioi kanpoko zirkulazioa" small />

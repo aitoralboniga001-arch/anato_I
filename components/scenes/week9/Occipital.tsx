@@ -283,17 +283,7 @@ export function CranialWiring({ t }: SceneProps) {
           </g>
         );
       })}
-      {/* V: mixed (its threads: motor + sensory); XII: one motor thread. Text only, no extra lines. */}
-      {mixed > 0.01 && (
-        <g opacity={mixed}>
-          <Note x={PLUG_X + 76} y={234} size={11.5} tone="accent">
-            3 adar · m + s (+ beg.)
-          </Note>
-          <Note x={PLUG_X + 82} y={478} size={11.5} tone="accent">
-            motoreak soilik
-          </Note>
-        </g>
-      )}
+      {/* V mixed, XII motor only: their own strands say it (V: motor + sensory, XII: one motor), the caption names it. */}
 
       {/* Sensory nerves I and II: the fibres come in, from the nose and from the retina. */}
       {SENS.map((r, i) => (
@@ -362,10 +352,11 @@ export function CranialWiring({ t }: SceneProps) {
         </Note>
       </g>
 
-      <Note x={150} y={40} size={12} tone="dim">
+      {/* The two sides' headings, on their own line above the names. */}
+      <Note x={235} y={18} size={12} tone="dim">
         Burezurraren barruan
       </Note>
-      <Note x={760} y={40} size={12} tone="dim">
+      <Note x={790} y={18} size={12} tone="dim">
         Kanpoan: muskuluak (kolorea = jatorria)
       </Note>
       <Label id="nerbio-kranialak" x={560} y={58} ax={PLUG_X + 8} ay={82} align="middle" small />

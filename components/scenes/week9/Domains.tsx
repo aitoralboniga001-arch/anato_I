@@ -1,6 +1,8 @@
 'use client';
 
-import { Label, Note, Part, clamp, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import type { MouseEvent as ReactMouseEvent } from 'react';
+import { Label, Note, Part, clamp, rand, seg, smoothPath, useScene, type Pt, type SceneProps } from '@/components/kit';
+import { partState } from '@/components/kit/context';
 import { E6, somiteClose, somiteLips } from '@/components/scenes/week4-meso/Stage3Somite';
 import { NOTO, SOMITE, TUBE, band, placer, skinIn, trunkGeom } from '@/components/scenes/week4-meso/trunk';
 import { HUE, Steps, f1, vis } from './common';
@@ -191,29 +193,107 @@ const ROWS: Row[] = [
     abax: [{ text: '—' }],
   },
 ];
-const X0 = 24;
-const COLS = [170, 330, 400];
-const XS = [X0, X0 + COLS[0] + 4, X0 + COLS[0] + COLS[1] + 8];
-const LINE = 25;
-const HEAD_Y = 74;
-const HEAD_H = 40;
+/* A table, not a figure: names sit in their cells as plain list rows (a dot in the domain colour and the
+ * name), no plates and no leaders. Each row is still the structure: hover, click and the step's focus light it. */
+const X0 = 15;
+const COLS = [160, 394, 404];
+const XS = [X0, X0 + COLS[0] + 6, X0 + COLS[0] + COLS[1] + 12];
+const LINE = 26;
+const PAD = 7;
+const HEAD_Y = 54;
+const HEAD_H = 42;
+const FS = 16;
+const SUB_FS = 14;
+const REGION_FS = 15;
+/** Semibold width per character at 1px (a little generous: what follows must never touch it). */
+const CW = 0.54;
 
 /** Lines a cell needs (the three abdominal ones share a line). */
 const linesOf = (items: Item[]) => items.filter((it, i) => !(it.sub && items[i - 1]?.sub)).length;
 
+/** A region name on one line, or two when it would not fit its column. */
+function wrap(text: string, room: number, size: number): string[] {
+  if (text.length * CW * size <= room) return [text];
+  const cut = text.lastIndexOf(' ', Math.ceil(text.length / 2) + 2);
+  return cut > 0 ? [text.slice(0, cut), text.slice(cut + 1)] : [text];
+}
+
+/** The step's own names in the warm focus colour and bold; the pointed one bright; the rest step back. */
+function nameStyle(state: ReturnType<typeof partState>) {
+  const lit = state === 'focus' || state === 'spot';
+  return {
+    fill: state === 'active' ? '#ffffff' : lit ? 'var(--focus)' : '#ece8e1',
+    fontWeight: lit || state === 'active' ? 700 : 550,
+    opacity: state === 'dim' || state === 'shade' ? 0.45 : state === 'ctx' ? 0.72 : 1,
+  } as const;
+}
+
+function useEntry(id: string) {
+  const ctx = useScene();
+  const state = partState(ctx, id);
+  const on = {
+    onClick: (e: ReactMouseEvent) => {
+      e.stopPropagation();
+      ctx.onSelect(id);
+    },
+    onPointerEnter: () => ctx.onHover(id),
+    onPointerLeave: () => ctx.onHover(null),
+  };
+  return { state, on, labels: ctx.showLabels && !ctx.quiz };
+}
+
+/** One row of a cell: the dot (the structure) and its name. */
+function Entry({ id, text, x, y, color, show }: { id: string; text: string; x: number; y: number; color: string; show: number }) {
+  const { state, on, labels } = useEntry(id);
+  return (
+    <g opacity={show}>
+      <Part id={id}>
+        <circle cx={f1(x)} cy={f1(y)} r={5.5} fill={color} stroke="rgba(0,0,0,0.55)" strokeWidth={1} />
+      </Part>
+      {labels && (
+        <g data-label={id} className="label" {...on}>
+          <text x={f1(x + 13)} y={f1(y)} dy="0.35em" fontSize={FS} style={nameStyle(state)}>
+            {text}
+          </text>
+        </g>
+      )}
+    </g>
+  );
+}
+
+/** A part of the line above (the abdominal muscles): a smaller dot and name, sharing one line. */
+function SubEntry({ id, text, x, y, color, show }: { id: string; text: string; x: number; y: number; color: string; show: number }) {
+  const { state, on, labels } = useEntry(id);
+  return (
+    <g opacity={show}>
+      <Part id={id}>
+        <circle cx={f1(x)} cy={f1(y)} r={3.8} fill={color} stroke="rgba(0,0,0,0.55)" strokeWidth={0.8} />
+      </Part>
+      {labels && (
+        <g data-label={id} className="label" {...on}>
+          <text x={f1(x + 9)} y={f1(y)} dy="0.35em" fontSize={SUB_FS} style={nameStyle(state)}>
+            {text}
+          </text>
+        </g>
+      )}
+    </g>
+  );
+}
+
 /** Where each item of a cell sits: its line, and (for sub items sharing a line) its offset along it. */
 function layout(items: Item[]) {
   const out: { line: number; subX: number }[] = [];
-  let line = 0;
+  let line = -1;
   let subX = 0;
   items.forEach((it, i) => {
     // A sub item right after another sub item stays on the same line.
-    if (!(it.sub && items[i - 1]?.sub)) {
-      if (i > 0) line++;
-      subX = 0;
+    const joins = !!it.sub && !!items[i - 1]?.sub;
+    if (!joins) {
+      line++;
+      subX = 30;
     }
     out.push({ line, subX });
-    if (it.sub) subX += it.text.length * 7.6 + 34;
+    if (it.sub) subX += it.text.length * CW * SUB_FS + 26;
   });
   return out;
 }
@@ -223,67 +303,85 @@ function Cell({ items, x, y, color, show }: { items: Item[]; x: number; y: numbe
   return (
     <g>
       {items.map((it, i) => {
-        const yy = y + 18 + pos[i].line * LINE;
-        const xx = x + 16 + (it.sub ? 12 + pos[i].subX : 0);
+        const { line } = pos[i];
+        const at = x + pos[i].subX;
+        const yy = y + PAD + LINE / 2 + line * LINE;
         const k = clamp(show * 1.6 - i * 0.12);
         if (!it.id)
           return (
-            <Note key={i} x={x + 16} y={yy} align="start" size={12} tone="dim" show={k}>
+            <text key={i} x={x + 16} y={yy} dy="0.35em" fontSize={14} fontStyle="italic" fill="#b9b3aa" opacity={k} pointerEvents="none">
               {it.text}
-            </Note>
+            </text>
           );
-        return (
-          <g key={i}>
-            <Part id={it.id} show={k}>
-              <circle cx={f1(xx)} cy={f1(yy)} r={5} fill={color} stroke="rgba(0,0,0,0.5)" strokeWidth={1} />
-            </Part>
-            <Label id={it.id} x={xx + 10} y={yy} align="start" text={it.text} show={k} small />
-          </g>
-        );
+        if (it.sub) return <SubEntry key={i} id={it.id} text={it.text} x={at} y={yy} color={color} show={k} />;
+        return <Entry key={i} id={it.id} text={it.text} x={x + 18} y={yy} color={color} show={k} />;
       })}
     </g>
   );
 }
 
+/** A column head: the domain itself (its colour fills the box), its name inside. */
+function Head({ id, x, w, color, text, show }: { id: string; x: number; w: number; color: string; text: string; show: number }) {
+  const { state, on, labels } = useEntry(id);
+  return (
+    <g opacity={show}>
+      <Part id={id}>
+        <rect x={x} y={HEAD_Y} width={w} height={HEAD_H} rx={9} fill={color} fillOpacity={0.55} stroke={color} strokeWidth={1.5} />
+      </Part>
+      {labels && (
+        <g data-label={id} className="label" {...on}>
+          <text x={x + w / 2} y={HEAD_Y + HEAD_H / 2} dy="0.35em" textAnchor="middle" fontSize={16} fontWeight={700} fill="#ffffff" opacity={nameStyle(state).opacity}>
+            {text}
+          </text>
+        </g>
+      )}
+    </g>
+  );
+}
+
 export function DomainTable({ t }: SceneProps) {
-  const rowY = ROWS.reduce<number[]>((acc, r) => [...acc, acc[acc.length - 1] + 12 + Math.max(linesOf(r.prim), linesOf(r.abax)) * LINE + 5], [HEAD_Y + HEAD_H + 6]);
+  const ctx = useScene();
+  const names = ROWS.map((r) => wrap(r.region, COLS[0] - 22, REGION_FS));
+  // A wrapped region name needs its second line inside the row too.
+  const rowH = (r: Row, j: number) => Math.max(Math.max(linesOf(r.prim), linesOf(r.abax)) * LINE, (names[j].length - 1) * 19 + LINE) + PAD * 2;
+  const rowY = ROWS.reduce<number[]>((acc, r, j) => [...acc, acc[acc.length - 1] + rowH(r, j) + 5], [HEAD_Y + HEAD_H + 6]);
   const head = seg(t, 0.44, 0.48);
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#120a10" />
-      <Note x={470} y={34} size={14} tone="warn" show={head}>
+      <Note x={500} y={26} size={14} tone="warn" show={head}>
         * Muskuluen izenak ez dira ikasi behar! Ikasi araua: zein domeinutatik.
       </Note>
-      <g opacity={head}>
-        <rect x={XS[0]} y={HEAD_Y} width={COLS[0]} height={HEAD_H} rx={8} fill="#2b2333" />
-        <Note x={XS[0] + COLS[0] / 2} y={HEAD_Y + HEAD_H / 2} size={12.5} tone="dim">
-          Eskualdea
-        </Note>
-      </g>
-      <Part id="domeinu-primaxiala" show={head}>
-        <rect x={XS[1]} y={HEAD_Y} width={COLS[1]} height={HEAD_H} rx={8} fill={HUE.primaxial} fillOpacity={0.5} stroke={HUE.primaxial} />
-      </Part>
-      <Label id="domeinu-primaxiala" x={XS[1] + COLS[1] / 2} y={HEAD_Y + HEAD_H / 2} align="middle" text="Domeinu primaxiala (miotometatik)" show={head} />
-      <Part id="domeinu-abaxiala" show={head}>
-        <rect x={XS[2]} y={HEAD_Y} width={COLS[2]} height={HEAD_H} rx={8} fill={HUE.abaxial} fillOpacity={0.5} stroke={HUE.abaxial} />
-      </Part>
-      <Label id="domeinu-abaxiala" x={XS[2] + COLS[2] / 2} y={HEAD_Y + HEAD_H / 2} align="middle" text="Domeinu abaxiala" show={head} />
+      {head > 0.01 && (
+        <g opacity={head} pointerEvents="none">
+          <rect x={XS[0]} y={HEAD_Y} width={COLS[0]} height={HEAD_H} rx={9} fill="#2b2333" />
+          {ctx.showLabels && (
+            <text x={XS[0] + COLS[0] / 2} y={HEAD_Y + HEAD_H / 2} dy="0.35em" textAnchor="middle" fontSize={14} fontStyle="italic" fill="#c9c5bd">
+              Eskualdea
+            </text>
+          )}
+        </g>
+      )}
+      <Head id="domeinu-primaxiala" x={XS[1]} w={COLS[1]} color={HUE.primaxial} text="Domeinu primaxiala (miotometatik)" show={head} />
+      <Head id="domeinu-abaxiala" x={XS[2]} w={COLS[2]} color={HUE.abaxial} text="Domeinu abaxiala" show={head} />
       {ROWS.map((r, j) => {
-        const n = Math.max(linesOf(r.prim), linesOf(r.abax));
-        const h = 12 + n * LINE;
+        const h = rowH(r, j);
         const ry = rowY[j];
         const show = seg(t, r.at, r.at + 0.05);
         if (show <= 0.01) return null;
         return (
           <g key={j}>
-            <g opacity={show}>
-              <rect x={XS[0]} y={ry} width={COLS[0]} height={h} rx={7} fill="#2b2333" fillOpacity={0.7} />
-              <rect x={XS[1]} y={ry} width={COLS[1]} height={h} rx={7} fill={HUE.primaxial} fillOpacity={0.12} stroke={HUE.primaxial} strokeOpacity={0.45} />
-              <rect x={XS[2]} y={ry} width={COLS[2]} height={h} rx={7} fill={HUE.abaxial} fillOpacity={0.12} stroke={HUE.abaxial} strokeOpacity={0.45} />
+            <g opacity={show} pointerEvents="none">
+              <rect x={XS[0]} y={ry} width={COLS[0]} height={h} rx={8} fill="#2b2333" fillOpacity={0.75} />
+              <rect x={XS[1]} y={ry} width={COLS[1]} height={h} rx={8} fill={HUE.primaxial} fillOpacity={0.12} stroke={HUE.primaxial} strokeOpacity={0.45} />
+              <rect x={XS[2]} y={ry} width={COLS[2]} height={h} rx={8} fill={HUE.abaxial} fillOpacity={0.12} stroke={HUE.abaxial} strokeOpacity={0.45} />
+              {ctx.showLabels &&
+                names[j].map((s, i) => (
+                  <text key={i} x={XS[0] + 11} y={ry + PAD + LINE / 2 + i * 19} dy="0.35em" fontSize={REGION_FS} fontWeight={650} fill="#f1eee8">
+                    {s}
+                  </text>
+                ))}
             </g>
-            <Note x={XS[0] + 10} y={ry + 18} align="start" size={12} tone="accent" show={show}>
-              {r.region}
-            </Note>
             <Cell items={r.prim} x={XS[1]} y={ry} color={HUE.primaxial} show={show} />
             <Cell items={r.abax} x={XS[2]} y={ry} color={HUE.abaxial} show={show} />
           </g>

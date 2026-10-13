@@ -3,36 +3,97 @@
    as one more calm tool. Nothing moves or appears unless the student asks for it.
    ———————————————————————————————————————————————————————————————— */
 
-/* ——— Mark (the sprout glyph) ——— */
-.kimu-mark {
+/* ——— Kimu himself: the embryo with the sprout. Still in the top bar; the sprout waves once on hover,
+   sways while Kimu reads the notes, the eyes blink in the panel. ——— */
+.kimu-face {
   display: block;
   flex: none;
   overflow: visible;
-  color: var(--signal);
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45));
 }
-.kimu-mark .km-leaf {
+.kimu-face .kf-sprout,
+.kimu-face .kf-eye,
+.kimu-face .kf-mouth,
+.kimu-face .kf-tail {
   transform-box: fill-box;
 }
-.kimu-mark .km-leaf-l {
-  transform-origin: 100% 100%;
+.kimu-face .kf-sprout {
+  transform-origin: 30% 100%;
 }
-.kimu-mark .km-leaf-r {
+.kimu-face .kf-eye {
+  transform-origin: center;
+}
+.kimu-face .kf-mouth {
+  transform-origin: center top;
+}
+.kimu-face .kf-tail {
   transform-origin: 0 100%;
 }
-.kimu-mark.is-thinking .km-leaf-l {
-  animation: km-leaf-l 1.6s ease-in-out infinite;
+.kimu-face:not(.is-still) .kf-eye {
+  animation: kf-blink 5.2s infinite;
 }
-.kimu-mark.is-thinking .km-leaf-r {
-  animation: km-leaf-r 1.6s ease-in-out 0.2s infinite;
+.kimu-face:not(.is-still) .kf-eye + .kf-eye {
+  animation-delay: 0.04s;
 }
-@keyframes km-leaf-l {
-  50% {
-    transform: rotate(-9deg);
+.kimu-face.is-thinking:not(.is-still) .kf-sprout {
+  animation: kf-sway 1.6s ease-in-out infinite;
+}
+.kimu-face.is-thinking:not(.is-still) .kf-tail {
+  animation: kf-tail 2.4s ease-in-out infinite;
+}
+.kimu-face.is-talking .kf-mouth {
+  animation: kf-talk 0.24s ease-in-out infinite alternate;
+}
+.kimu-face .kf-drop {
+  animation: kf-drop 2.4s ease-in infinite;
+}
+.kimu-tool:hover .kimu-face .kf-sprout,
+.kimu-launch:hover .kimu-face .kf-sprout {
+  animation: kf-sway 1.1s ease-in-out 1;
+}
+@keyframes kf-sway {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  30% {
+    transform: rotate(-10deg);
+  }
+  70% {
+    transform: rotate(8deg);
   }
 }
-@keyframes km-leaf-r {
+@keyframes kf-tail {
   50% {
-    transform: rotate(9deg);
+    transform: rotate(-8deg);
+  }
+}
+@keyframes kf-blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  97% {
+    transform: scaleY(0.12);
+  }
+}
+@keyframes kf-talk {
+  to {
+    transform: scaleY(1.45);
+  }
+}
+@keyframes kf-drop {
+  0% {
+    transform: translateY(-2px);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(5px);
+    opacity: 0;
   }
 }
 
@@ -608,14 +669,19 @@
 
 /* The simulator's top-bar button: its look comes from the top bar's own tool styles (globals.css);
    here only the glyph is nudged into line with the text. */
-.kimu-tool .kimu-mark {
-  margin: -2px 0;
+.kimu-tool .kimu-face {
+  margin: -4px 0 -3px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .kimu-panel,
-  .kimu-mark *,
+  .kimu-face *,
   .kimu-dots i {
     animation: none !important;
   }
+}
+
+/* The top bar dims its glyphs a touch: Kimu is a character, not a glyph. */
+.tb-tools .tool .kimu-face {
+  opacity: 1;
 }

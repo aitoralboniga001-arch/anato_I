@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { mix } from '@/lib/sim/anim';
+import { aimCamera, blendCamera, centreOf } from '@/lib/three-d/aim';
 import { add, cross, mul, norm, rotate, sub, viewOf, project, type M4, type V3, type View3 } from '@/lib/three-d/math';
 import { KEY_LIGHT, projectItem, type Item3, type Projected, type Scene3 } from '@/lib/three-d/scene';
 import { Part } from '../Part';
@@ -36,6 +37,10 @@ const STATE: Record<ReturnType<typeof partState>, GLState> = {
  * the viewport a lazily loaded WebGL layer under the SVG draws the shaded tissue, and the SVG keeps
  * only invisible outlines for pointing, plus the names. Without WebGL the outlines are drawn flat.
  */
+/** How long the camera takes to turn to a structure put forward, and back. */
+const GLIDE_MS = 1100;
+const ease = (x: number) => x * x * x * (x * (x * 6 - 15) + 10);
+
 /** The drag hint is a one-time lesson: once the viewer has turned a 3D view, it no longer takes room. */
 let turnedOnce = false;
 
@@ -58,7 +63,33 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
     off = rotate(off, right, -turn.pitch);
     return { ...c, eye: add(c.target, off) };
   }, [scene.camera, turn]);
-  const view = viewOf(cam);
+
+  // The structure put forward (the step's tour, the 3D tour): the camera turns to the side it is best
+  // seen from, gliding there and back so the viewer always sees where the picture went.
+  const spot = ctx.spotlight ?? null;
+  const goalFor = (id: string | null) => (id ? aimCamera(cam, centreOf(scene.items, id, ctx.partsOf)) : cam);
+  const [aim, setAim] = useState<{ from: string | null; to: string | null; p: number }>({ from: spot, to: spot, p: 1 });
+  // A new structure: the glide starts from where the camera is aimed now (adjusted during render, so
+  // the first frame never shows the end of the move).
+  if (aim.to !== spot) setAim({ from: aim.p < 0.5 ? aim.from : aim.to, to: spot, p: 0 });
+  const gliding = aim.p < 1;
+  useEffect(() => {
+    if (!gliding) return;
+    // Reduced motion: the camera is simply there on the next frame.
+    const ms = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 1 : GLIDE_MS;
+    let raf = 0;
+    let t0 = 0;
+    const step = (now: number) => {
+      t0 ||= now;
+      const p = Math.min(1, (now - t0) / ms);
+      setAim((a) => ({ ...a, p }));
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [gliding, aim.to]);
+  const display = gliding ? blendCamera(goalFor(aim.from), goalFor(spot), ease(aim.p)) : goalFor(spot);
+  const view = viewOf(display);
   const light = scene.light ?? KEY_LIGHT;
 
   // Once WebGL draws the tissue, the flat fallback is not drawn (only the outlines for pointing).

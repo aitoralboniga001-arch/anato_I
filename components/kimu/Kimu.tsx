@@ -312,7 +312,7 @@ export function Kimu() {
     <>
       {!open && !inSim && (
         <button type="button" className="kimu-launch" data-tour="kimu" onClick={() => setKimuOpen(true)} onPointerEnter={() => void warm()} onFocus={() => void warm()} aria-label="Galdetu Kimuri (K)">
-          <KimuFace size={16} still />
+          <KimuFace size={20} still />
           <span>Galdetu</span>
           <kbd aria-hidden>K</kbd>
         </button>
@@ -322,7 +322,7 @@ export function Kimu() {
         <section className={`kimu-panel${inSim ? ' is-sim' : ''}`} role="dialog" aria-label="Kimu, apunteetako laguna">
           <header className="kimu-head">
             <span className="kimu-head-mark">
-              <KimuFace size={18} mood={busy ? 'thinking' : 'happy'} />
+              <KimuFace size={24} mood={busy ? 'thinking' : 'happy'} />
             </span>
             <div className="kimu-head-tx">
               <b>Kimu</b>

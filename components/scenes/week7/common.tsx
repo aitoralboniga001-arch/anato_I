@@ -32,7 +32,8 @@ export const P = {
   ppMem: '#e58bd0',
   poMem: '#b57cf0',
   eso: '#5ec2b0',
-  bodyMuscle: '#c06c94',
+  // Rose (muscle), well apart from the membranes' violet beside it.
+  bodyMuscle: '#e8607a',
   nerve: '#fde047',
   aorta: '#d8203a',
   ivc: '#3b6fd8',
@@ -227,7 +228,8 @@ export const KEY7 = {
   perito: { id: 'peritoneo-barrunbea', color: P.peritoSolid, text: 'peritoneoa' },
   septum: { id: 'septum-transversum', color: P.septum, text: 'septuma' },
 } as const;
-export type KeyRow = (typeof KEY7)[keyof typeof KEY7];
+/** A key row: one of KEY7, or a view's own (an id, its colour, a short name). */
+export type KeyRow = { id: string; color: string; text: string };
 
 /**
  * Topic 7's colour key, the same in every view: one row across the top left, a swatch and a name per
@@ -238,8 +240,11 @@ export function CavityKey({ rows, x = 24, y = 22, show = 1, quiet }: { rows: (Ke
   if (show <= 0.02) return null;
   const live = rows.filter((r): r is KeyRow => !!r);
   const items = live.map((r, i) => ({ r, x: x + live.slice(0, i).reduce((w, q) => w + 26 + q.text.length * 6.9, 0) }));
+  const width = live.reduce((w, q) => w + 26 + q.text.length * 6.9, 0) - 6;
   return (
     <g data-key opacity={show} fontSize={12.5} fontWeight={600} fill="rgba(244,247,255,0.95)" style={{ paintOrder: 'stroke' }} stroke="rgba(11,12,15,0.9)" strokeWidth={3}>
+      {/* A dark plate under the key: it reads the same over the dark ground and over a close-up's tissue. */}
+      {live.length > 0 && <rect x={x - 8} y={y - 13} width={width + 16} height={26} rx={8} fill="rgba(11,12,15,0.78)" stroke="rgba(255,255,255,0.1)" strokeWidth={1} pointerEvents="none" />}
       {items.map(({ r, x: rx }) => {
         const row = (
           <g transform={`translate(${f1(rx)} ${y})`}>

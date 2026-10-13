@@ -1423,9 +1423,67 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   if (mounted && turned3d === null) setTurned3d(readTurned());
   const [turnable, setTurnable] = useState('');
   useEffect(() => {
-    const raf = requestAnimationFrame(() => setTurnable(svgRef.current?.querySelector('.stage3d-orbit') ? sceneKey : ''));
-    return () => cancelAnimationFrame(raf);
+    // A 3D view's geometry is built off the main thread: look again until it is there (a few seconds at most).
+    let tries = 0;
+    const look = () => {
+      const found = !!svgRef.current?.querySelector('.stage3d-orbit');
+      setTurnable(found ? sceneKey : '');
+      return found;
+    };
+    const raf = requestAnimationFrame(look);
+    const id = window.setInterval(() => {
+      if (look() || ++tries > 30) window.clearInterval(id);
+    }, 400);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearInterval(id);
+    };
   }, [sceneKey, mounted]);
+  // 3D bira: every structure of the 3D model in turn, each named with its card while the camera turns to
+  // the side it is best seen from (Stage3D aims at the lit structure). Runs paused too, at the tour's pace.
+  const [bira, setBira] = useState(false);
+  const startBira = () => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    // The step's own structures first (what it is about), then the rest of the model as the stage lists it.
+    const focus = stage.beats[activeBeat]?.focus ?? [];
+    const order = (id: string) => {
+      const f = focus.indexOf(id);
+      if (f >= 0) return f;
+      const i = stage.structures.indexOf(id);
+      return 100 + (i < 0 ? 999 : i);
+    };
+    const ids = [...new Set([...svg.querySelectorAll('.stage3d [data-part]')].map((el) => el.getAttribute('data-part') ?? ''))]
+      .filter((id) => structures.has(id) && drawnIn(svg, id))
+      .sort((a, b) => order(a) - order(b));
+    if (!ids.length) return;
+    const key = `${pos.i}:${activeBeat}`;
+    transport.cancel();
+    speaking.current = false;
+    narratedTour.current = null;
+    toured.current = key;
+    tourRef.current = { key, items: ids, idx: 0, start: 0, said: false };
+    setBira(true);
+    setTour({ items: ids, idx: 0 });
+  };
+  if (bira && !tour) setBira(false);
+  useEffect(() => {
+    if (!bira || !tour || playing) return;
+    // The camera's turn (about a second) comes on top of the reading time.
+    const id = window.setTimeout(() => {
+      const tr = tourRef.current;
+      if (!tr) return;
+      if (tr.idx + 1 < tr.items.length) {
+        tr.idx += 1;
+        tr.start = 0;
+        setTour({ items: tr.items, idx: tr.idx });
+      } else {
+        tourRef.current = null;
+        setTour(null);
+      }
+    }, tourMs(tour.items[tour.idx], guided) / speed + 1200);
+    return () => window.clearTimeout(id);
+  }, [bira, tour, playing, guided, speed]);
   const onTurn = () => {
     setTurned3d(true);
     try {
@@ -1851,6 +1909,12 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                     </div>
                   )}
                   {viewFlash && viewFlash.key === sceneKey && intro === null && <ViewFlash key={`flash-${viewFlash.key}`} label={viewFlash.label} plane={viewFlash.plane} onDone={() => setViewFlash(null)} />}
+                  {turnable === sceneKey && !tour && !bridge && intro === null && !find && !travel && (
+                    <button className="bira-btn" key={`bira-${sceneKey}`} onClick={startBira} data-tip="Egitura bakoitza bere aldetik: kamera bakoitzera biratzen da" data-tip-pos="bottom-end">
+                      <span className="turn-hint-i" aria-hidden>↻</span>
+                      <b>3D bira</b>
+                    </button>
+                  )}
                   {turnable === sceneKey && turned3d === false && !bridge && !(viewFlash && viewFlash.key === sceneKey) && intro === null && !find && !travel && (
                     <p className="turn-hint" key={`turn-${sceneKey}`} role="status">
                       <span className="turn-hint-i" aria-hidden>↻</span>
@@ -1860,7 +1924,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                   )}
                   {bridge && intro === null && !travel && <ViewBridge autoClose={!voice} key={bridge.to.key} from={bridge.from} to={bridge.to} small={!!bridge.small} onSmall={(v) => setBridge((b) => (b ? { ...b, small: v } : b))} onClose={() => { transport.cancel(); setBridge(null); }} />}
                   {tour && intro === null && structures.get(tour.items[tour.idx]) && (
-                    <TourCard compact={voice} side={noticeSide} item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} onSkip={skipTour} onPick={onSelect} />
+                    <TourCard compact={voice} side={noticeSide} item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} onSkip={skipTour} onPick={onSelect} kicker={bira ? '3D bira' : undefined} />
                   )}
                   {intro !== null && (
                     <div className="pv-card" key={`intro-${stage.id}`}>

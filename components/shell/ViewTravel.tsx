@@ -639,7 +639,9 @@ export function ViewTravel({
     // The cutting plane: on the old cut, then turned and moved to the new one.
     const kp = glide((ms - KNIFE[0]) / (KNIFE[1] - KNIFE[0]));
     const qa = quatOf(F.from.r, F.from.u, F.from.n);
-    const qb = quatOf(F.to.r, F.to.u, F.to.n);
+    // The same plane seen from its other side (from above → from below): the knife stays, only the camera goes round.
+    const flip = F.from.axis === F.to.axis && dot(F.from.n, F.to.n) < 0;
+    const qb = flip ? qa : quatOf(F.to.r, F.to.u, F.to.n);
     const [kr, ku, kn] = rowsOf(slerp(qa, qb, kp));
     const onA: V3 = [...body.center];
     onA[F.from.axis] = F.from.at;

@@ -1,8 +1,7 @@
 'use client';
 
-import { useId } from 'react';
-import { Arrow, C, Label, Note, OnTop, Part, clamp, lerp, mix, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
-import { CavityKey, Defs7, KEY7, P, along, f1, poly, sm, spline, vis } from './common';
+import { Arrow, Label, Note, OnTop, Part, clamp, lerp, mix, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { CavityKey, Defs7, KEY7, P, along, f1, sm, spline, vis } from './common';
 import { HEART_C, LoopHeart } from './LoopHeart';
 import { CANAL, DUCT, HEART_IN, SideEmbryo, backAt, placeXY, planeAt, type Place, type SideState } from './SideEmbryo';
 
@@ -18,8 +17,8 @@ export { HEART_C, HEART_SINUS, HEART_VENT, LoopHeart, cum, table, tubeD } from '
  *  - `septum-transversum` (§2): the septum condenses at C3–C5 as a mesenchymal plate between the heart
  *    and the gut, anchored ventrally on the body wall and dorsally on the mesenchyme round the oesophagus;
  *    it splits the coelom into the primitive pericardial cavity (above) and the peritoneal cavity (below),
- *    except for the two dorsolateral pericardioperitoneal canals (beside the foregut, and in a loupe as
- *    the transverse section at the septum).
+ *    except for the two dorsolateral pericardioperitoneal canals (beside the foregut; the stage's
+ *    transverse view, SeptumSection, shows them and the plate's fixings).
  */
 
 const ORIENT_LABELS = { left: 'Bentrala', right: 'Dortsala' };
@@ -253,9 +252,21 @@ export function CoelomExtent({ t, reduced }: SceneProps) {
   );
 }
 
+/**
+ * Where the septum's story happens, close up: the cavities from the heart down to the belly fill the frame
+ * (the head leaves it at the top). The camera starts on the whole embryo and glides in as the septum starts.
+ */
+const CLOSE: Place = { dx: -175, dy: -95, s: 1.75 };
+
 /** 7:septum-transversum:sagitala — the septum condenses at C3–C5 and splits the coelom, except the canals. */
 export function SeptumLateral({ t, reduced }: SceneProps) {
-  const cid = useId().replace(/:/g, '');
+  // The whole embryo first (where we are), then close in on the plate between the heart and the gut.
+  const near = sm(seg(t, 0.15, 0.2));
+  // Scale in log steps and the centre with it, so the close-up region grows steadily into the frame.
+  const s = PLACE.s * (CLOSE.s / PLACE.s) ** near;
+  const f = (s - PLACE.s) / (CLOSE.s - PLACE.s);
+  const place: Place = { dx: lerp(PLACE.dx, CLOSE.dx, f), dy: lerp(PLACE.dy, CLOSE.dy, f), s };
+  const A = placeXY(place);
   const cells = seg(t, 0.185, 0.3);
   const reach = seg(t, 0.2, 0.32) * 0.9 + 0.1 * seg(t, 0.41, 0.47);
   const solid = seg(t, 0.27, 0.34);
@@ -263,7 +274,6 @@ export function SeptumLateral({ t, reduced }: SceneProps) {
   const anchors = vis(t, 0.44, 0.56, 0.04);
   const split = seg(t, 0.55, 0.63);
   const canals = seg(t, 0.72, 0.77);
-  const loupe = seg(t, 0.75, 0.8);
   const levels = vis(t, 0.18, 0.54);
   const upper = mix(P.coelomSolid, P.periSolid, split);
   const st: SideState = {
@@ -289,7 +299,8 @@ export function SeptumLateral({ t, reduced }: SceneProps) {
       // In the cavity's lower part, below the heart: its leader runs under the heart's, clear of its anchor.
       { id: 'hasierako-perikardio-barrunbea', a: A([572, 352]), show: split, small: true },
       { id: 'bihotza', a: A(HEART_AT) },
-      { id: 'hodi-neurala', a: A(bead(6.5, 6).p) },
+      // Close up the neck has left the frame: the cord is named down the back, beside the thorax.
+      { id: 'hodi-neurala', a: A(bead(lerp(6.5, 9, near), 6).p) },
       { id: 'somitak', a: A(bead(11, 16).p), small: true },
       { id: 'aurreko-hestea', a: A([668, 246]) },
       { id: 'hestegorri-inguruko-mesenkima', a: A([696, 300]), show: eso, small: true },
@@ -298,9 +309,8 @@ export function SeptumLateral({ t, reduced }: SceneProps) {
       { id: 'erdiko-hestea', a: A([640, 458]) },
     ],
     64,
-    // With the loupe the column is shorter: tighter rows keep the long canal name below the orientation pill.
-    loupe > 0.01 ? 460 : 560,
-    loupe > 0.01 ? 27 : 34,
+    560,
+    34,
     790,
     levels > 0.02 ? tags.map((q) => tagBand(q.x, q.y)) : [],
   );
@@ -308,7 +318,7 @@ export function SeptumLateral({ t, reduced }: SceneProps) {
     <g>
       <Defs7 />
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
-      <SideEmbryo st={st} place={PLACE} whole={1 - split} wholeId="enbrioi-barruko-zeloma" cells={cells} reach={reach} solid={solid} meso={eso} anchors={anchors} midgut beating={!reduced} reduced={reduced} flow={canals} />
+      <SideEmbryo st={st} place={place} whole={1 - split} wholeId="enbrioi-barruko-zeloma" cells={cells} reach={reach} solid={solid} meso={eso} anchors={anchors} midgut beating={!reduced} reduced={reduced} flow={canals} />
       {/* C3–C5: the levels the septum faces when it forms (the somites beside it). */}
       {levels > 0.02 &&
         tags.map((q) => (
@@ -316,7 +326,6 @@ export function SeptumLateral({ t, reduced }: SceneProps) {
             {q.l}
           </Note>
         ))}
-      <CanalLoupe show={loupe} reduced={!!reduced} cid={cid} src={canalA} />
       <Note x={500} y={616} tone="accent" show={vis(t, 0.19, 0.36)}>
         4. astea: lepo mailan (C3–C5) mesenkima trinkotu eta trenkada horizontala sortzen da
       </Note>
@@ -332,111 +341,14 @@ export function SeptumLateral({ t, reduced }: SceneProps) {
 
       <CavityKey rows={split < 0.5 ? [KEY7.zeloma, cells > 0.02 && KEY7.septum] : [KEY7.hperi, canals > 0.02 && KEY7.canal, KEY7.perito, KEY7.septum]} />
       <Label id="enbrioi-barruko-zeloma" x={236} y={366} ax={A([530, 346])[0]} ay={A([530, 346])[1]} show={1 - split} />
-      {/* The septum's upper half: its leader passes above the vitelline duct's anchor, not over it. */}
-      <Label id="septum-transversum" x={236} y={A([552, 382])[1]} ax={A([552, 382])[0]} ay={A([552, 382])[1]} show={seg(t, 0.2, 0.24)} />
+      {/* The septum's upper half: its leader passes above the vitelline duct's anchor, not over it; the name
+          stays above the side orientation pill (y 302–338) however close the camera comes. */}
+      <Label id="septum-transversum" x={236} y={Math.min(A([552, 382])[1], 290)} ax={A([552, 382])[0]} ay={A([552, 382])[1]} show={seg(t, 0.2, 0.24)} />
       <Label id="peritoneo-barrunbea" x={236} y={470} ax={A([522, 462])[0]} ay={A([522, 462])[1]} show={split} small />
       <Label id="hodi-onfalomesenterikoa" x={236} y={530} ax={A(DUCT[2])[0]} ay={A(DUCT[2])[1]} small />
       {right.map((r) => (
         <Label key={r.id} id={r.id} x={790} y={r.y} ax={r.a[0]} ay={r.a[1]} show={r.show} small={r.small} noArrange />
       ))}
-    </g>
-  );
-}
-
-/** Transverse section at the septum (dorsal up), in a loupe: the septum leaves two dorsolateral canals open. */
-const LOUPE: Pt = [896, 562];
-const LR = 62;
-function CanalLoupe({ show, reduced, cid, src }: { show: number; reduced: boolean; cid: string; src: Pt }) {
-  if (show <= 0.01) return null;
-  const [cx, cy] = LOUPE;
-  // Source of the cone: the canal in the main drawing.
-  const [sx, sy] = src;
-  const dx = sx - cx;
-  const dy = sy - cy;
-  const L = Math.hypot(dx, dy);
-  const ang = Math.atan2(dy, dx);
-  const half = Math.acos(Math.min(1, LR / L));
-  const t1: Pt = [cx + Math.cos(ang + half) * LR, cy + Math.sin(ang + half) * LR];
-  const t2: Pt = [cx + Math.cos(ang - half) * LR, cy + Math.sin(ang - half) * LR];
-  // Section (in loupe coordinates, centre 0,0): body wall ring, neural tube + aorta dorsally, oesophagus in its mesenchyme, septum ventral.
-  const wallOut = 'M-74,-6 C-74,-50 -40,-74 0,-74 C40,-74 74,-50 74,-6 C74,40 44,72 0,74 C-44,72 -74,40 -74,-6Z';
-  const septum = 'M-60,10 C-48,-6 -30,-4 -22,4 C-12,14 12,14 22,4 C30,-4 48,-6 60,10 C58,40 34,62 0,64 C-34,62 -58,40 -60,10Z';
-  const flowD = (k: number) => `M${k * 34},-10 C${k * 40},-26 ${k * 40},-30 ${k * 34},-34`;
-  return (
-    <g opacity={show}>
-      <defs>
-        <clipPath id={`w7-loupe${cid}`}>
-          <circle cx={cx} cy={cy} r={LR} />
-        </clipPath>
-        <linearGradient id={`w7-cone${cid}`} gradientUnits="userSpaceOnUse" x1={sx} y1={sy} x2={cx} y2={cy}>
-          <stop offset="0" stopColor="#7fc8e8" stopOpacity={0.3} />
-          <stop offset="1" stopColor="#7fc8e8" stopOpacity={0.04} />
-        </linearGradient>
-      </defs>
-      <path d={poly([[sx, sy], t1, t2])} fill={`url(#w7-cone${cid})`} pointerEvents="none" />
-      <circle cx={cx} cy={cy} r={LR + 3} fill="#0b0d12" stroke="#7fc8e8" strokeWidth={2} opacity={0.95} pointerEvents="none" />
-      {/* Every piece of the small section names itself too: the same parts as the big drawing. */}
-      <g clipPath={`url(#w7-loupe${cid})`}>
-        <g transform={`translate(${cx} ${cy}) scale(0.94)`}>
-          <Part id="gorputz-pareta" quiet>
-            <path d={wallOut} fill={P.wall} />
-            <path d={wallOut} fill="url(#w7-mesench)" />
-          </Part>
-          {/* Pericardial cavity side (cut above the septum): dark coelom between the wall and the septum. */}
-          <Part id="hasierako-perikardio-barrunbea">
-            <path d="M-62,-4 C-62,-36 -34,-54 0,-54 C34,-54 62,-36 62,-4 C62,30 40,56 0,58 C-40,56 -62,30 -62,-4Z" fill={P.space} />
-            <path d="M-62,-4 C-62,-36 -34,-54 0,-54 C34,-54 62,-36 62,-4 C62,30 40,56 0,58 C-40,56 -62,30 -62,-4Z" fill={P.peri} />
-          </Part>
-          {/* Dorsal block: neural tube, notochord, aorta and the oesophageal mesenchyme. */}
-          <Part id="gorputz-pareta" quiet>
-            <path d="M-26,-74 C-26,-60 -18,-40 -18,-24 C-18,-6 -10,8 0,8 C10,8 18,-6 18,-24 C18,-40 26,-60 26,-74Z" fill={P.wall} />
-            <path d="M-26,-74 C-26,-60 -18,-40 -18,-24 C-18,-6 -10,8 0,8 C10,8 18,-6 18,-24 C18,-40 26,-60 26,-74Z" fill="url(#w7-mesench)" />
-          </Part>
-          <Part id="hodi-neurala">
-            <circle cx={0} cy={-62} r={10} fill={C.neural} stroke="rgba(10,16,48,0.7)" />
-            <circle cx={0} cy={-62} r={2.6} fill="#101a3a" />
-          </Part>
-          <Part id="notokorda">
-            <circle cx={0} cy={-46} r={3} fill={C.notochord} />
-          </Part>
-          <Part id="aorta-dortsalak">
-            <circle cx={-6} cy={-36} r={3.6} fill={C.artery} />
-            <circle cx={6} cy={-36} r={3.6} fill={C.artery} />
-          </Part>
-          <Part id="hestegorri-inguruko-mesenkima">
-            <ellipse cx={0} cy={-10} rx={17} ry={15} fill={P.eso} opacity={0.75} />
-          </Part>
-          <Part id="aurreko-hestea">
-            <circle cx={0} cy={-10} r={6.5} fill={P.gut} />
-            <circle cx={0} cy={-10} r={2.4} fill="#3a2a10" />
-          </Part>
-          {/* The septum: ventral and lateral on the wall, dorsally on the oesophageal mesenchyme… */}
-          <Part id="septum-transversum">
-            <path d={septum} fill={P.septum} />
-            <path d={septum} fill="url(#w7-mesench)" />
-            <path d={septum} fill="none" stroke={P.septumDeep} strokeWidth={1.2} />
-          </Part>
-          {/* …leaving the two canals open on each side of the oesophagus. */}
-          <Part id="erreten-perikardioperitonealak">
-            {[-1, 1].map((k) => (
-              <g key={k}>
-                <ellipse cx={k * 36} cy={-20} rx={12} ry={15} fill={P.space} />
-                <ellipse cx={k * 36} cy={-20} rx={12} ry={15} fill={P.canal} stroke="#7fc8e8" strokeWidth={1.4} />
-                {!reduced &&
-                  [0, 1].map((j) => (
-                    <circle key={j} r={2.2} fill="#c8ecff">
-                      <animateMotion dur="1.6s" repeatCount="indefinite" begin={`${(-j * 0.8).toFixed(1)}s`} path={flowD(k)} />
-                    </circle>
-                  ))}
-              </g>
-            ))}
-          </Part>
-        </g>
-      </g>
-      <circle cx={cx} cy={cy} r={LR + 3} fill="none" stroke="#7fc8e8" strokeWidth={2} pointerEvents="none" />
-      <Note x={cx - 14} y={cy - LR - 14} size={12.5}>
-        zeharkako ebakia septumaren mailan
-      </Note>
     </g>
   );
 }

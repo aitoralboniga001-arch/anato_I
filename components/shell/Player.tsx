@@ -650,12 +650,12 @@ export function Player(p: PlayerProps) {
  * Guided tour card, floating over the scene: the structure lit right now, in its colour, with its
  * definition. It sits on the viewport so the dock (and the scene size) does not jump while it runs.
  */
-export function TourCard({ item, idx, n, onSkip, onPick, compact = false, side = 'left' }: { item: StructureDef; idx: number; n: number; onSkip: () => void; onPick: (id: string) => void; compact?: boolean; side?: 'left' | 'right' }) {
+export function TourCard({ item, idx, n, onSkip, onPick, compact = false, side = 'left', kicker = 'Ezagutu egiturak' }: { item: StructureDef; idx: number; n: number; onSkip: () => void; onPick: (id: string) => void; compact?: boolean; side?: 'left' | 'right'; kicker?: string }) {
   return (
     <div className={`tour is-${side}`} role="status">
       <div className="tour-top">
         <span className="tour-kicker">
-          Ezagutu egiturak · {idx + 1}/{n}
+          {kicker} · {idx + 1}/{n}
         </span>
         <span className="tour-dots" aria-hidden>
           {Array.from({ length: n }, (_, k) => (

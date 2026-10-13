@@ -547,7 +547,8 @@ const FOCUS_L: Pt = [432, 336];
 const CANAL_MID: Pt = [334, 272];
 const mx = (p: Pt): Pt => [1000 - p[0], p[1]];
 
-export function DiaphragmSection({ t, reduced }: SceneProps) {
+/** `early`: the section as the septum stage shows it (its own notes, none of this stage's). */
+export function DiaphragmSection({ t, reduced, early }: SceneProps & { early?: boolean }) {
   const c = seg(t, 0.74, 0.84);
   const mus = seg(t, 0.88, 0.95);
   const rim = lerp(0, 30, mus);
@@ -557,6 +558,8 @@ export function DiaphragmSection({ t, reduced }: SceneProps) {
   const front = lerp(212, 476, Math.pow(c, 0.85));
   const cid = useId().replace(/:/g, '');
   const migrate = vis(t, 0.88);
+  // In the 4th week the tube is still the foregut (the future oesophagus).
+  const esoId = early ? 'aurreko-hestea' : 'hestegorria';
 
   return (
     <g>
@@ -699,7 +702,7 @@ export function DiaphragmSection({ t, reduced }: SceneProps) {
         <path d={poly(MES)} fill={P.eso} />
         <path d={poly(MES)} fill="url(#w7-mesench)" />
       </Part>
-      <Part id="hestegorria">
+      <Part id={esoId}>
         <circle cx={ESO_X[0]} cy={ESO_X[1]} r={15} fill="#7a3b48" stroke="rgba(40,10,20,0.6)" strokeWidth={1} />
         <circle cx={ESO_X[0]} cy={ESO_X[1]} r={15} fill="url(#w7-muscle)" opacity={0.5} />
         <circle cx={ESO_X[0]} cy={ESO_X[1]} r={8.5} fill={P.gut} />
@@ -722,7 +725,7 @@ export function DiaphragmSection({ t, reduced }: SceneProps) {
 
       <path d={poly(BODY_X)} fill="url(#w7-light)" pointerEvents="none" />
 
-      <Note x={500} y={612} tone="accent" show={vis(t, 0, 0.74)}>
+      <Note x={500} y={612} tone="accent" show={early ? 0 : vis(t, 0, 0.74)}>
         Erretenak zabalik: goiko barrunbea (pleura) ↔ beheko barrunbea (peritoneoa)
       </Note>
       <Note x={500} y={612} tone="accent" show={vis(t, 0.74, 0.88)}>
@@ -741,8 +744,41 @@ export function DiaphragmSection({ t, reduced }: SceneProps) {
       <Label id="septum-transversum" x={190} y={540} ax={380} ay={500} />
       <Label id="hodi-neurala" x={810} y={96} ax={524} ay={100} small />
       <Label id="aorta" x={810} y={150} ax={AORTA_X[0] + 12} ay={AORTA_X[1] - 4} small />
-      <Label id="hestegorria" x={810} y={196} ax={ESO_X[0] + 12} ay={ESO_X[1] - 6} />
+      <Label id={esoId} x={810} y={196} ax={ESO_X[0] + 12} ay={ESO_X[1] - 6} />
       <Label id="hestegorri-inguruko-mesenkima" x={780} y={250} ax={550} ay={300} small />
+    </g>
+  );
+}
+
+/** Where the septum is fixed: its outer margin on the body wall (in front and at the sides). */
+const FIX_WALL = spline([[750, 396], [724, 466], [664, 534], [580, 568], [500, 576], [420, 568], [336, 534], [276, 466], [250, 396]], 8);
+
+/**
+ * 7:septum-transversum:zeharkakoa — the same transverse section as the diaphragm's stage (so it is familiar
+ * there), at the 4th week, before the membranes: what the side view cannot show. The plate is fixed to the
+ * body wall in front and at both sides and, behind, to the mesenchyme round the oesophagus (both glow at
+ * that step); beside the mesenchyme the two canals stay open (marked at their step).
+ */
+export function SeptumSection({ t, reduced }: SceneProps) {
+  // Its clock on the diaphragm section's: the septum and the open canals (0.5), then the canals marked (0.62–0.74).
+  const at = lerp(0.5, 0.7, seg(t, 0.72, 0.78));
+  const fix = vis(t, 0.38, 0.56, 0.04);
+  return (
+    <g>
+      <DiaphragmSection t={at} reduced={reduced} early />
+      {fix > 0.02 && (
+        <g opacity={fix} pointerEvents="none">
+          <path d={smoothPath(FIX_WALL, false, 0.3)} fill="none" stroke="#ffd9a0" strokeWidth={22} strokeLinecap="round" opacity={0.35} />
+          <path d={smoothPath(FIX_WALL, false, 0.3)} fill="none" stroke="#fff4dc" strokeWidth={5} strokeLinecap="round" />
+          <ellipse cx={500} cy={350} rx={58} ry={20} fill="#fff4dc" opacity={0.5} />
+        </g>
+      )}
+      <Note x={500} y={612} tone="accent" show={vis(t, 0, 0.56)}>
+        Aurrean eta alboetan gorputz paretan finkatuta; atzean, hestegorri inguruko mesenkiman
+      </Note>
+      <Note x={500} y={612} tone="accent" show={vis(t, 0.56)}>
+        Banaketa partziala: hestegorriaren bi aldeetan bi erreten zabalik (goiko ↔ beheko barrunbea)
+      </Note>
     </g>
   );
 }

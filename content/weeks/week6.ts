@@ -1,6 +1,7 @@
 import type { WeekDef } from '@/lib/sim/types';
 import { VilliLongSection, VillusCross, VillusThinning } from '@/components/scenes/week6/Villus';
 import { ChorionicSac, SacCirculation } from '@/components/scenes/week6/Sac';
+import { BloodDirection } from '@/components/scenes/week6/BloodDirection';
 import { UterusSagittal } from '@/components/scenes/week6/Uterus';
 import { Cotyledons, PlacentaCirculation, PlacentaFaces, PlacentaFunctions } from '@/components/scenes/week6/Placenta';
 import { CordFormation, CordSections } from '@/components/scenes/week6/Cord';
@@ -115,6 +116,15 @@ export const week6: WeekDef = {
           description: 'Apunteetako irudia: biloxka tertziarioen eraztuna; fetuaren odola zilbor-hestetik korion orrira eta biloxketara, amaren odola biloxka arteko guneetara.',
           scene: SacCirculation,
         },
+        {
+          id: 'norabidea',
+          label: 'Arteria ala zaina?',
+          plane: 'eskema',
+          // A comparison: the mother's side stays at full colour beside the fetus's (the tags say which is the trap).
+          ownFocus: true,
+          description: 'Zirkuitua eskema gisa: amaren bihotza, karena eta fetuaren bihotza. Odol oxigenatua (gorria) amaren arterietatik iristen da eta fetura zilborreko zainetik doa: izena norabideak ematen du, ez oxigenoak.',
+          scene: BloodDirection,
+        },
       ],
       beats: [
         { at: 0, notes: ['w6/1.3/p3/s1'], text: 'Hurrengo 2.–3. hilabeteetan biloxka tertziarioen enborrak adarkatzen hasten dira; adarkadurak geroz eta txikiagoak dira.', focus: ['biloxka-enborra', 'biloxka-tertziarioa'] },
@@ -122,7 +132,22 @@ export const week6: WeekDef = {
         { at: 0.34, notes: ['w6/1.4/p4/s1-s2'], text: '4. hilabetetik aurrera biloxka askeen paretetan desagerpen prozesua: lehenik adarkadura txikiko biloxketan, gero handiagoetan.', focus: ['karena-mugaren-meheketa', 'biloxka-askea'] },
         { at: 0.5, notes: ['w6/1.4/p5/s1-s3'], view: 'karena-muga', text: 'Zitotrofoblastoa eta ehun konektiboko zelulak desagertzen dira: karena muga bi geruzakoa da (endotelioa + sinzitiotrofoblastoa), askoz meheagoa eta eraginkorragoa.', focus: ['karena-muga', 'endotelioa', 'sinzitiotrofoblastoa'] },
         { at: 0.7, notes: ['w6/1.4/p4/s3-s4'], view: 'korion-zakua', text: 'Desagerpena ez da inoiz enborrezko/aingurazko biloxketara heltzen: hauek ez dute elkartrukeetan parte hartzen, biloxka askeek bakarrik.', focus: ['biloxka-enborra', 'biloxka-askea'] },
-        { at: 0.8, notes: ['w6/1.5/p3/s1', 'w6/1.5/p4/s1-s6'], view: 'zirkulazioa', text: 'Enbrioi kanpoko sistema zirkulatorioa: fetuaren odola zilbor-hestetik korion orriko odol-hodietara eta biloxketara; amaren odola biloxka arteko espazioetara. Ez dute zuzeneko kontakturik, baina trukea badago.', focus: ['enbrioi-kanpoko-zirkulazioa', 'zilbor-hodiak', 'korion-plaka'] },
+        {
+          at: 0.8,
+          notes: ['w6/1.5/p3/s1', 'w6/1.5/p4/s1-s4'],
+          view: 'zirkulazioa',
+          text: 'Enbrioi kanpoko sistema zirkulatorioa: fetuaren odola zilbor-hestetik korion orriko odol-hodietara eta biloxketara; amaren odola biloxka arteko espazioetara.',
+          focus: ['enbrioi-kanpoko-zirkulazioa', 'zilbor-hodiak', 'korion-plaka'],
+        },
+        {
+          at: 0.9,
+          notes: ['w6/1.5/p4/s5-s6'],
+          // The circuit as a diagram: the trap of its names (arteries/veins vs oxygen) is the point of this step.
+          view: 'norabidea',
+          text: 'Amaren eta fetuaren odolek ez dute zuzeneko kontakturik, baina trukea badago (oxigenoa, elikagaiak…) biloxka pareten bidez. Karenan oxigenoa hartu ondoren, fetuaren odol oxigenatua zilborreko zainetik itzultzen da fetura, eta zilborreko arteriek odol pobrea eramaten dute karenara.',
+          caution: 'Fetuan oxigenoa alderantziz doa: zilborreko zainek odol oxigenatua daramate (karenatik fetura) eta zilborreko arteriek odol pobrea (fetutik karenara). Amaren aldean, helduan bezala. Izenaren araua bera da: arteria bihotzetik ateratzen da, zaina bihotzera itzultzen da.',
+          focus: ['zilbor-zainak', 'zilbor-arteriak', 'karena-muga'],
+        },
       ],
       structures: [
         'biloxka-tertziarioa',
@@ -130,6 +155,8 @@ export const week6: WeekDef = {
         'biloxka-askea',
         'biloxka-arteko-espazioa',
         'kanpoko-zorro-zitotrofoblastikoa',
+        'zilbor-arteriak',
+        'zilbor-zainak',
         'korion-plaka',
         'korion-barrunbea',
         'dezidua-basala',
@@ -146,6 +173,7 @@ export const week6: WeekDef = {
         'finkapen-pedikulua',
         'amnios-barrunbea',
         'bitelo-zaku-sekundarioa',
+        'biloxka-kapilarrak',
       ],
       keyPoints: [
         '2.–3. hilabeteetan biloxka tertziarioen enborrak adarkatzen dira: adarkadura guztiak biloxka askeak dira eta biloxka arteko espazioa okupatzen dute.',

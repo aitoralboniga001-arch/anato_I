@@ -3,7 +3,7 @@ import { CoelomFold } from '@/components/scenes/week7/Coelom';
 import { CoelomExtent, SeptumLateral, lateralOrientation } from '@/components/scenes/week7/Lateral';
 import { PeritoneumSection } from '@/components/scenes/week7/Peritoneum';
 import { LungBudFront, ThoraxSection } from '@/components/scenes/week7/Thorax';
-import { DiaphragmDescent, DiaphragmSection } from '@/components/scenes/week7/Diaphragm';
+import { DiaphragmDescent, DiaphragmSection, SeptumSection } from '@/components/scenes/week7/Diaphragm';
 import { DiaphragmBelow, DiaphragmProfile } from '@/components/scenes/week7/DiaphragmAdult';
 import { CoelomMapDiaphragm, CoelomMapSeptum, CoelomMapThorax } from '@/components/scenes/week7/CoelomMap';
 import { DiaphragmFate } from '@/components/scenes/week7/DiaphragmFate';
@@ -186,6 +186,15 @@ export const week7: WeekDef = {
           scene: SeptumLateral,
         },
         {
+          id: 'zeharkakoa',
+          label: 'Zeharkako mozketa',
+          plane: 'zeharkakoa',
+          description: 'Diafragmaren etapako zeharkako mozketa bera (dortsala goian), 4. astean: septuma aurrean eta alboetan gorputz paretan finkatuta, atzean hestegorri inguruko mesenkiman; hestegorriaren bi aldeetan bi erreten zabalik.',
+          orientation: { top: 'Dortsala', bottom: 'Bentrala' },
+          scene: SeptumSection,
+          locator: { level: 0.5, note: 'Septumaren maila' },
+        },
+        {
           id: 'mapa',
           label: 'Barrunbeen mapa',
           plane: 'eskema',
@@ -229,6 +238,8 @@ export const week7: WeekDef = {
           idea: 'Trenkada aurrean eta alboetan paretan finkatzen da; atzean, hestegorri inguruko mesenkiman.',
           key: 'Aurrean eta alboetan itxita dago; atzean ez erabat.',
           notes: ['w7/2/p4/s1'],
+          // Seen across: the plate fixed in front, at both sides and behind (the side view shows only front and back).
+          view: 'zeharkakoa',
           text: 'Mesodermoz (mesenkimaz) osatutako trenkada hori gorputzaren aurreko eta alboko paretetan finkatzen da; atzean, aurreko hestearen (geroko hestegorriaren) inguruko mesenkiman.',
           focus: ['septum-transversum', 'hestegorri-inguruko-mesenkima'],
         },
@@ -248,6 +259,8 @@ export const week7: WeekDef = {
             ],
           },
           notes: ['w7/2/p5/s1-s2'],
+          // Above and below the plate: only the side view shows both cavities.
+          view: 'sagitala',
           text: 'Septumak zeloma bitan banatzen du: goiko atala hasierako perikardio barrunbea da (torax barrunbe osoa okupatzen du); azpikoa peritoneo barrunbea.',
           focus: ['hasierako-perikardio-barrunbea', 'peritoneo-barrunbea'],
         },
@@ -266,7 +279,8 @@ export const week7: WeekDef = {
             ],
           },
           notes: ['w7/2/p5/s3', 'w7/2/p6/s1'],
-          view: 'mapa',
+          // The canals beside the oesophagus: the same cross-section as the diaphragm's stage.
+          view: 'zeharkakoa',
           text: 'Banaketa partziala da: septumaren alde dortsolateraletan bi kanal geratzen dira, goiko eta beheko atalak komunikatzen dituztenak: erreten perikardioperitonealak.',
           focus: ['erreten-perikardioperitonealak'],
           caution: 'Septum transversumak ez ditu barrunbeak erabat bereizten: erretenak 5. astean itxiko dira (mintz pleuroperitonealak).',
@@ -762,7 +776,6 @@ export const week7: WeekDef = {
           orientation: { top: 'Dortsala', bottom: 'Bentrala', left: 'Eskuina', right: 'Ezkerra' },
           scene: DiaphragmFate,
           locator: { level: 0.5, note: 'Diafragmaren maila' },
-          travel: false,
         },
       ],
       beats: [

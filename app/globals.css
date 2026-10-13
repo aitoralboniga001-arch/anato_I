@@ -13303,6 +13303,42 @@ kbd {
   }
 }
 
+/* 3D views: the tour of the model, in the corner the drag hint uses (the hint sits under it). */
+.viewport .bira-btn {
+  position: absolute;
+  z-index: 29;
+  top: 12px;
+  right: 58px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  margin: 0;
+  padding: 0 14px 0 6px;
+  border: 1px solid var(--float-edge);
+  border-radius: 999px;
+  background: var(--float);
+  box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.9);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-meta);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.viewport .bira-btn:hover {
+  border-color: rgba(255, 184, 107, 0.6);
+}
+
+.viewport .bira-btn b {
+  font-weight: 600;
+}
+
+.viewport .bira-btn ~ .turn-hint {
+  top: 52px;
+}
+
 .app:has(.loc-card) .viewport .turn-hint {
   visibility: hidden;
 }

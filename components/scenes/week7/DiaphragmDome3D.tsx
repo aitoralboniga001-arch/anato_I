@@ -56,9 +56,20 @@ const dSept = polygon2(to2(SEPTUM_X));
 const dMes = polygon2(to2(MES));
 const dCanalR = polygon2(to2(CANAL_L));
 const dCanalL = polygon2(to2(CANAL_L.map(([a, b]) => [1000 - a, b] as Pt)));
-const RIM_W = 0.1;
+/** The body wall's muscular rim: wide enough to read as the fourth component, not as the floor's edge. */
+const RIM_W = 0.15;
 /** Where a membrane is attached (the posterolateral wall) and how far in it reaches when grown. */
 const MEM_PIVOT = { right: X(226), left: X(774) };
+/** The cavity's edge on the embryo's left (3D x, z), where the rim's name points, and the way into the cavity there. */
+const RIM_EDGE = ((): [number, number] => {
+  const p = CAV_X.reduce((b, q) => (Math.hypot(q[0] - 742, q[1] - 420) < Math.hypot(b[0] - 742, b[1] - 420) ? q : b));
+  return [X(p[0]), Z(p[1])];
+})();
+const RIM_IN = ((): [number, number] => {
+  const d: [number, number] = [0 - RIM_EDGE[0], Z(390) - RIM_EDGE[1]];
+  const l = Math.hypot(d[0], d[1]);
+  return [d[0] / l, d[1] / l];
+})();
 
 const smooth = (k: number) => k * k * (3 - 2 * k);
 
@@ -140,7 +151,8 @@ function build(): Geo {
   const memF = (dc: (x: number, z: number) => number) => plate(memD(dc), 0.03);
   // The canal: the same opening, as a tall glassy passage between the cavity above and the one below.
   const canalF = (dc: (x: number, z: number) => number) => slab(memD(dc), 0.34, 0.06);
-  const rimF = plate((x, z) => Math.max(dCav(x, z) - 0.004, -dCav(x, z) - RIM_W), 0.045);
+  // A little thicker than the septum: the rim shows all round the edge, in front too.
+  const rimF = plate((x, z) => Math.max(dCav(x, z) - 0.004, -dCav(x, z) - RIM_W), 0.062);
   const rimMesh = surfaceMesh(rimF, ...plateBoxCav(), 0.018);
   const rimHitMesh = surfaceMesh(rimF, ...plateBoxCav(), 0.05);
   const mesh = (f: SDF, step: number, box: [V3, V3]) => surfaceMesh(f, box[0], box[1], step);
@@ -317,7 +329,8 @@ export function buildDiaphragm(t: number, reduced: boolean, canalLit = false) {
   const canalShow = 1 - seg(F.c, 0.82, 1);
   const crusK = seg(t, DOME_T.dome[0] + 0.01, DOME_T.dome[1] + 0.01);
   const items: Item3[] = [
-    { key: 'wall', id: 'gorputz-pareta', quiet: true, mesh: G.wall, hit: G.wallHit, color: '#9a6570', deep: '#4a2630', tissue: 'mesenchyme' },
+    // The trunk's wall in a neutral tone: it is the frame, and the pink rim it gives the diaphragm must stand out from it.
+    { key: 'wall', id: 'gorputz-pareta', quiet: true, mesh: G.wall, hit: G.wallHit, color: '#8c807c', deep: '#3a3331', tissue: 'mesenchyme' },
     { key: 'spine', id: 'ornoak', quiet: true, mesh: G.spine, color: P.bone, deep: '#8a8070', tissue: 'cartilage' },
     { key: 'aorta', id: 'aorta', mesh: AORTA, color: P.aorta, deep: '#6a0f1e', tissue: 'vessel' },
     { key: 'ivc', id: 'beheko-kaba-zaina', mesh: IVC, color: P.ivc, deep: '#1c3c88', tissue: 'vessel' },
@@ -327,7 +340,7 @@ export function buildDiaphragm(t: number, reduced: boolean, canalLit = false) {
     { key: 'mes', id: 'hestegorri-inguruko-mesenkima', groups: ['gerriko-atala'], mesh: M.mes, hit: M.mesHit, color: P.eso, deep: '#2a6a60', tissue: 'mesenchyme' },
     { key: 'memR', id: 'mintz-pleuroperitonealak', mesh: M.memR, hit: M.memRHit, color: P.poMem, deep: '#5a3a8a', tissue: 'membrane', show: F.memK },
     { key: 'memL', id: 'mintz-pleuroperitonealak', mesh: M.memL, hit: M.memLHit, color: P.poMem, deep: '#5a3a8a', tissue: 'membrane', show: F.memK },
-    { key: 'rim', id: 'gorputz-paretako-mesodermoa', groups: ['diafragmaren-alde-periferikoa'], mesh: M.rim, hit: M.rimHit, color: P.bodyMuscle, deep: '#6a2a4a', tissue: 'muscle', show: F.rimK > 0.01 ? 1 : 0 },
+    { key: 'rim', id: 'gorputz-paretako-mesodermoa', groups: ['diafragmaren-alde-periferikoa'], mesh: M.rim, hit: M.rimHit, color: P.bodyMuscle, deep: '#7a2032', tissue: 'muscle', show: F.rimK > 0.01 ? 1 : 0 },
   ];
   if (canalShow > 0.02)
     items.push(
@@ -352,12 +365,13 @@ export function buildDiaphragm(t: number, reduced: boolean, canalLit = false) {
       }
     }
   // Camera: from the front and above onto the floor; lower and a little round while the dome rises.
-  // While the dome rises the camera goes round to the side: the profile (front higher, back lower)
-  // and the near membrane come into view; it keeps turning slowly while the step holds.
+  // While the dome rises the camera turns a little to the side: the profile (front higher, back lower)
+  // shows, while the membranes and the rim behind the septum's dome stay in view.
   const k = F.domeK;
   const hold = seg(t, DOME_T.dome[1], DOME_T.adult[1] + 0.03, (q) => q);
-  const elev = deg(58 - 14 * k);
-  const yaw = deg(-14 + 74 * k + 16 * hold);
+  // Higher as the dome rises: from above, its front cannot hide the membranes and the rim at the back.
+  const elev = deg(58 + 12 * k);
+  const yaw = deg(-14 + 30 * k + 8 * hold);
   const dist = 5.6;
   const target: V3 = [0, 0.02 + 0.16 * k, 0.12];
   const eye = add(target, [Math.sin(yaw) * Math.cos(elev) * dist, Math.sin(elev) * dist, Math.cos(yaw) * Math.cos(elev) * dist]);
@@ -388,7 +402,9 @@ function DiaphragmDome3DView({ t, reduced }: SceneProps) {
           const mes = at(top(X(500), Z(330), 0.05));
           const memR = at(top(MEM_PIVOT.right + (X(330) - MEM_PIVOT.right) * (0.08 + 0.92 * F.c), Z(300), 0.04));
           const canal = at([X(330) + (X(470) - X(330)) * (1 - Math.max(0.04, 1 - F.c)), 0.2, Z(300)]);
-          const rim = at(top(X(712), Z(500), 0.05));
+          // In the middle of the rim's band as it grows in from the wall (never on the septum beside it).
+          const rimIn = Math.max(0.012, (RIM_W / 2) * F.rimK);
+          const rim = at(top(RIM_EDGE[0] + RIM_IN[0] * rimIn, RIM_EDGE[1] + RIM_IN[1] * rimIn, 0.05));
           const aorta = at([X(AORTA_X[0]) + 0.05, 0.62, Z(AORTA_X[1])]);
           const eso = at([X(ESO_X[0]) + 0.03, 0.55, Z(ESO_X[1])]);
           const ivc = at([X(IVC_X[0]) - 0.04, 0.45, Z(IVC_X[1])]);
@@ -410,7 +426,19 @@ function DiaphragmDome3DView({ t, reduced }: SceneProps) {
               <Note x={24} y={24} size={12.5} align="start" show={L}>
                 Diafragmaren osagaiak · aurretik eta goitik
               </Note>
-              <CavityKey rows={[canalShow > 0.5 && KEY7.canal, KEY7.septum]} y={48} show={L} quiet />
+              {/* The four components each keep one colour from here to the adult diaphragm. */}
+              <CavityKey
+                rows={[
+                  canalShow > 0.5 && KEY7.canal,
+                  KEY7.septum,
+                  memShow > 0.3 && { id: 'mintz-pleuroperitonealak', color: P.poMem, text: 'mintzak' },
+                  { id: 'hestegorri-inguruko-mesenkima', color: P.eso, text: 'mesenkima' },
+                  F.rimK > 0.05 && { id: 'gorputz-paretako-mesodermoa', color: P.bodyMuscle, text: 'gorputz pareta' },
+                ]}
+                y={48}
+                show={L}
+                quiet
+              />
               <Callouts
                 items={[
                   { id: 'aorta', at: aorta, show: L, small: true },

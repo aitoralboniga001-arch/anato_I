@@ -1,5 +1,6 @@
 'use client';
 
+import { TrapCard } from '@/components/kit/TrapCard';
 import { Arrow, C, Flow, Label, Note, Part, clamp, easeInOut, lerp, mix, rand, seg, zoom, type SceneProps } from '@/components/kit';
 import {
   BASE,
@@ -365,6 +366,8 @@ const ROUTES = NET.legs.map((lg, i) => {
 });
 
 /** Chevron colours: towards the villi (blue blood) and back to the embryo (red blood); maternal blood. */
+/** The umbilical arteries and veins are both the umbilical vessels: naming those lights both. */
+const UMB = ['zilbor-hodiak'];
 const CH_OUT = '#cfe0ff';
 const CH_BACK = '#ffd2d9';
 const CH_MAT = '#ffe1e6';
@@ -435,8 +438,9 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
   const stalkPart = (p: P) => p[1] < STALK_FROM;
   const formA = vesselSegments(PLAN_A, v1).map((p) => splitBy(p, stalkPart));
   const formV = vesselSegments(PLAN_V, v1).map((p) => splitBy(p, stalkPart));
-  const umb = [...formA.flatMap((q) => q.a.map((p) => ({ p, c: cA }))), ...formV.flatMap((q) => q.a.map((p) => ({ p, c: cV })))];
-  umb.push({ p: grow(NET.linkA, v2), c: cA }, { p: grow(NET.linkV, v2), c: cV });
+  // The stalk's two kinds of vessel, each its own structure (both are the umbilical vessels).
+  const umbArt = [...formA.flatMap((q) => q.a), grow(NET.linkA, v2)];
+  const umbVen = [...formV.flatMap((q) => q.a), grow(NET.linkV, v2)];
   const intra = [...formA.flatMap((q) => q.b.map((p) => ({ p, c: cA }))), ...formV.flatMap((q) => q.b.map((p) => ({ p, c: cV })))];
   const plate = [{ p: NET.plateA, c: cA }, ...NET.plateV.map((p) => ({ p, c: cV }))];
   const caps: { p: P[]; c: string }[] = [];
@@ -449,8 +453,8 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
   BRANCHES.forEach((b) => caps.push({ p: NET.branchLoops[b.i], c: b.arterial ? cA : cV }));
   // Mouths where a vessel enters the side of a plate vessel drawn over it: re-open them (no wall across).
   const stubs: { a: P; b: P; w: number; c: string; id: string }[] = [];
-  if (v2 > 0.98) stubs.push({ a: [NET.xA, NET.plateAAt(NET.xA) + 6], b: [NET.xA, NET.plateAAt(NET.xA) + 1.6], w: 6.2, c: cA, id: 'zilbor-hodiak' });
-  if (v2 > 0.98) stubs.push({ a: [NET.xV, NET.plateVAt(NET.xV) + 6], b: [NET.xV, NET.plateVAt(NET.xV) + 1.6], w: 6.2, c: cV, id: 'zilbor-hodiak' });
+  if (v2 > 0.98) stubs.push({ a: [NET.xA, NET.plateAAt(NET.xA) + 6], b: [NET.xA, NET.plateAAt(NET.xA) + 1.6], w: 6.2, c: cA, id: 'zilbor-arteriak' });
+  if (v2 > 0.98) stubs.push({ a: [NET.xV, NET.plateVAt(NET.xV) + 6], b: [NET.xV, NET.plateVAt(NET.xV) + 1.6], w: 6.2, c: cV, id: 'zilbor-zainak' });
   if (v3 > 0.98)
     for (const lg of NET.legs) {
       stubs.push({ a: [lg.outerX, NET.plateAAt(lg.outerX) - 6], b: [lg.outerX, NET.plateAAt(lg.outerX) - 1.6], w: 6.4, c: cA, id: 'biloxka-kapilarrak' });
@@ -598,8 +602,11 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
 
       {/* Vessels, each anatomical piece its own part. Drawn stalk → embryo → villi → plate, so every piece
           meets the next without a wall across the junction (mouths re-opened below). */}
-      <Part id="zilbor-hodiak" show={v1 > 0.02 ? 1 : 0}>
-        <VesselSet segs={umb.map((q) => q.p)} lumens={umb.map((q) => q.c)} w={6.2} />
+      <Part id="zilbor-arteriak" groups={UMB} show={v1 > 0.02 ? 1 : 0}>
+        <VesselSet segs={umbArt} lumen={cA} w={6.2} />
+      </Part>
+      <Part id="zilbor-zainak" groups={UMB} show={v1 > 0.02 ? 1 : 0}>
+        <VesselSet segs={umbVen} lumen={cV} w={6.2} />
       </Part>
       <VesselSet segs={intra.map((q) => q.p)} lumens={intra.map((q) => q.c)} w={6.2} linecap="butt" />
       <Part id="biloxka-kapilarrak">
@@ -609,7 +616,7 @@ function CirculationDrawing({ t, reduced }: SceneProps) {
         <VesselSet segs={plate.map((q) => q.p)} lumens={plate.map((q) => q.c)} w={7} />
       </Part>
       {stubs.map((q, i) => (
-        <Part key={i} id={q.id}>
+        <Part key={i} id={q.id} groups={q.id.startsWith('zilbor') ? UMB : undefined}>
           <g fill="none" strokeLinecap="butt">
             <path d={pd([q.a, q.b])} stroke={K.endo} strokeWidth={q.w} />
             <path d={pd([q.a, [q.b[0], q.b[1] + Math.sign(q.b[1] - q.a[1]) * 1.4]])} stroke={q.c} strokeWidth={q.w * 0.6} />
@@ -751,6 +758,7 @@ function labels(t: number) {
   const umbL = atY(NET.pathA.slice(Math.floor(NET.pathA.length * 0.45)), 456);
   const umbR = atY(NET.pathV, 450);
   const stalk = atY(STALK_BODY.left, 410);
+  const named = s(t, W.heartbeat) > 0.5;
   return (
     <>
       <Label id="dezidua-basala" x={190} y={32} ax={300} ay={22} />
@@ -761,7 +769,8 @@ function labels(t: number) {
       <Label id="zitotrofoblastoa" x={190} y={240} ax={cyto[0]} ay={cyto[1]} />
       <Label id="korion-plaka" x={190} y={318} ax={226} ay={318} />
       <Label id="finkapen-pedikulua" x={190} y={404} ax={stalk[0]} ay={stalk[1]} />
-      <Label id="zilbor-hodiak" x={190} y={456} ax={umbL[0]} ay={umbL[1]} show={v1} />
+      {/* Once the blood flows they are named for what they are: arteries out of the embryo, veins back into it. */}
+      <Label id={named ? 'zilbor-arteriak' : 'zilbor-hodiak'} x={190} y={456} ax={umbL[0]} ay={umbL[1]} show={v1} />
       <Label id="korion-barrunbea" x={190} y={500} ax={300} ay={470} />
       <Label id="bihotz-hodia" x={190} y={566} ax={EMB.x0 - 6} ay={EMB.disc + 1} show={seg(t, 0.06, 0.1)} />
       <Label id="karena-muga" x={810} y={214} ax={bar[0]} ay={bar[1]} show={exchange} />
@@ -769,7 +778,7 @@ function labels(t: number) {
       <Label id="biloxka-kapilarrak" x={810} y={292} ax={cap[0]} ay={cap[1]} text="Biloxka kapilarrak" />
       <Label id="enbrioi-kanpoko-mesodermoa" x={810} y={322} ax={742} ay={325} text="Kanpoko mesodermoa" />
       <Label id="enbrioi-kanpoko-hodiak" x={810} y={354} ax={736} ay={NET.plateAAt(736)} text="Enbrioi kanpoko hodiak" />
-      <Label key="zh-r" id="zilbor-hodiak" x={810} y={450} ax={umbR[0]} ay={umbR[1]} show={Math.max(v1, v2)} />
+      <Label key="zh-r" id={named ? 'zilbor-zainak' : 'zilbor-hodiak'} x={810} y={404} ax={umbR[0]} ay={umbR[1]} show={Math.max(v1, v2)} />
     </>
   );
 }
@@ -791,24 +800,20 @@ export function CirculationOverview(props: SceneProps) {
       <Note x={752} y={232} align="start" show={s(t, W.co2)}>
         CO2
       </Note>
-      {/* Key to the chevrons (the embryo's blood once it flows). */}
-      {s(t, W.heartbeat) > 0.01 && (
-        <g pointerEvents="none" opacity={s(t, W.heartbeat)}>
-          <path d="M804,528 H828" stroke={K.endo} strokeWidth={7} strokeLinecap="round" />
-          <path d="M804,528 H828" stroke={BLUE} strokeWidth={4} strokeLinecap="round" />
-          <Chevron x={817} y={528} a={0} o={1} color={CH_OUT} size={0.9} />
-          <path d="M804,554 H828" stroke={K.endo} strokeWidth={7} strokeLinecap="round" />
-          <path d="M804,554 H828" stroke={RED} strokeWidth={4} strokeLinecap="round" />
-          <Chevron x={815} y={554} a={180} o={1} color={CH_BACK} size={0.9} />
-        </g>
-      )}
-      <Note x={834} y={528} align="start" show={s(t, W.heartbeat)}>
-        Enbrioitik biloxketara
-      </Note>
-      <Note x={834} y={554} align="start" show={s(t, W.heartbeat)}>
-        Biloxketatik enbrioira
-      </Note>
-      <Note x={500} y={614} tone="accent" show={s(t, W.heartbeat) * (1 - seg(t, W.o2[0], W.o2[0] + 0.03))}>
+      {/* The key to the flow, and the trap it holds: the arteries carry the poor blood, the veins the oxygenated. */}
+      <TrapCard
+        x={612}
+        y={446}
+        w={376}
+        show={s(t, W.heartbeat)}
+        title="KONTUZ · HELDUAN EZ BEZALA"
+        rows={[
+          { id: 'zilbor-arteriak', name: 'Zilborreko arteriak', detail: 'enbrioitik → karenara · odol pobrea (O₂ gutxi)', swatch: BLUE },
+          { id: 'zilbor-zainak', name: 'Zilborreko zainak', detail: 'karenatik → enbrioira · odol oxigenatua', swatch: RED },
+        ]}
+        rule={['Izena ez du oxigenoak ematen, norabideak baizik:', 'arteria bihotzetik ateratzen da; zaina bihotzera itzultzen da.']}
+      />
+      <Note x={320} y={614} tone="accent" show={s(t, W.heartbeat) * (1 - seg(t, W.o2[0], W.o2[0] + 0.03))}>
         Bihotzak taupada egiten hasten du (4. astea): odola zirkulatzen hasten da
       </Note>
     </g>
