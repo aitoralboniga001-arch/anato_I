@@ -175,6 +175,8 @@ export interface TravelPlan {
   toPlane: PlaneKind;
   /** The words the new view puts on its edges (the body's directions ride there at the end). */
   words: Partial<Record<Edge, string>>;
+  /** "Non nago?": out to the whole body and back in to the same view (no old and new). */
+  reveal?: boolean;
 }
 
 /** Where the camera looks from between the two views: the embryo's left side, a little from the front and above, turned so both drawings face it. */
@@ -209,6 +211,21 @@ export function travelPlan(week: number, day: number, from: ViewDef, to: ViewDef
   }
   const kind = (v: ViewDef) => (v.plane === 'eskema' || v.plane === 'kanpokoa' ? v.frame : v.plane) ?? v.plane;
   return { shape, day, from: a, to: b, fromLabel: from.label, toLabel: to.label, fromPlane: kind(from), toPlane: kind(to), words: { ...to.orientation } };
+}
+
+/**
+ * "Non nago?": the camera pulls back from the view to the whole body (the plane on it) and goes back in
+ * to the same view. Null when the view is not a plane of the modelled body.
+ */
+export function revealPlan(week: number, day: number, view: ViewDef): TravelPlan | null {
+  if (view.travel === false) return null;
+  const shape = shapeFor(week, day, view.plane);
+  if (!BODIES.includes(shape)) return null;
+  let a = frameOf(view, modelOf(shape, day));
+  if (!a) return null;
+  if (a.free && dot(a.n, [-0.35, 0.45, 1]) < 0) a = { ...a, r: neg(a.r), n: neg(a.n) };
+  const kind = (view.plane === 'eskema' || view.plane === 'kanpokoa' ? view.frame : view.plane) ?? view.plane;
+  return { shape, day, from: a, to: a, fromLabel: view.label, toLabel: view.label, fromPlane: kind, toPlane: kind, words: { ...view.orientation }, reveal: true };
 }
 
 // ---- camera -----------------------------------------------------------------------------------
@@ -834,11 +851,11 @@ export function ViewTravel({
 
   const fromKind = PLANE_TEXT[plan.fromPlane].name.toLowerCase();
   const toKind = PLANE_TEXT[plan.toPlane].name.toLowerCase();
-  const title = `${plan.fromLabel}  →  ${plan.toLabel}`;
+  const title = plan.reveal ? plan.toLabel : `${plan.fromLabel}  →  ${plan.toLabel}`;
   const pillW = Math.max(380, title.length * 10.4 + 72);
   const sameCut = plan.from.axis === plan.to.axis && Math.abs(plan.from.at - plan.to.at) < 4;
-  const legend = [`Lehen: ${fromKind}`, fromKind !== toKind ? `Orain: ${toKind}` : sameCut ? `Orain: ${toKind}, maila berean` : `Orain: ${toKind}, beste maila batean`];
-  const legendW = Math.max(330, (legend[0].length + legend[1].length) * 7.9 + 130);
+  const legend = plan.reveal ? [`Hemen: ${toKind}, gorputz osoan`] : [`Lehen: ${fromKind}`, fromKind !== toKind ? `Orain: ${toKind}` : sameCut ? `Orain: ${toKind}, maila berean` : `Orain: ${toKind}, beste maila batean`];
+  const legendW = plan.reveal ? Math.max(240, legend[0].length * 7.9 + 70) : Math.max(330, (legend[0].length + legend[1].length) * 7.9 + 130);
   const sans = 'var(--font-sans, system-ui)';
   const decalStyle = (d: Decal) => DECAL[d.kind];
 
@@ -907,13 +924,17 @@ export function ViewTravel({
       <g {...ref('caption')} opacity={0}>
         <rect x={500 - pillW / 2} y={14} width={pillW} height={60} rx={16} fill="rgba(12,14,20,0.84)" stroke="rgba(255,255,255,0.09)" />
         <text x={500} y={35} textAnchor="middle" style={{ font: '600 10.5px var(--font-mono, monospace)', letterSpacing: '0.16em', fill: '#fbbf24' }}>
-          IKUSPEGIA ALDATZEN
+          {plan.reveal ? 'NON NAGO? · GORPUTZ OSOAN' : 'IKUSPEGIA ALDATZEN'}
         </text>
         <text x={500} y={60} textAnchor="middle" style={{ font: `650 19px ${sans}`, fill: '#e8eefc' }}>
-          <tspan {...ref('was')} fill="rgba(232,238,252,0.85)">
-            {plan.fromLabel}
-          </tspan>
-          <tspan fill="#fbbf24">{'  →  '}</tspan>
+          {!plan.reveal && (
+            <>
+              <tspan {...ref('was')} fill="rgba(232,238,252,0.85)">
+                {plan.fromLabel}
+              </tspan>
+              <tspan fill="#fbbf24">{'  →  '}</tspan>
+            </>
+          )}
           <tspan {...ref('now')}>{plan.toLabel}</tspan>
         </text>
       </g>
@@ -921,14 +942,25 @@ export function ViewTravel({
       <g {...ref('legend')} opacity={0}>
         <rect x={500 - legendW / 2} y={H - 52} width={legendW} height={34} rx={17} fill="rgba(12,14,20,0.84)" stroke="rgba(255,255,255,0.09)" />
         <g transform={`translate(${500 - legendW / 2 + 22},${H - 35})`}>
-          <rect x={0} y={-7} width={18} height={13} rx={2} fill="rgba(232,238,252,0.1)" stroke="rgba(232,238,252,0.75)" />
-          <text x={26} dy="0.35em" style={{ font: `500 14px ${sans}`, fill: 'rgba(232,238,252,0.85)' }}>
-            {legend[0]}
-          </text>
-          <rect x={legend[0].length * 7.9 + 50} y={-7} width={18} height={13} rx={2} fill="rgba(251,191,36,0.2)" stroke="#fbbf24" />
-          <text x={legend[0].length * 7.9 + 76} dy="0.35em" style={{ font: `600 14px ${sans}`, fill: '#fde68a' }}>
-            {legend[1]}
-          </text>
+          {plan.reveal ? (
+            <>
+              <rect x={0} y={-7} width={18} height={13} rx={2} fill="rgba(251,191,36,0.2)" stroke="#fbbf24" />
+              <text x={26} dy="0.35em" style={{ font: `600 14px ${sans}`, fill: '#fde68a' }}>
+                {legend[0]}
+              </text>
+            </>
+          ) : (
+            <>
+              <rect x={0} y={-7} width={18} height={13} rx={2} fill="rgba(232,238,252,0.1)" stroke="rgba(232,238,252,0.75)" />
+              <text x={26} dy="0.35em" style={{ font: `500 14px ${sans}`, fill: 'rgba(232,238,252,0.85)' }}>
+                {legend[0]}
+              </text>
+              <rect x={legend[0].length * 7.9 + 50} y={-7} width={18} height={13} rx={2} fill="rgba(251,191,36,0.2)" stroke="#fbbf24" />
+              <text x={legend[0].length * 7.9 + 76} dy="0.35em" style={{ font: `600 14px ${sans}`, fill: '#fde68a' }}>
+                {legend[1]}
+              </text>
+            </>
+          )}
         </g>
       </g>
 

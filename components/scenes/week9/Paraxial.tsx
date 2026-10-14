@@ -127,7 +127,8 @@ export function ParaxialMap({ t }: SceneProps) {
           const to: Pt = [EYE[0] + Math.cos(an) * 25, EYE[1] + Math.sin(an) * 25];
           const d = Math.hypot(to[0] - SMT[i][0], to[1] - SMT[i][1]);
           const from: Pt = [SMT[i][0] + ((to[0] - SMT[i][0]) / d) * 10, SMT[i][1] + ((to[1] - SMT[i][1]) / d) * 10];
-          return <Arrow key={i} from={from} to={to} color={W.striated} width={2.4 / cam.s} head={8 / cam.s} bend={0.22} show={lit(0.28, 0.37)} progress={toEye} />;
+          // The long ones (3 and 5) bow out on the ventral side, clear of the beads and of 4's arrow to the first arch.
+          return <Arrow key={i} from={from} to={to} color={W.striated} width={2.4 / cam.s} head={8 / cam.s} bend={i === 4 ? 0.42 : i === 2 ? 0.3 : 0.22} show={lit(0.28, 0.37)} progress={toEye} />;
         })}
         {([[3, 0], [5, 1], [6, 2]] as const).map(([i, a]) => (
           <Arrow key={i} from={[SMT[i][0] + 2, SMT[i][1] + 10]} to={[BARS[a].top[0] - 1, BARS[a].top[1] + 22]} color={W.striated} width={2.4 / cam.s} head={8 / cam.s} bend={-0.15} show={lit(0.28, 0.37)} progress={toArch} />

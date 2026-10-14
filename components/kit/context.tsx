@@ -14,6 +14,11 @@ export interface SceneContextValue {
   /** Guided tour: the one structure lit right now; everything else is shaded. */
   spotlight?: string | null;
   showLabels: boolean;
+  /**
+   * Progressive names: which structures the study has named so far (null or absent: all). An unnamed
+   * structure's name still shows while it is the step's focus, lit, pointed at or picked.
+   */
+  named?: ((id: string) => boolean) | null;
   /** When quiz mode is on, labels are hidden and clicks answer the prompt. */
   quiz: boolean;
   quizFlash: QuizFlash;

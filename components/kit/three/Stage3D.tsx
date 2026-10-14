@@ -50,6 +50,8 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
   const [turn, setTurn] = useState({ yaw: 0, pitch: 0 });
   const [gl, setGl] = useState<GLApi | null>(null);
   const [ready, setReady] = useState(false);
+  // WebGL could not start (or is very late): only then the coarse flat picture stands in for it.
+  const [flatOnly, setFlatOnly] = useState(false);
   const drag = useRef<{ x: number; y: number; yaw: number; pitch: number; moved: boolean } | null>(null);
 
   // The camera the scene asks for, turned by the viewer's drag around its target.
@@ -92,29 +94,41 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
   const view = viewOf(display);
   const light = scene.light ?? KEY_LIGHT;
 
-  // Once WebGL draws the tissue, the flat fallback is not drawn (only the outlines for pointing).
+  const host = ul?.host ?? null;
+  // The flat fallback is drawn without a viewport (server render, tests) or when WebGL fails. While the
+  // WebGL layer is starting (well under a second) nothing is drawn: the coarse flat meshes would flash
+  // a jagged picture before the smooth one.
+  const flat = !ready && (!host || flatOnly);
+  // Starting up: the spinner stands in for the picture, and its names wait for it.
+  const waiting = !!host && !ready && !flatOnly;
   const drawn = scene.items
     .filter((it) => (it.show ?? 1) * (it.opacity ?? 1) > 0.01)
-    .map((it) => ({ it, pr: projectCached(it, view, light, !ready) }))
+    .map((it) => ({ it, pr: projectCached(it, view, light, flat) }))
     .sort((a, b) => b.pr.depth - a.pr.depth);
 
-  const host = ul?.host ?? null;
   useEffect(() => {
     if (!host) return;
     let dead = false;
     let api: GLApi | null = null;
+    const late = window.setTimeout(() => setFlatOnly(true), 2500);
     import('./gl')
       .then((m) => {
         if (dead) return;
-        api = m.createGL(host, () => setReady(true));
+        api = m.createGL(host, () => {
+          window.clearTimeout(late);
+          setReady(true);
+        });
         setGl(api);
+        if (!api) setFlatOnly(true);
       })
-      .catch(() => {});
+      .catch(() => !dead && setFlatOnly(true));
     return () => {
       dead = true;
+      window.clearTimeout(late);
       api?.dispose();
       setGl(null);
       setReady(false);
+      setFlatOnly(false);
     };
   }, [host]);
 
@@ -182,7 +196,7 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
         if (!pr.any) return null;
         const deep = it.deep ?? mix(it.color, '#000000', 0.55);
         const lit = mix(it.color, '#ffffff', 0.22);
-        const flat = !ready && (
+        const flatEl = flat && (
           <g className="stage3d-flat" opacity={it.opacity ?? 1}>
             <path d={pr.bands[0]} fill={deep} stroke={deep} strokeWidth={0.6} strokeLinejoin="round" />
             <path d={pr.bands[1]} fill={it.color} stroke={it.color} strokeWidth={0.6} strokeLinejoin="round" />
@@ -192,18 +206,19 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
         if (!it.id)
           return (
             <g key={it.key} opacity={it.show ?? 1} pointerEvents="none">
-              {flat}
+              {flatEl}
             </g>
           );
         return (
           <Part key={it.key} id={it.id} groups={it.groups} quiet={it.quiet} show={it.show ?? 1}>
-            {flat}
+            {flatEl}
             <path className="stage3d-hit" d={pr.d} />
           </Part>
         );
       })}
-      {axes && <Axes view={view} axes={axes} hint={canTurn && ready && !turnedOnce} />}
-      {children?.(at, view)}
+      {waiting && <Loading3D />}
+      {!waiting && axes && <Axes view={view} axes={axes} hint={canTurn && ready && !turnedOnce} />}
+      {!waiting && children?.(at, view)}
     </g>
   );
 }

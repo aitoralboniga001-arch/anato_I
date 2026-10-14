@@ -11,3 +11,24 @@ export function retime(Scene: SceneComponent, end: number): SceneComponent {
   }
   return Retimed;
 }
+
+/**
+ * The same scene with the stage's time mapped onto its own through `[stage t, scene t]` knots (ascending,
+ * piecewise linear): a stage can put its steps in a clearer order, or stretch one step over another's
+ * time, without re-timing the drawing. Not a client module (see retime).
+ */
+export function remap(Scene: SceneComponent, knots: readonly [number, number][]): SceneComponent {
+  function Remapped({ t, reduced }: SceneProps) {
+    let u = knots[knots.length - 1][1];
+    for (let i = 1; i < knots.length; i++) {
+      const [a, sa] = knots[i - 1];
+      const [b, sb] = knots[i];
+      if (t <= b) {
+        u = sa + (sb - sa) * (b > a ? (Math.max(a, t) - a) / (b - a) : 1);
+        break;
+      }
+    }
+    return <Scene t={u} reduced={reduced} />;
+  }
+  return Remapped;
+}

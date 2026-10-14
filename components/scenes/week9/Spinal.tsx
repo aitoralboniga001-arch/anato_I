@@ -34,15 +34,22 @@ export function SpinalColumn({ t, reduced }: SceneProps) {
   return (
     <g>
       <VertebraBack t={t8} reduced={reduced} />
+      {/* Each segment a bracket over its run of vertebrae and nerve pairs (topic 8's column: 2 cervical, 3 thoracic, 2 lumbar). */}
       <Part id="ornomuin-segmentuak" show={segs}>
-        {[0, 1, 2].map((k) => (
-          <rect key={k} x={824} y={[150, 280, 470][k] - 10} width={20} height={20} rx={4} fill="none" stroke="#c7d2ff" strokeWidth={1.6} />
+        {(
+          [
+            [96, 244],
+            [244, 466],
+            [466, 614],
+          ] as const
+        ).map(([y0, y1], k) => (
+          <path key={k} d={`M826,${y0 + 5}Q816,${y0 + 5} 816,${y0 + 16}V${y1 - 16}Q816,${y1 - 5} 826,${y1 - 5}`} fill="none" stroke="#c7d2ff" strokeWidth={2.2} strokeLinecap="round" opacity={segs} />
         ))}
       </Part>
       <Note x={846} y={540} size={12.5} align="start" show={segs}>
         … sakroak, kokzigeoak
       </Note>
-      <Label id="ornomuin-segmentuak" x={990} y={600} align="end" ax={834} ay={480} show={segs} small />
+      <Label id="ornomuin-segmentuak" x={990} y={600} align="end" ax={816} ay={572} show={segs} small />
     </g>
   );
 }
@@ -170,6 +177,32 @@ function Section({ s, uid, ids }: { s: SpinalShow; uid: string; ids: { back: str
         <pattern id={`${uid}-stri`} width="7" height="7" patternUnits="userSpaceOnUse">
           <path d="M0,0V7" stroke="rgba(60,4,10,0.45)" strokeWidth={1.4} />
         </pattern>
+        {/* Grey matter: scattered neuron cell bodies. */}
+        <pattern id={`${uid}-soma`} width="34" height="29" patternUnits="userSpaceOnUse">
+          {(
+            [
+              [4, 5, 2.1, 0.55],
+              [15, 2, 1.1, 0.35],
+              [26, 8, 1.6, 0.5],
+              [9, 15, 1.3, 0.4],
+              [21, 19, 2.3, 0.55],
+              [31, 21, 1, 0.3],
+              [3, 25, 1.5, 0.45],
+              [14, 26, 0.9, 0.3],
+            ] as const
+          ).map(([x, y, r, o], i) => (
+            <circle key={i} cx={x} cy={y} r={r} fill={`rgba(40,30,44,${o})`} />
+          ))}
+        </pattern>
+        {/* White matter: myelinated fibres cut across, a fine stipple; lighter at the rim. */}
+        <pattern id={`${uid}-myel`} width="9" height="8" patternUnits="userSpaceOnUse">
+          <circle cx={2} cy={2} r={1.1} fill="none" stroke="rgba(120,104,80,0.28)" strokeWidth={0.7} />
+          <circle cx={6.5} cy={6} r={1} fill="none" stroke="rgba(120,104,80,0.22)" strokeWidth={0.7} />
+        </pattern>
+        <radialGradient id={`${uid}-wm`} cx="50%" cy="50%" r="55%">
+          <stop offset="0%" stopColor="#e9e2d2" />
+          <stop offset="100%" stopColor="#f6f1e6" />
+        </radialGradient>
       </defs>
       {/* Periphery: the back (dorsal) and the body wall, each with its skin. */}
       <g opacity={Math.max(s.vr, s.rami)}>
@@ -207,10 +240,11 @@ function Section({ s, uid, ids }: { s: SpinalShow; uid: string; ids: { back: str
       {/* Cord: white matter and its three cords. */}
       <Part id="ornomuina" show={s.cord}>
         <ellipse cx={C[0]} cy={C[1]} rx={RX + 4} ry={RY + 4} fill="#3a3550" />
-        <ellipse cx={C[0]} cy={C[1]} rx={RX} ry={RY} fill="#dfe3ee" />
+        <ellipse cx={C[0]} cy={C[1]} rx={RX} ry={RY} fill={`url(#${uid}-wm)`} />
       </Part>
       <Part id="gai-zuria" show={s.cord} quiet>
-        <ellipse cx={C[0]} cy={C[1]} rx={RX} ry={RY} fill="#dfe3ee" />
+        <ellipse cx={C[0]} cy={C[1]} rx={RX} ry={RY} fill={`url(#${uid}-wm)`} />
+        <ellipse cx={C[0]} cy={C[1]} rx={RX} ry={RY} fill={`url(#${uid}-myel)`} />
       </Part>
       <g clipPath={`url(#${clip})`} opacity={s.white}>
         {(
@@ -243,7 +277,8 @@ function Section({ s, uid, ids }: { s: SpinalShow; uid: string; ids: { back: str
 
       {/* Grey matter: the H, then its horns as their own pieces. */}
       <Part id="gai-grisa" show={s.grey}>
-        <path d={D(GREY)} fill="#8d93a6" stroke="#4a4f63" strokeWidth={1.6} />
+        <path d={D(GREY)} fill="#9a8e98" stroke="#4a3f4a" strokeWidth={1.6} />
+        <path d={D(GREY)} fill={`url(#${uid}-soma)`} />
       </Part>
       {(
         [
@@ -254,7 +289,10 @@ function Section({ s, uid, ids }: { s: SpinalShow; uid: string; ids: { back: str
       ).map(([id, loc, k]) => (
         <Part key={id} id={id} show={Math.max(k, s.grey * 0.6)} groups={['gai-grisa']}>
           {both(loc as unknown as [number, number][]).map((pts, i) => (
-            <path key={i} d={D(pts)} fill="#9aa0b4" stroke={k > 0.5 ? '#eef0f8' : '#4a4f63'} strokeWidth={k > 0.5 ? 2 : 1} />
+            <g key={i}>
+              <path d={D(pts)} fill="#a39aa3" stroke={k > 0.5 ? '#fff7e8' : '#4a3f4a'} strokeWidth={k > 0.5 ? 2 : 1} />
+              <path d={D(pts)} fill={`url(#${uid}-soma)`} />
+            </g>
           ))}
         </Part>
       ))}
@@ -521,8 +559,8 @@ export function EpaxialColumn({ t, reduced }: SceneProps) {
 }
 
 const RAMI_ROWS = (green: string, magenta: string) => [
-  { at: 0.38, cells: [{ id: 'gorputz-paretako-muskuluak', text: 'Gorputz paretako muskulu ildaskatu guztiak', color: green }, { id: 'bizkarreko-muskulu-sakonak', text: 'Bizkarreko muskulu sakonak (hedatzaileak, autoktonoak)', color: magenta }] },
-  { at: 0.4, cells: [{ id: 'urrutiko-muskuluak', text: 'Goiko eta beheko gorputz-adarretako muskulu guztiak', color: green }, { text: '—' }] },
+  { at: 0.38, cells: [{ id: 'gorputz-paretako-muskuluak', text: 'Gorputz paretako muskulu ildaskatu guztiak', color: green }, { id: 'bizkarreko-muskulu-sakonak', text: 'Bizkarreko muskulu sakonak (hedatzaile autoktonoak)', color: magenta }] },
+  { at: 0.4, cells: [{ id: 'urrutiko-muskuluak', text: 'Gorputz-adarretako muskulu guztiak', color: green }, { text: '—' }] },
   { at: 0.42, cells: [{ id: 'erronboideak', text: 'Autoktonoen azalekoak (erronboideak…)', color: green }, { text: '—' }] },
   { at: 0.44, cells: [{ text: '(Ia-ia gorputzeko muskulu ildaskatu guztiak)', color: green }, { text: '—' }] },
   { at: 0.5, cells: [{ id: 'muskulu-hipaxialak', text: '= muskulu HIPAXIALAK', color: green }, { id: 'muskulu-epaxialak', text: '= muskulu EPAXIALAK (atzekoak)', color: magenta }] },
@@ -533,7 +571,7 @@ export function RamiTable({ t }: SceneProps) {
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#120a10" />
-      <SummaryTable t={t} x={50} y={70} widths={[430, 430]} rowH={56} head={['Aurreko adar primarioko zuntz motoreek', 'Atzeko adar primarioko zuntz motoreek']} rows={RAMI_ROWS(HUE.ventralRamus, HUE.dorsalRamus)} />
+      <SummaryTable t={t} x={20} y={70} widths={[480, 428]} rowH={56} head={['Aurreko adar primarioko zuntz motoreek', 'Atzeko adar primarioko zuntz motoreek']} rows={RAMI_ROWS(HUE.ventralRamus, HUE.dorsalRamus)} />
       <Part id="axoi-motoreak" show={seg(t, 0.38, 0.41)}>
         <path d="M250,36H290" stroke={FIB.m} strokeWidth={3} strokeLinecap="round" />
       </Part>

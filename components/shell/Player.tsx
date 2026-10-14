@@ -4,7 +4,7 @@ import { firstSentence } from '@/content/generate';
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Beat, MicroQuestion, StageDef, StructureDef } from '@/lib/sim/types';
 import { structures } from '@/content/registry';
-import { IconBolt, IconCalendar, IconChevron, IconQuiz, IconCaptions, IconGuide, IconLoop, IconNext, IconNotes, IconPause, IconPlay, IconPrev, IconRestart, IconSkipNext, IconSkipPrev, IconVoice, IconVoiceOff } from './icons';
+import { IconBolt, IconCalendar, IconChevron, IconClose, IconQuiz, IconCaptions, IconGuide, IconLoop, IconNext, IconNotes, IconPause, IconPlay, IconPrev, IconRestart, IconSkipNext, IconSkipPrev, IconVoice, IconVoiceOff } from './icons';
 import { Popover } from './Popover';
 import { categoryColor } from '@/lib/sim/palette';
 import type { AudioSnapshot } from './narrate';
@@ -65,6 +65,14 @@ interface PlayerProps {
   onPick: (id: string) => void;
   /** Guided micro-question shown in place of the caption at the end of a step. */
   ask?: ReactNode;
+  /** The structure tour's card, in the caption's place while the learner walks through the step's structures. */
+  tourCard?: ReactNode;
+  /** Open the structure tour: these structures, from this one, walking on by itself or not. */
+  onTour?: (items: string[], idx: number, auto: boolean) => void;
+  /** The camera is moving to the step's view: its text waits, dimmed, until the picture arrives. */
+  travelling?: boolean;
+  /** Paused before the current step's change has been seen: the Next key plays it out first (`start`: the stage has not begun). */
+  unseen?: 'start' | 'step';
   /** GOGORATU: watch again how an earlier structure formed (time machine, with a way back). */
   onRecall?: (id: string) => void;
   /** Exam dates the current step shows. */
@@ -87,8 +95,8 @@ const MODES: { id: PlayMode; label: string; title: string; hint: string }[] = [
   {
     id: 'gidatua',
     label: 'Gidatua',
-    title: 'Modu gidatua: mantso, urrats bakoitzean gelditu, egiturak aurkeztu eta galdera txikiak',
-    hint: 'Mantso; urrats bakoitzean gelditzen da, egiturak aurkezten ditu eta galdera txikiak egiten ditu',
+    title: 'Modu gidatua: mantso, urrats bakoitzean gelditu, egitura berriak seinalatu eta galdera txikiak',
+    hint: 'Mantso; urrats bakoitzean gelditzen da, egitura berriak seinalatzen ditu eta galdera txikiak egiten ditu',
   },
   {
     id: 'arrunta',
@@ -232,12 +240,32 @@ function Caption({
 /** At most this many "Berria" chips before a "+N" chip: a long list would squeeze the scene. */
 const FRESH_CAP = 5;
 
-/** The "BERRIA" chips of a step: its new structures, easing in one after the other. */
-function FreshList({ items, onPick, k }: { items: StructureDef[]; onPick: (id: string) => void; k: string }) {
-  return <FreshChips key={k} items={items} onPick={onPick} />;
+/**
+ * What the step brings to know, beside its text: "Ezagutu egiturak" (its structures one by one, lit in
+ * the scene, each card in the caption's place) and the "BERRIA" chips (hover: lit; click: that one's card).
+ * Nothing here runs by itself: playback and the Next key never stop for it.
+ */
+function StepKnow({ fresh, tour, onTour, onHover, k }: { fresh: StructureDef[]; tour: string[]; onTour: (items: string[], idx: number, auto: boolean) => void; onHover?: (id: string | null) => void; k: string }) {
+  if (!fresh.length && !tour.length) return null;
+  const freshIds = fresh.map((s) => s.id);
+  return (
+    <div className="step-know">
+      {tour.length > 0 && (
+        <button className="tour-go" onClick={() => onTour(tour, 0, true)} title={`Urrats honetako egiturak banan-banan, irudian argituta: ${tour.map((id) => structures.get(id)?.name ?? id).join(', ')}`}>
+          <IconPlay size={10} />
+          Ezagutu egiturak
+          <em>{tour.length}</em>
+        </button>
+      )}
+      {fresh.length > 0 && <FreshChips key={k} items={fresh} onPick={(id) => onTour(freshIds, freshIds.indexOf(id), false)} onHover={onHover} />}
+    </div>
+  );
 }
 
-function FreshChips({ items, onPick }: { items: StructureDef[]; onPick: (id: string) => void }) {
+/** The structures a step's "Ezagutu egiturak" walks through: its own list, else (guided) its new ones when there are two or more. */
+const tourOf = (b: Beat | undefined, fresh: StructureDef[]) => b?.tour ?? (fresh.length >= 2 ? fresh.map((s) => s.id) : []);
+
+function FreshChips({ items, onPick, onHover }: { items: StructureDef[]; onPick: (id: string) => void; onHover?: (id: string | null) => void }) {
   const [all, setAll] = useState(false);
   const folded = !all && items.length > FRESH_CAP + 1;
   const shown = folded ? items.slice(0, FRESH_CAP) : items;
@@ -246,7 +274,7 @@ function FreshChips({ items, onPick }: { items: StructureDef[]; onPick: (id: str
       <li className="fresh-tag">Berria</li>
       {shown.map((s, i) => (
         <li key={s.id} style={{ animationDelay: `${0.25 + i * 0.2}s` }}>
-          <button onClick={() => onPick(s.id)} title={`${s.definition} — klik fitxa irekitzeko`}>
+          <button onClick={() => onPick(s.id)} onPointerEnter={() => onHover?.(s.id)} onPointerLeave={() => onHover?.(null)} title={`${s.definition} — klik: irudian argitu eta azaldu`}>
             <i style={{ background: s.color ?? categoryColor[s.category] }} />
             {s.name}
           </button>
@@ -342,7 +370,11 @@ export function Player(p: PlayerProps) {
   // question, go on after a step, the next stage), always in the same place. `go` lights it up: the app
   // is waiting for this press.
   const next: { tone: 'plain' | 'go' | 'timed' | 'stage'; label: string; tip: string; onClick: () => void; seconds?: number; disabled?: boolean } =
-    p.intro && p.onStart
+    p.unseen && !p.intro && !p.ask
+      ? p.unseen === 'start'
+        ? { tone: 'go', label: 'Hasi', tip: '1. urratsa ikusi · →', onClick: () => p.onBeat(1) }
+        : { tone: 'plain', label: 'Ikusi urratsa', tip: 'Urrats honen aldaketa amaierara arte ikusi · →', onClick: () => p.onBeat(1) }
+      : p.intro && p.onStart
       ? { tone: p.intro === 'ready' ? 'go' : 'plain', label: 'Hasi', tip: p.intro === 'ready' ? 'Hasi urratsez urrats · →' : 'Aurrebista saltatu eta hasi · →', onClick: p.onStart }
       : p.ask && p.askState && p.onAskDone
         ? p.askState === 'answered'
@@ -377,7 +409,7 @@ export function Player(p: PlayerProps) {
             onRecall={recall ? noop : undefined}
             terms={terms}
             onPick={noop}
-            extra={(extras?.[k]?.fresh.length ?? 0) > 0 && <FreshChips items={extras![k].fresh} onPick={noop} />}
+            extra={<StepKnow fresh={extras?.[k]?.fresh ?? []} tour={tourOf(b, extras?.[k]?.fresh ?? [])} onTour={noop} k={`s-${k}`} />}
           />
         </div>
       )),
@@ -397,7 +429,7 @@ export function Player(p: PlayerProps) {
   };
 
   return (
-    <div className={`dock${p.guided ? ' is-guided' : ''}${p.mode === 'azkarra' ? ' is-quick' : ''}`}>
+    <div className={`dock${p.travelling ? ' is-travel' : ''}${p.guided ? ' is-guided' : ''}${p.mode === 'azkarra' ? ' is-quick' : ''}`}>
       {/* The step's text takes the card's whole width: the pager lives in the control row below, so it
           never moves and the text wraps (and reserves) fewer lines. */}
       <div className="cap" aria-live="polite">
@@ -407,13 +439,13 @@ export function Player(p: PlayerProps) {
               <IconVoice size={15} /> Ahotsarekin ikasi
             </button>
           )}
-          {p.voice && !p.ask && <SpokenCaption beat={beat} audio={p.audioState} configured={p.voiceConfigured} fullText={fullText} onFullText={setFullText} onRepeat={p.onRepeat} onOff={() => p.onVoice(false)} />}
-          {(p.ask || showText) && (
+          {p.voice && !p.ask && !p.tourCard && <SpokenCaption beat={beat} audio={p.audioState} configured={p.voiceConfigured} fullText={fullText} onFullText={setFullText} onRepeat={p.onRepeat} onOff={() => p.onVoice(false)} />}
+          {(p.ask || p.tourCard || showText) && (
             // Every step of the stage sits invisibly in the same cell, so the card keeps the stage's
             // tallest height: the scene and the pager stay put from step to step.
             <div className="cap-stack" key={p.stage.id}>
               {sizers}
-              {p.ask ?? (
+              {p.ask ?? p.tourCard ?? (
                 <Caption
                   beat={beat}
                   quick={quick}
@@ -424,7 +456,7 @@ export function Player(p: PlayerProps) {
                   terms={terms}
                   onPick={p.onPick}
                   onTermHover={p.onTermHover}
-                  extra={p.fresh.length > 0 && <FreshList items={p.fresh} onPick={p.onPick} k={`f-${p.stage.id}-${p.activeBeat}`} />}
+                  extra={p.onTour && <StepKnow fresh={p.fresh} tour={tourOf(beat, p.fresh)} onTour={p.onTour} onHover={p.onTermHover} k={`f-${p.stage.id}-${p.activeBeat}`} />}
                 />
               )}
             </div>
@@ -517,9 +549,11 @@ export function Player(p: PlayerProps) {
               </b>
               <i>/{n}</i>
             </span>
-            <span className="tp-tc" title="Garapenaren eguna">
-              {p.day}
-            </span>
+            {p.day && (
+              <span className="tp-tc" title="Garapenaren adina">
+                {p.day}
+              </span>
+            )}
           </p>
 
           <div className="tp-end">
@@ -647,12 +681,13 @@ export function Player(p: PlayerProps) {
 }
 
 /**
- * Guided tour card, floating over the scene: the structure lit right now, in its colour, with its
- * definition. It sits on the viewport so the dock (and the scene size) does not jump while it runs.
+ * The structure tour's card, in the caption's place (never over the picture): the structure lit in the
+ * scene right now, in its colour, with its definition; its own arrows walk the list (the Next key still
+ * goes to the next step) and a click on the card opens its full entry.
  */
-export function TourCard({ item, idx, n, onSkip, onPick, compact = false, side = 'left', kicker = 'Ezagutu egiturak' }: { item: StructureDef; idx: number; n: number; onSkip: () => void; onPick: (id: string) => void; compact?: boolean; side?: 'left' | 'right'; kicker?: string }) {
+export function TourCard({ item, idx, n, auto, onStep, onClose, onPick, kicker = 'Ezagutu egiturak' }: { item: StructureDef; idx: number; n: number; auto: boolean; onStep: (d: number) => void; onClose: () => void; onPick: (id: string) => void; kicker?: string }) {
   return (
-    <div className={`tour is-${side}`} role="status">
+    <div className={`tour is-dock${auto ? ' is-auto' : ''}`} role="group" aria-label={kicker}>
       <div className="tour-top">
         <span className="tour-kicker">
           {kicker} · {idx + 1}/{n}
@@ -662,16 +697,26 @@ export function TourCard({ item, idx, n, onSkip, onPick, compact = false, side =
             <i key={k} className={k < idx ? 'is-past' : k === idx ? 'is-on' : ''} />
           ))}
         </span>
-        <button className="btn small ghost" onClick={onSkip} title="Egituren bira saltatu">
-          Saltatu <span aria-hidden>→</span>
+        {n > 1 && (
+          <span className="tour-nav">
+            <button onClick={() => onStep(-1)} disabled={idx === 0} aria-label="Aurreko egitura" title="Aurreko egitura">
+              <IconPrev size={13} />
+            </button>
+            <button onClick={() => onStep(1)} disabled={idx + 1 >= n} aria-label="Hurrengo egitura" title="Hurrengo egitura">
+              <IconNext size={13} />
+            </button>
+          </span>
+        )}
+        <button className="tour-close" onClick={onClose} aria-label="Itxi egituren bira" title="Itxi: urratsaren testura itzuli">
+          <IconClose size={13} />
         </button>
       </div>
-      <button className="tour-card" key={item.id} onClick={() => onPick(item.id)} title="Ireki fitxa">
+      <button className="tour-card" key={item.id} onClick={() => onPick(item.id)} title="Ireki fitxa osoa">
         <i className="tour-swatch" style={{ background: item.color ?? categoryColor[item.category] }} />
         <span>
           <b>{item.name}</b>
-          {!compact && item.es && <em>{item.es}</em>}
-          {!compact && <span className="tour-def">{item.definition}</span>}
+          {item.es && <em>{item.es}</em>}
+          <span className="tour-def">{item.definition}</span>
         </span>
       </button>
     </div>

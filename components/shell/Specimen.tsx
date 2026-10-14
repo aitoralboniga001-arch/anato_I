@@ -318,6 +318,39 @@ export function cutOf(plane: PlaneKind, m: Model, level: number): { axis: Axis; 
   return null;
 }
 
+/** The sketch's projection into its 120×88 box (the plane's box, the largest thing drawn, fitted and centred). */
+function fitOf(m: Model, flip?: boolean, big?: boolean) {
+  const raw = (v: V3): Pt => [(flip ? -v[0] : v[0]) + DX * v[2], -(v[1] + DY * v[2])];
+  const corners = m.ext.x.flatMap((x) => m.ext.y.flatMap((y) => m.ext.z.map((z) => raw([x, y, z]))));
+  const [x0, x1] = [Math.min(...corners.map((c) => c[0])), Math.max(...corners.map((c) => c[0]))];
+  const [y0, y1] = [Math.min(...corners.map((c) => c[1])), Math.max(...corners.map((c) => c[1]))];
+  const S = Math.min(112 / (x1 - x0), (big ? 76 : 84) / (y1 - y0));
+  const ox = 60 - ((x0 + x1) / 2) * S;
+  const oy = (big ? 46 : 44) - ((y0 + y1) / 2) * S;
+  return (v: V3): Pt => {
+    const [x, y] = raw(v);
+    return [ox + x * S, oy + y * S];
+  };
+}
+
+/**
+ * Where a transverse cut at level 0 (head end) and at level 1 (tail end) crosses the sketch's middle, in
+ * its 120×88 units: the line a dragged plane runs along. Null when the cut does not move with the level.
+ */
+export function levelLine(week: number, day: number, plane: PlaneKind, flip?: boolean, big?: boolean): [Pt, Pt] | null {
+  if (plane !== 'zeharkakoa') return null;
+  const m = modelOf(shapeFor(week, day, plane), day);
+  if (m.box) return null;
+  const P = fitOf(m, flip, big);
+  const mid = (level: number): Pt => {
+    const c = cutOf(plane, m, level)!;
+    const q: V3 = [(m.ext.x[0] + m.ext.x[1]) / 2, (m.ext.y[0] + m.ext.y[1]) / 2, 0];
+    q[c.axis] = c.at;
+    return P(q);
+  };
+  return [mid(0), mid(1)];
+}
+
 export function Specimen({
   plane,
   week,
@@ -327,6 +360,7 @@ export function Specimen({
   prev,
   big,
   className = 'loc-svg',
+  ticks,
 }: {
   plane: PlaneKind;
   week: number;
@@ -338,21 +372,14 @@ export function Specimen({
   prev?: PlaneKind | null;
   big?: boolean;
   className?: string;
+  /** Levels where the topic has a transverse cut (the live map's stops); `on` = the one shown. */
+  ticks?: { level: number; on?: boolean }[];
 }) {
   const shape = shapeFor(week, day, plane);
   const m = modelOf(shape, day);
-  // Fit the plane's box (the largest thing drawn) to the 120×88 frame, centred.
-  const raw = (v: V3): Pt => [(flip ? -v[0] : v[0]) + DX * v[2], -(v[1] + DY * v[2])];
-  const corners = m.ext.x.flatMap((x) => m.ext.y.flatMap((y) => m.ext.z.map((z) => raw([x, y, z]))));
-  const [x0, x1] = [Math.min(...corners.map((c) => c[0])), Math.max(...corners.map((c) => c[0]))];
-  const [y0, y1] = [Math.min(...corners.map((c) => c[1])), Math.max(...corners.map((c) => c[1]))];
-  const S = Math.min(112 / (x1 - x0), (big ? 76 : 84) / (y1 - y0));
-  const ox = 60 - ((x0 + x1) / 2) * S;
-  const oy = (big ? 46 : 44) - ((y0 + y1) / 2) * S;
-  const P = (v: V3): Pt => {
-    const [x, y] = raw(v);
-    return [ox + x * S, oy + y * S];
-  };
+  const P = fitOf(m, flip, big);
+  // The tube's stroke width is in world units: the sketch's scale, measured on one unit.
+  const S = Math.hypot(P([1, 0, 0])[0] - P([0, 0, 0])[0], P([1, 0, 0])[1] - P([0, 0, 0])[1]);
   const cut = cutOf(plane, m, level);
   const before = prev && prev !== plane ? cutOf(prev, m, level) : null;
   const Y = '#fbbf24';
@@ -450,6 +477,22 @@ export function Specimen({
               <path key={i} d={d} fill="rgba(232,238,252,0.75)" stroke={Y} strokeWidth={1} />
             ),
           )}
+        </g>
+      )}
+      {ticks && plane === 'zeharkakoa' && !m.box && (
+        <g className="loc-ticks">
+          {ticks.map((tk) => {
+            const c = cutOf(plane, m, tk.level)!;
+            // A short notch at the plane's far edge, where a dragged plane snaps.
+            const q: V3 = [m.ext.x[1], m.ext.y[1], m.ext.z[0]];
+            q[c.axis] = c.at;
+            const r: V3 = [...q];
+            if (c.axis === 1) r[0] = m.ext.x[1] + (m.ext.x[1] - m.ext.x[0]) * 0.08;
+            else r[1] = m.ext.y[1] + (m.ext.y[1] - m.ext.y[0]) * 0.08;
+            const [ax, ay] = P(q);
+            const [bx, by] = P(r);
+            return <path key={tk.level} d={`M${ax.toFixed(1)} ${ay.toFixed(1)}L${bx.toFixed(1)} ${by.toFixed(1)}`} className={tk.on ? 'is-on' : undefined} />;
+          })}
         </g>
       )}
       {plane === 'dortsala' && (m.tube ? eye([m.ext.x[1] - 2, 10, 0], [18, 4, 0]) : eye([m.spot[0], top - 3, 0], [m.spot[0], m.spot[1] + 4, 0]))}

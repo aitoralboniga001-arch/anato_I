@@ -116,7 +116,10 @@ function polygonXY(pts: readonly [number, number][]) {
   };
 }
 
-const clipZ = (f: SDF, z0 = Z0, z1 = Z1): SDF => (x, y, z) => Math.max(f(x, y, z), z - z1, z0 - z);
+/** Intersection of two fields with the crease rounded by r (a hard max meshes as a staircase on the grid). */
+const cut = (a: number, b: number, r: number) => Math.hypot(Math.max(a + r, 0), Math.max(b + r, 0)) + Math.min(Math.max(a + r, b + r), 0) - r;
+const slabZ = (z: number, z0: number, z1: number) => Math.abs(z - (z0 + z1) / 2) - (z1 - z0) / 2;
+const clipZ = (f: SDF, z0 = Z0, z1 = Z1, r = 0.03): SDF => (x, y, z) => cut(f(x, y, z), slabZ(z, z0, z1), r);
 const sym = (f: SDF): SDF => (x, y, z) => f(Math.abs(x), y, z);
 
 /** A fine mesh for the WebGL layer and a coarse one for pointing and the flat fallback. */
@@ -170,10 +173,10 @@ function build(): Geo {
   const neuralF: SDF = (x, y, z) => {
     const e = Math.hypot(x / 0.17, (y - 0.55) / 0.3);
     const lumen = Math.hypot(x / 0.028, (y - 0.56) / 0.2);
-    return Math.max(Math.max((e - 1) * 0.17, -(lumen - 1) * 0.028), z - Z1, Z0 - z);
+    return cut(Math.max((e - 1) * 0.17, -(lumen - 1) * 0.028), slabZ(z, Z0, Z1), 0.03);
   };
   const neural = mk(neuralF, [-0.2, 0.2, zr[0]], [0.2, 0.9, zr[1]], 0.02);
-  const noto = mk(prismZ((x, y) => Math.hypot(x, y - 0.13) - 0.065, Z0, Z1, 0.005), [-0.09, 0.03, zr[0]], [0.09, 0.23, zr[1]], 0.018);
+  const noto = mk(prismZ((x, y) => Math.hypot(x, y - 0.13) - 0.065, Z0, Z1, 0.03), [-0.09, 0.03, zr[0]], [0.09, 0.23, zr[1]], 0.018);
   // Sclerotome: mesenchyme gathering round the notochord and the neural tube, one condensation per somite.
   const scl = SOMITES.map((zs) => ellipsoid([0.2, 0.22, zs], [0.2, 0.24, 0.25]));
   const scleroF = clipZ(
@@ -191,34 +194,34 @@ function build(): Geo {
   };
   // The dermatome is a curved epithelial cap over the myotome (the dermomyotome of topic 4).
   const outer = SOMITES.map((zs) => ellipsoid([0.48, 0.56, zs], [0.26, 0.17, 0.25]));
-  const inner = SOMITES.map((zs) => ellipsoid([0.48, 0.52, zs], [0.24, 0.15, 0.24]));
+  const inner = SOMITES.map((zs) => ellipsoid([0.48, 0.53, zs], [0.21, 0.13, 0.21]));
   const capF = clipZ((x, y, z) => {
     let d = Infinity;
-    for (let i = 0; i < 3; i++) d = Math.min(d, Math.max(outer[i](x, y, z), -inner[i](x, y, z)));
-    return Math.max(d, 0.55 - y);
+    for (let i = 0; i < 3; i++) d = smin(d, cut(outer[i](x, y, z), -inner[i](x, y, z), 0.012), 0.03);
+    return cut(d, 0.55 - y, 0.015);
   });
-  const dermato = mk(capF, [0.2, 0.5, zr[0]], [0.76, 0.76, zr[1]], 0.016, true);
-  const myo = mk(somiteF([0.48, 0.55, 0], [0.21, 0.1, 0.22]), [0.24, 0.42, zr[0]], [0.72, 0.68, zr[1]], 0.018, true);
-  const inter = mk(prismZ((x, y) => Math.hypot(x - 0.65, y - 0.07) - 0.075, Z0, Z1, 0.005), [0.54, -0.04, zr[0]], [0.76, 0.18, zr[1]], 0.018, true);
-  const aorta = mk(prismZ((x, y) => Math.hypot(x - 0.2, y + 0.06) - 0.07, Z0, Z1, 0.005), [0.1, -0.16, zr[0]], [0.3, 0.04, zr[1]], 0.018, true);
-  const gut = mk(prismZ((x, y) => Math.hypot(x, y + 0.42) - 0.11, Z0, Z1, 0.005), [-0.14, -0.56, zr[0]], [0.14, -0.28, zr[1]], 0.018);
+  const dermato = mk(capF, [0.18, 0.5, zr[0]], [0.78, 0.78, zr[1]], 0.011, true);
+  const myo = mk(somiteF([0.48, 0.55, 0], [0.19, 0.09, 0.2]), [0.24, 0.42, zr[0]], [0.72, 0.68, zr[1]], 0.014, true);
+  const inter = mk(prismZ((x, y) => Math.hypot(x - 0.65, y - 0.07) - 0.075, Z0, Z1, 0.03), [0.54, -0.04, zr[0]], [0.76, 0.18, zr[1]], 0.016, true);
+  const aorta = mk(prismZ((x, y) => Math.hypot(x - 0.2, y + 0.06) - 0.07, Z0, Z1, 0.03), [0.1, -0.16, zr[0]], [0.3, 0.04, zr[1]], 0.016, true);
+  const gut = mk(prismZ((x, y) => Math.hypot(x, y + 0.42) - 0.11, Z0, Z1, 0.03), [-0.14, -0.56, zr[0]], [0.14, -0.28, zr[1]], 0.016);
   const par2 = polyline2(PARIETAL);
-  const sheet = (d2: (u: number, v: number) => number, half: number) => prismZ((x, y) => d2(x, y) - half, Z0, Z1, 0.008);
-  const parietal = mk(sheet(par2, 0.035), [0.25, -1.24, zr[0]], [1.14, 0.1, zr[1]], 0.02, true);
+  const sheet = (d2: (u: number, v: number) => number, half: number) => prismZ((x, y) => d2(x, y) - half, Z0, Z1, Math.min(0.03, half * 0.8));
+  const parietal = mk(sheet(par2, 0.04), [0.25, -1.24, zr[0]], [1.14, 0.1, zr[1]], 0.016, true);
   // The visceral layer: from the intermediate mesoderm round the gut.
   const vis2 = polyline2(VISCERAL);
   const visF: SDF = (x, y, z) => {
     const ring = Math.abs(Math.hypot(Math.abs(x), y + 0.42) - 0.15) - 0.03;
     const strip = vis2(Math.abs(x), y) - 0.03;
-    return Math.max(Math.min(ring, strip), z - Z1, Z0 - z);
+    return cut(Math.min(ring, strip), slabZ(z, Z0, Z1), 0.025);
   };
-  const visceral = mk(visF, [-0.7, -0.62, zr[0]], [0.7, 0.05, zr[1]], 0.02);
+  const visceral = mk(visF, [-0.7, -0.62, zr[0]], [0.7, 0.05, zr[1]], 0.016);
   const ecto2 = polyline2(ECTO);
-  const ecto = mk((x, y, z) => Math.max(ecto2(Math.abs(x), y) - 0.025, z - SKIN_END, Z0 - z), [-1.2, -1.32, zr[0]], [1.2, 0.96, SKIN_END + 0.04], 0.024);
-  const frontier = mk(sheet(polyline2(FRONTIER), 0.011), [0.64, -0.03, zr[0]], [0.86, 0.8, zr[1]], 0.014, true);
+  const ecto = mk((x, y, z) => cut(ecto2(Math.abs(x), y) - 0.03, slabZ(z, Z0, SKIN_END), 0.025), [-1.2, -1.32, zr[0]], [1.2, 0.96, SKIN_END + 0.04], 0.02);
+  const frontier = mk(sheet(polyline2(FRONTIER), 0.016), [0.64, -0.03, zr[0]], [0.86, 0.8, zr[1]], 0.011, true);
   const prim2 = polygonXY(PRIM);
-  const prim = mk(clipZ(sym((x, y) => prim2(x, y))), [-0.85, -0.02, zr[0]], [0.85, 0.9, zr[1]], 0.035);
-  const abax = mk(sheet(par2, 0.085), [0.18, -1.32, zr[0]], [1.22, 0.18, zr[1]], 0.035, true);
+  const prim = mk(clipZ(sym((x, y) => prim2(x, y)), Z0, Z1, 0.04), [-0.85, -0.02, zr[0]], [0.85, 0.9, zr[1]], 0.024);
+  const abax = mk(sheet(par2, 0.085), [0.18, -1.32, zr[0]], [1.22, 0.18, zr[1]], 0.024, true);
   return { neural, noto, sclero, dermato, myo, inter, aorta, gut, parietal, visceral, ecto, frontier, prim, abax, cell: blob({ center: [0, 0, 0], radii: [0.04, 0.04, 0.04], rings: 6, sides: 8 }) };
 }
 

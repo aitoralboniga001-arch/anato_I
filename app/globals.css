@@ -14306,3 +14306,337 @@ kbd {
 .ask .ask-skip-all {
   margin-left: auto;
 }
+
+/* ——— The step's structures, on demand (batch B) ——————————————————————————————————————————————
+   "Ezagutu egiturak" and the BERRIA chips live in the caption; the tour card takes the caption's
+   place in the dock, so nothing about a structure ever covers the picture. */
+.step-know {
+  display: grid;
+  gap: 7px;
+  justify-items: start;
+}
+
+.tour-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px 5px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 184, 107, 0.5);
+  background: rgba(255, 184, 107, 0.09);
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.tour-go:hover {
+  background: rgba(255, 184, 107, 0.18);
+  border-color: var(--focus);
+}
+
+.tour-go svg {
+  color: var(--focus);
+}
+
+.tour-go em {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--focus);
+}
+
+.dock .tour.is-dock {
+  max-width: none;
+  animation: cap-in 0.25s var(--ease) both;
+}
+
+.tour.is-dock .tour-top {
+  gap: 10px;
+}
+
+.tour-nav {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.tour-nav button,
+.tour-close {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--line-2);
+  background: var(--surface-2);
+  color: var(--text-2);
+  transition: background 0.15s, color 0.15s;
+}
+
+.tour-nav button:hover:not(:disabled),
+.tour-close:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.tour-nav button:disabled {
+  opacity: 0.35;
+}
+
+.tour-nav + .tour-close {
+  margin-left: 0;
+}
+
+.tour-close {
+  margin-left: auto;
+}
+
+.tour.is-dock .tour-card {
+  cursor: pointer;
+}
+
+/* A walking tour shows its pace: the lit dot breathes while it waits to move on. */
+.tour.is-auto .tour-dots i.is-on {
+  animation: tour-breathe 1.6s ease-in-out infinite;
+}
+
+@keyframes tour-breathe {
+  50% {
+    box-shadow: 0 0 0 5px rgba(255, 184, 107, 0.12);
+  }
+}
+
+/* The tour card is read whole: the caption's height cap (and its scroll) does not apply to it. */
+.dock .cap-stack:has(> .tour.is-dock) {
+  max-height: none;
+  overflow: visible;
+}
+
+.tour.is-dock .tour-card {
+  padding: 9px 13px;
+}
+
+.tour.is-dock .tour-card > span {
+  display: block;
+}
+
+.tour.is-dock .tour-card b {
+  margin-right: 9px;
+}
+
+.tour.is-dock .tour-def {
+  display: block;
+  margin-top: 2px;
+}
+
+/* The names key's mode: step by step (plain), all (∀) or none (–). */
+.icon-btn.label-mode {
+  position: relative;
+}
+
+.label-mode-pip {
+  position: absolute;
+  right: 3px;
+  bottom: 1px;
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--focus);
+}
+
+.icon-btn.label-mode.is-ez {
+  color: var(--text-3);
+}
+
+/* ——— Live map ("Non nago?") in the stage bar: the body, the plane, the path to this view ———————————— */
+.live-map {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.lm-fig {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 78px;
+  height: 52px;
+  border-radius: 10px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  cursor: pointer;
+  touch-action: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.lm-fig:hover,
+.lm-fig.is-on,
+.lm-fig:focus-visible {
+  border-color: rgba(251, 191, 36, 0.6);
+  background: var(--surface-2);
+}
+
+.lm-fig.can-drag {
+  cursor: ns-resize;
+}
+
+.lm-fig .loc-svg {
+  width: 74px;
+  height: 50px;
+}
+
+.live-map.is-changed .lm-fig {
+  animation: loc-pulse 1.2s var(--ease) 2;
+  border-color: rgba(251, 191, 36, 0.7);
+}
+
+.live-map.is-drag .lm-fig {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.18);
+}
+
+.live-map.is-drag .loc-svg .loc-cut {
+  animation: none;
+  stroke-dashoffset: 0;
+}
+
+.loc-ticks path {
+  stroke: rgba(251, 191, 36, 0.55);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.loc-ticks path.is-on {
+  stroke: #fbbf24;
+  stroke-width: 2.4;
+}
+
+.lm-new {
+  position: absolute;
+  left: 50%;
+  top: -8px;
+  transform: translateX(-50%);
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #fbbf24;
+  color: #1a1206;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: lm-new 3.2s var(--ease) both;
+}
+
+@keyframes lm-new {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 4px);
+  }
+  10%,
+  80% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.lm-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lm-crumbs {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  min-width: 0;
+  font-size: 12.5px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.lm-crumbs > span {
+  display: inline-flex;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.lm-crumbs > span > i {
+  margin: 0 5px;
+  font-style: normal;
+  color: var(--text-4);
+}
+
+.lm-crumbs button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(251, 191, 36, 0.45);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.lm-crumbs button:hover {
+  color: var(--text);
+  text-decoration-color: #fbbf24;
+}
+
+.lm-crumbs b {
+  font-weight: 500;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lm-crumbs .is-here b {
+  font-weight: 650;
+  color: var(--text);
+}
+
+.lm-plane {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fbbf24;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.live-map .loc-card {
+  top: calc(100% + 10px);
+  left: 0;
+  right: auto;
+}
+
+/* While the camera travels to the step's view, the step's text waits (dimmed) for the picture. */
+.dock .cap-body {
+  transition: opacity 0.45s var(--ease);
+}
+
+.dock.is-travel .cap-body {
+  opacity: 0.28;
+}
+
+@media (max-width: 1100px) {
+  .lm-text {
+    max-width: 180px;
+  }
+}

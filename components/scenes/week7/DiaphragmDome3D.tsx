@@ -330,7 +330,7 @@ export function buildDiaphragm(t: number, reduced: boolean, canalLit = false) {
   const crusK = seg(t, DOME_T.dome[0] + 0.01, DOME_T.dome[1] + 0.01);
   const items: Item3[] = [
     // The trunk's wall in a neutral tone: it is the frame, and the pink rim it gives the diaphragm must stand out from it.
-    { key: 'wall', id: 'gorputz-pareta', quiet: true, mesh: G.wall, hit: G.wallHit, color: '#8c807c', deep: '#3a3331', tissue: 'mesenchyme' },
+    { key: 'wall', id: 'gorputz-pareta', quiet: true, mesh: G.wall, hit: G.wallHit, color: '#c4a597', deep: '#6a5249', tissue: 'mesenchyme' },
     { key: 'spine', id: 'ornoak', quiet: true, mesh: G.spine, color: P.bone, deep: '#8a8070', tissue: 'cartilage' },
     { key: 'aorta', id: 'aorta', mesh: AORTA, color: P.aorta, deep: '#6a0f1e', tissue: 'vessel' },
     { key: 'ivc', id: 'beheko-kaba-zaina', mesh: IVC, color: P.ivc, deep: '#1c3c88', tissue: 'vessel' },
@@ -435,7 +435,9 @@ function DiaphragmDome3DView({ t, reduced }: SceneProps) {
                   { id: 'hestegorri-inguruko-mesenkima', color: P.eso, text: 'mesenkima' },
                   F.rimK > 0.05 && { id: 'gorputz-paretako-mesodermoa', color: P.bodyMuscle, text: 'gorputz pareta' },
                 ]}
-                y={48}
+                // On the title line, right of it: the axes cross sits under the title.
+                x={364}
+                y={24}
                 show={L}
                 quiet
               />

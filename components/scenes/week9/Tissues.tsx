@@ -66,17 +66,20 @@ export function MuscleTissues({ t }: SceneProps) {
       {/* Three panels. */}
       {[
         [110, 'Muskulu ildaskatua', 'mesodermo paraxiala', W.striated, a],
-        [370, 'Muskulu leuna', 'errai orria (hestearen inguruan)', W.smooth, b],
-        [630, 'Miokardioa', 'errai orria (bihotz hodiaren inguruan)', W.cardiac, c],
+        [370, 'Muskulu leuna', 'errai orria|hestearen inguruan', W.smooth, b],
+        [630, 'Miokardioa', 'errai orria|bihotz hodiaren inguruan', W.cardiac, c],
       ].map(([x, title, origin, col, s], i) => (
         <g key={title as string}>
           <rect x={x as number} y={56} width={252} height={262} rx={16} fill="#1b1520" stroke={col as string} strokeOpacity={0.25 + 0.5 * (s as number)} strokeWidth={1.6} />
           <Note x={(x as number) + 126} y={74} size={14} tone="accent" show={0.35 + 0.65 * (s as number)}>
             {title as string}
           </Note>
-          <Note x={(x as number) + 126} y={300} size={11.5} show={s as number}>
-            {`jatorria: ${origin as string}`}
-          </Note>
+          {/* The origin on one line, where it is in a second one (each kept inside its panel). */}
+          {(origin as string).split('|').map((line, j, all) => (
+            <Note key={j} x={(x as number) + 126} y={300 - (all.length - 1 - j) * 15} size={11.5} show={s as number}>
+              {j ? `(${line})` : `jatorria: ${line}`}
+            </Note>
+          ))}
           {/* How to tell it apart: a card under the panel, in the tissue's colour. */}
           {cmp > 0.01 && (
             <g opacity={cmp}>

@@ -11,7 +11,7 @@ import { CavitySummary } from '@/components/scenes/week7/CavitySummary';
 import { PeritoneumTypes } from '@/components/scenes/week7/PeritoneumTypes';
 import { FATE, SUMMARY, TYPES } from '@/components/scenes/week7/timing';
 import { DiaphragmDome3D } from '@/components/scenes/week7/DiaphragmDome3D';
-import { retime } from '@/components/scenes/week7/retime';
+import { remap, retime } from '@/components/scenes/week7/retime';
 import { structures7 } from './week7-structures';
 
 const FILE = '7.GAIA_Gorputzaren barrunbeak (ZUZENDUTA).pdf';
@@ -61,7 +61,7 @@ export const week7: WeekDef = {
           key: 'Lehenengo zelomaren espazioa sortzen da; gero tolespenek gorputz barruan ixten dute.',
           notes: ['w7/1/p3/s1-s2', 'w7/1/p4/s1'],
           text: '3. astearen bukaeran disko laua tolestu egiten da enbrioiaren atzeko, aurreko eta alboko paretak eratzeko: zeharkako tolespena eta tolespen zefalokaudala. Enbrioi barruko mesodermoak hiru atal ditu: paraxiala, bitartekoa eta alboko mesodermoa.',
-          focus: ['somitak', 'bitarteko-mesodermoa', 'paretako-orria', 'errai-orria'],
+          focus: ['somitak', 'bitarteko-mesodermoa', 'alboko-mesodermoa'],
           view: 'zeharkakoa',
         },
         {
@@ -94,9 +94,9 @@ export const week7: WeekDef = {
         {
           at: 0.52,
           idea: 'Alboko ertzak aurrerantz eta erdirantz tolesten dira.',
-          more: 'Tolespen zefalokaudalak ere gertatzen dira (alde zefalikoa eta kaudala aurrerantz), baina hemen zeharkako tolespena ikusten da.',
+          more: 'Tolespen zefalokaudalean, alde zefalikoa eta kaudala aurrerantz tolesten dira: albotik ikusiko da, bihotzarekin (6. urratsa).',
           notes: ['w7/1/p4/s5'],
-          text: 'Zeharkako tolespenean alboko ertzak aurrerantz eta erdikalderantz mugitzen dira. Tolespen zefalokaudalean, alde zefalikoa eta kaudala aurrerantz tolesten dira.',
+          text: 'Zeharkako tolespenean alboko ertzak aurrerantz eta erdikalderantz mugitzen dira, eta gorputzaren alboko eta aurreko paretak ixten dituzte.',
           focus: ['tolestura-laterala'],
         },
         {
@@ -183,7 +183,8 @@ export const week7: WeekDef = {
           plane: 'sagitala',
           description: 'Apunteetako irudia: enbrioia albotik moztuta. Septum transversuma bihotzaren eta hestearen artean, C3–C5 mailan; goian hasierako perikardio barrunbea, behean peritoneo barrunbea.',
           orientation: lateralOrientation,
-          scene: SeptumLateral,
+          // Steps: the plate, then the division (above / below), then across: how it is held and the canals behind.
+          scene: remap(SeptumLateral, [[0, 0], [0.36, 0.36], [0.54, 0.72], [1, 1]]),
         },
         {
           id: 'zeharkakoa',
@@ -191,7 +192,7 @@ export const week7: WeekDef = {
           plane: 'zeharkakoa',
           description: 'Diafragmaren etapako zeharkako mozketa bera (dortsala goian), 4. astean: septuma aurrean eta alboetan gorputz paretan finkatuta, atzean hestegorri inguruko mesenkiman; hestegorriaren bi aldeetan bi erreten zabalik.',
           orientation: { top: 'Dortsala', bottom: 'Bentrala' },
-          scene: SeptumSection,
+          scene: remap(SeptumSection, [[0, 0], [0.54, 0.36], [0.72, 0.72], [1, 1]]),
           locator: { level: 0.5, note: 'Septumaren maila' },
         },
         {
@@ -235,16 +236,6 @@ export const week7: WeekDef = {
         },
         {
           at: 0.36,
-          idea: 'Trenkada aurrean eta alboetan paretan finkatzen da; atzean, hestegorri inguruko mesenkiman.',
-          key: 'Aurrean eta alboetan itxita dago; atzean ez erabat.',
-          notes: ['w7/2/p4/s1'],
-          // Seen across: the plate fixed in front, at both sides and behind (the side view shows only front and back).
-          view: 'zeharkakoa',
-          text: 'Mesodermoz (mesenkimaz) osatutako trenkada hori gorputzaren aurreko eta alboko paretetan finkatzen da; atzean, aurreko hestearen (geroko hestegorriaren) inguruko mesenkiman.',
-          focus: ['septum-transversum', 'hestegorri-inguruko-mesenkima'],
-        },
-        {
-          at: 0.54,
           recall: ['bihotza'],
           idea: 'Septumak zeloma bitan banatzen du: goian hasierako perikardio barrunbea, behean peritoneo barrunbea.',
           key: 'Goian bihotza dagoen barrunbea; behean hestea dagoena.',
@@ -263,6 +254,16 @@ export const week7: WeekDef = {
           view: 'sagitala',
           text: 'Septumak zeloma bitan banatzen du: goiko atala hasierako perikardio barrunbea da (torax barrunbe osoa okupatzen du); azpikoa peritoneo barrunbea.',
           focus: ['hasierako-perikardio-barrunbea', 'peritoneo-barrunbea'],
+        },
+        {
+          at: 0.54,
+          idea: 'Trenkada aurrean eta alboetan paretan finkatzen da; atzean, hestegorri inguruko mesenkiman.',
+          key: 'Aurrean eta alboetan itxita dago; atzean ez erabat.',
+          notes: ['w7/2/p4/s1'],
+          // How the plate is held, seen across (after the division it makes, so the canals behind follow on).
+          view: 'zeharkakoa',
+          text: 'Mesodermoz (mesenkimaz) osatutako trenkada hori gorputzaren aurreko eta alboko paretetan finkatzen da; atzean, aurreko hestearen (geroko hestegorriaren) inguruko mesenkiman.',
+          focus: ['septum-transversum', 'hestegorri-inguruko-mesenkima'],
         },
         {
           at: 0.72,
@@ -330,6 +331,7 @@ export const week7: WeekDef = {
           id: 'motak',
           label: 'Hiru motak',
           plane: 'eskema',
+          age: null,
           description: 'Abdomeneko hiru organo motak alderatuta, mozketa beraren hiru zatitan (dortsala goian): peritoneo barrukoak, kanpokoak eta atzekoak. Galdera bakarrak bereizten ditu: mesenterioa izan duen ala ez.',
           orientation: { top: 'Dortsala', bottom: 'Bentrala' },
           scene: PeritoneumTypes,
@@ -383,6 +385,7 @@ export const week7: WeekDef = {
         },
         {
           at: 0.4224,
+          age: '3. hilabetetik aurrera',
           idea: 'Hestetik sortutako organoak peritoneo barrunbean daude: peritoneo barrukoak dira.',
           notes: ['w7/2.1/p6/s1-s2', 'w7/2.1/p7/s1-s2', 'w7/2.1/p9/s1'],
           text: 'Peritoneo barrunbean daude aurreko hestearen urrutiko atala, erdiko hestea eta atzeko hestearen zatirik handiena. Hortik sortutako egiturak (urdaila, duodenoa, heste lodia…) errai peritoneoz inguratuta daude: peritoneo barruko egiturak.',
@@ -390,6 +393,7 @@ export const week7: WeekDef = {
         },
         {
           at: 0.5456,
+          age: '3. hilabetetik aurrera',
           idea: 'Giltzurrunak, aorta eta beheko kaba peritoneo barrunbetik kanpo daude, atzean.',
           key: 'Peritoneo kanpokoak ez dira inoiz barrunbean egon.',
           ask: {
@@ -409,6 +413,7 @@ export const week7: WeekDef = {
         },
         {
           at: 0.6688,
+          age: '3. hilabetetik aurrera',
           idea: 'Batzuk peritoneo barrukoak ziren, baina mesenterioa atzeko paretarekin fusionatu zaie: atzekoak bihurtu dira.',
           key: 'Atzekoak lehen barrukoak ziren; kanpokoak ez ziren inoiz.',
           ask: {
@@ -428,6 +433,7 @@ export const week7: WeekDef = {
         },
         {
           at: 0.792,
+          age: '3. hilabetetik aurrera',
           idea: 'Peritoneo barrunbeak ez du abdomen osoa betetzen.',
           key: 'Toraxean hasierako barrunbeak dena betetzen zuen; abdomenean ez.',
           notes: ['w7/2.1/p12/s1', 'w7/2.1/p8/s1', 'w7/2.1/p12/s2'],
@@ -461,7 +467,7 @@ export const week7: WeekDef = {
           focus: ['peritoneo-kanpoko-egiturak', 'peritoneo-atzeko-egiturak'],
           tour: ['peritoneo-barruko-egiturak', 'peritoneo-kanpoko-egiturak', 'peritoneo-atzeko-egiturak'],
           tourAt: 0.985,
-          caution: 'Peritoneo atzekoa ≠ peritoneo kanpokoa. Apunteen laburpenak (4. atala) "peritoneo kanpokoak (atzekaldean kokatu)" dio, baina 2.1 atalaren arabera mesenterioa fusionatu zaien organoak peritoneo atzekoak dira.',
+          caution: 'Peritoneo atzekoa ≠ peritoneo kanpokoa: atzekoak mesenterioa izan zuen eta atzeko paretari fusionatu zitzaion (duodenoa, kolonak); kanpokoak ez du inoiz mesenteriorik izan (giltzurruna, aorta, beheko kaba).',
         },
       ],
       structures: [
@@ -507,7 +513,8 @@ export const week7: WeekDef = {
           plane: 'zeharkakoa',
           description: 'Apunteetako irudia: toraxaren zeharkako mozketa (dortsala goian). Birika hastapenak, mintz pleuroperikardikoak (nerbio frenikoa eta bena kardinal komuna barnean), bihotza eta hestegorria.',
           orientation: { top: 'Dortsala', bottom: 'Bentrala' },
-          scene: ThoraxSection,
+          // Step 2 (the three cavities to come) plays the section's opening over its own time.
+          scene: remap(ThoraxSection, [[0, 0], [0.14, 0], [0.24, 0.24], [1, 1]]),
           locator: { level: 0.25, note: 'Toraxa' },
         },
         {
@@ -515,8 +522,10 @@ export const week7: WeekDef = {
           label: 'Arnas hastapena',
           plane: 'koronala',
           description: 'Aurreko hestea aurretik ikusita: arnas hastapena, hodi laringotrakeala eta bi birika hastapenak.',
-          orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Eskuina', right: 'Ezkerra' },
-          scene: LungBudFront,
+          // Two panels side by side (from the side, from the front), each with its own direction words: the frame names only the shared ones.
+          orientation: { top: 'Kraneala', bottom: 'Kaudala' },
+          // The stage opens on the lung bud: the drawing's bud phase (0.1–0.24) is step 1.
+          scene: remap(LungBudFront, [[0, 0.1], [0.14, 0.24], [1, 1]]),
         },
         {
           id: 'mapa',
@@ -532,6 +541,25 @@ export const week7: WeekDef = {
       beats: [
         {
           at: 0,
+          idea: 'Aurreko hesteak arnas hastapena sortzen du; erpinean, bi birika hastapen.',
+          key: 'Birikak aurreko hestearen aurreko paretatik sortzen dira (endodermoa).',
+          ask: {
+            q: 'Nondik sortzen dira birika hastapenak?',
+            options: ['Aurreko hestearen aurreko paretatik', 'Septum transversumetik', 'Bihotz hodiaren alboetatik'],
+            answer: 0,
+            why: [
+              'Hori da: ebaginazio endodermiko bat, hodi laringotrakealean amaitzen dena; erpinetik bi hastapen.',
+              'Septumak diafragmaren osagai bat sortzen du, ez birikak.',
+              'Bihotz hodiak bihotza sortzen du.',
+            ],
+          },
+          notes: ['w7/2.2/p6/s1-s3'],
+          view: 'birika-hastapena',
+          text: 'Aurreko hestea zelomaren atzealdean dago. Haren aurreko paretatik arnas aparatuaren hastapena agertzen da (ebaginazio endodermikoa); luzatu egiten da (hurbileko atala: hodi laringotrakeala) eta erpinetik bi birika hastapen sortzen dira, eskuinekoa eta ezkerrekoa.',
+          focus: ['aurreko-hestea', 'arnas-hastapena', 'hodi-laringotrakeala', 'birika-hastapenak'],
+        },
+        {
+          at: 0.14,
           recall: ['septum-transversum'],
           idea: 'Hasierako perikardio barrunbetik hiru barrunbe sortuko dira: bi pleura eta perikardio bat.',
           key: 'Goiko barrunbe bakarra → hiru: 2 pleura (alboetan) + 1 perikardio (erdian, aurrean).',
@@ -549,25 +577,6 @@ export const week7: WeekDef = {
           view: 'zeharkakoa',
           text: 'Hasierako perikardio barrunbeak torax barrunbe osoa okupatzen du. Hortik hiru barrunbe sortzen dira: bi pleura barrunbe (alboetan, birikentzat) eta behin-betiko perikardio barrunbea (aurre erdikaldean, bihotzarentzat).',
           focus: ['hasierako-perikardio-barrunbea', 'bihotza'],
-        },
-        {
-          at: 0.1,
-          idea: 'Aurreko hesteak arnas hastapena sortzen du; erpinean, bi birika hastapen.',
-          key: 'Birikak aurreko hestearen aurreko paretatik sortzen dira (endodermoa).',
-          ask: {
-            q: 'Nondik sortzen dira birika hastapenak?',
-            options: ['Aurreko hestearen aurreko paretatik', 'Septum transversumetik', 'Bihotz hodiaren alboetatik'],
-            answer: 0,
-            why: [
-              'Hori da: ebaginazio endodermiko bat, hodi laringotrakealean amaitzen dena; erpinetik bi hastapen.',
-              'Septumak diafragmaren osagai bat sortzen du, ez birikak.',
-              'Bihotz hodiak bihotza sortzen du.',
-            ],
-          },
-          notes: ['w7/2.2/p6/s1-s3'],
-          view: 'birika-hastapena',
-          text: 'Aurreko hestea zelomaren atzealdean dago. Haren aurreko paretatik arnas aparatuaren hastapena agertzen da (ebaginazio endodermikoa); luzatu egiten da (hurbileko atala: hodi laringotrakeala) eta erpinetik bi birika hastapen sortzen dira, eskuinekoa eta ezkerrekoa.',
-          focus: ['aurreko-hestea', 'arnas-hastapena', 'hodi-laringotrakeala', 'birika-hastapenak'],
         },
         {
           at: 0.24,
@@ -772,6 +781,7 @@ export const week7: WeekDef = {
           id: 'patua',
           label: 'Osagaien patua',
           plane: 'zeharkakoa',
+          age: 'Heldua',
           description: 'Lau osagaiak bakoitza bere kolorez, 5. asteko mozketatik diafragma helduraino (goitik ikusita, dortsala goian): non geratzen den bakoitza eta zein zulotatik pasatzen diren aorta, hestegorria eta beheko kaba.',
           orientation: { top: 'Dortsala', bottom: 'Bentrala', left: 'Eskuina', right: 'Ezkerra' },
           scene: DiaphragmFate,
@@ -964,6 +974,7 @@ export const week7: WeekDef = {
           id: 'azpitik',
           label: 'Behetik ikusita',
           plane: 'eskema',
+          age: 'Heldua',
           description: 'Diafragma behetik ikusita (abdomenaren sabaia): aurrea goian, gorputzaren eskuina ikuslearen ezkerrean. Zentro tendinosoa, atal muskularrak, zutabeak eta zuloak.',
           orientation: { top: 'Aurrea', bottom: 'Atzea', left: 'Eskuina', right: 'Ezkerra' },
           frame: 'zeharkakoa',
@@ -974,6 +985,7 @@ export const week7: WeekDef = {
           id: 'sagitala',
           label: 'Profila (sagitala)',
           plane: 'sagitala',
+          age: 'Heldua',
           description: 'Diafragmaren kupula albotik: aurrean bularrezurrean (gora), atzean gerri-ornoetan (behera). Goian barrunbe torazikoa, behean abdomenekoa.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Aurrea', right: 'Atzea' },
           // The trunk from the thorax to the lumbar spine.
@@ -984,6 +996,7 @@ export const week7: WeekDef = {
           id: 'laburpena',
           label: 'Laburpena: 1 → 4',
           plane: 'eskema',
+          age: null,
           description: 'Gai osoa irudi bakarrean: enborra aurretik ikusita hiru unetan. Zeloma bakarra (3.–4. astea) → septum transversumak bitan (4. astea, atzean bi erreten) → mintzek lau barrunbe uzten dituzte (5. astetik aurrera).',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: CavitySummary,
@@ -1017,7 +1030,7 @@ export const week7: WeekDef = {
           idea: 'Zentroaren inguruan muskulu-zuntzak daude: bularrezur atala eta saihets-hezur atala.',
           key: 'Izenak adierazten du non lotzen den: bularrezurrean edo saihetsetan.',
           notes: ['w7/3.1/p9/s1-s2'],
-          text: 'Zentro tendinosoaren inguruko zuntz muskularretan hiru azpiatal: bularrezur atala (goi-aurrekaldean, bularrezurrean insertatuta) eta saihets-hezur atala (saihets-hezurretan insertatuta)…',
+          text: 'Zentro tendinosoaren inguruko zuntz muskularretan hiru atal bereizten dira. Lehen biak: bularrezur atala (goi-aurrekaldean, bularrezurrean insertatuta) eta saihets-hezur atala (saihets-hezurretan insertatuta).',
           focus: ['bularrezur-atala', 'saihets-hezur-atala'],
         },
         {
@@ -1035,7 +1048,7 @@ export const week7: WeekDef = {
             ],
           },
           notes: ['w7/3.1/p9/s3-s5', 'w7/3.1/p10/s1-s2'],
-          text: '…eta gerriko atala (atal lumbarra), hestegorriaren inguruko mesenkimatik sortua. Bertan bi zutabe: eskuinekoa, lehen 3 gerri-ornoen aurre-alboko aurpegian insertatua (L1–L3), eta ezkerrekoa, lehen 2 gerri-ornoetan (L1–L2). Bien artean erdiko lotailu arkutua.',
+          text: 'Hirugarrena gerriko atala da (atal lumbarra), hestegorriaren inguruko mesenkimatik sortua. Bi zutabe ditu: eskuinekoa, lehen 3 gerri-ornoen aurre-alboko aurpegian insertatua (L1–L3), eta ezkerrekoa, lehen 2 gerri-ornoetan (L1–L2). Bien artean erdiko lotailu arkutua.',
           focus: ['gerriko-atala', 'diafragmaren-zutabeak', 'erdiko-lotailu-arkutua'],
           exam: 'Eskuineko zutabea L1–L3; ezkerrekoa L1–L2; tartean erdiko lotailu arkutua.',
         },

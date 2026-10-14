@@ -6,7 +6,7 @@ import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } fro
 import { SceneContext, type QuizFlash, type SceneContextValue } from '@/components/kit/context';
 import { getWeek, isSpace, partsOf, nameOf, structures, weeks } from '@/content/registry';
 import { firstSeenOf, periodOf, weekOfDay } from '@/content/chronology';
-import { ageLabel, spanOf } from '@/lib/sim/age';
+import { clockLabel, spanOf } from '@/lib/sim/age';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { PlaneKind, StageDef, StructureCategory, StructureDef, WeekDef } from '@/lib/sim/types';
 import { Glossary } from './Glossary';
@@ -14,6 +14,7 @@ import { IconBook, IconCalendar, IconChevron, IconNotes, IconClock, IconExpand, 
 import { Popover } from './Popover';
 import { Wordmark, isWip } from './LandNav';
 import { AskCard, Player, TourCard, ideaOf } from './Player';
+import { namedAt } from './named';
 import { Help, useHelp } from './Help';
 import { TourHost } from './tour/TourHost';
 import { useTourBusy } from './tour/store';
@@ -22,10 +23,11 @@ import { Inspector } from './Inspector';
 import { NotesPanel } from './NotesPanel';
 import type { NotesAnchor } from '@/content/notes-text';
 import { NowCard } from './NowCard';
-import { Locator } from './Locator';
+import { Locator, type CutStop, type Crumb } from './Locator';
+import { shapeFor } from './Specimen';
 import { warmGeo } from '@/lib/three-d/geo-client';
-import { ViewBridge, ViewFlash, needsBridge, type ViewSnap } from './ViewBridge';
-import { ViewTravel, travelPlan, type TravelPlan } from './ViewTravel';
+import type { ViewSnap } from './ViewBridge';
+import { ViewTravel, revealPlan, travelPlan, type TravelPlan } from './ViewTravel';
 import { ViewZoom, zoomPlan, type ZoomPlan } from './ViewZoom';
 import { CavityRoad } from './CavityRoad';
 import { IconRail, Outline, StageInfo, StageNav } from './SidePanel';
@@ -123,16 +125,6 @@ const stepExtrasOf = (week: number, stage: StageDef, guided: boolean) => {
   return hit;
 };
 
-const LAST_VIEW_KEY = 'enbrioatlas:last-view';
-/** The view shown last in ANOTHER week (so the first view of this week can be bridged from it). */
-const readLastView = (week: number): ViewSnap | null => {
-  try {
-    const v = JSON.parse(window.sessionStorage.getItem(LAST_VIEW_KEY) ?? 'null') as (ViewSnap & { at: number }) | null;
-    return v && v.week !== week && Date.now() - v.at < 30 * 60 * 1000 ? v : null;
-  } catch {
-    return null;
-  }
-};
 
 
 /** Minimum caption dwell in normal playback, with extra time for longer explanations. */
@@ -178,13 +170,11 @@ const tourAtOf = (stage: StageDef, k: number) => {
 const drawnIn = (svg: SVGSVGElement | null, id: string) =>
   !!svg && [...svg.querySelectorAll(`[data-part="${CSS.escape(id)}"], [data-label="${CSS.escape(id)}"]`)].some((el) => Number(el.getAttribute('opacity') ?? 1) > 0.3);
 
+/** A structure tour, opened from the caption (never by playback): `auto` walks on by itself. */
 interface Tour {
-  key: string;
   items: string[];
   idx: number;
-  /** When the current item was lit (0 = not yet, e.g. after a pause). */
-  start: number;
-  said: boolean;
+  auto?: boolean;
 }
 
 const easeInOut = (x: number) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
@@ -346,7 +336,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const [hovered, setHovered] = useState<string | null>(null);
   // Only highlight (and dim the rest) when the picked structure is actually drawn in this view.
   const [selectedLit, setSelectedLit] = useState(false);
-  const [showLabels, setShowLabels] = useState(true);
+  // Names in the picture: step by step as the study names them (default), all of them, or none.
+  const [labelMode, setLabelMode] = useState<'urratsez' | 'guztiak' | 'ez'>('urratsez');
+  const showLabels = labelMode !== 'ez';
+  const cycleLabels = () => setLabelMode((m) => (m === 'urratsez' ? 'guztiak' : m === 'guztiak' ? 'ez' : 'urratsez'));
   const [legendOpen, setLegendOpen] = useState(false);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const [questionsOpen, setQuestionsOpen] = useState(false);
@@ -403,12 +396,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const speaking = useRef(false);
   const skipHold = useRef(false);
   const introClock = useRef(0);
-  // Guided tour of the current step: the loop owns `tourRef`; `tour` mirrors it for rendering.
-  const tourRef = useRef<Tour | null>(null);
   const bridgeHold = useRef(false);
-  const toured = useRef('');
-  const narratedTour = useRef<{ key: string; items: string[]; idx: number } | null>(null);
-  const [tour, setTour] = useState<{ items: string[]; idx: number } | null>(null);
+  const [tour, setTour] = useState<Tour | null>(null);
   // Scenes use floating-point geometry; render them only on the client to avoid hydration mismatches.
   const mounted = useHydrated();
   const visited = useVisited(week.week);
@@ -485,20 +474,14 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     const want = beat?.view;
     if (want && !manualView[stage.id] && stage.views.some((v) => v.id === want) && view.id !== want) setViewByStage((m) => ({ ...m, [stage.id]: want }));
   }
-  const [pickedView, setPickedView] = useState('');
-  /** The view-change card (see ViewBridge), set when the simulation itself moves to another view. */
-  const [bridge, setBridge] = useState<{ from: ViewSnap; to: ViewSnap; small?: boolean } | null>(null);
   const chooseView = (id: string) => {
     transport.cancel();
     if (formation) { setFormation(null); setPlaying(false); }
-    setPickedView(`${week.week}/${stage.id}/${id}`);
     setManualView((m) => ({ ...m, [stage.id]: true }));
     setViewByStage((m) => ({ ...m, [stage.id]: id }));
   };
-  // One card over the picture at a time: when the structure tour starts, an open view card folds into its chip.
-  if (tour && bridge && !bridge.small) setBridge({ ...bridge, small: true });
   // Guided mode asks the step's micro-question once its animation is done, before moving on.
-  const askNow = !formation && guided && playing && waiting && intro === null && (!tour || (voice && audioState.status === 'done')) && asksOn && !!beat?.ask && !asked.includes(askKey);
+  const askNow = !formation && guided && playing && waiting && intro === null && asksOn && !!beat?.ask && !asked.includes(askKey);
 
   // Cross-fade: when the scene changes (stage or view), the previous one fades out over the new one.
   const sceneKey = `${week.week}/${stage.id}/${view.id}`;
@@ -601,10 +584,6 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     transport.cancel();
     speaking.current = false;
     clock.current.key = '';
-    if (tourRef.current) {
-      tourRef.current.start = 0;
-      tourRef.current.said = false;
-    }
     introClock.current = 0;
   }, [playing, voice, voiceStarted, transport]);
 
@@ -627,12 +606,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         const p = live.current;
         const st = week.stages[p.i];
         const k = beatIndexAt(st, p.t);
-        const tourKey = `${week.week}/${st.id}/${k}`;
-        if (narratedTour.current?.key !== tourKey) narratedTour.current = null;
-        const currentTour = narratedTour.current;
-        const kind: NarrationKind = introRef.current !== null ? 'intro' : bridge ? 'bridge' : currentTour ? 'structure' : 'beat';
-        const options = kind === 'beat' ? { beat: k } : kind === 'bridge' ? { view: view.id } : kind === 'structure' && currentTour ? { structure: currentTour.items[currentTour.idx] } : {};
-        const key = `${week.week}/${st.id}/${kind}/${k}/${view.id}/${options.structure ?? ''}`;
+        const kind: NarrationKind = introRef.current !== null ? 'intro' : 'beat';
+        const options = kind === 'beat' ? { beat: k } : {};
+        const key = `${week.week}/${st.id}/${kind}/${k}/${view.id}`;
         if (transport.key !== key) {
           transport.start(key, { week: week.week, stage: st.id, kind, ...options }, getNarrationSegments(week, st, kind, options), speed);
           skipHold.current = false; setWaiting(false);
@@ -647,27 +623,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           if (audio.status === 'done') { introRef.current = null; setIntro(null); transport.cancel(); }
           return;
         }
-        if (kind === 'bridge') {
-          if (audio.status === 'done') { setBridge(null); transport.cancel(); }
-          return;
-        }
-        const t = kind === 'structure' ? doneAt(st, k) : narratedFrame(st.beats[k].at, doneAt(st, k), audio.segment, audio.count, fraction);
+        const t = narratedFrame(st.beats[k].at, doneAt(st, k), audio.segment, audio.count, fraction);
         live.current = { i: p.i, t }; setPos(live.current);
         if (audio.status !== 'done') return;
-        if (kind === 'beat' && toured.current !== tourKey) {
-          toured.current = tourKey;
-          const items = (st.beats[k].tour ?? []).filter((id) => structures.has(id) && drawnIn(svgRef.current, id));
-          if (items.length) {
-            narratedTour.current = { key: tourKey, items, idx: 0 };
-            setTour({ items, idx: 0 }); transport.cancel(); return;
-          }
-        }
-        if (kind === 'structure' && currentTour && currentTour.idx + 1 < currentTour.items.length) {
-          currentTour.idx++; setTour({ items: currentTour.items, idx: currentTour.idx }); transport.cancel(); return;
-        }
         setWaiting(true);
         if (!skipHold.current && guided) return;
-        narratedTour.current = null; setTour(null);
         transport.cancel(); setWaiting(false);
         if (k + 1 < st.beats.length) {
           live.current = { i: p.i, t: st.beats[k + 1].at + .000001 }; setPos(live.current);
@@ -715,61 +675,12 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         return;
       }
 
-      // 2) Detailed playback, step by step (on hold while the view bridge is being read).
+      // 2) Detailed playback, step by step (on hold while the camera moves to another view).
       if (bridgeHold.current) return;
       const p = live.current;
       const st = week.stages[p.i];
       let t = p.t + (dt * speed * NORMAL_RATE * (guided ? GUIDED_RATE : quick ? QUICK_RATE : 1)) / st.duration;
       const k = beatIndexAt(st, p.t);
-
-      // 2a) Tour: light the step's structures one at a time while the animation holds.
-      const tkey = `${p.i}:${k}`;
-      let tr = tourRef.current;
-      if (tr && tr.key !== tkey) {
-        tr = null;
-        tourRef.current = null;
-        setTour(null);
-      }
-      const tourAt = tourAtOf(st, k);
-      if (!tr && !quick && toured.current !== tkey && t >= tourAt) {
-        toured.current = tkey;
-        const b = st.beats[k];
-        const items = (b.tour ?? (guided ? freshAt(st, k, week.week).map((s) => s.id) : [])).filter((id) => drawnIn(svgRef.current, id));
-        if (items.length >= (b.tour ? 1 : 2)) {
-          tr = { key: tkey, items, idx: 0, start: 0, said: false };
-          tourRef.current = tr;
-          setTour({ items, idx: 0 });
-        }
-      }
-      if (tr) {
-        t = Math.max(p.t, Math.min(t, tourAt));
-        // With narration, let the step's caption finish before naming the first structure.
-        if (!(speaking.current && !tr.said)) {
-          if (!tr.start) tr.start = now;
-          const id = tr.items[tr.idx];
-
-          if (now - tr.start >= tourMs(id, guided) / speed && !speaking.current) {
-            if (tr.idx + 1 < tr.items.length) {
-              tr.idx += 1;
-              tr.start = now;
-              tr.said = false;
-              setTour({ items: tr.items, idx: tr.idx });
-            } else {
-              tourRef.current = null;
-              setTour(null);
-            }
-          }
-        }
-        setWaiting(false);
-        if (waitSecondsRef.current !== null) {
-          waitSecondsRef.current = null;
-          setWaitSeconds(null);
-        }
-        const held = { i: p.i, t };
-        live.current = held;
-        setPos(held);
-        return;
-      }
 
       const key = `${st.id}:${k}`;
       if (clock.current.key !== key) {
@@ -804,7 +715,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [playing, speed, autoContinue, week, guided, quick, voice, formation, find, voiceStarted, voiceConfigured, transport, bridge, view.id]);
+  }, [playing, speed, autoContinue, week, guided, quick, voice, formation, find, voiceStarted, voiceConfigured, transport, view.id]);
 
   // Auto-stop at the end of the stage (or of the week, when auto-continuing).
   if (playing && !voice && intro === null && pos.t >= 1 && (!autoContinue || pos.i === week.stages.length - 1)) setPlaying(false);
@@ -872,12 +783,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     setGlideAim({ w: week.week, i: pos.i, k });
     setGlideRun((n) => n + 1);
   };
-  const clearTour = () => {
-    tourRef.current = null;
-    toured.current = '';
-    narratedTour.current = null;
-    setTour(null);
-  };
+  const clearTour = () => setTour(null);
   const startIntro = () => {
     if (quick || formation) return;
     introRef.current = 0;
@@ -899,18 +805,31 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     clearTour();
     place({ i, t });
   };
+  /**
+   * The step's structures one at a time, lit in the scene, each with its card in the caption's place.
+   * Only the learner opens it (from the caption): playback and the Next key never run through it. The
+   * animation pauses on the step's tour frame, where its structures have formed.
+   */
+  const startTour = (items: string[], idx = 0, auto = false) => {
+    endIntro();
+    stopGlide();
+    setPlaying(false);
+    setBira(false);
+    const k = glideBeat ?? activeBeat;
+    const at = tourAtOf(stage, k);
+    if (stage.beats[k]?.tourAt !== undefined || pos.t < at || beatIndexAt(stage, pos.t) !== k) place({ i: pos.i, t: at });
+    // The frame first, then what it draws: a structure not drawn there is left out of the walk.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const shown = items.filter((id) => structures.has(id) && drawnIn(svgRef.current, id));
+        if (!shown.length) return;
+        setTour({ items: shown, idx: Math.max(0, shown.indexOf(items[idx])), auto });
+      }),
+    );
+  };
   const skipTour = () => {
-    if (voice && narratedTour.current) {
-      narratedTour.current = null; setTour(null); transport.cancel();
-      const next = stage.beats[activeBeat + 1];
-      if (next) place({ i: pos.i, t: next.at + .000001 });
-      else { place({ i: pos.i, t: 1 }); setPlaying(false); }
-      return;
-    }
-    tourRef.current = null;
     setTour(null);
-    transport.cancel();
-    speaking.current = false;
+    setBira(false);
   };
   /** Focus mode + browser full screen (inside the click/key gesture, as browsers require). */
   const enterFull = () => {
@@ -958,8 +877,6 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       place({ ...pos, t: 0 });
     }
     if (!playing && !continuingNarration && intro === null && !find && (pos.t <= 0.001 || pos.t >= 1)) startIntro();
-    // Starting fresh dismisses the view card; resuming narrated speech preserves its view bridge.
-    if (!playing && !continuingNarration) setBridge(null);
     setPlaying(!playing);
   };
   /** Advance from a reading hold; in guided mode this also lets the learner stop narration. */
@@ -1006,24 +923,16 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     }
     // Paused: the step plays out up to its complete frame, continuing from here when "here" is on the
     // way (the previous step, or earlier in this one), else replaying it from its start.
-    const tours = !!b.tour?.length;
-    const to = tours ? tourAtOf(stage, kk) : doneAt(stage, kk);
+    const to = doneAt(stage, kk);
     const onTheWay = pos.t < to && pos.t >= (stage.beats[kk - 1]?.at ?? 0);
-    glideTo(kk, onTheWay ? pos.t : b.at + 0.001, to, () => {
-      // A step with a tour then shows its first structure; the arrows walk through the rest.
-      if (!tours || !b.tour) return;
-      const key = `${pos.i}:${kk}`;
-      toured.current = key;
-      tourRef.current = { key, items: b.tour, idx: 0, start: 0, said: false };
-      setTour({ items: b.tour, idx: 0 });
-    });
+    glideTo(kk, onTheWay ? pos.t : b.at + 0.001, to);
   };
-  /** Paused, the current step's change not yet seen: → first plays it out. */
-  const stepUnseen = () => {
-    if (playing || intro !== null || glideRef.current) return false;
-    const to = stage.beats[activeBeat]?.tour?.length ? tourAtOf(stage, activeBeat) : doneAt(stage, activeBeat);
-    return pos.t < to - 0.004;
-  };
+  /**
+   * Paused with the current step's change not yet seen (the stage not started, a scrub into the middle of
+   * a step): the Next key then plays it out first, and says so ("Hasi", "Ikusi urratsa") instead of
+   * "Hurrengoa", so a press is never a surprise.
+   */
+  const unseen = !playing && intro === null && glideBeat === null && !find && !formation && !tour && pos.t < doneAt(stage, activeBeat) - 0.004;
   /** The micro-question is done (answered or skipped): on to the next step. */
   const doneAsk = () => {
     setAsked((a) => [...a, askKey]);
@@ -1040,25 +949,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       doneAsk();
       return;
     }
-    const tr = tourRef.current;
-    if (tr && intro === null && tr.key === `${pos.i}:${activeBeat}`) {
-      const j = tr.idx + delta;
-      if (j >= tr.items.length) {
-        skipTour();
-        return;
-      }
-      if (j >= 0) {
-        tr.idx = j;
-        tr.start = 0;
-        tr.said = false;
-        transport.cancel();
-        speaking.current = false;
-        setTour({ items: tr.items, idx: j });
-        return;
-      }
-    }
     const shownBeat = glideBeat ?? activeBeat;
-    if (delta > 0 && glideBeat === null && stepUnseen()) {
+    if (delta > 0 && unseen) {
       gotoBeat(activeBeat);
       return;
     }
@@ -1140,7 +1032,6 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     setGlossaryOpen(false);
     setFind(null);
     setHovered(null);
-    setBridge(null);
     transport.cancel();
     speaking.current = false;
     endIntro();
@@ -1395,29 +1286,6 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     return () => cancelAnimationFrame(raf);
   }, [focusKey, beat, mounted]);
 
-  // Cards at the foot of the picture (the structure tour, the full-screen offer) take the bottom corner
-  // away from what is being pointed at, so a card never covers the structure it names.
-  const [noticeSide, setNoticeSide] = useState<'left' | 'right'>('left');
-  const sideOf = tour ? tour.items[tour.idx] : null;
-  useEffect(() => {
-    if (!sideOf) return;
-    const raf = requestAnimationFrame(() => {
-      const svg = svgRef.current;
-      if (!svg) return;
-      const sel = `[data-label="${CSS.escape(sideOf)}"], [data-part="${CSS.escape(sideOf)}"]`;
-      const boxes = [...svg.querySelectorAll(sel)].map((el) => el.getBoundingClientRect()).filter((r) => r.width + r.height > 0);
-      if (!boxes.length) return;
-      const f = svg.getBoundingClientRect();
-      const w = Math.min(440, f.width * 0.46);
-      const h = 160;
-      const cover = (x0: number) => boxes.reduce((a, r) => a + Math.max(0, Math.min(r.right, x0 + w) - Math.max(r.left, x0)) * Math.max(0, Math.min(r.bottom, f.bottom) - Math.max(r.top, f.bottom - h)), 0);
-      const left = cover(f.left);
-      const right = cover(f.right - w);
-      setNoticeSide(left > right ? 'right' : 'left');
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [sideOf, view.id]);
-
   // 3D views turn by dragging: said once, as a chip in the view corner, until the viewer has done it.
   const [turned3d, setTurned3d] = useState<boolean | null>(null);
   if (mounted && turned3d === null) setTurned3d(readTurned());
@@ -1457,33 +1325,25 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       .filter((id) => structures.has(id) && drawnIn(svg, id))
       .sort((a, b) => order(a) - order(b));
     if (!ids.length) return;
-    const key = `${pos.i}:${activeBeat}`;
     transport.cancel();
     speaking.current = false;
-    narratedTour.current = null;
-    toured.current = key;
-    tourRef.current = { key, items: ids, idx: 0, start: 0, said: false };
+    setPlaying(false);
     setBira(true);
-    setTour({ items: ids, idx: 0 });
+    setTour({ items: ids, idx: 0, auto: true });
   };
   if (bira && !tour) setBira(false);
+  // Playback and a tour never run together: pressing play closes it.
+  if (playing && tour) setTour(null);
   useEffect(() => {
-    if (!bira || !tour || playing) return;
-    // The camera's turn (about a second) comes on top of the reading time.
-    const id = window.setTimeout(() => {
-      const tr = tourRef.current;
-      if (!tr) return;
-      if (tr.idx + 1 < tr.items.length) {
-        tr.idx += 1;
-        tr.start = 0;
-        setTour({ items: tr.items, idx: tr.idx });
-      } else {
-        tourRef.current = null;
-        setTour(null);
-      }
-    }, tourMs(tour.items[tour.idx], guided) / speed + 1200);
+    if (!tour?.auto || playing) return;
+    // A 3D bira adds the camera's turn (about a second) to the reading time.
+    const id = window.setTimeout(
+      () => setTour((tr) => (!tr ? tr : tr.idx + 1 < tr.items.length ? { ...tr, idx: tr.idx + 1 } : null)),
+      tourMs(tour.items[tour.idx], guided) / speed + (bira ? 1200 : 0),
+    );
     return () => window.clearTimeout(id);
   }, [bira, tour, playing, guided, speed]);
+  const tourStep = (d: number) => setTour((tr) => (!tr ? tr : { ...tr, idx: Math.max(0, Math.min(tr.items.length - 1, tr.idx + d)), auto: false }));
   const onTurn = () => {
     setTurned3d(true);
     try {
@@ -1545,7 +1405,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       e.preventDefault();
       if (e.shiftKey) gotoStage(-1);
       else stepBeat(-1);
-    } else if (e.key.toLowerCase() === 'l') setShowLabels((v) => !v);
+    } else if (e.key.toLowerCase() === 'l') cycleLabels();
     else if (e.key.toLowerCase() === 'g' && !e.ctrlKey && !e.metaKey) setPlayMode(mode === 'gidatua' ? 'arrunta' : mode === 'arrunta' ? 'azkarra' : 'gidatua');
     else if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey) setFocusMode((v) => !v);
     else if (e.key === '[') toggleOutline();
@@ -1585,6 +1445,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     dimContext: !formation && focusLit && !view.ownFocus && !find && intro === null,
     spotlight: !find && intro === null && tour ? tour.items[tour.idx] : null,
     showLabels: showLabels && intro === null,
+    named: labelMode === 'urratsez' && !formation && !find ? namedAt(week.week, stage, glideBeat ?? activeBeat) : null,
     quiz: !!find,
     quizFlash: flash,
     nameOf,
@@ -1603,14 +1464,12 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 
   const day = lerpDay(stage.dayRange, pos.t);
 
-  // View bridge: when the simulation (not the student) moves to another way of looking at the
-  // specimen — next step, next stage, next week — it says so on the same 3-D sketch.
+  // A view change: the camera moves (travel or zoom) when it can; the live map in the stage bar shows
+  // the old and the new plane on the body either way, so no card covers the picture.
   const snap: ViewSnap = { key: sceneKey, week: week.week, stageTitle: stage.title, label: view.label, plane: view.plane, day, level: view.locator?.level, orientation: view.orientation };
   const [seenView, setSeenView] = useState<ViewSnap | null>(null);
-  const [viewFlash, setViewFlash] = useState<{ key: string; label: string; plane: PlaneKind } | null>(null);
   // Only once the deep link has been applied: the view a link replaces was never on screen.
   if (mounted && linkedWeek === week.week && seenView?.key !== sceneKey) {
-    const from = seenView ?? readLastView(week.week);
     setSeenView(snap);
     // When the view of the same body changes (by the simulation or by the viewer), the camera travels from the old plane to the new one.
     const [fw, fs, fv] = seenView?.key.split('/') ?? [];
@@ -1622,28 +1481,67 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     if (plan) setTravel({ key: sceneKey, plan });
     else if (zoom) setTravel({ key: sceneKey, zoom });
     else if (travel) setTravel(null);
-    const moved = !!plan || !!zoom;
-    // After a camera move the card is only its chip (reopen to read it); narrated, it is read out as before.
-    const bridged = !formation && !!from && pickedView !== sceneKey && needsBridge(from, snap);
-    if (bridged) setBridge({ from, to: snap, small: moved && !voice });
-    else if (bridge) setBridge(null);
-    // Every other view change the simulation makes is announced over the picture itself, briefly
-    // (one message at a time: when the card opens, it already names the new view).
-    if (!moved && !bridged && !formation && seenView && pickedView !== sceneKey && seenView.label !== snap.label) setViewFlash({ key: sceneKey, label: view.label, plane: view.plane });
   }
-  const saveView = useEffectEvent(() => {
-    try {
-      window.sessionStorage.setItem(LAST_VIEW_KEY, JSON.stringify({ ...snap, at: Date.now() }));
-    } catch {}
-  });
+  // Playback waits while the camera moves.
   useEffect(() => {
-    if (mounted) saveView();
-  }, [sceneKey, mounted]);
-  // Guided playback waits while the bridge is up.
-  useEffect(() => {
-    // Folded into its chip, the card no longer holds the playback.
-    bridgeHold.current = (!!bridge && !bridge.small && guided) || !!travel;
-  }, [bridge, guided, travel]);
+    bridgeHold.current = !!travel;
+  }, [travel]);
+  /** "Non nago?": out to the whole body (the plane on it) and back in, on the same view. */
+  const reveal = revealPlan(week.week, day, view);
+  const startReveal = () => {
+    if (!reveal || travel || reduced) return;
+    setPlaying(false);
+    endIntro();
+    clearTour();
+    setGhost({ key: sceneKey, i: pos.i, view: view.id, t: pos.t });
+    setTravel({ key: sceneKey, plan: reveal });
+  };
+  /** The topic's transverse cuts of the modelled body: the live map's plane snaps to them (one per level). */
+  const cutStops: CutStop[] = (() => {
+    const all = week.stages.flatMap((s) =>
+      s.views.filter((v) => v.plane === 'zeharkakoa' && v.locator?.level !== undefined && v.travel !== false).map((v): CutStop => ({ level: v.locator!.level ?? 0.5, stage: s.id, view: v.id, note: v.locator!.note ?? '', title: s.title })),
+    );
+    const out: CutStop[] = [];
+    for (const c of all) {
+      const twin = out.findIndex((o) => Math.abs(o.level - c.level) < 0.04);
+      if (twin < 0) out.push(c);
+      else if (c.stage === stage.id && c.view === view.id) out[twin] = c;
+    }
+    return out.sort((a, b) => a.level - b.level);
+  })();
+  /** The plane let go on another cut: that view, at the step that shows it (with the way back when it is another stage). */
+  const gotoCut = (c: CutStop) => {
+    if (c.stage === stage.id) {
+      chooseView(c.view);
+      return;
+    }
+    const idx = week.stages.findIndex((s) => s.id === c.stage);
+    if (idx < 0) return;
+    const target = week.stages[idx];
+    let k = -1;
+    let shownView = target.views[0].id;
+    target.beats.forEach((b, j) => {
+      if (b.view && target.views.some((v) => v.id === b.view)) shownView = b.view;
+      if (k < 0 && shownView === c.view) k = j;
+    });
+    setBack({ week: week.week, stage: stage.id, t: pos.t, view: view.id, selected, title: stage.title });
+    endIntro();
+    clearTour();
+    setPlaying(false);
+    if (k < 0) {
+      setManualView((m) => ({ ...m, [c.stage]: true }));
+      setViewByStage((m) => ({ ...m, [c.stage]: c.view }));
+    }
+    place({ i: idx, t: k >= 0 ? doneAt(target, k) : 0 });
+    setSelected(null);
+  };
+  // The path from the whole body to this view: the body (out and back), the region or the drawing a close-up came from, this view.
+  const parentView = view.zoom ? stage.views.find((v) => v.id === view.zoom!.from) : undefined;
+  const crumbs: Crumb[] = [
+    { label: shapeFor(week.week, day, view.plane) === 'fetua' ? 'Fetua' : 'Enbrioia', tip: reveal ? 'Kamera atzera: gorputz osoa eta planoa, eta berriro hona' : undefined, onClick: reveal && !reduced ? startReveal : undefined },
+    ...(parentView ? [{ label: parentView.label, tip: `Itzuli ${parentView.label.toLowerCase()} ikuspegira`, onClick: () => chooseView(parentView.id) }] : view.locator?.note ? [{ label: view.locator.note }] : []),
+    { label: view.label, tip: view.description },
+  ];
 
   const nextStage = week.stages[pos.i + 1];
   // The topic's last stage ends on the next topic (or, after the last one, on the questions): no dead end.
@@ -1837,8 +1735,12 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                 orientation={view.orientation}
                 note={view.locator?.note}
                 view={view.description}
-                viewKey={`${stage.id}/${view.id}`}
-                hold={(drawer && panelOpen) || helpOpen || tourBusy || questionsOpen || glossaryOpen || !!bridge || playing || intro !== null || !!find || nowOpen || kimuOpen || !!formation}
+                label={view.label}
+                crumbs={crumbs}
+                stops={cutStops}
+                onStop={gotoCut}
+                viewKey={sceneKey}
+                hold={(drawer && panelOpen) || helpOpen || tourBusy || questionsOpen || glossaryOpen || !!travel || playing || intro !== null || !!find || nowOpen || kimuOpen || !!formation}
                 onOpen={() => setNowOpen(false)}
               />
               {stage.views.length > 1 && <ViewSwitch views={stage.views} current={view.id} onChoose={chooseView} />}
@@ -1852,6 +1754,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               resetKey={`${stage.id}/${view.id}`}
               onBackgroundClick={() => !find && setSelected(null)}
               marks={travel ? [] : marks}
+              reveal={travel || find || intro !== null || formation ? undefined : beat?.focus}
+              revealKey={focusKey}
               nameOf={nameOf}
               fullscreenRef={appRef}
               onFullscreenChange={setFocusMode}
@@ -1861,8 +1765,15 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               overlay={
                 <>
                   <div className="view-tools">
-                    <button className={`icon-btn${showLabels ? ' is-on' : ''}`} onClick={() => setShowLabels((v) => !v)} data-tip={showLabels ? 'Etiketak ezkutatu · L' : 'Etiketak erakutsi · L'} data-tip-pos="left" aria-label="Etiketak" aria-pressed={showLabels}>
+                    <button
+                      className={`icon-btn label-mode is-${labelMode}${labelMode === 'guztiak' ? ' is-on' : ''}`}
+                      onClick={cycleLabels}
+                      data-tip={labelMode === 'urratsez' ? 'Izenak urratsez urrats (aipatu ahala) · sakatu: izen guztiak · L' : labelMode === 'guztiak' ? 'Izen guztiak · sakatu: izenik gabe · L' : 'Izenik gabe · sakatu: urratsez urrats · L'}
+                      data-tip-pos="left"
+                      aria-label={labelMode === 'urratsez' ? 'Izenak: urratsez urrats' : labelMode === 'guztiak' ? 'Izenak: guztiak' : 'Izenak: ezkutatuta'}
+                    >
                       <IconTag size={16} />
+                      {labelMode !== 'urratsez' && <i className="label-mode-pip" aria-hidden>{labelMode === 'guztiak' ? '∀' : '–'}</i>}
                     </button>
                     <button className={`icon-btn${legendOpen ? ' is-on' : ''}`} onClick={() => setLegendOpen((v) => !v)} data-tip="Koloreen esanahia" data-tip-pos="left" aria-label="Kolore-kodea" aria-pressed={legendOpen}>
                       <IconLayers size={16} />
@@ -1908,23 +1819,18 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       </button>
                     </div>
                   )}
-                  {viewFlash && viewFlash.key === sceneKey && intro === null && <ViewFlash key={`flash-${viewFlash.key}`} label={viewFlash.label} plane={viewFlash.plane} onDone={() => setViewFlash(null)} />}
-                  {turnable === sceneKey && !tour && !bridge && intro === null && !find && !travel && (
+                  {turnable === sceneKey && !tour && intro === null && !find && !travel && (
                     <button className="bira-btn" key={`bira-${sceneKey}`} onClick={startBira} data-tip="Egitura bakoitza bere aldetik: kamera bakoitzera biratzen da" data-tip-pos="bottom-end">
                       <span className="turn-hint-i" aria-hidden>↻</span>
                       <b>3D bira</b>
                     </button>
                   )}
-                  {turnable === sceneKey && turned3d === false && !bridge && !(viewFlash && viewFlash.key === sceneKey) && intro === null && !find && !travel && (
+                  {turnable === sceneKey && turned3d === false && intro === null && !find && !travel && (
                     <p className="turn-hint" key={`turn-${sceneKey}`} role="status">
                       <span className="turn-hint-i" aria-hidden>↻</span>
                       <b>Arrastatu biratzeko</b>
                       <small>klik bikoitza: hasierara</small>
                     </p>
-                  )}
-                  {bridge && intro === null && !travel && <ViewBridge autoClose={!voice} key={bridge.to.key} from={bridge.from} to={bridge.to} small={!!bridge.small} onSmall={(v) => setBridge((b) => (b ? { ...b, small: v } : b))} onClose={() => { transport.cancel(); setBridge(null); }} />}
-                  {tour && intro === null && structures.get(tour.items[tour.idx]) && (
-                    <TourCard compact={voice} side={noticeSide} item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} onSkip={skipTour} onPick={onSelect} kicker={bira ? '3D bira' : undefined} />
                   )}
                   {intro !== null && (
                     <div className="pv-card" key={`intro-${stage.id}`}>
@@ -1981,7 +1887,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                     </div>
                   )}
                   {fsOffer && playing && !focusMode && !tour && (
-                    <div className={`fs-offer is-${noticeSide}`} role="group" aria-label="Pantaila osoa">
+                    <div className="fs-offer is-left" role="group" aria-label="Pantaila osoa">
                       <span className="fs-offer-icon" aria-hidden>
                         <IconExpand size={15} />
                       </span>
@@ -2116,7 +2022,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             playing={playing}
             speed={speed}
             autoContinue={autoContinue}
-            day={ageLabel(day)}
+            day={clockLabel(day, stage.day, view.age, stage.beats[glideBeat ?? activeBeat]?.age)}
             onSeek={(t) => seek(pos.i, t)}
             onTogglePlay={togglePlay}
             onStage={gotoStage}
@@ -2134,7 +2040,15 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             onRepeat={() => { endIntro(); clearTour(); place({ i: pos.i, t: beat.at + .000001 }); setVoiceStarted(true); setPlaying(true); }}
             waiting={!formation && waiting && playing && intro === null}
             waitSeconds={!formation && waiting && playing && intro === null ? waitSeconds : null}
-            fresh={!formation && guided && intro === null && !tour ? fresh : []}
+            fresh={!formation && guided && intro === null ? fresh : []}
+            travelling={!!travel}
+            unseen={unseen ? (activeBeat === 0 && pos.t <= stage.beats[0].at + 0.002 ? 'start' : 'step') : undefined}
+            onTour={formation || find ? undefined : startTour}
+            tourCard={
+              tour && intro === null && structures.get(tour.items[tour.idx]) ? (
+                <TourCard item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} auto={!!tour.auto} onStep={tourStep} onClose={skipTour} onPick={onSelect} kicker={bira ? '3D bira' : undefined} />
+              ) : undefined
+            }
             stepExtras={stepExtrasOf(week.week, stage, guided)}
             intro={formation || intro === null ? null : intro >= 1 ? 'ready' : 'running'}
             onStart={endIntro}

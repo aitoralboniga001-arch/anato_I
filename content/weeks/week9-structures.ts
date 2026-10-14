@@ -1068,7 +1068,7 @@ export const structures9: StructureDef[] = [
     aka: ['Beheko gorputz-adarreko muskulu guztiak'],
     category: 'mesodermoa',
     color: HUE.abaxial,
-    definition: 'Beheko gorputz-adarreko muskulu guztiak (apunteek diote ez dagoela hain argi).',
+    definition: 'Beheko gorputz-adarreko muskulu guztiak abaxialak dira; primaxialik dagoen ez dago argi.',
     origin: 'Domeinu abaxiala.',
     related: ['domeinu-abaxiala'],
   },

@@ -239,8 +239,8 @@ export type KeyRow = { id: string; color: string; text: string };
 export function CavityKey({ rows, x = 24, y = 22, show = 1, quiet }: { rows: (KeyRow | false | null | undefined)[]; x?: number; y?: number; show?: number; quiet?: boolean }) {
   if (show <= 0.02) return null;
   const live = rows.filter((r): r is KeyRow => !!r);
-  const items = live.map((r, i) => ({ r, x: x + live.slice(0, i).reduce((w, q) => w + 26 + q.text.length * 6.9, 0) }));
-  const width = live.reduce((w, q) => w + 26 + q.text.length * 6.9, 0) - 6;
+  const items = live.map((r, i) => ({ r, x: x + live.slice(0, i).reduce((w, q) => w + 26 + q.text.length * 7.4, 0) }));
+  const width = live.reduce((w, q) => w + 26 + q.text.length * 7.4, 0) - 6;
   return (
     <g data-key opacity={show} fontSize={12.5} fontWeight={600} fill="rgba(244,247,255,0.95)" style={{ paintOrder: 'stroke' }} stroke="rgba(11,12,15,0.9)" strokeWidth={3}>
       {/* A dark plate under the key: it reads the same over the dark ground and over a close-up's tissue. */}
@@ -248,7 +248,7 @@ export function CavityKey({ rows, x = 24, y = 22, show = 1, quiet }: { rows: (Ke
       {items.map(({ r, x: rx }) => {
         const row = (
           <g transform={`translate(${f1(rx)} ${y})`}>
-            <rect x={-3} y={-10} width={22 + r.text.length * 6.9} height={20} fill="transparent" stroke="none" />
+            <rect x={-3} y={-10} width={22 + r.text.length * 7.4} height={20} fill="transparent" stroke="none" />
             <rect x={0} y={-6} width={14} height={12} rx={3} fill={r.color} stroke="rgba(255,255,255,0.55)" strokeWidth={1} />
             <text x={20} y={4.5}>
               {r.text}

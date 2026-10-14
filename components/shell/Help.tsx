@@ -46,7 +46,7 @@ const CONTROLS: { area: string; items: { icon: ReactNode; name: string; text: st
   {
     area: 'Irudia',
     items: [
-      { icon: <IconTag size={16} />, name: 'Etiketak', text: 'Egituren izenak erakutsi edo ezkutatu (ezkutatuta, zure burua probatzeko).', key: 'L' },
+      { icon: <IconTag size={16} />, name: 'Izenak', text: 'Hiru modu: urratsez urrats (izen bat agertzen da azalpenak aipatzen duenean; etaparen azken urratsean, denak), izen guztiak, edo izenik gabe (zure burua probatzeko). Izenik gabeko egitura baten gainean pasatzean, haren izena ikusten da.', key: 'L' },
       { icon: <IconLayers size={16} />, name: 'Kolore-kodea', text: 'Kolore bakoitzak zer ehun edo orri esan nahi duen.' },
       { icon: <IconZoomIn size={16} />, name: 'Zooma', text: 'Handitu, txikitu edo irudia osorik ikusi. Arrastatuta mugitzen da.' },
       { icon: <IconExpand size={16} />, name: 'Pantaila osoa', text: 'Irudia ahalik eta handien, azalpena behean. F teklak gauza bera egiten du leihoaren barruan (foku modua). Irteteko: Esc, F edo tresnen azpiko botoia.', key: 'F' },
@@ -82,7 +82,7 @@ const KEYS: [string, string][] = [
   ['Shift + ← →', 'Aurreko / hurrengo etapa'],
   ['1–9', 'Ikuspegia aldatu (mozketak)'],
   ['G', 'Modua aldatu: gidatua → arrunta → azkarra'],
-  ['L', 'Etiketak erakutsi / ezkutatu'],
+  ['L', 'Izenak: urratsez urrats / guztiak / gabe'],
   ['F', 'Foku modua: eszena handia, azalpena beti beheko txartelean'],
   ['[  ]', 'Etapen zerrenda / azalpen-panela tolestu'],
   ['N', 'Apunteak erakutsi / ezkutatu'],

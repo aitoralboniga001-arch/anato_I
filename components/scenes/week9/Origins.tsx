@@ -286,12 +286,14 @@ export function OriginsArt({ t, zoom = 0 }: { t: number; zoom?: number }) {
 }
 
 /** 9:muskulu-motak `jatorria`. */
-export function OriginsSection({ t }: SceneProps) {
-  // Steps 3–4 close in on the gut and the heart tube (where the visceral layer makes smooth muscle and myocardium); back out for the summary.
-  const zoom = seg(t, 0.3, 0.36) * (1 - seg(t, 0.64, 0.7));
+export function OriginsSection({ t: stageT }: SceneProps) {
+  // The stage teaches two steps here (the sources, then somites → striated muscle, until the tissues view
+  // at 0.64): the striated step is stretched over that span. The smooth-muscle and myocardium phases of the
+  // art (printed in grey in the notes' introduction) are never reached; their own stages teach them.
+  const t = stageT <= 0.12 ? stageT : Math.min(0.29, 0.12 + (stageT - 0.12) * 0.34);
   return (
     <g>
-      <OriginsArt t={t} zoom={zoom} />
+      <OriginsArt t={t} />
       <Note x={500} y={22} size={12.5} tone="dim">
         4. astea · bihotzaren mailako zeharkako mozketa
       </Note>
@@ -300,9 +302,6 @@ export function OriginsSection({ t }: SceneProps) {
         steps={[
           [0, 'Gihar guztiak mesodermotik: paraxiala (somitak) eta alboko mesodermoaren bi orriak'],
           [0.14, 'Somitak (mesodermo paraxiala) → muskulu ildaskatuak (borondatezkoak, mugimendua)'],
-          [0.32, 'Hestearen inguruko errai orria → muskulu leuna (erraiak, arteriak, zainak)'],
-          [0.5, 'Bihotz hodiaren inguruko errai orria → miokardioa (ildaskatua, baina berezia)'],
-          [0.64, 'Hiru muskulu motak, hiru jatorri: kolore bakoitza gai osoan bera da'],
         ]}
       />
     </g>

@@ -734,6 +734,14 @@ export function LimbRotation({ t }: SceneProps) {
       <Note x={500} y={612} tone="accent" show={upTurn}>
         Goiko gorputz-adarrak: aurrean tolestatzaileak; atzean eta alboan hedatzaileak
       </Note>
+      {/* The two colours, kept in sight the whole way (the names move from limb to limb). */}
+      <g pointerEvents="none" fontSize={12.5} fontWeight={600} fill="rgba(244,247,255,0.92)">
+        <rect x={748} y={14} width={238} height={26} rx={8} fill="rgba(11,12,15,0.78)" stroke="rgba(255,255,255,0.1)" />
+        <rect x={760} y={21} width={14} height={12} rx={3} fill={Q.flexor} />
+        <text x={780} y={31.5}>tolestatzaileak</text>
+        <rect x={882} y={21} width={14} height={12} rx={3} fill={Q.extensor} />
+        <text x={902} y={31.5}>hedatzaileak</text>
+      </g>
       <Note x={500} y={612} tone="accent" show={lowTurn}>
         Beheko gorputz-adarrak (kontrako biraketa): aurrean hedatzaileak; atzean tolestatzaileak
       </Note>

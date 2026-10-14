@@ -51,6 +51,11 @@ export interface ViewDef {
   /** No camera move to or from this view (it shows one organ or bone, not a cut of the whole body). */
   travel?: false;
   /**
+   * The age this drawing shows, when it is not the stage's running day: a day number, a fixed label
+   * ("Heldua") or null for drawings that have no age (tables, summaries). The clock then stops running.
+   */
+  age?: number | string | null;
+  /**
    * A close-up of one structure of another view of the same stage: moving between the two, the camera
    * dives into where `part` is drawn in view `from` (and back out), so the detail is never placeless.
    */
@@ -81,6 +86,8 @@ export interface MicroQuestion {
 
 export interface Beat {
   at: number;
+  /** The age this step shows when it runs ahead of the stage's days (a later stage drawn in advance). Same forms as `ViewDef.age`. */
+  age?: number | string | null;
   /** Original notes sentence ids (week-prefixed), or paragraph ranges such as w1/4.2/p3/s1-s4. */
   notes?: string[];
   /** AZALPEN LABURRA: what just happened on screen, in 2–4 short sentences. */

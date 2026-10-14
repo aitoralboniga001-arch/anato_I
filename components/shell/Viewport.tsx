@@ -36,6 +36,13 @@ interface ViewportProps {
   hoverNames?: boolean;
   /** The viewer turned a 3D view by dragging it (once is enough: the shell stops explaining how). */
   onTurn?: () => void;
+  /**
+   * What the step names. When the zoomed frame cuts one of them off, the camera backs off just enough
+   * to show them, holds a moment, then glides back to the zoom the viewer had.
+   */
+  reveal?: readonly string[];
+  /** Changes with the step: the reveal runs once per step. */
+  revealKey?: string;
 }
 
 interface Zoom {
@@ -131,12 +138,36 @@ function measureMarks(svg: SVGSVGElement, root: SVGGraphicsElement, ids: string[
   return merged.slice(0, 6);
 }
 
+/** Scene-space box of all drawn pieces of the given structures together (null when none is drawn in this view). */
+function boxOf(svg: SVGSVGElement, root: SVGGraphicsElement, ids: readonly string[]): { x: number; y: number; w: number; h: number } | null {
+  let x0 = Infinity;
+  let y0 = Infinity;
+  let x1 = -Infinity;
+  let y1 = -Infinity;
+  for (const id of ids) {
+    const drawn = [...svg.querySelectorAll<SVGGElement>(`[data-part="${CSS.escape(id)}"]`)].filter((el) => seenOpacity(el, svg) > 0.3);
+    const pins = drawn.length ? [] : [...svg.querySelectorAll<SVGCircleElement>(`[data-label="${CSS.escape(id)}"] .label-dot`)].filter((el) => seenOpacity(el, svg) > 0.3);
+    for (const el of [...drawn, ...pins]) {
+      const b = boxIn(el, root);
+      if (!b) continue;
+      x0 = Math.min(x0, b.x);
+      y0 = Math.min(y0, b.y);
+      x1 = Math.max(x1, b.x + b.w);
+      y1 = Math.max(y1, b.y + b.h);
+    }
+  }
+  return x1 > x0 ? { x: x0, y: y0, w: x1 - x0, h: y1 - y0 } : null;
+}
+
+/** How long the wider view stays before the camera glides back in. */
+const REVEAL_HOLD_MS = 2600;
+
 const sameMarks = (a: Mark[], b: Mark[]) =>
   a.length === b.length && a.every((m, i) => m.id === b[i].id && Math.abs(m.x - b[i].x) + Math.abs(m.y - b[i].y) + Math.abs(m.w - b[i].w) + Math.abs(m.h - b[i].h) < 3);
 
 /** SVG stage with wheel/drag zoom-pan, orientation edges and a feathered specimen backdrop. */
 export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewport(
-  { orientation, children, resetKey, onBackgroundClick, overlay, marks, nameOf, fullscreenRef, onFullscreenChange, makeRoom, hoverNames, onTurn },
+  { orientation, children, resetKey, onBackgroundClick, overlay, marks, nameOf, fullscreenRef, onFullscreenChange, makeRoom, hoverNames, onTurn, reveal, revealKey },
   svgRef,
 ) {
   const [tag, setTag] = useState<{ id: string; x: number; y: number } | null>(null);
@@ -179,6 +210,14 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
     zRaf.current = requestAnimationFrame(frame);
   }, []);
   useEffect(() => () => cancelAnimationFrame(zRaf.current), []);
+  // A reveal in progress: the zoom to glide back to once the hold is over (and its timer).
+  const revealRun = useRef<{ home: Zoom; timer: number } | null>(null);
+  /** The viewer takes the zoom into their own hands: no glide back. */
+  const cancelReveal = useCallback(() => {
+    if (revealRun.current) window.clearTimeout(revealRun.current.timer);
+    revealRun.current = null;
+  }, []);
+  useEffect(() => cancelReveal, [cancelReveal]);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   const drag = useRef<{ x: number; y: number; zx: number; zy: number; moved: boolean; turned?: boolean } | null>(null);
   const wrap = useRef<HTMLDivElement>(null);
@@ -222,9 +261,47 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
 
   useEffect(() => {
     cancelAnimationFrame(zRaf.current);
+    cancelReveal();
     zGoal.current = null;
     setZ(HOME);
-  }, [resetKey]);
+  }, [resetKey, cancelReveal]);
+
+  // The step names structures that the zoomed frame may cut off: back off just enough to show them, hold,
+  // then glide back to the viewer's zoom. Runs once per step, after the step is drawn.
+  const revealStep = useEffectEvent(() => {
+    const svg = scene.current?.ownerSVGElement;
+    const root = scene.current;
+    if (!svg || !root || !reveal?.length) return;
+    const cur = zGoal.current ?? zNow.current;
+    // A reveal under way keeps the viewer's own zoom as the one to return to.
+    const home = revealRun.current?.home ?? cur;
+    if (home.k <= 1.01) return;
+    const box = boxOf(svg, root, reveal);
+    if (!box) return;
+    // The part of the scene the frame shows now, in scene units.
+    const view = { x: -cur.x / cur.k, y: -cur.y / cur.k, w: W / cur.k, h: H / cur.k };
+    const m = view.w * 0.03;
+    const inside = box.x >= view.x + m && box.y >= view.y + m && box.x + box.w <= view.x + view.w - m && box.y + box.h <= view.y + view.h - m;
+    if (inside) return;
+    // The closest zoom that still shows all of them (never closer than the viewer's own zoom).
+    const k = Math.max(1, Math.min(home.k, W / (box.w * 1.12 + 40), H / (box.h * 1.12 + 40)));
+    if (k > home.k * 0.97) return;
+    const cx = box.x + box.w / 2;
+    const cy = box.y + box.h / 2;
+    const to = k <= 1.01 ? HOME : { k, x: W / 2 - cx * k, y: H / 2 - cy * k };
+    if (revealRun.current) window.clearTimeout(revealRun.current.timer);
+    glideZoom(to);
+    const timer = window.setTimeout(() => {
+      revealRun.current = null;
+      glideZoom(home);
+    }, REVEAL_HOLD_MS);
+    revealRun.current = { home, timer };
+  });
+  useEffect(() => {
+    if (!revealKey) return;
+    const raf = requestAnimationFrame(() => revealStep());
+    return () => cancelAnimationFrame(raf);
+  }, [revealKey]);
 
   useEffect(() => {
     const el = wrap.current;
@@ -310,7 +387,10 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   }, []);
 
   /** Buttons: glide, building on a zoom still under way so quick clicks add up. */
-  const zoomAt = useCallback((factor: number, px = W / 2, py = H / 2) => glideZoom(zoomedAt(zGoal.current ?? zNow.current, factor, px, py)), [glideZoom]);
+  const zoomAt = useCallback((factor: number, px = W / 2, py = H / 2) => {
+    cancelReveal();
+    glideZoom(zoomedAt(zGoal.current ?? zNow.current, factor, px, py));
+  }, [glideZoom, cancelReveal]);
 
   useEffect(() => {
     const el = wrap.current;
@@ -319,13 +399,14 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
       if (!e.ctrlKey && !e.metaKey && Math.abs(e.deltaY) < 4) return;
       e.preventDefault();
       const p = toSvg(e.clientX, e.clientY);
+      cancelReveal();
       cancelAnimationFrame(zRaf.current);
       zGoal.current = null;
       setZ((z) => zoomedAt(z, Math.exp(-e.deltaY * 0.0022), p.x, p.y));
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
-  }, [toSvg]);
+  }, [toSvg, cancelReveal]);
 
   return (
     <div
@@ -334,6 +415,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
       className={`viewport${z.k > 1 ? ' is-zoomed' : ''}`}
       onPointerDown={(e) => {
         if (e.button !== 0) return;
+        cancelReveal();
         if (z.k > 1) stopZoom();
         drag.current = { x: e.clientX, y: e.clientY, zx: z.x, zy: z.y, moved: false };
       }}
@@ -371,7 +453,10 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
           e.preventDefault();
         }
       }}
-      onDoubleClick={() => glideZoom(HOME)}
+      onDoubleClick={() => {
+        cancelReveal();
+        glideZoom(HOME);
+      }}
     >
       <div ref={setUnderHost} className="viewport-underlay" aria-hidden />
       <svg
@@ -413,6 +498,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
             const zoomIn = (e: ReactMouseEvent) => {
               e.stopPropagation();
               const k = Math.min(6, Math.max(z.k * 1.5, Math.min(W / (m.w * 6 + 60), H / (m.h * 6 + 60))));
+              cancelReveal();
               glideZoom({ k, x: W / 2 - cx * k, y: H / 2 - cy * k });
             };
             // Name pill above the ring (below it when the ring is at the top edge), joined by a short stem.
@@ -469,7 +555,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
           <IconZoomOut />
         </button>
         {z.k > 1.01 && (
-          <button className="icon-btn zoom-level" onClick={() => glideZoom(HOME)} aria-label="Zooma berrezarri" data-tip="Irudi osoa ikusi · klik bikoitza" data-tip-pos="left">
+          <button className="icon-btn zoom-level" onClick={() => { cancelReveal(); glideZoom(HOME); }} aria-label="Zooma berrezarri" data-tip="Irudi osoa ikusi · klik bikoitza" data-tip-pos="left">
             {Math.round(z.k * 100)}%
           </button>
         )}

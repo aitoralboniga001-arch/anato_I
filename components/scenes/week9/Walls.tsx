@@ -125,7 +125,8 @@ export function SomiteWalls({ t }: SceneProps) {
   const dorsal = vis(t, 0.52, 0.64);
   const lips = vis(t, 0.53, 0.76);
   const sclLat = seg(t, 0.32, 0.38);
-  const rib = seg(t, 0.37, 0.42);
+  // The rib is a later result (6.–8. asteak) drawn ahead for one step only: it fades before the 4–5-week myotome steps.
+  const rib = seg(t, 0.37, 0.42) * (1 - seg(t, 0.44, 0.49));
   const front = seg(t, 0.32, 0.35);
   const myoX = seg(t, 0.44, 0.5) * (1 - seg(t, 0.52, 0.55));
   const vlX = seg(t, 0.76, 0.84);
@@ -183,7 +184,7 @@ export function SomiteWalls({ t }: SceneProps) {
           </Part>
         </g>
       )}
-      <ThoraxInset show={vis(t, 0.24, 0.5)} ribs={seg(t, 0.37, 0.4)} />
+      <ThoraxInset show={vis(t, 0.33, 0.45)} ribs={seg(t, 0.35, 0.39)} />
       {/* Muscle precursors cross the frontier too (they will be the body-wall muscles). */}
       <Part id="aurre-alboko-muskulu-zelulak" show={Math.max(myoX, vlX)} groups={['mioblastoak']}>
         <Crossers k={Math.max(seg(t, 0.44, 0.5), vlX)} color="#f2a33a" n={7} seed={11} from={vl} into={a['paretako-orria']} />
@@ -195,7 +196,7 @@ export function SomiteWalls({ t }: SceneProps) {
           [0, 'Birpasoa: muskulu horiek guztiak somiten mesodermotik; hasieran somita guztiak berdinak'],
           [0.1, 'Somitaren paretak: atzekoa (dortsala), erdialdekoa (mediala) eta aurrekoa'],
           [0.2, 'Erdialdeko eta aurreko paretak → esklerotoma → erdikaldera: hodi neurala eta notokorda inguratu → ornoak'],
-          [0.32, 'Esklerotoma zelula batzuk albora: muga gurutzatu → paretako orria → saihets kartilagoak'],
+          [0.32, 'Esklerotoma zelula batzuk albora: muga gurutzatu → paretako orria → saihets kartilagoak (saihetsa geroago, 6.–8. asteetan)'],
           [0.44, 'Zelula muskular aintzindari batzuek ere gurutzatzen dute muga'],
           [0.52, 'Atzeko paretaren erdia → dermatoma · ertzetako zelulak → zelula muskularren aintzindariak'],
           [0.64, 'Bi ertzetakoak bentralera → miotoma (dermatomaren azpian): bizkarra, eskapula ingurua, saihets artekoak'],

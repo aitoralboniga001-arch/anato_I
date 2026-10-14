@@ -128,8 +128,8 @@ describe('dates in words', () => {
   });
 
   it('marks dates the notes give only by week or month', () => {
-    const m = MILESTONES.find((x) => x.short === 'Zuntz ildaskatuak')!;
-    expect(whenOf(m)).toBe('≈ 3. hilabetearen bukaera');
+    const m = MILESTONES.find((x) => x.short === 'Korion barrunbea desagertzen')!;
+    expect(whenOf(m)).toBe('≈ 3. hilabetea');
     expect(dayLabel(15, 16)).toBe('15–16. egunak');
     expect(dayLabel(84)).toBe('12. astea');
     expect(dayLabel(afterBirth(18))).toBe('18. hilabetea (jaio ondoren)');

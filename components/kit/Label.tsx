@@ -186,6 +186,8 @@ export function LabelDraw({ id, x, y, ax, ay, align, show = 1, text, small, span
   const inPane = useContext(PaneContext);
   if (!ctx.showLabels || ctx.quiz || show <= 0.02 || inPane) return null;
   const state = partState(ctx, id);
+  // Not named yet (progressive names): the slot is kept, so names already shown never move when it comes.
+  if (ctx.named && state !== 'focus' && state !== 'spot' && state !== 'active' && !ctx.named(id)) return null;
   const space = !!ctx.isSpace?.(id);
   const name = text ?? ctx.nameOf(id);
   const size = labelSize(state, small);

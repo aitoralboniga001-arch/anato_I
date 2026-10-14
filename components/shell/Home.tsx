@@ -248,7 +248,7 @@ export function Home() {
             <kbd>1</kbd>–<kbd>9</kbd> ikuspegiak
           </span>
           <span>
-            <kbd>L</kbd> etiketak
+            <kbd>L</kbd> izenak
           </span>
         </div>
       </section>

@@ -124,7 +124,7 @@ relation('segmentu-arteko-mesenkima', 'ornoarteko-diskoa', 'origin', `${topic8}#
 relation('gune-pulposoa', 'ornoarteko-diskoa', 'composition', `${topic8}#ornoarteko-diskoa.origin`);
 relation('eraztun-fibrosoa', 'ornoarteko-diskoa', 'composition', `${topic8}#ornoarteko-diskoa.origin`);
 relation('esklerotoma', 'saihets-hezurra', 'origin', `${topic8}#saihets-hezurra.origin`);
-relation('paretako-orria', 'saihets-kartilagoa', 'origin', `${topic8}#saihets-kartilagoa.origin`);
+relation('esklerotoma', 'saihets-kartilagoa', 'origin', `${topic8}#saihets-kartilagoa.origin`);
 relation('paretako-orria', 'esternoi-barrak', 'origin', `${topic8}#esternoi-barrak.origin`);
 relation('esternoi-barrak', 'esternoia', 'origin', `${topic8}#esternoi-barrak.fate`);
 relation('kirtena', 'esternoia', 'composition', `${topic8}#kirtena.fate`);
