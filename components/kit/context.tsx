@@ -97,6 +97,8 @@ export interface Underlay {
   scene: SVGGElement | null;
   /** Zoomed in: dragging pans the frame, so a 3D view does not turn. */
   zoomed: boolean;
+  /** Accessible buttons use the same camera as pointer dragging. */
+  orbitRequest?: { direction: 'left' | 'right' | 'up' | 'down' | 'reset'; serial: number };
 }
 
 export const UnderlayContext = createContext<Underlay | null>(null);

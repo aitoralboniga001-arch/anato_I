@@ -3,7 +3,8 @@
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { mix } from '@/lib/sim/anim';
 import { aimCamera, blendCamera, centreOf } from '@/lib/three-d/aim';
-import { add, cross, mul, norm, rotate, sub, viewOf, project, type M4, type V3, type View3 } from '@/lib/three-d/math';
+import { viewOf, project, type M4, type V3, type View3 } from '@/lib/three-d/math';
+import { orbitCamera } from '@/lib/three-d/orbit';
 import { KEY_LIGHT, projectItem, type Item3, type Projected, type Scene3 } from '@/lib/three-d/scene';
 import { Part } from '../Part';
 import { UnderlayContext, partState, useLabelScale, useScene } from '../context';
@@ -55,16 +56,17 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
   const drag = useRef<{ x: number; y: number; yaw: number; pitch: number; moved: boolean } | null>(null);
 
   // The camera the scene asks for, turned by the viewer's drag around its target.
-  const cam = useMemo(() => {
-    const c = scene.camera;
-    if (!turn.yaw && !turn.pitch) return c;
-    const up: V3 = c.up ?? [0, 1, 0];
-    let off = sub(c.eye, c.target);
-    off = rotate(off, up, turn.yaw);
-    const right = norm(cross(up, off));
-    off = rotate(off, right, -turn.pitch);
-    return { ...c, eye: add(c.target, off) };
-  }, [scene.camera, turn]);
+  const cam = useMemo(() => orbitCamera(scene.camera, turn), [scene.camera, turn]);
+  const orbitRequest = ul?.orbitRequest;
+  const [appliedOrbit, setAppliedOrbit] = useState<typeof orbitRequest>(undefined);
+  if (orbitRequest && orbit && appliedOrbit !== orbitRequest) {
+    setAppliedOrbit(orbitRequest);
+    const { direction } = orbitRequest;
+    setTurn((previous) => direction === 'reset' ? { yaw: 0, pitch: 0 } : {
+      yaw: previous.yaw + (direction === 'left' ? 0.25 : direction === 'right' ? -0.25 : 0),
+      pitch: Math.max(-1.1, Math.min(1.1, previous.pitch + (direction === 'up' ? 0.18 : direction === 'down' ? -0.18 : 0))),
+    });
+  }
 
   // The structure put forward (the step's tour, the 3D tour): the camera turns to the side it is best
   // seen from, gliding there and back so the viewer always sees where the picture went.
@@ -185,6 +187,8 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
         setTurn({ yaw: d.yaw - dx * 0.007, pitch: Math.max(-1.1, Math.min(1.1, d.pitch + dy * 0.006)) });
       }}
       onPointerUp={() => setTimeout(() => (drag.current = null), 0)}
+      onPointerCancel={() => { drag.current = null; }}
+      onLostPointerCapture={() => { setTimeout(() => (drag.current = null), 0); }}
       onClickCapture={(e) => {
         // A drag that turned the picture is not a click on what it started on.
         if (drag.current?.moved) e.stopPropagation();

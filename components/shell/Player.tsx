@@ -2,9 +2,10 @@
 
 import { firstSentence } from '@/content/generate';
 import { useMemo, useRef, useState, type ReactNode } from 'react';
-import type { Beat, MicroQuestion, StageDef, StructureDef } from '@/lib/sim/types';
+import type { Beat, MicroQuestion, StageDef, StructureDef, ViewGuide } from '@/lib/sim/types';
+import { ModelGuide } from './ModelGuide';
 import { structures } from '@/content/registry';
-import { IconBolt, IconCalendar, IconChevron, IconClose, IconQuiz, IconCaptions, IconGuide, IconLoop, IconNext, IconNotes, IconPause, IconPlay, IconPrev, IconRestart, IconSkipNext, IconSkipPrev, IconVoice, IconVoiceOff } from './icons';
+import { IconBolt, IconCalendar, IconChevron, IconClose, IconQuiz, IconCaptions, IconGuide, IconInfo, IconLoop, IconNext, IconNotes, IconPause, IconPlay, IconPrev, IconRestart, IconSkipNext, IconSkipPrev, IconVoice, IconVoiceOff } from './icons';
 import { Popover } from './Popover';
 import { categoryColor } from '@/lib/sim/palette';
 import type { AudioSnapshot } from './narrate';
@@ -14,6 +15,7 @@ import { linkTerms, termsOf, type Term } from './terms';
 import type { ExamDate } from '@/content/examDates';
 
 interface PlayerProps {
+  modelGuide?: { key: string; content: ViewGuide; onOpen: () => void };
   stage: StageDef;
   stageIndex: number;
   stageCount: number;
@@ -365,6 +367,13 @@ export function Player(p: PlayerProps) {
   const allTerms = useMemo(() => termsOf([...p.stage.structures, ...p.stage.beats.flatMap((b) => b.focus ?? [])]), [p.stage]);
   const terms = p.noTerms ? NO_TERMS : allTerms;
   const showText = !p.voice || fullText;
+  // The 3D view's reading guide belongs to one step of one view: playing on or moving to another step closes it.
+  const guideKey = p.modelGuide && !p.voice && !p.ask && !p.tourCard && !p.intro ? `${p.modelGuide.key}|${p.stage.id}|${p.activeBeat}` : null;
+  const [guideFor, setGuideFor] = useState<string | null>(null);
+  if (p.playing && guideFor !== null) setGuideFor(null);
+  const guideOpen = guideKey !== null && guideFor === guideKey;
+  const guideBtn = useRef<HTMLButtonElement>(null);
+  const closeGuide = () => { setGuideFor(null); guideBtn.current?.focus({ preventScroll: true }); };
 
   // The one Next key: whatever moves the study on right now (start after the preview, skip or leave the
   // question, go on after a step, the next stage), always in the same place. `go` lights it up: the app
@@ -433,7 +442,8 @@ export function Player(p: PlayerProps) {
       {/* The step's text takes the card's whole width: the pager lives in the control row below, so it
           never moves and the text wraps (and reserves) fewer lines. */}
       <div className="cap" aria-live="polite">
-        <div className="cap-body">
+        <div className={`cap-body${guideOpen ? ' has-guide' : ''}`}>
+          {guideOpen && p.modelGuide && <ModelGuide guide={p.modelGuide.content} onClose={closeGuide} />}
           {!p.voice && p.voiceConfigured !== false && (
             <button className="voice-cta" onClick={() => p.onVoice(true)} title="Urrats bakoitza ahoz azaldu, irudiari begira">
               <IconVoice size={15} /> Ahotsarekin ikasi
@@ -560,6 +570,25 @@ export function Player(p: PlayerProps) {
             {/* How the stage plays, as one group: the voice on/off key and the mode sheet (mode, speed,
                 voice, auto-continue, mini-questions). */}
             <div className="tp-group" role="group" aria-label="Erreprodukzioa">
+            {guideKey !== null && (
+              <button
+                ref={guideBtn}
+                className={`tp-voice tp-guide${guideOpen ? ' is-on' : ''}`}
+                onClick={() => {
+                  if (guideOpen) return closeGuide();
+                  p.modelGuide?.onOpen();
+                  setGuideFor(guideKey);
+                }}
+                aria-expanded={guideOpen}
+                aria-controls={guideOpen ? 'model-guide' : undefined}
+                aria-label="Irudia ulertu"
+                data-tip="Irudia ulertu: non zauden eta zeri begiratu"
+                data-tip-pos="top"
+              >
+                <IconInfo size={15} />
+                <span className="tp-guide-l">Irudia ulertu</span>
+              </button>
+            )}
             {p.voiceConfigured !== false && (
               <button
                 className={`tp-voice${p.voice ? ' is-on' : ''}`}
@@ -685,7 +714,7 @@ export function Player(p: PlayerProps) {
  * scene right now, in its colour, with its definition; its own arrows walk the list (the Next key still
  * goes to the next step) and a click on the card opens its full entry.
  */
-export function TourCard({ item, idx, n, auto, onStep, onClose, onPick, kicker = 'Ezagutu egiturak' }: { item: StructureDef; idx: number; n: number; auto: boolean; onStep: (d: number) => void; onClose: () => void; onPick: (id: string) => void; kicker?: string }) {
+export function TourCard({ item, idx, n, auto, onStep, onClose, onPick, kicker = 'Ezagutu egiturak', manual = false }: { item: StructureDef; idx: number; n: number; auto: boolean; onStep: (d: number) => void; onClose: () => void; onPick: (id: string) => void; kicker?: string; manual?: boolean }) {
   return (
     <div className={`tour is-dock${auto ? ' is-auto' : ''}`} role="group" aria-label={kicker}>
       <div className="tour-top">
@@ -719,6 +748,12 @@ export function TourCard({ item, idx, n, auto, onStep, onClose, onPick, kicker =
           <span className="tour-def">{item.definition}</span>
         </span>
       </button>
+      {manual && (
+        <div className="tour-manual">
+          <span>Begiratu lasai. Zuk erabaki noiz jarraitu.</span>
+          <button className="btn small" onClick={() => idx + 1 < n ? onStep(1) : onClose()}>{idx + 1 < n ? 'Hurrengo egitura →' : 'Bira amaitu'}</button>
+        </div>
+      )}
     </div>
   );
 }

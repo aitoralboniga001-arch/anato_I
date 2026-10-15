@@ -1,4 +1,5 @@
 import type { WeekDef } from '@/lib/sim/types';
+import { domainsGuide } from '../three-d-guides';
 import { OriginsSection } from '@/components/scenes/week9/Origins';
 import { MuscleTissues } from '@/components/scenes/week9/Tissues';
 import { ParaxialMap } from '@/components/scenes/week9/Paraxial';
@@ -909,6 +910,7 @@ export const week9: WeekDef = {
           plane: 'eskema',
           description: 'Enborraren xerra bat 3Dn, hiru somita luze: aurrealdeko ebakia 4. gaiko irudia bera da. Muga berdea gortina bat da enbor osoan zehar; somita bakoitzaren aurre-alboko ertzetik zelulak muga gurutzatu eta paretako orrira doaz. Gero bi domeinuak bolumen gisa: primaxiala (urdina) barrualdean, abaxiala (laranja) paretako orrian.',
           scene: Domains3D,
+          guide: domainsGuide,
           travel: false,
         },
         {
@@ -935,6 +937,7 @@ export const week9: WeekDef = {
           notes: ['w9/2.2.1/p3/s1'],
           recall: ['aurre-alboko-muskulu-zelulak', 'esklerotoma'],
           idea: 'Somita-zelula batzuk (muskulu zelulak eta esklerotoma zelula batzuk) paretako orrira migratzen dute.',
+          completeAt: 0.099, // All migrating cells have reached the parietal layer.
           text: 'Somitetako zelula batzuk (zelula muskularrak eta esklerotomako zelula batzuk) alboko mesodermoaren paretako orrira migratzen dute.',
           focus: ['aurre-alboko-muskulu-zelulak', 'paretako-orria'],
           view: 'domeinuak-3d',
@@ -943,6 +946,7 @@ export const week9: WeekDef = {
           at: 0.1,
           notes: ['w9/2.2.1/p4/s1'],
           idea: 'Somitaren alboko muga (marra berdea): mesodermoa 2 domeinutan banatzen du.',
+          caution: '3D ereduko gortina berdea muga kontzeptuala da, ez benetako mintza. Zelulek zeharkatzen dute.',
           text: 'Somitaren alboko aldean somitaren alboko muga dago (irudian marra berdea), eta honek mesodermoaren zelula multzoa 2 domeinutan banatzen du.',
           focus: ['somitaren-alboko-muga'],
         },

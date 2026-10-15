@@ -1,0 +1,78 @@
+/* Lies over the caption (the caption keeps its place underneath), so opening it never resizes the dock or the scene. */
+.panel {
+  position: absolute;
+  z-index: 3;
+  left: -12px;
+  right: -12px;
+  bottom: -6px;
+  display: flex;
+  flex-direction: column;
+  /* At least the caption's own box; when the guide needs more, it rises over the scene's lower edge
+     like a sheet (never past about half the screen) instead of scrolling in a slit. */
+  min-height: calc(100% + 12px);
+  max-height: max(calc(100% + 12px), min(360px, 50dvh));
+  padding: 10px 12px 6px;
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 -18px 40px -22px rgba(0, 0, 0, 0.95);
+  font-size: 13px;
+  line-height: 1.6;
+  animation: guide-in 0.18s var(--ease, ease-out);
+}
+@keyframes guide-in {
+  from { opacity: 0; transform: translateY(4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel { animation: none; }
+}
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.head h2 { margin: 0; font-size: 13px; font-weight: 600; color: var(--text); }
+.head span { color: var(--text-3); font-size: 12px; }
+.close {
+  align-self: center;
+  margin-left: auto;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.close:hover { background: var(--surface-2); color: var(--text); }
+.close:focus-visible,
+.check summary:focus-visible { outline: 2px solid var(--accent, #ffb86b); outline-offset: 2px; }
+.content {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-content: start;
+  gap: 10px 24px;
+  padding: 10px 6px 4px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.content h3 { color: var(--text-2); font-size: 12px; margin: 0 0 2px; }
+.content p { margin: 0; max-width: 65ch; color: var(--text-2); }
+.meaning { align-self: start; padding-left: 12px; border-left: 2px solid #ffb86b; }
+.check { padding: 8px 12px; background: rgba(255, 255, 255, 0.035); border-radius: 8px; }
+.check summary { cursor: pointer; color: var(--text); }
+.check summary span { display: block; font-size: 12px; color: var(--text-3); }
+.check p { padding-top: 8px; }
+@media (max-width: 760px) {
+  .content { grid-template-columns: 1fr; }
+}
+/* Beats the guided-mode caption size (.dock.is-guided .cap p): the guide is reference, read in a glance. */
+.panel.panel.panel .content p { font-size: 14px; line-height: 1.5; }
+.panel.panel.panel .check summary { font-size: 13.5px; line-height: 1.45; }

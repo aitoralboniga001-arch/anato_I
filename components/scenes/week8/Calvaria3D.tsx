@@ -490,22 +490,22 @@ export function buildCalvaria(t: number, reduced: boolean) {
 const onVault = (q: V3, out = 0.006): V3 => add(surfaceAlong(head, O, norm(q), 2).p, mul(norm(q), out));
 
 function Calvaria3DView({ t, reduced }: SceneProps) {
-  const { scene, eye, grow, growing, mold, pfClose, afClose, sutures, fontSize, calm } = buildCalvaria(t, reduced);
-  const view = norm(sub(eye, O));
-  /** The side (x sign) facing the camera, for the names of paired structures. */
-  const sd = view[0] >= 0 ? 1 : -1;
-  const facing = (q: V3) => dot(norm(q), view) > 0.12;
+  const { scene, grow, growing, mold, pfClose, afClose, sutures, fontSize, calm } = buildCalvaria(t, reduced);
   const mon = afClose > 0.5 ? '18. hilabetea' : pfClose > 0.5 ? '1.–2. hilabetea' : 'jaiotzean';
   const bones = vis(t, CAL_T.bones);
   const sides = vis(t, CAL_T.side);
-  const shown = (q: V3, k: number) => (facing(q) ? k : 0);
-  const pick = (a: V3, b: V3): V3 => (dot(norm(a), view) >= dot(norm(b), view) ? a : b);
   const mirror = (q: V3): V3 => [-q[0], q[1], q[2]];
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="none" />
       <Stage3D scene={scene} axes={{ up: 'goia', front: 'aurrea', side: 'ezkerra', sideDir: [1, 0, 0] }}>
-        {(at) => {
+        {(at, camera) => {
+          // Follow the actual camera, including manual orbit and the structure tour.
+          const view = norm(sub(camera.eye, O));
+          const sd = view[0] >= 0 ? 1 : -1;
+          const facing = (q: V3) => dot(norm(q), view) > 0.12;
+          const shown = (q: V3, k: number) => (facing(q) ? k : 0);
+          const pick = (a: V3, b: V3): V3 => (dot(norm(a), view) >= dot(norm(b), view) ? a : b);
           const m = mould(mold, [0, 0, 0]);
           const tip = (q: V3, out?: number) => at(onVault(q, out), m);
           const F = BONES[idx('FL')].dir;
@@ -532,7 +532,7 @@ function Calvaria3DView({ t, reduced }: SceneProps) {
           return (
             <>
               <Note x={24} y={24} size={12.5} align="start">
-                {`Jaioberriaren buru-ganga · ${c3Name(t)}`}
+                Buru-gangaren garapena · 3D eredua
               </Note>
               <Callouts
                 dim={calm}
@@ -590,13 +590,6 @@ function Calvaria3DView({ t, reduced }: SceneProps) {
       </Stage3D>
     </g>
   );
-}
-
-function c3Name(t: number) {
-  if (t >= CAL_T.side && t < CAL_T.birth) return 'albotik';
-  if (t >= CAL_T.fontanelles && t < CAL_T.side) return 'goitik eta atzetik';
-  if (t >= CAL_T.after) return 'goitik eta atzetik';
-  return 'goitik eta aurretik';
 }
 
 /** The view waits (without freezing the page) until its geometry has been built off the main thread. */

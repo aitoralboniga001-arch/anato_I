@@ -13339,6 +13339,63 @@ kbd {
   top: 52px;
 }
 
+/* Persistent camera keys (touch and keyboard as well as dragging): a small round cross in the view's
+   lower-right corner, as on a map, so the top corner keeps only the tour key. */
+.orbit-controls {
+  position: absolute;
+  z-index: 29;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, 30px);
+  grid-template-rows: repeat(3, 30px);
+  grid-template-areas: '. up .' 'left reset right' '. down .';
+  padding: 4px;
+  border: 1px solid var(--float-edge);
+  border-radius: 50%;
+  background: var(--float);
+  box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.9);
+}
+.orbit-controls button {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+.orbit-up { grid-area: up; }
+.orbit-left { grid-area: left; }
+.orbit-right { grid-area: right; }
+.orbit-down { grid-area: down; }
+.orbit-controls .orbit-reset { grid-area: reset; color: var(--text-3); font-size: 14px; }
+.orbit-controls button:hover { background: rgba(255, 255, 255, 0.09); color: var(--text); }
+.orbit-controls button:focus-visible { outline: 2px solid #ffb86b; outline-offset: 1px; }
+.orbit-controls button:active { background: rgba(255, 184, 107, 0.14); }
+.tour-manual { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0 0; }
+.tour-manual > span { color: var(--text-3); font-size: 12px; }
+.tour-manual .btn { flex-shrink: 0; min-height: 40px; }
+/* The 3D reading guide lies over the caption; the caption keeps the dock's height underneath. */
+.dock .cap-body.has-guide { position: relative; overflow: visible; }
+/* The dock is a stacking context (container query): lift it over the scene's corner keys while the sheet rises. */
+.dock:has(.cap-body.has-guide) { position: relative; z-index: 40; }
+.cap-body.has-guide > :not(section) { visibility: hidden; }
+@media (max-width: 820px) {
+  .tour-manual { flex-wrap: wrap; }
+}
+@media (pointer: coarse) {
+  .orbit-controls { grid-template-columns: repeat(3, 40px); grid-template-rows: repeat(3, 40px); }
+}
+@container dock (max-width: 880px) {
+  .dock .tp-guide > .tp-guide-l { display: none; }
+  .dock .tp-guide { width: var(--h-md); padding: 0; justify-content: center; }
+}
+
 .app:has(.loc-card) .viewport .turn-hint {
   visibility: hidden;
 }

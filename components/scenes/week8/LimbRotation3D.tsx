@@ -8,6 +8,7 @@ import { add, cross, deg, dot, mix3, mul, norm, perp, rotate, rotateAbout, sub, 
 import { blob, curve3, merge, tube, type Mesh } from '@/lib/three-d/mesh';
 import { blend, capsule, ellipsoid, partition, smin, surfaceAlong, surfaceMesh, type SDF } from '@/lib/three-d/sdf';
 import type { Item3, Scene3 } from '@/lib/three-d/scene';
+import { visibleFrom } from '@/lib/three-d/visibility';
 import { Q } from './common';
 import { LIMB_T } from './Limbs';
 
@@ -288,7 +289,10 @@ export function buildLimbRotation(t: number): { scene: Scene3; turn: { up: numbe
   // The camera eases down from the arms to the legs as the steps move on.
   const focusLow = seg(t, LIMB_T.rotLow - 0.02, LIMB_T.rotLow + 0.04);
   const target = mix3([0.08, 0.18, 0.12], [0.08, -0.28, 0.16], focusLow);
-  const yaw = deg(50 + 6 * focusLow);
+  // While the legs turn, the camera goes round with them to the back-left: the flexors end up behind,
+  // and the step names them, so the student must see both masses at its end (not only after turning by hand).
+  const lowSeen = seg(t, ROT3.low[0] + 0.025, ROT3.low[1] - 0.012);
+  const yaw = deg(50 + 6 * focusLow + 90 * lowSeen);
   const pitch = deg(14 - 4 * focusLow);
   const dist = 7.0;
   const eye: V3 = add(target, [Math.sin(yaw) * Math.cos(pitch) * dist, Math.sin(pitch) * dist, Math.cos(yaw) * Math.cos(pitch) * dist]);
@@ -310,10 +314,11 @@ function LimbRotation3DView({ t }: SceneProps) {
       <rect x={0} y={0} width={1000} height={640} fill="none" />
       <Stage3D scene={scene} axes={{ up: 'kraneala', front: 'bentrala', side: 'ezkerra', sideDir: [1, 0, 0] }}>
         {(at, view) => {
+          const occluders = scene.items.filter((item) => item.key === 'body' || item.key.endsWith('-flex') || item.key.endsWith('-ext'));
           // A point on the surface of one muscle mass, on whichever limb of the pair (and segment) shows
           // it best to the camera: the name always points at red or blue the student can see.
           const onMass = (lower: boolean, flexSide: boolean) => {
-            let best = { p: [0, 0, 0] as V3, score: -Infinity };
+            const candidates: { p: V3; score: number; facing: number }[] = [];
             for (const i of lower ? [2, 3] : [0, 1])
               for (const which of ['mid1', 'mid2'] as const) {
                 const g = geo.limbs[i].g;
@@ -326,25 +331,44 @@ function LimbRotation3DView({ t }: SceneProps) {
                 // Lean the point from the middle of the mass towards the viewer, staying on that half.
                 const side = perp(toEye, along);
                 const dir = norm(add(f, mul(side, 0.5 * Math.sign(dot(side, f) || 1))));
-                const score = dot(dir, toEye) + (i % 2 === 0 ? 0.08 : 0) + (which === 'mid2' ? 0.04 : 0);
-                if (score > best.score) best = { p: add(c, mul(dir, lower ? 0.11 : 0.095)), score };
+                if (dot(dir, toEye) <= 0.05) continue;
+                // Snap to the actual coloured surface, rather than assuming a constant limb radius.
+                const localDir: V3 = [dot([m[0], m[1], m[2]], dir), dot([m[4], m[5], m[6]], dir), dot([m[8], m[9], m[10]], dir)];
+                const desired = add(g.marks[which], mul(localDir, lower ? 0.11 : 0.095));
+                const mesh = flexSide ? g.flexMesh : g.extMesh;
+                let nearest = 0;
+                let distance = Infinity;
+                for (let j = 0; j < mesh.pos.length; j += 3) {
+                  const d = (mesh.pos[j] - desired[0]) ** 2 + (mesh.pos[j + 1] - desired[1]) ** 2 + (mesh.pos[j + 2] - desired[2]) ** 2;
+                  if (d < distance) { nearest = j; distance = d; }
+                }
+                const p = apply(m, [mesh.pos[nearest], mesh.pos[nearest + 1], mesh.pos[nearest + 2]]);
+                const normal = applyDir(m, [mesh.nrm[nearest], mesh.nrm[nearest + 1], mesh.nrm[nearest + 2]]);
+                const facing = dot(normal, norm(sub(view.eye, p)));
+                if (facing <= 0.05) continue;
+                candidates.push({ p, score: facing + (i % 2 === 0 ? 0.08 : 0) + (which === 'mid2' ? 0.04 : 0), facing });
               }
-            return at(best.p);
+            // The best-scoring anchor the camera can actually see: rays are cast best-first, so usually only one.
+            const best = candidates.sort((a, b) => b.score - a.score).find((c) => visibleFrom(c.p, view.eye, occluders)) ?? { p: [0, 0, 0] as V3, facing: 0 };
+            // A far-side flexor anchor otherwise projects onto the blue extensor in front of it.
+            // Fade the leader when neither limb exposes that muscle mass; invite the learner to turn.
+            return { at: at(best.p), visible: seg(best.facing, 0.05, 0.25) };
           };
           const jointAt = (i: number) => {
             const g = geo.limbs[i].g;
             return at(apply(mats[i], add(g.marks.joint, mul(g.flex, -0.12))));
           };
-          const uf = onMass(false, true);
-          const ue = onMass(false, false);
-          const lf = onMass(true, true);
-          const le = onMass(true, false);
+          const hidden = { at: { x: 0, y: 0, z: 0 }, visible: 0 };
+          const uf = lowTurn < 1 ? onMass(false, true) : hidden;
+          const ue = lowTurn < 1 ? onMass(false, false) : hidden;
+          const lf = lowTurn > 0 ? onMass(true, true) : hidden;
+          const le = lowTurn > 0 ? onMass(true, false) : hidden;
           const elbow = jointAt(0);
           const knee = jointAt(2);
           return (
             <>
               <Note x={24} y={24} size={12.5} align="start">
-                8. astea · ezker aldetik eta aurretik
+                8. astea · gorputz-adarren biraketa
               </Note>
               <Note x={24} y={44} size={12.5} align="start" show={before}>
                 Biratu aurretik: ahurrak eta oin-zolak enborrari begira
@@ -354,6 +378,9 @@ function LimbRotation3DView({ t }: SceneProps) {
               </Note>
               <Note x={24} y={44} size={12.5} align="start" tone="accent" show={lowTurn}>
                 Behekoak: 90° erdialdera (barrura)
+              </Note>
+              <Note x={590} y={586} size={12} show={1 - Math.min(uf.visible * (1 - lowTurn) + lf.visible * lowTurn, ue.visible * (1 - lowTurn) + le.visible * lowTurn)}>
+                Ezkutuko muskulu-masa ikusteko, biratu eredua
               </Note>
               <Note x={elbow.x} y={elbow.y - 22} size={12} show={upDone * (1 - lowTurn * 0.6)}>
                 ukondoa atzera
@@ -369,10 +396,10 @@ function LimbRotation3DView({ t }: SceneProps) {
               </Note>
               <Callouts
                 items={[
-                  { id: 'muskulu-tolestatzaileak', at: uf, show: 1 - lowTurn },
-                  { id: 'muskulu-hedatzaileak', at: ue, show: 1 - lowTurn },
-                  { id: 'muskulu-tolestatzaileak', at: lf, show: lowTurn, key: 'muskulu-tolestatzaileak-1' },
-                  { id: 'muskulu-hedatzaileak', at: le, show: lowTurn, key: 'muskulu-hedatzaileak-1' },
+                  { id: 'muskulu-tolestatzaileak', at: uf.at, show: uf.visible * (1 - lowTurn) },
+                  { id: 'muskulu-hedatzaileak', at: ue.at, show: ue.visible * (1 - lowTurn) },
+                  { id: 'muskulu-tolestatzaileak', at: lf.at, show: lf.visible * lowTurn, key: 'muskulu-tolestatzaileak-1' },
+                  { id: 'muskulu-hedatzaileak', at: le.at, show: le.visible * lowTurn, key: 'muskulu-hedatzaileak-1' },
                 ]}
               />
             </>

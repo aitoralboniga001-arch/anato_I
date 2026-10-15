@@ -1,4 +1,5 @@
 import type { WeekDef } from '@/lib/sim/types';
+import { calvariaGuide, limbGuide } from '../three-d-guides';
 import { OriginsMap, OriginsSection } from '@/components/scenes/week8/Origins';
 import { OssificationTypes } from '@/components/scenes/week8/Ossification';
 import { CalvariaSide, CalvariaTop } from '@/components/scenes/week8/Calvaria';
@@ -315,6 +316,7 @@ export const week8: WeekDef = {
           plane: 'kanpokoa',
           description: 'Buru-ganga osoa 3Dn, entzefaloaren gaineko kupula bat: hezur bakoitza bere hezurtzapen zentrotik hazten da mintzean zehar; bi hezur elkartzen diren lekuan joskura, gehiago elkartzen diren lekuan fontanela. Sei fontanelak irudi berean; erditzean parietalak ondokoen gainera.',
           scene: Calvaria3D,
+          guide: calvariaGuide,
           travel: false,
         },
       ],
@@ -804,6 +806,7 @@ export const week8: WeekDef = {
           description: '8. asteko biraketak 3Dn, enbrioia ezker aldetik eta aurretik ikusita: muskulu tolestatzaileak (gorria) eta hedatzaileak (urdina) gorputz-adar bakoitzaren ardatzaren inguruan biratzen. Arrastatu edozein aldetik ikusteko.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: LimbRotation3D,
+          guide: limbGuide,
           travel: false,
         },
         {
@@ -906,6 +909,7 @@ export const week8: WeekDef = {
         {
           at: 0.76,
           idea: 'Goiko gorputz-adarrak 90° biratzen dute kanpora: flexoreak aurrean.',
+          completeAt: 0.87, // Full rotation and the posterior-elbow landmark, before the legs turn.
           notes: ['w8/4/p13/s1', 'w8/4/p14/s1-s2', 'w8/4/p15/s1'],
           text: '8. astean gorputz-adarrek kontrako biraketak egiten dituzte. Goikoek 90° biratzen dute albora (kanpora): aurreko aldean muskulu tolestatzaileak (flexoreak) gelditzen dira, eta alde dortsalean eta lateraletan muskulu hedatzaileak (extensoreak).',
           focus: ['muskulu-tolestatzaileak', 'muskulu-hedatzaileak'],

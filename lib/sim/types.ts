@@ -28,6 +28,15 @@ export interface Orientation {
   right?: string;
 }
 
+export interface ViewGuide {
+  /** Plain-language orientation and one observation task, without advancing the clock. */
+  orientation: string;
+  observe: string;
+  meaning: string;
+  question: string;
+  answer: string;
+}
+
 export interface ViewDef {
   id: string;
   /** Short Basque tab label, e.g. "Mozketa sagitala". */
@@ -35,6 +44,7 @@ export interface ViewDef {
   plane: PlaneKind;
   /** One sentence: what this perspective shows and where the cut is. */
   description: string;
+  guide?: ViewGuide;
   orientation?: Orientation;
   scene: SceneComponent;
   /** The scene dims its own context per step (tracked-cell scenes); the shell must not dim on top. */
@@ -86,6 +96,8 @@ export interface MicroQuestion {
 
 export interface Beat {
   at: number;
+  /** Explicit resting frame when the animation finishes later than the default reading hold. Must precede the next beat. */
+  completeAt?: number;
   /** The age this step shows when it runs ahead of the stage's days (a later stage drawn in advance). Same forms as `ViewDef.age`. */
   age?: number | string | null;
   /** Original notes sentence ids (week-prefixed), or paragraph ranges such as w1/4.2/p3/s1-s4. */

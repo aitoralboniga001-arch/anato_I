@@ -349,15 +349,17 @@ export function buildDiaphragm(t: number, reduced: boolean, canalLit = false) {
     );
   const cr = crura(F.lift, crusK);
   if (cr) items.push({ key: 'crura', id: 'hestegorri-inguruko-mesenkima', groups: ['gerriko-atala'], mesh: cr, color: P.eso, deep: '#2a6a60', tissue: 'muscle' });
-  // Myocytes from the septum into the membranes, while they are being colonised.
-  const myoShow = vis(t, DOME_T.myo[0], DOME_T.myo[1], 0.012);
+  // Track each cell once, then keep it at its destination for the reading hold. A modulo loop
+  // made the same cell jump back to the septum, suggesting reversible migration.
+  const myoShow = seg(t, DOME_T.myo[0], DOME_T.myo[0] + 0.012) * (1 - seg(t, ...DOME_T.adult));
   const myoAt: V3[] = [];
   if (myoShow > 0.02)
     for (let i = 0; i < 3; i++) {
-      const u = reduced ? 0.2 + i * 0.3 : (i / 3 + seg(t, DOME_T.myo[0], DOME_T.myo[1], (k) => k) * 2.4) % 1;
+      const u = seg(t, DOME_T.myo[0] + i * 0.006, DOME_T.myo[1] - 0.012);
       for (const s of [1, -1]) {
-        const a: V3 = [s * Math.abs(X(400)), 0, Z(430)];
-        const b: V3 = [s * Math.abs(X(332)), 0, Z(300)];
+        const lane = (i - 1) * 0.065;
+        const a: V3 = [s * (Math.abs(X(400)) + lane), 0, Z(430)];
+        const b: V3 = [s * (Math.abs(X(332)) + lane), 0, Z(300)];
         const p0 = mix3(a, b, u);
         const p = F.lift([p0[0], 0.065 + 0.04 * Math.sin(Math.PI * u), p0[2]]);
         myoAt.push(p);
@@ -381,13 +383,13 @@ export function buildDiaphragm(t: number, reduced: boolean, canalLit = false) {
   const FI = flyIn(fly, EMBRYO_AT, camera, PLANES, { cranial: [0, 1, 0], dorsal: [0, 0, -1] });
   reveal(items, FI, (it) => it.key.startsWith('myo'));
   const scene: Scene3 = { camera: FI.camera, items: [...FI.items, ...items] };
-  return { scene, F, myoAt, canalShow, FI };
+  return { scene, F, myoAt, myoShow, canalShow, FI };
 }
 
 function DiaphragmDome3DView({ t, reduced }: SceneProps) {
   const ctx = useScene();
   const lit = ['focus', 'spot', 'active'].includes(partState(ctx, 'erreten-perikardioperitonealak'));
-  const { scene, F, myoAt, canalShow, FI } = buildDiaphragm(t, reduced, lit);
+  const { scene, F, myoAt, myoShow, canalShow, FI } = buildDiaphragm(t, reduced, lit);
   const L = FI.labels;
   const top = (x: number, z: number, up = 0.06) => F.lift([x, up, z]);
   const adult = seg(t, DOME_T.adult[0], DOME_T.adult[1]);
@@ -424,7 +426,7 @@ function DiaphragmDome3DView({ t, reduced }: SceneProps) {
                 5. astea · ebaki zeharkakoa septum transversumaren mailan
               </Note>
               <Note x={24} y={24} size={12.5} align="start" show={L}>
-                Diafragmaren osagaiak · aurretik eta goitik
+                Diafragmaren osagaiak · 3D eredua
               </Note>
               {/* The four components each keep one colour from here to the adult diaphragm. */}
               <CavityKey
@@ -451,7 +453,7 @@ function DiaphragmDome3DView({ t, reduced }: SceneProps) {
                   { id: 'diafragmaren-alde-periferikoa', at: rim, show: adult * L },
                   { id: 'erreten-perikardioperitonealak', at: canal, show: canalShow * L, small: true },
                   { id: 'mintz-pleuroperitonealak', at: memR, show: memShow * L },
-                  { id: 'miozitoak', at: myo ?? { x: 0, y: 0 }, show: myo ? (vis(t, DOME_T.myo[0], DOME_T.myo[1], 0.012)) * L : 0, small: true },
+                  { id: 'miozitoak', at: myo ?? { x: 0, y: 0 }, show: myo ? myoShow * L : 0, small: true },
                   { id: 'beheko-kaba-zaina', at: ivc, show: L, small: true },
                   { id: 'septum-transversum', at: sept, show: young * L },
                   { id: 'zentro-tendinosoa', at: sept, show: adult * L },
@@ -466,7 +468,7 @@ function DiaphragmDome3DView({ t, reduced }: SceneProps) {
               <Note x={500} y={612} tone="accent" show={vis(t, DOME_T.rim[0], DOME_T.dome[0]) * L}>
                 Miozitoak septumetik mintzetara · gorputz paretak ertz muskularra
               </Note>
-              <Note x={500} y={612} tone="accent" show={vis(t, DOME_T.dome[0], DOME_T.adult[0]) * L}>
+              <Note x={500} y={612} tone="accent" show={seg(t, DOME_T.dome[0], DOME_T.dome[1]) * young * L}>
                 Lau osagaiak kupula bihurtzen dira: bakoitzak bere tokia gordetzen du
               </Note>
               <Note x={500} y={612} tone="accent" show={adult * L}>

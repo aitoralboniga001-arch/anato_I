@@ -331,8 +331,11 @@ function Domains3DView({ t, reduced }: SceneProps) {
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="none" />
       <Stage3D scene={scene} axes={{ up: 'dortsala', front: 'kraneala', side: 'ezkerra', sideDir: [1, 0, 0] }}>
-        {(at) => {
-          const face = (x: number, y: number) => at([x, y, Z1 + 0.005]);
+        {(at, view) => {
+          // Both cut faces and both sides exist: labels follow the side the learner is viewing.
+          const side = view.eye[0] >= 0 ? 1 : -1;
+          const faceZ = view.eye[2] >= (Z0 + Z1) / 2 ? Z1 + 0.005 : Z0 - 0.005;
+          const face = (x: number, y: number) => at([x * side, y, faceZ]);
           const head = at(F.head);
           const tail = at(F.tail);
           const neural = face(0.12, 0.62);
@@ -340,7 +343,7 @@ function Domains3DView({ t, reduced }: SceneProps) {
           const sclero = face(0.3, 0.12);
           const dermato = face(0.5, 0.71);
           const myo = face(0.5, 0.55);
-          const fr = at([0.76, 0.42 - 0.3 * (1 - front), 0.55]);
+          const fr = at([0.76 * side, 0.42 - 0.3 * (1 - front), faceZ]);
           const par = face(...along(PARIETAL, 0.36));
           const inter = face(0.69, 0.07);
           const cellsLabel = cellPts.length ? at(cellPts.reduce((b, p) => (p[2] > b[2] && p[1] < 0 ? p : b), cellPts[0])) : par;
@@ -358,7 +361,7 @@ function Domains3DView({ t, reduced }: SceneProps) {
                 5. astea · ebaki zeharkakoa enborraren erdian: hiru somitako xerra
               </Note>
               <Note x={24} y={24} size={12.5} align="start" show={L}>
-                5. astea · enborraren xerra (hiru somita), kranealetik eta alboetatik
+                5. astea · enborraren xerra (hiru somita) · 3D eredua
               </Note>
               <Callouts
                 items={[
@@ -379,7 +382,7 @@ function Domains3DView({ t, reduced }: SceneProps) {
                 Somita bakoitzetik zelulak paretako orrira migratzen dute
               </Note>
               <Note x={500} y={612} tone="accent" show={vis(t, DOM3_T.frontier[0], DOM3_T.prim[0])}>
-                Somitaren alboko muga: gortina berdea enbor osoan zehar
+                Muga berdea: domeinuak bereizteko eskema, ez benetako mintza
               </Note>
               <Note x={500} y={612} tone="accent" show={vis(t, DOM3_T.prim[0], DOM3_T.abax[0])}>
                 Barrualdean domeinu primaxiala (urdina): somitak, hodi neuralaren aldamenean

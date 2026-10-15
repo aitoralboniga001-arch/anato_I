@@ -10,6 +10,8 @@ const W = 1000;
 const H = 640;
 
 interface ViewportProps {
+  /** Show keyboard- and touch-accessible camera controls for an interactive 3D view. */
+  interactive3d?: boolean;
   orientation?: Orientation;
   children: ReactNode;
   /** Changing this key resets zoom (e.g. when the view changes). */
@@ -167,7 +169,7 @@ const sameMarks = (a: Mark[], b: Mark[]) =>
 
 /** SVG stage with wheel/drag zoom-pan, orientation edges and a feathered specimen backdrop. */
 export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewport(
-  { orientation, children, resetKey, onBackgroundClick, overlay, marks, nameOf, fullscreenRef, onFullscreenChange, makeRoom, hoverNames, onTurn, reveal, revealKey },
+  { orientation, children, resetKey, onBackgroundClick, overlay, marks, nameOf, fullscreenRef, onFullscreenChange, makeRoom, hoverNames, onTurn, reveal, revealKey, interactive3d },
   svgRef,
 ) {
   const [tag, setTag] = useState<{ id: string; x: number; y: number } | null>(null);
@@ -232,7 +234,15 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
     setSceneEl(el);
   }, []);
   const zoomed = z.k > 1.01;
-  const underlay = useMemo<Underlay | null>(() => (underHost ? { host: underHost, scene: sceneEl, zoomed } : null), [underHost, sceneEl, zoomed]);
+  const [orbitCommand, setOrbitCommand] = useState<{ key: string; request: NonNullable<Underlay['orbitRequest']> } | null>(null);
+  const orbitRequest = orbitCommand?.key === resetKey ? orbitCommand.request : undefined;
+  const underlay = useMemo<Underlay | null>(() => (underHost ? { host: underHost, scene: sceneEl, zoomed, orbitRequest } : null), [underHost, sceneEl, zoomed, orbitRequest]);
+  const turnModel = (direction: NonNullable<Underlay['orbitRequest']>['direction']) => {
+    cancelReveal();
+    if (direction === 'reset') glideZoom(HOME);
+    setOrbitCommand((old) => ({ key: resetKey, request: { direction, serial: (old?.request.serial ?? 0) + 1 } }));
+    onTurn?.();
+  };
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenError, setFullscreenError] = useState('');
   const markKey = (marks ?? []).join('|');
@@ -264,6 +274,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
     cancelReveal();
     zGoal.current = null;
     setZ(HOME);
+    setOrbitCommand(null);
   }, [resetKey, cancelReveal]);
 
   // The step names structures that the zoomed frame may cut off: back off just enough to show them, hold,
@@ -570,6 +581,20 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
           <IconFit />
         </button>
       </div>
+      {interactive3d && (
+        // A small camera cross in the view's lower corner, as on a map: the four turns round the reset key.
+        <div className="orbit-controls" role="group" aria-label="Kamera" onPointerDown={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
+          {([
+            ['up', '↑', 'Ikusi goragotik'],
+            ['left', '←', 'Biratu ikuspegia ezkerrera'],
+            ['reset', '↺', 'Ikuspegia berrezarri (kamera eta zooma; denbora ez da aldatzen)'],
+            ['right', '→', 'Biratu ikuspegia eskuinera'],
+            ['down', '↓', 'Ikusi beheragotik'],
+          ] as const).map(([direction, symbol, label]) => (
+            <button key={direction} type="button" className={`orbit-${direction}`} onClick={() => turnModel(direction)} aria-label={label} data-tip={label} data-tip-pos="left">{symbol}</button>
+          ))}
+        </div>
+      )}
       {fullscreenError && <div className="viewport-fullscreen-error" role="status" aria-live="polite">{fullscreenError}</div>}
       {hoverNames && tag && nameOf && (
         <div className="hover-name" style={{ left: tag.x, top: tag.y }} aria-hidden>

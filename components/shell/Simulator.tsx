@@ -7,6 +7,7 @@ import { SceneContext, type QuizFlash, type SceneContextValue } from '@/componen
 import { getWeek, isSpace, partsOf, nameOf, structures, weeks } from '@/content/registry';
 import { firstSeenOf, periodOf, weekOfDay } from '@/content/chronology';
 import { clockLabel, spanOf } from '@/lib/sim/age';
+import { doneAt } from '@/lib/sim/beat-completion';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { PlaneKind, StageDef, StructureCategory, StructureDef, WeekDef } from '@/lib/sim/types';
 import { Glossary } from './Glossary';
@@ -132,17 +133,6 @@ const captionDwellMs = (stage: StageDef, k: number) => Math.max(5500, (stage.bea
 
 /** Quick replay dwell: just long enough to read the step's main idea. */
 const quickDwellMs = (stage: StageDef, k: number) => Math.max(1600, ideaOf(stage.beats[k]).length * 38);
-
-/** Stage time before a step boundary where a reading hold rests (scenes cross-fade steps over ~0.03). */
-const HOLD_LEAD = 0.035;
-
-/** The frame where a step's change is complete: just before the next step's cross-fade (where reading holds rest). */
-const doneAt = (stage: StageDef, k: number) => {
-  const b = stage.beats[k];
-  if (k + 1 >= stage.beats.length) return 1;
-  const end = stage.beats[k + 1].at;
-  return end - Math.min(HOLD_LEAD, (end - b.at) * 0.25) - 1e-4;
-};
 
 /** How long a paused step takes to play itself out when stepped to (ms): its own pace, kept brief. */
 const glideMs = (stage: StageDef, from: number, to: number) => Math.min(2200, Math.max(550, (Math.abs(to - from) * stage.duration * 1000) / NORMAL_RATE));
@@ -688,18 +678,17 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         skipHold.current = false;
 
       }
-      const end = k + 1 < st.beats.length ? st.beats[k + 1].at : 1;
-      // Rest just before the next step's cross-fade begins, so the frame being read shows this step complete.
-      const boundary = k + 1 < st.beats.length ? end - Math.min(HOLD_LEAD, (end - st.beats[k].at) * 0.25) : 1;
+      // Playback, narrated observation and manual steps must all show the same completed frame.
+      const boundary = doneAt(st, k);
       const elapsed = now - clock.current.start;
       const dwell = quick ? quickDwellMs(st, k) : captionDwellMs(st, k);
-      const hold = t >= boundary - 1e-4 && (guided ? !skipHold.current : elapsed < dwell && !skipHold.current);
+      const hold = t >= boundary && (guided ? !skipHold.current : elapsed < dwell && !skipHold.current);
       const remainingSeconds = hold && !guided ? Math.max(1, Math.ceil((dwell - elapsed) / 1000)) : null;
       if (waitSecondsRef.current !== remainingSeconds) {
         waitSecondsRef.current = remainingSeconds;
         setWaitSeconds(remainingSeconds);
       }
-      if (hold) t = Math.max(p.t, boundary - 1e-4);
+      if (hold) t = Math.max(p.t, boundary);
       setWaiting(hold);
       let next: Pos = { i: p.i, t: Math.min(t, 1) };
       if (t >= 1 && autoContinue && p.i < week.stages.length - 1) {
@@ -1329,7 +1318,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     speaking.current = false;
     setPlaying(false);
     setBira(true);
-    setTour({ items: ids, idx: 0, auto: true });
+    setTour({ items: ids, idx: 0, auto: false });
   };
   if (bira && !tour) setBira(false);
   // Playback and a tour never run together: pressing play closes it.
@@ -1749,6 +1738,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 
           <SceneContext.Provider value={ctx}>
             <Viewport
+              interactive3d={turnable === sceneKey && !travel && intro === null && !find}
               ref={svgRef}
               orientation={travel ? undefined : view.orientation}
               resetKey={`${stage.id}/${view.id}`}
@@ -2013,6 +2003,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             </section>
           )}
           <Player
+            modelGuide={view.guide && !find ? { key: sceneKey, content: view.guide, onOpen: () => { transport.cancel(); speaking.current = false; setPlaying(false); } } : undefined}
             stage={withRecall(week.week, stage)}
             stageIndex={pos.i}
             stageCount={week.stages.length}
@@ -2046,7 +2037,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             onTour={formation || find ? undefined : startTour}
             tourCard={
               tour && intro === null && structures.get(tour.items[tour.idx]) ? (
-                <TourCard item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} auto={!!tour.auto} onStep={tourStep} onClose={skipTour} onPick={onSelect} kicker={bira ? '3D bira' : undefined} />
+                <TourCard item={structures.get(tour.items[tour.idx])!} idx={tour.idx} n={tour.items.length} auto={!!tour.auto} onStep={tourStep} onClose={skipTour} onPick={onSelect} kicker={bira ? '3D bira' : undefined} manual={bira} />
               ) : undefined
             }
             stepExtras={stepExtrasOf(week.week, stage, guided)}

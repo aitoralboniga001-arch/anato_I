@@ -1,4 +1,5 @@
 import type { WeekDef } from '@/lib/sim/types';
+import { diaphragmGuide } from '../three-d-guides';
 import { CoelomFold } from '@/components/scenes/week7/Coelom';
 import { CoelomExtent, SeptumLateral, lateralOrientation } from '@/components/scenes/week7/Lateral';
 import { PeritoneumSection } from '@/components/scenes/week7/Peritoneum';
@@ -775,6 +776,7 @@ export const week7: WeekDef = {
           description: 'Diafragma 3Dn, enborraren xerra bat aurretik eta goitik ikusita (apunteetako zeharkako mozketaren marra berberak): mintz pleuroperitonealek erretenak ixten dituzte, gorputz paretak ertza gehitzen du eta lau osagaiek kupula osatzen dute, bakoitza bere kolorez. Arrastatu edozein aldetik ikusteko.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: DiaphragmDome3D,
+          guide: diaphragmGuide,
           travel: false,
         },
         {
@@ -888,6 +890,7 @@ export const week7: WeekDef = {
         },
         {
           at: 0.7568,
+          completeAt: 0.855, // The 3D dome and cell migration must finish before the adult view.
           idea: 'Diafragmak lau osagai ditu.',
           key: 'Septuma, mintz pleuroperitonealak, hestegorri inguruko mesenkima eta gorputz paretako mesodermoa.',
           ask: {
