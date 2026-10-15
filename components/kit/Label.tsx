@@ -117,6 +117,10 @@ export function Label(given: LabelProps) {
       col.notify();
     };
   }, [col, inPane, key]);
+  // Re-rendered on its own (its layer did not draw this version): ask the layer to redraw before the paint.
+  useLayoutEffect(() => {
+    if (col && !inPane && col.stale()) col.notify();
+  });
   if (!col || inPane) return <LabelDraw {...props} />;
   col.put(key, props);
   return null;

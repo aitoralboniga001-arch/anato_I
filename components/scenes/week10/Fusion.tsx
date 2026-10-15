@@ -309,7 +309,7 @@ export function FusionArt({ t }: { t: number }) {
             <Part id="orri-epimiokardikoa" show={wrap * (1 - split)}>
               <Cells outer={ringOut} inner={ringIn} n={40} fill={T.epimyo} nucleus="rgba(90,10,40,0.75)" edge="rgba(90,10,40,0.35)" seed={25} />
             </Part>
-            <Part id="miokardioa" show={split}>
+            <Part id="miokardioa" show={split} groups={["bihotz-hodia"]}>
               <Cells outer={ringMid} inner={ringIn} n={40} fill={T.myocard} nucleus="rgba(70,6,30,0.75)" edge="rgba(70,6,30,0.4)" seed={27} />
             </Part>
             <Part id="epikardioa" show={split}>
@@ -327,7 +327,7 @@ export function FusionArt({ t }: { t: number }) {
           </Part>
         )}
         {closed > 0.02 && (
-          <Part id="endokardioa" show={closed}>
+          <Part id="endokardioa" show={closed} groups={["bihotz-hodia"]}>
             <Tube c={HC} r={TUBE_R[2]} out={mig} seed={35} />
           </Part>
         )}

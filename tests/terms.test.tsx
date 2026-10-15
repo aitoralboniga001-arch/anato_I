@@ -35,7 +35,8 @@ describe('caption terms', () => {
     expect(link('Berriro epiblastoa.', ['epiblastoa'], used).words).toEqual([]);
   });
 
-  it('never changes the wording of any step', () => {
+  // Renders every step of every topic: slow on a loaded machine, so it gets more than the default 5 s.
+  it('never changes the wording of any step', { timeout: 30000 }, () => {
     for (const w of weeks)
       for (const s of w.stages) {
         const ids = [...s.structures, ...s.beats.flatMap((b) => b.focus ?? [])];

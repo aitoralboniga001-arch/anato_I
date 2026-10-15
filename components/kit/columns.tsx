@@ -205,6 +205,7 @@ function LabelLayer({ col, fixed }: { col: LabelCollector; fixed?: boolean }) {
   // A name that unmounts (or mounts) between frames redraws the layer before the paint.
   useLayoutEffect(() => col.listen(redraw), [col]);
   const list = [...col.entries.entries()];
+  col.drawn = col.version;
   // Judged as each label draws itself (its state's size and its growth) at the drawn and the grown size,
   // with the character estimate, so the server and the client seat the names alike.
   const shape: Shape = (e, p) => {

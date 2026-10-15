@@ -1,7 +1,7 @@
 'use client';
 
 import { Label } from './Label';
-import { useScene } from './context';
+import { useLabelScale, useScene } from './context';
 
 /** A name for a point of a moving (3D) picture: where it points this frame, and how much it shows. */
 export interface Callout {
@@ -110,6 +110,7 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
 /** The names of a 3D view, laid out by `layoutCallouts`. `dim` fades them all (e.g. while the camera turns). */
 export function Callouts({ items, dim = 1, ...o }: Opts & { items: Callout[]; dim?: number }) {
   const { nameOf } = useScene();
+  const pills = useLabelScale();
   const live = items.filter((c) => c.show * dim > 0.02);
   // Plate width as the label sizes it (≈7.1 units a character, 6.4 for small names, plus padding).
   const width = (c: Callout) => (c.text ?? nameOf(c.id)).length * (c.small ? 6.4 : 7.1) + 16;
@@ -118,7 +119,10 @@ export function Callouts({ items, dim = 1, ...o }: Opts & { items: Callout[]; di
     <>
       {live.map((c) => {
         const p = pos.get(c)!;
-        return <Label key={c.key ?? c.id} id={c.id} x={p.x} y={p.y} align={p.align} ax={c.at.x} ay={c.at.y} show={c.show * dim} small={c.small} text={c.text} />;
+        // A name level with a side orientation pill steps in past it instead of running under it.
+        const level = p.y > 288 && p.y < 352;
+        const x = level && p.align === 'start' && pills.left && p.x < 122 ? 122 : level && p.align === 'end' && pills.right && p.x > 878 ? 878 : p.x;
+        return <Label key={c.key ?? c.id} id={c.id} x={x} y={p.y} align={p.align} ax={c.at.x} ay={c.at.y} show={c.show * dim} small={c.small} text={c.text} />;
       })}
     </>
   );

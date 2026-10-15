@@ -101,3 +101,16 @@ Usar `Ikusi urratsa` o `Hasi` y observar tanto el movimiento como la pausa final
 Pruebas enfocadas: `npx vitest run tests/animation-completion.test.ts tests/limb-labels.test.tsx tests/visibility-ray.test.ts tests/notes.test.ts tests/view-changes.test.ts --silent`.
 
 No se ha hecho commit, push ni despliegue. Los PDF y su extracción original permanecen intactos.
+
+## Pendiente: flechas y giro de los modelos 3D (anotado el 15 de octubre de 2026, desde el tema 10)
+
+El usuario ha visto que, al girar los modelos 3D, las flechas no siempre apuntan donde deben y que su reajuste resulta brusco. En el tema 10 ya se ha corregido; ver `docs/handover/topic-10.md`, apartado "3D arrows and turning".
+
+- **Ya aplicado a 7–9, porque es código compartido del kit:**
+  - Los nombres siguen a la cámara durante el arrastre y los deslizamientos. Antes se quedaban apuntando a la posición anterior hasta el siguiente fotograma de la animación.
+  - Los botones de giro y el reinicio se deslizan en 420 ms.
+  - La clave de ejes pasa de línea a punto de forma gradual.
+- **Pendiente en 7–9:**
+  - Añadir `edges` a `axes` en `DiaphragmDome3D`, `Calvaria3D`, `LimbRotation3D` y `Domains3D`, para que las etiquetas de los bordes (ezkerra/eskuina…) sigan a la cámara.
+  - Revisar si alguna flecha propia de esas escenas inventa una dirección cuando se ve de frente; en el tema 10 se muestra entonces un punto o un aro con cruz.
+  - Probar arrastrando cada vista 3D a 768 y 1440 px.

@@ -236,7 +236,10 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   const zoomed = z.k > 1.01;
   const [orbitCommand, setOrbitCommand] = useState<{ key: string; request: NonNullable<Underlay['orbitRequest']> } | null>(null);
   const orbitRequest = orbitCommand?.key === resetKey ? orbitCommand.request : undefined;
-  const underlay = useMemo<Underlay | null>(() => (underHost ? { host: underHost, scene: sceneEl, zoomed, orbitRequest } : null), [underHost, sceneEl, zoomed, orbitRequest]);
+  // A 3D view keeps the edge pills true to its camera as it turns (the view's own words otherwise).
+  const [liveOrient, setLiveOrient] = useState<{ key: string; o: Orientation } | null>(null);
+  const setOrient = useCallback((o: Orientation | null) => setLiveOrient(o ? { key: resetKey, o } : null), [resetKey]);
+  const underlay = useMemo<Underlay | null>(() => (underHost ? { host: underHost, scene: sceneEl, zoomed, orbitRequest, setOrient } : null), [underHost, sceneEl, zoomed, orbitRequest, setOrient]);
   const turnModel = (direction: NonNullable<Underlay['orbitRequest']>['direction']) => {
     cancelReveal();
     if (direction === 'reset') glideZoom(HOME);
@@ -340,8 +343,9 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   // fits); zooming in makes them larger as usual.
   const fit = size ? Math.min(size.w / W, size.h / H) : 1;
   const labelK = Math.round(Math.min(1.5, Math.max(1, 1 / (fit * z.k * room.k))) * 50) / 50;
-  const pillL = !!orientation?.left;
-  const pillR = !!orientation?.right;
+  const edges = orientation && liveOrient?.key === resetKey ? liveOrient.o : orientation;
+  const pillL = !!edges?.left;
+  const pillR = !!edges?.right;
   const labelScale = useMemo(() => ({ k: labelK, left: pillL, right: pillR }), [labelK, pillL, pillR]);
 
   const changed = useEffectEvent((on: boolean) => onFullscreenChange?.(on));
@@ -549,12 +553,13 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
         </g>
       </svg>
 
-      {orientation && (
+      {edges && (
+        // Keyed by their words: a pill whose direction changed as a 3D view turned fades in anew.
         <div className="orient" data-tour="norabideak" aria-hidden>
-          {orientation.top && <span className="orient-top">▲ {orientation.top}</span>}
-          {orientation.bottom && <span className="orient-bottom">▼ {orientation.bottom}</span>}
-          {orientation.left && <span className="orient-left">◀ {orientation.left}</span>}
-          {orientation.right && <span className="orient-right">{orientation.right} ▶</span>}
+          {edges.top && <span key={`t:${edges.top}`} className="orient-top">▲ {edges.top}</span>}
+          {edges.bottom && <span key={`b:${edges.bottom}`} className="orient-bottom">▼ {edges.bottom}</span>}
+          {edges.left && <span key={`l:${edges.left}`} className="orient-left">◀ {edges.left}</span>}
+          {edges.right && <span key={`r:${edges.right}`} className="orient-right">{edges.right} ▶</span>}
         </div>
       )}
 

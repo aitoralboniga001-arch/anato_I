@@ -123,7 +123,13 @@ export const NOTES: Record<number, NotesSection[]> = {
     { n: '4', title: 'Bihotzeko muskulua edo miokardioa', depth: 0, stages: ['bihotz-muskulua'] },
   ],
   10: [
-    { n: '1', title: 'Eskualde kardiogenikoaren eraketa', depth: 0, stages: ['eskualde-kardiogenikoa', 'bihotz-hodia'] },
+    { n: '1', title: 'Eskualde kardiogenikoaren eraketa', depth: 0, stages: ['eskualde-kardiogenikoa', 'bihotz-hodia', 'zirkulazio-goiztiarra'] },
+    { n: '2', title: 'Bihotz lakioaren eraketa', depth: 0, stages: ['bihotz-atalak', 'bihotz-lakioa'] },
+    { n: '3', title: 'Bihotz lakioaren ataletatik sortzen diren egiturak', depth: 0, stages: [] },
+    { n: '3.1', title: 'Bihotzaren atal bulbarretik', depth: 1, stages: ['atal-bulbarra'] },
+    { n: '3.2', title: 'Atal bentrikularretik', depth: 1, stages: ['atal-bentrikularra'] },
+    { n: '3.3', title: 'Atal aurikularretik', depth: 1, stages: ['atal-aurikularra'] },
+    { n: '3.4', title: 'Atal zain-sinutik', depth: 1, stages: ['zain-sinua', 'eskuineko-aurikula'] },
   ],
   11: [
     { n: '2', title: 'Aurikula komunaren trenkadak', depth: 0, stages: [] },

@@ -46,8 +46,11 @@ const GONE: Record<string, string> = {
   '6/korion-hostotsua/6/dezidua-kapsularra': 'endekatzen da urrats honetan',
   '6/korion-hostotsua/6/umetoki-barrunbea': 'ixten da urrats honetan',
   '6/korion-hostotsua/7/korion-barrunbea': 'amniosak betetzen du urrats honetan',
-  '10/bihotz-hodia/3/orri-epimiokardikoa': 'urrats honetan miokardio eta epikardio bihurtzen da',
-  '10/bihotz-hodia/5/mesokardio-dortsala': 'urrats honetan desagertzen da: zeharkako sinua geratzen da',
+  '10/bihotz-hodia/4/orri-epimiokardikoa': 'urrats honetan miokardio eta epikardio bihurtzen da',
+  '10/bihotz-hodia/6/mesokardio-dortsala': 'urrats honetan desagertzen da: zeharkako sinua geratzen da',
+  '10/zain-sinua/3/eskuineko-zilbor-zaina': 'urrats honetan desagertzen da (4. asterako): izena hasieran, gero ixten',
+  '10/zain-sinua/3/ezkerreko-zain-bitelinoa': 'urrats honetan desagertzen da (4. asterako): izena hasieran, gero ixten',
+  '10/eskuineko-aurikula/4/eskuineko-zain-balbula': 'goiko aldea desagertzen da urrats honetan; behekoa kaben eta sinu koronarioaren balbulak (izendatuta)',
 };
 
 /** A structure's name as the text uses it (case and the final article aside). */
@@ -55,6 +58,8 @@ const stem = (n: string) => n.toLowerCase().replace(/[()]/g, '').replace(/a$/, '
 
 /** Names a step's text says without showing them, on purpose: `week/stage/step/id` → why. */
 const MENTION_ONLY: Record<string, string> = {
+  '10/bihotz-hodia/7/errai-orria': 'jatorria aipatzen da: errai orria zeharkako mozketan (4. urratsa); 3D ereduan hodiak, aortak eta notokorda',
+  '10/bihotz-hodia/7/endokardioa': 'endokardio hodiak 3D ereduan "bihotz hodiak" izenez marraztuta eta izendatuta',
   '10/eskualde-kardiogenikoa/2/errai-orria': 'diskoa goitik: errai orria zeharkako mozketan ikusten da',
   '10/eskualde-kardiogenikoa/3/errai-orria': 'diskoa goitik: errai orria zeharkako mozketan ikusten da',
   '10/eskualde-kardiogenikoa/3/ferra-formako-plexua': '"ferra formako egitura": irlatxoak; plexua 5. urratsean',

@@ -1,51 +1,54 @@
 # Topic 10 handover: 10. GAIA, ZIRKULAZIO APARATUA
 
-Source: `10. GAIA_ ZIRKULAZIO APARATUA (ZUZENDUTA).pdf` → `content/notes-text/w10.ts` (sentence ids `w10/<section>/p<n>/s<n>`). When the prose and the tables disagree, the prose wins. Week 10 is registered with `inPreparation: true` (new optional `WeekDef` field). To show it as "prestatzen" while the built stages stay reachable, the shell's `isWip` in `components/shell/LandNav.tsx` needs `w.inPreparation ||`.
+Source: `10. GAIA_ ZIRKULAZIO APARATUA (ZUZENDUTA).pdf` → `content/notes-text/w10.ts` (sentence ids `w10/<section>/p<n>/s<n>`). When the prose and the tables disagree, the prose wins. State on 15 October 2026: all ten stages are built; nothing is committed.
 
-## Stage plan
+## Stages
 
-| # | stage id | notes | state |
+| # | stage id | notes | views |
 |---|---|---|---|
-| 1 | `eskualde-kardiogenikoa` (views `diskoa`, `zeharkakoa`) | w10/1/p3–p8 | **done**, accepted by the lead |
-| 2 | `bihotz-hodia` (view `zeharkakoa`) | w10/1/p9, p11–p18 | **done** for the section view |
-| 2b | `bihotz-hodia` view `sagitala` (cephalocaudal fold, plaka kardiogenikoa from the neck to the thorax; aortic arches) | w10/1/p10, p19–p21 | to do. Plan: rotate a head flap 180° round a hinge caudal to the BPM; add beats at ≈0.1 (p10) and ≈0.84 (p19, p21) |
-| 3 | `zirkulazio-goiztiarra` (real lateral embryo, vessels coloured by O2, summary table) | w10/1/p22–p36 | to do |
-| 4 | `bihotz-atalak` (21. eguna: segments) | w10/2/p3–p11 | to do |
-| 5 | `bihotz-lakioa` (23–28. egunak; front and side views with a ghost of the start and an orientation cross) | w10/2/p12–p22 | to do |
-| 6 | `atal-bulbarra` | w10/3.1 | to do |
-| 7 | `atal-bentrikularra` | w10/3.2 | to do |
-| 8 | `atal-aurikularra` | w10/3.3 | to do |
-| 9 | `zain-sinua` (posterior view, the shift from left to right) | w10/3.4 (first half) | to do |
-| 10 | `eskuineko-aurikula` (valves, septa, smooth vs trabeculated parts, crista terminalis) | w10/3.4 (second half) | to do |
+| 1 | `eskualde-kardiogenikoa` | w10/1/p3–p8 | `diskoa`, `zeharkakoa` |
+| 2 | `bihotz-hodia` | w10/1/p9–p21 | `zeharkakoa`, `sagitala` (head fold), `3d` (zipper + dorsal aortas + notochord) |
+| 3 | `zirkulazio-goiztiarra` | w10/1/p22–p36 | `alboa` (whole conceptus → embryo → heart camera, O2-coloured vessels, summary table), `3d` |
+| 4 | `bihotz-atalak` | w10/2/p3–p11 | `3d` |
+| 5 | `bihotz-lakioa` | w10/2/p12–p22 | `3d` (ghost of the start, direction arrows) |
+| 6 | `atal-bulbarra` | w10/3.1 | `3d`, `eratorriak` (derivative map: one continuous outflow per ventricle) |
+| 7 | `atal-bentrikularra` | w10/3.2 | `frontala` (topic 11 HeartArt, earlier), `3d` |
+| 8 | `atal-aurikularra` | w10/3.3 | `3d` (front → right → behind), `frontala` |
+| 9 | `zain-sinua` | w10/3.4 p3–p9 | `3d` (from behind; KONTUZ note on left/right), `frontala` |
+| 10 | `eskuineko-aurikula` | w10/3.4 p10–p23 | `barrutik` (the atrium opened, one morphing drawing with a zoom table), `trenkada`, `frontala`; ends on the section-3 summary table |
+
+Every notes sentence of topic 10 is mapped to a beat (`tests/notes.test.ts`, count pinned at 619). There are 15 quiz questions (`w10-q-*`) and chronology milestones for days 21, 23–28 and 28–70.
 
 ## Files
 
-- `content/weeks/week10.ts`: the WeekDef with stages 1–2. `quiz: []` for now.
-- `content/weeks/week10-structures.ts`: every topic 10 id with its colour (`SEG` = segment colours). It already has the ids that stages 3–10 will need.
-- `components/scenes/week10/Disc.tsx`: stage 1 seen from above (`D1` timings).
-- `components/scenes/week10/DiscSection.tsx`: stage 1 close-up section.
-- `components/scenes/week10/Fusion.tsx`: stage 2 section (`D2` timings). It starts from stage 1's last frame and folds via key shapes A/B/C.
-- `components/scenes/week10/flat.ts`: shared geometry of the flat disc section (`F`, `ectoTopAt`, `ectoBottomAt`, `coelomRight`, `range`).
-- `components/scenes/week10/common.tsx`: palette `T`, `Defs10`, `Stream` (blood cells along a path), and re-exports of the week 7 helpers and the week 9 `Steps`/`SummaryTable`.
-- Shared files that were edited:
-  - `content/registry.ts`, `content/notes.ts` (NOTES[10] section 1), `content/notes-text/index.ts`
-  - `content/chronology.ts`: 3 milestones
-  - `lib/sim/types.ts`: week 10 and `inPreparation`
-  - `components/shell/StudyMap.tsx`, `components/shell/TopicShot.tsx`
-  - `tests/notes.test.ts`: w10 pin, beat count 560
-  - `tests/visibility.test.tsx`: 2 GONE and 3 MENTION_ONLY entries for week 10, each with its reason
-  - `scripts/narration/export-catalog.test.ts`: the week count is now ≥ 10
+- `content/weeks/week10.ts` (stages 1–2, the quiz), `week10-circulation.ts` (3), `week10-loop.ts` (4–5), `week10-derivs.ts` (6–10), `week10-structures.ts` (ids and colours).
+- `components/scenes/week10/`:
+  - `model3d.ts`: the one parametric heart. Its pose fields include `fuse`, `segs`, `loop`, `loopTail`, `atriaFuse`, `split`, `truncusMid`, `expand`, `shift`, `obliterate`, `anast`, `coronary` and `hole`. Its options include `cavity`, `septum`, `gut`, `aortas`, `noto`, `flow` and `ghost`.
+  - `Heart3D.tsx`: `HeartView`, `orbit`, `cameraAt`, `Trail` and `DirArrows`, plus stages 4–5.
+  - `Stage2Views.tsx`, `Circulation.tsx`, `Circulation3D.tsx`, `Bulbus.tsx`, `Derivs.tsx` (stages 7–9), `RightAtrium.tsx`.
+- `components/scenes/week11/heart.tsx` (`HeartArt`) is reused for the frontal views of stages 7–10. New state fields: `trabR`/`trabL` (trabeculae growing) and `lvAlso` (names the primitive left ventricle also answers to).
 
-## Colours
+## Test exceptions added (each with its reason)
 
-- Germ layers follow topics 3–9. The heart wall: endocardium `#f9a8d4`, cardiac jelly `#a9e4dc`, myocardium `#d6337a`, epicardium `#f3b5c4`, epimyocardial layer `#e46a8c`.
-- Blood by oxygen content: oxygenated `#e5484d`, deoxygenated `#3b82f6`. Mixing is never drawn as purple.
-- One colour per heart segment, kept by everything that segment becomes: sinus venosus `#9b7bf0`, atrium `#ef7d2d`, ventricle `#22b8cf`, bulbus `#3fbf73` (its proximal part `#2fa865`, conus `#9ccc3c`, truncus and aortic sac `#e6dcc0`).
-- Open item: `septum-primum` (`#fde4c8`) and `septum-secundum` (`#fcd9b6`) are too similar. The topic 11 agent now updates them in `week10-structures.ts`; the lead's suggestion was pale cream for primum and rose `#ec8fbf` for secundum.
+- `tests/visibility.test.tsx`:
+  - GONE: `bihotz-hodia/4/orri-epimiokardikoa`, `bihotz-hodia/6/mesokardio-dortsala` (the step numbers moved when the sagittal step was inserted), `zain-sinua/3/eskuineko-zilbor-zaina`, `zain-sinua/3/ezkerreko-zain-bitelinoa`, `eskuineko-aurikula/4/eskuineko-zain-balbula`.
+  - MENTION_ONLY: `bihotz-hodia/7/errai-orria`, `bihotz-hodia/7/endokardioa`.
+
+## 3D arrows and turning (15 October 2026, after user feedback)
+
+- **Names now follow the camera when the picture turns.** Kit fix in `LabelCollector` and `Label`: a name re-rendered without its layer triggers a redraw. Before, a drag, a turn-button press or a tour glide left every leader pointing where things had been, and all the names jumped at the next tick. It is shared, so it also applies to topics 7–9.
+- **Turn buttons and reset glide.** They now take 420 ms with easing; they used to jump. Each press turns 0.35 rad. A drag still follows the pointer at once and takes over from a glide.
+- **The axes key fades between line and end mark.** There is no abrupt line ↔ dot switch.
+- **Live edge pills in topic 10's 3D views.** `axes.edges` names the six directions; Stage3D works out which one faces each frame edge (with hysteresis) and hands it to the Viewport through `Underlay.setOrient`. A pill that changes fades in, and name columns step in past the side pills (`Callouts`).
+- **Honest direction arrows.** `DirArrows` seen end-on fade into a dot (towards you) or a crossed ring (away), and the word says which. Before, the arrow got a fake direction, straight up when exactly end-on.
+
+**Pending for topics 7–9:**
+- Give `DiaphragmDome3D`, `Calvaria3D`, `LimbRotation3D` and `Domains3D` an `edges` set in their `axes`, so their pills follow the camera.
+- Check their own arrow overlays for fake directions when seen end-on.
+- Re-check their views by dragging, at 768 and 1440 px.
 
 ## Resume list
 
-1. Stage 2 sagittal view and its two beats (p10, p19–p21).
-2. Stages 3–10 as planned above. Reuse ids and colours; use Label `span` for layered wholes.
-3. Then: the topic quiz, NOTES[10] sections 2–3, chronology milestones for days 21, 23 and 28, the narration week cap in `lib/narration/server-utils.ts` (it still rejects week > 9), and the anchor audit (`node scripts/anchor-audit.mjs http://localhost:3000 10-10`; it overwrites docs/anchor-audit.md). The last audit run flagged 7 dots; they have been moved but the audit has not been re-run.
-4. The `Specimen.tsx` week 10 case and `isWip` are shell work.
+1. Anchor audit for topic 10: `node scripts/anchor-audit.mjs http://localhost:3005 10-10` (it overwrites `docs/anchor-audit.md`).
+2. Check the topic 10 views at 768 px (tablet) by eye.
+3. `inPreparation` is gone from week 10 (it is still on week 11).

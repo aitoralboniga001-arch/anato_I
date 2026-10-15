@@ -346,7 +346,7 @@ const structures: StructureDef[] = [
     id: 'bitelo-zaku-sekundarioa',
     name: 'Bitelo zaku sekundarioa',
     es: 'Saco vitelino secundario (definitivo)',
-    aka: ['Behin betiko bitelo zakua'],
+    aka: ['Behin betiko bitelo zakua', 'Bitelo zakua'],
     category: 'barrunbea',
     color: '#f2c14e',
     definition: 'Hipoblastoko zelulak ugaldu, migratu eta Heuser-en mintzaren barruko aurpegia estaltzean sortzen den bitelo zaku txikiagoa eta behin betikoa.',

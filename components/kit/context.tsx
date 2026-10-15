@@ -99,6 +99,8 @@ export interface Underlay {
   zoomed: boolean;
   /** Accessible buttons use the same camera as pointer dragging. */
   orbitRequest?: { direction: 'left' | 'right' | 'up' | 'down' | 'reset'; serial: number };
+  /** A 3D view tells the frame which anatomical direction each edge faces now (null: back to the view's own). */
+  setOrient?: (o: { top?: string; bottom?: string; left?: string; right?: string } | null) => void;
 }
 
 export const UnderlayContext = createContext<Underlay | null>(null);
@@ -113,9 +115,21 @@ export class LabelCollector {
   /** The last props of names that were dropped, for an effect that mounts them again (StrictMode). */
   private last = new Map<string, LabelEntry>();
   private listener: () => void = () => {};
+  /** Bumped whenever a name's props change; `drawn` is the version the label layer last drew. */
+  version = 0;
+  drawn = 0;
   put(key: string, e: LabelEntry) {
+    const was = this.entries.get(key);
+    if (!was || !sameEntry(was, e)) this.version++;
     this.entries.set(key, e);
     this.last.set(key, e);
+  }
+  /**
+   * A name re-rendered without its layer (e.g. a 3D view turned by a drag or a camera glide, which
+   * re-renders only the view): the layer must redraw now, or the names point where things were.
+   */
+  stale() {
+    return this.version !== this.drawn;
   }
   /** Back in, with the props it last rendered with. */
   restore(key: string) {
@@ -149,5 +163,12 @@ export interface LabelEntry {
   span?: [[number, number], [number, number]];
   /** Hand-placed: the label layer never moves it to another slot. */
   noArrange?: boolean;
+}
+const ENTRY_KEYS = ['id', 'x', 'y', 'ax', 'ay', 'align', 'show', 'text', 'small', 'noArrange'] as const;
+function sameEntry(a: LabelEntry, b: LabelEntry) {
+  if (ENTRY_KEYS.some((k) => a[k] !== b[k])) return false;
+  const p = a.span;
+  const q = b.span;
+  return p === q || (!!p && !!q && p[0][0] === q[0][0] && p[0][1] === q[0][1] && p[1][0] === q[1][0] && p[1][1] === q[1][1]);
 }
 export const LabelCollectorContext = createContext<LabelCollector | null>(null);

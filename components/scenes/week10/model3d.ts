@@ -1,0 +1,589 @@
+import { add, mix3, mul, norm, sub, type V3 } from '@/lib/three-d/math';
+import { blob, curve3, merge, tube, type Mesh } from '@/lib/three-d/mesh';
+import type { Item3 } from '@/lib/three-d/scene';
+import { T } from './common';
+
+/**
+ * Topic 10's one heart, in 3D. Every heart view of the topic is a camera on this model, so the student
+ * never meets a new picture: the two endocardial tubes zip together, the straight tube gets its
+ * constrictions (segments), bends into the loop, its paired atria and sinus horns fuse, the common
+ * atrium bulges out on both sides of the truncus, and the sinus venosus loses its left horn.
+ *
+ * Axes (the embryo's own): x towards the embryo's LEFT, y cranial, z ventral (anterior). A camera in
+ * front (+z) therefore shows the embryo's left on the viewer's right, as in the notes' figures.
+ * Units: the straight heart tube is about 2.4 long.
+ *
+ * Colours: one per segment, kept by everything the segment becomes (see week10-structures SEG):
+ * sinus venosus violet, atrium orange, ventricle cyan, bulbus green (proximal green, conus lime,
+ * truncus and aortic sac ivory). Blood by oxygen: red oxygenated, blue poorly oxygenated.
+ */
+
+export interface HeartPose {
+  /** The two endocardial tubes fused, from the cranial end down (0 = two tubes, 1 = one tube). */
+  fuse: number;
+  /** The tubes are wrapped in myocardium (0 = bare endocardial tubes). */
+  myo: number;
+  /** Constrictions (sulci) and dilatations along the tube (0 = smooth). */
+  segs: number;
+  /** Segment colours (0 = all myocardium magenta). */
+  colour: number;
+  /** Per segment, overriding `colour` (segments named one after the other). */
+  colourBy?: Partial<Record<'bulbus' | 'ventricle' | 'atrium' | 'sinus', number>>;
+  /** 0 = straight (21 d), 0.5 = C-shaped (≈24 d), 1 = the loop (28 d). */
+  loop: number;
+  /** The caudal end's own progress through the loop (defaults to `loop`): the two ends can move one after the other. */
+  loopTail?: number;
+  /** Paired atria and sinus horns fused in the midline (0 = paired). */
+  atriaFuse: number;
+  /** Bulbus in its three sub-parts (proximal, conus, truncus) and their own colours. */
+  split: number;
+  /** The common atrium bulges out on both sides of the truncus (primitive right and left atria). */
+  expand: number;
+  /** The truncus moves from the right side of the pericardial cavity to the middle. */
+  truncusMid: number;
+  /** Sinus venosus: blood shunted to the right (0 = symmetric, 1 = left horn small, right horn wide). */
+  shift: number;
+  /** Left veins obliterated: [right umbilical + left vitelline (4th week), left common cardinal (≈10th week)]. */
+  obliterate: [number, number];
+  /** Aortic arches shown (0..3; fractional = the next one growing). */
+  arches: number;
+  /** Walls see-through (to show blood flowing inside). */
+  glass: number;
+  /** Veins and their names (0 = cut short at the sinus horns). */
+  veins: number;
+  /** Anastomoses carrying the left veins' blood to the right (0..1). */
+  anast?: number;
+  /** The left horn as the coronary sinus, with the oblique vein of the left atrium (0..1). */
+  coronary?: number;
+  /** The sinoatrial orifice drawn as an opening in the back wall of the atrium (0..1, its visibility). */
+  hole?: number;
+}
+
+export const POSE0: HeartPose = {
+  fuse: 1,
+  myo: 1,
+  segs: 0,
+  colour: 0,
+  loop: 0,
+  atriaFuse: 0,
+  split: 0,
+  expand: 0,
+  truncusMid: 0,
+  shift: 0,
+  obliterate: [0, 0],
+  arches: 1,
+  glass: 0,
+  veins: 1,
+};
+
+const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
+const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
+const ss = (a: number, b: number, x: number) => {
+  const u = clamp01((x - a) / (b - a));
+  return u * u * (3 - 2 * u);
+};
+
+/** Hex colour mix (both #rrggbb). */
+export function mixHex(a: string, b: string, k: number): string {
+  const p = (h: string, i: number) => parseInt(h.slice(1 + i * 2, 3 + i * 2), 16);
+  const c = [0, 1, 2].map((i) => Math.round(lerp(p(a, i), p(b, i), clamp01(k))));
+  return `#${c.map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+}
+
+// ———————————————————————————— the heart tube's centreline ————————————————————————————
+
+/** Boundaries along the tube (u from the cranial end): sac | truncus | conus | proximal | ventricle | atrium. */
+export const U = { sac: 0.07, truncus: 0.2, conus: 0.33, proximal: 0.54, ventricle: 0.82, end: 1 } as const;
+
+/** Key points along the tube at u = 0, .07, .2, .33, .44, .54, .68, .82, 1 for the three shapes. */
+const KU = [0, 0.07, 0.2, 0.33, 0.44, 0.54, 0.68, 0.82, 1];
+const STRAIGHT: V3[] = [
+  [0, 1.72, 0.05],
+  [0, 1.52, 0.08],
+  [0, 1.18, 0.1],
+  [0, 0.84, 0.12],
+  [0, 0.56, 0.12],
+  [0, 0.28, 0.12],
+  [0, -0.08, 0.12],
+  [0, -0.42, 0.1],
+  [0, -0.78, 0.04],
+];
+/** ≈24 days: the bulboventricular part bends ventrally and to the right (a C open to the left). */
+const CSHAPE: V3[] = [
+  [0, 1.66, 0.02],
+  [-0.06, 1.46, 0.12],
+  [-0.24, 1.1, 0.34],
+  [-0.46, 0.7, 0.58],
+  [-0.6, 0.3, 0.7],
+  [-0.56, -0.12, 0.62],
+  [-0.22, -0.52, 0.42],
+  [0.12, -0.66, 0.1],
+  [0.18, -0.5, -0.32],
+];
+/** 28 days: bulbus anterior, inferior and right; ventricle to the left; atrium superior and posterior. */
+const LOOPED: V3[] = [
+  [0.02, 1.5, 0.0],
+  [-0.08, 1.3, 0.22],
+  [-0.32, 0.92, 0.52],
+  [-0.52, 0.48, 0.66],
+  [-0.6, 0.06, 0.66],
+  [-0.38, -0.42, 0.6],
+  [0.16, -0.58, 0.44],
+  [0.5, -0.12, 0.08],
+  [0.1, 0.48, -0.5],
+];
+
+/** The truncus at the end of stage 8: moved to the middle (x towards 0). */
+function truncusShift(p: V3, u: number, k: number): V3 {
+  if (k <= 0 || u > U.proximal) return p;
+  const w = 1 - ss(U.conus, U.proximal, u);
+  return [p[0] + 0.3 * k * w * (u < U.conus ? 1 : 0.6), p[1], p[2] - 0.06 * k * w];
+}
+
+/** Key points of the tube for a pose: straight → C → loop (two halves, each eased). */
+function keys(pose: HeartPose): V3[] {
+  return STRAIGHT.map((_, i) => {
+    // Cranial keys follow `loop`, caudal ones `loopTail`, the ventricle blends between them.
+    const w = ss(0.44, 0.82, KU[i]);
+    const L = clamp01(lerp(pose.loop, pose.loopTail ?? pose.loop, w));
+    const a = L < 0.5 ? STRAIGHT : CSHAPE;
+    const b = L < 0.5 ? CSHAPE : LOOPED;
+    const k = L < 0.5 ? ss(0, 1, L * 2) : ss(0, 1, (L - 0.5) * 2);
+    return truncusShift(mix3(a[i], b[i], k), KU[i], pose.truncusMid);
+  });
+}
+
+/** The centreline, sampled at n + 1 points uniformly in u (u = 0 cranial end, 1 atrial end). */
+export function centreline(pose: HeartPose, n = 120): V3[] {
+  const K = keys(pose);
+  // Catmull-Rom through the keys, then resampled by u (the keys are not evenly spaced in u).
+  const dense = curve3(K, (K.length - 1) * 24 + 1);
+  const out: V3[] = [];
+  for (let i = 0; i <= n; i++) {
+    const u = i / n;
+    let j = 0;
+    while (j < KU.length - 2 && KU[j + 1] < u) j++;
+    const f = (u - KU[j]) / (KU[j + 1] - KU[j]);
+    const g = (j + f) * 24;
+    const lo = Math.floor(g);
+    const hi = Math.min(dense.length - 1, lo + 1);
+    out.push(mix3(dense[Math.min(lo, dense.length - 1)], dense[hi], g - lo));
+  }
+  return out;
+}
+
+/** Tube radius at u: even at first; with `segs`, the dilatations and the sulci between them. */
+export function radiusAt(u: number, pose: HeartPose): number {
+  const base = 0.21;
+  const seg =
+    u < U.sac
+      ? 0.17
+      : u < U.truncus
+        ? 0.15
+        : u < U.conus
+          ? 0.19
+          : u < U.proximal
+            ? 0.31
+            : u < U.ventricle
+              ? 0.37
+              : 0.29;
+  // The sulci: narrow waists at the bulboventricular and atrioventricular borders, softer at the bulbus' own borders.
+  const dip = (c: number, w: number, d: number) => d * Math.exp(-(((u - c) / w) ** 2));
+  const waist = dip(U.proximal, 0.028, 0.13) + dip(U.ventricle, 0.03, 0.13) + dip(U.conus, 0.03, 0.04);
+  // Smooth the steps between segment radii.
+  const sm = (x: number) => {
+    const edges = [U.sac, U.truncus, U.conus, U.proximal, U.ventricle];
+    const rs = [0.17, 0.15, 0.19, 0.31, 0.37, 0.29];
+    let r = rs[0];
+    edges.forEach((e, i) => (r += (rs[i + 1] - rs[i]) * ss(e - 0.04, e + 0.04, x)));
+    return r;
+  };
+  void seg;
+  const s = clamp01(pose.segs);
+  // The tube grows a little as it loops (the heart enlarges).
+  const grow = 1 + 0.08 * clamp01(pose.loop);
+  return lerp(base, sm(u) - waist, s) * grow;
+}
+
+// ———————————————————————————— the caudal tree: atria, sinus horns, veins ————————————————————————————
+
+export interface Caudal {
+  /** Per side (0 = right, 1 = left; x sign −1 / +1): atrial branch end, sinus horn medial end, horn tip. */
+  atrium: [V3, V3];
+  sinusIn: [V3, V3];
+  horn: [V3, V3];
+  /** The atrial (u = 1) end of the tube. */
+  end: V3;
+}
+
+export function caudal(pose: HeartPose, line = centreline(pose)): Caudal {
+  const end = line[line.length - 1];
+  const L = clamp01(pose.loopTail ?? pose.loop);
+  const f = clamp01(pose.atriaFuse);
+  const sides = [-1, 1] as const;
+  const side = (sx: number) => {
+    // Straight: the paired atria and horns spread caudally and laterally under the tube (in the septum transversum).
+    const aS: V3 = [sx * 0.42, -1.12, 0.0];
+    const sS: V3 = [sx * 0.62, -1.42, -0.1];
+    const hS: V3 = [sx * 0.95, -1.58, -0.18];
+    // Looped: behind the ventricles, the atria superior-posterior and the sinus behind them.
+    const aL: V3 = [sx * 0.42, 0.52, -0.6];
+    const sL: V3 = [sx * 0.42, 0.08, -0.98];
+    const hL: V3 = [sx * 0.88, -0.18, -0.96];
+    const k = ss(0, 1, L);
+    const a = mix3(aS, aL, k);
+    const s = mix3(sS, sL, k);
+    const h = mix3(hS, hL, k);
+    // Fusion brings the medial parts to the midline: the atria into one, the horns into the transverse part.
+    const toMid = (p: V3, amount: number): V3 => [p[0] * (1 - amount), p[1], p[2]];
+    return { a: toMid(a, 0.55 * f), s: toMid(s, f), h };
+  };
+  const r = side(-1);
+  const l = side(1);
+  void sides;
+  return { atrium: [r.a, l.a], sinusIn: [r.s, l.s], horn: [r.h, l.h], end };
+}
+
+/** Polyline through key points (smooth). */
+const path = (pts: V3[], n = 18) => curve3(pts, n);
+
+/** The three veins of one side, ending at that side's horn tip. */
+export function veins(h: V3, sx: number) {
+  const j: V3 = add(h, [sx * 0.42, 0.06, -0.34]);
+  return {
+    cardinal: path([h, add(h, [sx * 0.22, 0.03, -0.14]), j], 10),
+    anterior: path([j, add(j, [sx * 0.18, 0.7, -0.22]), add(j, [sx * 0.1, 1.55, -0.3]), add(j, [0, 2.3, -0.32])], 20),
+    posterior: path([j, add(j, [sx * 0.14, -0.7, -0.2]), add(j, [sx * 0.08, -1.5, -0.24]), add(j, [0, -2.2, -0.24])], 20),
+    umbilical: path([h, add(h, [sx * 0.34, -0.3, 0.24]), add(h, [sx * 0.42, -1.0, 0.44]), add(h, [sx * 0.3, -1.9, 0.62])], 18),
+    vitelline: path([h, add(h, [-sx * 0.16, -0.42, 0.22]), add(h, [-sx * 0.36, -1.1, 0.42]), add(h, [-sx * 0.48, -1.9, 0.66])], 18),
+  };
+}
+
+// ———————————————————————————— items ————————————————————————————
+
+export interface HeartOpts {
+  /** Context: pericardial cavity (0..1), septum transversum (0..1), foregut (0..1), dorsal aortas + arches. */
+  cavity?: number;
+  septum?: number;
+  gut?: number;
+  /** The notochord: a rod in the midline behind the dorsal aortas (0..1). */
+  noto?: number;
+  aortas?: number;
+  /** Faint copy of a pose (the start of the looping). */
+  ghost?: HeartPose | null;
+  /** Blood cells in the lumen: phase (stage time × speed) and visibility. */
+  flow?: { phase: number; show: number; mixed?: boolean } | null;
+  /** Show the 2-tube endocardium inside the myocardium while fusing. */
+  endocardium?: number;
+  /** Dorsal mesocardium (0..1, and broken 0..1). */
+  mesocardium?: [number, number];
+}
+
+const vessel = (pts: V3[], r: number | ((u: number) => number), sides = 10, caps = true): Mesh =>
+  tube(pts, { radius: typeof r === 'number' ? () => r : r, ref: [0, 0, 1], sides, capStart: caps, capEnd: caps });
+
+/** Sub-polyline of a sampled centreline between u0 and u1 (with a little overlap for the seams). */
+function slice(line: V3[], u0: number, u1: number): { pts: V3[]; u: number[] } {
+  const n = line.length - 1;
+  const i0 = Math.max(0, Math.floor(u0 * n));
+  const i1 = Math.min(n, Math.ceil(u1 * n));
+  const pts = line.slice(i0, i1 + 1);
+  return { pts, u: pts.map((_, k) => (i0 + k) / n) };
+}
+
+export interface HeartModel {
+  items: Item3[];
+  line: V3[];
+  cd: Caudal;
+  /** Named points for the callouts (centres inside each structure). */
+  pts: Record<string, V3>;
+}
+
+const MYO = T.myocard;
+/** Naming the whole tube (or the loop) lights every segment. */
+const WHOLE = ['bihotz-hodia', 'bihotz-lakioa'];
+
+/** All items of the heart for a pose. */
+export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
+  const line = centreline(pose);
+  const cd = caudal(pose, line);
+  const items: Item3[] = [];
+  const pts: Record<string, V3> = {};
+  const glass = clamp01(pose.glass);
+  const wallOp = 1 - 0.62 * glass;
+  const colOf = (g: 'bulbus' | 'ventricle' | 'atrium' | 'sinus') => clamp01(pose.colourBy?.[g] ?? pose.colour);
+  const split = clamp01(pose.split);
+  const segColour = (c: string, g: 'bulbus' | 'ventricle' | 'atrium' | 'sinus') => mixHex(MYO, c, colOf(g));
+  const segDeep = (c: string, g: 'bulbus' | 'ventricle' | 'atrium' | 'sinus') => mixHex('#6e0f36', c, colOf(g));
+  const at = (u: number) => line[Math.round(clamp01(u) * (line.length - 1))];
+
+  // The myocardial tube, one item per segment (the sulci hide the seams).
+  const fuse = clamp01(pose.fuse);
+  const myo = clamp01(pose.myo);
+  type Seg = { key: string; id: string; groups?: string[]; u0: number; u1: number; color: string; deep: string; g: 'bulbus' | 'ventricle' | 'atrium' | 'sinus' };
+  const bulbusId = (id: string) => (split > 0.5 ? id : 'atal-bulbarra');
+  const segsList: Seg[] = [
+    { g: 'bulbus', key: 'sac', id: split > 0.5 ? 'aorta-zakua' : 'aorta-zakua', groups: ['atal-bulbarra', 'arteria-muturra'], u0: 0, u1: U.sac + 0.01, color: mixHex(T.bulbus, T.truncus, Math.max(split, 0.6)), deep: T.truncusDeep },
+    { g: 'bulbus', key: 'truncus', id: bulbusId('enbor-arteriosoa'), groups: ['atal-bulbarra', 'arteria-muturra'], u0: U.sac - 0.01, u1: U.truncus + 0.01, color: mixHex(T.bulbus, T.truncus, split), deep: mixHex(T.bulbusDeep, T.truncusDeep, split) },
+    { g: 'bulbus', key: 'conus', id: bulbusId('arteria-konoa'), groups: ['atal-bulbarra'], u0: U.truncus - 0.01, u1: U.conus + 0.01, color: mixHex(T.bulbus, T.conus, split), deep: mixHex(T.bulbusDeep, T.conusDeep, split) },
+    { g: 'bulbus', key: 'proximal', id: bulbusId('bulboaren-hurbileko-atala'), groups: ['atal-bulbarra', 'atal-bulbobentrikularra'], u0: U.conus - 0.01, u1: U.proximal + 0.012, color: mixHex(T.bulbus, T.proximal, split), deep: T.bulbusDeep },
+    { g: 'ventricle', key: 'ventricle', id: 'atal-bentrikularra', groups: ['atal-bulbobentrikularra'], u0: U.proximal - 0.012, u1: U.ventricle + 0.012, color: T.ventricle, deep: T.ventricleDeep },
+    { g: 'atrium', key: 'atrium', id: 'atal-aurikularra', groups: ['zain-muturra'], u0: U.ventricle - 0.012, u1: 1, color: T.atrium, deep: T.atriumDeep },
+  ];
+  // Unfused part of the tube: from the fusion front down, the tube is two tubes (left and right).
+  const front = lerp(-0.05, 1.05, fuse); // u reached by the zipper
+  for (const s of segsList) {
+    const { pts: P, u: us } = slice(line, s.u0, s.u1);
+    if (P.length < 2) continue;
+    const r = (k: number) => radiusAt(lerp(us[0], us[us.length - 1], k), pose);
+    const fusedPart = us[us.length - 1] <= front;
+    const color = segColour(s.color, s.g);
+    const deep = segDeep(s.deep, s.g);
+    if (fusedPart || fuse >= 1) {
+      items.push({ key: `myo-${s.key}`, id: s.id, groups: [...(s.groups ?? []), ...WHOLE], mesh: tube(P, { radius: (k) => r(k) * lerp(0.62, 1, myo), ref: [0, 0, 1], sides: 22, capStart: s.key === 'sac' }), color, deep, tissue: 'muscle', opacity: wallOp });
+    } else {
+      // Paired tubes, drawn apart by how far below the zipper they are.
+      for (const sx of [-1, 1]) {
+        const Q = P.map((p, k): V3 => {
+          const below = clamp01((us[k] - front) / 0.25);
+          return [p[0] + sx * 0.36 * ss(0, 1, below), p[1], p[2] - 0.05 * below];
+        });
+        items.push({ key: `myo-${s.key}-${sx}`, id: s.id, groups: [...(s.groups ?? []), ...WHOLE, 'bihotz-hodiak'], mesh: tube(Q, { radius: (k) => r(k) * lerp(0.62, 1, myo) * 0.82, ref: [0, 0, 1], sides: 18 }), color, deep, tissue: 'muscle', opacity: wallOp });
+      }
+    }
+    pts[s.id] ??= at((s.u0 + s.u1) / 2);
+  }
+  pts['aorta-zakua'] = at(0.03);
+  pts['atal-bulbarra'] = at((U.sac + U.proximal) / 2 + 0.06);
+  pts['enbor-arteriosoa'] = at((U.sac + U.truncus) / 2);
+  pts['arteria-konoa'] = at((U.truncus + U.conus) / 2);
+  pts['bulboaren-hurbileko-atala'] = at((U.conus + U.proximal) / 2 + 0.02);
+  pts['atal-bentrikularra'] = at((U.proximal + U.ventricle) / 2 + 0.02);
+  pts['erreten-aurikulubentrikularra'] = at(U.ventricle + 0.02);
+  pts['atal-bulbobentrikularra'] = at(U.proximal);
+  // Once looped, the atrioventricular canal: the narrow collar where the atrial segment opens into the ventricle.
+  if (clamp01(pose.loop) > 0.5 && fuse >= 1) {
+    const { pts: P, u: us } = slice(line, U.ventricle - 0.006, U.ventricle + 0.04);
+    if (P.length >= 2)
+      items.push({ key: 'av-canal', id: 'erreten-aurikulubentrikularra', groups: [...WHOLE], mesh: tube(P, { radius: (k) => radiusAt(lerp(us[0], us[us.length - 1], k), pose) * lerp(0.62, 1, myo) * 1.06, ref: [0, 0, 1], sides: 22 }), color: mixHex(T.ventricle, T.atrium, 0.5), deep: T.atriumDeep, tissue: 'muscle', opacity: wallOp });
+  }
+  pts['atal-bulbobentrikularra'] = at(U.proximal);
+
+  // Atrial branches (paired → fused) and the common atrium.
+  const f = clamp01(pose.atriaFuse);
+  const atriumColour = segColour(T.atrium, 'atrium');
+  const atriumDeep = segDeep(T.atriumDeep, 'atrium');
+  const rA = radiusAt(0.95, pose);
+  const branches: Mesh[] = [];
+  for (let i = 0; i < 2; i++) {
+    const a = cd.atrium[i];
+    const mid = mix3(cd.end, a, 0.5);
+    branches.push(tube(path([cd.end, add(mid, [0, -0.02 * (1 - pose.loop), 0]), a], 12), { radius: (k) => rA * lerp(1, 0.86 + 0.3 * f, k), ref: [0, 0, 1], sides: 18, capEnd: true }));
+  }
+  if (f > 0.02 || pose.expand > 0.01) {
+    // The common atrium: a wide chamber between the two branches, bulging on both sides of the truncus later.
+    const c = mix3(cd.atrium[0], cd.atrium[1], 0.5);
+    const e = clamp01(pose.expand);
+    branches.push(blob({ center: add(c, [0, 0.02 * e, 0.04 * e]), radii: [lerp(0.3, 0.46, f) + 0.12 * e, lerp(0.26, 0.34, f) + 0.06 * e, lerp(0.24, 0.3, f) + 0.04 * e], rings: 14, sides: 20 }));
+  }
+  items.push({ key: 'atria', id: 'atal-aurikularra', groups: ['zain-muturra', 'aurikula-komuna', ...WHOLE], mesh: merge(branches), color: atriumColour, deep: atriumDeep, tissue: 'muscle', opacity: wallOp });
+  // Inside the tissue: one branch while they are paired, the common chamber once fused.
+  pts['atal-aurikularra'] = f > 0.5 ? mix3(cd.atrium[0], cd.atrium[1], 0.5) : mix3(cd.end, cd.atrium[1], 0.6);
+
+  // Primitive right and left atria: the two lateral expansions of the common atrium, either side of the truncus.
+  const e = clamp01(pose.expand);
+  if (e > 0.01) {
+    for (const [i, id] of [[0, 'hasierako-eskuineko-aurikula'], [1, 'hasierako-ezkerreko-aurikula']] as const) {
+      const sx = i ? 1 : -1;
+      const a = cd.atrium[i];
+      const c: V3 = add(a, [sx * 0.2 * e, 0.12 * e, 0.3 * e]);
+      items.push({
+        key: `pa${i}`,
+        id,
+        groups: ['atal-aurikularra'],
+        mesh: blob({ center: c, radii: [0.3 * e + 0.04, 0.28 * e + 0.04, 0.26 * e + 0.04], rings: 14, sides: 20, shape: (d) => 1 + 0.12 * d[1] }),
+        color: T.atrium,
+        deep: T.atriumDeep,
+        tissue: 'muscle',
+        opacity: wallOp,
+      });
+      pts[id] = add(c, [sx * 0.08, 0.04, 0.12]);
+    }
+  }
+
+  // The sinus venosus: two horns (paired) that meet in the midline as its transverse part.
+  const sh = clamp01(pose.shift);
+  const sinusCol = segColour(T.sinus, 'sinus');
+  const sinusDeep = segDeep(T.sinusDeep, 'sinus');
+  const hornR = (i: number) => (i === 0 ? lerp(0.21, 0.3, sh) : lerp(0.21, 0.1, sh));
+  for (let i = 0; i < 2; i++) {
+    const sx = i ? 1 : -1;
+    const P = path([cd.atrium[i], cd.sinusIn[i], mix3(cd.sinusIn[i], cd.horn[i], 0.55), cd.horn[i]], 16);
+    // The left horn shrinks with the shift (towards the coronary sinus).
+    items.push({
+      key: `horn${i}`,
+      id: i && (pose.coronary ?? 0) > 0.5 ? 'sinu-koronarioa' : i ? 'ezkerreko-sinu-luzapena' : 'eskuineko-sinu-luzapena',
+      groups: ['zain-sinua', 'zain-muturra', ...(i ? ['ezkerreko-sinu-luzapena'] : []), ...WHOLE],
+      mesh: tube(P, { radius: (k) => hornR(i) * lerp(0.92, 1.05, k) * (k < 0.15 ? lerp(0.86, 1, k / 0.15) : 1), ref: [0, 0, 1], sides: 16, capEnd: true }),
+      color: sinusCol,
+      deep: sinusDeep,
+      tissue: 'muscle',
+      opacity: wallOp,
+    });
+    pts[i ? 'ezkerreko-sinu-luzapena' : 'eskuineko-sinu-luzapena'] = mix3(cd.sinusIn[i], cd.horn[i], 0.6);
+    void sx;
+  }
+  if (f > 0.02) {
+    // Behind the atrium (dorsal, -z), sagging a little: it must show from the back, not hide inside the horns.
+    const back = (p: V3, k: number): V3 => [p[0], p[1] - 0.06 * k, p[2] - 0.12 * k];
+    const P = path([back(cd.sinusIn[0], 0.5), back(mix3(cd.sinusIn[0], cd.sinusIn[1], 0.5), 1), back(cd.sinusIn[1], 0.5)], 10);
+    items.push({ key: 'sinus-mid', id: 'zain-sinuaren-zeharkako-atala', groups: ['zain-sinua', 'zain-muturra', ...WHOLE], mesh: tube(P, { radius: () => lerp(0.14, 0.22, f), ref: [0, 0, 1], sides: 16, capStart: true, capEnd: true }), color: sinusCol, deep: sinusDeep, tissue: 'muscle', opacity: wallOp });
+  }
+  pts['zain-sinua'] = f > 0.5 ? mix3(cd.sinusIn[0], cd.sinusIn[1], 0.5) : mix3(cd.sinusIn[1], cd.horn[1], 0.5);
+  pts['sinu-koronarioa'] = mix3(cd.sinusIn[1], cd.horn[1], 0.6);
+  // The sinoatrial orifice: where the sinus opens into the atrium; it moves to the right with the shift.
+  const so = lerp(0.5, 0.12, sh);
+  pts['zulo-sinoaurikularra'] = mix3(mix3(cd.sinusIn[0], cd.sinusIn[1], so), mix3(cd.atrium[0], cd.atrium[1], so), 0.45);
+  const hole = clamp01(pose.hole ?? 0);
+  if (hole > 0.01) {
+    // Wide at first (the notes' figure), narrower as it moves into the primitive right atrium.
+    items.push({ key: 'sa-hole', id: 'zulo-sinoaurikularra', mesh: blob({ center: pts['zulo-sinoaurikularra'], radii: [lerp(0.2, 0.11, sh), lerp(0.11, 0.13, sh), 0.09], rings: 12, sides: 18 }), color: '#1a0710', deep: '#000000', tissue: 'vessel', opacity: hole });
+  }
+  const cor = clamp01(pose.coronary ?? 0);
+  if (cor > 0.01) {
+    // The oblique vein of the left atrium: up the back of the left atrium into the coronary sinus.
+    const a = mix3(cd.sinusIn[1], cd.horn[1], 0.55);
+    const ov = path([a, add(a, [0.02, 0.22, -0.04]), add(cd.atrium[1], [0.12, 0.28, -0.22])], 12);
+    items.push({ key: 'oblique', id: 'ezkerreko-aurikularen-zain-laprana', mesh: vessel(ov.slice(0, Math.max(2, Math.round(ov.length * cor))), 0.045, 8), color: T.deo2, deep: T.deo2Deep, tissue: 'vessel', opacity: 1 });
+    pts['ezkerreko-aurikularen-zain-laprana'] = ov[8];
+  }
+  pts['bihotz-lakioa'] = at(0.62);
+  pts['zain-sinuaren-zeharkako-atala'] = add(mix3(cd.sinusIn[0], cd.sinusIn[1], 0.5), [0, -0.06, -0.12]);
+
+  // The veins of each side, at the tips of the horns.
+  const vShow = clamp01(pose.veins);
+  if (vShow > 0.01) {
+    for (let i = 0; i < 2; i++) {
+      const sx = i ? 1 : -1;
+      const V = veins(cd.horn[i], sx);
+      const gone = (k: number) => clamp01(k);
+      // Obliterated veins: right umbilical and left vitelline (4th week), left common cardinal (≈10th week).
+      const umbGone = i === 0 ? gone(pose.obliterate[0]) : 0;
+      const vitGone = i === 1 ? gone(pose.obliterate[0]) : 0;
+      const cardGone = i === 1 ? gone(pose.obliterate[1]) : 0;
+      const big = i === 0 ? 1 + 0.35 * sh : 1 - 0.3 * sh;
+      // The single veins the notes name (the ones that close) answer to their own ids too.
+      const own: Record<string, string | undefined> = {
+        umb: i === 0 ? 'eskuineko-zilbor-zaina' : undefined,
+        vit: i === 1 ? 'ezkerreko-zain-bitelinoa' : undefined,
+        card: i === 1 ? 'ezkerreko-kardinal-komuna' : undefined,
+      };
+      const v = (key: string, id: string, pts0: V3[], color: string, deep: string, r: number, gone0: number) => {
+        if (gone0 >= 0.98) return;
+        const g = own[key];
+        items.push({ key: `${key}${i}`, id, groups: g ? [g] : undefined, mesh: vessel(pts0, (u) => r * big * (1 - 0.75 * gone0) * lerp(1, 0.75, u), 10), color, deep, tissue: 'vessel', opacity: vShow * (1 - 0.6 * gone0) });
+        if (g) pts[g] = pts0[Math.min(pts0.length - 1, 10)];
+      };
+      v('card', 'bena-kardinal-komuna', V.cardinal, T.deo2, T.deo2Deep, 0.1, cardGone);
+      // Only the left common cardinal closes: the left anterior cardinal drains through its anastomosis to the right.
+      v('ant', 'aurreko-zain-kardinalak', V.anterior, T.deo2, T.deo2Deep, 0.075, 0);
+      v('post', 'atzeko-zain-kardinalak', V.posterior, T.deo2, T.deo2Deep, 0.075, 0.5 * cardGone);
+      v('umb', 'zilbor-zainak', V.umbilical, T.o2, T.o2Deep, 0.09, umbGone);
+      v('vit', 'bitelo-zainak', V.vitelline, T.deo2, T.deo2Deep, 0.085, vitGone);
+      pts[`bena-kardinal-komuna${i}`] = V.cardinal[V.cardinal.length - 1];
+      pts[`aurreko-zain-kardinalak${i}`] = V.anterior[10];
+      pts[`atzeko-zain-kardinalak${i}`] = V.posterior[10];
+      pts[`zilbor-zainak${i}`] = V.umbilical[12];
+      pts[`bitelo-zainak${i}`] = V.vitelline[12];
+    }
+    // Anastomoses: cross connections that carry the left veins' blood over to the right side.
+    const an = clamp01(pose.anast ?? 0);
+    if (an > 0.01) {
+      const L = veins(cd.horn[1], 1);
+      const R = veins(cd.horn[0], -1);
+      const cross = (a: V3, b: V3): V3[] => path([a, add(mix3(a, b, 0.5), [0, -0.12, 0.08]), b], 12);
+      const links = [cross(L.vitelline[10], R.vitelline[10]), cross(L.anterior[12], R.anterior[9])];
+      links.forEach((c, k) => {
+        const part = c.slice(0, Math.max(2, Math.round(c.length * an)));
+        items.push({ key: `anast${k}`, id: 'anastomosiak', mesh: vessel(part, 0.06, 10), color: T.deo2, deep: T.deo2Deep, tissue: 'vessel', opacity: vShow });
+      });
+      pts['anastomosiak'] = mix3(L.vitelline[10], R.vitelline[10], 0.3);
+    }
+  }
+
+  // Context: dorsal aortas, the aortic arches round the foregut, the foregut, the pericardial cavity, the septum transversum.
+  const ao = o.aortas ?? 0;
+  if (ao > 0.01) {
+    const sac = line[0];
+    const n = Math.max(0, Math.min(3, pose.arches));
+    for (const sx of [-1, 1]) {
+      const da = path([[sx * 0.4, sac[1] + 0.5, -1.38], [sx * 0.42, 0.2, -1.42], [sx * 0.38, -1.6, -1.4], [sx * 0.3, -2.6, -1.36]], 24);
+      items.push({ key: `dao${sx}`, id: 'aorta-dortsalak', mesh: vessel(da, 0.11, 12), color: T.aorta, deep: T.aortaDeep, tissue: 'vessel', opacity: ao });
+      for (let k = 0; k < 3; k++) {
+        const g = clamp01(n - k);
+        if (g <= 0.01) continue;
+        const y0 = sac[1] + 0.32 - k * 0.3;
+        const arch = path([sac, [sx * 0.22, y0 + 0.08, sac[2] - 0.05], [sx * 0.38, y0 + 0.18, -0.55], [sx * 0.4, y0 + 0.08, -1.12], [sx * 0.4, y0 - 0.06, -1.38]], 16);
+        const part = arch.slice(0, Math.max(2, Math.round(arch.length * g)));
+        items.push({ key: `arch${k}${sx}`, id: 'aorta-arkuak', mesh: vessel(part, 0.075, 10), color: T.o2, deep: T.o2Deep, tissue: 'vessel', opacity: ao });
+        if (k === 0) pts[`aorta-arkuak${sx}`] = arch[9];
+      }
+      pts[`aorta-dortsalak${sx}`] = da[12];
+    }
+  }
+  const gut = o.gut ?? 0;
+  if (gut > 0.01) {
+    const g = path([[0, 2.3, -0.82], [0, 1.0, -0.86], [0, -0.6, -0.9], [0, -2.4, -0.86]], 24);
+    items.push({ key: 'gut', id: 'aurreko-hestea', mesh: tube(g, { radius: (u) => lerp(0.24, 0.18, u), ref: [0, 0, 1], sides: 16, capStart: true, capEnd: true }), color: T.endo, deep: T.endoDeep, tissue: 'epithelium', opacity: gut * 0.85 });
+    pts['aurreko-hestea'] = g[6];
+  }
+  const noto = o.noto ?? 0;
+  if (noto > 0.01) {
+    const n = path([[0, 2.5, -1.78], [0, 0.4, -1.84], [0, -1.4, -1.82], [0, -2.7, -1.76]], 24);
+    items.push({ key: 'noto', id: 'notokorda', mesh: tube(n, { radius: () => 0.1, ref: [0, 0, 1], sides: 12, capStart: true, capEnd: true }), color: '#a855f7', deep: '#5b21b6', tissue: 'mesenchyme', opacity: noto });
+    pts['notokorda'] = n[9];
+  }
+  const cav = o.cavity ?? 0;
+  if (cav > 0.01) {
+    const L = clamp01(pose.loop);
+    const c: V3 = [lerp(0, -0.04, L), lerp(0.48, 0.42, L), lerp(0.28, 0.08, L)];
+    items.push({ key: 'cavity', id: 'perikardio-barrunbea', mesh: blob({ center: c, radii: [lerp(0.95, 1.25, L), lerp(1.55, 1.5, L), lerp(0.85, 1.22, L)], rings: 20, sides: 28 }), color: '#ffb3c4', deep: '#a3485e', tissue: 'membrane', opacity: 0.13 * cav, outline: false });
+    pts['perikardio-barrunbea'] = add(c, [0.75, 0.6, 0.3]);
+  }
+  const st = o.septum ?? 0;
+  if (st > 0.01) {
+    const L = clamp01(pose.loop);
+    const c: V3 = [0, lerp(-1.42, -1.3, L), lerp(-0.05, -0.3, L)];
+    items.push({ key: 'septum', id: 'septum-transversum', mesh: blob({ center: c, radii: [1.35, 0.36, 1.0], rings: 14, sides: 24 }), color: T.septum, deep: T.septumDeep, tissue: 'mesenchyme', opacity: 0.32 * st, outline: false });
+    pts['septum-transversum'] = add(c, [-0.9, -0.05, 0.4]);
+  }
+
+  // Blood in the lumen: cells along the centreline from the horns to the aortic sac.
+  if (o.flow && o.flow.show > 0.01) {
+    const cells: Mesh[] = [];
+    const cellsO2: Mesh[] = [];
+    const route: V3[] = [...line].reverse();
+    const N = 26;
+    for (let i = 0; i < N; i++) {
+      const u = (((i / N + o.flow.phase) % 1) + 1) % 1;
+      const p = route[Math.min(route.length - 1, Math.floor(u * (route.length - 1)))];
+      const jit: V3 = [Math.sin(i * 12.9) * 0.07, Math.cos(i * 7.3) * 0.05, Math.sin(i * 3.1) * 0.07];
+      const m = blob({ center: add(p, jit), radii: [0.055, 0.04, 0.055], rings: 6, sides: 8 });
+      (o.flow.mixed && i % 3 === 0 ? cellsO2 : cells).push(m);
+    }
+    if (cells.length) items.push({ key: 'flow', mesh: merge(cells), color: T.deo2, deep: T.deo2Deep, tissue: 'skin', opacity: o.flow.show });
+    if (cellsO2.length) items.push({ key: 'flowO2', mesh: merge(cellsO2), color: T.o2, deep: T.o2Deep, tissue: 'skin', opacity: o.flow.show });
+  }
+
+  // A faint copy of another pose (where the tube started).
+  if (o.ghost) {
+    const gl = centreline(o.ghost, 60);
+    items.push({ key: 'ghost', mesh: tube(gl, { radius: (u) => radiusAt(u, o.ghost!) * 0.98, ref: [0, 0, 1], sides: 16, capStart: true, capEnd: true }), color: '#e8eefc', deep: '#8c96b0', tissue: 'membrane', opacity: 0.14, outline: false });
+  }
+
+  return { items, line, cd, pts };
+}
+
+/** Unit direction helper for arrows. */
+export const dirTo = (a: V3, b: V3) => norm(sub(b, a));
+export { add, mul };

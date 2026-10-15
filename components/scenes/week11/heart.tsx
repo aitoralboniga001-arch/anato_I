@@ -54,6 +54,11 @@ export interface HeartState {
   veins: number;
   /** After birth: the atria are the definitive ones (their own ids). */
   adult?: boolean;
+  /** Trabeculae of the right and left ventricles growing (0 … 1; default 1). */
+  trabR?: number;
+  trabL?: number;
+  /** Earlier names the primitive left ventricle also answers to (topic 10: the ventricular segment). */
+  lvAlso?: string[];
   /** After birth: how much blood the lungs return to the LA (0 … 1): its volume and pressure. */
   laFill?: number;
   /** Through a patent foramen ovale, venous blood mixes into the LA (0 … 1). */
@@ -384,7 +389,7 @@ export function HeartArt({ s, t }: { s: HeartState; t: number }) {
       <Part id="hasierako-eskuineko-bentrikulua">
         <Tissue d={`M${IV_TOP[0]},${IV_TOP[1]}L292,312${curve(RV_OUT, 0.5).replace(/^M[^C]*/, '')}L${IV_TOP[0]},${IV_TOP[1]}Z`} fill={K.proximal} deep={K.bulbusDeep} pattern="w11-myo" />
       </Part>
-      <Part id="hasierako-ezkerreko-bentrikulua">
+      <Part id="hasierako-ezkerreko-bentrikulua" groups={s.lvAlso}>
         <Tissue d={`M${IV_TOP[0]},${IV_TOP[1]}L${IV_BOT[0]},${IV_BOT[1]}${curve(LV_OUT, 0.5).replace(/^M[^C]*/, '')}Z`} fill={K.ventricle} deep={K.ventricleDeep} pattern="w11-myo" />
       </Part>
 
@@ -407,8 +412,8 @@ export function HeartArt({ s, t }: { s: HeartState; t: number }) {
 
       {/* Trabeculae of both ventricles (they become the trabeculated parts). */}
       <Part id="muskulu-trenkadak" quiet>
-        <Trabeculae pts={V_IN.slice(1, 7)} inward={[440, 440]} fill={K.proximal} deep={K.bulbusDeep} n={18} len={22} seed={3} />
-        <Trabeculae pts={V_IN.slice(7, 13)} inward={[600, 450]} fill={K.ventricle} deep={K.ventricleDeep} n={18} len={24} seed={9} />
+        <Trabeculae pts={V_IN.slice(1, 7)} inward={[440, 440]} fill={K.proximal} deep={K.bulbusDeep} n={18} len={22 * (0.3 + 0.7 * (s.trabR ?? 1))} seed={3} show={s.trabR ?? 1} />
+        <Trabeculae pts={V_IN.slice(7, 13)} inward={[600, 450]} fill={K.ventricle} deep={K.ventricleDeep} n={18} len={24 * (0.3 + 0.7 * (s.trabL ?? 1))} seed={9} show={s.trabL ?? 1} />
       </Part>
 
       {/* Bulboventricular ridge (flattens as the canal moves). */}

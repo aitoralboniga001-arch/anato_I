@@ -51,7 +51,7 @@ describe('original notes and reviewed alignment', () => {
       }
       for (const id of refs) expect(sentence(id), `${key}: ${id}`).toBeDefined();
     });
-    expect(count).toBe(562);
+    expect(count).toBe(619);
     expect(unmapped).toBe(1);
   });
 

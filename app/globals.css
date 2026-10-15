@@ -1328,6 +1328,22 @@ kbd {
   white-space: nowrap;
 }
 
+.orient span {
+  animation: orient-in 0.32s ease-out;
+}
+
+@keyframes orient-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orient span {
+    animation: none;
+  }
+}
+
 .orient-top {
   top: 10px;
   left: 50%;
