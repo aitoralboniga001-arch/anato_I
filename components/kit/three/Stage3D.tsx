@@ -1,13 +1,13 @@
 'use client';
 
-import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { mix } from '@/lib/sim/anim';
 import { aimCamera, blendCamera, centreOf } from '@/lib/three-d/aim';
-import { viewOf, project, type M4, type V3, type View3 } from '@/lib/three-d/math';
-import { orbitCamera } from '@/lib/three-d/orbit';
+import { len, norm, sub, viewOf, project, type Camera3, type M4, type V3, type View3 } from '@/lib/three-d/math';
+import { lookTurn, orbitCamera } from '@/lib/three-d/orbit';
 import { KEY_LIGHT, projectItem, type Item3, type Projected, type Scene3 } from '@/lib/three-d/scene';
 import { Part } from '../Part';
-import { UnderlayContext, partState, useLabelScale, useScene } from '../context';
+import { BridgeLookContext, UnderlayContext, partState, useLabelScale, useScene, type LookSide } from '../context';
 import type { GLApi, GLState } from './gl';
 
 export type At3 = (p: V3, m?: M4) => { x: number; y: number; z: number };
@@ -20,6 +20,12 @@ interface Stage3DProps {
   orbit?: boolean;
   /** Three short axis names for the small orientation cross (up, towards the viewer, side). */
   axes?: { up: string; front: string; side: string; sideDir: V3; edges?: EdgeNames };
+  /**
+   * The same specimen across views (a key naming it): a view that takes over from one with the same key
+   * starts from the camera the viewer was just looking through and glides to its own, so a stage change
+   * on the same model never cuts to another angle.
+   */
+  continuity?: string;
 }
 
 /**
@@ -65,6 +71,23 @@ function edgesFor(m: M4, n: EdgeNames, sideDir: V3, was: Edges): Edges {
 }
 const sameEdges = (a: Edges, b: Edges) => a.top === b.top && a.bottom === b.bottom && a.left === b.left && a.right === b.right;
 
+/** Where the eye is, seen from the specimen, for each named side. */
+function lookDir(side: LookSide, sideDir: V3): V3 {
+  const neg = (v: V3): V3 => [-v[0], -v[1], -v[2]];
+  return side === 'front' ? [0, 0, 1] : side === 'back' ? [0, 0, -1] : side === 'up' ? [0, 1, 0] : side === 'down' ? [0, -1, 0] : side === 'side' ? sideDir : neg(sideDir);
+}
+const SIDES: LookSide[] = ['front', 'back', 'side', 'otherSide', 'up', 'down'];
+
+/** The named side the camera looks from now (within ~20 degrees), if any. */
+function facingOf(m: M4, sideDir: V3): LookSide | undefined {
+  // The camera's own z axis in world space points from the specimen to the eye.
+  const z: V3 = [m[2], m[6], m[10]];
+  return SIDES.find((k) => {
+    const d = lookDir(k, sideDir);
+    return (z[0] * d[0] + z[1] * d[1] + z[2] * d[2]) / Math.hypot(d[0], d[1], d[2]) > 0.94;
+  });
+}
+
 /** How long a turn asked for with the buttons (or a reset) takes. */
 const TURN_MS = 420;
 
@@ -88,17 +111,101 @@ const STATE: Record<ReturnType<typeof partState>, GLState> = {
 const GLIDE_MS = 1100;
 const ease = (x: number) => x * x * x * (x * (x * 6 - 15) + 10);
 
+/**
+ * The WebGL layer a 3D view leaves behind stays parked a few seconds for the next one in the same frame:
+ * a camera move between views (which draws the view it leaves once more) or the next stage's 3D view
+ * then shows at once, with no "preparing" moment in the middle of the move.
+ */
+const parked = new Map<HTMLDivElement, { api: GLApi; timer: number }>();
+const PARK_MS = 60000;
+/** 3D views on screen per frame: one still there when another mounts will hand its layer over. */
+const live = new Map<HTMLDivElement, number>();
+
+function park(host: HTMLDivElement, api: GLApi) {
+  api.park();
+  const old = parked.get(host);
+  if (old && old.api !== api) {
+    window.clearTimeout(old.timer);
+    old.api.dispose();
+  }
+  parked.set(host, {
+    api,
+    timer: window.setTimeout(() => {
+      if (parked.get(host)?.api === api) parked.delete(host);
+      api.dispose();
+    }, PARK_MS),
+  });
+}
+
+/**
+ * A WebGL layer made ready in the background (its shader programs compile while nothing else is going
+ * on), parked for the first 3D view: that view, or a camera move into it, never waits for WebGL.
+ */
+export function prewarm3D(host: HTMLDivElement) {
+  if (parked.has(host) || (live.get(host) ?? 0) > 0) return;
+  import('./gl')
+    .then((m) => {
+      if (parked.has(host) || (live.get(host) ?? 0) > 0 || !host.isConnected) return;
+      const api = m.createGL(host, () => {});
+      if (api) park(host, api);
+    })
+    .catch(() => {});
+}
+
+/** The camera each frame's 3D view last showed (and its specimen key), for the next view to start from. */
+const lastCam = new Map<HTMLDivElement, { key: string; cam: Camera3; at: number; live: number }>();
+const ENTER_MS = 1100;
+const differs = (a: Camera3, b: Camera3) => {
+  const ea = norm(sub(a.eye, a.target));
+  const eb = norm(sub(b.eye, b.target));
+  return ea[0] * eb[0] + ea[1] * eb[1] + ea[2] * eb[2] < 0.9986 || Math.hypot(...sub(a.target, b.target)) > 0.05 || Math.abs(a.fov - b.fov) > 0.5 || Math.abs(len(sub(a.eye, a.target)) - len(sub(b.eye, b.target))) > 0.1;
+};
+
+type Pub = { orient: Edges | null; look: { names: Record<LookSide, string>; facing?: LookSide } | null };
+/** The 3D views on each frame, oldest first: the last one sets the frame's side names and camera keys. */
+const pubs = new Map<HTMLDivElement, Pub[]>();
+
+const noSubscribe = () => () => {};
+const zero = () => 0;
+
 /** The drag hint is a one-time lesson: once the viewer has turned a 3D view, it no longer takes room. */
 let turnedOnce = false;
 
-export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
+export function Stage3D({ scene, children, orbit = true, axes, continuity }: Stage3DProps) {
   const ctx = useScene();
   const ul = useContext(UnderlayContext);
+  // Taking over from a view of the same specimen: start from its camera (see `continuity`).
+  const [enter] = useState(() => {
+    const l = continuity && ul?.host ? lastCam.get(ul.host) : undefined;
+    // Still on screen (the outgoing view fades out over this one) or only just gone.
+    return l && l.key === continuity && (l.live > 0 || performance.now() - l.at < 1500) ? l.cam : null;
+  });
+  const [enterP, setEnterP] = useState(enter ? 0 : 1);
+  useEffect(() => {
+    if (!enter) return;
+    const ms = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 1 : ENTER_MS;
+    let raf = 0;
+    let last = 0;
+    let done = 0;
+    // The new stage's first frames can be slow (scene set-up): the glide counts at most one smooth
+    // frame's worth per frame, so it is seen from its start instead of jumping a third of the way.
+    const step = (now: number) => {
+      done += last ? Math.min(now - last, 40) : 0;
+      last = now;
+      const p = Math.min(1, done / ms);
+      setEnterP(p);
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [enter]);
   const [turn, setTurn] = useState({ yaw: 0, pitch: 0 });
   const [gl, setGl] = useState<GLApi | null>(null);
   const [ready, setReady] = useState(false);
   // WebGL could not start (or is very late): only then the coarse flat picture stands in for it.
   const [flatOnly, setFlatOnly] = useState(false);
+  // A parked layer is waiting for this view: no "preparing" spinner, the picture is there next frame.
+  const [warm] = useState(() => !!ul?.host && (parked.has(ul.host) || (live.get(ul.host) ?? 0) > 0));
   const drag = useRef<{ x: number; y: number; yaw: number; pitch: number; moved: boolean } | null>(null);
   // Turns asked for with the buttons or a reset glide there (a drag follows the pointer at once).
   const turnNow = useRef(turn);
@@ -122,8 +229,16 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
   }, [turnGoal]);
   const glideTurn = (to: { yaw: number; pitch: number }) => setTurnGoal((g) => ({ ...to, serial: (g?.serial ?? 0) + 1 }));
 
+  // A camera move into a cut turns the picture to the side the cut is seen from first.
+  const bridge = useContext(BridgeLookContext);
+  const bridgeK = useSyncExternalStore(bridge?.subscribe ?? noSubscribe, bridge?.get ?? zero, zero);
   // The camera the scene asks for, turned by the viewer's drag around its target.
-  const cam = useMemo(() => orbitCamera(scene.camera, turn), [scene.camera, turn]);
+  const cam = useMemo(() => {
+    if (!bridge || bridgeK <= 0 || !axes) return orbitCamera(scene.camera, turn);
+    const goal = lookTurn(scene.camera, lookDir(bridge.side, axes.sideDir));
+    const yaw = turn.yaw + Math.atan2(Math.sin(goal.yaw - turn.yaw), Math.cos(goal.yaw - turn.yaw));
+    return orbitCamera(scene.camera, { yaw: turn.yaw + (yaw - turn.yaw) * bridgeK, pitch: turn.pitch + (goal.pitch - turn.pitch) * bridgeK });
+  }, [scene.camera, turn, bridge, bridgeK, axes]);
   const orbitRequest = ul?.orbitRequest;
   const [appliedOrbit, setAppliedOrbit] = useState<typeof orbitRequest>(undefined);
   if (orbitRequest && orbit && appliedOrbit !== orbitRequest) {
@@ -131,7 +246,10 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
     const { direction } = orbitRequest;
     // From where the last asked-for turn is heading (quick presses add up), not from mid-glide.
     const base = turnGoal && !drag.current ? turnGoal : turn;
-    glideTurn(direction === 'reset' ? { yaw: 0, pitch: 0 } : {
+    const look = direction === 'look' && orbitRequest.look && axes ? lookTurn(scene.camera, lookDir(orbitRequest.look, axes.sideDir)) : null;
+    // The short way round from where the picture is now.
+    const wrap = (a: number) => base.yaw + Math.atan2(Math.sin(a - base.yaw), Math.cos(a - base.yaw));
+    glideTurn(look ? { yaw: wrap(look.yaw), pitch: look.pitch } : direction === 'reset' || direction === 'look' ? { yaw: 0, pitch: 0 } : {
       yaw: base.yaw + (direction === 'left' ? 0.35 : direction === 'right' ? -0.35 : 0),
       pitch: Math.max(-1.1, Math.min(1.1, base.pitch + (direction === 'up' ? 0.22 : direction === 'down' ? -0.22 : 0))),
     });
@@ -161,27 +279,74 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
   }, [gliding, aim.to]);
-  const display = gliding ? blendCamera(goalFor(aim.from), goalFor(spot), ease(aim.p)) : goalFor(spot);
+  const aimed = gliding ? blendCamera(goalFor(aim.from), goalFor(spot), ease(aim.p)) : goalFor(spot);
+  const display = enter && enterP < 1 && differs(enter, aimed) ? blendCamera(enter, aimed, ease(enterP)) : aimed;
   const view = viewOf(display);
+  useEffect(() => {
+    if (continuity && ul?.host) lastCam.set(ul.host, { key: continuity, cam: display, at: performance.now(), live: lastCam.get(ul.host)?.live ?? 0 });
+  });
+  // A paused view stops rendering, so "how recent" counts from when it leaves, not from its last frame.
+  useEffect(() => {
+    const h = ul?.host;
+    if (!continuity || !h) return;
+    const mark = (d: number) => {
+      const l = lastCam.get(h);
+      if (l) lastCam.set(h, { ...l, live: Math.max(0, l.live + d), at: performance.now() });
+    };
+    mark(1);
+    return () => mark(-1);
+  }, [continuity, ul?.host]);
   const light = scene.light ?? KEY_LIGHT;
 
   // The frame's edge pills follow the camera (the step's turns, the tour's glides and the viewer's drag).
   const setOrient = ul?.setOrient;
+  const setLook = ul?.setLook;
+  const host0 = ul?.host ?? null;
+  // Two views share the frame while one fades into the other: the newest one speaks for it, and the
+  // one leaving hands the frame back to whoever is left instead of blanking it.
+  const pub = useRef<Pub>({ orient: null, look: null });
+  useEffect(() => {
+    if (!host0) return;
+    const entry = pub.current;
+    const list = pubs.get(host0) ?? [];
+    // The fading copy of the last view never speaks over the view taking over.
+    if (root.current?.closest('.scene-ghost')) list.unshift(entry);
+    else list.push(entry);
+    pubs.set(host0, list);
+    return () => {
+      const i = list.indexOf(entry);
+      if (i < 0) return;
+      const top = i === list.length - 1;
+      list.splice(i, 1);
+      if (!top) return;
+      const next = list[list.length - 1];
+      setOrient?.(next?.orient ?? null);
+      setLook?.(next?.look ?? null);
+    };
+  }, [host0, setOrient, setLook]);
+  const speaks = () => {
+    const list = host0 ? pubs.get(host0) : undefined;
+    return !list || list[list.length - 1] === pub.current;
+  };
   const edges = useRef<Edges>({});
   const edgeNames = axes?.edges;
   const nextEdges = edgeNames && axes ? edgesFor(view.view, edgeNames, axes.sideDir, edges.current) : null;
   useEffect(() => {
     if (!setOrient || !nextEdges || sameEdges(nextEdges, edges.current)) return;
     edges.current = nextEdges;
-    setOrient(nextEdges);
+    pub.current.orient = nextEdges;
+    if (speaks()) setOrient(nextEdges);
   });
-  useEffect(
-    () => () => {
-      edges.current = {};
-      setOrient?.(null);
-    },
-    [setOrient],
-  );
+  // The frame's camera keys offer the named sides and light the one the picture is seen from now.
+  const facing = edgeNames && axes && orbit ? facingOf(view.view, axes.sideDir) : undefined;
+  const lookKey = edgeNames && orbit ? `${SIDES.map((k) => edgeNames[k]).join('|')}|${facing ?? ''}` : '';
+  useEffect(() => {
+    if (!setLook || !lookKey || !edgeNames) return;
+    pub.current.look = { names: edgeNames, facing };
+    if (speaks()) setLook(pub.current.look);
+    // Only when the names or the side change: the key says both.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setLook, lookKey]);
 
   const host = ul?.host ?? null;
   // The flat fallback is drawn without a viewport (server render, tests) or when WebGL fails. While the
@@ -189,7 +354,7 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
   // a jagged picture before the smooth one.
   const flat = !ready && (!host || flatOnly);
   // Starting up: the spinner stands in for the picture, and its names wait for it.
-  const waiting = !!host && !ready && !flatOnly;
+  const waiting = !!host && !ready && !flatOnly && !warm;
   const drawn = scene.items
     .filter((it) => (it.show ?? 1) * (it.opacity ?? 1) > 0.01)
     .map((it) => ({ it, pr: projectCached(it, view, light, flat) }))
@@ -197,32 +362,49 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
 
   useEffect(() => {
     if (!host) return;
+    live.set(host, (live.get(host) ?? 0) + 1);
     let dead = false;
     let api: GLApi | null = null;
     const late = window.setTimeout(() => setFlatOnly(true), 2500);
-    import('./gl')
-      .then((m) => {
-        if (dead) return;
-        api = m.createGL(host, () => {
-          window.clearTimeout(late);
-          setReady(true);
-        });
-        setGl(api);
-        if (!api) setFlatOnly(true);
-      })
-      .catch(() => !dead && setFlatOnly(true));
+    const pooled = parked.get(host);
+    if (pooled) {
+      parked.delete(host);
+      window.clearTimeout(pooled.timer);
+      api = pooled.api;
+      api.wake(() => {
+        window.clearTimeout(late);
+        if (!dead) setReady(true);
+      });
+      setGl(api);
+    } else
+      import('./gl')
+        .then((m) => {
+          if (dead) return;
+          api = m.createGL(host, () => {
+            window.clearTimeout(late);
+            setReady(true);
+          });
+          setGl(api);
+          if (!api) setFlatOnly(true);
+        })
+        .catch(() => !dead && setFlatOnly(true));
     return () => {
       dead = true;
+      live.set(host, (live.get(host) ?? 1) - 1);
       window.clearTimeout(late);
-      api?.dispose();
+      // Parked for the next 3D view in this frame (one at a time), then let go.
+      if (api) park(host, api);
       setGl(null);
       setReady(false);
       setFlatOnly(false);
     };
   }, [host]);
 
+  // The shaded picture follows this view's own group (not just the frame's zoom): a camera move between
+  // views, which carries and fades the drawings, carries and fades the 3D picture with them.
+  const root = useRef<SVGGElement>(null);
   const sceneEl = ul?.scene ?? null;
-  useEffect(() => gl?.follow(sceneEl), [gl, sceneEl]);
+  useEffect(() => gl?.follow(root.current ?? sceneEl), [gl, sceneEl]);
 
   // Every render hands the WebGL layer this frame's meshes, matrices and highlight states.
   useLayoutEffect(() => {
@@ -255,7 +437,9 @@ export function Stage3D({ scene, children, orbit = true, axes }: Stage3DProps) {
   const canTurn = orbit && !ul?.zoomed;
   return (
     <g
+      ref={root}
       className={`stage3d${ready ? ' is-gl' : ''}`}
+      data-orbit={orbit ? '' : undefined}
       onPointerDown={(e) => {
         if (!canTurn || e.button !== 0) return;
         // A drag takes over from a glide where it is.

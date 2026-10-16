@@ -34,6 +34,7 @@ export const stageCirculation: StageDef = {
       orientation: { top: 'Kraneala', bottom: 'Kaudala' },
       scene: CirculationFront,
       travel: false,
+      bridges: [{ from: 'alboa', part: 'bihotz-hodia' }],
     },
   ],
   beats: [

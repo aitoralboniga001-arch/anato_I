@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useEffectEvent, useId, useLayoutEffect, useRef, type ReactNode } from 'react';
-import { PaneContext } from '@/components/kit/context';
+import { useEffect, useEffectEvent, useId, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react';
+import { BridgeLookContext, PaneContext, type BridgeLook, type LookSide } from '@/components/kit/context';
 import type { ViewDef } from '@/lib/sim/types';
 
 /**
@@ -29,12 +29,28 @@ export interface ZoomPlan {
   at?: [number, number, number];
   fromLabel: string;
   toLabel: string;
+  /** The close-up is a cut through the whole view's specimen (not just a closer look). */
+  section?: boolean;
+  /** The side the cut is seen from: the whole view's 3D picture turns to it (before going in, while coming out). */
+  look?: LookSide;
 }
 
-/** The zoom between two views of one stage, or null: one must be the other's close-up. */
-export function zoomPlan(from: ViewDef, to: ViewDef): ZoomPlan | null {
-  if (to.zoom?.from === from.id) return { inward: true, part: to.zoom.part, at: to.zoom.at, fromLabel: from.label, toLabel: to.label };
-  if (from.zoom?.from === to.id) return { inward: false, part: from.zoom.part, at: from.zoom.at, fromLabel: from.label, toLabel: to.label };
+/** Going into a cut seen from another side than the 3D picture: the turn comes first. */
+const TURN_MS = 1100;
+
+/**
+ * The zoom between two views, or null: one must be the other's close-up (`zoom`, same stage) or name the
+ * other among its `bridges` (by view id within a stage, `stage/view` across stages).
+ */
+export function zoomPlan(from: ViewDef, to: ViewDef, fromStage?: string, toStage?: string): ZoomPlan | null {
+  const same = fromStage === toStage;
+  if (same && to.zoom?.from === from.id) return { inward: true, part: to.zoom.part, at: to.zoom.at, fromLabel: from.label, toLabel: to.label };
+  if (same && from.zoom?.from === to.id) return { inward: false, part: from.zoom.part, at: from.zoom.at, fromLabel: from.label, toLabel: to.label };
+  const names = (v: ViewDef, stage?: string) => (same ? [v.id] : [`${stage}/${v.id}`]);
+  const into = to.bridges?.find((b) => names(from, fromStage).includes(b.from));
+  if (into) return { inward: true, part: into.part, at: into.at, fromLabel: from.label, toLabel: to.label, section: into.section, look: into.look };
+  const out = from.bridges?.find((b) => names(to, toStage).includes(b.from));
+  if (out) return { inward: false, part: out.part, at: out.at, fromLabel: from.label, toLabel: to.label, section: out.section, look: out.look };
   return null;
 }
 
@@ -49,7 +65,8 @@ function partBox(host: SVGGElement | null, part: string): Box | null {
   let y0 = Infinity;
   let x1 = -Infinity;
   let y1 = -Infinity;
-  host.querySelectorAll<SVGGraphicsElement>(`[data-part="${CSS.escape(part)}"]`).forEach((el) => {
+  // A structure drawn in pieces counts its pieces too (parts that carry it among their groups).
+  host.querySelectorAll<SVGGraphicsElement>(`[data-part="${CSS.escape(part)}"], [data-groups~="${CSS.escape(part)}"]`).forEach((el) => {
     if (Number(el.getAttribute('opacity') ?? 1) < 0.05) return;
     const b = el.getBBox();
     if (b.width + b.height === 0) return;
@@ -106,11 +123,34 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
   const wholeRef = useRef<SVGGElement>(null);
   const reg = useRef<Box | null>(null);
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
+  // Into a cut seen from another side: the 3D picture turns first, then the camera goes in.
+  const pre = plan.look && plan.inward ? TURN_MS : 0;
+  const total = ZOOM_MS + pre;
+  const look = useMemo(() => {
+    let k = plan.look && !plan.inward ? 1 : 0;
+    const subs = new Set<() => void>();
+    const store: BridgeLook & { set: (v: number) => void } = {
+      side: plan.look ?? 'front',
+      get: () => k,
+      subscribe: (cb) => {
+        subs.add(cb);
+        return () => subs.delete(cb);
+      },
+      set: (v) => {
+        if (Math.abs(v - k) < 0.001) return;
+        k = v;
+        subs.forEach((cb) => cb());
+      },
+    };
+    return store;
+  }, [plan.look, plan.inward]);
 
-  const draw = (ms: number) => {
+  const draw = (msAll: number) => {
     const g = root.current;
     const r = reg.current;
     if (!g || !r) return;
+    const ms = msAll - pre;
+    if (plan.look) look.set(plan.inward ? glide(msAll / TURN_MS) : 1 - glide((ms - 350) / 1200));
     const q = (k: string) => g.querySelector<SVGElement>(`[data-z="${k}"]`);
     const set = (k: string, attrs: Record<string, string | number>) => {
       const el = q(k);
@@ -136,7 +176,7 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
       set('old', { opacity: 1 - ramp(ms, 250, 700) });
       set('new', { opacity: ramp(ms, 0, 450) });
     }
-    set('caption', { opacity: ramp(ms, 0, 350) * (1 - ramp(ms, ZOOM_MS - 500, ZOOM_MS - 100)) });
+    set('caption', { opacity: ramp(msAll, 0, 350) * (1 - ramp(msAll, total - 500, total - 100)) });
   };
 
   const finish = useEffectEvent(onDone);
@@ -153,28 +193,39 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
       grad?.setAttribute('cy', (r.y + r.h / 2).toFixed(1));
       grad?.setAttribute('r', (Math.hypot(r.w, r.h) * 0.62).toFixed(1));
     }
-    paint((progress ?? 0) * ZOOM_MS);
-  }, [progress, plan.part, plan.at]);
+    paint((progress ?? 0) * total);
+  }, [progress, plan.part, plan.at, total]);
   useEffect(() => {
     if (progress !== undefined) return;
     let raf = 0;
     let start = 0;
+    let last = 0;
+    let held = 0;
     let over = false;
     const end = () => {
       if (over) return;
       over = true;
       finish();
     };
+    // A 3D view still starting up: the camera waits where it is (the close-up not yet shown, or the
+    // whole view not yet left) rather than show a "preparing" picture mid-move, for 3 s at most.
+    const holdAt = plan.inward ? 1000 + pre : 0;
+    const MAX_HOLD = 3000;
     const tick = (now: number) => {
-      if (!start) start = now;
-      const ms = Math.min(ZOOM_MS, now - start);
-      paint(ms);
-      if (ms < ZOOM_MS) raf = requestAnimationFrame(tick);
+      if (!start) start = last = now;
+      const ms = Math.min(total, now - start);
+      if (ms >= holdAt && held < MAX_HOLD && ms < holdAt + 400 && root.current?.querySelector('.stage3d-loading')) {
+        held += now - last;
+        start += now - last;
+      }
+      last = now;
+      paint(Math.min(total, now - start));
+      if (now - start < total) raf = requestAnimationFrame(tick);
       else end();
     };
     raf = requestAnimationFrame(tick);
     // Never left half-way (a tab in the background stops animation frames).
-    const safety = window.setTimeout(end, ZOOM_MS + 2500);
+    const safety = window.setTimeout(end, total + MAX_HOLD + 2500);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') end();
     };
@@ -194,6 +245,7 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
   const close = plan.inward ? 'new' : 'old';
 
   return (
+    <BridgeLookContext.Provider value={plan.look ? look : null}>
     <g ref={root} className={`view-zoom${plan.inward ? ' is-in' : ' is-out'}`} aria-hidden>
       {/* The whole view lies under the close-up, whichever way the camera goes. */}
       <g {...z(whole)} opacity={plan.inward ? 1 : 0} pointerEvents="none">
@@ -219,7 +271,7 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
       <g {...z('caption')} opacity={0}>
         <rect x={500 - pillW / 2} y={14} width={pillW} height={60} rx={16} fill="rgba(12,14,20,0.84)" stroke="rgba(255,255,255,0.09)" />
         <text x={500} y={35} textAnchor="middle" style={{ font: '600 10.5px var(--font-mono, monospace)', letterSpacing: '0.16em', fill: '#fbbf24' }}>
-          {plan.inward ? 'GERTUTIK BEGIRATZEN' : 'OSORIK IKUSTEN'}
+          {plan.section ? (plan.inward ? 'BARRURA BEGIRATZEN · MOZKETA' : 'KANPOTIK IKUSTEN · OSORIK') : plan.inward ? 'GERTUTIK BEGIRATZEN' : 'OSORIK IKUSTEN'}
         </text>
         <text x={500} y={60} textAnchor="middle" style={{ font: `650 19px ${sans}`, fill: '#e8eefc' }}>
           <tspan fill="rgba(232,238,252,0.85)">{plan.fromLabel}</tspan>
@@ -240,5 +292,6 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
         </g>
       )}
     </g>
+    </BridgeLookContext.Provider>
   );
 }

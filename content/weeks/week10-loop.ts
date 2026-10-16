@@ -24,6 +24,7 @@ export const stageSegments: StageDef = {
       orientation: { top: 'Kraneala', bottom: 'Kaudala' },
       scene: SegmentsScene,
       travel: false,
+      bridges: [{ from: 'zirkulazio-goiztiarra/alboa', part: 'bihotz-hodia' }],
     },
   ],
   beats: [

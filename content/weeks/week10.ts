@@ -47,6 +47,7 @@ export const week10: WeekDef = {
           orientation: { top: 'Dortsala', bottom: 'Bentrala' },
           scene: CardiogenicSection,
           locator: { level: 0.3, note: 'Endokardio hodien maila' },
+          bridges: [{ from: 'diskoa', part: 'odol-irlatxoak', section: true }],
         },
       ],
       beats: [
@@ -188,6 +189,7 @@ export const week10: WeekDef = {
           orientation: { top: 'Dortsala', bottom: 'Bentrala' },
           scene: FusionSection,
           locator: { level: 0.3, note: 'Bihotzaren maila' },
+          bridges: [{ from: 'sagitala', part: 'perikardio-barrunbea', section: true }],
         },
         {
           id: 'sagitala',
@@ -206,6 +208,7 @@ export const week10: WeekDef = {
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: ZipperFront,
           travel: false,
+          bridges: [{ from: 'zeharkakoa', part: 'bihotz-hodia' }, { from: 'sagitala', part: 'perikardio-barrunbea' }],
         },
       ],
       beats: [

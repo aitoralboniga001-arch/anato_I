@@ -97,11 +97,31 @@ export interface Underlay {
   scene: SVGGElement | null;
   /** Zoomed in: dragging pans the frame, so a 3D view does not turn. */
   zoomed: boolean;
-  /** Accessible buttons use the same camera as pointer dragging. */
-  orbitRequest?: { direction: 'left' | 'right' | 'up' | 'down' | 'reset'; serial: number };
+  /** Accessible buttons use the same camera as pointer dragging; `look` turns it to see the specimen from one side. */
+  orbitRequest?: { direction: 'left' | 'right' | 'up' | 'down' | 'reset' | 'look'; look?: LookSide; serial: number };
   /** A 3D view tells the frame which anatomical direction each edge faces now (null: back to the view's own). */
   setOrient?: (o: { top?: string; bottom?: string; left?: string; right?: string } | null) => void;
+  /**
+   * A 3D view that knows its anatomical directions offers to be seen from each side, and says which side
+   * it is seen from now (none while the camera is in between). Null: the view has no named sides.
+   */
+  setLook?: (l: { names: Record<LookSide, string>; facing?: LookSide } | null) => void;
 }
+
+/** The six sides a 3D specimen can be looked at from (the names of `EdgeNames`). */
+export type LookSide = 'front' | 'back' | 'side' | 'otherSide' | 'up' | 'down';
+
+/**
+ * A camera move into a cut (see ViewZoom): the 3D view it comes from first turns to the side the cut is
+ * seen from (`get()`: 0 = its own camera, 1 = looking from `side`), so left and right never swap as the
+ * cut takes over. Read per frame, without re-rendering the scene around it.
+ */
+export interface BridgeLook {
+  side: LookSide;
+  get: () => number;
+  subscribe: (cb: () => void) => () => void;
+}
+export const BridgeLookContext = createContext<BridgeLook | null>(null);
 
 export const UnderlayContext = createContext<Underlay | null>(null);
 

@@ -47,6 +47,38 @@ Every notes sentence of topic 10 is mapped to a beat (`tests/notes.test.ts`, cou
 - Check their own arrow overlays for fake directions when seen end-on.
 - Re-check their views by dragging, at 768 and 1440 px.
 
+## Never getting lost: camera keys and moves between views (16 October 2026, after user feedback)
+
+The user said the camera pad did not work, that its purpose was unclear, and that students "sometimes get lost" in topic 10. Their demand: a student seeing it for the first time must understand it and never get lost. What changed:
+
+- **The camera pad now names the sides.**
+  - A 3D view with `axes.edges` gets a `.look-controls` panel (Viewport) instead of the arrow pad. Its keys are Aurretik / Atzetik / Ezkerretik / Eskuinetik / Goitik / Behetik, plus ↺.
+  - The title says where the picture is seen from now ("Aurretik ikusita"), or just "Ikusi" when the view sits between named sides.
+  - A key glides the turn to that side with `lookTurn` (`lib/three-d/orbit.ts`, tested in `tests/orbit-look.test.ts`).
+  - The arrow pad is still there only for 3D views without edge names (topics 7–9 until they get `edges`).
+- **Why the pad looked dead.** The Simulator found the 3D once, sometimes a fading ghost, and stopped looking. It now polls for the live 3D only (not `.scene-ghost`, `.view-zoom` or `.travel`).
+- **Every view change in topic 10 moves the camera.**
+  - `ViewDef.bridges` (`lib/sim/types.ts`) links two views that show one region. A bridge works within a stage (`from: 'view'`) and across stages (`from: 'stage/view'`).
+  - `zoomPlan` turns a bridge into a ViewZoom dive (inward) or pull-back (outward).
+  - `section: true` captions the move "Barrura begiratzen · mozketa" / "Kanpotik ikusten · osorik".
+  - `look` first turns the 3D to the side the cut is drawn from, so left and right never flip. Example: stage 9, from the 3D seen from behind to the frontal cut seen from the front.
+  - The links: stage 1 disc→cut; stage 2 sagittal↔cut↔3D; stage 3 side↔3D; 3→4; stage 6 3D→derivatives; 7–9 3D↔frontal cut; 9→10 frontal cut→inside of the atrium; stage 10 inside→septum, with an explicit `at` because the part box was taller than the frame.
+  - Checked frame by frame in headless Chrome, both ways where they exist.
+- **3D → 3D across stages glides instead of cutting.** `Stage3D continuity="bihotza-10"` (HeartView): a new 3D view starts from the camera the last one ended on and glides to its own (1.1 s). Each frame's step is capped at 40 ms, so a slow first frame does not eat the start of the move.
+- **Viewpoint notes only show once the camera has arrived.** "Aurretik begiratzen dugu", the KONTUZ note and similar notes are multiplied by `askedView`, so a student who has turned the model is not told the wrong side.
+- **No more "3D eredua prestatzen" spinner in the middle of a move.**
+  - Contexts that have done their work are parked and reused for 60 s.
+  - The Viewport warms one up 1.2 s after mount.
+  - The canvas keeps its last picture through a hand-off.
+  - ViewZoom waits (at most 3 s) while a 3D is still compiling.
+  - A draw on a detached element is skipped: it used to read opacity '' as 0 and blank the canvas.
+- **Two views share the frame while one fades into the other.** The newest one sets the side pills and camera keys. The ghost never does, and a view that leaves hands them back instead of blanking them. Before this fix, the arrow pad came back and the side pills vanished after every "Hurrengo etapa".
+
+**Pending for topics 7–9:**
+- Add `edges` so the named-sides panel appears.
+- Add `bridges` / `zoom` links between their views.
+- Add `continuity` where one model spans several stages.
+
 ## Resume list
 
 1. Anchor audit for topic 10: `node scripts/anchor-audit.mjs http://localhost:3005 10-10` (it overwrites `docs/anchor-audit.md`).

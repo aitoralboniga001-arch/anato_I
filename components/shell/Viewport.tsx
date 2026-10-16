@@ -2,7 +2,8 @@
 
 import { forwardRef, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from 'react';
 import { Defs } from '@/components/kit/Defs';
-import { LabelScaleContext, TextLayerContext, UnderlayContext, type Underlay } from '@/components/kit/context';
+import { LabelScaleContext, TextLayerContext, UnderlayContext, type LookSide, type Underlay } from '@/components/kit/context';
+import { prewarm3D } from '@/components/kit/three/Stage3D';
 import type { Orientation } from '@/lib/sim/types';
 import { IconFit, IconZoomIn, IconZoomOut } from './icons';
 
@@ -62,6 +63,25 @@ function zoomedAt(p: Zoom, factor: number, px: number, py: number): Zoom {
   const f = k / p.k;
   return { k, x: px - (px - p.x) * f, y: py - (py - p.y) * f };
 }
+
+/**
+ * The named sides as the camera keys say them ("see it from…"). Keyed by the view's own direction words,
+ * so each key says the side in plain words and, beside it, the anatomical name the edges use.
+ */
+const FROM: Record<string, string> = {
+  Bentrala: 'Aurretik',
+  Dortsala: 'Atzetik',
+  Ezkerra: 'Ezkerretik',
+  Eskuina: 'Eskuinetik',
+  Kraneala: 'Goitik',
+  Kaudala: 'Behetik',
+};
+const fromWord = (name: string) => FROM[name] ?? `${name}etik`;
+/** Key order: front and back, the two sides (the embryo's left first), above and below. */
+const LOOK_ORDER = (names: Record<LookSide, string>): LookSide[] => {
+  const sides: LookSide[] = names.side === 'Eskuina' ? ['otherSide', 'side'] : ['side', 'otherSide'];
+  return ['front', 'back', ...sides, 'up', 'down'];
+};
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -229,6 +249,12 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   // 3D views draw their shaded tissue here, behind the SVG that keeps the names and the pointing.
   const [underHost, setUnderHost] = useState<HTMLDivElement | null>(null);
   const [sceneEl, setSceneEl] = useState<SVGGElement | null>(null);
+  // WebGL made ready once the page is quiet, so no 3D view (or camera move into one) waits for it.
+  useEffect(() => {
+    if (!underHost) return;
+    const id = window.setTimeout(() => prewarm3D(underHost), 1200);
+    return () => window.clearTimeout(id);
+  }, [underHost]);
   const sceneRef = useCallback((el: SVGGElement | null) => {
     scene.current = el;
     setSceneEl(el);
@@ -239,11 +265,15 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   // A 3D view keeps the edge pills true to its camera as it turns (the view's own words otherwise).
   const [liveOrient, setLiveOrient] = useState<{ key: string; o: Orientation } | null>(null);
   const setOrient = useCallback((o: Orientation | null) => setLiveOrient(o ? { key: resetKey, o } : null), [resetKey]);
-  const underlay = useMemo<Underlay | null>(() => (underHost ? { host: underHost, scene: sceneEl, zoomed, orbitRequest, setOrient } : null), [underHost, sceneEl, zoomed, orbitRequest, setOrient]);
-  const turnModel = (direction: NonNullable<Underlay['orbitRequest']>['direction']) => {
+  // A 3D view with named sides: the camera keys say them, and light the one it is seen from.
+  const [liveLook, setLiveLook] = useState<{ key: string; names: Record<LookSide, string>; facing?: LookSide } | null>(null);
+  const setLook = useCallback((l: { names: Record<LookSide, string>; facing?: LookSide } | null) => setLiveLook(l ? { key: resetKey, ...l } : null), [resetKey]);
+  const look = liveLook?.key === resetKey ? liveLook : null;
+  const underlay = useMemo<Underlay | null>(() => (underHost ? { host: underHost, scene: sceneEl, zoomed, orbitRequest, setOrient, setLook } : null), [underHost, sceneEl, zoomed, orbitRequest, setOrient, setLook]);
+  const turnModel = (direction: NonNullable<Underlay['orbitRequest']>['direction'], side?: LookSide) => {
     cancelReveal();
     if (direction === 'reset') glideZoom(HOME);
-    setOrbitCommand((old) => ({ key: resetKey, request: { direction, serial: (old?.request.serial ?? 0) + 1 } }));
+    setOrbitCommand((old) => ({ key: resetKey, request: { direction, look: side, serial: (old?.request.serial ?? 0) + 1 } }));
     onTurn?.();
   };
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -586,7 +616,32 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
           <IconFit />
         </button>
       </div>
-      {interactive3d && (
+      {interactive3d && look && (
+        // Named sides: "see it from the front, from behind, from its left…" — the words a student
+        // studies with, and the lit key always says where the picture is seen from now.
+        <div className="look-controls" role="group" aria-label="Ikusi alde batetik" onPointerDown={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
+          <span className="look-title">{look.facing ? `${fromWord(look.names[look.facing])} ikusita` : 'Ikusi'}</span>
+          <div className="look-keys">
+            {LOOK_ORDER(look.names).map((side) => (
+              <button
+                key={side}
+                type="button"
+                className={`look-${side}`}
+                aria-pressed={look.facing === side}
+                onClick={() => turnModel('look', side)}
+                data-tip={`Ikusi ${fromWord(look.names[side]).toLowerCase()} (${look.names[side].toLowerCase()})`}
+                data-tip-pos="top"
+              >
+                {fromWord(look.names[side])}
+              </button>
+            ))}
+          </div>
+          <button type="button" className="look-reset" onClick={() => turnModel('reset')} aria-label="Ikuspegia berrezarri" data-tip="Hasierako ikuspegira itzuli (kamera eta zooma) · klik bikoitza" data-tip-pos="top">
+            ↺
+          </button>
+        </div>
+      )}
+      {interactive3d && !look && (
         // A small camera cross in the view's lower corner, as on a map: the four turns round the reset key.
         <div className="orbit-controls" role="group" aria-label="Kamera" onPointerDown={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
           {([

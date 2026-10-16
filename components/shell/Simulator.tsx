@@ -1280,17 +1280,14 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   if (mounted && turned3d === null) setTurned3d(readTurned());
   const [turnable, setTurnable] = useState('');
   useEffect(() => {
-    // A 3D view's geometry is built off the main thread: look again until it is there (a few seconds at most).
-    let tries = 0;
+    // A 3D view's geometry is built off the main thread: keep looking while the view is on screen. Only the live view counts — the drawing
+    // the camera is leaving (a fading ghost, a camera move between views) may be a 3D one.
     const look = () => {
-      const found = !!svgRef.current?.querySelector('.stage3d-orbit');
+      const found = [...(svgRef.current?.querySelectorAll('.stage3d[data-orbit]') ?? [])].some((el) => !el.closest('.scene-ghost, .view-zoom, .travel'));
       setTurnable(found ? sceneKey : '');
-      return found;
     };
     const raf = requestAnimationFrame(look);
-    const id = window.setInterval(() => {
-      if (look() || ++tries > 30) window.clearInterval(id);
-    }, 400);
+    const id = window.setInterval(look, 400);
     return () => {
       cancelAnimationFrame(raf);
       window.clearInterval(id);
@@ -1465,8 +1462,10 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     const fromView = Number(fw) === week.week ? week.stages.find((x) => x.id === fs)?.views.find((x) => x.id === fv) : undefined;
     const may = !formation && !reduced && !travel && intro === null && fromView && seenView;
     const plan = may ? travelPlan(week.week, day, fromView, view, seenView.day) : null;
-    // A close-up of the same stage's other view: the camera dives into where it is (or pulls back out).
-    const zoom = may && !plan && fs === stage.id ? zoomPlan(fromView, view) : null;
+    // A close-up of another view (of this stage, or one it names across a stage change): the camera dives
+    // into where it is (or pulls back out). Across a stage change it runs while the stage's preview starts.
+    const crossing = fs !== stage.id && intro !== null;
+    const zoom = (may || (crossing && !formation && !reduced && !travel && fromView && seenView)) && !plan ? zoomPlan(fromView!, view, fs, stage.id) : null;
     if (plan) setTravel({ key: sceneKey, plan });
     else if (zoom) setTravel({ key: sceneKey, zoom });
     else if (travel) setTravel(null);

@@ -3,7 +3,7 @@
 import { Callouts, Note, lerp, type Callout, type SceneProps } from '@/components/kit';
 import { Stage3D, type At3 } from '@/components/kit/three/Stage3D';
 import { blendCamera } from '@/lib/three-d/aim';
-import { add, deg, type Camera3, type V3 } from '@/lib/three-d/math';
+import { add, deg, norm, sub, type Camera3, type V3, type View3 } from '@/lib/three-d/math';
 import type { Scene3 } from '@/lib/three-d/scene';
 import { seg } from '@/lib/sim/anim';
 import { vis } from './common';
@@ -175,7 +175,8 @@ export function HeartView({
   opts: HeartOpts;
   camera: Camera3;
   names: CalloutSpec[];
-  over?: (at: At3) => React.ReactNode;
+  /** `asked`: 1 while the picture is seen as the step shows it, fading to 0 as the viewer turns it away. */
+  over?: (at: At3, asked: number) => React.ReactNode;
   caption?: string;
 }) {
   const model = heartModel(pose, opts);
@@ -183,8 +184,11 @@ export function HeartView({
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="none" />
-      <Stage3D scene={scene} axes={AXES}>
-        {(at) => {
+      <Stage3D scene={scene} axes={AXES} continuity="bihotza-10">
+        {(at, view) => {
+          // Words that say where the picture is seen from ("from the front…") hold only for the step's own
+          // camera: turned more than ~20 degrees away, they fade (the camera keys say the side instead).
+          const asked = askedView(camera, view);
           const items: Callout[] = [];
           for (const n of names) {
             if (n.show <= 0.01) continue;
@@ -195,10 +199,10 @@ export function HeartView({
           }
           return (
             <>
-              {over?.(at)}
+              {over?.(at, asked)}
               <Callouts items={items} left={[120, 580]} right={[240, 580]} />
               {caption && (
-                <Note x={24} y={24} size={12.5} align="start">
+                <Note x={24} y={24} size={12.5} align="start" show={0.35 + 0.65 * asked}>
                   {caption}
                 </Note>
               )}
@@ -208,6 +212,15 @@ export function HeartView({
       </Stage3D>
     </g>
   );
+}
+
+/** 1 while the view looks from where the step's camera does, 0 once turned ~25 degrees or more away. */
+function askedView(camera: Camera3, view: View3) {
+  const e = norm(sub(camera.eye, camera.target));
+  const m = view.view;
+  const c = e[0] * m[2] + e[1] * m[6] + e[2] * m[10];
+  const u = Math.max(0, Math.min(1, (c - 0.9) / (0.97 - 0.9)));
+  return u * u * (3 - 2 * u);
 }
 
 // ———————————————————————————— stage 4: the segments (21–22 days) ————————————————————————————
@@ -337,7 +350,7 @@ export function LoopScene({ t }: SceneProps) {
       camera={camera}
       names={names}
       caption={t < S5[1] ? '23. eguna · bihotz hodi luze eta zuzena' : t < S5[6] ? '23.–28. egunak · bihotz hodia tolesten (zuria: hasierako hodia)' : '28. eguna · bihotz lakioa'}
-      over={(at) => {
+      over={(at, asked) => {
         const bulb = travel(0.44, 0, 1);
         const atr = travel(1, 0, 1, { loop: 1 }, 16, true);
         const line = centreline(pose, 60);
@@ -371,7 +384,7 @@ export function LoopScene({ t }: SceneProps) {
             <Note x={500} y={612} tone="accent" show={vis(t, S5[4], S5[5])}>
               Bikoitzak diren egiturak fusionatzen dira: bihotz hodia → bihotz lakioa
             </Note>
-            <Note x={500} y={612} tone="warn" show={vis(t, S5[5], S5[6])}>
+            <Note x={500} y={612} tone="warn" show={vis(t, S5[5], S5[6]) * asked}>
               Aurretik begiratzen dugu: enbrioiaren eskuina zure ezkerrean dago
             </Note>
             <Note x={500} y={612} tone="accent" show={vis(t, S5[6], 2)}>

@@ -75,6 +75,20 @@ export interface ViewDef {
     /** Where the camera closes in, when `part` is drawn in several places (centre x, y and width, stage units). */
     at?: [number, number, number];
   };
+  /**
+   * Other views this one is a closer look at (besides `zoom`): moving between them, the camera dives into
+   * where `part` is drawn in the other view, or pulls back out to it. `from` may name a view of another
+   * stage of the topic (`'stage-id/view-id'`), so the camera also makes its way across a stage change.
+   * `section`: this view is a cut through what the other one shows (the caption says so).
+   */
+  bridges?: {
+    from: string;
+    part: string;
+    at?: [number, number, number];
+    section?: boolean;
+    /** The side the cut is seen from: a 3D view turns to it before the camera goes into the cut. */
+    look?: 'front' | 'back' | 'side' | 'otherSide' | 'up' | 'down';
+  }[];
 }
 
 /** A narrative caption active from `at` until the next beat. `focus` highlights structures while active. */

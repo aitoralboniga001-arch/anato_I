@@ -48,6 +48,10 @@ export interface GLFrame {
 export interface GLApi {
   frame(f: GLFrame): void;
   follow(el: SVGGElement | null): void;
+  /** Set aside, drawing nothing, ready to be taken up by the next 3D view (shaders compiled, meshes kept). */
+  park(): void;
+  /** Taken up again: shown from its first frame on, when `onReady` is called. */
+  wake(onReady: () => void): void;
   dispose(): void;
 }
 
@@ -322,7 +326,11 @@ const edgeMaterial = () =>
     side: BackSide,
   });
 
-export function createGL(host: HTMLDivElement, onReady: () => void): GLApi | null {
+export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null {
+  let onReady = ready;
+  let hideTimer = 0;
+  // Woken from the pool: the first frame drawn for the new view shows the canvas again.
+  let waking = false;
   const canvas = document.createElement('canvas');
   let renderer: WebGLRenderer;
   try {
@@ -453,8 +461,31 @@ export function createGL(host: HTMLDivElement, onReady: () => void): GLApi | nul
     return { a: m.a, b: m.b, c: m.c, d: m.d, e: m.e - r.left, f: m.f - r.top };
   }
 
+  /** How visible the followed group is (its own and its ancestors' opacity, up to the svg). */
+  let seenNow = 1;
+  function seen() {
+    let o = 1;
+    for (let e: Element | null = sceneEl; e && !(e instanceof SVGSVGElement); e = e.parentElement) {
+      const a = e.getAttribute('opacity');
+      if (a !== null) o *= Number(a);
+      const cs = getComputedStyle(e);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return 0;
+      o *= Number(cs.opacity);
+    }
+    return Math.max(0, Math.min(1, o));
+  }
+
   function draw(dt: number) {
-    if (!frame || !compiled) return false;
+    // The followed drawing just left the page (its view is being replaced): keep the last picture.
+    if (!frame || !compiled || (sceneEl && !sceneEl.isConnected)) return false;
+    // The picture fades with its drawing (a view fading in, a camera move between views).
+    const o = seen();
+    if (Math.abs(o - seenNow) > 0.004 || (o !== seenNow && (o === 0 || o === 1))) {
+      seenNow = o;
+      canvas.style.opacity = o >= 0.999 ? '' : o.toFixed(3);
+      // Frame by frame with the drawing: the canvas's own fade-in would lag behind it.
+      canvas.style.transition = o >= 0.999 ? '' : 'none';
+    }
     const m = ctmNow();
     if (!m || !size.w) return false;
     const key = `${m.a.toFixed(4)},${m.d.toFixed(4)},${m.e.toFixed(2)},${m.f.toFixed(2)},${size.w},${size.h}`;
@@ -515,6 +546,11 @@ export function createGL(host: HTMLDivElement, onReady: () => void): GLApi | nul
       canvas.classList.add('is-ready');
       onReady();
     }
+    if (waking) {
+      waking = false;
+      canvas.style.visibility = '';
+      onReady();
+    }
     return moving;
   }
 
@@ -535,6 +571,21 @@ export function createGL(host: HTMLDivElement, onReady: () => void): GLApi | nul
     },
     follow(el) {
       sceneEl = el;
+      dirty = true;
+    },
+    park() {
+      frame = null;
+      sceneEl = null;
+      waking = false;
+      // The last picture stays a moment: handed straight to the next view (a camera move ending, the
+      // same view drawn again), there is no blank frame; otherwise it goes.
+      window.clearTimeout(hideTimer);
+      hideTimer = window.setTimeout(() => (canvas.style.visibility = 'hidden'), 180);
+    },
+    wake(cb) {
+      window.clearTimeout(hideTimer);
+      onReady = cb;
+      waking = true;
       dirty = true;
     },
     dispose() {

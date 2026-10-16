@@ -12104,6 +12104,17 @@ kbd {
 }
 
 /* The projected outlines a 3D view keeps for pointing: invisible while WebGL draws the tissue. */
+/* "Preparing the 3D model" only when it really takes a while: a quick start (a parked layer taken up,
+   a cached model) never flashes a spinner. */
+.stage3d-loading {
+  animation: stage3d-loading-in 0.25s ease 0.35s both;
+}
+@keyframes stage3d-loading-in {
+  from {
+    opacity: 0;
+  }
+}
+
 .stage3d-hit {
   fill: transparent;
   transition: fill-opacity 0.35s ease;
@@ -13393,6 +13404,61 @@ kbd {
 .orbit-controls button:hover { background: rgba(255, 255, 255, 0.09); color: var(--text); }
 .orbit-controls button:focus-visible { outline: 2px solid #ffb86b; outline-offset: 1px; }
 .orbit-controls button:active { background: rgba(255, 184, 107, 0.14); }
+/* Named sides of a 3D view: "see it from the front, from behind, from its left…". The lit key says
+   where the picture is seen from now (the title repeats it in words). */
+.look-controls {
+  position: absolute;
+  z-index: 29;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  grid-template-columns: auto 30px;
+  grid-template-rows: auto auto;
+  grid-template-areas: 'title title' 'keys reset';
+  gap: 4px 6px;
+  padding: 6px 8px 8px;
+  border: 1px solid var(--float-edge);
+  border-radius: 12px;
+  background: var(--float);
+  box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.9);
+}
+.look-title {
+  grid-area: title;
+  padding: 0 2px;
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.look-keys {
+  grid-area: keys;
+  display: grid;
+  grid-template-rows: repeat(2, auto);
+  grid-auto-flow: column;
+  gap: 3px;
+}
+.look-controls button {
+  min-height: 26px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-2);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.look-controls button:hover { background: rgba(255, 255, 255, 0.1); color: var(--text); }
+.look-controls button:focus-visible { outline: 2px solid #ffb86b; outline-offset: 1px; }
+.look-controls button[aria-pressed='true'] { border-color: rgba(255, 184, 107, 0.7); background: rgba(255, 184, 107, 0.16); color: #ffd9ae; }
+.look-controls .look-reset { grid-area: reset; align-self: stretch; padding: 0; font-size: 15px; color: var(--text-3); }
+@media (pointer: coarse) {
+  .look-controls button { min-height: 36px; padding: 0 10px; font-size: 13px; }
+}
 .tour-manual { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0 0; }
 .tour-manual > span { color: var(--text-3); font-size: 12px; }
 .tour-manual .btn { flex-shrink: 0; min-height: 40px; }

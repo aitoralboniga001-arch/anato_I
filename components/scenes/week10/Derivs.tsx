@@ -281,9 +281,9 @@ export function SinusBack({ t }: SceneProps) {
       camera={camera}
       names={names}
       caption={t < 0.03 ? '4. astea · bihotza aurretik (3D)' : '4. astea → · bihotza ATZETIK (3D): enbrioiaren eskuina zure eskuinean'}
-      over={() => (
+      over={(_, asked) => (
         <>
-          <Note x={500} y={62} size={13} tone="warn" show={vis(t, 0.03, S9[1])}>
+          <Note x={500} y={62} size={13} tone="warn" show={vis(t, 0.03, S9[1]) * asked}>
             KONTUZ! Atzetik ikusita: eskuina eta ezkerra ez dira alderantzizkatu behar
           </Note>
           <Note x={500} y={612} tone="accent" show={vis(t, 0.03, S9[1])}>

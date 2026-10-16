@@ -41,6 +41,7 @@ export const stageBulbus: StageDef = {
       description: 'Arteria bulboa zutik (goian aorta zakua) eta azpiatal bakoitzetik zer sortzen den: muskulu trenkadak, trenkadaz banatutako bi espazioak (zeharkako mozketan) eta sustraiak.',
       scene: BulbusMap,
       travel: false,
+      bridges: [{ from: '3d', part: 'atal-bulbarra' }],
       age: null,
     },
   ],
@@ -167,6 +168,7 @@ export const stageVentricle: StageDef = {
       orientation: FRONT,
       scene: VentricleFrontal,
       travel: false,
+      bridges: [{ from: '3d', part: 'bihotz-lakioa', section: true, look: 'front' }],
     },
     {
       id: '3d',
@@ -261,6 +263,7 @@ export const stageAtrium: StageDef = {
       orientation: FRONT,
       scene: AtriaFrontal,
       travel: false,
+      bridges: [{ from: '3d', part: 'bihotz-lakioa', section: true, look: 'front' }],
     },
   ],
   beats: [
@@ -353,6 +356,7 @@ export const stageSinus: StageDef = {
       orientation: FRONT,
       scene: SinusFrontal,
       travel: false,
+      bridges: [{ from: '3d', part: 'bihotz-lakioa', section: true, look: 'front' }],
     },
   ],
   beats: [
@@ -491,6 +495,7 @@ export const stageRightAtrium: StageDef = {
       orientation: FRONT,
       scene: RightAtriumInside,
       travel: false,
+      bridges: [{ from: 'frontala', part: 'hasierako-eskuineko-aurikula' }, { from: 'zain-sinua/frontala', part: 'hasierako-eskuineko-aurikula' }],
     },
     {
       id: 'trenkada',
@@ -499,6 +504,7 @@ export const stageRightAtrium: StageDef = {
       description: 'Aurikula arteko trenkada eskuineko aurikularen barrutik (11. gaiko ikuspegia): septum spuriuma eta ezkerreko zain balbula septum secundumarekin fusionatzen.',
       scene: SpuriumFace,
       travel: false,
+      zoom: { from: 'barrutik', part: 'aurikula-arteko-trenkada', at: [760, 330, 420] },
     },
     {
       id: 'frontala',

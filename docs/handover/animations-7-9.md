@@ -114,3 +114,17 @@ El usuario ha visto que, al girar los modelos 3D, las flechas no siempre apuntan
   - Añadir `edges` a `axes` en `DiaphragmDome3D`, `Calvaria3D`, `LimbRotation3D` y `Domains3D`, para que las etiquetas de los bordes (ezkerra/eskuina…) sigan a la cámara.
   - Revisar si alguna flecha propia de esas escenas inventa una dirección cuando se ve de frente; en el tema 10 se muestra entonces un punto o un aro con cruz.
   - Probar arrastrando cada vista 3D a 768 y 1440 px.
+
+## Pendiente: no perderse entre vistas (anotado el 16 de octubre de 2026, desde el tema 10)
+
+El usuario exige que un alumno que lo vea por primera vez lo entienda y no se pierda nunca. En el tema 10 ya está resuelto; ver `docs/handover/topic-10.md`, apartado "Never getting lost".
+
+- **Ya aplicado a 7–9, porque es código compartido del kit:**
+  - El mando detecta solo la vista 3D viva. Antes se quedaba sin funcionar tras un fundido.
+  - Se reutilizan los contextos WebGL, así que ya no aparece la rueda de "prestatzen" a mitad de un movimiento.
+  - La vista que sale ya no borra las etiquetas de los bordes ni el mando de la nueva.
+- **Pendiente en 7–9:**
+  - Con `axes.edges`, el mando de flechas pasa a ser el panel de lados con nombre (Aurretik, Atzetik…). Es la misma tarea que la del apartado anterior.
+  - Revisar cada cambio de vista de cada etapa. Si es un corte brusco, enlazar las vistas con `zoom` o `bridges` (`section: true` para un corte; `look` si el corte se dibuja desde otro lado que el 3D) para que la cámara haga el camino.
+  - Si un mismo modelo 3D sigue de una etapa a otra, pasar `continuity` a `Stage3D`.
+  - Las notas que dicen desde dónde se mira deben atenuarse si el alumno ha girado el modelo (patrón `askedView` de `Heart3D.tsx`).
