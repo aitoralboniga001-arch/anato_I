@@ -110,7 +110,18 @@ export function blocked(at: { x: number; y: number; facing: Facing }, input: Sta
   const aim = centreOf(targets);
   if (!aim) return false;
   const s = shoulderOf(at.x, at.y, kimu, at.facing);
-  return Math.hypot(aim.x - s.x, aim.y - s.y) > reach + 60;
+  // Far out of reach (the camera moved it away), not just beyond the stick: standAt may pick a spot a
+  // little beyond when the near ones would cover the drawing, and that is not a reason to walk.
+  return Math.hypot(aim.x - s.x, aim.y - s.y) > reach * 1.8 + 20;
+}
+
+/** Whether the stick reaches what is named from where Kimu stands (then it points without walking). */
+export function reaches(at: { x: number; y: number; facing: Facing }, kimu: { w: number; h: number }, targets: Pt[], reach: number): boolean {
+  const aim = centreOf(targets);
+  if (!aim) return true;
+  const facing: Facing = aim.x >= at.x + kimu.w / 2 ? 'right' : 'left';
+  const s = shoulderOf(at.x, at.y, kimu, facing);
+  return Math.hypot(aim.x - s.x, aim.y - s.y) <= reach + 14;
 }
 
 /** The stick arm's angle (degrees, Kimu's own frame: 0 = ahead, −90 = up) and length toward a point. */

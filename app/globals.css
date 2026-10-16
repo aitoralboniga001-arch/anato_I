@@ -14103,7 +14103,8 @@ kbd {
   opacity: 1;
   transform: none;
 }
-.viewport .orient .orient-top {
+.viewport .orient .orient-top,
+.app.is-focus .viewport .orient .orient-top {
   top: 0;
   bottom: auto;
   left: 50%;
@@ -14111,7 +14112,8 @@ kbd {
   /* Hangs from the frame line, clear of the scene's own top and bottom captions (which sit at the centre). */
   transform: translate(-50%, -92%);
 }
-.viewport .orient .orient-bottom {
+.viewport .orient .orient-bottom,
+.app.is-focus .viewport .orient .orient-bottom {
   top: auto;
   bottom: 0;
   left: 50%;
@@ -14122,7 +14124,12 @@ kbd {
 .stage > .viewport {
   margin-bottom: 9px;
 }
-.viewport .orient .orient-left {
+/* Focus mode has no stage heading above the picture: keep room for the top notch to hang there too. */
+.app.is-focus .stage > .viewport {
+  margin-top: 8px;
+}
+.viewport .orient .orient-left,
+.app.is-focus .viewport .orient .orient-left {
   top: 50%;
   bottom: auto;
   left: 12px;
@@ -14130,7 +14137,8 @@ kbd {
   transform: translateY(-50%);
   background: color-mix(in srgb, var(--bg) 82%, transparent);
 }
-.viewport .orient .orient-right {
+.viewport .orient .orient-right,
+.app.is-focus .viewport .orient .orient-right {
   top: 50%;
   bottom: auto;
   left: auto;
@@ -14141,7 +14149,8 @@ kbd {
 /* A short frame brings mid-height up to the zoom keys: the right pill steps left of them (the picture is
    then narrower than the frame, so it stands in the empty band beside it). */
 @media (max-height: 820px) {
-  .viewport .orient .orient-right {
+  .viewport .orient .orient-right,
+  .app.is-focus .viewport .orient .orient-right {
     right: 56px;
   }
 }
@@ -14816,8 +14825,9 @@ kbd {
 
 /* Class layout: the outline folds and the right column is the board, so the scene keeps most of the
    width (≥ 60% at 768–1440 px). 1024–1320 px: a narrower board rail, not a drawer. Below: the board is a
-   strip in the dock, and a structure opened shows in the usual drawer. */
-.workspace.klasea {
+   strip in the dock, and a structure opened shows in the usual drawer. Focus mode keeps its own one-column
+   layout (the board then opens as its drawer, and the dock shows the strip). */
+.app:not(.is-focus) .workspace.klasea {
   grid-template-columns: minmax(0, 1fr) clamp(300px, 24vw, 344px);
 }
 
@@ -14828,10 +14838,10 @@ kbd {
 }
 
 @media (min-width: 1024px) and (max-width: 1320px) {
-  .workspace.klasea {
+  .app:not(.is-focus) .workspace.klasea {
     grid-template-columns: minmax(0, 1fr) 260px;
   }
-  .workspace.klasea .info {
+  .app:not(.is-focus) .workspace.klasea .info {
     position: static;
     width: auto;
     transform: none;
@@ -14840,7 +14850,7 @@ kbd {
     border-left: 1px solid var(--line);
     transition: none;
   }
-  .workspace.klasea .info-scrim {
+  .app:not(.is-focus) .workspace.klasea .info-scrim {
     display: none;
   }
 }

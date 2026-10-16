@@ -122,7 +122,7 @@ The v2 "fates" rule was dropped: the fates the derivatives table uses are alread
 
 **Tests on the rules themselves:**
 
-- **Coverage.** The core is at most 60 % of the 189 prose sentences, and every stage has at least one core sentence. Topic 10 comes out at 99 sentences (52 %): its notes are dense and its steps' `exam` fields cover most of them, so the 25–40 % hoped for in v2 is not reachable without dropping exam facts. The class compresses instead by saying each fact once, in short spoken lines (about 13 minutes of speech).
+- **Coverage.** The core is at most 60 % of the 189 prose sentences, and every stage has at least one core sentence. Topic 10 comes out at 99 sentences (52 %): its notes are dense and its steps' `exam` fields cover most of them, so the 25–40 % hoped for in v2 is not reachable without dropping exam facts. The class compresses instead by saying each fact once, in short spoken lines. 2026-10-16 trim: lines that only carried secondary sentences were dropped and repeated ones merged (1447 → 1124 spoken words, 29 → 20 checks, about 18 minutes in all).
 - **Every `exam` fact is covered.** Each one is reachable from at least one core sentence.
 - **A pinned set of sentences a student needs in order to *understand* topic 10 must be core:** `w10/1/p3/s1`, `p26/s1–s3`, `p33/s1`, `p34/s1`, `p35/s1`, `2/p9/s1–s2`, `2/p20/s4`, `3.3/p3/s1–s2`, `3.4/p4/s2`. These came out of the review: the v2 rules dropped them. If one fails, the rules change. Membership is never hand-edited.
 - **Never past exams**, in any role.
@@ -171,7 +171,7 @@ The v2 "fates" rule was dropped: the fates the derivatives table uses are alread
 - At most 22 words per `say`.
 
 **Timing**
-- A chunk lasts 90–240 s at 1×, estimated as syllables ÷ 5.5 per second plus holds. Topic 10's notes average 2.83 syllables per word, about 1.9 words per second; the v2 figure of 2.3 words per second was too fast.
+- A chunk lasts 60–240 s at 1× and the class 12–20 min (2026-10-16, after the student's review: shorter, the core and what an exam can ask, not every detail), estimated as syllables ÷ 5.5 per second plus holds. Topic 10's notes average 2.83 syllables per word, about 1.9 words per second; the v2 figure of 2.3 words per second was too fast.
 - There is an interaction at least every 120 s.
 
 **Voice**

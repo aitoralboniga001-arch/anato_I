@@ -139,7 +139,7 @@ const isShown = (st: StageDef, k: number, id: string) => {
  * anyway. `chunk#line/id` → where it is drawn.
  */
 const SHOWN: Record<string, string> = {
-  'zirkulazioa#3/aorta-dortsalak': 'Circulation3D: aorta dortsalak izendatuta hasieratik (aorta-dortsalak1 callout)',
+  'zirkulazioa#2/aorta-dortsalak': 'Circulation3D: aorta dortsalak izendatuta hasieratik (aorta-dortsalak1 callout)',
 };
 
 /** One part under two names: saying one is lighting the other. id → the ids that are the same part. */
@@ -368,13 +368,13 @@ describe('class: wording and timing', () => {
   const lineSeconds = (l: Line) => 0.8 + speakSeconds(l.say) + (l.writes ? 0.8 : 0) + (l.hold ?? 0);
   const checkSeconds = (k: Check) => (k.kind === 'fill' ? 60 : k.kind === 'order' ? 25 : 15);
 
-  it('each chunk lasts 90–240 s and the class 15–25 min', () => {
+  it('each chunk lasts 60–240 s and the class 12–20 min (short: the core, not every detail)', () => {
     const times = lesson.chunks.map((c) => c.lines.reduce((s, l) => s + lineSeconds(l), 0) + (c.checks ?? []).reduce((s, k) => s + checkSeconds(k), 0));
-    const bad = lesson.chunks.flatMap((c, i) => (i > 0 && i < lesson.chunks.length - 1 && (times[i] < 90 || times[i] > 240) ? [`${c.id}: ${times[i].toFixed(0)} s`] : []));
+    const bad = lesson.chunks.flatMap((c, i) => (i > 0 && i < lesson.chunks.length - 1 && (times[i] < 60 || times[i] > 240) ? [`${c.id}: ${times[i].toFixed(0)} s`] : []));
     expect(bad).toEqual([]);
     const total = times.reduce((a, b) => a + b, 0);
-    expect(total).toBeGreaterThan(15 * 60);
-    expect(total).toBeLessThan(25 * 60);
+    expect(total).toBeGreaterThan(12 * 60);
+    expect(total).toBeLessThan(20 * 60);
   });
 
   it('the student does something at least every 120 s', () => {

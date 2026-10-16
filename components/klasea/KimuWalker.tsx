@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import type { Gaze, Phase, Pose } from '@/lib/klasea/engine';
-import { armTo, blocked, centreOf, standAt,type Facing, type Pt, type Rect } from '@/lib/klasea/stand';
+import { armTo, blocked, centreOf, reaches, standAt,type Facing, type Pt, type Rect } from '@/lib/klasea/stand';
 import { ARM, KimuTeacher, STICK } from './KimuTeacher';
 import styles from './klasea.module.css';
 
@@ -16,6 +16,7 @@ import styles from './klasea.module.css';
  */
 
 const GHOST = '.scene-ghost, .view-zoom, .travel';
+const OVERLAYS = '.focus-title, .turn-hint, .back-chip, .fs-offer, .look-controls, .zoom-controls, .view-tools, .focus-exit, .axes3d-plate, .orient span';
 
 /** How visible an element is, from the opacity of it and its parents inside the viewport. */
 function seen(el: Element, stop: Element) {
@@ -29,7 +30,17 @@ function seen(el: Element, stop: Element) {
   return o;
 }
 
+/** A card on screen (not faded out or hidden by its own styles). */
+const shown = (el: Element) => {
+  const c = getComputedStyle(el);
+  return c.visibility !== 'hidden' && Number(c.opacity) > 0.3;
+};
+
 const local = (r: DOMRect, h: DOMRect): Rect => ({ x: r.left - h.left, y: r.top - h.top, w: r.width, h: r.height });
+
+/** What the scene looks like, to the nearest few pixels: what is named, and the names and dots around. */
+const signature = (scene: { targets: Pt[]; avoid: { r: Rect; weight: number }[] }) =>
+  [...scene.targets.map((p) => `${Math.round(p.x / 4)},${Math.round(p.y / 4)}`), ...scene.avoid.filter((a) => a.weight >= 6).map((a) => `${Math.round(a.r.x / 4)},${Math.round(a.r.y / 4)}`)].join(' ');
 
 interface Scene {
   view: { w: number; h: number };
@@ -43,6 +54,7 @@ function readScene(host: HTMLElement, focus: string[]): Scene {
   const h = host.getBoundingClientRect();
   const view = { w: h.width, h: h.height };
   const live = (el: Element) => !el.closest(GHOST) && seen(el, host) > 0.3;
+  const present = (el: Element) => !el.closest(GHOST) && seen(el, host) > 0.05;
   const rectOf = (el: Element) => {
     const r = el.getBoundingClientRect();
     return r.width > 0 && r.height > 0 ? local(r, h) : null;
@@ -67,9 +79,12 @@ function readScene(host: HTMLElement, focus: string[]): Scene {
       const r = el.closest(GHOST) ? null : rectOf(el);
       if (r) avoid.push({ r: { x: r.x - 4, y: r.y - 4, w: r.w + 8, h: r.h + 8 }, weight: 9 });
     }
-  for (const el of host.querySelectorAll('.label-plate')) if (live(el)) { const r = rectOf(el); if (r) avoid.push({ r: { x: r.x - 4, y: r.y - 4, w: r.w + 8, h: r.h + 8 }, weight: 9 }); }
-  for (const el of host.querySelectorAll('.label-dot')) if (live(el)) { const r = rectOf(el); if (r) avoid.push({ r: { x: r.x - 8, y: r.y - 8, w: r.w + 16, h: r.h + 16 }, weight: 6 }); }
+  // Every name on screen, dimmed ones too (the class dims what it is not about, but they are still read).
+  for (const el of host.querySelectorAll('.label-plate')) if (present(el)) { const r = rectOf(el); if (r) avoid.push({ r: { x: r.x - 4, y: r.y - 4, w: r.w + 8, h: r.h + 8 }, weight: 9 }); }
+  for (const el of host.querySelectorAll('.label-dot')) if (present(el)) { const r = rectOf(el); if (r) avoid.push({ r: { x: r.x - 8, y: r.y - 8, w: r.w + 16, h: r.h + 16 }, weight: 6 }); }
   for (const el of host.querySelectorAll('button, [role="toolbar"]')) { const r = rectOf(el); if (r) avoid.push({ r, weight: 6 }); }
+  // The screen's own cards over the picture: where-you-are title, hints, the way back, the 3D axes key.
+  for (const el of host.querySelectorAll(OVERLAYS)) if (!el.closest(GHOST) && shown(el)) { const r = rectOf(el); if (r) avoid.push({ r: { x: r.x - 6, y: r.y - 6, w: r.w + 12, h: r.h + 12 }, weight: 6 }); }
   // Drawn tissue: covering a small structure costs more than standing on a large background one.
   for (const el of host.querySelectorAll('[data-part]')) {
     if (!live(el)) continue;
@@ -139,15 +154,18 @@ export function KimuWalker({ svgRef, status, phase, stepKey, pose, gaze, focus, 
     if (!host) return;
     let retry = 0;
     let tries = 0;
+    let lastLook = '';
+    let covering = 0;
     // The camera is still travelling to another view: what is on screen now is not where it will be.
     const settling = () => !!host.querySelector('.travel, .view-zoom');
     const sized = (view: Scene['view']) => {
       const size = Math.round(Math.max(64, Math.min(104, view.w * 0.085)));
       return { w: size, h: Math.round((size * 150) / 120) };
     };
-    const walkTo = (scene: Scene, k: { w: number; h: number }, from: typeof spot) => {
-      const home = { x: 8, y: scene.view.h - k.h - 8 };
-      const next = standAt({ view: scene.view, kimu: k, targets: pointing ? scene.targets : [], keepClear: scene.keepClear, avoid: scene.avoid, from, home, reach: (k.w / 120) * (ARM + STICK) });
+    // `aside`: only out of the way, to the nearest free spot (nothing to point at yet).
+    const walkTo = (scene: Scene, k: { w: number; h: number }, from: typeof spot, aside = false) => {
+      const home = aside ? undefined : { x: 8, y: scene.view.h - k.h - 8 };
+      const next = standAt({ view: scene.view, kimu: k, targets: pointing && !aside ? scene.targets : [], keepClear: scene.keepClear, avoid: scene.avoid, from, home, reach: (k.w / 120) * (ARM + STICK) });
       const dist = from ? Math.hypot(next.x - from.x, next.y - from.y) : 0;
       if (from && dist < 6 && next.facing === from.facing) return;
       const ms = reduced || !from ? 0 : Math.round(Math.max(380, Math.min(1500, dist * 2.4)));
@@ -166,6 +184,14 @@ export function KimuWalker({ svgRef, status, phase, stepKey, pose, gaze, focus, 
         if (tries++ < 8) retry = window.setTimeout(decide, 300);
         return;
       }
+      // The camera may still be gliding to it, and a new view's names still fading in: decide once the
+      // picture holds still (what it names and every name around it), not on how it was a moment ago.
+      const look = signature(scene);
+      if (look !== lastLook && tries++ < 14) {
+        lastLook = look;
+        retry = window.setTimeout(decide, 160);
+        return;
+      }
       const k = sized(scene.view);
       setKimu(k);
       const from = spotRef.current;
@@ -173,16 +199,30 @@ export function KimuWalker({ svgRef, status, phase, stepKey, pose, gaze, focus, 
       // the class; for a question with nothing lit it stays and turns to the student.
       const moves = !from || status !== 'running' || (pointing && (phase === 'speak' || phase === 'ask'));
       if (!moves || (paused && from)) return;
+      // Like a teacher: if its stick reaches from where it stands, it points without walking.
+      const reach = (k.w / 120) * (ARM + STICK);
+      if (pointing && from && reaches(from, k, scene.targets, reach) && !blocked(from, { view: scene.view, kimu: k, targets: scene.targets, keepClear: scene.keepClear, avoid: scene.avoid, from, reach })) return;
       walkTo(scene, k, from);
     };
     // While it points, a name can pop up under it or the camera can move the drawing: it steps aside then.
     const watch = window.setInterval(() => {
       const from = spotRef.current;
-      if (!pointing || !from || walkRef.current || settling()) return;
+      if (status !== 'running' || paused || !from || walkRef.current || settling()) return;
       const scene = readScene(host, focus);
-      if (!scene.targets.length) return;
       const k = sized(scene.view);
-      if (blocked(from, { view: scene.view, kimu: k, targets: scene.targets, keepClear: scene.keepClear, avoid: scene.avoid, from, reach: (k.w / 120) * (ARM + STICK) })) walkTo(scene, k, from);
+      const reach = (k.w / 120) * (ARM + STICK);
+      // Walking to point is only for what is being said (between lines it still holds the last line's
+      // names, which a new view may have put elsewhere).
+      const saying = pointing && (phase === 'speak' || phase === 'ask' || phase === 'hold') && scene.targets.length > 0;
+      if (saying) {
+        if (blocked(from, { view: scene.view, kimu: k, targets: scene.targets, keepClear: scene.keepClear, avoid: scene.avoid, from, reach })) walkTo(scene, k, from);
+      } else if (blocked(from, { view: scene.view, kimu: k, targets: [], keepClear: [], avoid: scene.avoid, from, reach })) {
+        // A new view put a name under it while it waits: it steps out of the way, whatever the phase (on
+        // the second look, so a line about to start walks it straight to its place instead).
+        if (++covering >= 2) walkTo(scene, k, from, true);
+        return;
+      }
+      covering = 0;
     }, 700);
     // After the frame has settled (labels placed, the camera arrived).
     const t = window.setTimeout(decide, 120);
