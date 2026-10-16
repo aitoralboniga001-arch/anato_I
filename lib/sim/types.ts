@@ -88,6 +88,11 @@ export interface ViewDef {
     section?: boolean;
     /** The side the cut is seen from: a 3D view turns to it before the camera goes into the cut. */
     look?: 'front' | 'back' | 'side' | 'otherSide' | 'up' | 'down';
+    /**
+     * Degrees this view is turned in the other one (clockwise): a close-up drawn with its own axes (cranial
+     * on the left) rolls round while the camera moves, so the student sees the turn instead of a cut.
+     */
+    roll?: number;
   }[];
 }
 

@@ -1,20 +1,22 @@
 'use client';
 
 import { Label, Note, Part, rand, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
-import type { V3 } from '@/lib/three-d/math';
+import { add, type V3 } from '@/lib/three-d/math';
 import { Defs10, Stream, T, f1, spline, vis } from './common';
 import { HeartView, Trail, cameraAt, orbit, type CalloutSpec } from './Heart3D';
-import { POSE0, centreline, type HeartPose } from './model3d';
+import { POSE0, U, centreline, type HeartPose } from './model3d';
 
 /**
  * Stage 6 of topic 10 (notes 3.1, atal bulbarra).
  *
  * `BulbusScene` (view `3d`) — the looped heart of stage 5, from the front and a little from the right: the
- * aortic sac at the top of the bulbus sends the blood through the aortic arches to the dorsal aortas behind
- * (p3); then the bulbus shows its three sub-parts in their own colours — proximal part (widest), conus,
- * truncus — the colours every later derivative keeps.
+ * aortic sac at the top of the bulbus sends the blood through the aortic arches on both sides to the dorsal
+ * aortas behind (p3); then the bulbus shows its three sub-parts in their own colours — proximal part
+ * (widest), conus, truncus — and what each continues with, from the ventricle up to the sac. Then its wall
+ * turns to glass and the camera comes to each sub-part in turn while what it becomes grows inside it:
+ * trabeculae in the proximal part, two lumens (the infundibula) in the conus, two roots in the truncus.
  *
- * `BulbusMap` (view `eratorriak`) — one sub-part at a time, what it becomes: the proximal part's wall grows
+ * `BulbusMap` (view `eratorriak`, the same as a flat summary) — one sub-part at a time, what it becomes: the proximal part's wall grows
  * trabeculae (the primitive right ventricle); the conus is divided by a ridge into two smooth outflow
  * spaces (the infundibula of both ventricles); the truncus is divided in the same way into the roots of the
  * pulmonary trunk (from the right infundibulum) and of the aorta (from the left one). Each division is shown
@@ -27,43 +29,83 @@ const LOOPED: HeartPose = { ...POSE0, loop: 1, segs: 1, colour: 1, atriaFuse: 0.
 
 export function BulbusScene({ t }: SceneProps) {
   const split = seg(t, S6[1] + 0.02, S6[1] + 0.09);
-  const pose: HeartPose = { ...LOOPED, split, glass: 0.5 * vis(t, 0, S6[1]) };
+  // Steps 3–5: the wall turns to glass and what each sub-part becomes grows inside it, one at a time.
+  // Once the infundibula are there, the arteries they lead to show above them (step 4 names them), and the
+  // truncus divides fully in step 5.
+  const roots = seg(t, S6[3] + 0.1, S6[3] + 0.14);
+  const derive = { trab: seg(t, S6[2] + 0.02, S6[2] + 0.1), conus: seg(t, S6[3] + 0.02, S6[3] + 0.1), truncus: Math.max(0.4 * roots, seg(t, S6[4] + 0.02, S6[4] + 0.09)) };
+  const inside = vis(t, S6[2] - 0.01);
+  const pose: HeartPose = { ...LOOPED, split, glass: Math.max(0.5 * vis(t, 0, S6[1]), inside), derive };
+  const line = centreline(pose, 60);
+  const atU = (u: number) => line[Math.round(u * (line.length - 1))];
+  const mid = { truncus: atU((U.sac + U.truncus) / 2), conus: atU((U.truncus + U.conus) / 2), proximal: atU((U.conus + U.proximal) / 2) };
+  // Each sub-part in turn: the camera comes close to the one whose fate the step tells.
+  const close = (target: V3) => orbit(-30, 12, 6.6, add(target, [0, 0, 0.1]), [40, 4]);
   const camera = cameraAt(t, [
     [0, orbit(-24, 16, 10, [-0.15, 0.6, -0.3], [40, 8])],
     [S6[1], orbit(-38, 8, 8.6, [-0.35, 0.55, 0.3], [40, 6])],
+    [S6[2], close(mid.proximal)],
+    [S6[3], close(mid.conus)],
+    [S6[4], close(mid.truncus)],
+    // Last: back to the whole bulbus, every derivative named.
+    [S6[4] + 0.11, orbit(-34, 10, 8.4, [-0.3, 0.55, 0.3], [40, 6])],
   ]);
-  const line = centreline(pose, 60);
   const sac = line[0];
-  // The way out (p3): aortic sac → an arch → the dorsal aorta behind, on the embryo's right.
-  const out: V3[] = [sac, [-0.22, sac[1] + 0.12, sac[2] - 0.05], [-0.38, sac[1] + 0.2, -0.55], [-0.4, sac[1] + 0.1, -1.12], [-0.4, sac[1] - 0.05, -1.38], [-0.4, -0.6, -1.42]];
+  // The way out (p3): aortic sac → the arches on both sides → the dorsal aortas behind, and down them.
+  const out = (sx: number): V3[] => [sac, [sx * 0.22, sac[1] + 0.4, sac[2] - 0.05], [sx * 0.38, sac[1] + 0.5, -0.55], [sx * 0.4, sac[1] + 0.4, -1.12], [sx * 0.4, sac[1] + 0.26, -1.38], [sx * 0.4, -0.6, -1.42]];
+  // What it continues with (p3): from the ventricle up through the three sub-parts to the aortic sac.
+  const upward = line.slice(0, Math.round(0.66 * (line.length - 1)) + 1).reverse();
   const early = vis(t, 0, S6[1]);
+  const parts = vis(t, S6[1], S6[2] - 0.01);
+  const at = (a: number) => vis(t, a);
   const names: CalloutSpec[] = [
-    { id: 'aorta-zakua', p: 'aorta-zakua', show: early },
+    { id: 'aorta-zakua', p: 'aorta-zakua', show: Math.max(early, at(S6[1] + 0.17) * parts) },
     { id: 'aorta-arkuak', p: 'aorta-arkuak-1', show: early },
     { id: 'aorta-dortsalak', p: 'aorta-dortsalak-1', show: early, small: true },
     { id: 'atal-bulbarra', p: 'atal-bulbarra', show: early * 0.9 },
     { id: 'arteria-muturra', p: 'aorta-zakua', show: 0 },
-    { id: 'bulboaren-hurbileko-atala', p: 'bulboaren-hurbileko-atala', show: vis(t, S6[1] + 0.04), text: 'Hurbileko atala' },
-    { id: 'arteria-konoa', p: 'arteria-konoa', show: vis(t, S6[1] + 0.05) },
-    { id: 'enbor-arteriosoa', p: 'enbor-arteriosoa', show: vis(t, S6[1] + 0.06) },
-    { id: 'atal-bentrikularra', p: 'atal-bentrikularra', show: vis(t, S6[1] + 0.1), small: true },
-    { id: 'atal-aurikularra', p: 'atal-aurikularra', show: vis(t, S6[1] + 0.1), small: true },
+    { id: 'bulboaren-hurbileko-atala', p: 'bulboaren-hurbileko-atala', show: Math.max(at(S6[1] + 0.04) * parts, inside), text: 'Hurbileko atala' },
+    { id: 'arteria-konoa', p: 'arteria-konoa', show: Math.max(at(S6[1] + 0.05) * parts, at(S6[3] - 0.01)) },
+    { id: 'enbor-arteriosoa', p: 'enbor-arteriosoa', show: Math.max(at(S6[1] + 0.06) * parts, at(S6[4] - 0.01)) },
+    { id: 'atal-bentrikularra', p: 'atal-bentrikularra', show: at(S6[1] + 0.1) * parts, small: true },
+    { id: 'atal-aurikularra', p: 'atal-aurikularra', show: at(S6[1] + 0.1) * parts, small: true },
+    { id: 'muskulu-trenkadak', p: 'muskulu-trenkadak', show: inside * derive.trab, small: true },
+    { id: 'hasierako-eskuineko-bentrikulua', p: atU(U.proximal - 0.03), show: inside * vis(t, S6[2] + 0.06) },
+    { id: 'infundibuluak', p: 'infundibuluak', show: derive.conus },
+    { id: 'birika-enborraren-sustraiak', p: 'birika-enborraren-sustraiak', show: Math.max(roots, derive.truncus) },
+    { id: 'aortaren-sustraiak', p: 'aortaren-sustraiak', show: Math.max(roots, derive.truncus) },
   ];
+  const chain = at(S6[1] + 0.1) * parts;
   return (
     <HeartView
       pose={pose}
-      opts={{ cavity: 0.35, septum: 0, gut: 0.5, aortas: 1, flow: early > 0.01 ? { phase: t * 26, show: early, mixed: true } : null }}
+      opts={{ cavity: 0.35 * (1 - inside), septum: 0, gut: 0.5 * (1 - inside), aortas: 1 - 0.6 * inside, flow: early > 0.01 ? { phase: t * 26, show: early, mixed: true } : null }}
       camera={camera}
       names={names}
-      caption="5. astea · bihotz lakioa aurretik eta eskuinetik (3D)"
-      over={(at) => (
+      caption={inside > 0.5 ? '5. astea · arteria bulboa barrutik (3D): azpiatal bakoitzetik zer sortzen den' : '5. astea · bihotz lakioa aurretik eta eskuinetik (3D)'}
+      over={(at3) => (
         <>
-          <Trail pts={out} at={at} show={early * 0.9} progress={seg(t, 0.02, 0.09)} color="#ff8a8a" />
+          {[-1, 1].map((sx) => (
+            <Trail key={sx} pts={out(sx)} at={at3} show={early * 0.9} progress={seg(t, 0.02, 0.09)} color="#ff8a8a" />
+          ))}
+          <Trail pts={upward} at={at3} show={chain * 0.95} progress={seg(t, S6[1] + 0.1, S6[1] + 0.17)} color="#ffd27a" />
           <Note x={500} y={612} tone="accent" show={early}>
-            Arteria muturra: aorta zakutik aorta arkuetara, eta atzeko aorta dortsaletara
+            Arteria muturra: aorta zakutik aorta arkuetara (ezkerrean eta eskuinean), eta atzeko aorta dortsaletara
           </Note>
-          <Note x={500} y={612} tone="accent" show={vis(t, S6[1])}>
+          <Note x={500} y={612} tone="accent" show={parts * (1 - chain)}>
             Arteria bulboan hiru azpiatal: hurbileko atala (zabalena), arteria konoa eta enbor arteriosoa
+          </Note>
+          <Note x={500} y={612} tone="accent" show={chain}>
+            Behetik gora jarraian: atal bentrikularra → hurbileko atala → arteria konoa → enbor arteriosoa → aorta zakua
+          </Note>
+          <Note x={500} y={612} tone="accent" show={vis(t, S6[2] - 0.01, S6[3] - 0.01)}>
+            Hurbileko atala: paretan muskulu trenkadak → hasierako eskuineko bentrikulua
+          </Note>
+          <Note x={500} y={612} tone="accent" show={vis(t, S6[3] - 0.01, S6[4] - 0.01)}>
+            Arteria konoa: trenkada batek bitan banatzen du → bi infundibuluak (eskuinekoa urdina, ezkerrekoa gorria)
+          </Note>
+          <Note x={500} y={612} tone="accent" show={vis(t, S6[4] - 0.01, 2)}>
+            Enbor arteriosoa: trenkadatu → birika enborraren sustraiak (eskuinetik) eta aortaren sustraiak (ezkerretik)
           </Note>
         </>
       )}

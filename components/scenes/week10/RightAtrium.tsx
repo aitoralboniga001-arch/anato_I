@@ -5,6 +5,8 @@ import { Cells, Defs11, K, Tissue } from '@/components/scenes/week11/common';
 import { FaceArt, FACE, type FaceState } from '@/components/scenes/week11/septal';
 import { H0, HeartArt, hp, type HeartState } from '@/components/scenes/week11/heart';
 import { Steps, SummaryTable, T, f1, vis } from './common';
+import { atriumModel, type AtriumState } from './atrium3d';
+import { ModelView, cameraAt, orbit, type CalloutSpec } from './Heart3D';
 
 /**
  * Stage 10 of topic 10 (notes 3.4 p10–p23): the right atrium.
@@ -350,31 +352,167 @@ export function RightAtriumInside({ t }: SceneProps) {
         Bi atalen artean gandor terminala; haren goiko muturrean nodulu sinusala (bihotzaren markapasoa)
       </Note>
 
-      {table > 0.01 && (
-        <g opacity={table}>
-          <rect x={292} y={58} width={606} height={420} rx={12} fill="#120c16" opacity={0.92} />
-          <SummaryTable
+      <AtriumTable t={t} show={table} />
+    </g>
+  );
+}
+
+/** The whole section's summary (notes 3, p21): each part of the heart loop in its colour and what it becomes. */
+function AtriumTable({ t, show, x = 0 }: { t: number; show: number; x?: number }) {
+  if (show <= 0.01) return null;
+  return (
+    <g transform={x ? `translate(${x} 0)` : undefined}>
+      <g opacity={show}>
+        <rect x={292} y={58} width={606} height={420} rx={12} fill="#120c16" opacity={0.92} />
+        <SummaryTable
+          t={t}
+          x={300}
+          y={66}
+          widths={[278, 312]}
+          rowH={30}
+          head={['Bihotz lakioaren atala', 'Eratorria']}
+          rows={[
+            { at: S[8] + 0.01, cells: [{ id: 'bulboaren-hurbileko-atala', text: 'Bulboaren hurbileko atala', color: T.proximal }, { id: 'hasierako-eskuineko-bentrikulua', text: 'Hasierako eskuineko bentrikulua' }] },
+            { at: S[8] + 0.015, cells: [{ id: 'arteria-konoa', text: 'Arteria konoa', color: T.conus }, { id: 'infundibuluak', text: 'Bi infundibuluak (lisoak)' }] },
+            { at: S[8] + 0.02, cells: [{ id: 'enbor-arteriosoa', text: 'Enbor arteriosoa', color: T.truncus }, { id: 'aortaren-sustraiak', text: 'Birika enborraren + aortaren sustraiak' }] },
+            { at: S[8] + 0.025, cells: [{ id: 'atal-bentrikularra', text: 'Atal bentrikularra', color: T.ventricle }, { id: 'hasierako-ezkerreko-bentrikulua', text: 'Hasierako ezkerreko bentrikulua' }] },
+            { at: S[8] + 0.03, cells: [{ id: 'atal-aurikularra', text: 'Atal aurikularra', color: T.atrium }, { id: 'atal-trabekulatua', text: 'Atal trabekulatua eta belarritxoa' }] },
+            { at: S[8] + 0.035, cells: [{ id: 'eskuineko-sinu-luzapena', text: 'Sinuaren eskuineko luzapena', color: T.sinus }, { id: 'atal-lisoa', text: 'Eskuineko aurikularen atal lisoa' }] },
+            { at: S[8] + 0.04, cells: [{ id: 'ezkerreko-sinu-luzapena', text: 'Sinuaren ezkerreko luzapena', color: T.sinus }, { id: 'sinu-koronarioa', text: 'Sinu koronarioa + zain laprana' }] },
+            { at: S[8] + 0.045, cells: [{ id: 'eskuineko-zain-balbula', text: 'Eskuineko zain balbula', color: VALVE.fill }, { id: 'beheko-kabaren-balbula', text: 'Kaba eta sinu koronarioaren balbulak' }] },
+            { at: S[8] + 0.05, cells: [{ id: 'ezkerreko-zain-balbula', text: 'Ezkerreko zain balbula', color: VALVE.fill }, { id: 'septum-secundum', text: 'Septum secundumarekin fusionatzen da' }] },
+          ]}
+        />
+      </g>
+    </g>
+  );
+}
+
+// ———————————————————————————— the right atrium in 3D ————————————————————————————
+
+/**
+ * `RightAtrium3D` (view `3d`) — the same story as `RightAtriumInside`, in a room the camera can turn in:
+ * the atrium opened from the front, its back wall ahead. For the septum (p11) the camera turns to the
+ * embryo's left wall, seen from the right through the lateral wall gone clear: the turn the 2D drawing
+ * could only cut to.
+ */
+export function RightAtrium3D({ t }: SceneProps) {
+  const st: AtriumState = {
+    valves: seg(t, S[1] + 0.01, S[1] + 0.05),
+    spur: seg(t, S[1] + 0.05, S[1] + 0.1),
+    // After the camera has turned to the septum (its glide takes the first ~0.035).
+    toSeptum: seg(t, S[2] + 0.04, S[2] + 0.1),
+    secundum: seg(t, S[2] + 0.01, S[2] + 0.05),
+    primum: seg(t, S[2] + 0.02, S[2] + 0.06),
+    rightTopGone: seg(t, S[3] + 0.03, S[3] + 0.07),
+    lowSplit: seg(t, S[3] + 0.06, S[3] + 0.11),
+    orifice: 1 - seg(t, S[4] + 0.02, S[4] + 0.08),
+    holes: seg(t, S[3] + 0.04, S[3] + 0.09),
+    svc: seg(t, S[4] + 0.05, S[4] + 0.1),
+    incorp: seg(t, S[4] + 0.015, S[4] + 0.1),
+    pect: seg(t, S[6] + 0.01, S[6] + 0.08),
+    crista: seg(t, S[7] + 0.005, S[7] + 0.05),
+    node: seg(t, S[7] + 0.04, S[7] + 0.07),
+    lateralGlass: seg(t, S[2], S[2] + 0.03) * (1 - seg(t, S[3], S[3] + 0.03)),
+  };
+  const table = seg(t, S[8], S[8] + 0.03);
+  const whole = orbit(-8, 12, 7.4, [0, 0, -0.3]);
+  const camera = cameraAt(t, [
+    [0, whole],
+    // The valves and the spurium up to the roof.
+    [S[1], orbit(-10, 16, 6.2, [0, 0.4, -0.45])],
+    // The septum: from the embryo's right, through the clear lateral wall (its back on your left).
+    [S[2], orbit(-80, 6, 7.4, [0.25, 0.1, -0.1])],
+    // Down to the openings of the IVC and the coronary sinus.
+    [S[3], orbit(-6, -10, 6.2, [0, -0.5, -0.45])],
+    [S[4], whole],
+    // The lateral wall from inside: from the front and the embryo's left.
+    [S[6], orbit(40, 10, 7.2, [-0.3, 0.15, -0.1])],
+    // The crista's top, by the SVC: the sinus node.
+    [S[7], orbit(28, 16, 6, [-0.35, 0.55, -0.45])],
+    // The table: the atrium steps aside to the left.
+    [S[8], orbit(-8, 12, 12, [0, 0, -0.3], [-372, 10])],
+  ]);
+  const model = atriumModel(st);
+  const L = 1 - table;
+  const on = (v: number) => Math.min(1, v) * L;
+  const names: CalloutSpec[] = [
+    { id: 'zain-sinua', p: 'zain-sinua', show: on(vis(t, 0, S[4] + 0.02)), text: 'Zain sinua (atzean)' },
+    { id: 'zulo-sinoaurikularra', p: 'zulo-sinoaurikularra', show: on(vis(t, 0, S[1] + 0.02) + vis(t, S[4], S[4] + 0.04)) },
+    { id: 'hasierako-eskuineko-aurikula', p: 'hasierako-eskuineko-aurikula', show: on(vis(t, 0, S[4] + 0.03) * (1 - st.lateralGlass)) },
+    { id: 'eskuineko-zain-balbula', p: 'eskuineko-zain-balbula', show: on(vis(t, S[1] + 0.02, S[2]) + vis(t, S[3], S[3] + 0.08)) },
+    { id: 'ezkerreko-zain-balbula', p: 'ezkerreko-zain-balbula', show: on(vis(t, S[1] + 0.02, S[3])) },
+    { id: 'septum-spurium', p: 'septum-spurium', show: on(vis(t, S[1] + 0.03, S[3])) },
+    { id: 'aurikula-arteko-trenkada', p: 'aurikula-arteko-trenkada', show: on(vis(t, S[2], S[3])), small: true },
+    { id: 'septum-secundum', p: 'septum-secundum', show: on(vis(t, S[2] + 0.01, S[3])) },
+    { id: 'septum-primum', p: 'septum-primum', show: on(vis(t, S[2] + 0.02, S[3])) },
+    { id: 'beheko-kabaren-balbula', p: 'beheko-kabaren-balbula', show: on(vis(t, S[3] + 0.07, S[4])) },
+    { id: 'sinu-koronarioaren-balbula', p: 'sinu-koronarioaren-balbula', show: on(vis(t, S[3] + 0.07, S[4])) },
+    { id: 'atal-lisoa', p: 'atal-lisoa', show: on(vis(t, S[4] + 0.06, S[6]) + vis(t, S[7], S[8])) },
+    { id: 'eskuineko-aurikula', p: 'eskuineko-aurikula', show: on(vis(t, S[4] + 0.06, S[5])), text: 'Behin betiko eskuineko aurikula' },
+    { id: 'goiko-kaba-zaina', p: 'goiko-kaba-zaina', show: on(vis(t, S[5], S[6])) },
+    { id: 'beheko-kaba-zaina', p: 'beheko-kaba-zaina', show: on(vis(t, S[5], S[6])) },
+    { id: 'sinu-koronarioa', p: 'sinu-koronarioa', show: on(vis(t, S[5], S[6])) },
+    { id: 'atal-trabekulatua', p: 'atal-trabekulatua', show: on(vis(t, S[6], S[8])) },
+    { id: 'belarritxoa', p: 'belarritxoa', show: on(vis(t, S[6], S[7])) },
+    { id: 'muskulu-pektinioak', p: 'muskulu-pektinioak', show: on(vis(t, S[6] + 0.03, S[7])) },
+    { id: 'gandor-terminala', p: 'gandor-terminala', show: on(vis(t, S[7], S[8])) },
+    { id: 'nodulu-sinusala', p: 'nodulu-sinusala', show: on(vis(t, S[7] + 0.04, S[8])) },
+  ];
+  return (
+    <ModelView
+      model={model}
+      continuity="aurikula-10"
+      camera={camera}
+      names={names}
+      over={(_, asked) => (
+        <>
+          <Steps
             t={t}
-            x={300}
-            y={66}
-            widths={[278, 312]}
-            rowH={30}
-            head={['Bihotz lakioaren atala', 'Eratorria']}
-            rows={[
-              { at: S[8] + 0.01, cells: [{ id: 'bulboaren-hurbileko-atala', text: 'Bulboaren hurbileko atala', color: T.proximal }, { id: 'hasierako-eskuineko-bentrikulua', text: 'Hasierako eskuineko bentrikulua' }] },
-              { at: S[8] + 0.015, cells: [{ id: 'arteria-konoa', text: 'Arteria konoa', color: T.conus }, { id: 'infundibuluak', text: 'Bi infundibuluak (lisoak)' }] },
-              { at: S[8] + 0.02, cells: [{ id: 'enbor-arteriosoa', text: 'Enbor arteriosoa', color: T.truncus }, { id: 'aortaren-sustraiak', text: 'Birika enborraren + aortaren sustraiak' }] },
-              { at: S[8] + 0.025, cells: [{ id: 'atal-bentrikularra', text: 'Atal bentrikularra', color: T.ventricle }, { id: 'hasierako-ezkerreko-bentrikulua', text: 'Hasierako ezkerreko bentrikulua' }] },
-              { at: S[8] + 0.03, cells: [{ id: 'atal-aurikularra', text: 'Atal aurikularra', color: T.atrium }, { id: 'atal-trabekulatua', text: 'Atal trabekulatua eta belarritxoa' }] },
-              { at: S[8] + 0.035, cells: [{ id: 'eskuineko-sinu-luzapena', text: 'Sinuaren eskuineko luzapena', color: T.sinus }, { id: 'atal-lisoa', text: 'Eskuineko aurikularen atal lisoa' }] },
-              { at: S[8] + 0.04, cells: [{ id: 'ezkerreko-sinu-luzapena', text: 'Sinuaren ezkerreko luzapena', color: T.sinus }, { id: 'sinu-koronarioa', text: 'Sinu koronarioa + zain laprana' }] },
-              { at: S[8] + 0.045, cells: [{ id: 'eskuineko-zain-balbula', text: 'Eskuineko zain balbula', color: VALVE.fill }, { id: 'beheko-kabaren-balbula', text: 'Kaba eta sinu koronarioaren balbulak' }] },
-              { at: S[8] + 0.05, cells: [{ id: 'ezkerreko-zain-balbula', text: 'Ezkerreko zain balbula', color: VALVE.fill }, { id: 'septum-secundum', text: 'Septum secundumarekin fusionatzen da' }] },
+            y={22}
+            steps={[
+              [S[0], 'Eskuineko aurikula aurretik irekita: atzeko pareta'],
+              [S[1], 'Zain balbulak eta septum spuriuma'],
+              [S[2], 'Ezkerreko balbula eta spuriuma → septum secunduma'],
+              [S[3], 'Eskuineko balbula: beheko kabaren eta sinu koronarioaren balbulak'],
+              [S[4], 'Zain sinua atzeko paretan inkorporatzen da'],
+              [S[5], 'Atal lisoa (zain sinutik): kabak eta sinu koronarioa'],
+              [S[6], 'Atal trabekulatua (hasierako aurikulatik): belarritxoa'],
+              [S[7], 'Gandor terminala eta nodulu sinusala'],
+              [S[8], 'Laburpena: bihotz lakioaren atalak eta haien eratorriak'],
             ]}
           />
-        </g>
+          <Note x={500} y={52} size={12.5} tone="dim" show={vis(t, S[2] + 0.02, S[3]) * asked}>
+            Eskuinetik begiratzen dugu: alboko pareta gardena, aurikula arteko trenkada aurrez aurre (atzea zure ezkerrean)
+          </Note>
+          <Note x={500} y={616} tone="accent" show={vis(t, 0, S[1])}>
+            Zulo sinoaurikularra: eskuin-atzeko aurikula paretan, zain sinuarekin komunikazioa
+          </Note>
+          <Note x={500} y={616} tone="accent" show={vis(t, S[1], S[2])}>
+            Zuloaren ertzetan bi zain balbula; goikaldean fusionatu → septum spurium, sabairaino
+          </Note>
+          <Note x={500} y={616} tone="accent" show={vis(t, S[2], S[3])}>
+            Septum spuriuma eta ezkerreko zain balbula septum secundumarekin fusionatzen dira; septum primuma ere orain agertzen da
+          </Note>
+          <Note x={500} y={616} tone="accent" show={vis(t, S[3], S[4])}>
+            Eskuineko zain balbula: goian desagertu; behean bitan → beheko kabaren eta sinu koronarioaren balbulak
+          </Note>
+          <Note x={500} y={616} tone="accent" show={vis(t, S[4], S[5])}>
+            Zain sinua atzeko paretan inkorporatzen da: hasierako eskuineko aurikula → behin betiko eskuineko aurikula
+          </Note>
+          <Note x={500} y={616} tone="accent" show={vis(t, S[5], S[6])}>
+            Atzeko pareta lisoa (eskuineko luzapenetik, atalik handiena): bertan goiko eta beheko kabak eta sinu koronarioa
+          </Note>
+          <Note x={500} y={616} tone="accent" show={vis(t, S[6], S[7])}>
+            Gainerako pareta trabekulatua (hasierako eskuineko aurikulatik): belarritxoa eta muskulu pektinioak
+          </Note>
+          <Note x={500} y={616} tone="accent" show={vis(t, S[7], S[8])}>
+            Bi atalen artean gandor terminala; haren goiko muturrean nodulu sinusala (bihotzaren markapasoa)
+          </Note>
+          <AtriumTable t={t} show={table} x={60} />
+        </>
       )}
-    </g>
+    />
   );
 }
 

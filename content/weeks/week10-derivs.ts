@@ -1,7 +1,7 @@
 import type { StageDef } from '@/lib/sim/types';
 import { BulbusMap, BulbusScene, S6 } from '@/components/scenes/week10/Bulbus';
 import { AtriaFrontal, AtriaScene, S7, S8, S9, SinusBack, SinusFrontal, VentricleFrontal, VentricleScene } from '@/components/scenes/week10/Derivs';
-import { RightAtriumFrontal, RightAtriumInside, S10, SpuriumFace } from '@/components/scenes/week10/RightAtrium';
+import { RightAtrium3D, RightAtriumFrontal, RightAtriumInside, S10, SpuriumFace } from '@/components/scenes/week10/RightAtrium';
 
 const FILE = '10. GAIA_ ZIRKULAZIO APARATUA (ZUZENDUTA).pdf';
 const src = (section: string) => ({ file: FILE, section });
@@ -29,7 +29,7 @@ export const stageBulbus: StageDef = {
       id: '3d',
       label: 'Bihotz lakioa 3D',
       plane: 'eskema',
-      description: 'Bihotz lakioa 3D ereduan, aurretik eta eskuinetik: goian aorta zakua, arku aortikoak atzeko aorta dortsaletara; bulboaren hiru azpiatalak bere koloreetan. Arrastatu biratzeko.',
+      description: 'Bihotz lakioa 3D ereduan, aurretik eta eskuinetik: goian aorta zakua, arku aortikoak bi aldeetan atzeko aorta dortsaletara; bulboaren hiru azpiatalak bere koloreetan, eta pareta gardenaren barruan bakoitzetik zer sortzen den. Arrastatu biratzeko.',
       orientation: { top: 'Kraneala', bottom: 'Kaudala' },
       scene: BulbusScene,
       travel: false,
@@ -38,7 +38,7 @@ export const stageBulbus: StageDef = {
       id: 'eratorriak',
       label: 'Eratorriak',
       plane: 'eskema',
-      description: 'Arteria bulboa zutik (goian aorta zakua) eta azpiatal bakoitzetik zer sortzen den: muskulu trenkadak, trenkadaz banatutako bi espazioak (zeharkako mozketan) eta sustraiak.',
+      description: 'Laburpena lauan: arteria bulboa zutik (goian aorta zakua) eta azpiatal bakoitzetik zer sortzen den: muskulu trenkadak, trenkadaz banatutako bi espazioak (zeharkako mozketan) eta sustraiak.',
       scene: BulbusMap,
       travel: false,
       bridges: [{ from: '3d', part: 'atal-bulbarra' }],
@@ -65,7 +65,7 @@ export const stageBulbus: StageDef = {
       idea: 'Arteria bulboan hiru azpiatal: hurbileko atala (zabalena), arteria konoa (erdikoa) eta enbor arteriosoa (urrunekoa).',
       key: 'Bentrikulutik gora: hurbileko atala → konoa → enborra → aorta zakua.',
       exam: 'Arteria bulboaren hiru azpiatalak: hurbileko atala, bitarteko atala edo arteria konoa, urruneko atala edo enbor arteriosoa.',
-      text: 'Arteria bulbo honetan hiru azpiatal bereizten dira: hurbileko atala (zabalena, bentrikuluaren ondoan, berde iluna), bitarteko edo erdiko atala, arteria konoa (berde argia), eta urruneko atala, enbor arteriosoa (marfila), aorta zakuaren azpian.',
+      text: 'Arteria bulbo honetan hiru azpiatal bereizten dira: hurbileko atala (zabalena, bentrikuluaren ondoan, berde iluna), bitarteko edo erdiko atala, arteria konoa (berde argia), eta urruneko atala, enbor arteriosoa (marfila), aorta zakuaren azpian. Marra horia: behetik gora, atal bakoitza zerekin jarraitzen den: atal bentrikularra → hurbileko atala → arteria konoa → enbor arteriosoa → aorta zakua.',
       focus: ['bulboaren-hurbileko-atala', 'arteria-konoa', 'enbor-arteriosoa'],
       tour: ['bulboaren-hurbileko-atala', 'arteria-konoa', 'enbor-arteriosoa'],
       tourAt: S6[1] + 0.1,
@@ -88,10 +88,10 @@ export const stageBulbus: StageDef = {
       idea: 'Hurbileko atalaren paretan muskulu trenkadak → hasierako eskuineko bentrikulua (behin betiko eskuineko bentrikuluaren atal trabekulatua).',
       key: 'Eskuineko bentrikulua bulbotik dator, ez atal bentrikularretik.',
       exam: 'Bulboaren hurbileko atala: muskulu trenkadak → hasierako eskuineko bentrikulua = eskuineko bentrikuluaren atal trabekulatua (atal garrantzitsuena, baina ez bakarra).',
-      text: 'Hurbileko atala zabalena da. Atal zabal honen paretan muskuluak agertzen hasten dira, eta muskulu horiek muskulu trenkadak sortzen dituzte. Beraz, hemendik behin betiko eskuineko bentrikuluaren atal trabekulatua sortzen da: hasierako eskuineko bentrikulua. Hori izango da behin betiko eskuineko bentrikuluaren atalik garrantzitsuena, baina ez bakarra.',
+      text: 'Hurbileko atala zabalena da. Atal zabal honen paretan muskuluak agertzen hasten dira, eta muskulu horiek muskulu trenkadak sortzen dituzte. Beraz, hemendik behin betiko eskuineko bentrikuluaren atal trabekulatua sortzen da: hasierako eskuineko bentrikulua. Hori izango da behin betiko eskuineko bentrikuluaren atalik garrantzitsuena, baina ez bakarra. Pareta gardena bihurtzen da, eta barruan trenkadak hazten dira.',
       focus: ['bulboaren-hurbileko-atala', 'hasierako-eskuineko-bentrikulua', 'muskulu-trenkadak'],
       caution: 'Ez nahastu: eskuineko bentrikulu primitiboa atal bulbarretik dator; atal bentrikularretik ezkerrekoa sortzen da.',
-      view: 'eratorriak',
+      view: '3d',
     },
     {
       at: S6[3],
@@ -99,7 +99,7 @@ export const stageBulbus: StageDef = {
       idea: 'Arteria konoa: trenkada batek bitan banatzen du → bi bentrikuluen atal lisoak edo infundibuluak.',
       key: 'Eskuineko infundibulutik birika arteria; ezkerrekotik aorta.',
       exam: 'Arteria konoa trenkadatu → bi espazio = bi bentrikuluen infundibuluak (atal lisoak); eskuinekotik birika arteria, ezkerrekotik aorta.',
-      text: 'Bitarteko (erdiko) atala edo arteria konoa trenkadatu egingo da: espazio horretan trenkada bat agertzen da eta espazioa bitan banatzen du (zeharkako mozketan ikusten da). Bi espazio horiek dira, hain zuzen ere, bi bentrikuluen atal lisoak edo infundibuluak. Hemendik sortzen dira birika arteria (eskuinekotik) eta aorta (ezkerrekotik).',
+      text: 'Bitarteko (erdiko) atala edo arteria konoa trenkadatu egingo da: espazio horretan trenkada bat agertzen da eta espazioa bitan banatzen du (pareta gardenaren barrutik ikusten da). Bi espazio horiek dira, hain zuzen ere, bi bentrikuluen atal lisoak edo infundibuluak. Hemendik sortzen dira birika arteria (eskuinekotik) eta aorta (ezkerrekotik).',
       focus: ['arteria-konoa', 'infundibuluak'],
       ask: {
         q: 'Zer sortzen da arteria konotik?',
@@ -112,7 +112,7 @@ export const stageBulbus: StageDef = {
           'Ez: arkuak aorta zakutik irteten dira.',
         ],
       },
-      view: 'eratorriak',
+      view: '3d',
     },
     {
       at: S6[4],
@@ -124,7 +124,7 @@ export const stageBulbus: StageDef = {
       focus: ['enbor-arteriosoa', 'birika-enborraren-sustraiak', 'aortaren-sustraiak'],
       tour: ['bulboaren-hurbileko-atala', 'hasierako-eskuineko-bentrikulua', 'arteria-konoa', 'infundibuluak', 'enbor-arteriosoa', 'birika-enborraren-sustraiak', 'aortaren-sustraiak'],
       tourAt: S6[4] + 0.12,
-      view: 'eratorriak',
+      view: '3d',
     },
   ],
   structures: [
@@ -168,7 +168,7 @@ export const stageVentricle: StageDef = {
       orientation: FRONT,
       scene: VentricleFrontal,
       travel: false,
-      bridges: [{ from: '3d', part: 'bihotz-lakioa', section: true, look: 'front' }],
+      bridges: [{ from: '3d', part: 'bihotz-lakioa', section: true, look: 'front' }, { from: 'atal-bulbarra/3d', part: 'bihotz-lakioa', section: true, look: 'front' }],
     },
     {
       id: '3d',
@@ -368,7 +368,7 @@ export const stageSinus: StageDef = {
       key: 'Odola luzapenetatik zain sinura, eta zulotik atal aurikularrera.',
       exam: 'Zain sinua (4. astea): zeharkako atala + ezkerreko eta eskuineko luzapenak; bakoitzean 3 zain (bitelinoa, zilborrekoa, kardinal komuna).',
       caution: 'KONTUZ! Atzetik ikusita dago: eskuina eta ezkerra ez dira alderantzizkatu behar (enbrioiaren eskuina zure eskuinean).',
-      text: 'Kamera bihotzaren atzera biratzen da, apunteetako irudian bezala. Goian aurikula komunaren espazioa, zain sinuarekin komunikatuta. Garapenaren 4. astean zain sinuan zeharkako atala eta ezkerreko eta eskuineko luzapenak bereizten dira. Luzapen horietan bukatzen dira enbrioiaren ezkerreko eta eskuineko zainak, hasieran 3: zain bitelinoak, zilborreko zainak eta kardinalak. Bi luzapenen bidez odola zain sinura heltzen da, eta haren zuloaren bidez atal aurikularrera.',
+      text: 'Bihotza atzetik ikusten dugu, apunteetako irudian bezala. Goian aurikula komunaren espazioa, zain sinuarekin komunikatuta. Garapenaren 4. astean zain sinuan zeharkako atala eta ezkerreko eta eskuineko luzapenak bereizten dira. Luzapen horietan bukatzen dira enbrioiaren ezkerreko eta eskuineko zainak, hasieran 3: zain bitelinoak, zilborreko zainak eta kardinalak. Bi luzapenen bidez odola zain sinura heltzen da, eta haren zuloaren bidez atal aurikularrera.',
       focus: ['zain-sinuaren-zeharkako-atala', 'eskuineko-sinu-luzapena', 'ezkerreko-sinu-luzapena'],
       tour: ['atal-aurikularra', 'zain-sinuaren-zeharkako-atala', 'eskuineko-sinu-luzapena', 'ezkerreko-sinu-luzapena', 'bitelo-zainak', 'zilbor-zainak', 'bena-kardinal-komuna'],
       tourAt: 0.11,
@@ -482,20 +482,33 @@ export const stageRightAtrium: StageDef = {
   dayRange: [32, 56],
   title: 'Eskuineko aurikula',
   subtitle: 'Zain balbulak eta septum spuriuma; zain sinua atzeko paretan: atal lisoa eta atal trabekulatua',
-  intro: 'Eskuineko aurikula aurretik irekita: haren atzeko paretara begiratzen dugu. Marrazki bera aldatzen joaten da apunteen ordenan: zulo sinoaurikularra, zain balbulak, zain sinuaren inkorporazioa, eta bukaeran behin betiko eskuineko aurikularen bi atalak. Kamera xehetasun bakoitzera hurbiltzen da eta berriro urruntzen.',
+  intro: 'Eskuineko aurikula 3D ereduan, aurretik irekita: haren atzeko paretara begiratzen dugu, ezkerrean (enbrioiaren ezkerra) aurikula arteko trenkada eta eskuinean alboko pareta. Eredua aldatzen joaten da apunteen ordenan: zulo sinoaurikularra, zain balbulak, zain sinuaren inkorporazioa, eta bukaeran behin betiko eskuineko aurikularen bi atalak. Kamera xehetasun bakoitzera hurbiltzen da; trenkada ikusteko aurikula barruan biratzen da.',
   duration: 110,
   source: src('3.4 Atal zain-sinutik'),
   views: [
     {
+      id: '3d',
+      label: 'Aurikula 3D',
+      plane: 'eskema',
+      description: 'Eskuineko aurikula 3D ereduan, aurretik irekita: atzeko pareta aurrean, aurikula arteko trenkada enbrioiaren ezkerrean (zure eskuinean) eta alboko pareta beste aldean. Morea: zain sinutik; laranja: atal aurikularretik. Arrastatu biratzeko.',
+      orientation: { top: 'Kraneala', bottom: 'Kaudala' },
+      scene: RightAtrium3D,
+      travel: false,
+      bridges: [
+        { from: 'zain-sinua/frontala', part: 'hasierako-eskuineko-aurikula' },
+        { from: 'zain-sinua/3d', part: 'bihotz-lakioa' },
+      ],
+    },
+    {
       id: 'barrutik',
-      label: 'Barrutik',
+      label: 'Barrutik (eskema)',
       plane: 'eskema',
       frame: 'koronala',
       description: 'Eskuineko aurikula aurretik irekita: atzeko pareta ikusten dugu (enbrioiaren eskuina zure ezkerrean; aurikula arteko trenkada eskuinean). Morea: zain sinutik; laranja: atal aurikularretik.',
       orientation: FRONT,
       scene: RightAtriumInside,
       travel: false,
-      bridges: [{ from: 'frontala', part: 'hasierako-eskuineko-aurikula' }, { from: 'zain-sinua/frontala', part: 'hasierako-eskuineko-aurikula' }],
+      bridges: [{ from: '3d', part: 'eskuineko-aurikula' }, { from: 'frontala', part: 'hasierako-eskuineko-aurikula' }, { from: 'zain-sinua/frontala', part: 'hasierako-eskuineko-aurikula' }],
     },
     {
       id: 'trenkada',
@@ -514,6 +527,7 @@ export const stageRightAtrium: StageDef = {
       orientation: FRONT,
       scene: RightAtriumFrontal,
       travel: false,
+      bridges: [{ from: '3d', part: 'eskuineko-aurikula', section: true, look: 'front' }],
     },
   ],
   beats: [
@@ -524,7 +538,7 @@ export const stageRightAtrium: StageDef = {
       idea: 'Eskuin-atzeko aurikularen pareta zain sinuarekin komunikatuta: zulo sinoaurikularra.',
       text: 'Aurreko mugimenduen ondorioz, eskuin-atzeko aurikularen pareta bihotz hodiaren atzeko zain sinuarekin komunikatuta dago. Zulo honi zulo sinoaurikularra deritzo. Aurikula aurretik irekita dago: zulotik atzeko zain sinua (morea) ikusten da, eta odol nahasia sartzen.',
       focus: ['zulo-sinoaurikularra'],
-      view: 'barrutik',
+      view: '3d',
     },
     {
       at: S10[1],
@@ -536,7 +550,7 @@ export const stageRightAtrium: StageDef = {
       focus: ['eskuineko-zain-balbula', 'ezkerreko-zain-balbula', 'septum-spurium'],
       tour: ['eskuineko-zain-balbula', 'ezkerreko-zain-balbula', 'septum-spurium'],
       tourAt: S10[1] + 0.06,
-      view: 'barrutik',
+      view: '3d',
     },
     {
       at: S10[2],
@@ -544,11 +558,11 @@ export const stageRightAtrium: StageDef = {
       idea: 'Septum spuriuma eta ezkerreko zain balbula septum secundumarekin fusionatzen dira (aurikula arteko trenkadaren osagai). Septum primuma momentu honetan agertzen da.',
       key: 'Ezkerreko balbula → aurikula arteko trenkadara (septum secundum).',
       exam: 'Septum spurium + ezkerreko zain balbula → septum secundumarekin fusionatu (aurikula arteko trenkadaren osagai); septum primuma garai honetan agertzen da.',
-      text: 'Garapenak aurrera egin ahala, septum spuriuma, ezkerreko zain balbularekin batera, bi aurikulen artean garatzen ari den aurikula arteko trenkadarekin fusionatzen da: septum secundumarekin, zehazki. Beraz, aurikula arteko trenkadaren osagai bat izango dira. Septum primuma momentu honetan agertu den aurikula arteko trenkada da. Hasieran bi zain balbula daude zain sinuaren eta aurikula komunaren artean, eta aldaketak izaten dituzte: ezkerrekoa aurikula arteko trenkadarekin fusionatzen da. Ikuspegi hau 11. gaian erabiliko dugu.',
+      text: 'Garapenak aurrera egin ahala, septum spuriuma, ezkerreko zain balbularekin batera, bi aurikulen artean garatzen ari den aurikula arteko trenkadarekin fusionatzen da: septum secundumarekin, zehazki. Beraz, aurikula arteko trenkadaren osagai bat izango dira. Septum primuma momentu honetan agertu den aurikula arteko trenkada da. Hasieran bi zain balbula daude zain sinuaren eta aurikula komunaren artean, eta aldaketak izaten dituzte: ezkerrekoa aurikula arteko trenkadarekin fusionatzen da. Kamera aurikula barruan biratzen da: eskuinetik begiratzen dugu, alboko pareta gardena bihurtzen da eta trenkada aurrez aurre geratzen da (11. gaian erabiliko dugun ikuspegia).',
       focus: ['septum-spurium', 'ezkerreko-zain-balbula', 'septum-secundum'],
       tour: ['septum-spurium', 'ezkerreko-zain-balbula', 'septum-secundum', 'septum-primum'],
       tourAt: S10[2] + 0.05,
-      view: 'trenkada',
+      view: '3d',
     },
     {
       at: S10[3],
@@ -569,7 +583,7 @@ export const stageRightAtrium: StageDef = {
           'Ez: horiek kuxin endokardikoetatik sortzen dira (11. gaia).',
         ],
       },
-      view: 'barrutik',
+      view: '3d',
     },
     {
       at: S10[4],
@@ -578,7 +592,7 @@ export const stageRightAtrium: StageDef = {
       key: 'Inkorporazioaren ondoren: hasierako eskuineko aurikula + zain sinua = behin betiko eskuineko aurikula.',
       text: 'Bukatzeko, hasierako eskuineko aurikularen atzealdean zegoen zain sinua poliki-poliki hasierako eskuineko aurikularen atzeko paretan inkorporatzen da. Inkorporazioa gertatu ondoren, hasierako eskuineko aurikula behin betiko eskuineko aurikula izatera pasatzen da. Morea (zain sinua) atzeko paretan zabaltzen da.',
       focus: ['atal-lisoa', 'eskuineko-aurikula'],
-      view: 'barrutik',
+      view: '3d',
     },
     {
       at: S10[5],
@@ -590,7 +604,7 @@ export const stageRightAtrium: StageDef = {
       focus: ['atal-lisoa', 'goiko-kaba-zaina', 'beheko-kaba-zaina', 'sinu-koronarioa'],
       tour: ['atal-lisoa', 'goiko-kaba-zaina', 'beheko-kaba-zaina', 'sinu-koronarioa'],
       tourAt: S10[5] + 0.03,
-      view: 'barrutik',
+      view: '3d',
     },
     {
       at: S10[6],
@@ -598,7 +612,7 @@ export const stageRightAtrium: StageDef = {
       idea: 'Atal trabekulatua: hasierako eskuineko aurikulatik (atal aurikularretik); belarritxoa eta muskulu pektinioak.',
       key: 'Laranja = atal aurikularretik: aurreko pareta, belarritxoa, muskulu pektinioak.',
       exam: 'Eskuineko aurikularen atal trabekulatua: hasierako eskuineko aurikulatik; aurreko pareta eta belarritxoa, muskulu pektinioekin.',
-      text: 'Beste aldetik, behin betiko eskuineko aurikulan atal trabekulatua dago, hasierako eskuineko aurikulatik sortzen dena (bihotzaren atal aurikularretik). Gainerako pareta osatzen du: aurreko pareta eta belarritxoa (mintz fina, oso muskulu finekin: muskulu pektinioak; horregatik esaten da atal trabekulatua dela). Beraz, eskuineko aurikulak bi atal guztiz desberdin ditu: atzeko atal lisoa (zain sinutik, handiena) eta atal trabekulatua. Kamera ezkerreko paretara hurbiltzen da.',
+      text: 'Beste aldetik, behin betiko eskuineko aurikulan atal trabekulatua dago, hasierako eskuineko aurikulatik sortzen dena (bihotzaren atal aurikularretik). Gainerako pareta osatzen du: aurreko pareta eta belarritxoa (mintz fina, oso muskulu finekin: muskulu pektinioak; horregatik esaten da atal trabekulatua dela). Beraz, eskuineko aurikulak bi atal guztiz desberdin ditu: atzeko atal lisoa (zain sinutik, handiena) eta atal trabekulatua. Kamera alboko paretara (enbrioiaren eskuinekoa) biratzen da.',
       focus: ['atal-trabekulatua', 'belarritxoa', 'muskulu-pektinioak'],
       tour: ['atal-trabekulatua', 'belarritxoa', 'muskulu-pektinioak'],
       tourAt: S10[6] + 0.05,
@@ -613,7 +627,7 @@ export const stageRightAtrium: StageDef = {
           'Ez: hurbileko ataletik eskuineko bentrikulua.',
         ],
       },
-      view: 'barrutik',
+      view: '3d',
     },
     {
       at: S10[7],
@@ -623,7 +637,7 @@ export const stageRightAtrium: StageDef = {
       exam: 'Gandor terminala: atal lisoaren eta trabekulatuaren arteko gandor muskularra; goiko aldean nodulu sinusala (eroapen sistema, markapasoa).',
       text: 'Bi atal horien artean gandortxo bat dago, gandor muskularra: gandor terminala. Haren goiko aldean bihotz eroapen sistemako nodulu sinusala dago: bertan sortzen dira nerbio kinadak, bihotzaren markapasoa da. Kamera gandorraren goiko muturrera hurbiltzen da, goiko kabaren ondora.',
       focus: ['gandor-terminala', 'nodulu-sinusala'],
-      view: 'barrutik',
+      view: '3d',
     },
     {
       at: S10[8],
@@ -631,7 +645,7 @@ export const stageRightAtrium: StageDef = {
       idea: 'Laburpena: bihotz lakioaren atal bakoitza eta haren eratorriak.',
       text: 'Irudiaren eskuineko marrazkian eskuineko aurikularen paretako bi atalak ikusten dira. Kamera urruntzen da, eta 3. ataleko laburpen taula agertzen da: bihotz lakioaren atal bakoitza bere kolorez eta zer sortzen duen. Gelaxka bakoitza sakatuz, egituraren fitxa irekitzen da.',
       focus: ['atal-lisoa', 'atal-trabekulatua'],
-      view: 'barrutik',
+      view: '3d',
     },
   ],
   structures: [

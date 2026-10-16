@@ -33,6 +33,8 @@ export interface ZoomPlan {
   section?: boolean;
   /** The side the cut is seen from: the whole view's 3D picture turns to it (before going in, while coming out). */
   look?: LookSide;
+  /** Degrees the close-up is turned in the whole view (clockwise): the camera rolls with the move. */
+  roll?: number;
 }
 
 /** Going into a cut seen from another side than the 3D picture: the turn comes first. */
@@ -48,9 +50,9 @@ export function zoomPlan(from: ViewDef, to: ViewDef, fromStage?: string, toStage
   if (same && from.zoom?.from === to.id) return { inward: false, part: from.zoom.part, at: from.zoom.at, fromLabel: from.label, toLabel: to.label };
   const names = (v: ViewDef, stage?: string) => (same ? [v.id] : [`${stage}/${v.id}`]);
   const into = to.bridges?.find((b) => names(from, fromStage).includes(b.from));
-  if (into) return { inward: true, part: into.part, at: into.at, fromLabel: from.label, toLabel: to.label, section: into.section, look: into.look };
+  if (into) return { inward: true, part: into.part, at: into.at, fromLabel: from.label, toLabel: to.label, section: into.section, look: into.look, roll: into.roll };
   const out = from.bridges?.find((b) => names(to, toStage).includes(b.from));
-  if (out) return { inward: false, part: out.part, at: out.at, fromLabel: from.label, toLabel: to.label, section: out.section, look: out.look };
+  if (out) return { inward: false, part: out.part, at: out.at, fromLabel: from.label, toLabel: to.label, section: out.section, look: out.look, roll: out.roll };
   return null;
 }
 
@@ -103,19 +105,24 @@ function region(b: Box | null): Box {
   return { x: cx - w / 2, y: cy - h / 2, w, h };
 }
 
-/** The camera at e (0 = the whole view, 1 = the region filling the stage). */
-function camera(r: Box, e: number) {
+/** The camera at e (0 = the whole view, 1 = the region filling the stage), rolled by `roll` degrees at e = 1. */
+function camera(r: Box, e: number, roll = 0) {
   const s = W / r.w;
   const k = Math.exp(lerp(0, Math.log(s), e));
   // The centre moves so the region's own centre reaches the middle exactly as the scale arrives.
   const f = s === 1 ? e : (k - 1) / (s - 1);
   const cx = lerp(W / 2, r.x + r.w / 2, f);
   const cy = lerp(H / 2, r.y + r.h / 2, f);
-  return `translate(${W / 2} ${H / 2}) scale(${k.toFixed(4)}) translate(${(-cx).toFixed(2)} ${(-cy).toFixed(2)})`;
+  const rot = roll ? ` rotate(${(-roll * e).toFixed(2)})` : '';
+  return `translate(${W / 2} ${H / 2})${rot} scale(${k.toFixed(4)}) translate(${(-cx).toFixed(2)} ${(-cy).toFixed(2)})`;
 }
 
-/** The close-up laid on the region (the inverse of the camera's end). */
-const onRegion = (r: Box) => `translate(${r.x.toFixed(2)} ${r.y.toFixed(2)}) scale(${(r.w / W).toFixed(4)})`;
+/** The close-up laid on the region (the inverse of the camera's end), turned by `roll` round the region's centre. */
+const onRegion = (r: Box, roll = 0) => {
+  const c = `${(r.x + r.w / 2).toFixed(2)} ${(r.y + r.h / 2).toFixed(2)}`;
+  const turn = roll ? `rotate(${roll} ${c}) ` : '';
+  return `${turn}translate(${r.x.toFixed(2)} ${r.y.toFixed(2)}) scale(${(r.w / W).toFixed(4)})`;
+};
 
 export function ViewZoom({ plan, old, children, onDone, progress }: { plan: ZoomPlan; old: ReactNode; children: ReactNode; onDone: () => void; progress?: number }) {
   const root = useRef<SVGGElement>(null);
@@ -160,11 +167,11 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
     const IN0 = 350;
     const IN1 = 1550;
     const e = glide((ms - IN0) / (IN1 - IN0));
-    const cam = camera(r, plan.inward ? e : 1 - e);
+    const cam = camera(r, plan.inward ? e : 1 - e, plan.roll);
     const whole = plan.inward ? 'old' : 'new';
     const close = plan.inward ? 'new' : 'old';
     set(`${whole}-cam`, { transform: cam });
-    set(`${close}-cam`, { transform: `${cam} ${onRegion(r)}` });
+    set(`${close}-cam`, { transform: `${cam} ${onRegion(r, plan.roll)}` });
     // Everything but the region dims while the camera aims, then lifts as the close-up takes over.
     const dim = plan.inward ? ramp(ms, 0, 350) * (1 - ramp(ms, 1200, 1600)) : ramp(ms, 300, 700) * (1 - ramp(ms, 1450, 1900));
     set('dim', { opacity: dim * 0.8 });
@@ -177,6 +184,9 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
       set('new', { opacity: ramp(ms, 0, 450) });
     }
     set('caption', { opacity: ramp(msAll, 0, 350) * (1 - ramp(msAll, total - 500, total - 100)) });
+    // Overlays of the whole view (a summary table) step aside while the camera travels.
+    const fade = plan.inward ? 1 - ramp(ms, 0, 300) : ramp(ms, 1550, 1900);
+    wholeRef.current?.querySelectorAll<SVGElement>('.zoom-fade').forEach((el) => el.setAttribute('opacity', fade.toFixed(3)));
   };
 
   const finish = useEffectEvent(onDone);

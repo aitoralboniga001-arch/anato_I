@@ -243,7 +243,8 @@ export function SinusBack({ t }: SceneProps) {
   const mixing = vis(t, S9[1], S9[2]);
   const opts: HeartOpts = { cavity: 0.15, septum: 0.35, gut: 0.2, aortas: 0.35, flow: mixing > 0.01 ? { phase: t * 26, show: mixing, mixed: true } : null };
   const camera = cameraAt(t, [
-    [0, orbit(20, 10, 10.6, [0, 0.1, -0.2], [40, 0])],
+    // Stage 8 ends seen from behind (and says so): start there, then settle straight behind.
+    [0, orbit(165, 20, 10.4, [0, 0, -0.3], [40, 0])],
     [0.03, orbit(180, 14, 10.2, [0, -0.1, -0.3], [40, 0])],
     [S9[1], orbit(180, 8, 8.2, [0, 0.05, -0.35], [40, 0])],
     [S9[2], orbit(186, 24, 11.2, [0, -0.45, -0.4], [40, 0])],
@@ -280,7 +281,7 @@ export function SinusBack({ t }: SceneProps) {
       opts={opts}
       camera={camera}
       names={names}
-      caption={t < 0.03 ? '4. astea · bihotza aurretik (3D)' : '4. astea → · bihotza ATZETIK (3D): enbrioiaren eskuina zure eskuinean'}
+      caption="4. astea → · bihotza ATZETIK (3D): enbrioiaren eskuina zure eskuinean"
       over={(_, asked) => (
         <>
           <Note x={500} y={62} size={13} tone="warn" show={vis(t, 0.03, S9[1]) * asked}>

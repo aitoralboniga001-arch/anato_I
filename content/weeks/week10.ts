@@ -199,6 +199,9 @@ export const week10: WeekDef = {
           orientation: { top: 'Dortsala', bottom: 'Bentrala', left: 'Kraneala', right: 'Kaudala' },
           scene: HeadFoldSagittal,
           travel: false,
+          // On to stage 3: the camera pulls back to the whole embryo seen from its left, turning a quarter
+          // round so the cranial end (on the left here) comes to the top there.
+          bridges: [{ from: 'zirkulazio-goiztiarra/alboa', part: 'bihotz-hodia', roll: 90 }],
         },
         {
           id: '3d',

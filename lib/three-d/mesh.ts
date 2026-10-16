@@ -168,6 +168,43 @@ export function blob(o: BlobOptions): Mesh {
   return finish(pos, uv, idx);
 }
 
+/**
+ * A surface patch over a (u, v) grid in 0..1 × 0..1 — walls of an opened chamber, flaps. `facing`: the
+ * point the front side looks towards (a chamber seen from inside faces its own centre), so pointing and
+ * the flat fallback find it from there.
+ */
+export function grid(nu: number, nv: number, at: (u: number, v: number) => V3, facing?: V3): Mesh {
+  const pos: number[] = [];
+  const uv: number[] = [];
+  for (let i = 0; i <= nu; i++)
+    for (let j = 0; j <= nv; j++) {
+      const p = at(i / nu, j / nv);
+      pos.push(p[0], p[1], p[2]);
+      uv.push(i / nu, j / nv);
+    }
+  // Which way round the triangles go: their normal towards `facing` at the middle of the patch.
+  let flip = false;
+  if (facing) {
+    const P = (i: number, j: number) => at(i / nu, j / nv);
+    const mi = Math.floor(nu / 2);
+    const mj = Math.floor(nv / 2);
+    const a = P(mi, mj);
+    const n = cross(sub(P(mi + 1, mj), a), sub(P(mi, mj + 1), a));
+    flip = dot(n, sub(facing, a)) < 0;
+  }
+  const idx: number[] = [];
+  for (let i = 0; i < nu; i++)
+    for (let j = 0; j < nv; j++) {
+      const a = i * (nv + 1) + j;
+      const b = a + 1;
+      const c = a + nv + 1;
+      const d = c + 1;
+      if (flip) idx.push(a, b, c, b, d, c);
+      else idx.push(a, c, b, b, c, d);
+    }
+  return finish(pos, uv, idx);
+}
+
 /** Smooth vertex normals from the triangles (seams of open parts keep their own). */
 function finish(pos: number[], uv: number[], idx: number[]): Mesh {
   const p = new Float32Array(pos);

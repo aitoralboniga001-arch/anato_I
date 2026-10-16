@@ -162,29 +162,33 @@ const AXES = {
   edges: { up: 'Kraneala', down: 'Kaudala', front: 'Bentrala', back: 'Dortsala', side: 'Ezkerra', otherSide: 'Eskuina' },
 };
 
-/** One 3D heart view: the model for a pose, a camera, and the names. */
-export function HeartView({
-  pose,
-  opts,
-  camera,
-  names,
-  over,
-  caption,
-}: {
-  pose: HeartPose;
-  opts: HeartOpts;
+type ViewProps = {
   camera: Camera3;
   names: CalloutSpec[];
   /** `asked`: 1 while the picture is seen as the step shows it, fading to 0 as the viewer turns it away. */
   over?: (at: At3, asked: number) => React.ReactNode;
   caption?: string;
-}) {
-  const model = heartModel(pose, opts);
+};
+
+/** One 3D heart view: the model for a pose, a camera, and the names. */
+export function HeartView({ pose, opts, ...rest }: ViewProps & { pose: HeartPose; opts: HeartOpts }) {
+  return <ModelView model={heartModel(pose, opts)} continuity="bihotza-10" {...rest} />;
+}
+
+/** Any model of topic 10 in 3D (the heart, the right atrium): the same axes, camera keys and names. */
+export function ModelView({
+  model,
+  continuity,
+  camera,
+  names,
+  over,
+  caption,
+}: ViewProps & { model: { items: Scene3['items']; pts: Record<string, V3> }; continuity: string }) {
   const scene: Scene3 = { camera, items: model.items };
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="none" />
-      <Stage3D scene={scene} axes={AXES} continuity="bihotza-10">
+      <Stage3D scene={scene} axes={AXES} continuity={continuity}>
         {(at, view) => {
           // Words that say where the picture is seen from ("from the front…") hold only for the step's own
           // camera: turned more than ~20 degrees away, they fade (the camera keys say the side instead).
@@ -324,8 +328,9 @@ export function LoopScene({ t }: SceneProps) {
     [S5[2], orbit(64, 14, 9.8, [0.1, 0.2, -0.2], [40, 0])],
     [S5[3], orbit(-30, 18, 9.8, [0, 0.1, 0], [40, 0])],
     [S5[4], orbit(4, 8, 9.4, [0, 0.2, 0], [40, 0])],
-    [S5[6], orbit(-62, 12, 9.6, [0, 0.2, 0], [40, 0])],
-    [S5[6] + 0.06, orbit(150, 16, 9.6, [0, 0.2, -0.2], [40, 0])],
+    // From the right and a little above: front (bulb) and back (atrium, sinus) side by side, without
+    // swinging round behind the heart and back again within one step.
+    [S5[6], orbit(-72, 22, 9.8, [0, 0.2, -0.1], [40, 0])],
     [S5[7], orbit(0, 6, 9.2, [0, 0.25, 0], [40, 0])],
   ]);
   // During the replay each segment glows as its direction is said.

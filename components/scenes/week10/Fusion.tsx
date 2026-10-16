@@ -211,6 +211,8 @@ export function FusionArt({ t }: { t: number }) {
   // Label anchors that follow the shapes.
   const parA = mid(parOut, roof, lerp(0.5, 0.3, k));
   const visA = lerp3(k, [720, 392], mid(floor, visIn, 0.2), mid(floor, visIn, 0.16));
+  // Cardiac jelly: halfway between the endocardium's outer edge and the ring's inner edge, so the dot stays in the band as it widens.
+  const jellyA: Pt = [HC[0] + Math.cos(0.38) * (TUBE_R[2][0] + rx - RING) / 2, HC[1] + Math.sin(0.38) * (TUBE_R[2][1] + ry - RING) / 2];
   const caveA: Pt = k < 0.5 ? mid(roof, floor, 0.55) : lerp3(k, mid(roof, floor, 0.55), mid(roof, floor, 0.55), [580, 520]);
 
   return (
@@ -384,7 +386,7 @@ export function FusionArt({ t }: { t: number }) {
       <Label id="epikardioa" x={790} y={420} ax={HC[0] + rx - EPI / 2} ay={HC[1] - 8} show={split} />
       <Label id="orri-epimiokardikoa" x={790} y={456} span={[[HC[0] + rx - RING + 3, HC[1] + 8], [HC[0] + rx - 3, HC[1] + 8]]} show={wrap * (1 - split) * closed} />
       <Label id="miokardioa" x={790} y={456} ax={HC[0] + rx - EPI - (RING - EPI) / 2} ay={HC[1] + 8} show={split} />
-      <Label id="bihotz-gelatina" x={790} y={496} ax={HC[0] + 61} ay={HC[1] + 24} show={jelly * closed} />
+      <Label id="bihotz-gelatina" x={790} y={496} ax={jellyA[0]} ay={jellyA[1]} show={jelly * closed} />
       <Label id="endokardioa" x={790} y={540} ax={HC[0] + 14} ay={HC[1] + 28} show={closed} />
     </g>
   );

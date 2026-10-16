@@ -250,7 +250,8 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
     // The short way round from where the picture is now.
     const wrap = (a: number) => base.yaw + Math.atan2(Math.sin(a - base.yaw), Math.cos(a - base.yaw));
     glideTurn(look ? { yaw: wrap(look.yaw), pitch: look.pitch } : direction === 'reset' || direction === 'look' ? { yaw: 0, pitch: 0 } : {
-      yaw: base.yaw + (direction === 'left' ? 0.35 : direction === 'right' ? -0.35 : 0),
+      // The keys move the camera, as ↑ does: → walks it round to the right of the specimen.
+      yaw: base.yaw + (direction === 'left' ? -0.35 : direction === 'right' ? 0.35 : 0),
       pitch: Math.max(-1.1, Math.min(1.1, base.pitch + (direction === 'up' ? 0.22 : direction === 'down' ? -0.22 : 0))),
     });
   }

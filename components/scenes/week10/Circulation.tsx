@@ -488,32 +488,35 @@ export function CirculationSide({ t }: SceneProps) {
       <Callouts items={callouts} left={[110, 590]} right={[240, 590]} />
 
       {table > 0.01 && (
-        <g opacity={table}>
-          <Note x={378} y={64} size={14} tone="accent">
-            4. asteko zirkulazioa: nondik nora, eta zer odol
-          </Note>
-          <rect x={108} y={44} width={540} height={404} rx={14} fill="#120d17" opacity={0.92} stroke="rgba(255,255,255,0.1)" />
-          <SummaryTable
-            t={t}
-            x={116}
-            y={86}
-            widths={[150, 228, 146]}
-            rowH={30}
-            head={['Odol hodia', 'Nondik → nora', 'Odola']}
-            rows={[
-              { at: S3[11] + 0.005, cells: [{ id: 'zilbor-zainak', text: 'Zilbor zainak', color: T.o2 }, { text: 'Karena → zain sinua' }, { text: 'Oxigenatua', color: T.o2 }] },
-              { at: S3[11] + 0.01, cells: [{ id: 'bitelo-zainak', text: 'Bitelo zainak', color: T.deo2 }, { text: 'Bitelo zakua → zain sinua' }, { text: 'O₂ gutxi', color: T.deo2 }] },
-              { at: S3[11] + 0.015, cells: [{ id: 'bena-kardinal-komuna', text: 'Kardinal komunak', color: T.deo2 }, { text: 'Burua + gorputza → zain sinua' }, { text: 'O₂ gutxi', color: T.deo2 }] },
-              { at: S3[11] + 0.02, cells: [{ id: 'atal-aurikularra', text: 'Atrio primitiboa', color: T.atrium }, { text: 'Hiru odolak nahasten dira' }, { text: 'Nahasia', color: '#6b6475' }] },
-              { at: S3[11] + 0.025, cells: [{ id: 'aorta-arkuak', text: 'Arku aortikoak', color: T.o2 }, { text: 'Aorta zakua → burua, aortak' }, { text: 'Oxigenatua', color: T.o2 }] },
-              { at: S3[11] + 0.03, cells: [{ id: 'aorta-dortsalak', text: 'Aorta dortsalak', color: T.aorta }, { text: 'Gorputz osora' }, { text: 'O₂ gero eta gutxiago', color: T.o2 }] },
-              { at: S3[11] + 0.035, cells: [{ id: 'bitelo-arteriak', text: 'Bitelo arteriak', color: T.deo2 }, { text: 'Aorta → bitelo zakua' }, { text: 'O₂ gabea', color: T.deo2 }] },
-              { at: S3[11] + 0.04, cells: [{ id: 'zilbor-arteriak', text: 'Zilbor arteriak', color: T.deo2 }, { text: 'Aorta → karena' }, { text: 'O₂ gabea', color: T.deo2 }] },
-            ]}
-          />
-          <Note x={378} y={430} size={12.5} tone="dim">
-            Hodi guztiak bikoitiak dira (ezkerra eta eskuina)
-          </Note>
+        // A camera move out of this view first fades the table: it never flies past its cells.
+        <g className="zoom-fade">
+          <g opacity={table}>
+            <Note x={378} y={64} size={14} tone="accent">
+              4. asteko zirkulazioa: nondik nora, eta zer odol
+            </Note>
+            <rect x={108} y={44} width={540} height={404} rx={14} fill="#120d17" opacity={0.92} stroke="rgba(255,255,255,0.1)" />
+            <SummaryTable
+              t={t}
+              x={116}
+              y={86}
+              widths={[150, 228, 146]}
+              rowH={30}
+              head={['Odol hodia', 'Nondik → nora', 'Odola']}
+              rows={[
+                { at: S3[11] + 0.005, cells: [{ id: 'zilbor-zainak', text: 'Zilbor zainak', color: T.o2 }, { text: 'Karena → zain sinua' }, { text: 'Oxigenatua', color: T.o2 }] },
+                { at: S3[11] + 0.01, cells: [{ id: 'bitelo-zainak', text: 'Bitelo zainak', color: T.deo2 }, { text: 'Bitelo zakua → zain sinua' }, { text: 'O₂ gutxi', color: T.deo2 }] },
+                { at: S3[11] + 0.015, cells: [{ id: 'bena-kardinal-komuna', text: 'Kardinal komunak', color: T.deo2 }, { text: 'Burua + gorputza → zain sinua' }, { text: 'O₂ gutxi', color: T.deo2 }] },
+                { at: S3[11] + 0.02, cells: [{ id: 'atal-aurikularra', text: 'Atrio primitiboa', color: T.atrium }, { text: 'Hiru odolak nahasten dira' }, { text: 'Nahasia', color: '#6b6475' }] },
+                { at: S3[11] + 0.025, cells: [{ id: 'aorta-arkuak', text: 'Arku aortikoak', color: T.o2 }, { text: 'Aorta zakua → burua, aortak' }, { text: 'Oxigenatua', color: T.o2 }] },
+                { at: S3[11] + 0.03, cells: [{ id: 'aorta-dortsalak', text: 'Aorta dortsalak', color: T.aorta }, { text: 'Gorputz osora' }, { text: 'O₂ gero eta gutxiago', color: T.o2 }] },
+                { at: S3[11] + 0.035, cells: [{ id: 'bitelo-arteriak', text: 'Bitelo arteriak', color: T.deo2 }, { text: 'Aorta → bitelo zakua' }, { text: 'O₂ gabea', color: T.deo2 }] },
+                { at: S3[11] + 0.04, cells: [{ id: 'zilbor-arteriak', text: 'Zilbor arteriak', color: T.deo2 }, { text: 'Aorta → karena' }, { text: 'O₂ gabea', color: T.deo2 }] },
+              ]}
+            />
+            <Note x={378} y={430} size={12.5} tone="dim">
+              Hodi guztiak bikoitiak dira (ezkerra eta eskuina)
+            </Note>
+          </g>
         </g>
       )}
 

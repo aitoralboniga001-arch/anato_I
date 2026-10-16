@@ -135,7 +135,13 @@ const captionDwellMs = (stage: StageDef, k: number) => Math.max(5500, (stage.bea
 const quickDwellMs = (stage: StageDef, k: number) => Math.max(1600, ideaOf(stage.beats[k]).length * 38);
 
 /** How long a paused step takes to play itself out when stepped to (ms): its own pace, kept brief. */
-const glideMs = (stage: StageDef, from: number, to: number) => Math.min(2200, Math.max(550, (Math.abs(to - from) * stage.duration * 1000) / NORMAL_RATE));
+/**
+ * A step played with the Next key runs at the speed it was drawn for (normal playback; guided a little
+ * slower), not squeezed into a fixed time: a step's growth, fold or turn must be followable the first
+ * time. Only very long steps are shortened, and only so far.
+ */
+const glideMs = (stage: StageDef, from: number, to: number, guided = false) =>
+  Math.min(guided ? 11000 : 8500, Math.max(900, ((Math.abs(to - from) * stage.duration * 1000) / NORMAL_RATE) * (guided ? 1.25 : 1)));
 
 /** The preview card stays up until it has had time to be read (ms at 1×). */
 const previewMs = (stage: StageDef) => 2500 + ((stage.intro ?? '').length + stage.keyPoints.slice(0, 3).join('').length) * 40;
@@ -168,6 +174,14 @@ interface Tour {
 }
 
 const easeInOut = (x: number) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
+/** Steady speed with a soft start and stop: a played step moves like playback, not fast in the middle. */
+const RAMP = 0.12;
+const steady = (x: number) => {
+  const v = 1 / (1 - RAMP);
+  if (x < RAMP) return (v * x * x) / (2 * RAMP);
+  if (x > 1 - RAMP) return 1 - (v * (1 - x) * (1 - x)) / (2 * RAMP);
+  return v * (x - RAMP / 2);
+};
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 
@@ -640,6 +654,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         return;
       }
 
+      // While the camera moves to another view nothing runs: neither the stage's overview nor its steps.
+      if (bridgeHold.current) return;
+
       // 1) Quick overview of the whole stage; the card then stays until it has been read
       //    (in guided mode, until the viewer presses "Hasi").
       if (introRef.current !== null && quick) {
@@ -665,8 +682,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         return;
       }
 
-      // 2) Detailed playback, step by step (on hold while the camera moves to another view).
-      if (bridgeHold.current) return;
+      // 2) Detailed playback, step by step.
       const p = live.current;
       const st = week.stages[p.i];
       let t = p.t + (dt * speed * NORMAL_RATE * (guided ? GUIDED_RATE : quick ? QUICK_RATE : 1)) / st.duration;
@@ -732,7 +748,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       }
       if (!g.start) g.start = now;
       const x = Math.min(1, (now - g.start) / g.ms);
-      const next = { i: g.i, t: g.from + (g.to - g.from) * easeInOut(x) };
+      const next = { i: g.i, t: g.from + (g.to - g.from) * steady(x) };
       live.current = next;
       setPos(next);
       if (x < 1) {
@@ -768,7 +784,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       return;
     }
     place({ i: pos.i, t: from });
-    glideRef.current = { w: week.week, i: pos.i, from, to, ms: glideMs(stage, from, to), start: 0, then };
+    glideRef.current = { w: week.week, i: pos.i, from, to, ms: glideMs(stage, from, to, guided), start: 0, then };
     setGlideAim({ w: week.week, i: pos.i, k });
     setGlideRun((n) => n + 1);
   };
@@ -1821,7 +1837,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                       <small>klik bikoitza: hasierara</small>
                     </p>
                   )}
-                  {intro !== null && (
+                  {intro !== null && !travel && (
                     <div className="pv-card" key={`intro-${stage.id}`}>
                       <div className="pv-top">
                         <span className="pv-kicker">Aurrebista · {stage.day}</span>

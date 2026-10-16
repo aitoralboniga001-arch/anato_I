@@ -1,4 +1,4 @@
-import { add, mix3, mul, norm, sub, type V3 } from '@/lib/three-d/math';
+import { add, cross, mix3, mul, norm, sub, type V3 } from '@/lib/three-d/math';
 import { blob, curve3, merge, tube, type Mesh } from '@/lib/three-d/mesh';
 import type { Item3 } from '@/lib/three-d/scene';
 import { T } from './common';
@@ -57,6 +57,12 @@ export interface HeartPose {
   coronary?: number;
   /** The sinoatrial orifice drawn as an opening in the back wall of the atrium (0..1, its visibility). */
   hole?: number;
+  /**
+   * What each bulbus sub-part becomes (notes 3.1), drawn inside it: muscle trabeculae in the proximal
+   * part (the primitive right ventricle), the conus divided by a ridge into two lumens (the infundibula),
+   * the truncus divided the same way into the roots of the pulmonary trunk (right) and the aorta (left).
+   */
+  derive?: { trab?: number; conus?: number; truncus?: number };
 }
 
 export const POSE0: HeartPose = {
@@ -326,7 +332,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
     { g: 'bulbus', key: 'sac', id: split > 0.5 ? 'aorta-zakua' : 'aorta-zakua', groups: ['atal-bulbarra', 'arteria-muturra'], u0: 0, u1: U.sac + 0.01, color: mixHex(T.bulbus, T.truncus, Math.max(split, 0.6)), deep: T.truncusDeep },
     { g: 'bulbus', key: 'truncus', id: bulbusId('enbor-arteriosoa'), groups: ['atal-bulbarra', 'arteria-muturra'], u0: U.sac - 0.01, u1: U.truncus + 0.01, color: mixHex(T.bulbus, T.truncus, split), deep: mixHex(T.bulbusDeep, T.truncusDeep, split) },
     { g: 'bulbus', key: 'conus', id: bulbusId('arteria-konoa'), groups: ['atal-bulbarra'], u0: U.truncus - 0.01, u1: U.conus + 0.01, color: mixHex(T.bulbus, T.conus, split), deep: mixHex(T.bulbusDeep, T.conusDeep, split) },
-    { g: 'bulbus', key: 'proximal', id: bulbusId('bulboaren-hurbileko-atala'), groups: ['atal-bulbarra', 'atal-bulbobentrikularra'], u0: U.conus - 0.01, u1: U.proximal + 0.012, color: mixHex(T.bulbus, T.proximal, split), deep: T.bulbusDeep },
+    { g: 'bulbus', key: 'proximal', id: bulbusId('bulboaren-hurbileko-atala'), groups: ['atal-bulbarra', 'atal-bulbobentrikularra', ...((pose.derive?.trab ?? 0) > 0.3 ? ['hasierako-eskuineko-bentrikulua'] : [])], u0: U.conus - 0.01, u1: U.proximal + 0.012, color: mixHex(T.bulbus, T.proximal, split), deep: T.bulbusDeep },
     { g: 'ventricle', key: 'ventricle', id: 'atal-bentrikularra', groups: ['atal-bulbobentrikularra'], u0: U.proximal - 0.012, u1: U.ventricle + 0.012, color: T.ventricle, deep: T.ventricleDeep },
     { g: 'atrium', key: 'atrium', id: 'atal-aurikularra', groups: ['zain-muturra'], u0: U.ventricle - 0.012, u1: 1, color: T.atrium, deep: T.atriumDeep },
   ];
@@ -368,6 +374,58 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
       items.push({ key: 'av-canal', id: 'erreten-aurikulubentrikularra', groups: [...WHOLE], mesh: tube(P, { radius: (k) => radiusAt(lerp(us[0], us[us.length - 1], k), pose) * lerp(0.62, 1, myo) * 1.06, ref: [0, 0, 1], sides: 22 }), color: mixHex(T.ventricle, T.atrium, 0.5), deep: T.atriumDeep, tissue: 'muscle', opacity: wallOp });
   }
   pts['atal-bulbobentrikularra'] = at(U.proximal);
+
+  // What the bulbus sub-parts become, inside them (seen through the glass wall).
+  const dv = pose.derive;
+  if (dv && fuse >= 1) {
+    /** A sub-part's centreline with, at each point, the embryo's right across the tube (the line runs down from the sac). */
+    const along = (u0: number, u1: number) => {
+      const { pts: P, u: us } = slice(line, u0, u1);
+      const side = P.map((q, k) => {
+        const tg = norm(sub(P[Math.min(P.length - 1, k + 1)], P[Math.max(0, k - 1)]));
+        return norm(cross(tg, [0, 0, 1]));
+      });
+      return { P, us, side };
+    };
+    // Two lumens pulled apart by a ridge growing in the middle (k = how far the division has gone).
+    const divide = (u0: number, u1: number, k: number, key: string, right: { id: string; color: string; deep: string }, left: { id: string; color: string; deep: string }, ridgeId: string, ridgeColor: string) => {
+      const { P, us, side } = along(u0, u1);
+      if (P.length < 2) return;
+      const rAt = (j: number) => radiusAt(us[j], pose);
+      for (const [sx, lum] of [[1, right], [-1, left]] as const) {
+        const Q = P.map((q, j): V3 => add(q, mul(side[j], sx * rAt(j) * 0.46 * k)));
+        items.push({ key: `${key}-${sx > 0 ? 'r' : 'l'}`, id: lum.id, groups: ['atal-bulbarra'], mesh: tube(Q, { radius: (x) => rAt(Math.round(x * (P.length - 1))) * lerp(0.6, 0.36, k), ref: [0, 0, 1], sides: 16 }), color: lum.color, deep: lum.deep, tissue: 'vessel', opacity: 0.25 + 0.75 * k });
+        pts[lum.id] = Q[Math.floor(Q.length / 2)];
+      }
+      // The ridge between them, down the middle of the tube.
+      items.push({ key: `${key}-ridge`, id: ridgeId, groups: ['atal-bulbarra'], mesh: tube(P, { radius: (x) => rAt(Math.round(x * (P.length - 1))) * 0.11 * k, ref: [0, 0, 1], sides: 8 }), color: ridgeColor, deep: ridgeColor, tissue: 'muscle', opacity: k });
+    };
+    const tc = clamp01(dv.conus ?? 0);
+    if (tc > 0.01) divide(U.truncus, U.conus, tc, 'conus', { id: 'infundibuluak', color: T.deo2, deep: T.deo2Deep }, { id: 'infundibuluak', color: T.o2, deep: T.o2Deep }, 'arteria-konoa', T.conusDeep);
+    const tt = clamp01(dv.truncus ?? 0);
+    if (tt > 0.01) divide(U.sac + 0.01, U.truncus, tt, 'truncus', { id: 'birika-enborraren-sustraiak', color: T.deo2, deep: T.deo2Deep }, { id: 'aortaren-sustraiak', color: T.aorta, deep: T.aortaDeep }, 'enbor-arteriosoa', T.truncusDeep);
+    if (tc > 0.5) pts['infundibuluak'] = at((U.truncus + U.conus) / 2);
+    // Muscle ridges on the inner wall of the proximal part: its wall becomes trabeculated.
+    const tr = clamp01(dv.trab ?? 0);
+    if (tr > 0.01) {
+      const { P, us, side } = along(U.conus + 0.01, U.proximal - 0.01);
+      const ridges: Mesh[] = [];
+      for (let i = 0; i < 7; i++) {
+        const a = (i / 7) * Math.PI * 2;
+        const R = P.map((q, j): V3 => {
+          const sd = side[j];
+          const tg = norm(sub(P[Math.min(P.length - 1, j + 1)], P[Math.max(0, j - 1)]));
+          const up = norm(cross(sd, tg));
+          const wob = 0.1 * Math.sin(j * 1.7 + i * 2.3);
+          const rr = radiusAt(us[j], pose) * 0.74;
+          return add(q, add(mul(sd, rr * Math.cos(a + wob)), mul(up, rr * Math.sin(a + wob))));
+        });
+        ridges.push(tube(R, { radius: () => 0.035 * tr, ref: [0, 0, 1], sides: 6, capStart: true, capEnd: true }));
+      }
+      items.push({ key: 'trabeculae', id: 'muskulu-trenkadak', groups: ['hasierako-eskuineko-bentrikulua', 'bulboaren-hurbileko-atala'], mesh: merge(ridges), color: mixHex(T.proximal, '#0f3d22', 0.35), deep: '#0f3d22', tissue: 'muscle', opacity: tr });
+      pts['muskulu-trenkadak'] = add(P[Math.floor(P.length / 2)], mul(side[Math.floor(P.length / 2)], radiusAt(us[Math.floor(P.length / 2)], pose) * 0.6));
+    }
+  }
 
   // Atrial branches (paired → fused) and the common atrium.
   const f = clamp01(pose.atriaFuse);
@@ -488,8 +546,21 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
       // Only the left common cardinal closes: the left anterior cardinal drains through its anastomosis to the right.
       v('ant', 'aurreko-zain-kardinalak', V.anterior, T.deo2, T.deo2Deep, 0.075, 0);
       v('post', 'atzeko-zain-kardinalak', V.posterior, T.deo2, T.deo2Deep, 0.075, 0.5 * cardGone);
-      v('umb', 'zilbor-zainak', V.umbilical, T.o2, T.o2Deep, 0.09, umbGone);
-      v('vit', 'bitelo-zainak', V.vitelline, T.deo2, T.deo2Deep, 0.085, vitGone);
+      if (i === 0) {
+        v('umb', 'zilbor-zainak', V.umbilical, T.o2, T.o2Deep, 0.09, umbGone);
+        v('vit', 'bitelo-zainak', V.vitelline, T.deo2, T.deo2Deep, 0.085, vitGone);
+      } else {
+        // Left side: only the stretch between the horn and the anastomosis closes. The left vitelline's
+        // stretch goes (the vein the notes say disappears); the left umbilical's end empties as its blood
+        // takes the anastomosis to the right, so the shrinking left horn never receives it.
+        const J = 10;
+        const leftUmbGone = 0.92 * gone(pose.obliterate[0]);
+        v('umb', 'zilbor-zainak', V.umbilical.slice(0, J + 1), T.o2, T.o2Deep, 0.09, leftUmbGone);
+        v('umbD', 'zilbor-zainak', V.umbilical.slice(J), T.o2, T.o2Deep, 0.09, 0);
+        v('vit', 'bitelo-zainak', V.vitelline.slice(0, J + 1), T.deo2, T.deo2Deep, 0.085, vitGone);
+        v('vitD', 'bitelo-zainak', V.vitelline.slice(J), T.deo2, T.deo2Deep, 0.085, 0);
+        pts['ezkerreko-zain-bitelinoa'] = V.vitelline[5];
+      }
       pts[`bena-kardinal-komuna${i}`] = V.cardinal[V.cardinal.length - 1];
       pts[`aurreko-zain-kardinalak${i}`] = V.anterior[10];
       pts[`atzeko-zain-kardinalak${i}`] = V.posterior[10];
@@ -502,10 +573,13 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
       const L = veins(cd.horn[1], 1);
       const R = veins(cd.horn[0], -1);
       const cross = (a: V3, b: V3): V3[] => path([a, add(mix3(a, b, 0.5), [0, -0.12, 0.08]), b], 12);
-      const links = [cross(L.vitelline[10], R.vitelline[10]), cross(L.anterior[12], R.anterior[9])];
+      // Vitelline to vitelline, anterior cardinal to anterior cardinal, and the left umbilical to the right
+      // vitelline (through the liver): every left vein that stays reaches the right horn.
+      const links = [cross(L.vitelline[10], R.vitelline[10]), cross(L.anterior[12], R.anterior[9]), cross(L.umbilical[10], R.vitelline[13])];
       links.forEach((c, k) => {
         const part = c.slice(0, Math.max(2, Math.round(c.length * an)));
-        items.push({ key: `anast${k}`, id: 'anastomosiak', mesh: vessel(part, 0.06, 10), color: T.deo2, deep: T.deo2Deep, tissue: 'vessel', opacity: vShow });
+        // The umbilical one carries the placenta's oxygenated blood (red), the others venous blood.
+        items.push({ key: `anast${k}`, id: 'anastomosiak', mesh: vessel(part, k === 2 ? 0.07 : 0.06, 10), color: k === 2 ? T.o2 : T.deo2, deep: k === 2 ? T.o2Deep : T.deo2Deep, tissue: 'vessel', opacity: vShow });
       });
       pts['anastomosiak'] = mix3(L.vitelline[10], R.vitelline[10], 0.3);
     }
@@ -546,15 +620,18 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
   const cav = o.cavity ?? 0;
   if (cav > 0.01) {
     const L = clamp01(pose.loop);
-    const c: V3 = [lerp(0, -0.04, L), lerp(0.48, 0.42, L), lerp(0.28, 0.08, L)];
-    items.push({ key: 'cavity', id: 'perikardio-barrunbea', mesh: blob({ center: c, radii: [lerp(0.95, 1.25, L), lerp(1.55, 1.5, L), lerp(0.85, 1.22, L)], rings: 20, sides: 28 }), color: '#ffb3c4', deep: '#a3485e', tissue: 'membrane', opacity: 0.13 * cav, outline: false });
+    // Straight tube: the cavity ends at the ventricle–atrium boundary (u = 0.82): bulbus and ventricle inside,
+    // the atrium and the sinus outside, in the septum transversum (notes 2, p9). The loop brings them in.
+    const c: V3 = [lerp(0, -0.04, L), lerp(0.79, 0.42, L), lerp(0.28, 0.08, L)];
+    items.push({ key: 'cavity', id: 'perikardio-barrunbea', mesh: blob({ center: c, radii: [lerp(0.95, 1.25, L), lerp(1.24, 1.5, L), lerp(0.85, 1.22, L)], rings: 20, sides: 28 }), color: '#ffb3c4', deep: '#a3485e', tissue: 'membrane', opacity: 0.13 * cav, outline: false });
     pts['perikardio-barrunbea'] = add(c, [0.75, 0.6, 0.3]);
   }
   const st = o.septum ?? 0;
   if (st > 0.01) {
     const L = clamp01(pose.loop);
-    const c: V3 = [0, lerp(-1.42, -1.3, L), lerp(-0.05, -0.3, L)];
-    items.push({ key: 'septum', id: 'septum-transversum', mesh: blob({ center: c, radii: [1.35, 0.36, 1.0], rings: 14, sides: 24 }), color: T.septum, deep: T.septumDeep, tissue: 'mesenchyme', opacity: 0.32 * st, outline: false });
+    // Straight tube: it holds the atrial end of the tube, the paired atria and the sinus horns.
+    const c: V3 = [0, lerp(-1.08, -1.3, L), lerp(-0.05, -0.3, L)];
+    items.push({ key: 'septum', id: 'septum-transversum', mesh: blob({ center: c, radii: [1.35, lerp(0.68, 0.36, L), 1.0], rings: 14, sides: 24 }), color: T.septum, deep: T.septumDeep, tissue: 'mesenchyme', opacity: 0.32 * st, outline: false });
     pts['septum-transversum'] = add(c, [-0.9, -0.05, 0.4]);
   }
 
