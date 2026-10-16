@@ -6,7 +6,7 @@ import { parseAnswer } from '@/lib/kimu/groq';
 import { offlineReply } from '@/lib/kimu/offline';
 import { allPassages, intentOf, searchNotes } from '@/lib/kimu/notes';
 import { buildMessages } from '@/lib/kimu/prompt';
-import { CONFIDENT, search, toTarget } from '@/lib/kimu/search';
+import { CONFIDENT, fromHere, search, toTarget } from '@/lib/kimu/search';
 import { detectLang, fold } from '@/lib/kimu/text';
 import { pickPractice, practiceScope, wantsPractice } from '@/lib/kimu/practice';
 import type { KimuAsk, KimuModelReply } from '@/lib/kimu/types';
@@ -260,6 +260,89 @@ describe('Kimu context: the topic, step, view and structure on screen', () => {
     expect(sentBody(f).places[0]).toContain('Jatorria');
     expect(result.lineage).toMatchObject({ kind: 'from' });
     expect(result.lineage!.names.at(-1)).toBe('Notokorda');
+  });
+});
+
+describe('Kimu position: "take me to X" starts from where the student is', () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const folds = { week: 4, stage: 'tolespenak', beat: 0 };
+
+  it('places a destination from the student: now, this stage, next stage, further on, earlier, another topic', () => {
+    const w4 = getWeek(4)!.stages;
+    const here = { week: 4, stage: 'neurulazioa', beat: 2 };
+    const neur = w4.find((s) => s.id === 'neurulazioa')!;
+    expect(fromHere(here, 4, 'neurulazioa', neur.beats[2].at)).toBe('now');
+    expect(fromHere(here, 4, 'neurulazioa', neur.beats[5].at)).toBe('ahead');
+    expect(fromHere(here, 4, 'neurulazioa', neur.beats[0].at)).toBe('back');
+    expect(fromHere(here, 4, w4[2].id, 0)).toBe('next');
+    expect(fromHere(here, 4, w4[3].id, 0)).toBe('later');
+    expect(fromHere(here, 4, 'tolespenak', 0)).toBe('earlier');
+    expect(fromHere(here, 3, 'notokorda', 0)).toBe('other');
+  });
+
+  it('reads the Basque "to" ending (-ra, -era, -etara) as the name itself', () => {
+    expect(first('eraman nazazu somitetara').doc.structure).toBe('somitak');
+    expect(first('eraman nazazu hodi neuralera').doc.structure).toBe('hodi-neurala');
+  });
+
+  it('takes the student to the next stage that shows it and says so (offline)', async () => {
+    vi.stubGlobal('fetch', nokey());
+    const r = await askKimu('Eraman nazazu hodi neuralera', [], folds);
+    expect(r.source).toBe('offline');
+    expect(r.targets[0]).toMatchObject({ week: 4, stage: 'neurulazioa', structure: 'hodi-neurala', from: 'next' });
+    expect(r.reply).toMatch(/Hurrengo etapan ikusten da: Neurulazioa/);
+  });
+
+  it('offers the nearest place first and the usual place too when it is another stage', async () => {
+    vi.stubGlobal('fetch', nokey());
+    const r = await askKimu('Llévame a los somitas', [], folds);
+    const stages = getWeek(4)!.stages.map((s) => s.id);
+    expect(r.targets[0]).toMatchObject({ week: 4, structure: 'somitak', from: 'next', stage: stages[1] });
+    expect(r.targets[1]).toMatchObject({ week: 4, structure: 'somitak', stage: 'somitak', from: 'later' });
+    expect(r.reply).toMatch(/Se ve en la siguiente etapa: /);
+    // Without knowing where the student is, the usual place, and nothing said about position.
+    const anywhere = await askKimu('Llévame a los somitas', [], null);
+    expect(anywhere.targets[0]).toMatchObject({ stage: 'somitak' });
+    expect(anywhere.targets[0].from).toBeUndefined();
+    expect(anywhere.reply).not.toMatch(/Se ve en/);
+  });
+
+  it('prefers a later step of the stage on screen over a later stage', async () => {
+    vi.stubGlobal('fetch', nokey());
+    const here = { week: 4, stage: 'neurulazioa', beat: 0 };
+    const r = await askKimu('where is the neural tube', [], here);
+    expect(r.targets[0]).toMatchObject({ stage: 'neurulazioa', structure: 'hodi-neurala', from: 'ahead' });
+    expect(r.reply).toMatch(/It is shown later in this same stage: step \d+\./);
+  });
+
+  it('falls back to the usual place, said to be earlier, when nothing later in the topic shows it', async () => {
+    vi.stubGlobal('fetch', nokey());
+    const w4 = getWeek(4)!.stages;
+    const last = w4.at(-1)!;
+    const r = await askKimu('Non dago hodi neurala?', [], { week: 4, stage: last.id, beat: last.beats.length - 1 });
+    expect(r.targets[0]).toMatchObject({ stage: 'neurulazioa', from: 'earlier' });
+    expect(r.reply).toMatch(/Gai honetan lehenago ikusten da/);
+  });
+
+  it('leaves "when does it form" on the reviewed formation, only marking where it is', async () => {
+    vi.stubGlobal('fetch', nokey());
+    const r = await askKimu('Noiz sortzen da notokorda?', [], { week: 3, stage: 'gastrulazioa', beat: 0 });
+    expect(r.targets[0]).toMatchObject({ formation: 'notokorda', from: 'later' });
+    expect(r.reply).not.toMatch(/Gai honetan aurrerago ikusten da/);
+  });
+
+  it('tells the model where each place is, and adds the sentence only when its reply lacks it (model)', async () => {
+    const f = vi.fn(async () => Response.json({ ok: true, reply: '**Hodi neurala** tolesdura neuralak fusionatzean sortzen da.', cite: ['n1'], go: ['c1'], followups: [] }));
+    vi.stubGlobal('fetch', f);
+    const r = await askKimu('Eraman nazazu hodi neuralera', [], folds);
+    expect(r.source).toBe('ai');
+    expect(sentBody(f as unknown as ReturnType<typeof nokey>).places[0]).toMatch(/FROM HERE: the next stage/);
+    expect(r.targets[0]).toMatchObject({ stage: 'neurulazioa', from: 'next' });
+    expect(r.reply).toMatch(/sortzen da\. Hurrengo etapan ikusten da: Neurulazioa/);
+
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ ok: true, reply: 'Hurrengo etapan ikusten da **hodi neurala**.', cite: ['n1'], go: ['c1'], followups: [] })));
+    const said = await askKimu('Eraman nazazu hodi neuralera', [], folds);
+    expect(said.reply.match(/Hurrengo etapan/g)).toHaveLength(1);
   });
 });
 

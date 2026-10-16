@@ -2,9 +2,9 @@ import { expandNotes } from '@/content/notes-text';
 import { structures, weeks } from '@/content/registry';
 import type { Answers } from '@/components/shell/answers';
 import { evidenceOf, intentOf, numbersIn, passagesOfSentences, searchNotes, strongHit, warmNotes, type NotesContext, type NotesHit } from './notes';
-import { boldName, followupsFor, lineageOf, notesTarget, offlineReply, sourceOf, targetsOf, type Evidence } from './offline';
+import { boldName, followupsFor, fromSentence, lineageOf, notesTarget, offlineReply, SAYS_WHERE, sourceOf, targetsOf, type Evidence } from './offline';
 import { pickPractice, wantsPractice } from './practice';
-import { CONFIDENT, describeHere, factsOf, search, toTarget } from './search';
+import { CONFIDENT, describeHere, factsFrom, GO, isFormationQuestion, nearestFrom, search, toTarget, wantsPlace, withFrom, type Hit } from './search';
 import { detectLang, keyWords, match, queryTokens, type Lang } from './text';
 import type { KimuAsk, KimuHere, KimuModelReply, KimuReply, KimuTurn } from './types';
 
@@ -140,26 +140,33 @@ export async function askKimu(question: string, history: KimuTurn[], here: KimuH
   if (wantsPractice(question)) return practiceReply(question, here, opts.answers ?? {}, lang);
 
   const intent = intentOf(question);
-  const aboutStep = !!here && DEICTIC.test(question) && (!here.structure || STEP.test(question)) && !(search(question, 1)[0]?.score >= CONFIDENT * 1.5);
+  // "Eraman nazazu X-ra", "llévame a X": where to see it from here, not how it forms.
+  const going = !!here && wantsPlace(question) && !isFormationQuestion(question.replace(GO, ' '));
+  const aboutStep = !going && !!here && DEICTIC.test(question) && (!here.structure || STEP.test(question)) && !(search(question, 1)[0]?.score >= CONFIDENT * 1.5);
   const step = aboutStep ? stepReply(here!, lang) : null;
 
   const rq = retrievalQuestion(question, history, here);
-  const places = step ? [] : search(rq, 3);
-  const top = places[0];
+  let places = step ? [] : search(rq, 3);
   // The structure the question names: the best place that is one (not always the first place found).
   const named = places.find((h) => h.doc.kind === 'structure' && h.score >= CONFIDENT && !!h.doc.structure && namedIn(rq, h.doc.structure));
+  // "Take me to X": the nearest place that shows X at or after the student's position comes first, and
+  // X's usual place second when it is in another stage (the same stage: the usual place says it best).
+  const near = going && named ? nearestFrom(here!, named) : null;
+  const sameStage = (a: Hit, b: Hit) => a.doc.week === b.doc.week && a.doc.stage === b.doc.stage;
+  if (going && named) places = [near && !sameStage(near, named) ? near : named, ...(near && !sameStage(near, named) ? [named] : []), ...places.filter((h) => h !== named)].slice(0, 3);
+  const top = places[0];
   const s = named ? structures.get(named.doc.structure!) : undefined;
   const ctx = notesContext(here);
   if (named) ctx.focus = { week: named.doc.week, sentences: reviewedSentences(named.doc.structure!), home: stageSentences(named.doc.week, named.doc.stage) };
   const notes = step ? step.notes : searchNotes(rq, ctx, 3);
-  const ev: Evidence = { question, lang, intent, structure: s, notes, places };
-  const offline = step ? step.reply : offlineReply(ev);
+  const ev: Evidence = { question, lang, intent, structure: s, notes, places, going: going && !!named };
+  const offline = located(step ? step.reply : offlineReply(ev), here, ev.going ? lang : null);
 
   // Nothing the notes really answer: the model would have nothing to stand on, so it is not asked.
   if (!step && !strongHit(notes[0]) && !(places[0]?.score >= CONFIDENT)) return offline;
 
   const hereInfo = here ? describeHere(here) : null;
-  const ask: KimuAsk = { question, history, notes: notes.map((h) => evidenceOf(h)), places: places.slice(0, 2).map(factsOf), here: hereInfo, lang };
+  const ask: KimuAsk = { question, history, notes: notes.map((h) => evidenceOf(h)), places: places.slice(0, 2).map((h) => factsFrom(h, here)), here: hereInfo, lang };
   let model: KimuModelReply = { ok: false, reason: 'error' };
   try {
     const res = await fetch('/api/kimu', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ask), signal: AbortSignal.timeout(opts.timeoutMs ?? 6000) });
@@ -190,7 +197,7 @@ export async function askKimu(question: string, history: KimuTurn[], here: KimuH
     const n = cited[0] ? notesTarget(cited[0]) : undefined;
     if (n && targets.length < 2 && !targets.some((t) => t.week === n.week && t.stage === n.stage)) targets.push(n);
   }
-  return {
+  return located({
     reply: model.reply,
     targets,
     sources,
@@ -198,5 +205,17 @@ export async function askKimu(question: string, history: KimuTurn[], here: KimuH
     followups: model.followups.length ? model.followups : offline.followups,
     mood: 'happy',
     source: 'ai',
-  };
+  }, here, ev.going ? lang : null, true);
+}
+
+/**
+ * Marks every destination with where it is from the student; for "take me to X" (`tell` = the
+ * reply's language) also says where the first one is, unless the model's reply already does (the
+ * offline reply quotes the notes, whose "lehenago" or "hurrengo" are about something else).
+ */
+function located(r: KimuReply, here: KimuHere | null, tell: Lang | null, model = false): KimuReply {
+  if (!here || !r.targets.length) return r;
+  const targets = r.targets.map((t) => withFrom(t, here));
+  const said = tell && !(model && SAYS_WHERE.test(r.reply)) ? fromSentence(tell, targets[0]) : '';
+  return { ...r, targets, reply: said ? `${r.reply} ${said}` : r.reply };
 }

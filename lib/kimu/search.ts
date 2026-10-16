@@ -9,7 +9,7 @@ import { lifeOf, dayLabel, firstSeenOf, spanLabel } from '@/content/chronology';
 import { firstSentence } from '@/content/generate';
 import { structures, weeks } from '@/content/registry';
 import { formationOf } from '@/content/formation';
-import type { KimuTarget } from './types';
+import type { KimuFrom, KimuHere, KimuTarget } from './types';
 import { match, queryTokens, tokens } from './text';
 
 interface Doc {
@@ -250,6 +250,86 @@ export const toTarget = (h: Hit, id: string): KimuTarget => ({
 
 export const factsOf = (h: Hit) => h.doc.facts;
 export const blurbOf = (h: Hit) => h.doc.blurb;
+
+/** "Take me to X", "llévame a X", "where is X": the student wants to see it, not to read about it. */
+export const GO = /(eraman|eramadazu|eramaidazu|erakutsi|erakuts|\bnon (?:dago|daude|ikus|aurki)|ikusi nahi|joan nahi|ll[eé]v(?:a|ame|arme)|mu[eé]str|ens[eé][nñ]|d[oó]nde (?:est|se ve|lo veo|la veo|los veo|aparec|sale|hay)|quiero ver|\bir a\b|take me|show me|bring me|go to|where (?:is|are|can i see|do i see))/i;
+export const wantsPlace = (question: string) => GO.test(question);
+
+/** The step of a stage at stage time `at`. */
+const beatAt = (beats: { at: number }[], at: number) => {
+  let k = 0;
+  beats.forEach((b, i) => { if (b.at <= at + 1e-6) k = i; });
+  return k;
+};
+
+/** Where a place is from the student's position. */
+export function fromHere(here: KimuHere, week: number, stageId: string, at: number): KimuFrom {
+  if (week !== here.week) return 'other';
+  const stages = weeks.find((w) => w.week === week)?.stages ?? [];
+  const si = stages.findIndex((s) => s.id === stageId);
+  const hi = stages.findIndex((s) => s.id === here.stage);
+  if (si < 0 || hi < 0) return 'other';
+  if (si > hi) return si === hi + 1 ? 'next' : 'later';
+  if (si < hi) return 'earlier';
+  const k = beatAt(stages[si].beats, at);
+  return k === here.beat ? 'now' : k > here.beat ? 'ahead' : 'back';
+}
+
+/** Marks a destination with where it is from the student (unchanged when Kimu does not know). */
+export const withFrom = (t: KimuTarget, here: KimuHere | null): KimuTarget => (here ? { ...t, from: fromHere(here, t.week, t.stage, t.at) } : t);
+
+const FROM_FACT: Record<KimuFrom, string> = {
+  now: 'on screen now',
+  ahead: 'later in the stage on screen',
+  back: 'earlier in the stage on screen',
+  next: 'the next stage after the one on screen',
+  later: 'further on in the topic on screen',
+  earlier: 'earlier in the topic on screen',
+  other: 'in another topic',
+};
+
+/**
+ * The nearest place, at or after where the student is and in the same topic, where a structure is shown:
+ * a later step of this stage that lights or names it, else the first later stage that does (or that
+ * draws it). Built on the structure's own hit, so it carries the same facts and confidence.
+ */
+export function nearestFrom(here: KimuHere, hit: Hit): Hit | null {
+  const id = hit.doc.structure;
+  const week = weeks.find((w) => w.week === here.week);
+  const hi = week?.stages.findIndex((s) => s.id === here.stage) ?? -1;
+  if (!id || !week || hi < 0) return null;
+  const shows = (b: { focus?: string[]; tour?: string[] }) => !!b.focus?.includes(id) || !!b.tour?.includes(id);
+  for (let si = hi; si < week.stages.length; si++) {
+    const stage = week.stages[si];
+    let k = stage.beats.findIndex((b, i) => (si > hi || i >= here.beat) && shows(b));
+    if (k < 0 && si > hi && stage.structures.includes(id)) k = 0;
+    if (k < 0) continue;
+    const beat = stage.beats[k];
+    const where = `${week.week}. gaia · ${stage.day}`;
+    const from = fromHere(here, week.week, stage.id, beat.at);
+    return {
+      score: hit.score,
+      doc: {
+        ...hit.doc,
+        kind: 'structure',
+        week: week.week,
+        stage: stage.id,
+        at: beat.at,
+        structure: id,
+        view: beat.view,
+        formation: undefined,
+        action: 'explanation',
+        where,
+        facts: `${hit.doc.facts.replace(/ SIMULATOR:.*$/, '')} SIMULATOR: shown in ${stage.title} (${where}), ${k + 1}. urratsa; FROM HERE: ${FROM_FACT[from]}. Explanation only.`,
+      },
+    };
+  }
+  return null;
+}
+
+/** The structure's place with its position from the student, for the model. */
+export const factsFrom = (h: Hit, here: KimuHere | null) =>
+  here && !/FROM HERE:/.test(h.doc.facts) ? `${h.doc.facts} FROM HERE: ${FROM_FACT[fromHere(here, h.doc.week, h.doc.stage, h.doc.at)]}.` : h.doc.facts;
 
 /** The step the student is looking at, described for the model. */
 export function describeHere(here: { week: number; stage: string; beat: number; structure?: string | null; view?: string }) {

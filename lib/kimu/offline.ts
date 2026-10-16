@@ -5,7 +5,7 @@ import type { StructureDef } from '@/lib/sim/types';
 import { anchorOf, fairHit, headingOf, itemHead, joinBest, quoteOf, refOf, strongHit, type Intent, type NotesHit } from './notes';
 import { CONFIDENT, SAMPLE_TOPICS, toTarget, type Hit } from './search';
 import { fold, keyWord, match, queryTokens, tokens, type Lang } from './text';
-import type { KimuReply, KimuSource, KimuTarget } from './types';
+import type { KimuFrom, KimuReply, KimuSource, KimuTarget } from './types';
 
 /**
  * Kimu's answer built from the notes alone: what most students get (no key, limit reached, no
@@ -202,14 +202,65 @@ export interface Evidence {
   structure?: StructureDef;
   notes: NotesHit[];
   places: Hit[];
+  /**
+   * "Take me to X" from where the student is: places[0] is the nearest place that shows it at or after
+   * the student's position, and places[1] its usual place (when that is another stage).
+   */
+  going?: boolean;
 }
+
+/** Where a place is from the student, said in one sentence (stage titles are the notes' own Basque). */
+const FROM: Record<Lang, Record<KimuFrom, (title: string, step: number, week: number) => string>> = {
+  eu: {
+    now: () => 'Orain bertan pantailan duzu.',
+    ahead: (_, k) => `Etapa honetan bertan ikusten da, aurrerago: ${k}. urratsa.`,
+    back: (_, k) => `Etapa honetan bertan ikusten da, lehenago: ${k}. urratsa.`,
+    next: (t) => `Hurrengo etapan ikusten da: ${t}.`,
+    later: (t) => `Gai honetan aurrerago ikusten da: ${t}.`,
+    earlier: (t) => `Gai honetan lehenago ikusten da: ${t}.`,
+    other: (t, _, w) => `${w}. gaian ikusten da: ${t}.`,
+  },
+  es: {
+    now: () => 'Lo tienes ahora mismo en pantalla.',
+    ahead: (_, k) => `Se ve en esta misma etapa, un poco más adelante: paso ${k}.`,
+    back: (_, k) => `Se ve en esta misma etapa, un poco antes: paso ${k}.`,
+    next: (t) => `Se ve en la siguiente etapa: ${t}.`,
+    later: (t) => `Se ve más adelante en este tema: ${t}.`,
+    earlier: (t) => `Se ve antes en este tema: ${t}.`,
+    other: (t, _, w) => `Se ve en el tema ${w}: ${t}.`,
+  },
+  en: {
+    now: () => 'It is on screen right now.',
+    ahead: (_, k) => `It is shown later in this same stage: step ${k}.`,
+    back: (_, k) => `It is shown earlier in this same stage: step ${k}.`,
+    next: (t) => `It is shown in the next stage: ${t}.`,
+    later: (t) => `It is shown later in this topic: ${t}.`,
+    earlier: (t) => `It is shown earlier in this topic: ${t}.`,
+    other: (t, _, w) => `It is shown in topic ${w}: ${t}.`,
+  },
+};
+
+/** "Hurrengo etapan ikusten da: …": where a destination is from the student, or '' when unknown. */
+export function fromSentence(lang: Lang, t: KimuTarget | undefined): string {
+  if (!t?.from) return '';
+  const stage = weeks.find((w) => w.week === t.week)?.stages.find((s) => s.id === t.stage);
+  if (!stage) return '';
+  let k = 0;
+  stage.beats.forEach((b, i) => { if (b.at <= t.at + 1e-6) k = i; });
+  return FROM[lang][t.from](stage.title, k + 1, t.week);
+}
+
+/** A reply that already says where the place is (the model's own words), so the sentence is not repeated. */
+export const SAYS_WHERE = /(hurrengo|aurrerago|lehenago|pantailan|etapa honetan|gai honetan|\d+\. gaian|siguiente|m[aá]s adelante|antes|en pantalla|misma etapa|este tema|el tema \d|\bnext\b|\blater\b|\bearlier\b|on screen|same stage|this topic|topic \d)/i;
 
 /** The simulator destinations for an answer: the place of the thing asked about, then the notes' step. */
 export function targetsOf(ev: Evidence): KimuTarget[] {
   const place = ev.places[0] && ev.places[0].score >= CONFIDENT ? toTarget(ev.places[0], 'c1') : undefined;
   const n = strongHit(ev.notes[0]) ? notesTarget(ev.notes[0]) : undefined;
+  // "Take me to X": the nearest place first, then X's usual place when that is another stage.
+  const usual = ev.going && place && ev.places[1]?.doc.structure === place.structure ? toTarget(ev.places[1], 'c2') : undefined;
   // The thing asked about first when the question names it; otherwise the step of the passage quoted.
-  const order = ev.structure || place?.formation ? [place, n] : [n, place];
+  const order = ev.going ? [place, usual, n] : ev.structure || place?.formation ? [place, n] : [n, place];
   const out: KimuTarget[] = [];
   for (const t of order) if (t && !out.some((o) => o.week === t.week && o.stage === t.stage)) out.push(t);
   return out.slice(0, 2);

@@ -16,6 +16,7 @@ Rules:
 - "cite": the NOTES ids you used, best first. Required whenever you state a fact.
 - "go": up to 2 PLACES ids to open in the simulator, best first; [] if none fits. Promise a formation animation only for a place marked "reviewed formation animation".
 - HERE is what the student is looking at now; use it to understand "this", "hau", "esto".
+- A PLACE may say FROM HERE where it is from the student (on screen now, later in this stage, the next stage, further on…). When the student asks to be taken to or shown something, "go" the first such place and say in one short clause where it is from them (e.g. "hurrengo etapan ikusten da").
 - Questions outside embryology and anatomy: one friendly sentence, then steer back to the notes. No personal medical advice.
 - "followups": up to 3 very short next questions in the student's language that these notes can answer.
 Reply with JSON only: {"reply":"…","cite":["n1"],"go":["c1"],"followups":["…"]}`;

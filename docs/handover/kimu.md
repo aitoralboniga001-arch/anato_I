@@ -4,7 +4,7 @@
 - `lib/kimu/`: engine.ts, notes.ts (new), practice.ts (new), offline.ts, search.ts, text.ts, prompt.ts, groq.ts, guard.ts, types.ts
 - `components/kimu/`: Kimu.tsx, KimuFace.tsx, store.ts, kimu.css
 - `app/api/kimu/route.ts`
-- Tests: `tests/kimu.test.ts` (85 tests)
+- Tests: `tests/kimu.test.ts` (94 tests)
 
 ## Architecture
 - **engine.ts `askKimu`** handles one question, in this order:
@@ -15,6 +15,11 @@
   5. `/api/kimu` with a 6 s timeout, but only when the notes give a strong hit.
 
   The model reply is kept only if it cites `n#`/`c#` ids it was given and states no number the evidence lacks; otherwise the offline reply is used.
+- **Position ("eraman nazazu X-ra", "llévame a X", "where is X")**: when the browser sends `KimuHere` and the question asks to go to or see a named structure (`wantsPlace`, `GO` in search.ts; "erakutsi" alone does not make it a formation question), `nearestFrom` (search.ts) picks the nearest place at or after the student in the same topic: a later step of this stage that lights or tours it (`focus`/`tour`), else the first later stage that does, or that lists it in `structures` (stage start). It becomes `c1`; the usual place (`bestSpot` / reviewed formation) stays `c2` when it is in another stage. Nothing later in the topic: the usual place only.
+  - Every target gets `from` (`fromHere`: now, ahead, back, next, later, earlier, other) whenever `here` is known. The go card shows it ("Hurrengo etapa · Azalpena · …").
+  - The reply says where the first place is (`fromSentence`, offline.ts: "Hurrengo etapan ikusten da: …", "Se ve en la siguiente etapa: …", "It is shown in the next stage: …"), in `located` (engine.ts). The model gets "FROM HERE: …" in each PLACE's facts and a prompt rule to say it; its sentence is added only when its reply lacks one (`SAYS_WHERE`). The offline reply always gets it (its notes quotes may say "lehenago" about something else).
+  - "Noiz / nola sortzen da X?" keeps the reviewed formation first; only `from` is added.
+- text.ts `ENDINGS` now strip `-etara` and `-era` ("somitetara", "hodi neuralera").
 - **offline.ts** builds the answer from the notes verbatim (a list, or the best one or two sentences), or from an atlas card for "zer / nondik / patua" questions with a short notes quote. Weak matches get "nearest section". Nothing found gets the generic reply plus sample questions.
 - **prompt.ts / groq.ts**: notes-only system prompt with a JSON schema `{reply, cite, go, followups}`. The key is read server-side from env only.
 - **practice.ts**: pulls questions from the reviewed `POOL` only, filtered through the generate.ts LEFT_OUT ids. Due questions come first, then unseen ones. Answers are written with `recordAnswer`.
@@ -26,6 +31,7 @@
   - In the simulator, the panel is narrow and hangs under the top bar.
 - **P2**: practice in Kimu.
 - **P4**: lineage line.
+- **P5**: "take me to X" from where the student is (above).
 
 ## P1: not applied (`components/shell/Simulator.tsx`, UI owner)
 ```diff

@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { Fragment, useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
-import type { KimuPractice, KimuReply, KimuSource, KimuTarget } from '@/lib/kimu/types';
+import type { KimuFrom, KimuPractice, KimuReply, KimuSource, KimuTarget } from '@/lib/kimu/types';
 import { recordAnswer, useAnswers } from '@/components/shell/answers';
 import { IconClose, IconPlay } from '@/components/shell/icons';
 import { KimuFace } from './KimuFace';
@@ -89,6 +89,16 @@ const Fresh = () => (
   </svg>
 );
 
+/** Where the destination is from the student (another topic already shows in `where`). */
+const FROM_LABEL: Partial<Record<KimuFrom, string>> = {
+  now: 'Orain pantailan',
+  ahead: 'Etapa honetan, aurrerago',
+  back: 'Etapa honetan, lehenago',
+  next: 'Hurrengo etapa',
+  later: 'Gai honetan, aurrerago',
+  earlier: 'Gai honetan, lehenago',
+};
+
 function GoCard({ t, primary, onGo }: { t: KimuTarget; primary: boolean; onGo: (t: KimuTarget) => void }) {
   return (
     <button type="button" className={`kimu-go${primary ? ' is-primary' : ''}`} onClick={() => onGo(t)}>
@@ -98,6 +108,7 @@ function GoCard({ t, primary, onGo }: { t: KimuTarget; primary: boolean; onGo: (
       <span className="kimu-go-tx">
         <b>{t.label}</b>
         <small>
+          {t.from && FROM_LABEL[t.from] ? `${FROM_LABEL[t.from]} · ` : ''}
           {t.formation ? 'Eraketa ikusi' : t.notes ? 'Urratsa eta apunteak' : 'Azalpena'} · {t.where}
         </small>
       </span>

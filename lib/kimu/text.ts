@@ -231,7 +231,7 @@ export function match(q: string, w: string, fuzzy: boolean): number {
 }
 
 /** Folded Basque word without its case or number ending ("somitei" → "somit"), when enough is left. */
-const ENDINGS = ['etatik', 'arekin', 'aren', 'etako', 'etan', 'eko', 'ari', 'ren', 'tik', 'ean', 'ak', 'ek', 'ei', 'ri', 'ra', 'an', 'en', 'a'];
+const ENDINGS = ['etatik', 'etara', 'arekin', 'aren', 'etako', 'etan', 'eko', 'ari', 'ren', 'tik', 'ean', 'ak', 'ek', 'ei', 'ri', 'era', 'ra', 'an', 'en', 'a'];
 export function stem(w: string): string {
   for (const e of ENDINGS) if (w.length - e.length >= 4 && w.endsWith(e)) return w.slice(0, -e.length);
   return w;

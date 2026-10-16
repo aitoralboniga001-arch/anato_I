@@ -26,7 +26,15 @@ export interface KimuTarget {
   label: string;
   /** Where it is: "3. gaia · 16–18. egunak". */
   where: string;
+  /** Where it is from the student's position (only when Kimu knows where the student is). */
+  from?: KimuFrom;
 }
+
+/**
+ * A place seen from where the student is: on screen now, later or earlier in this stage, the next
+ * stage, further on or earlier in this topic, or another topic.
+ */
+export type KimuFrom = 'now' | 'ahead' | 'back' | 'next' | 'later' | 'earlier' | 'other';
 
 /** A passage of the original notes an answer rests on. */
 export interface KimuSource {
