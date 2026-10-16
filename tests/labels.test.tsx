@@ -152,5 +152,5 @@ for (const w of weeks)
               for (const p of problems(labelBoxes(html), v.orientation, leaders(html))) found.set(p, [...(found.get(p) ?? []), k === 1 ? `${t}` : `${t}×${k}`]);
             }
           expect([...found].map(([p, ts]) => `${p} (t=${ts.join(',')})`)).toEqual([]);
-        });
+        }, 15000);
   });

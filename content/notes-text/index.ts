@@ -68,6 +68,7 @@ for (const week of weeks) for (const stage of week.stages) stage.beats.forEach((
 /** Audited exceptions where a scene teaches detail absent from this ORIGINAL PDF. */
 export const NOTES_EXCEPTIONS: Record<string, { sections?: string[]; reason: string }> = {
   '1/ibilbidea': { sections: ['4.2', '4.3', '4.4', '4.5'], reason: 'Ibilbideak ernalkuntza, segmentazioa, blastozistoa eta habiratzea ere erakusten ditu.' },
+  '10/atal-bulbarra/5': { reason: 'Etaparen laburpena: aurreko urratsetako eratorriak mapa lau batean biltzen ditu; ez dago apunteetako esaldi berririk.' },
   '1/habiratzea/4': { reason: 'Ezohiko habiratzea simulazioan osagarri da; 1. gaiaren jatorrizko PDFak ez dauka 4.6 atala.' },
   '3/mesodermoa-hedatzen/6': { sections: ['2'], reason: 'Plaka prekordalaren lehen zelulak notokordaren atalaren hasieran azaltzen dira.' },
   '3/alantoidea-eta-hazkundea/1': { sections: ['2'], reason: 'Polaritatea eta lateralitatea 2. atalaren amaieran azaltzen dira.' },

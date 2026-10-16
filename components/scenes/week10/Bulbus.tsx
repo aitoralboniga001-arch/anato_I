@@ -23,7 +23,8 @@ import { POSE0, U, centreline, type HeartPose } from './model3d';
  * in a cross-section beside the tube.
  */
 
-export const S6 = [0, 0.2, 0.42, 0.62, 0.8] as const;
+// Five steps in 3D, then the flat summary map (step 6).
+export const S6 = [0, 0.18, 0.38, 0.56, 0.72, 0.9] as const;
 
 const LOOPED: HeartPose = { ...POSE0, loop: 1, segs: 1, colour: 1, atriaFuse: 0.7, veins: 0.35, arches: 3 };
 
@@ -319,8 +320,11 @@ export function BulbusMap({ t }: SceneProps) {
       <Note x={500} y={612} tone="accent" show={vis(t, S6[3] - 0.02, S6[4] - 0.02)}>
         Arteria konoa: trenkada batek bitan banatzen du → bi bentrikuluen infundibuluak (atal lisoak)
       </Note>
-      <Note x={500} y={612} tone="accent" show={vis(t, S6[4] - 0.02, 2)}>
+      <Note x={500} y={612} tone="accent" show={vis(t, S6[4] - 0.02, S6[5] - 0.005)}>
         Enbor arteriosoa: trenkadatu → birika enborraren sustraiak (eskuinetik) eta aortaren sustraiak (ezkerretik)
+      </Note>
+      <Note x={500} y={612} tone="accent" show={vis(t, S6[5] - 0.005, 2)}>
+        Hurbileko atala → eskuineko bentrikulua · arteria konoa → bi infundibuluak · enbor arteriosoa → sustraiak
       </Note>
     </g>
   );

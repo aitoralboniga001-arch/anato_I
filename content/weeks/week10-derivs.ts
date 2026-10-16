@@ -21,8 +21,8 @@ export const stageBulbus: StageDef = {
   dayRange: [28, 35],
   title: 'Atal bulbarra',
   subtitle: 'Aorta zakua eta arkuak; hiru azpiatal: hurbileko atala, arteria konoa, enbor arteriosoa',
-  intro: 'Bihotz lakioa osatuta dago. Arteria bulboa da odola ateratzen den atala: haren muturreko aorta zakutik aorta arkuen bidez aorta dortsaletara. Gero bulboa bere hiru azpiataletan banatzen da, eta bakoitzak bere kolorea gordetzen du eratorrietan.',
-  duration: 74,
+  intro: 'Bihotz lakioa osatuta dago. Arteria bulboa da odola ateratzen den atala: haren muturreko aorta zakutik aorta arkuen bidez aorta dortsaletara. Gero bulboa bere hiru azpiataletan banatzen da, eta bakoitzak bere kolorea gordetzen du eratorrietan. Bukaeran, laburpena lauan: azpiatal bakoitza eta haren eratorria, elkarren ondoan.',
+  duration: 82,
   source: src('3.1 Bihotzaren atal bulbarretik'),
   views: [
     {
@@ -41,7 +41,8 @@ export const stageBulbus: StageDef = {
       description: 'Laburpena lauan: arteria bulboa zutik (goian aorta zakua) eta azpiatal bakoitzetik zer sortzen den: muskulu trenkadak, trenkadaz banatutako bi espazioak (zeharkako mozketan) eta sustraiak.',
       scene: BulbusMap,
       travel: false,
-      bridges: [{ from: '3d', part: 'atal-bulbarra' }],
+      // In from the bulbus of the 3D; on to stage 7, where the proximal part sits in the frontal cut as the right ventricle.
+      bridges: [{ from: '3d', part: 'atal-bulbarra' }, { from: 'atal-bentrikularra/frontala', part: 'hasierako-eskuineko-bentrikulua' }],
       age: null,
     },
   ],
@@ -125,6 +126,25 @@ export const stageBulbus: StageDef = {
       tour: ['bulboaren-hurbileko-atala', 'hasierako-eskuineko-bentrikulua', 'arteria-konoa', 'infundibuluak', 'enbor-arteriosoa', 'birika-enborraren-sustraiak', 'aortaren-sustraiak'],
       tourAt: S6[4] + 0.12,
       view: '3d',
+    },
+    {
+      at: S6[5],
+      idea: 'Laburpena: arteria bulboaren azpiatal bakoitza eta zer sortzen duen, elkarren ondoan.',
+      key: 'Hurbileko atala → eskuineko bentrikulua (atal trabekulatua); arteria konoa → bi infundibuluak; enbor arteriosoa → birika enborraren eta aortaren sustraiak.',
+      text: 'Laburpena lauan. Arteria bulboa zutik dago, goian aorta zakua duela, eta azpiatal bakoitzaren ondoan haren eratorria, kolore berean. Hurbileko atalaren muskulu trenkadetatik hasierako eskuineko bentrikulua sortzen da. Arteria konoaren bi espazioak bi infundibuluak dira (zeharkako mozketan ikusten dira). Enbor arteriosotik birika enborraren eta aortaren sustraiak sortzen dira. Hurrengo etapan atal bentrikularra ikusiko dugu.',
+      focus: [],
+      ask: {
+        q: 'Zer sortzen da enbor arteriosotik?',
+        options: ['Birika enborraren eta aortaren sustraiak', 'Bi bentrikuluen infundibuluak', 'Hasierako eskuineko bentrikulua', 'Aorta arkuak'],
+        answer: 0,
+        why: [
+          'Hori da: enbor arteriosoa trenkadatzean, arteria handien hasierako zatiak eta sustraiak.',
+          'Ez: infundibuluak arteria konotik sortzen dira.',
+          'Ez: hori hurbileko atalaren eratorria da.',
+          'Ez: arkuak aorta zakutik irteten dira.',
+        ],
+      },
+      view: 'eratorriak',
     },
   ],
   structures: [

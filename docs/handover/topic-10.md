@@ -122,9 +122,19 @@ An outside review was checked line by line against the code and the notes. About
 - **Stage 9: text.** Step 1 now says the heart is seen from behind, as in the notes' figure.
 - **Stage 2: anchor.** The cardiac jelly's dot follows the middle of the jelly band as it widens; it used to land in the myocardium early on (`Fusion.tsx`).
 
-**Still open (owner's call):**
-- Views no step visits: stage 6 `eratorriak`, stage 8 `frontala`, stage 10 `barrutik` / `trenkada` / `frontala`. Should they be visited in a step, or kept as optional?
-- Stage 3 step 2 jumps to the 3D and back. Should that preview stay?
+**Views no step visits.** The owner's rule: if a view helps students, a step visits it, in the best way.
+- **Stage 6 `eratorriak` is now step 6, a summary.**
+  - The camera dives from the 3D bulbus into the flat map: each part next to what it becomes, plus a micro-question.
+  - It is the one beat without a notes sentence (`NOTES_EXCEPTIONS['10/atal-bulbarra/5']`). The pins are now 620 beats, 2 unmapped.
+  - `S6` is now six steps and the duration went from 74 s to 82 s.
+  - A bridge carries the map into stage 7's frontal cut, shrinking into the primitive right ventricle.
+- **Kept optional, with the reasons:**
+  - Stage 8 `frontala` shows the same frontal cut as stage 9 step 6.
+  - Stage 10 `barrutik` and `trenkada` are the flat versions of the 3D room. They look like the notes' drawings.
+  - Stage 10 `frontala` is the view topic 11 opens with. Visiting it at the end would have meant leaving the 3D only to come back for the table.
+  - Each is one click away, and every switch moves the camera.
+
+**Stage 3 keeps its two turns to the 3D** (steps 3 and 11). They are the only views where both sides of the embryo show at once: the two sinus horns, and the paired veins meeting in the atrium. Each step now says why the camera turns. The `view-changes` test does not apply here: those views have plane `eskema`, and topic 10 is not pinned.
 
 ## Resume list
 

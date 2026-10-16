@@ -51,8 +51,9 @@ describe('original notes and reviewed alignment', () => {
       }
       for (const id of refs) expect(sentence(id), `${key}: ${id}`).toBeDefined();
     });
-    expect(count).toBe(619);
-    expect(unmapped).toBe(1);
+    expect(count).toBe(620);
+    // The second: topic 10 stage 6's summary step (the flat map of the derivatives).
+    expect(unmapped).toBe(2);
   });
 
   it('keeps anchors in the stage sections or an explicitly reviewed exception', () => {
