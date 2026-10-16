@@ -14779,3 +14779,77 @@ kbd {
     max-width: 180px;
   }
 }
+
+/* ——— Class (components/klasea): the focus swells once when Kimu names it (SVG; 3D keeps its glow),
+   and printing the summary sheet prints only the sheet. ——— */
+.klasea-on .part-focus {
+  animation: klasea-swell 1.3s var(--ease) 1;
+}
+
+@keyframes klasea-swell {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(255, 184, 107, 0.4)) brightness(1);
+  }
+  35% {
+    filter: drop-shadow(0 0 4px rgba(255, 236, 200, 0.95)) drop-shadow(0 0 14px rgba(255, 184, 107, 0.7)) brightness(1.2);
+  }
+  100% {
+    filter: drop-shadow(0 0 5px rgba(255, 184, 107, 0.75)) brightness(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .klasea-on .part-focus {
+    animation: none;
+  }
+}
+
+@media print {
+  body.klasea-print > :not([data-klasea-sheet]) {
+    display: none !important;
+  }
+
+  body.klasea-print {
+    background: #fff;
+  }
+}
+
+/* Class layout: the outline folds and the right column is the board, so the scene keeps most of the
+   width (≥ 60% at 768–1440 px). 1024–1320 px: a narrower board rail, not a drawer. Below: the board is a
+   strip in the dock, and a structure opened shows in the usual drawer. */
+.workspace.klasea {
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 24vw, 344px);
+}
+
+.workspace.klasea .info > section {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+@media (min-width: 1024px) and (max-width: 1320px) {
+  .workspace.klasea {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+  .workspace.klasea .info {
+    position: static;
+    width: auto;
+    transform: none;
+    visibility: visible;
+    box-shadow: none;
+    border-left: 1px solid var(--line);
+    transition: none;
+  }
+  .workspace.klasea .info-scrim {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .workspace.klasea {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .workspace.klasea:not(.panel-open) .info {
+    visibility: hidden;
+  }
+}

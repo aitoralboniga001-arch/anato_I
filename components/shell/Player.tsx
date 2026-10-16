@@ -93,7 +93,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 /** The step in one line: its IDEIA NAGUSIA, or the first sentence of its explanation ("15. eguna" is not a sentence end). */
 export const ideaOf = (b: Beat | undefined) => b?.idea ?? b?.text.match(/^.+?(?<!\d)[.!?](?=\s|$)/)?.[0] ?? b?.text ?? '';
 
-const MODES: { id: PlayMode; label: string; title: string; hint: string }[] = [
+export const MODES: { id: PlayMode; label: string; title: string; hint: string }[] = [
   {
     id: 'gidatua',
     label: 'Gidatua',
@@ -114,7 +114,7 @@ const MODES: { id: PlayMode; label: string; title: string; hint: string }[] = [
   },
 ];
 
-const ModeIcon = ({ mode, size = 15 }: { mode: PlayMode; size?: number }) => (mode === 'gidatua' ? <IconGuide size={size} /> : mode === 'azkarra' ? <IconBolt size={size} /> : <IconPlay size={size - 3} />);
+export const ModeIcon = ({ mode, size = 15 }: { mode: PlayMode; size?: number }) => (mode === 'gidatua' ? <IconGuide size={size} /> : mode === 'azkarra' ? <IconBolt size={size} /> : <IconPlay size={size - 3} />);
 
 /** The date tag in front of the step's idea (exam dates, "HITO-DATAK"). */
 function DateTag({ dates }: { dates: ExamDate[] }) {

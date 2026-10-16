@@ -5,6 +5,7 @@
  * and a review can re-test the same competence with a different question.
  */
 import { generated, type Skill } from './generate';
+import { contrastChecks } from './klasea';
 import { structures, weeks } from './registry';
 import type { Competence } from '@/lib/sim/types';
 
@@ -22,8 +23,8 @@ export const COMPETENCES: { id: Competence; label: string; hint: string }[] = [
 ];
 export const competenceLabel = Object.fromEntries(COMPETENCES.map((c) => [c.id, c.label])) as Record<Competence, string>;
 
-export type Source = 'apunteak' | 'urratsa' | 'sortua';
-export const sourceLabel: Record<Source, string> = { apunteak: 'Apunteak', urratsa: 'Urratsa', sortua: 'Sortua' };
+export type Source = 'apunteak' | 'urratsa' | 'sortua' | 'klasea';
+export const sourceLabel: Record<Source, string> = { apunteak: 'Apunteak', urratsa: 'Urratsa', sortua: 'Sortua', klasea: 'Klasea' };
 
 export interface PoolQuestion {
   id: string;
@@ -144,7 +145,22 @@ const micro: PoolQuestion[] = weeks.flatMap((w) =>
 
 const gen: PoolQuestion[] = generated.map((g) => ({ ...g, source: 'sortua', comp: SKILL_COMP[g.skill] }));
 
-export const POOL: PoolQuestion[] = [...notes, ...micro, ...gen];
+/** The class's contrast checks (content/klasea): two look-alikes set against each other. */
+const klasea: PoolQuestion[] = contrastChecks().map(({ week, stage, check: k }) => ({
+  id: k.id,
+  source: 'klasea',
+  comp: inferCompetence(k.q),
+  concept: k.concept,
+  question: k.q,
+  options: k.options,
+  answer: k.answer,
+  why: k.why,
+  explanation: k.why[k.answer],
+  week,
+  stageId: stage,
+}));
+
+export const POOL: PoolQuestion[] = [...notes, ...micro, ...gen, ...klasea];
 
 /** Competence key: what "mastering" is measured on (a structure × a competence, or a competence alone). */
 export const compKey = (comp: Competence, concept?: string) => `${comp}:${concept ?? '*'}`;

@@ -15,7 +15,7 @@ import { IconBook, IconCalendar, IconChevron, IconNotes, IconClock, IconExpand, 
 import { Popover } from './Popover';
 import { Wordmark, isWip } from './LandNav';
 import { AskCard, Player, TourCard, ideaOf } from './Player';
-import { namedAt } from './named';
+import { knownBefore, namedAt } from './named';
 import { Help, useHelp } from './Help';
 import { TourHost } from './tour/TourHost';
 import { useTourBusy } from './tour/store';
@@ -48,6 +48,13 @@ import { examDatesAt } from '@/content/examDates';
 import { formationFrame, formationOf, type Formation } from '@/content/formation';
 import type { KimuTarget } from '@/lib/kimu/types';
 import { SceneView } from '@/components/kit';
+import { hasClass, lessonOf } from '@/content/klasea';
+import { stepsOf } from '@/lib/klasea/engine';
+import type { Lesson } from '@/lib/klasea/types';
+import { Board } from '@/components/klasea/Board';
+import { ClassDock } from '@/components/klasea/ClassDock';
+import { KimuWalker } from '@/components/klasea/KimuWalker';
+import { useKlasea, type ClassDriver, type ClassLink } from '@/components/klasea/useKlasea';
 
 interface Pos {
   i: number;
@@ -266,7 +273,18 @@ function readDeepLink(week: WeekDef) {
     questions: structures.has(params.get('galderak') ?? '') ? params.get('galderak') : null,
     /** Open the question bank on what is due for review, every topic (from Home). */
     review: params.get('galderak') === 'errepasoa',
+    /** The class was running at this chunk (`klasea=<chunk id>`). */
+    klasea: params.get('klasea'),
   };
+}
+
+/** A topic without a class gets an empty one: the class hook keeps its shape and never runs. */
+const noLesson = new Map<number, Lesson>();
+function lessonFor(week: WeekDef): Lesson {
+  const own = lessonOf(week.week);
+  if (own) return own;
+  if (!noLesson.has(week.week)) noLesson.set(week.week, { week: week.week, title: '', goals: [], chunks: [{ id: '-', title: '', stage: week.stages[0].id, lines: [] }] });
+  return noLesson.get(week.week)!;
 }
 
 /** Where "Bueltatu" returns to after the time machine jumped to where a structure forms. */
@@ -417,6 +435,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const [linkedWeek, setLinkedWeek] = useState<number | null>(null);
   // A "play" deep link hands its position to the loop before the loop's first frame.
   const [linkPos, setLinkPos] = useState<Pos | null>(null);
+  // Where a link opened the topic: the class offers to start at the chunk that teaches it.
+  const [classLink, setClassLink] = useState<ClassLink | null>(null);
   // After a client-side navigation the first render can come before the router has written the new
   // URL: wait for it (a few frames at most), or the link would be read from the previous page.
   const [urlWaits, setUrlWaits] = useState(0);
@@ -431,6 +451,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     const link = readDeepLink(week);
     setFormation(link.formation ?? null);
     if (link.formation) setSelected(null);
+    if (link.stageIndex !== null || link.klasea) setClassLink({ stage: week.stages[link.stageIndex ?? 0].id, t: link.t, chunk: link.klasea });
     if (link.stageIndex !== null) {
       setPos({ i: link.stageIndex, t: link.t });
       const sid = week.stages[link.stageIndex].id;
@@ -1066,11 +1087,93 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     setPlaying(!!f);
   });
   useEffect(() => registerKimuHost({ go: (t) => kimuGo(t) }), []);
-  useEffect(() => {
-    setKimuHere({ week: week.week, stage: stage.id, beat: activeBeat, structure: selected ?? formation?.structure, view: view.id });
-    return () => setKimuHere(null);
-  }, [week.week, stage.id, activeBeat, selected, formation, view.id]);
+
+  // ——— The class: guided mode, on a topic that has one (content/klasea), Kimu teaching ———
+  const lesson = lessonFor(week);
   const kimuOpen = useKimuOpen();
+  const classActive = mounted && guided && hasClass(week.week) && !formation && !find;
+  // Anything the student opens holds the class; it goes on (from the line's start) once closed.
+  const classHold = selected ? 'Pausatuta: egitura bat irekita' : kimuOpen ? 'Pausatuta: Kimurekin' : questionsOpen ? 'Pausatuta: galderak irekita' : helpOpen || glossaryOpen ? 'Pausatuta' : null;
+  /** Once the camera has arrived (a view change travels first) and the scene is still. */
+  const whenStill = (then: () => void) => {
+    let calm = 0;
+    const poll = () => {
+      calm = travelRef.current || glideRef.current ? 0 : calm + 1;
+      if (calm >= 3) then();
+      else window.setTimeout(poll, 60);
+    };
+    window.setTimeout(poll, 60);
+  };
+  /** The class moves the scene with the simulator's own glide, place and camera moves. */
+  const classDriver: ClassDriver = {
+    go: (sid, t, then, vid) => {
+      const i = week.stages.findIndex((s) => s.id === sid);
+      if (i < 0) return then();
+      const st = week.stages[i];
+      setPlaying(false);
+      endIntro();
+      clearTour();
+      // The class picks the view (the line's own, else the step's): a view chosen by hand is let go.
+      if (vid && st.views.some((v) => v.id === vid)) {
+        setViewByStage((m) => ({ ...m, [sid]: vid }));
+        setManualView((m) => ({ ...m, [sid]: true }));
+      } else if (manualView[sid]) {
+        setManualView((m) => ({ ...m, [sid]: false }));
+        setAutoViewKey('');
+      }
+      const cur = live.current;
+      if (cur.i !== i || t < cur.t - 0.002 || (reduced && t - cur.t >= 0.002)) place({ i, t });
+      else if (t - cur.t >= 0.002) {
+        stopGlide();
+        glideRef.current = { w: week.week, i, from: cur.t, to: t, ms: Math.min(4500, glideMs(st, cur.t, t, true)), start: 0 };
+        setGlideAim({ w: week.week, i, k: beatIndexAt(st, t) });
+        setGlideRun((n) => n + 1);
+      }
+      whenStill(then);
+    },
+    play: (ms, until) => {
+      const cur = live.current;
+      const st = week.stages[cur.i];
+      const to = Math.min(doneAt(st, beatIndexAt(st, cur.t)), until ?? 1);
+      if (to - cur.t < 0.002) return;
+      if (reduced) return place({ i: cur.i, t: to });
+      stopGlide();
+      glideRef.current = { w: week.week, i: cur.i, from: cur.t, to, ms, start: 0 };
+      setGlideAim({ w: week.week, i: cur.i, k: beatIndexAt(st, cur.t) });
+      setGlideRun((n) => n + 1);
+    },
+    halt: () => stopGlide(),
+  };
+  const klasea = useKlasea({ lesson, enabled: classActive, driver: classDriver, hold: !!classHold, link: classLink });
+  const classOn = classActive && klasea.status === 'running';
+  // The class owns the scene while it runs: playback, the preview, tours and the selection stop.
+  const quietForClass = useEffectEvent(() => {
+    setPlaying(false);
+    endIntro();
+    clearTour();
+    transport.cancel();
+    setSelected(null);
+  });
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- once as the class starts; it stops the simulator's own playback
+    if (classOn) quietForClass();
+  }, [classOn]);
+  // The link keeps the class's place (`klasea=<chunk>`), so a reload or a shared link returns to it.
+  const classChunk = classOn ? klasea.cmd.chunk.id : null;
+  useEffect(() => {
+    if (linkedWeek !== week.week) return;
+    const url = new URL(window.location.href);
+    if (classChunk) url.searchParams.set('klasea', classChunk);
+    else url.searchParams.delete('klasea');
+    window.history.replaceState(null, '', url);
+  }, [linkedWeek, week.week, classChunk]);
+  const classHere = classOn ? klasea.here : null;
+  const classHereKey = classHere ? `${classHere.chunk}/${classHere.line}` : '';
+  useEffect(() => {
+    setKimuHere({ week: week.week, stage: stage.id, beat: activeBeat, structure: selected ?? formation?.structure, view: view.id, lesson: classHere });
+    return () => setKimuHere(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- classHere follows its key
+  }, [week.week, stage.id, activeBeat, selected, formation, view.id, classHereKey]);
 
   const goBack = () => {
     if (!back) return;
@@ -1396,6 +1499,18 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     // The question window has its own keys (1–4, Enter): only Escape reaches the simulator.
     if (questionsOpen && e.key !== 'Escape') return;
+    // In the class: Space pauses Kimu, the arrows go to the next or the last sentence.
+    if (classOn && (e.key === ' ' || e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+      e.preventDefault();
+      const asking = klasea.state.phase === 'ask' || klasea.state.phase === 'feedback';
+      if (e.key === ' ') {
+        if (!asking) klasea.togglePause();
+      } else if (e.key === 'ArrowRight') {
+        if (klasea.state.phase === 'feedback') klasea.cont();
+        else if (!asking) klasea.next();
+      } else klasea.back();
+      return;
+    }
     if (e.key === ' ') {
       e.preventDefault();
       togglePlay();
@@ -1440,14 +1555,37 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     return () => window.removeEventListener('keydown', listener);
   }, []);
 
+  // The class lights what Kimu names (or what a check has placed); names appear as they are said, and
+  // "Zer da hau?" hides the name it asks for.
+  const classFocus = classOn ? (klasea.checkFocus.length ? klasea.checkFocus : klasea.cmd.focus) : [];
+  const spotting = classOn && klasea.cmd.check?.kind === 'zer-da-hau' && klasea.state.phase === 'ask' ? klasea.cmd.check.structure : null;
+  const classNamed = (() => {
+    if (!classOn) return null;
+    const said = new Set<string>(klasea.checkFocus);
+    stepsOf(lesson).forEach((s, i) => {
+      if (s.kind !== 'line' || i > klasea.state.step || (i === klasea.state.step && klasea.state.phase === 'move')) return;
+      for (const id of lesson.chunks[s.chunk].lines[s.line].focus ?? []) said.add(id);
+    });
+    const all = klasea.cmd.allNames;
+    if (all && !spotting) return null;
+    return (id: string) => id !== spotting && !partsOf(spotting ?? '').includes(id) && (all || said.has(id) || knownBefore(id, week.week, stage));
+  })();
+  const [classLit, setClassLit] = useState(false);
+  const classFocusKey = `${sceneKey}|${classFocus.join(' ')}`;
+  useEffect(() => {
+    const ids = classFocusKey.split('|')[1].split(' ').filter(Boolean);
+    const raf = requestAnimationFrame(() => setClassLit(ids.some((id) => drawnIn(svgRef.current, id))));
+    return () => cancelAnimationFrame(raf);
+  }, [classFocusKey, mounted]);
+
   const ctx: SceneContextValue = {
     selected: find || !selectedLit ? null : selected,
     hovered: find ? hovered : hovered,
-    focus: find || intro !== null ? [] : formation ? (formation.highlight ?? [formation.structure]) : voice && audioState.focus.length ? audioState.focus : (beat?.focus ?? []),
-    dimContext: !formation && focusLit && !view.ownFocus && !find && intro === null,
-    spotlight: !find && intro === null && tour ? tour.items[tour.idx] : null,
+    focus: classOn ? classFocus : find || intro !== null ? [] : formation ? (formation.highlight ?? [formation.structure]) : voice && audioState.focus.length ? audioState.focus : (beat?.focus ?? []),
+    dimContext: classOn ? classLit && !view.ownFocus : !formation && focusLit && !view.ownFocus && !find && intro === null,
+    spotlight: classOn ? null : !find && intro === null && tour ? tour.items[tour.idx] : null,
     showLabels: showLabels && intro === null,
-    named: labelMode === 'urratsez' && !formation && !find ? namedAt(week.week, stage, glideBeat ?? activeBeat) : null,
+    named: classOn ? (labelMode === 'urratsez' || spotting ? classNamed : null) : labelMode === 'urratsez' && !formation && !find ? namedAt(week.week, stage, glideBeat ?? activeBeat) : null,
     quiz: !!find,
     quizFlash: flash,
     nameOf,
@@ -1459,7 +1597,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
 
   // Rings for step structures drawn too small to notice: the tour's current one, else the selection, else the step's.
   const spot = !find && intro === null && tour ? tour.items[tour.idx] : null;
-  const marks = find || intro !== null ? [] : formation ? [formation.structure] : spot ? [spot] : selected && selectedLit ? [selected] : voice && audioState.focus.length ? audioState.focus : (beat?.focus ?? []);
+  const marks = classOn ? classFocus : find || intro !== null ? [] : formation ? [formation.structure] : spot ? [spot] : selected && selectedLit ? [selected] : voice && audioState.focus.length ? audioState.focus : (beat?.focus ?? []);
 
   // Legend: categories present in this stage.
   const legend = legendOf(stage.structures);
@@ -1674,9 +1812,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         </div>
       </header>
 
-      <div className={`workspace${notesOpen ? ' notes-mode' : ''}${panelOpen ? ' panel-open' : ''}${outlineShown ? '' : ' no-outline'}${infoOpen || notesOpen ? '' : ' no-info'}${selected ? ' has-sel' : ''}`}>
+      <div className={`workspace${classActive ? ' klasea' : notesOpen ? ' notes-mode' : ''}${panelOpen ? ' panel-open' : ''}${outlineShown && !classActive ? '' : ' no-outline'}${classActive || infoOpen || notesOpen ? '' : ' no-info'}${selected ? ' has-sel' : ''}`}>
         <Outline
-          collapsed={!outlineShown}
+          collapsed={!outlineShown || classActive}
           onToggle={toggleOutline}
           week={week}
           current={pos.i}
@@ -1684,7 +1822,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           onStage={openStage}
         />
 
-        <main className={`stage${formation ? ' has-formation' : ''}${find && print ? ' is-print' : ''}`}>
+        <main className={`stage${formation ? ' has-formation' : ''}${find && print ? ' is-print' : ''}${classOn ? ' klasea-on' : ''}`}>
           <div className="stage-bar">
             <div className="stage-heading">
               {/* Where this stage sits in the notes: topic › heading, numbered as the notes number it. */}
@@ -1744,7 +1882,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                 stops={cutStops}
                 onStop={gotoCut}
                 viewKey={sceneKey}
-                hold={(drawer && panelOpen) || helpOpen || tourBusy || questionsOpen || glossaryOpen || !!travel || playing || intro !== null || !!find || nowOpen || kimuOpen || !!formation}
+                hold={(drawer && panelOpen) || helpOpen || tourBusy || questionsOpen || glossaryOpen || !!travel || playing || classOn || intro !== null || !!find || nowOpen || kimuOpen || !!formation}
                 onOpen={() => setNowOpen(false)}
               />
               {stage.views.length > 1 && <ViewSwitch views={stage.views} current={view.id} onChoose={chooseView} />}
@@ -1759,7 +1897,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               resetKey={`${stage.id}/${view.id}`}
               onBackgroundClick={() => !find && setSelected(null)}
               marks={travel ? [] : marks}
-              reveal={travel || find || intro !== null || formation ? undefined : beat?.focus}
+              reveal={travel || find || intro !== null || formation ? undefined : classOn ? classFocus : beat?.focus}
               revealKey={focusKey}
               nameOf={nameOf}
               fullscreenRef={appRef}
@@ -2017,6 +2155,34 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               </div>
             </section>
           )}
+          {classActive ? (
+            <>
+              <ClassDock
+                k={klasea}
+                mode={mode}
+                onMode={setPlayMode}
+                holdReason={classHold}
+                onAskKimu={() => {
+                  klasea.pause();
+                  if (!kimuOpen) toggleKimu();
+                }}
+              />
+              {/* Kimu teaches from inside the scene: it walks to what it names and points at it. */}
+              <KimuWalker
+                svgRef={svgRef}
+                status={klasea.status}
+                phase={klasea.state.phase}
+                stepKey={`${klasea.state.step}/${klasea.state.phase}/${klasea.state.plain ? 'p' : ''}`}
+                pose={klasea.cmd.pose}
+                gaze={klasea.cmd.gaze}
+                focus={classFocus}
+                speaking={klasea.speaking}
+                word={klasea.word}
+                paused={klasea.paused}
+                reduced={reduced}
+              />
+            </>
+          ) : (
           <Player
             modelGuide={view.guide && !find ? { key: sceneKey, content: view.guide, onOpen: () => { transport.cancel(); speaking.current = false; setPlaying(false); } } : undefined}
             stage={withRecall(week.week, stage)}
@@ -2083,10 +2249,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               ) : undefined
             }
           />
+          )}
         </main>
 
         <aside className="info" aria-label="Azalpena" data-tour="eskuineko-zutabea">
-          {notesOpen && selected && <button className="notes-back" onClick={() => setSelected(null)}>← Apunteak</button>}
+          {notesOpen && selected && !classActive && <button className="notes-back" onClick={() => setSelected(null)}>← Apunteak</button>}
           {selected ? (
             <Inspector id={selected} week={week} currentStageId={stage.id} onClose={() => setSelected(null)} onSelect={pick} onGoto={(w, sid) => gotoWeekStage(w, sid, selected)} onReplay={replay}
               onPractice={(id) => {
@@ -2095,6 +2262,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               }}
               onFind={findConcept}
             />
+          ) : classActive ? (
+            <Board lesson={lesson} cmd={klasea.cmd} running={classOn} weak={klasea.state.weak} onChunk={klasea.chunk} />
           ) : notesOpen ? (
             <NotesPanel key={`${week.week}/${formation?.structure ?? 'notes'}`} week={week.week} stage={stage} activeBeat={notesBeatIndex}
               progress={notesProgress}
@@ -2132,7 +2301,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         />
       )}
       {helpOpen && <Help onClose={() => setHelpOpen(false)} />}
-      <TourHost tour="sim" />
+      <TourHost tour="sim" ready={!classActive} />
       {questionsOpen && <Questions week={week.week} concept={questionsConcept} review={questionsReview} onClose={() => { setQuestionsOpen(false); setQuestionsReview(false); }} onGoto={(w, sid, c) => gotoWeekStage(w, sid, c)} onFind={findConcept} />}
     </div>
   );

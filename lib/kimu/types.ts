@@ -75,6 +75,8 @@ export interface KimuHere {
   beat: number;
   structure?: string | null;
   view?: string;
+  /** In a class: the line Kimu is teaching and the notes sentences it rests on (they are the "step"). */
+  lesson?: { chunk: string; line: number; notes: string[] } | null;
 }
 
 /** What the browser sends the server: the question, the evidence it found, and where the student is. */

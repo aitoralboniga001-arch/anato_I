@@ -49,7 +49,7 @@ function notesContext(here: KimuHere | null): NotesContext {
   const stage = weeks.find((w) => w.week === here.week)?.stages.find((s) => s.id === here.stage);
   if (!stage) return { week: here.week };
   const beat = stage.beats[here.beat];
-  return { week: here.week, step: new Set(expandNotes(beat?.notes)), stage: new Set(stage.beats.flatMap((b) => expandNotes(b.notes))) };
+  return { week: here.week, step: new Set(expandNotes(here.lesson?.notes.length ? here.lesson.notes : beat?.notes)), stage:new Set(stage.beats.flatMap((b) => expandNotes(b.notes))) };
 }
 
 /** The notes sentences of every reviewed step that shows this structure. */
@@ -76,7 +76,8 @@ function stepReply(here: KimuHere, lang: Lang): { reply: KimuReply; notes: Notes
   const stage = weeks.find((w) => w.week === here.week)?.stages.find((s) => s.id === here.stage);
   const beat = stage?.beats[here.beat];
   if (!stage || !beat) return null;
-  const notes = passagesOfSentences(expandNotes(beat.notes));
+  // In a class, "this step" is the line being taught.
+  const notes = passagesOfSentences(expandNotes(here.lesson?.notes.length ? here.lesson.notes : beat.notes));
   const picked = here.structure ? structures.get(here.structure) : undefined;
   const said = notes.slice(0, 2).map((h) => h.best.slice(0, 2).map((x) => x.text).join(' ')).join(' ');
   const lead = { eu: '', es: 'En los apuntes (en euskera): ', en: 'From the notes (in Basque): ' }[lang];

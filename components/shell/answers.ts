@@ -42,15 +42,20 @@ const read = (): Answers => {
   return cache;
 };
 
-export function recordAnswer(id: string, ok: boolean, picked?: string) {
+/**
+ * `unsure`: right, but the learner said "Ez nago ziur". It counts as right in the history (it is not an
+ * error), yet the streak restarts and it is due at once, so the review brings it back.
+ */
+export function recordAnswer(id: string, ok: boolean, picked?: string, opts?: { unsure?: boolean }) {
   const prev = read()[id] ?? { streak: 0, right: 0, wrong: 0, due: 0 };
-  const streak = ok ? prev.streak + 1 : 0;
+  const unsure = ok && !!opts?.unsure;
+  const streak = ok && !unsure ? prev.streak + 1 : 0;
   const now = Date.now();
   const next: Record_ = {
     streak,
     right: prev.right + (ok ? 1 : 0),
     wrong: prev.wrong + (ok ? 0 : 1),
-    due: ok ? now + GAPS[Math.min(streak, GAPS.length) - 1] * DAY : now,
+    due: ok && !unsure ? now + GAPS[Math.min(streak, GAPS.length) - 1] * DAY : now,
     hist: [...(prev.hist ?? []), [now, ok ? 1 : 0] as [number, 0 | 1]].slice(-10),
     errors: !ok && picked ? [...(prev.errors ?? []), picked].slice(-5) : prev.errors,
   };
