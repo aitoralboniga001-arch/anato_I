@@ -90,6 +90,8 @@ export interface Item3 {
   clip?: Clip3;
   /** Copies of `mesh` carried along a route by the GPU (blood cells): never pointed at, not drawn flat. */
   stream?: Stream3;
+  /** 0–1: a thin wall (membrane, valve) that lets light through, glowing warm on the side away from the light. */
+  thin?: number;
 }
 
 /** Points in a stream's route. */

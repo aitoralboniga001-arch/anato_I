@@ -173,7 +173,7 @@ export function atriumModel(s: AtriumState): AtriumModel {
   // The venous valves on the rims: the right one on the lateral rim, the left one on the septal rim.
   if (s.valves > 0.01) {
     const vr = 0.06 * s.valves;
-    const VALVE = { color: '#a78bfa', deep: '#5b3fb8' };
+    const VALVE = { thin: 1, color: '#a78bfa', deep: '#5b3fb8' };
     if (s.rightTopGone < 0.99) items.push({ key: 'rv-top', id: 'eskuineko-zain-balbula', ...ridge(rim(8, 84, 0.955), vr), ...VALVE, tissue: 'epithelium', opacity: s.valves * (1 - s.rightTopGone) });
     if (s.lowSplit < 0.99) items.push({ key: 'rv-low', id: 'eskuineko-zain-balbula', ...ridge(rim(-84, 8, 0.955), vr), ...VALVE, tissue: 'epithelium', opacity: s.valves * (1 - s.lowSplit) });
     pts['eskuineko-zain-balbula'] = rim(-30, -30, 0.955, 1)[0];
@@ -189,7 +189,7 @@ export function atriumModel(s: AtriumState): AtriumModel {
     if (s.spur > 0.01) {
       const top = lerp(O.th - O.eb, 10, s.spur);
       const sp = along([[O.phi + shift, O.th - O.eb + 2], [O.phi + shift, (O.th - O.eb + top) / 2], [O.phi + shift * 1.05, top]], 0.955, 16);
-      items.push({ key: 'spurium', id: 'septum-spurium', ...ridge(sp, 0.075 * s.valves, false), color: '#e9d5ff', deep: '#7c5fd6', tissue: 'epithelium', opacity: fade });
+      items.push({ key: 'spurium', id: 'septum-spurium', ...ridge(sp, 0.075 * s.valves, false), color: '#e9d5ff', deep: '#7c5fd6', tissue: 'epithelium', thin: 1, opacity: fade });
       pts['septum-spurium'] = sp[8];
     }
   }
@@ -199,7 +199,7 @@ export function atriumModel(s: AtriumState): AtriumModel {
   // The septum primum: a curtain hanging from the roof, its free edge concave (lower at both ends).
   if (s.primum > 0.01) {
     const depth = (phi: number) => lerp(14, 50, s.primum) * (0.72 + 0.28 * ((phi - 88) / 24) ** 2);
-    items.push({ key: 'primum', id: 'septum-primum', mesh: cachedMesh('atrium primum', [s.primum], () => grid(16, 10, (u, v) => { const phi = lerp(64, 112, u); return wall(phi, lerp(8, 8 + depth(phi), v), 0.982); }, C)), color: K.primum, deep: K.primumDeep, tissue: 'membrane', opacity: Math.min(1, s.primum * 2), outline: false });
+    items.push({ key: 'primum', id: 'septum-primum', mesh: cachedMesh('atrium primum', [s.primum], () => grid(16, 10, (u, v) => { const phi = lerp(64, 112, u); return wall(phi, lerp(8, 8 + depth(phi), v), 0.982); }, C)), color: K.primum, deep: K.primumDeep, tissue: 'membrane', thin: 1, opacity: Math.min(1, s.primum * 2), outline: false });
     pts['septum-primum'] = wall(80, 8 + depth(80) * 0.55, 0.975);
   }
   // The septum secundum: a thick crescent from the roof down the septum's back edge, nearer the viewer
@@ -252,8 +252,8 @@ export function atriumModel(s: AtriumState): AtriumModel {
       along([[o.phi + o.ea * 1.2, o.th - 2], [o.phi + o.ea * 0.5, o.th - o.eb - 4 * grow], [o.phi - o.ea * 0.5, o.th - o.eb - 4 * grow], [o.phi - o.ea * 1.2, o.th - 2]], 0.96, 16);
     const ivcV = crescent(IVC, s.lowSplit);
     const csV = crescent(CS, s.lowSplit);
-    items.push({ key: 'ivc-valve', id: 'beheko-kabaren-balbula', ...ridge(ivcV, 0.055), color: '#a78bfa', deep: '#5b3fb8', tissue: 'epithelium', opacity: s.lowSplit });
-    items.push({ key: 'cs-valve', id: 'sinu-koronarioaren-balbula', ...ridge(csV, 0.04), color: '#a78bfa', deep: '#5b3fb8', tissue: 'epithelium', opacity: s.lowSplit });
+    items.push({ key: 'ivc-valve', id: 'beheko-kabaren-balbula', ...ridge(ivcV, 0.055), color: '#a78bfa', deep: '#5b3fb8', tissue: 'epithelium', thin: 1, opacity: s.lowSplit });
+    items.push({ key: 'cs-valve', id: 'sinu-koronarioaren-balbula', ...ridge(csV, 0.04), color: '#a78bfa', deep: '#5b3fb8', tissue: 'epithelium', thin: 1, opacity: s.lowSplit });
     pts['beheko-kabaren-balbula'] = ivcV[8];
     pts['sinu-koronarioaren-balbula'] = csV[8];
   }

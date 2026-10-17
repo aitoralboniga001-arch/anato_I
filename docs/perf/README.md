@@ -12,6 +12,8 @@ Measured with `scripts/perf-topic10.mjs`: headless Chrome on a production build 
 | `topic10-batch1/` | After Batch 1 of `docs/review/topic-10-3d-execplan.md`. |
 | `topic10-batch1-flow/` | Batch 1 code, measured again with the blood-cell points added to the harness: the fair "before" for Batch 2. |
 | `topic10-batch2/` | After Batch 2 (blood cells drawn by the GPU). |
+| `topic10-batch3-before/`, `-before-dpr2/` | Batch 2 code with the GPU bench, at DPR 1 and 2: the "before" for Batch 3. |
+| `topic10-batch3/`, `-dpr2/` | After Batch 3 (shader detail fade, thin walls, shared light). |
 
 Screenshots (`shots/`) are written next to each `results.json` but are not kept in git. Compare two runs' pictures with `node scripts/perf-topic10.mjs compare <dirA> <dirB>`.
 
@@ -55,4 +57,18 @@ Averages over the six blood-flow views (stages 3, 4, 6, 7, 8 and 9; playing, 144
 - **Other views:** the views without cells are unchanged (within run-to-run noise).
 - **Pictures:** cells sit where they did before. They are now opaque, and they grow in one by one instead of fading as a whole. The shots differ by at most 0.4% of pixels.
 - **Frame-time baseline:** this run's p50 sits at 17.8 ms for every view, before and after, rather than 16.7 ms. This is a machine-state difference between days, so compare within a run.
+
+## Batch 3 (2026-10-17): the shader, measured on the GPU
+
+`gpuMs` in the results is the GPU time for one held picture: the median of 5 timings, each of 30 pictures drawn back to back and ended by waiting for the GPU. `DPR=2` emulates a retina or tablet screen.
+
+| | DPR 1 | DPR 2 |
+|---|---|---|
+| Before (Batch 2 code) | 0.65 ms (0.48–0.85) | 0.96 ms (0.64–1.39) |
+| After | 0.68 ms | 0.94 ms |
+
+- **The GPU has plenty of room:** under 1.5 ms of a 16.7 ms frame, even at DPR 2. Quadrupling the pixels adds only about 0.3 ms, so the texture maths is not where the time goes.
+- **The changes are cost-neutral within noise.** About half the views are faster and half slower, with swings of up to ±15% between runs.
+- **Pictures:** they differ by at most 1% of pixels (cell timing and labels).
+- **Not done:** a texture bake and a DPR cap below 2 would save almost nothing, so neither was done.
 

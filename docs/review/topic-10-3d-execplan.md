@@ -1,6 +1,6 @@
 # Topic 10: better 3D for less compute — exec plan
 
-Date: 2026-10-16. Status: Batches 0 and 1 done (2026-10-16), Batch 2 done (2026-10-17); results in `docs/perf/README.md`. Batches 3–4 not started.
+Date: 2026-10-16. Status: Batches 0 and 1 done (2026-10-16), Batches 2 and 3 done (2026-10-17); results in `docs/perf/README.md`. Batch 4 not started.
 
 **What Batch 1 changed.**
 - `lib/three-d/mesh-cache.ts`: meshes fingerprinted on every input, so the same inputs give the same object.
@@ -87,6 +87,14 @@ Each batch has a finish line. Measure, then report what landed, and only then pi
 5. **Bake (R4), only if batch 0 and 1 show the GPU fragment cost matters on the tablet profile.** Bake one 512² tileable RGBA texture once per GL layer (fibres, mottling, cells, grain) and sample it triplanar on `vObj`, replacing fbm.
 6. **DPR trial:** cap 1.5 vs 2 on DPR-2 screens, with A/B screenshots at 1440. Labels are SVG and stay sharp either way. Ship 1.5 only if the outlines and edges hold up.
 - **Finish line:** equal or lower GPU time (timer query) on every baseline scene. No new pass. The A/B screenshots show the same or better legibility. The teaching landmarks (septa, ridges, openings) stay as geometry.
+- **Done (2026-10-17), measured first.** The harness gained a GPU bench: it draws the held picture 30 times and then waits for the GPU. A picture costs only 0.5–0.85 ms at DPR 1 and 0.7–1.4 ms at DPR 2, against a 16.7 ms frame. The GPU is not the bottleneck, which settled four of the six items:
+  - **Footprint fade (1), done.** Each fbm octave, the muscle and tendon fibres, the cells and lacunae, and the skin vessels fade to their mean once finer than a pixel, and are skipped when gone. fbm also drops its 4th octave, which moved the colour by less than one 8-bit step; its mean is added instead.
+  - **Thin-wall backlight (2), done.** It uses `Item3.thin` / `uThin`, set on septum primum and the venous, IVC and coronary-sinus valves and septum spurium in the stage 10 room. Their side away from the light glows softly; muscular walls stay solid.
+  - **Min-width vessels (3), not needed.** The thinnest topic 10 tube (radius 0.035) is about 10 px across.
+  - **Shared light (4), done.** One `uLight` object is shared by every body material.
+  - **Bake (5), skipped.** Its gate was not met: the fragment cost is too small to matter.
+  - **DPR cap (6), kept at 2.** Going to 1.5 would save about 0.2 ms per picture and soften the outlines.
+  - **Result.** GPU time is unchanged within noise (0.65→0.68 ms at DPR 1, 0.96→0.94 ms at DPR 2; per-view swings of ±15% between runs). Pictures differ by 1% or less. The shimmer reduction while turning was not measured.
 
 ### Batch 4: teaching clarity using the new tools (P2)
 - **Stage 3 (early circulation):** instanced cells on the real vessel routes. One on-demand pulse (R8) runs along the incoming veins, then along the outgoing arches, when the narration names them.

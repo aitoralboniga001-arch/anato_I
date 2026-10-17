@@ -31,6 +31,8 @@ const FLOW = [
   ['atal-aurikularra', 0.85],
   ['zain-sinua', 0.25],
 ];
+/** Screen density (DPR) to emulate: `DPR=2 node scripts/perf-topic10.mjs run …` for a tablet/retina screen. */
+const DPR = Number(process.env.DPR ?? 1);
 const PLAY_MS = 3000;
 const HOLD_MS = 3000;
 const DRAG_MS = 1500;
@@ -131,6 +133,20 @@ async function measure(c, ms, act, sampleFrames = true) {
   };
 }
 
+/**
+ * GPU time to draw the held picture once (ms): the median of 5 timings of 30 pictures drawn back to back,
+ * each timing ended by waiting for the GPU (gl.ts `bench`, installed only while the counters are on).
+ */
+async function gpu(c) {
+  return evaluate(c, `(() => {
+    if (!window.__glBench) return null;
+    const t = [];
+    for (let i = 0; i < 5; i++) t.push(window.__glBench(30));
+    t.sort((a, b) => a - b);
+    return t[2] == null ? null : +t[2].toFixed(3);
+  })()`);
+}
+
 async function open(c, base, stage, play, at = AT) {
   const url = `${base}/astea/10?etapa=${stage}&ikuspegia=3d&une=${at}${play ? '&jolastu=1' : ''}`;
   await c.send('Page.navigate', { url });
@@ -164,14 +180,14 @@ async function run(base, out) {
   const { proc, ws } = await launch(profile);
   const c = cdp(ws);
   await c.open;
-  const result = { base, at: AT, date: new Date().toISOString(), renderer: '', runs: [] };
+  const result = { base, at: AT, dpr: DPR, date: new Date().toISOString(), renderer: '', runs: [] };
   try {
     await c.send('Page.enable');
     await c.send('Runtime.enable');
     await c.send('Performance.enable');
     await c.send('Page.addScriptToEvaluateOnNewDocument', { source: PRELUDE });
     for (const vp of VIEWPORTS) {
-      await c.send('Emulation.setDeviceMetricsOverride', { width: vp.w, height: vp.h, deviceScaleFactor: 1, mobile: false });
+      await c.send('Emulation.setDeviceMetricsOverride', { width: vp.w, height: vp.h, deviceScaleFactor: DPR, mobile: false });
       for (const stage of vp.stages) {
         const row = { viewport: vp.name, stage };
         process.stdout.write(`${vp.name} ${stage}: `);
@@ -186,6 +202,7 @@ async function run(base, out) {
           result.renderer = await evaluate(c, `(() => { const g = document.createElement('canvas').getContext('webgl2'); const e = g && g.getExtension('WEBGL_debug_renderer_info'); return e ? g.getParameter(e.UNMASKED_RENDERER_WEBGL) : 'unknown'; })()`);
         await sleep(2500);
         row.hold = await measure(c, HOLD_MS, null, false);
+        row.gpuMs = await gpu(c);
         const shot = await c.send('Page.captureScreenshot', { format: 'png' });
         writeFileSync(join(outDir, 'shots', `${vp.name}-${stage}.png`), Buffer.from(shot.data, 'base64'));
         // Turned by the viewer.
@@ -196,11 +213,11 @@ async function run(base, out) {
           row.play = await measure(c, PLAY_MS);
         }
         result.runs.push(row);
-        console.log(`hold ${row.hold.mainThreadMsPerS} ms/s, play ${row.play?.mainThreadMsPerS} ms/s`);
+        console.log(`hold ${row.hold.mainThreadMsPerS} ms/s, gpu ${row.gpuMs} ms, play ${row.play?.mainThreadMsPerS} ms/s`);
       }
     }
     // Blood cells flowing: the held picture and playing.
-    await c.send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+    await c.send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: DPR, mobile: false });
     for (const [stage, at] of FLOW) {
       const row = { viewport: 'flow', stage, at };
       process.stdout.write(`flow ${stage} @${at}: `);
@@ -211,6 +228,7 @@ async function run(base, out) {
         continue;
       }
       await sleep(2500);
+      row.gpuMs = await gpu(c);
       const shot = await c.send('Page.captureScreenshot', { format: 'png' });
       writeFileSync(join(outDir, 'shots', `flow-${stage}.png`), Buffer.from(shot.data, 'base64'));
       if (await open(c, base, stage, true, at)) {

@@ -172,6 +172,14 @@ describe('meshes are kept while their inputs are unchanged', () => {
     }
   });
 
+  it('in the atrium room, the thin parts let light through (membrane, valves) and the muscular walls do not', () => {
+    const room = atriumModel({ ...A0, valves: 1, spur: 1, secundum: 1, primum: 1, lowSplit: 0.5, holes: 1, crista: 1, pect: 1 });
+    const thin = room.items.filter((it) => it.thin).map((it) => it.key);
+    expect(thin).toEqual(expect.arrayContaining(['primum', 'rv-top', 'rv-low', 'lv', 'ivc-valve', 'cs-valve']));
+    for (const it of room.items) if (it.thin) expect(['membrane', 'epithelium'], it.key).toContain(it.tissue);
+    for (const key of ['secundum', 'crista', 'pect']) expect(room.items.find((it) => it.key === key)?.thin, key).toBeFalsy();
+  });
+
   it('the atrium room drawn again with the same state reuses every mesh', () => {
     const s = { ...A0, valves: 0.7, secundum: 0.5, primum: 0.4, holes: 1, crista: 0.6, pect: 0.8 };
     const a = ids(atriumModel(s));

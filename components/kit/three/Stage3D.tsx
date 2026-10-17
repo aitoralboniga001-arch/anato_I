@@ -426,6 +426,7 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
         quiet: !!it.quiet,
         clip: it.clip,
         stream: it.stream,
+        thin: it.thin ?? 0,
       })),
     });
   });

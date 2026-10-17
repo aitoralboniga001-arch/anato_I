@@ -42,6 +42,8 @@ export interface GLItem {
   clip?: Clip3;
   /** The mesh drawn as copies moving along a route (see Stream3). */
   stream?: Stream3;
+  /** 0–1: a thin wall (membrane, valve) that lets light through. */
+  thin: number;
 }
 
 export interface GLFrame {
@@ -148,6 +150,7 @@ uniform float uSat;
 uniform float uBright;
 uniform float uOpacity;
 uniform float uKind;
+uniform float uThin;
 varying vec3 vN;
 varying vec3 vV;
 varying vec3 vObj;
@@ -165,14 +168,29 @@ float noise(vec3 x) {
   return mix(mix(mix(hash(i), hash(i + vec3(1, 0, 0)), f.x), mix(hash(i + vec3(0, 1, 0)), hash(i + vec3(1, 1, 0)), f.x), f.y),
              mix(mix(hash(i + vec3(0, 0, 1)), hash(i + vec3(1, 0, 1)), f.x), mix(hash(i + vec3(0, 1, 1)), hash(i + vec3(1, 1, 1)), f.x), f.y), f.z);
 }
-float fbm(vec3 p) {
-  float s = 0.0;
+// Detail finer than a pixel only shimmers as the picture turns: it fades to its mean value instead, and
+// is not computed at all once gone (far or small surfaces cost less).
+float px;  // object units per pixel here
+float keep(float cyclesPerPx) { return 1.0 - smoothstep(0.35, 1.0, cyclesPerPx); }
+// fbm of p * f, each octave faded by its own size on screen. Three octaves: a fourth would change the
+// colour by under half a percent (tex is scaled by 0.16), less than one step of 8-bit colour, so only its
+// mean is added.
+float fbm(vec3 p, float f) {
+  p *= f;
+  float s = 0.0625 * 0.5;
   float a = 0.5;
-  for (int i = 0; i < 4; i++) { s += a * noise(p); p *= 2.03; a *= 0.5; }
+  for (int i = 0; i < 3; i++) {
+    float w = keep(f * px);
+    s += a * (w < 0.004 ? 0.5 : mix(0.5, noise(p), w));
+    p *= 2.03;
+    f *= 2.03;
+    a *= 0.5;
+  }
   return s;
 }
 
 void main() {
+  px = length(fwidth(vObj));
   applyClip(vObj);
   vec3 n = normalize(vN);
   if (!gl_FrontFacing) n = -n;
@@ -183,27 +201,35 @@ void main() {
   float tex = 0.0;
   float vessels = 0.0;
   if (uKind < 0.5) {                 // skin: soft mottling, and the fine vessels seen through thin embryonic skin
-    tex = (fbm(vObj * 9.0) - 0.5) * 0.9;
-    float r1 = 1.0 - abs(noise(vObj * 4.2 + fbm(vObj * 2.0) * 1.6) * 2.0 - 1.0);
-    float r2 = 1.0 - abs(noise(vObj * 9.5 + 3.7) * 2.0 - 1.0);
-    vessels = smoothstep(0.955, 0.992, r1) * 0.7 + smoothstep(0.97, 0.995, r2) * 0.3;
-  } else if (uKind < 1.5) {          // muscle: fibres running along the mass
-    float f = sin(vUv.x * 150.0 + fbm(vObj * 5.0) * 4.0);
-    tex = f * 0.32 + (fbm(vObj * 12.0) - 0.5) * 0.5;
+    tex = (fbm(vObj, 9.0) - 0.5) * 0.9;
+    // The vessels are lines about a tenth of their noise's cell wide: they fade (to their sparse mean) by that width.
+    float vk = keep(4.2 * 10.0 * px);
+    if (vk > 0.004) {
+      float r1 = 1.0 - abs(noise(vObj * 4.2 + fbm(vObj, 2.0) * 1.6) * 2.0 - 1.0);
+      float r2 = 1.0 - abs(noise(vObj * 9.5 + 3.7) * 2.0 - 1.0);
+      vessels = smoothstep(0.955, 0.992, r1) * 0.7 + smoothstep(0.97, 0.995, r2) * 0.3;
+    }
+    vessels = mix(0.02, vessels, vk);
+  } else if (uKind < 1.5) {          // muscle: fibres running along the mass (24 per unit of u)
+    float fk = keep(fwidth(vUv.x) * 24.0);
+    float f = fk > 0.004 ? sin(vUv.x * 150.0 + fbm(vObj, 5.0) * 4.0) * fk : 0.0;
+    tex = f * 0.32 + (fbm(vObj, 12.0) - 0.5) * 0.5;
   } else if (uKind < 2.5) {          // mesenchyme: scattered cells
-    float c = smoothstep(0.62, 0.78, noise(vObj * 34.0));
-    tex = c * 0.9 - 0.25 + (fbm(vObj * 6.0) - 0.5) * 0.4;
+    float ck = keep(34.0 * px);
+    float c = mix(0.12, ck > 0.004 ? smoothstep(0.62, 0.78, noise(vObj * 34.0)) : 0.0, ck);
+    tex = c * 0.9 - 0.25 + (fbm(vObj, 6.0) - 0.5) * 0.4;
   } else if (uKind < 3.5) {          // cartilage: glassy, cells in lacunae
-    float c = smoothstep(0.7, 0.8, noise(vObj * 28.0));
+    float ck = keep(28.0 * px);
+    float c = mix(0.05, ck > 0.004 ? smoothstep(0.7, 0.8, noise(vObj * 28.0)) : 0.0, ck);
     tex = c * 0.8 - 0.1;
   } else if (uKind < 4.5) {          // bone: fine porous grain
-    tex = (fbm(vObj * 22.0) - 0.5) * 0.9;
+    tex = (fbm(vObj, 22.0) - 0.5) * 0.9;
   } else if (uKind < 5.5) {          // membrane: thin, almost even
-    tex = (fbm(vObj * 5.0) - 0.5) * 0.35;
-  } else if (uKind < 6.5) {          // tendon: bright fibres
-    tex = sin(vUv.x * 220.0) * 0.25;
+    tex = (fbm(vObj, 5.0) - 0.5) * 0.35;
+  } else if (uKind < 6.5) {          // tendon: bright fibres (35 per unit of u)
+    tex = sin(vUv.x * 220.0) * 0.25 * keep(fwidth(vUv.x) * 35.0);
   } else {
-    tex = (fbm(vObj * 8.0) - 0.5) * 0.5;
+    tex = (fbm(vObj, 8.0) - 0.5) * 0.5;
   }
   vec3 albedo = uColor * (1.0 + tex * 0.16);
   // Membrane bone still growing: spicules radiate from the centre, and the young edge is paler osteoid.
@@ -212,7 +238,7 @@ void main() {
     vec3 e1 = normalize(cross(uGrowDir, abs(uGrowDir.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
     vec3 e2 = cross(uGrowDir, e1);
     float ang = atan(dot(q, e2), dot(q, e1));
-    float rays = smoothstep(0.55, 0.95, sin(ang * 46.0 + fbm(q * 9.0) * 3.0) * 0.5 + 0.5);
+    float rays = smoothstep(0.55, 0.95, sin(ang * 46.0 + fbm(q, 9.0) * 3.0) * 0.5 + 0.5);
     float reach = smoothstep(0.0, 0.25, 1.0 - dot(q, uGrowDir));
     albedo = mix(albedo, albedo * 0.72, rays * reach * uSpic * 0.7);
     albedo = mix(albedo, vec3(0.98, 0.93, 0.78), clipFront * uSpic * 0.6);
@@ -235,6 +261,12 @@ void main() {
   vec3 h = normalize(l + v);
   float sheen = uKind > 2.5 && uKind < 4.5 ? 0.10 : 0.16;
   col += vec3(1.0) * pow(max(dot(n, h), 0.0), 36.0) * sheen;
+  // A thin wall (membrane, valve) lets light through: its side turned from the light glows warm, more so
+  // with the light behind it. Thick muscular walls beside it stay solid: the contrast that teaches which is which.
+  if (uThin > 0.0) {
+    float through = pow(0.5 - 0.5 * dot(n, l), 3.0) * (0.55 + 0.45 * pow(max(dot(l, -v), 0.0), 4.0));
+    col += mix(albedo, vec3(1.0, 0.78, 0.62), 0.45) * through * uThin * 0.45;
+  }
 
   // Highlight state (the same meanings as the 2D parts).
   float g = dot(col, vec3(0.299, 0.587, 0.114));
@@ -345,7 +377,7 @@ const DEEP_TINT = new Color('#2a1420');
 /** The shaded side's colour for a colour that has no `deep` of its own (written into `out`). */
 const deepInto = (out: Color, c: string) => out.set(c).multiplyScalar(0.42).lerp(DEEP_TINT, 0.25);
 
-const bodyMaterial = (stream?: StreamUniforms) =>
+const bodyMaterial = (light: { value: Vector3 }, stream?: StreamUniforms) =>
   new ShaderMaterial({
     defines: stream ? STREAM_DEFINES : {},
     vertexShader: VERT,
@@ -354,13 +386,15 @@ const bodyMaterial = (stream?: StreamUniforms) =>
       uOutline: { value: 0 },
       uColor: { value: new Color() },
       uDeep: { value: new Color() },
-      uLight: { value: new Vector3() },
+      // One light object shared by every material of the layer: set once per frame, not copied per item.
+      uLight: light,
       uGlow: { value: new Color() },
       uGlowAmt: { value: 0 },
       uSat: { value: 1 },
       uBright: { value: 1 },
       uOpacity: { value: 1 },
       uKind: { value: 0 },
+      uThin: { value: 0 },
       ...clipUniforms(),
       ...stream,
     },
@@ -415,6 +449,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
   ro.observe(host);
 
   const lightV = new Vector3();
+  const lightU = { value: lightV };
   // Scratch for the screen projection (no allocation per frame).
   const screenM = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
   const projOut = new Float32Array(16);
@@ -425,9 +460,9 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
   let compiled = false;
   // Kept until the layer goes: a program lives while some material uses it.
   const warmSt = streamUniforms();
-  const warmMats = [bodyMaterial(), edgeMaterial(), bodyMaterial(), edgeMaterial()];
+  const warmMats = [bodyMaterial(lightU), edgeMaterial(), bodyMaterial(lightU), edgeMaterial()];
   // The streams' programs too (blood cells), so the first cells do not stall the page either.
-  const warmStreamMats = [bodyMaterial(warmSt), edgeMaterial(warmSt)];
+  const warmStreamMats = [bodyMaterial(lightU, warmSt), edgeMaterial(warmSt)];
   const warmTri = new BufferGeometry();
   const warmTris = new InstancedBufferGeometry();
   {
@@ -484,7 +519,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
         perfCount('glUpload');
         const geo = geometryOf(it.mesh, it.stream);
         const su = it.stream && streamUniforms();
-        const mat = bodyMaterial(su);
+        const mat = bodyMaterial(lightU, su);
         const edgeMat = edgeMaterial(su);
         const body = new TMesh(geo, mat);
         const edge = new TMesh(geo, edgeMat);
@@ -510,6 +545,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
       if (it.deep) (u.uDeep.value as Color).set(it.deep);
       else deepInto(u.uDeep.value as Color, it.color);
       u.uKind.value = TISSUE_KIND[it.tissue];
+      u.uThin.value = it.thin;
       setClip(u, it.clip);
       setClip(s.edgeMat.uniforms, it.clip);
       const st = it.stream;
@@ -598,7 +634,6 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
       s.edgeMat.transparent = see;
       s.edge.visible = s.goal.outline && next.op > 0.05;
       s.body.visible = next.op > 0.01;
-      (u.uLight.value as Vector3).copy(lightV);
     }
     if (!dirty && !moving && key === lastCtm) return faded;
     lastCtm = key;
@@ -631,6 +666,8 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
     camera.matrixWorld.copy(camera.matrixWorldInverse).invert();
     renderer.render(scene, camera);
     perfCount('glRender');
+    // The performance harness times the GPU on the picture last drawn (only when it turned the counters on).
+    if ((globalThis as { __perf?: object }).__perf) (globalThis as { __glBench?: typeof bench }).__glBench = bench;
     if (!shown) {
       shown = true;
       canvas.classList.add('is-ready');
@@ -642,6 +679,22 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
       onReady();
     }
     return true;
+  }
+
+  /**
+   * For the harness: draws the current picture `n` times and waits for the GPU to finish (a one-pixel
+   * read makes it), giving the time per picture. Never called by the app.
+   */
+  function bench(n = 30) {
+    if (!frame || !shown) return null;
+    const gl = renderer.getContext();
+    const px = new Uint8Array(4);
+    renderer.render(scene, camera);
+    gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+    const t0 = performance.now();
+    for (let i = 0; i < n; i++) renderer.render(scene, camera);
+    gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+    return (performance.now() - t0) / n;
   }
 
   // Frames are drawn only while something can change on screen: a new frame from the scene, a highlight
