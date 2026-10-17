@@ -1,6 +1,6 @@
 # Topic 10: better 3D for less compute — exec plan
 
-Date: 2026-10-16. Status: Batches 0 and 1 done (2026-10-16; results in `docs/perf/README.md`); batches 2–4 not started.
+Date: 2026-10-16. Status: Batches 0 and 1 done (2026-10-16), Batch 2 done (2026-10-17); results in `docs/perf/README.md`. Batches 3–4 not started.
 
 **What Batch 1 changed.**
 - `lib/three-d/mesh-cache.ts`: meshes fingerprinted on every input, so the same inputs give the same object.
@@ -77,6 +77,7 @@ Each batch has a finish line. Measure, then report what landed, and only then pi
 - `phase` is still `t × 28`, so it scrubs. The O2 mix is per-instance (seed hash < mix), and the count ramps through the density gate (R2).
 - Cells skip the SVG projection: decorative, no hit.
 - **Finish line:** the same number of cells or fewer; 0 cell geometry builds per frame; smoother motion (screenshots at 3 consecutive `t`); and a lower total frame time than batch 1. If it doesn't win, revert to the CPU path with interpolation only.
+- **Done (2026-10-17).** As built: `Item3.stream` / `GLItem.stream` (`Stream3` in `lib/three-d/scene.ts`), with constant per-cell starts, offsets and gates, a cached 32-point route (`routeOf` in `model3d.ts`), and `phase` and `grow` as the only per-frame numbers. The O2 split stayed as two items (every third cell), the same as before. The cells grow in one by one instead of fading as a whole, and they are now opaque. With cells flowing, main-thread time fell by 29% and frame p95 went from 24 to 18 ms; cell builds, uploads and projections fell to 0. Without WebGL (the flat fallback), the cells are not drawn.
 
 ### Batch 3: the shader looks better and costs less (P1)
 1. **Footprint fade (R3):** `fp = length(fwidth(vObj * freq))`. Texture amplitude goes to `1 - smoothstep(0.35, 2.2, fp)`, and fbm octaves are skipped when the fade is near 0. Muscle fibres fade the same way via `fwidth(vUv.x*150)`. This removes shimmer and cuts cost on small or far surfaces.

@@ -22,6 +22,15 @@ const VIEWPORTS = [
   { name: 'pc', w: 1440, h: 900, stages: STAGES },
   { name: 'tablet', w: 768, h: 1024, stages: ['zirkulazio-goiztiarra', 'bihotz-lakioa', 'eskuineko-aurikula'] },
 ];
+/** Stage times where the blood cells flow (pc only): held picture and playing measured there too. */
+const FLOW = [
+  ['zirkulazio-goiztiarra', 0.9],
+  ['bihotz-atalak', 0.88],
+  ['atal-bulbarra', 0.03],
+  ['atal-bentrikularra', 0.75],
+  ['atal-aurikularra', 0.85],
+  ['zain-sinua', 0.25],
+];
 const PLAY_MS = 3000;
 const HOLD_MS = 3000;
 const DRAG_MS = 1500;
@@ -122,8 +131,8 @@ async function measure(c, ms, act, sampleFrames = true) {
   };
 }
 
-async function open(c, base, stage, play) {
-  const url = `${base}/astea/10?etapa=${stage}&ikuspegia=3d&une=${AT}${play ? '&jolastu=1' : ''}`;
+async function open(c, base, stage, play, at = AT) {
+  const url = `${base}/astea/10?etapa=${stage}&ikuspegia=3d&une=${at}${play ? '&jolastu=1' : ''}`;
   await c.send('Page.navigate', { url });
   await c.once('Page.loadEventFired', 60000).catch(() => {});
   // The 3D picture is up (its shaders compiled, the first frame drawn).
@@ -189,6 +198,27 @@ async function run(base, out) {
         result.runs.push(row);
         console.log(`hold ${row.hold.mainThreadMsPerS} ms/s, play ${row.play?.mainThreadMsPerS} ms/s`);
       }
+    }
+    // Blood cells flowing: the held picture and playing.
+    await c.send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+    for (const [stage, at] of FLOW) {
+      const row = { viewport: 'flow', stage, at };
+      process.stdout.write(`flow ${stage} @${at}: `);
+      if (!(await open(c, base, stage, false, at))) {
+        row.error = '3D never ready';
+        result.runs.push(row);
+        console.log('3D never ready');
+        continue;
+      }
+      await sleep(2500);
+      const shot = await c.send('Page.captureScreenshot', { format: 'png' });
+      writeFileSync(join(outDir, 'shots', `flow-${stage}.png`), Buffer.from(shot.data, 'base64'));
+      if (await open(c, base, stage, true, at)) {
+        await sleep(300);
+        row.play = await measure(c, PLAY_MS);
+      }
+      result.runs.push(row);
+      console.log(`play ${row.play?.mainThreadMsPerS} ms/s, frame p50 ${row.play?.frameMs.p50}`);
     }
   } finally {
     c.close();

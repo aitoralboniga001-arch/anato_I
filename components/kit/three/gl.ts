@@ -5,6 +5,8 @@ import {
   Camera,
   Color,
   FrontSide,
+  InstancedBufferAttribute,
+  InstancedBufferGeometry,
   Mesh as TMesh,
   Scene,
   ShaderMaterial,
@@ -15,7 +17,7 @@ import { perfCount } from '@/lib/perf';
 import type { M4, V3 } from '@/lib/three-d/math';
 import { createWaker } from '@/lib/three-d/waker';
 import type { Mesh } from '@/lib/three-d/mesh';
-import { TISSUE_KIND, type Clip3, type Tissue3 } from '@/lib/three-d/scene';
+import { STREAM_ROUTE_N, TISSUE_KIND, type Clip3, type Stream3, type Tissue3 } from '@/lib/three-d/scene';
 
 /**
  * The WebGL layer of the 3D views (loaded only when a 3D view is on screen). It draws, behind the
@@ -38,6 +40,8 @@ export interface GLItem {
   state: GLState;
   quiet: boolean;
   clip?: Clip3;
+  /** The mesh drawn as copies moving along a route (see Stream3). */
+  stream?: Stream3;
 }
 
 export interface GLFrame {
@@ -59,12 +63,34 @@ export interface GLApi {
 
 const VERT = /* glsl */ `
 uniform float uOutline;
+#ifdef STREAM
+// Copies of the mesh carried along a route (blood cells): each copy's place is worked out here from its
+// start and the phase, so a moving stream costs one number per frame and nothing is rebuilt.
+uniform vec3 uRoute[ROUTE_N];
+uniform float uPhase;
+uniform float uGrow;
+attribute vec4 aCell;   // start along the route (0-1), then a fixed offset from it
+attribute float aGate;  // the uGrow at which this copy starts to appear
+vec3 along(float u) {
+  float x = u * float(ROUTE_N - 1);
+  float i = min(floor(x), float(ROUTE_N - 2));
+  int k = int(i);
+  return mix(uRoute[k], uRoute[k + 1], x - i);
+}
+#endif
 varying vec3 vN;
 varying vec3 vV;
 varying vec3 vObj;
 varying vec2 vUv;
 void main() {
+#ifdef STREAM
+  // Each copy grows in as uGrow passes its gate; not there yet, it is not drawn at all (nor its outline).
+  float grow = clamp((uGrow - aGate) / 0.15, 0.0, 1.0);
+  if (grow <= 0.0) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+  vec4 mv = modelViewMatrix * vec4(position * grow + along(fract(aCell.x + uPhase)) + aCell.yzw, 1.0);
+#else
   vec4 mv = modelViewMatrix * vec4(position, 1.0);
+#endif
   vec3 n = normalize(normalMatrix * normal);
   // Outline pass: the back faces pushed out along the normal, by a width that stays the same on screen.
   if (uOutline > 0.0) mv.xyz += n * uOutline * (-mv.z);
@@ -235,6 +261,9 @@ const TARGET: Record<GLState, { sat: number; bright: number; glow: [number, numb
 
 interface Slot {
   mesh: Mesh;
+  /** A stream's constant per-copy data (its geometry is built with it) and the route last copied in. */
+  cells?: Float32Array;
+  route?: Float32Array;
   geo: BufferGeometry;
   body: TMesh;
   edge: TMesh;
@@ -245,14 +274,28 @@ interface Slot {
   seen: number;
 }
 
-function geometryOf(m: Mesh) {
-  const g = new BufferGeometry();
+function geometryOf(m: Mesh, st?: Stream3) {
+  const g = st ? new InstancedBufferGeometry() : new BufferGeometry();
   g.setAttribute('position', new BufferAttribute(m.pos, 3));
   g.setAttribute('normal', new BufferAttribute(m.nrm, 3));
   g.setAttribute('uv', new BufferAttribute(m.uv, 2));
   g.setIndex(new BufferAttribute(m.idx, 1));
+  if (st && g instanceof InstancedBufferGeometry) {
+    g.setAttribute('aCell', new InstancedBufferAttribute(st.cells, 4));
+    g.setAttribute('aGate', new InstancedBufferAttribute(st.gates, 1));
+    g.instanceCount = st.gates.length;
+  }
   return g;
 }
+
+/** A stream's uniforms: one set, shared by reference between its body and its outline. */
+const streamUniforms = () => ({
+  uRoute: { value: Array.from({ length: STREAM_ROUTE_N }, () => new Vector3()) },
+  uPhase: { value: 0 },
+  uGrow: { value: 1 },
+});
+type StreamUniforms = ReturnType<typeof streamUniforms>;
+const STREAM_DEFINES = { STREAM: '', ROUTE_N: STREAM_ROUTE_N };
 
 function clipUniforms() {
   return {
@@ -302,8 +345,9 @@ const DEEP_TINT = new Color('#2a1420');
 /** The shaded side's colour for a colour that has no `deep` of its own (written into `out`). */
 const deepInto = (out: Color, c: string) => out.set(c).multiplyScalar(0.42).lerp(DEEP_TINT, 0.25);
 
-const bodyMaterial = () =>
+const bodyMaterial = (stream?: StreamUniforms) =>
   new ShaderMaterial({
+    defines: stream ? STREAM_DEFINES : {},
     vertexShader: VERT,
     fragmentShader: CLIP + FRAG,
     uniforms: {
@@ -318,15 +362,17 @@ const bodyMaterial = () =>
       uOpacity: { value: 1 },
       uKind: { value: 0 },
       ...clipUniforms(),
+      ...stream,
     },
     side: FrontSide,
   });
 
-const edgeMaterial = () =>
+const edgeMaterial = (stream?: StreamUniforms) =>
   new ShaderMaterial({
+    defines: stream ? STREAM_DEFINES : {},
     vertexShader: VERT,
     fragmentShader: CLIP + OUT_FRAG,
-    uniforms: { uOutline: { value: 0.003 }, uColor: { value: new Color('#2a1317') }, uOpacity: { value: 0.75 }, ...clipUniforms() },
+    uniforms: { uOutline: { value: 0.003 }, uColor: { value: new Color('#2a1317') }, uOpacity: { value: 0.75 }, ...clipUniforms(), ...stream },
     side: BackSide,
   });
 
@@ -378,20 +424,29 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
   // first render froze the page for a moment every time a 3D view opened.
   let compiled = false;
   // Kept until the layer goes: a program lives while some material uses it.
+  const warmSt = streamUniforms();
   const warmMats = [bodyMaterial(), edgeMaterial(), bodyMaterial(), edgeMaterial()];
+  // The streams' programs too (blood cells), so the first cells do not stall the page either.
+  const warmStreamMats = [bodyMaterial(warmSt), edgeMaterial(warmSt)];
   const warmTri = new BufferGeometry();
+  const warmTris = new InstancedBufferGeometry();
   {
     const warm = new Scene();
-    const tri = warmTri;
-    tri.setAttribute('position', new BufferAttribute(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]), 3));
-    tri.setAttribute('normal', new BufferAttribute(new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1]), 3));
-    tri.setAttribute('uv', new BufferAttribute(new Float32Array([0, 0, 1, 0, 0, 1]), 2));
+    for (const tri of [warmTri, warmTris]) {
+      tri.setAttribute('position', new BufferAttribute(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]), 3));
+      tri.setAttribute('normal', new BufferAttribute(new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1]), 3));
+      tri.setAttribute('uv', new BufferAttribute(new Float32Array([0, 0, 1, 0, 0, 1]), 2));
+    }
+    warmTris.setAttribute('aCell', new InstancedBufferAttribute(new Float32Array(4), 4));
+    warmTris.setAttribute('aGate', new InstancedBufferAttribute(new Float32Array(1), 1));
+    warmTris.instanceCount = 1;
     const mats = warmMats;
     mats.slice(2).forEach((m) => {
       m.transparent = true;
       m.depthWrite = false;
     });
-    mats.forEach((m) => warm.add(new TMesh(tri, m)));
+    mats.forEach((m) => warm.add(new TMesh(warmTri, m)));
+    warmStreamMats.forEach((m) => warm.add(new TMesh(warmTris, m)));
     const done = () => {
       compiled = true;
       dirty = true;
@@ -404,6 +459,11 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
     tick++;
     for (const it of f.items) {
       let s = slots.get(it.key);
+      // A stream's geometry carries its copies: another set of copies (or none) needs a new slot.
+      if (s && s.cells !== it.stream?.cells) {
+        drop(it.key, s);
+        s = undefined;
+      }
       if (s && s.mesh !== it.mesh) {
         perfCount('glUpload');
         if (s.mesh.pos.length === it.mesh.pos.length && s.mesh.idx.length === it.mesh.idx.length) {
@@ -414,7 +474,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
           s.geo.computeBoundingSphere();
         } else {
           s.geo.dispose();
-          s.geo = geometryOf(it.mesh);
+          s.geo = geometryOf(it.mesh, it.stream);
           s.body.geometry = s.geo;
           s.edge.geometry = s.geo;
         }
@@ -422,9 +482,10 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
       }
       if (!s) {
         perfCount('glUpload');
-        const geo = geometryOf(it.mesh);
-        const mat = bodyMaterial();
-        const edgeMat = edgeMaterial();
+        const geo = geometryOf(it.mesh, it.stream);
+        const su = it.stream && streamUniforms();
+        const mat = bodyMaterial(su);
+        const edgeMat = edgeMaterial(su);
         const body = new TMesh(geo, mat);
         const edge = new TMesh(geo, edgeMat);
         for (const m of [body, edge]) {
@@ -434,7 +495,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
           scene.add(m);
         }
         const t = TARGET[it.state];
-        s = { mesh: it.mesh, geo, body, edge, mat, edgeMat, cur: { sat: t.sat, bright: t.bright, amt: t.amt, op: it.opacity }, goal: it, seen: tick };
+        s = { mesh: it.mesh, cells: it.stream?.cells, geo, body, edge, mat, edgeMat, cur: { sat: t.sat, bright: t.bright, amt: t.amt, op: it.opacity }, goal: it, seen: tick };
         slots.set(it.key, s);
       }
       s.goal = it;
@@ -451,16 +512,27 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
       u.uKind.value = TISSUE_KIND[it.tissue];
       setClip(u, it.clip);
       setClip(s.edgeMat.uniforms, it.clip);
+      const st = it.stream;
+      if (st) {
+        // The route is copied in only when its shape changed; the phase is the one number that moves.
+        if (s.route !== st.route) {
+          s.route = st.route;
+          (u.uRoute.value as Vector3[]).forEach((v, i) => v.fromArray(st.route, i * 3));
+        }
+        u.uPhase.value = st.phase - Math.floor(st.phase);
+        u.uGrow.value = st.grow;
+      }
     }
     // Items no longer drawn: removed.
-    for (const [k, s] of slots)
-      if (s.seen !== tick) {
-        scene.remove(s.body, s.edge);
-        s.geo.dispose();
-        s.mat.dispose();
-        s.edgeMat.dispose();
-        slots.delete(k);
-      }
+    for (const [k, s] of slots) if (s.seen !== tick) drop(k, s);
+  }
+
+  function drop(key: string, s: Slot) {
+    scene.remove(s.body, s.edge);
+    s.geo.dispose();
+    s.mat.dispose();
+    s.edgeMat.dispose();
+    slots.delete(key);
   }
 
   /** Screen transform of the scene group, relative to the host: the frame's place on screen right now. */
@@ -647,8 +719,9 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
         s.edgeMat.dispose();
       }
       slots.clear();
-      warmMats.forEach((m) => m.dispose());
+      [...warmMats, ...warmStreamMats].forEach((m) => m.dispose());
       warmTri.dispose();
+      warmTris.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
       canvas.remove();

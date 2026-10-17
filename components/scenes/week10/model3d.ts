@@ -1,7 +1,7 @@
 import { add, cross, mix3, mul, norm, sub, type V3 } from '@/lib/three-d/math';
 import { blob, curve3, merge, type BlobOptions, type Mesh, type TubeOptions } from '@/lib/three-d/mesh';
-import { cachedBlob, cachedMerge, cachedTube } from '@/lib/three-d/mesh-cache';
-import type { Item3 } from '@/lib/three-d/scene';
+import { cachedBlob, cachedMerge, cachedTube, Sig } from '@/lib/three-d/mesh-cache';
+import { STREAM_ROUTE_N, type Item3 } from '@/lib/three-d/scene';
 import { perfCount } from '@/lib/perf';
 import { T } from './common';
 
@@ -658,21 +658,13 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
     pts['septum-transversum'] = add(c, [-0.9, -0.05, 0.4]);
   }
 
-  // Blood in the lumen: cells along the centreline from the horns to the aortic sac.
+  // Blood in the lumen: cells along the centreline from the horns to the aortic sac, placed by the GPU
+  // from the phase (one cell mesh drawn once per cell); they appear one by one as the flow starts.
   if (o.flow && o.flow.show > 0.01) {
-    const cells: Mesh[] = [];
-    const cellsO2: Mesh[] = [];
-    const route: V3[] = [...line].reverse();
-    const N = 26;
-    for (let i = 0; i < N; i++) {
-      const u = (((i / N + o.flow.phase) % 1) + 1) % 1;
-      const p = route[Math.min(route.length - 1, Math.floor(u * (route.length - 1)))];
-      const jit: V3 = [Math.sin(i * 12.9) * 0.07, Math.cos(i * 7.3) * 0.05, Math.sin(i * 3.1) * 0.07];
-      const m = blob({ center: add(p, jit), radii: [0.055, 0.04, 0.055], rings: 6, sides: 8 });
-      (o.flow.mixed && i % 3 === 0 ? cellsO2 : cells).push(m);
-    }
-    if (cells.length) items.push({ key: 'flow', mesh: merge(cells), color: T.deo2, deep: T.deo2Deep, tissue: 'skin', opacity: o.flow.show });
-    if (cellsO2.length) items.push({ key: 'flowO2', mesh: merge(cellsO2), color: T.o2, deep: T.o2Deep, tissue: 'skin', opacity: o.flow.show });
+    const run = { route: routeOf(line), phase: o.flow.phase, grow: clamp01(o.flow.show) };
+    const cell = cachedBlob({ center: [0, 0, 0], radii: [0.055, 0.04, 0.055], rings: 6, sides: 8 });
+    items.push({ key: 'flow', mesh: cell, color: T.deo2, deep: T.deo2Deep, tissue: 'skin', stream: { ...run, ...(o.flow.mixed ? CELLS.deo2 : CELLS.all) } });
+    if (o.flow.mixed) items.push({ key: 'flowO2', mesh: cell, color: T.o2, deep: T.o2Deep, tissue: 'skin', stream: { ...run, ...CELLS.o2 } });
   }
 
   // A faint copy of another pose (where the tube started).
@@ -682,6 +674,47 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
   }
 
   return { items, line, cd, pts };
+}
+
+// ———————————————————————————— blood in the lumen ————————————————————————————
+
+const CELL_N = 26;
+
+/** Per cell (constant): where along the route it starts, its fixed offset from the centreline, when it appears. */
+function cellSet(pick: (i: number) => boolean) {
+  const idx = Array.from({ length: CELL_N }, (_, i) => i).filter(pick);
+  const cells = new Float32Array(idx.length * 4);
+  const gates = new Float32Array(idx.length);
+  idx.forEach((i, k) => {
+    cells.set([i / CELL_N, Math.sin(i * 12.9) * 0.07, Math.cos(i * 7.3) * 0.05, Math.sin(i * 3.1) * 0.07], k * 4);
+    // Spread evenly over the flow's start, but not in order along the route: here and there.
+    gates[k] = ((i * 0.618034) % 1) * 0.85;
+  });
+  return { cells, gates };
+}
+
+/** Mixed blood: every third cell oxygenated. */
+const CELLS = { all: cellSet(() => true), deo2: cellSet((i) => i % 3 !== 0), o2: cellSet((i) => i % 3 === 0) };
+
+const routes = new Map<string, Float32Array>();
+/**
+ * The cells' route: the centreline run backwards (the blood goes from the atrial end up to the sac),
+ * resampled for the GPU. The same array while the line keeps its shape, so it is sent to the GPU once.
+ */
+export function routeOf(line: readonly V3[]): Float32Array {
+  const key = new Sig().pts(line).key();
+  const known = routes.get(key);
+  if (known) return known;
+  const r = new Float32Array(STREAM_ROUTE_N * 3);
+  const n = line.length - 1;
+  for (let j = 0; j < STREAM_ROUTE_N; j++) {
+    const g = (1 - j / (STREAM_ROUTE_N - 1)) * n;
+    const lo = Math.min(n - 1, Math.floor(g));
+    r.set(mix3(line[lo], line[lo + 1], g - lo), j * 3);
+  }
+  if (routes.size >= 16) routes.delete(routes.keys().next().value!);
+  routes.set(key, r);
+  return r;
 }
 
 /** Unit direction helper for arrows. */

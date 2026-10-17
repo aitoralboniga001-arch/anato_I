@@ -88,6 +88,28 @@ export interface Item3 {
   /** Dark contour around the silhouette (default on). */
   outline?: boolean;
   clip?: Clip3;
+  /** Copies of `mesh` carried along a route by the GPU (blood cells): never pointed at, not drawn flat. */
+  stream?: Stream3;
+}
+
+/** Points in a stream's route. */
+export const STREAM_ROUTE_N = 32;
+
+/**
+ * Copies of one small mesh moving along a route, placed by the GPU from one number per frame (`phase`):
+ * nothing is rebuilt or uploaded while they move, and any stage time gives its own picture (scrubbable).
+ */
+export interface Stream3 {
+  /** STREAM_ROUTE_N points (x, y, z), evenly spaced in the route's parameter. The same array while the route holds. */
+  route: Float32Array;
+  /** Per copy: where along the route it starts (0–1), then a fixed offset from the route (x, y, z). Constant. */
+  cells: Float32Array;
+  /** Per copy: the `grow` at which it starts to appear (0–0.85). Constant. */
+  gates: Float32Array;
+  /** How far every copy has moved along the route, in route lengths. */
+  phase: number;
+  /** 0–1: the copies appear one by one, each growing in, as it rises (and go the same way). */
+  grow: number;
 }
 
 export interface Scene3 {

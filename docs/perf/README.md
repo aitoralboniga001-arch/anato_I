@@ -1,6 +1,6 @@
 # Topic 10 3D performance
 
-Measured with `scripts/perf-topic10.mjs`: headless Chrome on a production build (`next build && next start -p 3100`). The GPU is a Radeon 780M (ANGLE D3D11) at 1440×900 and 768×1024. Each run opens the 3D view of each topic 10 stage at stage time 0.55 and measures three scenarios:
+Measured with `scripts/perf-topic10.mjs`: headless Chrome on a production build (`next build && next start -p 3100`). The GPU is a Radeon 780M (ANGLE D3D11) at 1440×900 and 768×1024. Each run opens the 3D view of each topic 10 stage at stage time 0.55 and measures three scenarios (and, since Batch 2, plays six views where blood cells flow):
 - **held:** 3 s, nothing happening;
 - **dragged:** 1.8 s, the viewer turning the model;
 - **played:** 3 s.
@@ -10,6 +10,8 @@ Measured with `scripts/perf-topic10.mjs`: headless Chrome on a production build 
 | `topic10-baseline/` | Original code with the work counters only. Its "held" numbers are inflated by the harness's frame sampler (fixed afterwards); use it for the counters. |
 | `topic10-baseline-v2/` | Original code (counters stashed away) with the fixed harness: the fair "before" for timings. |
 | `topic10-batch1/` | After Batch 1 of `docs/review/topic-10-3d-execplan.md`. |
+| `topic10-batch1-flow/` | Batch 1 code, measured again with the blood-cell points added to the harness: the fair "before" for Batch 2. |
+| `topic10-batch2/` | After Batch 2 (blood cells drawn by the GPU). |
 
 Screenshots (`shots/`) are written next to each `results.json` but are not kept in git. Compare two runs' pictures with `node scripts/perf-topic10.mjs compare <dirA> <dirB>`.
 
@@ -36,3 +38,21 @@ View changes checked frame by frame on the new build:
 - the stage 9 3D→frontal bridge and the stage 10 room→cut bridge turn the 3D and land on the cut.
 
 Still the biggest cost: turning the model. Each frame re-projects every item to SVG for pointing (about 600 projections/s), now on coarse hit meshes.
+
+## Batch 2 (2026-10-17): blood cells drawn by the GPU
+
+Before Batch 2, each played frame with blood flowing built 26 cell meshes, merged them, uploaded them and projected them to SVG. Now one cell mesh is drawn 26 times. Each copy's place along a 32-point route comes from its start plus one phase number per frame, interpolated rather than snapped to the nearest centreline point.
+
+Averages over the six blood-flow views (stages 3, 4, 6, 7, 8 and 9; playing, 1440×900):
+
+| | Before | After |
+|---|---|---|
+| Main thread busy | 867 ms/s | 614 ms/s |
+| Script | 722 ms/s | 446 ms/s |
+| Frame time p50 / p95 | 17.8 / 24.1 ms | 17.9 / 18.3 ms |
+| Meshes built / GPU uploads per s | 1390–2720 / 107–209 | 0 / 0 |
+
+- **Other views:** the views without cells are unchanged (within run-to-run noise).
+- **Pictures:** cells sit where they did before. They are now opaque, and they grow in one by one instead of fading as a whole. The shots differ by at most 0.4% of pixels.
+- **Frame-time baseline:** this run's p50 sits at 17.8 ms for every view, before and after, rather than 16.7 ms. This is a machine-state difference between days, so compare within a run.
+

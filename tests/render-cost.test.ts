@@ -3,7 +3,8 @@ import { blob, tube } from '@/lib/three-d/mesh';
 import { cachedBlob, cachedMerge, cachedMesh, cachedTube } from '@/lib/three-d/mesh-cache';
 import { createWaker } from '@/lib/three-d/waker';
 import { A0, atriumModel } from '@/components/scenes/week10/atrium3d';
-import { POSE0, heartModel, type HeartOpts, type HeartPose } from '@/components/scenes/week10/model3d';
+import { POSE0, centreline, heartModel, routeOf, type HeartOpts, type HeartPose } from '@/components/scenes/week10/model3d';
+import { STREAM_ROUTE_N } from '@/lib/three-d/scene';
 import type { V3 } from '@/lib/three-d/math';
 
 /** A fake frame clock: frames run only when the test steps them. */
@@ -107,19 +108,49 @@ describe('meshes are kept while their inputs are unchanged', () => {
     expect(cachedBlob(shaped)).not.toBe(cachedBlob(shaped));
   });
 
-  const ids = (m: { items: { key: string; mesh: object; hit?: object }[] }) => new Map(m.items.map((it) => [it.key, it]));
+  const ids = <I extends { key: string }>(m: { items: I[] }) => new Map(m.items.map((it) => [it.key, it]));
 
-  it('a heart pose drawn again (a played frame where only the cells move) reuses every mesh', () => {
+  it('a heart pose drawn again (a played frame where only the cells move) reuses every mesh, the cells too', () => {
     const pose: HeartPose = { ...POSE0, segs: 1, colour: 1, loop: 0.6, arches: 2, veins: 1 };
-    const opts = (phase: number): HeartOpts => ({ cavity: 1, septum: 1, gut: 0.5, aortas: 1, flow: { phase, show: 1, mixed: true } });
+    const opts = (phase: number, show = 1): HeartOpts => ({ cavity: 1, septum: 1, gut: 0.5, aortas: 1, flow: { phase, show, mixed: true } });
     const a = ids(heartModel(pose, opts(0.1)));
-    const b = ids(heartModel(pose, opts(0.3)));
+    const b = ids(heartModel(pose, opts(0.3, 0.5)));
     expect(a.size).toBeGreaterThan(10);
     for (const [key, it] of a) {
-      if (key === 'flow' || key === 'flowO2') continue;
       expect(b.get(key)?.mesh, key).toBe(it.mesh);
       expect(b.get(key)?.hit, key).toBe(it.hit);
     }
+    // The cells move by their phase alone: same route and cells (sent to the GPU once), new phase and growth.
+    for (const key of ['flow', 'flowO2']) {
+      const [sa, sb] = [a.get(key)?.stream, b.get(key)?.stream];
+      expect(sa, key).toBeDefined();
+      expect(sb!.route, key).toBe(sa!.route);
+      expect(sb!.cells, key).toBe(sa!.cells);
+      expect([sa!.phase, sb!.phase, sa!.grow, sb!.grow]).toEqual([0.1, 0.3, 1, 0.5]);
+    }
+  });
+
+  it('the blood cells: 26 in all, a third oxygenated, along the centreline from the atrial end to the sac', () => {
+    const pose: HeartPose = { ...POSE0, segs: 1, loop: 0.6 };
+    const m = ids(heartModel(pose, { flow: { phase: 0, show: 1, mixed: true } }));
+    const [deo2, o2] = [m.get('flow')!.stream!, m.get('flowO2')!.stream!];
+    expect([deo2.gates.length, o2.gates.length]).toEqual([17, 9]);
+    expect(deo2.cells.length).toBe(17 * 4);
+    for (const g of [...deo2.gates, ...o2.gates]) {
+      expect(g).toBeGreaterThanOrEqual(0);
+      expect(g).toBeLessThanOrEqual(0.85);
+    }
+    const line = centreline(pose);
+    const r = routeOf(line);
+    expect(r.length).toBe(STREAM_ROUTE_N * 3);
+    expect(routeOf(centreline(pose))).toBe(r);
+    const end = (i: number) => [r[i * 3], r[i * 3 + 1], r[i * 3 + 2]];
+    end(0).forEach((x, k) => expect(x).toBeCloseTo(line[line.length - 1][k], 5));
+    end(STREAM_ROUTE_N - 1).forEach((x, k) => expect(x).toBeCloseTo(line[0][k], 5));
+    // Without mixing, every cell is venous.
+    const plain = ids(heartModel(pose, { flow: { phase: 0, show: 1 } }));
+    expect(plain.get('flow')!.stream!.gates.length).toBe(26);
+    expect(plain.has('flowO2')).toBe(false);
   });
 
   it('colours, highlights and see-through walls change no mesh; the shape changing does', () => {

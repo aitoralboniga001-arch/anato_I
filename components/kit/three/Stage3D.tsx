@@ -358,7 +358,7 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
   const waiting = !!host && !ready && !flatOnly && !warm;
   const drawn = scene.items
     .filter((it) => (it.show ?? 1) * (it.opacity ?? 1) > 0.01)
-    .map((it) => ({ it, pr: projectCached(it, view, light, flat) }))
+    .map((it) => ({ it, pr: it.stream ? UNPROJECTED : projectCached(it, view, light, flat) }))
     .sort((a, b) => b.pr.depth - a.pr.depth);
 
   useEffect(() => {
@@ -425,6 +425,7 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
         state: it.id ? STATE[partState(ctx, it.id, it.groups)] : ctx.hovered || ctx.selected || ctx.spotlight ? 'ctx' : 'idle',
         quiet: !!it.quiet,
         clip: it.clip,
+        stream: it.stream,
       })),
     });
   });
@@ -506,6 +507,8 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
  * frames of a played view: only highlights and visibility change), its outlines are not projected again.
  */
 const projections = new Map<string, { mesh: object; sig: string; pr: Projected }>();
+/** A stream (blood cells) is placed by the GPU alone: nothing to point at, nothing drawn flat. */
+const UNPROJECTED: Projected = { d: '', bands: ['', '', ''], depth: 0, any: false };
 function projectCached(it: Item3, view: View3, light: V3, flat: boolean) {
   const mesh = it.hit ?? it.mesh;
   const sig = `${flat ? 1 : 0}|${Array.prototype.join.call(view.vp, ',')}|${it.matrix ? Array.prototype.join.call(it.matrix, ',') : ''}|${light.join(',')}|${it.clip ? JSON.stringify(it.clip) : ''}`;
