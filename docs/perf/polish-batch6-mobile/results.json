@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-17T11:17:04.864Z",
+  "base": "http://localhost:3115",
+  "width": 390,
+  "height": 844,
+  "dpr": 2,
+  "reduced": true,
+  "gpuSamples": "median of 3 x 8 draws (CPU submission + GPU completion)",
+  "runs": [
+    {
+      "week": 7,
+      "stage": "diafragma-eraketa",
+      "view": "kupula",
+      "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (0x00001900) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "info": {
+        "calls": 18,
+        "triangles": 95692,
+        "w": 708,
+        "h": 566,
+        "geometries": 10,
+        "programs": 6
+      }
+    },
+    {
+      "week": 9,
+      "stage": "domeinuak",
+      "view": "domeinuak-3d",
+      "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (0x00001900) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "info": {
+        "calls": 92,
+        "triangles": 555704,
+        "w": 708,
+        "h": 566,
+        "geometries": 48,
+        "programs": 6
+      }
+    },
+    {
+      "week": 10,
+      "stage": "atal-bentrikularra",
+      "view": "3d",
+      "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (0x00001900) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "info": {
+        "calls": 62,
+        "triangles": 37832,
+        "w": 708,
+        "h": 566,
+        "geometries": 34,
+        "programs": 6
+      }
+    }
+  ],
+  "errors": []
+}

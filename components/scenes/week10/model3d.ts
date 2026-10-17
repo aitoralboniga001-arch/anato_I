@@ -374,6 +374,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
   // The myocardial tube, one item per segment (the sulci hide the seams).
   const fuse = clamp01(pose.fuse);
   const myo = clamp01(pose.myo);
+  const hasCanal = clamp01(pose.loop) > 0.5 && fuse >= 1;
   type Seg = { key: string; id: string; groups?: string[]; u0: number; u1: number; color: string; deep: string; g: 'bulbus' | 'ventricle' | 'atrium' | 'sinus' };
   const bulbusId = (id: string) => (split > 0.5 ? id : 'atal-bulbarra');
   const segsList: Seg[] = [
@@ -382,19 +383,33 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
     { g: 'bulbus', key: 'conus', id: bulbusId('arteria-konoa'), groups: ['atal-bulbarra'], u0: U.truncus - 0.01, u1: U.conus + 0.01, color: mixHex(T.bulbus, T.conus, split), deep: mixHex(T.bulbusDeep, T.conusDeep, split) },
     { g: 'bulbus', key: 'proximal', id: bulbusId('bulboaren-hurbileko-atala'), groups: ['atal-bulbarra', 'atal-bulbobentrikularra', ...((pose.derive?.trab ?? 0) > 0.3 ? ['hasierako-eskuineko-bentrikulua'] : [])], u0: U.conus - 0.01, u1: U.proximal + 0.012, color: mixHex(T.bulbus, T.proximal, split), deep: T.bulbusDeep },
     { g: 'ventricle', key: 'ventricle', id: 'atal-bentrikularra', groups: ['atal-bulbobentrikularra'], u0: U.proximal - 0.012, u1: U.ventricle + 0.012, color: T.ventricle, deep: T.ventricleDeep },
-    { g: 'atrium', key: 'atrium', id: 'atal-aurikularra', groups: ['zain-muturra'], u0: U.ventricle - 0.012, u1: 1, color: T.atrium, deep: T.atriumDeep },
+    // The canal is a stretch of the same narrowed tube, not a sleeve over it: a separate raised
+    // sleeve crossed the wall at its ends and showed jagged rims even after they were tapered.
+    ...(hasCanal ? [{ g: 'atrium' as const, key: 'av-canal', id: 'erreten-aurikulubentrikularra', u0: U.ventricle - 0.006, u1: U.ventricle + 0.04, color: mixHex(T.ventricle, T.atrium, 0.5), deep: T.atriumDeep }] : []),
+    { g: 'atrium', key: 'atrium', id: 'atal-aurikularra', groups: ['zain-muturra'], u0: hasCanal ? U.ventricle + 0.028 : U.ventricle - 0.012, u1: 1, color: T.atrium, deep: T.atriumDeep },
   ];
   // Unfused part of the tube: from the fusion front down, the tube is two tubes (left and right).
   const front = lerp(-0.05, 1.05, fuse); // u reached by the zipper
-  for (const s of segsList) {
+  for (const [si, s] of segsList.entries()) {
     const { pts: P, u: us } = slice(line, s.u0, s.u1);
     if (P.length < 2) continue;
-    const r = (k: number) => radiusAt(lerp(us[0], us[us.length - 1], k), pose);
+    // Neighbouring segments overlap a little (no gap at the seam); where they do, this one's end is drawn
+    // 3% narrower, inside the next one. Two walls in the same place would flicker through each other in
+    // jagged teeth.
+    const next = segsList[si + 1];
+    const tuck = (u: number) => (next ? 1 - 0.03 * ss(next.u0 - 0.008, next.u0, u) : 1);
+    const r = (k: number) => {
+      const u = lerp(us[0], us[us.length - 1], k);
+      return radiusAt(u, pose) * tuck(u);
+    };
     const fusedPart = us[us.length - 1] <= front;
     const color = segColour(s.color, s.g);
     const deep = segDeep(s.deep, s.g);
     if (fusedPart || fuse >= 1) {
-      items.push({ key: `myo-${s.key}`, id: s.id, groups: [...(s.groups ?? []), ...WHOLE], ...tubeParts(P, { radius: (k) => r(k) * lerp(0.62, 1, myo), ref: [0, 0, 1], sides: 22, capStart: s.key === 'sac' }), color, deep, tissue: 'muscle', opacity: wallOp });
+      // At the loop's tight inner bend an inflated back-face hull cuts through its own wall,
+      // drawing a false black crack. Shading defines the looped walls without that hull.
+      const outline = pose.loop <= 0.5 || !['proximal', 'ventricle', 'av-canal', 'atrium'].includes(s.key);
+      items.push({ key: s.key === 'av-canal' ? s.key : `myo-${s.key}`, id: s.id, groups: [...(s.groups ?? []), ...WHOLE], ...tubeParts(P, { radius: (k) => r(k) * lerp(0.62, 1, myo), ref: [0, 0, 1], sides: 22, capStart: s.key === 'sac' }), color, deep, tissue: 'muscle', opacity: wallOp, outline });
     } else {
       // Paired tubes, drawn apart by how far below the zipper they are.
       for (const sx of [-1, 1]) {
@@ -413,14 +428,10 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
   pts['arteria-konoa'] = at((U.truncus + U.conus) / 2);
   pts['bulboaren-hurbileko-atala'] = at((U.conus + U.proximal) / 2 + 0.02);
   pts['atal-bentrikularra'] = at((U.proximal + U.ventricle) / 2 + 0.02);
+  // Naming follows the anatomical segment, independent of splitting off the canal's draw mesh.
+  pts['atal-aurikularra'] = at((U.ventricle - 0.012 + 1) / 2);
   pts['erreten-aurikulubentrikularra'] = at(U.ventricle + 0.02);
   pts['atal-bulbobentrikularra'] = at(U.proximal);
-  // Once looped, the atrioventricular canal: the narrow collar where the atrial segment opens into the ventricle.
-  if (clamp01(pose.loop) > 0.5 && fuse >= 1) {
-    const { pts: P, u: us } = slice(line, U.ventricle - 0.006, U.ventricle + 0.04);
-    if (P.length >= 2)
-      items.push({ key: 'av-canal', id: 'erreten-aurikulubentrikularra', groups: [...WHOLE], ...tubeParts(P, { radius: (k) => radiusAt(lerp(us[0], us[us.length - 1], k), pose) * lerp(0.62, 1, myo) * 1.06, ref: [0, 0, 1], sides: 22 }), color: mixHex(T.ventricle, T.atrium, 0.5), deep: T.atriumDeep, tissue: 'muscle', opacity: wallOp });
-  }
   pts['atal-bulbobentrikularra'] = at(U.proximal);
 
   // What the bulbus sub-parts become, inside them (seen through the glass wall).

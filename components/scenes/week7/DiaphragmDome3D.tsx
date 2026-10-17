@@ -10,7 +10,7 @@ import type { Item3, Scene3 } from '@/lib/three-d/scene';
 import { EMBRYO5, sectionMatrix } from '@/lib/three-d/embryo5';
 import { flyIn, reveal } from '@/lib/three-d/flyin';
 import { geoOf, geoSlot, useGeoReady } from '@/lib/three-d/offthread';
-import { deform, polygon2, slab, surfaceMesh, type SDF } from '@/lib/three-d/sdf';
+import { deformBy, polygon2, slab, surfaceMesh, type SDF } from '@/lib/three-d/sdf';
 import { AORTA_X, BODY_X, CANAL_L, CAV_X, ESO_X, IVC_X, MES, SEPTUM_X } from './Diaphragm';
 import { CavityKey, KEY7, P, resample, vis } from './common';
 import type { Pt } from '@/components/kit';
@@ -212,6 +212,8 @@ function frameAt(t: number) {
   const rimK = seg(t, DOME_T.rim[0], DOME_T.rim[1]);
   const domeK = seg(t, DOME_T.dome[0], DOME_T.dome[1]);
   const lift = (p: V3): V3 => [p[0], p[1] + domeK * domeH(p[0], p[2]), p[2]];
+  // Before the dome rises, the lift moves nothing: the mesh as built.
+  const lifted = (m: Mesh) => (domeK === 0 ? m : deformBy(m, [domeK], lift));
   const squeeze = (pivot: number, k: number) => (p: V3): V3 => lift([pivot + (p[0] - pivot) * k, p[1], p[2]]);
   // The rim grows inwards from the wall: its vertices are pushed back towards the wall while it is thin.
   const rimMove = (data: Float32Array) => (p: V3, i: number): V3 => {
@@ -227,21 +229,23 @@ function frameAt(t: number) {
     c,
     rimK,
     lift,
+    // Each mesh is deformed again only when the numbers its movement depends on change: most played
+    // frames move none of them (the dome rises, the membranes close and the rim grows in short spans).
     meshes: {
-      septum: deform(G.septum, lift),
-      septumHit: deform(G.septumHit, lift),
-      mes: deform(G.mes, lift),
-      mesHit: deform(G.mesHit, lift),
-      memR: deform(G.mem[0], squeeze(MEM_PIVOT.right, memGrow)),
-      memL: deform(G.mem[1], squeeze(MEM_PIVOT.left, memGrow)),
-      memRHit: deform(G.memHit[0], squeeze(MEM_PIVOT.right, memGrow)),
-      memLHit: deform(G.memHit[1], squeeze(MEM_PIVOT.left, memGrow)),
-      canalR: deform(G.canal[0], (p) => [medial.right + (p[0] - medial.right) * open, p[1], p[2]]),
-      canalL: deform(G.canal[1], (p) => [medial.left + (p[0] - medial.left) * open, p[1], p[2]]),
-      canalRHit: deform(G.canalHit[0], (p) => [medial.right + (p[0] - medial.right) * open, p[1], p[2]]),
-      canalLHit: deform(G.canalHit[1], (p) => [medial.left + (p[0] - medial.left) * open, p[1], p[2]]),
-      rim: deform(G.rim, rimMove(G.rimWall)),
-      rimHit: deform(G.rimHit, rimMove(G.rimHitWall)),
+      septum: lifted(G.septum),
+      septumHit: lifted(G.septumHit),
+      mes: lifted(G.mes),
+      mesHit: lifted(G.mesHit),
+      memR: deformBy(G.mem[0], [domeK, memGrow], squeeze(MEM_PIVOT.right, memGrow)),
+      memL: deformBy(G.mem[1], [domeK, memGrow], squeeze(MEM_PIVOT.left, memGrow)),
+      memRHit: deformBy(G.memHit[0], [domeK, memGrow], squeeze(MEM_PIVOT.right, memGrow)),
+      memLHit: deformBy(G.memHit[1], [domeK, memGrow], squeeze(MEM_PIVOT.left, memGrow)),
+      canalR: deformBy(G.canal[0], [open], (p) => [medial.right + (p[0] - medial.right) * open, p[1], p[2]]),
+      canalL: deformBy(G.canal[1], [open], (p) => [medial.left + (p[0] - medial.left) * open, p[1], p[2]]),
+      canalRHit: deformBy(G.canalHit[0], [open], (p) => [medial.right + (p[0] - medial.right) * open, p[1], p[2]]),
+      canalLHit: deformBy(G.canalHit[1], [open], (p) => [medial.left + (p[0] - medial.left) * open, p[1], p[2]]),
+      rim: deformBy(G.rim, [domeK, rimK], rimMove(G.rimWall)),
+      rimHit: deformBy(G.rimHit, [domeK, rimK], rimMove(G.rimHitWall)),
     },
   };
 }

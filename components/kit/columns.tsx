@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useReducer, useState } from 'react';
+import { useEffect, useLayoutEffect, useReducer, useState } from 'react';
 import { LabelDraw, labelGeom, labelSize } from './Label';
 import { LabelCollector, LabelCollectorContext, partState, useLabelScale, useScene, type LabelEntry } from './context';
 import type { SceneComponent, SceneProps } from '@/lib/sim/types';
@@ -194,8 +194,15 @@ export function arrangeLabels(entries: LabelEntry[], shape: Shape, o: { pillL?: 
   return moved;
 }
 
-/** The last seating of each label layer (see LabelLayer). */
-const seatings = new WeakMap<LabelCollector, { sig: string; moved: Map<string, Pos> }>();
+/**
+ * The last seating of each label layer (see LabelLayer): for each moved name, the name whose slot it
+ * took (the slot's place is read again each frame, so a reused seating follows slots that drift).
+ */
+const seatings = new WeakMap<LabelCollector, { sig: string; names: string; at: number; seat: Map<string, string> }>();
+/** While the points drift, the seating is searched again at most this often (ms); once still, at once. */
+const RESEAT_MS = 150;
+/** Time for the reseating throttle (none where there is no clock: every render searches, as before). */
+const clock = () => (typeof performance === 'undefined' ? -Infinity : performance.now());
 
 /** Draws every collected name, laid out by `arrangeLabels`. */
 function LabelLayer({ col, fixed }: { col: LabelCollector; fixed?: boolean }) {
@@ -218,29 +225,49 @@ function LabelLayer({ col, fixed }: { col: LabelCollector; fixed?: boolean }) {
   // the next, so the last seating is reused until it does (the search is the costly part of a frame).
   // Points that drift with the drawing count once they have moved a few units: who sits where only
   // changes when the order of the points does, never for a fraction of a unit.
-  let moved = new Map<string, Pos>();
+  // A view whose points keep drifting (a camera turning as it plays) would search again every few frames:
+  // with the same names drawn, the last seating is kept for up to RESEAT_MS, then searched again; a
+  // last search follows once the points are still.
+  const moved = new Map<string, Pos>();
+  let stale = false;
   if (!fixed) {
-    const sig =
-      `${scale.k},${scale.left},${scale.right}|` +
-      list
-        .filter(([, e]) => (e.show ?? 1) > 0.02)
-        .map(([k, e]) => [k, e.id, e.text ?? ctx.nameOf(e.id), e.x, e.y, q(e.ax), q(e.ay), e.align, e.small, e.noArrange, labelSize(partState(ctx, e.id), e.small)].join(','))
-        .join(';');
+    const drawn = list.filter(([, e]) => (e.show ?? 1) > 0.02);
+    const names = `${scale.k},${scale.left},${scale.right}|` + drawn.map(([k, e]) => [k, e.id, e.text ?? ctx.nameOf(e.id), e.align, e.small, e.noArrange, labelSize(partState(ctx, e.id), e.small)].join(',')).join(';');
+    const sig = names + '|' + drawn.map(([, e]) => [e.x, e.y, q(e.ax), q(e.ay)].join(',')).join(';');
     const last = seatings.get(col);
-    if (last?.sig === sig) moved = last.moved;
-    else {
+    const now = clock();
+    let seat: Map<string, string>;
+    if (last && (last.sig === sig || (last.names === names && now - last.at < RESEAT_MS))) {
+      seat = last.seat;
+      stale = last.sig !== sig;
+    } else {
       const byEntry = arrangeLabels(
         list.map(([, e]) => e),
         shape,
         { pillL: scale.left, pillR: scale.right },
       );
+      // Each new place is the home of another drawn name (its slot): remember whose.
+      seat = new Map();
       for (const [k, e] of list) {
         const m = byEntry.get(e);
-        if (m) moved.set(k, m);
+        if (!m) continue;
+        const owner = list.find(([, o]) => o.x === m.x && o.y === m.y && alignOf(o) === m.align);
+        if (owner) seat.set(k, owner[0]);
       }
-      seatings.set(col, { sig, moved });
+      seatings.set(col, { sig, names, at: now, seat });
+    }
+    const byKey = new Map(list);
+    for (const [k, owner] of seat) {
+      const o = byKey.get(owner);
+      if (o) moved.set(k, { x: o.x, y: o.y, align: alignOf(o) });
     }
   }
+  // Kept for a moment while the points drifted: searched again once they have settled.
+  useEffect(() => {
+    if (!stale) return;
+    const id = window.setTimeout(redraw, RESEAT_MS + 10);
+    return () => window.clearTimeout(id);
+  });
   return (
     <>
       {list.map(([k, e]) => {

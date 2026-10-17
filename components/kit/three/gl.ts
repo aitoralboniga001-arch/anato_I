@@ -212,8 +212,9 @@ void main() {
     vessels = mix(0.02, vessels, vk);
   } else if (uKind < 1.5) {          // muscle: fibres running along the mass (24 per unit of u)
     float fk = keep(fwidth(vUv.x) * 24.0);
-    float f = fk > 0.004 ? sin(vUv.x * 150.0 + fbm(vObj, 5.0) * 4.0) * fk : 0.0;
-    tex = f * 0.32 + (fbm(vObj, 12.0) - 0.5) * 0.5;
+    // In bundles that come and go over the wall: one even ring after another reads as a rendering fault.
+    float f = fk > 0.004 ? sin(vUv.x * 150.0 + fbm(vObj, 5.0) * 4.0) * fk * smoothstep(0.3, 0.75, noise(vObj * 6.0 + 1.7)) : 0.0;
+    tex = f * 0.22 + (fbm(vObj, 12.0) - 0.5) * 0.5;
   } else if (uKind < 2.5) {          // mesenchyme: scattered cells
     float ck = keep(34.0 * px);
     float c = mix(0.12, ck > 0.004 ? smoothstep(0.62, 0.78, noise(vObj * 34.0)) : 0.0, ck);
@@ -410,7 +411,29 @@ const edgeMaterial = (stream?: StreamUniforms) =>
     side: BackSide,
   });
 
+/**
+ * The most pixels a 3D picture is drawn with (drawing buffer, before multisampling). A view at its usual
+ * size on a 2× screen stays under it and keeps the full density; a picture blown up (full screen on a
+ * large high-density screen) is drawn a little softer instead of with up to twice the pixels: the GPU of
+ * a thin laptop shares its memory and its heat with everything else.
+ */
+const PIXEL_BUDGET = 3.2e6;
+
+/**
+ * Once a WebGL context has been lost (the GPU driver reset, or the browser took it back), the 3D views
+ * draw their flat picture for the rest of the visit: asking the GPU again right away could make it fail again.
+ */
+let glLost = false;
+const lostListeners = new Set<() => void>();
+export const glWasLost = () => glLost;
+/** Called once if the GPU is lost; returns the unsubscribe. */
+export function onGLLost(cb: () => void) {
+  lostListeners.add(cb);
+  return () => lostListeners.delete(cb);
+}
+
 export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null {
+  if (glLost) return null;
   let onReady = ready;
   let hideTimer = 0;
   // Woken from the pool: the first frame drawn for the new view shows the canvas again.
@@ -422,9 +445,19 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
   } catch {
     return null;
   }
+  const ratioFor = (w: number, h: number) => Math.min(2, window.devicePixelRatio || 1, Math.sqrt(PIXEL_BUDGET / Math.max(1, w * h)));
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   renderer.setClearColor(0x000000, 0);
   host.appendChild(canvas);
+  let lost = false;
+  const onLost = () => {
+    if (lost) return;
+    lost = true;
+    glLost = true;
+    canvas.style.visibility = 'hidden';
+    lostListeners.forEach((cb) => cb());
+  };
+  canvas.addEventListener('webglcontextlost', onLost);
   const scene = new Scene();
   const camera = new Camera();
   camera.matrixAutoUpdate = false;
@@ -442,6 +475,8 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
   const ro = new ResizeObserver(() => {
     const r = host.getBoundingClientRect();
     size = { w: Math.max(1, Math.round(r.width)), h: Math.max(1, Math.round(r.height)) };
+    const ratio = ratioFor(size.w, size.h);
+    if (Math.abs(renderer.getPixelRatio() - ratio) > 0.01) renderer.setPixelRatio(ratio);
     renderer.setSize(size.w, size.h, false);
     dirty = true;
     kick();
@@ -596,7 +631,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
 
   function draw(dt: number) {
     // The followed drawing just left the page (its view is being replaced): keep the last picture.
-    if (!frame || !compiled || (sceneEl && !sceneEl.isConnected)) return false;
+    if (lost || !frame || !compiled || (sceneEl && !sceneEl.isConnected)) return false;
     // The picture fades with its drawing (a view fading in, a camera move between views).
     const o = seen();
     let faded = false;
@@ -667,7 +702,18 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
     renderer.render(scene, camera);
     perfCount('glRender');
     // The performance harness times the GPU on the picture last drawn (only when it turned the counters on).
-    if ((globalThis as { __perf?: object }).__perf) (globalThis as { __glBench?: typeof bench }).__glBench = bench;
+    if ((globalThis as { __perf?: object }).__perf) {
+      (globalThis as { __glBench?: typeof bench }).__glBench = bench;
+      // And what that picture costs: draw calls, triangles, the drawing buffer's size, what the GPU holds.
+      (globalThis as { __glInfo?: () => object }).__glInfo = () => ({
+        calls: renderer.info.render.calls,
+        triangles: renderer.info.render.triangles,
+        w: canvas.width,
+        h: canvas.height,
+        geometries: renderer.info.memory.geometries,
+        programs: renderer.info.programs?.length ?? 0,
+      });
+    }
     if (!shown) {
       shown = true;
       canvas.classList.add('is-ready');
@@ -686,7 +732,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
    * read makes it), giving the time per picture. Never called by the app.
    */
   function bench(n = 30) {
-    if (!frame || !shown) return null;
+    if (lost || !frame || !shown) return null;
     const gl = renderer.getContext();
     const px = new Uint8Array(4);
     renderer.render(scene, camera);
@@ -730,6 +776,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
 
   return {
     frame(f) {
+      if (lost) return;
       frame = f;
       lightV.set(f.light[0], f.light[1], f.light[2]).normalize();
       sync(f);
@@ -761,6 +808,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
     },
     dispose() {
       waker.stop();
+      canvas.removeEventListener('webglcontextlost', onLost);
       ro.disconnect();
       svgRo.disconnect();
       mo.disconnect();

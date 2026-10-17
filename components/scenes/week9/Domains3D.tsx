@@ -10,7 +10,7 @@ import type { Item3, Scene3 } from '@/lib/three-d/scene';
 import { flyIn, reveal } from '@/lib/three-d/flyin';
 import { EMBRYO5 } from '@/lib/three-d/embryo5';
 import { geoOf, geoSlot, useGeoReady } from '@/lib/three-d/offthread';
-import { deform, ellipsoid, mirrorX, polyline2, prismZ, smin, surfaceMesh, type SDF } from '@/lib/three-d/sdf';
+import { deformBy, ellipsoid, mirrorX, polyline2, prismZ, smin, surfaceMesh, type SDF } from '@/lib/three-d/sdf';
 import { HUE, W, vis } from './common';
 
 /**
@@ -162,21 +162,24 @@ function cat(m: Mesh, r: Mesh): Mesh {
 
 function build(): Geo {
   /** Mesh a field finely and coarsely (the coarse one a little inflated so thin sheets survive); `both` mirrors it to the left. */
-  const mk = (f: SDF, lo: V3, hi: V3, step: number, both = false, hitStep = 0.07): Pair => {
+  const mk = (f: SDF, lo: V3, hi: V3, step: number | V3, both = false, hitStep = 0.07): Pair => {
     const pad = hitStep * 0.45;
     const m = surfaceMesh(f, lo, hi, step);
     const h = surfaceMesh((x, y, z) => f(x, y, z) - pad, [lo[0] - pad, lo[1] - pad, lo[2] - pad], [hi[0] + pad, hi[1] + pad, hi[2] + pad], hitStep);
     return both ? { m: cat(m, mirrorX(m)), h: cat(h, mirrorX(h)) } : { m, h };
   };
   const zr: [number, number] = [Z0 - 0.04, Z1 + 0.04];
+  // The block is a slice of the trunk: most parts are the same all along it (extruded), and need few
+  // grid cells along it (the cut faces, in x and y, keep the fine step). Only the somites change along it.
+  const along = (step: number): V3 => [step, step, 0.04];
   // Neural tube with its slit-like lumen (seen on the cut face), notochord under it.
   const neuralF: SDF = (x, y, z) => {
     const e = Math.hypot(x / 0.17, (y - 0.55) / 0.3);
     const lumen = Math.hypot(x / 0.028, (y - 0.56) / 0.2);
     return cut(Math.max((e - 1) * 0.17, -(lumen - 1) * 0.028), slabZ(z, Z0, Z1), 0.03);
   };
-  const neural = mk(neuralF, [-0.2, 0.2, zr[0]], [0.2, 0.9, zr[1]], 0.02);
-  const noto = mk(prismZ((x, y) => Math.hypot(x, y - 0.13) - 0.065, Z0, Z1, 0.03), [-0.09, 0.03, zr[0]], [0.09, 0.23, zr[1]], 0.018);
+  const neural = mk(neuralF, [-0.2, 0.2, zr[0]], [0.2, 0.9, zr[1]], along(0.02));
+  const noto = mk(prismZ((x, y) => Math.hypot(x, y - 0.13) - 0.065, Z0, Z1, 0.03), [-0.09, 0.03, zr[0]], [0.09, 0.23, zr[1]], along(0.018));
   // Sclerotome: mesenchyme gathering round the notochord and the neural tube, one condensation per somite.
   const scl = SOMITES.map((zs) => ellipsoid([0.2, 0.22, zs], [0.2, 0.24, 0.25]));
   const scleroF = clipZ(
@@ -200,14 +203,14 @@ function build(): Geo {
     for (let i = 0; i < 3; i++) d = smin(d, cut(outer[i](x, y, z), -inner[i](x, y, z), 0.012), 0.03);
     return cut(d, 0.55 - y, 0.015);
   });
-  const dermato = mk(capF, [0.18, 0.5, zr[0]], [0.78, 0.78, zr[1]], 0.011, true);
+  const dermato = mk(capF, [0.18, 0.5, zr[0]], [0.78, 0.78, zr[1]], 0.0135, true);
   const myo = mk(somiteF([0.48, 0.55, 0], [0.19, 0.09, 0.2]), [0.24, 0.42, zr[0]], [0.72, 0.68, zr[1]], 0.014, true);
-  const inter = mk(prismZ((x, y) => Math.hypot(x - 0.65, y - 0.07) - 0.075, Z0, Z1, 0.03), [0.54, -0.04, zr[0]], [0.76, 0.18, zr[1]], 0.016, true);
-  const aorta = mk(prismZ((x, y) => Math.hypot(x - 0.2, y + 0.06) - 0.07, Z0, Z1, 0.03), [0.1, -0.16, zr[0]], [0.3, 0.04, zr[1]], 0.016, true);
-  const gut = mk(prismZ((x, y) => Math.hypot(x, y + 0.42) - 0.11, Z0, Z1, 0.03), [-0.14, -0.56, zr[0]], [0.14, -0.28, zr[1]], 0.016);
+  const inter = mk(prismZ((x, y) => Math.hypot(x - 0.65, y - 0.07) - 0.075, Z0, Z1, 0.03), [0.54, -0.04, zr[0]], [0.76, 0.18, zr[1]], along(0.016), true);
+  const aorta = mk(prismZ((x, y) => Math.hypot(x - 0.2, y + 0.06) - 0.07, Z0, Z1, 0.03), [0.1, -0.16, zr[0]], [0.3, 0.04, zr[1]], along(0.016), true);
+  const gut = mk(prismZ((x, y) => Math.hypot(x, y + 0.42) - 0.11, Z0, Z1, 0.03), [-0.14, -0.56, zr[0]], [0.14, -0.28, zr[1]], along(0.016));
   const par2 = polyline2(PARIETAL);
   const sheet = (d2: (u: number, v: number) => number, half: number) => prismZ((x, y) => d2(x, y) - half, Z0, Z1, Math.min(0.03, half * 0.8));
-  const parietal = mk(sheet(par2, 0.04), [0.25, -1.24, zr[0]], [1.14, 0.1, zr[1]], 0.016, true);
+  const parietal = mk(sheet(par2, 0.04), [0.25, -1.24, zr[0]], [1.14, 0.1, zr[1]], along(0.021), true);
   // The visceral layer: from the intermediate mesoderm round the gut.
   const vis2 = polyline2(VISCERAL);
   const visF: SDF = (x, y, z) => {
@@ -215,13 +218,13 @@ function build(): Geo {
     const strip = vis2(Math.abs(x), y) - 0.03;
     return cut(Math.min(ring, strip), slabZ(z, Z0, Z1), 0.025);
   };
-  const visceral = mk(visF, [-0.7, -0.62, zr[0]], [0.7, 0.05, zr[1]], 0.016);
+  const visceral = mk(visF, [-0.7, -0.62, zr[0]], [0.7, 0.05, zr[1]], along(0.016));
   const ecto2 = polyline2(ECTO);
-  const ecto = mk((x, y, z) => cut(ecto2(Math.abs(x), y) - 0.03, slabZ(z, Z0, SKIN_END), 0.025), [-1.2, -1.32, zr[0]], [1.2, 0.96, SKIN_END + 0.04], 0.02);
-  const frontier = mk(sheet(polyline2(FRONTIER), 0.016), [0.64, -0.03, zr[0]], [0.86, 0.8, zr[1]], 0.011, true);
+  const ecto = mk((x, y, z) => cut(ecto2(Math.abs(x), y) - 0.03, slabZ(z, Z0, SKIN_END), 0.025), [-1.2, -1.32, zr[0]], [1.2, 0.96, SKIN_END + 0.04], along(0.026));
+  const frontier = mk(sheet(polyline2(FRONTIER), 0.016), [0.64, -0.03, zr[0]], [0.86, 0.8, zr[1]], along(0.011), true);
   const prim2 = polygonXY(PRIM);
-  const prim = mk(clipZ(sym((x, y) => prim2(x, y)), Z0, Z1, 0.04), [-0.85, -0.02, zr[0]], [0.85, 0.9, zr[1]], 0.024);
-  const abax = mk(sheet(par2, 0.085), [0.18, -1.32, zr[0]], [1.22, 0.18, zr[1]], 0.024, true);
+  const prim = mk(clipZ(sym((x, y) => prim2(x, y)), Z0, Z1, 0.04), [-0.85, -0.02, zr[0]], [0.85, 0.9, zr[1]], along(0.024));
+  const abax = mk(sheet(par2, 0.085), [0.18, -1.32, zr[0]], [1.22, 0.18, zr[1]], along(0.03), true);
   return { neural, noto, sclero, dermato, myo, inter, aorta, gut, parietal, visceral, ecto, frontier, prim, abax, cell: blob({ center: [0, 0, 0], radii: [0.04, 0.04, 0.04], rings: 6, sides: 8 }) };
 }
 
@@ -272,8 +275,9 @@ export function buildDomains(t: number, reduced: boolean) {
   const abax = seg(t, DOM3_T.abax[0], DOM3_T.abax[1]);
   // The curtain grows down from the skin.
   const grow = (p: V3): V3 => [p[0], 0.74 + (p[1] - 0.74) * Math.max(0.02, front), p[2]];
-  const frontier = front >= 1 ? G.frontier.m : deform(G.frontier.m, grow);
-  const frontierHit = front >= 1 ? G.frontier.h : deform(G.frontier.h, grow);
+  // Grown only while it shows, and again only when it has grown further.
+  const frontier = front >= 1 || front <= 0.01 ? G.frontier.m : deformBy(G.frontier.m, [front], grow);
+  const frontierHit = front >= 1 || front <= 0.01 ? G.frontier.h : deformBy(G.frontier.h, [front], grow);
   const items: Item3[] = [
     { key: 'ecto', id: 'azaleko-ektodermoa', quiet: true, mesh: G.ecto.m, hit: G.ecto.h, color: '#cfdcf5', deep: '#7c8fb8', tissue: 'epithelium', opacity: 0.3, outline: false },
     { key: 'neural', id: 'hodi-neurala', mesh: G.neural.m, hit: G.neural.h, color: '#5577e6', deep: '#26398a', tissue: 'neural' },
@@ -308,10 +312,11 @@ export function buildDomains(t: number, reduced: boolean) {
       });
     }
   });
-  // Camera: from the cranial end, above and to the side; it drifts round as the steps go by.
-  const drift = seg(t, 0, 1, (q) => q);
-  const yaw = deg(24 + 16 * drift);
-  const elev = deg(22 - 4 * drift);
+  // Hold the teaching angle after the fly-in. A slow continuous orbit made every label and hit
+  // outline move during reading and kept projecting the whole specimen even after migration ended.
+  // The viewer can still turn it explicitly with the orbit controls.
+  const yaw = deg(32);
+  const elev = deg(20);
   const dist = 4.7;
   const target: V3 = [0.3, 0.02, 0.2];
   const eye = add(target, [Math.sin(yaw) * Math.cos(elev) * dist, Math.sin(elev) * dist, Math.cos(yaw) * Math.cos(elev) * dist]);

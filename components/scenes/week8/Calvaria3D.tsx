@@ -453,7 +453,7 @@ export function buildCalvaria(t: number, reduced: boolean) {
     { key: 'base', id: 'kondrokraneoa', quiet: true, mesh: G.base.m, hit: G.base.h, color: Q.cart, deep: Q.cartDeep, tissue: 'cartilage' },
     { key: 'face', id: 'errai-kraneoa', quiet: true, mesh: G.face.m, hit: G.face.h, color: '#dccfb2', deep: '#8a7a58', tissue: 'bone' },
     { key: 'ear', mesh: G.ear.m, hit: G.ear.h, color: '#1a1410', deep: '#000000', tissue: 'bone', outline: false },
-    { key: 'membrane', id: 'buru-ganga', quiet: true, mesh: G.membrane.m, hit: G.membrane.h, color: '#a9cbe0', deep: '#3a6884', tissue: 'membrane' },
+    { key: 'membrane', id: 'buru-ganga', quiet: true, mesh: G.membrane.m, hit: G.membrane.h, color: '#a9cbe0', deep: '#3a6884', tissue: 'membrane', outline: false },
   );
   BONES.forEach((b, i) => {
     if (grow < 0.005) return;
@@ -470,12 +470,14 @@ export function buildCalvaria(t: number, reduced: boolean) {
   });
   if (sutures > 0.01)
     G.sutures.forEach((s, i) =>
-      items.push({ key: `sut${i}`, id: s.id, groups: s.groups, mesh: s.m.m, hit: s.m.h, matrix: mould(mold, [0, 0, 0]), color: Q.suture, deep: '#1a4a6a', tissue: 'membrane', show: sutures, clip: { o: O, holes } }),
+      // These strips sit just below bone: an inflated back-face outline pokes through the plates
+      // as black teeth. Their blue surface already marks the groove without an extra rim.
+      items.push({ key: `sut${i}`, id: s.id, groups: s.groups, mesh: s.m.m, hit: s.m.h, matrix: mould(mold, [0, 0, 0]), color: Q.suture, deep: '#1a4a6a', tissue: 'membrane', show: sutures, clip: { o: O, holes }, outline: false }),
     );
   if (sutures > 0.01)
     FONT_AT.forEach((f, i) => {
       if (fontSize[i] < 0.01) return;
-      items.push({ key: `font${i}`, id: f.id, groups: ['fontanelak'], mesh: G.fonts[i].m, hit: G.fonts[i].h, matrix: mould(mold, [0, 0, 0]), color: '#7cc8f0', deep: '#1a4a6a', tissue: 'membrane', show: sutures, clip: { o: O, keep: holes[i] } });
+      items.push({ key: `font${i}`, id: f.id, groups: ['fontanelak'], mesh: G.fonts[i].m, hit: G.fonts[i].h, matrix: mould(mold, [0, 0, 0]), color: '#7cc8f0', deep: '#1a4a6a', tissue: 'membrane', show: sutures, clip: { o: O, keep: holes[i] }, outline: false });
     });
   const c = camAt(t);
   const target: V3 = [0, 0.02, 0];

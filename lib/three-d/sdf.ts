@@ -89,11 +89,14 @@ export function surfaceAlong(f: SDF, from: V3, dir: V3, maxLen = 3): { p: V3; n:
 /**
  * Surface nets: one vertex per grid cell the surface crosses (the mean of its edge crossings, then
  * pulled onto the surface), one quad per crossed grid edge. Smooth normals from the field itself.
+ * `step` is the grid spacing, or one per axis: a shape that does not change along an axis (a slice
+ * of the body, extruded) needs few cells along it.
  */
-export function surfaceMesh(f: SDF, min: V3, max: V3, step: number): Mesh {
-  const nx = Math.ceil((max[0] - min[0]) / step) + 1;
-  const ny = Math.ceil((max[1] - min[1]) / step) + 1;
-  const nz = Math.ceil((max[2] - min[2]) / step) + 1;
+export function surfaceMesh(f: SDF, min: V3, max: V3, step: number | V3): Mesh {
+  const [hx, hy, hz]: V3 = typeof step === 'number' ? [step, step, step] : step;
+  const nx = Math.ceil((max[0] - min[0]) / hx) + 1;
+  const ny = Math.ceil((max[1] - min[1]) / hy) + 1;
+  const nz = Math.ceil((max[2] - min[2]) / hz) + 1;
   const at = (i: number, j: number, k: number) => i + nx * (j + ny * k);
   const val = new Float32Array(nx * ny * nz);
   // Narrow band: a coarse grid first; fine samples only where the surface can be near.
@@ -104,13 +107,13 @@ export function surfaceMesh(f: SDF, min: V3, max: V3, step: number): Mesh {
   const coarse = new Float32Array(cx * cy * cz);
   for (let k = 0; k < cz; k++)
     for (let j = 0; j < cy; j++)
-      for (let i = 0; i < cx; i++) coarse[i + cx * (j + cy * k)] = f(min[0] + i * B * step, min[1] + j * B * step, min[2] + k * B * step);
-  const reach = B * step * 1.9;
+      for (let i = 0; i < cx; i++) coarse[i + cx * (j + cy * k)] = f(min[0] + i * B * hx, min[1] + j * B * hy, min[2] + k * B * hz);
+  const reach = B * Math.max(hx, hy, hz) * 1.9;
   for (let k = 0; k < nz; k++)
     for (let j = 0; j < ny; j++)
       for (let i = 0; i < nx; i++) {
         const c = coarse[Math.round(i / B) + cx * (Math.round(j / B) + cy * Math.round(k / B))];
-        val[at(i, j, k)] = Math.abs(c) > reach ? c : f(min[0] + i * step, min[1] + j * step, min[2] + k * step);
+        val[at(i, j, k)] = Math.abs(c) > reach ? c : f(min[0] + i * hx, min[1] + j * hy, min[2] + k * hz);
       }
   const cellVert = new Int32Array(nx * ny * nz).fill(-1);
   const pos: number[] = [];
@@ -146,9 +149,9 @@ export function surfaceMesh(f: SDF, min: V3, max: V3, step: number): Mesh {
           sz += ca[2] + (cb[2] - ca[2]) * t;
           n++;
         }
-        let p: V3 = [min[0] + (i + sx / n) * step, min[1] + (j + sy / n) * step, min[2] + (k + sz / n) * step];
+        let p: V3 = [min[0] + (i + sx / n) * hx, min[1] + (j + sy / n) * hy, min[2] + (k + sz / n) * hz];
         // Pull the vertex onto the surface (one Newton step along the field's gradient).
-        const g = gradient(f, p, step * 0.3);
+        const g = gradient(f, p, Math.min(hx, hy, hz) * 0.3);
         p = sub(p, mul(g, f(p[0], p[1], p[2])));
         cellVert[at(i, j, k)] = pos.length / 3;
         pos.push(p[0], p[1], p[2]);
@@ -190,33 +193,71 @@ export function surfaceMesh(f: SDF, min: V3, max: V3, step: number): Mesh {
 }
 
 /**
- * Split a mesh in two by which side each triangle's centre is on (e.g. a limb's flexor and extensor
- * halves, coloured and named apart). Vertices on the border are shared by both halves.
+ * Split a mesh at a side boundary (e.g. a limb's flexor and extensor halves). Triangles crossing it
+ * are clipped, rather than coloured whole: otherwise the colour boundary looks like saw teeth.
+ * Both halves reuse the same edge intersections, so there is no gap or overlapping seam.
  */
 export function partition(m: Mesh, side: (c: V3) => boolean): [Mesh, Mesh] {
-  const out = [0, 1].map(() => ({ map: new Map<number, number>(), pos: [] as number[], nrm: [] as number[], idx: [] as number[] }));
+  const points: V3[] = [];
+  const normals: V3[] = [];
+  const uvs: [number, number][] = [];
+  const sides: boolean[] = [];
+  for (let i = 0; i < m.pos.length / 3; i++) {
+    const p: V3 = [m.pos[i * 3], m.pos[i * 3 + 1], m.pos[i * 3 + 2]];
+    points.push(p);
+    normals.push([m.nrm[i * 3], m.nrm[i * 3 + 1], m.nrm[i * 3 + 2]]);
+    uvs.push([m.uv[i * 2], m.uv[i * 2 + 1]]);
+    sides.push(side(p));
+  }
+  const crossings = new Map<string, number>();
+  const crossing = (a0: number, b0: number) => {
+    const a = Math.min(a0, b0), b = Math.max(a0, b0);
+    const key = `${a},${b}`;
+    const hit = crossings.get(key);
+    if (hit !== undefined) return hit;
+    const at = (k: number): V3 => add(points[a], mul(sub(points[b], points[a]), k));
+    let lo = 0, hi = 1;
+    for (let i = 0; i < 14; i++) {
+      const mid = (lo + hi) / 2;
+      if (side(at(mid)) === sides[a]) lo = mid;
+      else hi = mid;
+    }
+    const k = (lo + hi) / 2;
+    const id = points.length;
+    points.push(at(k));
+    normals.push(norm(add(normals[a], mul(sub(normals[b], normals[a]), k))));
+    uvs.push([uvs[a][0] + (uvs[b][0] - uvs[a][0]) * k, uvs[a][1] + (uvs[b][1] - uvs[a][1]) * k]);
+    crossings.set(key, id);
+    return id;
+  };
+  const out = [0, 1].map(() => ({ map: new Map<number, number>(), pos: [] as number[], nrm: [] as number[], uv: [] as number[], idx: [] as number[] }));
   for (let t = 0; t < m.idx.length; t += 3) {
     const a = m.idx[t];
     const b = m.idx[t + 1];
     const c = m.idx[t + 2];
-    const cen: V3 = [
-      (m.pos[a * 3] + m.pos[b * 3] + m.pos[c * 3]) / 3,
-      (m.pos[a * 3 + 1] + m.pos[b * 3 + 1] + m.pos[c * 3 + 1]) / 3,
-      (m.pos[a * 3 + 2] + m.pos[b * 3 + 2] + m.pos[c * 3 + 2]) / 3,
-    ];
-    const o = out[side(cen) ? 0 : 1];
-    for (const v of [a, b, c]) {
-      let i = o.map.get(v);
-      if (i === undefined) {
-        i = o.pos.length / 3;
-        o.map.set(v, i);
-        o.pos.push(m.pos[v * 3], m.pos[v * 3 + 1], m.pos[v * 3 + 2]);
-        o.nrm.push(m.nrm[v * 3], m.nrm[v * 3 + 1], m.nrm[v * 3 + 2]);
+    for (const [half, o] of out.entries()) {
+      const polygon: number[] = [];
+      const tri = [a, b, c];
+      for (let j = 0; j < 3; j++) {
+        const p = tri[j], q = tri[(j + 1) % 3];
+        if (sides[p] === (half === 0)) polygon.push(p);
+        if (sides[p] !== sides[q]) polygon.push(crossing(p, q));
       }
-      o.idx.push(i);
+      const ids = polygon.map(v => {
+        let i = o.map.get(v);
+        if (i === undefined) {
+          i = o.pos.length / 3;
+          o.map.set(v, i);
+          o.pos.push(...points[v]);
+          o.nrm.push(...normals[v]);
+          o.uv.push(...uvs[v]);
+        }
+        return i;
+      });
+      for (let j = 1; j < ids.length - 1; j++) o.idx.push(ids[0], ids[j], ids[j + 1]);
     }
   }
-  const [p, q] = out.map((o) => ({ pos: new Float32Array(o.pos), nrm: new Float32Array(o.nrm), uv: new Float32Array((o.pos.length / 3) * 2), idx: new Uint32Array(o.idx) }));
+  const [p, q] = out.map((o) => ({ pos: new Float32Array(o.pos), nrm: new Float32Array(o.nrm), uv: new Float32Array(o.uv), idx: new Uint32Array(o.idx) }));
   return [p, q];
 }
 
@@ -281,6 +322,24 @@ export function deform(m: Mesh, move: (p: V3, i: number) => V3, e = 0.01): Mesh 
     nrm[i + 2] = nn[2];
   }
   return { pos, nrm, uv: m.uv, idx: m.idx };
+}
+
+const deformed = new WeakMap<Mesh, Map<string, Mesh>>();
+/**
+ * `deform`, remembered: `params` are the numbers `move` depends on (with the mesh, they fix the result),
+ * so a played frame where they did not change reuses the last deformation instead of redoing it. `slot`
+ * tells apart two deformations of the same mesh in one frame. Only the last result per slot is kept.
+ */
+export function deformBy(m: Mesh, params: readonly number[], move: (p: V3, i: number) => V3, slot = ''): Mesh {
+  let byMesh = deformed.get(m);
+  if (!byMesh) deformed.set(m, (byMesh = new Map()));
+  const key = `${slot}|${params.join(',')}`;
+  const hit = byMesh.get(key);
+  if (hit) return hit;
+  for (const k of byMesh.keys()) if (k.startsWith(`${slot}|`)) byMesh.delete(k);
+  const out = deform(m, move);
+  byMesh.set(key, out);
+  return out;
 }
 
 /** Unsigned distance to an open 2D curve (a sheet's mid-line), in whatever plane the caller uses. */

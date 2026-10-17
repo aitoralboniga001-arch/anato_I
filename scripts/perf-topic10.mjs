@@ -13,6 +13,7 @@ import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const PORT = 9341;
 const STAGES = ['bihotz-hodia', 'zirkulazio-goiztiarra', 'bihotz-atalak', 'bihotz-lakioa', 'atal-bulbarra', 'atal-bentrikularra', 'atal-aurikularra', 'zain-sinua', 'eskuineko-aurikula'];
@@ -56,7 +57,7 @@ window.__frames = (ms) => new Promise((done) => {
 `;
 
 async function launch(profile) {
-  const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${PORT}`, `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--use-angle=d3d11', '--ignore-gpu-blocklist', '--window-size=1440,900', 'about:blank'], { stdio: 'ignore' });
+  const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${PORT}`, `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--use-angle=d3d11', '--window-size=1440,900', 'about:blank'], { stdio: 'ignore', windowsHide: true });
   for (let i = 0; i < 50; i++) {
     try {
       const list = await (await fetch(`http://127.0.0.1:${PORT}/json/list`)).json();
@@ -74,6 +75,7 @@ function cdp(url) {
   let id = 0;
   const pending = new Map();
   const waiters = [];
+  const listeners = new Map();
   ws.onmessage = (m) => {
     const msg = JSON.parse(m.data);
     if (msg.id && pending.has(msg.id)) {
@@ -81,13 +83,21 @@ function cdp(url) {
       pending.delete(msg.id);
       if (msg.error) ko(new Error(msg.error.message));
       else ok(msg.result);
-    } else if (msg.method) for (const w of [...waiters]) if (w.method === msg.method) { waiters.splice(waiters.indexOf(w), 1); w.ok(msg.params); }
+    } else if (msg.method) {
+      for (const w of [...waiters]) if (w.method === msg.method) { waiters.splice(waiters.indexOf(w), 1); w.ok(msg.params); }
+      listeners.get(msg.method)?.forEach(fn => fn(msg.params));
+    }
   };
   const open = new Promise((r) => (ws.onopen = r));
   return {
     open,
+    on: (method, fn) => { if (!listeners.has(method)) listeners.set(method, new Set()); listeners.get(method).add(fn); },
     send: (method, params = {}) => new Promise((ok, ko) => { pending.set(++id, { ok, ko }); ws.send(JSON.stringify({ id, method, params })); }),
-    once: (method, ms = 30000) => new Promise((ok, ko) => { const w = { method, ok }; waiters.push(w); setTimeout(() => ko(new Error(`timeout ${method}`)), ms); }),
+    once: (method, ms = 30000) => new Promise((ok, ko) => {
+      const w = { method, ok: value => { clearTimeout(timer); ok(value); } };
+      const timer = setTimeout(() => { const i = waiters.indexOf(w); if (i >= 0) waiters.splice(i, 1); ko(new Error(`timeout ${method}`)); }, ms);
+      waiters.push(w);
+    }),
     close: () => ws.close(),
   };
 }
@@ -290,6 +300,10 @@ async function compare(a, b) {
   }
 }
 
-const [cmd = 'run', ...args] = process.argv.slice(2);
-if (cmd === 'compare') await compare(resolve(args[0]), resolve(args[1]));
-else await run(args[0] ?? 'http://localhost:3100', args[1] ?? 'docs/perf/topic10-baseline');
+export { launch, cdp, evaluate, measure, sleep, PRELUDE, compare };
+
+if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
+  const [cmd = 'run', ...args] = process.argv.slice(2);
+  if (cmd === 'compare') await compare(resolve(args[0]), resolve(args[1]));
+  else await run(args[0] ?? 'http://localhost:3100', args[1] ?? 'docs/perf/topic10-baseline');
+}

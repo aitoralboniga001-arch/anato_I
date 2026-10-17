@@ -91,3 +91,40 @@ Averages over the six blood-flow views (stages 3, 4, 6, 7, 8 and 9; playing, 144
 
 Pictures are within 0.13% of Batch 4. From this run on, a stage's later blood point gets its own shot (`flow-zain-sinua@0.45.png`). Before, it overwrote the first one.
 
+## Batch 6: crash safety + polish (2026-10-17)
+
+The reproducible all-topic survey is now `scripts/perf-3d-polish.mjs`. It measures all 13 3D views at 1536×960 CSS pixels, DPR 2, stage time 0.55, and captures held and eight-wheel-tick close-ups. `polish-batch6-before/results.json` is commit `25fae30`, built in an isolated temporary source copy; `polish-batch6/results.json` is this batch. Both use the Radeon 780M through ANGLE D3D11. The baseline copy only changes Turbopack's filesystem root so it can use the existing dependency junction.
+
+| View / measure | Before | After |
+|---|---:|---:|
+| Topic 7 diaphragm, played main thread | 1030 ms/s | 591 ms/s |
+| Topic 7, frame p95 | 33.4 ms | 16.8 ms |
+| Topic 9 domains, played main thread | 1037.4 ms/s | 756.5 ms/s |
+| Topic 9, frame p95 | 33.5 ms | 17.0 ms |
+| Topic 9, draw + completion time per picture | 7.46 ms | 3.64 ms |
+| Topic 8 calvaria, drawn triangles including outlines | 292,724 (previous survey) | 240,544 |
+
+The final run records CPU reductions of about 43% (diaphragm) and 27% (domains). An earlier repeat recorded about 49–50%; these short samples vary. Domains also caught a one-off 235 ms main-thread task in the final playback sample, visible in the raw result. The GPU sample is **not** a hardware timer query: it includes CPU submission and a readback waiting for completion. This survey uses the median of three eight-draw samples, with one browser and cooling gaps between views; the older harness used five thirty-draw samples. Compare the new before/after pair, not these absolute GPU values with the earlier table. The domains' hoped-for 2 ms GPU target was not reached; the CPU/frame-time improvement is clearer across repeats. An earlier after-pass measured 7.10 ms per picture versus the final 3.64 ms, so a repeatable GPU saving of a particular size has not been established. Its drawn triangles fell from the previous survey's 1.18 million to 555,704, but translucent overdraw and draw submission still cost time.
+
+Across all 13 sampled views, mean played main-thread work is 642.4→609.7 ms/s. Both runs report zero runtime exceptions. `pixel-diff.txt` records all 26 held/zoomed comparisons. At the held scale: diaphragm 0% changed; skull 0.084%; limb 0.025%; heart views 0.439–2.267%; domains 6.386% (the camera also changed). The largest close-up difference is domains at 16.598%; these are intentional appearance/framing changes, not a claim of pixel equivalence. The cut-face rims and landmarks were inspected visually as well. A 390×844, DPR 2, reduced-motion smoke survey of diaphragm, domains and the ventricular heart view is in `polish-batch6-mobile/results.json`; all three render without runtime exceptions.
+
+Changes and visual review:
+
+- Diaphragm deformations are cached by the parameters that actually move them. Domains use fewer samples along their extrusion and skip hidden/unchanged frontier deformation. Its camera holds after entry instead of slowly orbiting throughout playback; explicit orbit controls still work.
+- Label seating follows cached slot owners and searches at most every 150 ms while the anchors move, with a final settled update.
+- Heart seams nest the overlapping segment end. The AV canal is now a segment of the narrowed tube, rather than a raised sleeve intersecting it. Inflated outline hulls are omitted from the looped walls where they cut through the surface as false cracks. Both reported ventricular and atrial close-ups were inspected.
+- Muscle fibres are softer and broken into bundles. Internal skull membranes and sutures no longer have inflated outlines protruding through bone. The calvaria's sampling resolution was retained: its fontanelles and grooves are teaching landmarks, and removing the redundant outlines already reduced triangles.
+- Limb colour boundaries clip crossing triangles at a shared border instead of assigning whole triangles. This removes the red/blue saw teeth without opening a seam; draw triangles rise modestly (127,648 → 134,312), without changing the limb surface.
+- The shared tube bend guard was retained after the held/zoomed survey; it is not credited with fixing the heart crack. Remaining coarse venous junctions and anatomical suture edges can still be seen at high zoom; this batch does not claim seamless remeshing of every vessel junction.
+
+Crash mitigation and proof:
+
+- The drawing buffer is capped at 3.2 million pixels on resize. The browser check measured 2281×1402 pixels at a 2400×1600 CSS viewport, DPR 2, then successfully resized back.
+- A real `WEBGL_lose_context` event disposes the active renderer and switches to the SVG drawing. A subsequent flat→3D view switch stays flat for the rest of that document visit. No retries or mesh uploads to the lost context. `polish-batch6/fallback.json` records this check with no runtime exceptions.
+- The harness no longer bypasses the browser's GPU blocklist. Diagnostic globals are installed only when `__perf` is enabled.
+- TypeScript and the production build pass. Full Vitest: 31 files, 1084 tests pass; focused cache/partition/render-cost checks also pass after the final model changes. The final serial topic 10 label/visibility run passes all 51 selected checks (one concurrent run hit the existing 15-second per-test timeout; its isolated and serial reruns pass). Focused ESLint has the same eight existing errors (seven in `Stage3D.tsx`, one in `columns.tsx`), with no additional errors.
+
+The Windows event was re-read: Kernel-Power 41 records bugcheck 307 (`0x133`, `DPC_WATCHDOG_VIOLATION`). That confirms a watchdog timeout, **not which driver caused it**. The GPU attribution in the original handover remains unproven without a dump. See [Microsoft's diagnostic description](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0x133-dpc-watchdog-violation). Checking for a supported graphics-driver update is sensible; [AMD's official detection tool](https://www.amd.com/en/resources/support-articles/faqs/GPU-Driver-Autodetect.html) can identify available packages. No driver was installed by this work.
+
+Lessons for the next batch: cache deformation by pose inputs; throttle expensive label arrangement, then settle it; distinguish outline-hull artifacts from geometry cracks; avoid coincident sleeves over existing walls; clip material boundaries instead of colouring whole triangles; cap pixels independently of DPR; and verify context-loss disposal with an actual browser event.
+

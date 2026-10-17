@@ -72,13 +72,25 @@ export function tube(path: readonly V3[], o: TubeOptions): Mesh {
   const uv: number[] = [];
   const rows: V3[][] = [];
   const capRows = 4;
-  const ring = (f: Frame, u: number, scale: number, push: number) => {
+  // Where the path bends tighter than the tube is thick, neighbouring rings would cross on the inside of
+  // the bend and the wall fold through itself (a dark crease where its outline shows through). The inner
+  // side is drawn in instead, never reaching the centre of the bend: what a real bent tube does.
+  const bend = fr.map((f, i): V3 => {
+    const a = fr[Math.max(0, i - 1)];
+    const b = fr[Math.min(fr.length - 1, i + 1)];
+    const ds = Math.hypot(b.p[0] - a.p[0], b.p[1] - a.p[1], b.p[2] - a.p[2]);
+    return ds > 1e-9 ? mul(sub(b.t, a.t), 1 / ds) : [0, 0, 0];
+  });
+  const ring = (f: Frame, u: number, scale: number, push: number, kv: V3) => {
     const r = o.radius(u) * scale;
     const pts: V3[] = [];
     for (let j = 0; j < cols; j++) {
       const a = a0 + ((a1 - a0) * j) / sides;
       const k = o.around?.(a, u) ?? 1;
-      const d = add(mul(f.n, Math.cos(a) * r * k), mul(f.b, Math.sin(a) * r * k));
+      let d = add(mul(f.n, Math.cos(a) * r * k), mul(f.b, Math.sin(a) * r * k));
+      // How far towards the bend's centre, as a share of the bend's radius (1 = reaching it).
+      const x = d[0] * kv[0] + d[1] * kv[1] + d[2] * kv[2];
+      if (x > 0.7) d = mul(d, (0.7 + 0.25 * Math.tanh((x - 0.7) / 0.25)) / x);
       pts.push(add(add(f.p, d), mul(f.t, push)));
     }
     return pts;
@@ -87,18 +99,18 @@ export function tube(path: readonly V3[], o: TubeOptions): Mesh {
   if (o.capStart && whole)
     for (let c = capRows; c >= 1; c--) {
       const th = (c / capRows) * (Math.PI / 2);
-      rows.push(ring(fr[0], 0, Math.cos(th), -Math.sin(th) * o.radius(0)));
+      rows.push(ring(fr[0], 0, Math.cos(th), -Math.sin(th) * o.radius(0), bend[0]));
       us.push(0);
     }
   fr.forEach((f, i) => {
     const u = i / (fr.length - 1);
-    rows.push(ring(f, u, 1, 0));
+    rows.push(ring(f, u, 1, 0, bend[i]));
     us.push(u);
   });
   if (o.capEnd && whole)
     for (let c = 1; c <= capRows; c++) {
       const th = (c / capRows) * (Math.PI / 2);
-      rows.push(ring(fr[fr.length - 1], 1, Math.max(0.02, Math.cos(th)), Math.sin(th) * o.radius(1)));
+      rows.push(ring(fr[fr.length - 1], 1, Math.max(0.02, Math.cos(th)), Math.sin(th) * o.radius(1), bend[fr.length - 1]));
       us.push(1);
     }
   rows.forEach((r, i) =>

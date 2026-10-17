@@ -385,6 +385,31 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
     let dead = false;
     let api: GLApi | null = null;
     const late = window.setTimeout(() => setFlatOnly(true), 2500);
+    // The GPU was lost (driver reset): the flat picture from now on, and nothing more asked of the GPU.
+    let unLost = () => {};
+    import('./gl')
+      .then((m) => {
+        if (dead) return;
+        const lost = () => {
+          window.clearTimeout(late);
+          setReady(false);
+          setFlatOnly(true);
+          // Release the active layer too: otherwise scene updates still upload meshes to the lost
+          // context, and a later view can wake this renderer out of the parking pool.
+          api?.dispose();
+          api = null;
+          setGl(null);
+          const p = parked.get(host);
+          if (p) {
+            parked.delete(host);
+            window.clearTimeout(p.timer);
+            p.api.dispose();
+          }
+        };
+        if (m.glWasLost()) lost();
+        else unLost = m.onGLLost(lost);
+      })
+      .catch(() => {});
     const pooled = parked.get(host);
     if (pooled) {
       parked.delete(host);
@@ -409,6 +434,7 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
         .catch(() => !dead && setFlatOnly(true));
     return () => {
       dead = true;
+      unLost();
       live.set(host, (live.get(host) ?? 1) - 1);
       window.clearTimeout(late);
       // Parked for the next 3D view in this frame (one at a time), then let go.
