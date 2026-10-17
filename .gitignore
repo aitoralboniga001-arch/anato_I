@@ -19,3 +19,6 @@ private-images/
 # Isolated offline speech tooling, models and resumable generation cache
 .narration-tools/
 scripts/narration/__pycache__/
+
+# Performance harness screenshots (scripts/perf-topic10.mjs): compared locally, not kept
+docs/perf/**/shots/

@@ -1,6 +1,8 @@
 import { add, cross, mix3, mul, norm, sub, type V3 } from '@/lib/three-d/math';
-import { blob, curve3, merge, tube, type Mesh } from '@/lib/three-d/mesh';
+import { blob, curve3, merge, type BlobOptions, type Mesh, type TubeOptions } from '@/lib/three-d/mesh';
+import { cachedBlob, cachedMerge, cachedTube } from '@/lib/three-d/mesh-cache';
 import type { Item3 } from '@/lib/three-d/scene';
+import { perfCount } from '@/lib/perf';
 import { T } from './common';
 
 /**
@@ -285,8 +287,28 @@ export interface HeartOpts {
   mesocardium?: [number, number];
 }
 
-const vessel = (pts: V3[], r: number | ((u: number) => number), sides = 10, caps = true): Mesh =>
-  tube(pts, { radius: typeof r === 'number' ? () => r : r, ref: [0, 0, 1], sides, capStart: caps, capEnd: caps });
+/** A path for a coarse copy: every third point (and the last). */
+const sparse = (p: readonly V3[]) => (p.length <= 7 ? p : p.filter((_, i) => i % 3 === 0 || i === p.length - 1));
+
+/**
+ * A tube as drawn, and a coarse copy for pointing and the SVG layer (projected again whenever the camera
+ * moves). Both are kept while their inputs are unchanged, so a played stage rebuilds only what moves.
+ */
+export function tubeParts(path: readonly V3[], o: TubeOptions): { mesh: Mesh; hit: Mesh } {
+  return { mesh: cachedTube(path, o), hit: cachedTube(sparse(path), { ...o, sides: Math.min(o.sides ?? 18, 10) }) };
+}
+
+/** A blob as drawn and its coarse copy (see `tubeParts`); `shapeId` names a `shape` function. */
+export function blobParts(o: BlobOptions, shapeId?: string): { mesh: Mesh; hit: Mesh } {
+  const hit = { ...o, rings: Math.max(6, Math.round((o.rings ?? 18) / 2)), sides: Math.max(8, Math.round((o.sides ?? 24) / 2)) };
+  return { mesh: cachedBlob(o, shapeId), hit: cachedBlob(hit, shapeId) };
+}
+
+/** Several parts as one item. */
+const mergeParts = (ps: readonly { mesh: Mesh; hit: Mesh }[]) => ({ mesh: cachedMerge(ps.map((p) => p.mesh)), hit: cachedMerge(ps.map((p) => p.hit)) });
+
+const vessel = (pts: V3[], r: number | ((u: number) => number), sides = 10, caps = true) =>
+  tubeParts(pts, { radius: typeof r === 'number' ? () => r : r, ref: [0, 0, 1], sides, capStart: caps, capEnd: caps });
 
 /** Sub-polyline of a sampled centreline between u0 and u1 (with a little overlap for the seams). */
 function slice(line: V3[], u0: number, u1: number): { pts: V3[]; u: number[] } {
@@ -311,6 +333,7 @@ const WHOLE = ['bihotz-hodia', 'bihotz-lakioa'];
 
 /** All items of the heart for a pose. */
 export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
+  perfCount('heartModel');
   const line = centreline(pose);
   const cd = caudal(pose, line);
   const items: Item3[] = [];
@@ -346,7 +369,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
     const color = segColour(s.color, s.g);
     const deep = segDeep(s.deep, s.g);
     if (fusedPart || fuse >= 1) {
-      items.push({ key: `myo-${s.key}`, id: s.id, groups: [...(s.groups ?? []), ...WHOLE], mesh: tube(P, { radius: (k) => r(k) * lerp(0.62, 1, myo), ref: [0, 0, 1], sides: 22, capStart: s.key === 'sac' }), color, deep, tissue: 'muscle', opacity: wallOp });
+      items.push({ key: `myo-${s.key}`, id: s.id, groups: [...(s.groups ?? []), ...WHOLE], ...tubeParts(P, { radius: (k) => r(k) * lerp(0.62, 1, myo), ref: [0, 0, 1], sides: 22, capStart: s.key === 'sac' }), color, deep, tissue: 'muscle', opacity: wallOp });
     } else {
       // Paired tubes, drawn apart by how far below the zipper they are.
       for (const sx of [-1, 1]) {
@@ -354,7 +377,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
           const below = clamp01((us[k] - front) / 0.25);
           return [p[0] + sx * 0.36 * ss(0, 1, below), p[1], p[2] - 0.05 * below];
         });
-        items.push({ key: `myo-${s.key}-${sx}`, id: s.id, groups: [...(s.groups ?? []), ...WHOLE, 'bihotz-hodiak'], mesh: tube(Q, { radius: (k) => r(k) * lerp(0.62, 1, myo) * 0.82, ref: [0, 0, 1], sides: 18 }), color, deep, tissue: 'muscle', opacity: wallOp });
+        items.push({ key: `myo-${s.key}-${sx}`, id: s.id, groups: [...(s.groups ?? []), ...WHOLE, 'bihotz-hodiak'], ...tubeParts(Q, { radius: (k) => r(k) * lerp(0.62, 1, myo) * 0.82, ref: [0, 0, 1], sides: 18 }), color, deep, tissue: 'muscle', opacity: wallOp });
       }
     }
     pts[s.id] ??= at((s.u0 + s.u1) / 2);
@@ -371,7 +394,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
   if (clamp01(pose.loop) > 0.5 && fuse >= 1) {
     const { pts: P, u: us } = slice(line, U.ventricle - 0.006, U.ventricle + 0.04);
     if (P.length >= 2)
-      items.push({ key: 'av-canal', id: 'erreten-aurikulubentrikularra', groups: [...WHOLE], mesh: tube(P, { radius: (k) => radiusAt(lerp(us[0], us[us.length - 1], k), pose) * lerp(0.62, 1, myo) * 1.06, ref: [0, 0, 1], sides: 22 }), color: mixHex(T.ventricle, T.atrium, 0.5), deep: T.atriumDeep, tissue: 'muscle', opacity: wallOp });
+      items.push({ key: 'av-canal', id: 'erreten-aurikulubentrikularra', groups: [...WHOLE], ...tubeParts(P, { radius: (k) => radiusAt(lerp(us[0], us[us.length - 1], k), pose) * lerp(0.62, 1, myo) * 1.06, ref: [0, 0, 1], sides: 22 }), color: mixHex(T.ventricle, T.atrium, 0.5), deep: T.atriumDeep, tissue: 'muscle', opacity: wallOp });
   }
   pts['atal-bulbobentrikularra'] = at(U.proximal);
 
@@ -394,11 +417,11 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
       const rAt = (j: number) => radiusAt(us[j], pose);
       for (const [sx, lum] of [[1, right], [-1, left]] as const) {
         const Q = P.map((q, j): V3 => add(q, mul(side[j], sx * rAt(j) * 0.46 * k)));
-        items.push({ key: `${key}-${sx > 0 ? 'r' : 'l'}`, id: lum.id, groups: ['atal-bulbarra'], mesh: tube(Q, { radius: (x) => rAt(Math.round(x * (P.length - 1))) * lerp(0.6, 0.36, k), ref: [0, 0, 1], sides: 16 }), color: lum.color, deep: lum.deep, tissue: 'vessel', opacity: 0.25 + 0.75 * k });
+        items.push({ key: `${key}-${sx > 0 ? 'r' : 'l'}`, id: lum.id, groups: ['atal-bulbarra'], ...tubeParts(Q, { radius: (x) => rAt(Math.round(x * (P.length - 1))) * lerp(0.6, 0.36, k), ref: [0, 0, 1], sides: 16 }), color: lum.color, deep: lum.deep, tissue: 'vessel', opacity: 0.25 + 0.75 * k });
         pts[lum.id] = Q[Math.floor(Q.length / 2)];
       }
       // The ridge between them, down the middle of the tube.
-      items.push({ key: `${key}-ridge`, id: ridgeId, groups: ['atal-bulbarra'], mesh: tube(P, { radius: (x) => rAt(Math.round(x * (P.length - 1))) * 0.11 * k, ref: [0, 0, 1], sides: 8 }), color: ridgeColor, deep: ridgeColor, tissue: 'muscle', opacity: k });
+      items.push({ key: `${key}-ridge`, id: ridgeId, groups: ['atal-bulbarra'], ...tubeParts(P, { radius: (x) => rAt(Math.round(x * (P.length - 1))) * 0.11 * k, ref: [0, 0, 1], sides: 8 }), color: ridgeColor, deep: ridgeColor, tissue: 'muscle', opacity: k });
     };
     const tc = clamp01(dv.conus ?? 0);
     if (tc > 0.01) divide(U.truncus, U.conus, tc, 'conus', { id: 'infundibuluak', color: T.deo2, deep: T.deo2Deep }, { id: 'infundibuluak', color: T.o2, deep: T.o2Deep }, 'arteria-konoa', T.conusDeep);
@@ -409,7 +432,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
     const tr = clamp01(dv.trab ?? 0);
     if (tr > 0.01) {
       const { P, us, side } = along(U.conus + 0.01, U.proximal - 0.01);
-      const ridges: Mesh[] = [];
+      const ridges: { mesh: Mesh; hit: Mesh }[] = [];
       for (let i = 0; i < 7; i++) {
         const a = (i / 7) * Math.PI * 2;
         const R = P.map((q, j): V3 => {
@@ -420,9 +443,9 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
           const rr = radiusAt(us[j], pose) * 0.74;
           return add(q, add(mul(sd, rr * Math.cos(a + wob)), mul(up, rr * Math.sin(a + wob))));
         });
-        ridges.push(tube(R, { radius: () => 0.035 * tr, ref: [0, 0, 1], sides: 6, capStart: true, capEnd: true }));
+        ridges.push(tubeParts(R, { radius: () => 0.035 * tr, ref: [0, 0, 1], sides: 6, capStart: true, capEnd: true }));
       }
-      items.push({ key: 'trabeculae', id: 'muskulu-trenkadak', groups: ['hasierako-eskuineko-bentrikulua', 'bulboaren-hurbileko-atala'], mesh: merge(ridges), color: mixHex(T.proximal, '#0f3d22', 0.35), deep: '#0f3d22', tissue: 'muscle', opacity: tr });
+      items.push({ key: 'trabeculae', id: 'muskulu-trenkadak', groups: ['hasierako-eskuineko-bentrikulua', 'bulboaren-hurbileko-atala'], ...mergeParts(ridges), color: mixHex(T.proximal, '#0f3d22', 0.35), deep: '#0f3d22', tissue: 'muscle', opacity: tr });
       pts['muskulu-trenkadak'] = add(P[Math.floor(P.length / 2)], mul(side[Math.floor(P.length / 2)], radiusAt(us[Math.floor(P.length / 2)], pose) * 0.6));
     }
   }
@@ -432,19 +455,19 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
   const atriumColour = segColour(T.atrium, 'atrium');
   const atriumDeep = segDeep(T.atriumDeep, 'atrium');
   const rA = radiusAt(0.95, pose);
-  const branches: Mesh[] = [];
+  const branches: { mesh: Mesh; hit: Mesh }[] = [];
   for (let i = 0; i < 2; i++) {
     const a = cd.atrium[i];
     const mid = mix3(cd.end, a, 0.5);
-    branches.push(tube(path([cd.end, add(mid, [0, -0.02 * (1 - pose.loop), 0]), a], 12), { radius: (k) => rA * lerp(1, 0.86 + 0.3 * f, k), ref: [0, 0, 1], sides: 18, capEnd: true }));
+    branches.push(tubeParts(path([cd.end, add(mid, [0, -0.02 * (1 - pose.loop), 0]), a], 12), { radius: (k) => rA * lerp(1, 0.86 + 0.3 * f, k), ref: [0, 0, 1], sides: 18, capEnd: true }));
   }
   if (f > 0.02 || pose.expand > 0.01) {
     // The common atrium: a wide chamber between the two branches, bulging on both sides of the truncus later.
     const c = mix3(cd.atrium[0], cd.atrium[1], 0.5);
     const e = clamp01(pose.expand);
-    branches.push(blob({ center: add(c, [0, 0.02 * e, 0.04 * e]), radii: [lerp(0.3, 0.46, f) + 0.12 * e, lerp(0.26, 0.34, f) + 0.06 * e, lerp(0.24, 0.3, f) + 0.04 * e], rings: 14, sides: 20 }));
+    branches.push(blobParts({ center: add(c, [0, 0.02 * e, 0.04 * e]), radii: [lerp(0.3, 0.46, f) + 0.12 * e, lerp(0.26, 0.34, f) + 0.06 * e, lerp(0.24, 0.3, f) + 0.04 * e], rings: 14, sides: 20 }));
   }
-  items.push({ key: 'atria', id: 'atal-aurikularra', groups: ['zain-muturra', 'aurikula-komuna', ...WHOLE], mesh: merge(branches), color: atriumColour, deep: atriumDeep, tissue: 'muscle', opacity: wallOp });
+  items.push({ key: 'atria', id: 'atal-aurikularra', groups: ['zain-muturra', 'aurikula-komuna', ...WHOLE], ...mergeParts(branches), color: atriumColour, deep: atriumDeep, tissue: 'muscle', opacity: wallOp });
   // Inside the tissue: one branch while they are paired, the common chamber once fused.
   pts['atal-aurikularra'] = f > 0.5 ? mix3(cd.atrium[0], cd.atrium[1], 0.5) : mix3(cd.end, cd.atrium[1], 0.6);
 
@@ -459,7 +482,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
         key: `pa${i}`,
         id,
         groups: ['atal-aurikularra'],
-        mesh: blob({ center: c, radii: [0.3 * e + 0.04, 0.28 * e + 0.04, 0.26 * e + 0.04], rings: 14, sides: 20, shape: (d) => 1 + 0.12 * d[1] }),
+        ...blobParts({ center: c, radii: [0.3 * e + 0.04, 0.28 * e + 0.04, 0.26 * e + 0.04], rings: 14, sides: 20, shape: (d) => 1 + 0.12 * d[1] }, 'pa: 1 + 0.12 y'),
         color: T.atrium,
         deep: T.atriumDeep,
         tissue: 'muscle',
@@ -482,7 +505,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
       key: `horn${i}`,
       id: i && (pose.coronary ?? 0) > 0.5 ? 'sinu-koronarioa' : i ? 'ezkerreko-sinu-luzapena' : 'eskuineko-sinu-luzapena',
       groups: ['zain-sinua', 'zain-muturra', ...(i ? ['ezkerreko-sinu-luzapena'] : []), ...WHOLE],
-      mesh: tube(P, { radius: (k) => hornR(i) * lerp(0.92, 1.05, k) * (k < 0.15 ? lerp(0.86, 1, k / 0.15) : 1), ref: [0, 0, 1], sides: 16, capEnd: true }),
+      ...tubeParts(P, { radius: (k) => hornR(i) * lerp(0.92, 1.05, k) * (k < 0.15 ? lerp(0.86, 1, k / 0.15) : 1), ref: [0, 0, 1], sides: 16, capEnd: true }),
       color: sinusCol,
       deep: sinusDeep,
       tissue: 'muscle',
@@ -495,7 +518,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
     // Behind the atrium (dorsal, -z), sagging a little: it must show from the back, not hide inside the horns.
     const back = (p: V3, k: number): V3 => [p[0], p[1] - 0.06 * k, p[2] - 0.12 * k];
     const P = path([back(cd.sinusIn[0], 0.5), back(mix3(cd.sinusIn[0], cd.sinusIn[1], 0.5), 1), back(cd.sinusIn[1], 0.5)], 10);
-    items.push({ key: 'sinus-mid', id: 'zain-sinuaren-zeharkako-atala', groups: ['zain-sinua', 'zain-muturra', ...WHOLE], mesh: tube(P, { radius: () => lerp(0.14, 0.22, f), ref: [0, 0, 1], sides: 16, capStart: true, capEnd: true }), color: sinusCol, deep: sinusDeep, tissue: 'muscle', opacity: wallOp });
+    items.push({ key: 'sinus-mid', id: 'zain-sinuaren-zeharkako-atala', groups: ['zain-sinua', 'zain-muturra', ...WHOLE], ...tubeParts(P, { radius: () => lerp(0.14, 0.22, f), ref: [0, 0, 1], sides: 16, capStart: true, capEnd: true }), color: sinusCol, deep: sinusDeep, tissue: 'muscle', opacity: wallOp });
   }
   pts['zain-sinua'] = f > 0.5 ? mix3(cd.sinusIn[0], cd.sinusIn[1], 0.5) : mix3(cd.sinusIn[1], cd.horn[1], 0.5);
   pts['sinu-koronarioa'] = mix3(cd.sinusIn[1], cd.horn[1], 0.6);
@@ -505,14 +528,14 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
   const hole = clamp01(pose.hole ?? 0);
   if (hole > 0.01) {
     // Wide at first (the notes' figure), narrower as it moves into the primitive right atrium.
-    items.push({ key: 'sa-hole', id: 'zulo-sinoaurikularra', mesh: blob({ center: pts['zulo-sinoaurikularra'], radii: [lerp(0.2, 0.11, sh), lerp(0.11, 0.13, sh), 0.09], rings: 12, sides: 18 }), color: '#1a0710', deep: '#000000', tissue: 'vessel', opacity: hole });
+    items.push({ key: 'sa-hole', id: 'zulo-sinoaurikularra', ...blobParts({ center: pts['zulo-sinoaurikularra'], radii: [lerp(0.2, 0.11, sh), lerp(0.11, 0.13, sh), 0.09], rings: 12, sides: 18 }), color: '#1a0710', deep: '#000000', tissue: 'vessel', opacity: hole });
   }
   const cor = clamp01(pose.coronary ?? 0);
   if (cor > 0.01) {
     // The oblique vein of the left atrium: up the back of the left atrium into the coronary sinus.
     const a = mix3(cd.sinusIn[1], cd.horn[1], 0.55);
     const ov = path([a, add(a, [0.02, 0.22, -0.04]), add(cd.atrium[1], [0.12, 0.28, -0.22])], 12);
-    items.push({ key: 'oblique', id: 'ezkerreko-aurikularen-zain-laprana', mesh: vessel(ov.slice(0, Math.max(2, Math.round(ov.length * cor))), 0.045, 8), color: T.deo2, deep: T.deo2Deep, tissue: 'vessel', opacity: 1 });
+    items.push({ key: 'oblique', id: 'ezkerreko-aurikularen-zain-laprana', ...vessel(ov.slice(0, Math.max(2, Math.round(ov.length * cor))), 0.045, 8), color: T.deo2, deep: T.deo2Deep, tissue: 'vessel', opacity: 1 });
     pts['ezkerreko-aurikularen-zain-laprana'] = ov[8];
   }
   pts['bihotz-lakioa'] = at(0.62);
@@ -539,7 +562,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
       const v = (key: string, id: string, pts0: V3[], color: string, deep: string, r: number, gone0: number) => {
         if (gone0 >= 0.98) return;
         const g = own[key];
-        items.push({ key: `${key}${i}`, id, groups: g ? [g] : undefined, mesh: vessel(pts0, (u) => r * big * (1 - 0.75 * gone0) * lerp(1, 0.75, u), 10), color, deep, tissue: 'vessel', opacity: vShow * (1 - 0.6 * gone0) });
+        items.push({ key: `${key}${i}`, id, groups: g ? [g] : undefined, ...vessel(pts0, (u) => r * big * (1 - 0.75 * gone0) * lerp(1, 0.75, u), 10), color, deep, tissue: 'vessel', opacity: vShow * (1 - 0.6 * gone0) });
         if (g) pts[g] = pts0[Math.min(pts0.length - 1, 10)];
       };
       v('card', 'bena-kardinal-komuna', V.cardinal, T.deo2, T.deo2Deep, 0.1, cardGone);
@@ -579,7 +602,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
       links.forEach((c, k) => {
         const part = c.slice(0, Math.max(2, Math.round(c.length * an)));
         // The umbilical one carries the placenta's oxygenated blood (red), the others venous blood.
-        items.push({ key: `anast${k}`, id: 'anastomosiak', mesh: vessel(part, k === 2 ? 0.07 : 0.06, 10), color: k === 2 ? T.o2 : T.deo2, deep: k === 2 ? T.o2Deep : T.deo2Deep, tissue: 'vessel', opacity: vShow });
+        items.push({ key: `anast${k}`, id: 'anastomosiak', ...vessel(part, k === 2 ? 0.07 : 0.06, 10), color: k === 2 ? T.o2 : T.deo2, deep: k === 2 ? T.o2Deep : T.deo2Deep, tissue: 'vessel', opacity: vShow });
       });
       pts['anastomosiak'] = mix3(L.vitelline[10], R.vitelline[10], 0.3);
     }
@@ -592,14 +615,14 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
     const n = Math.max(0, Math.min(3, pose.arches));
     for (const sx of [-1, 1]) {
       const da = path([[sx * 0.4, sac[1] + 0.5, -1.38], [sx * 0.42, 0.2, -1.42], [sx * 0.38, -1.6, -1.4], [sx * 0.3, -2.6, -1.36]], 24);
-      items.push({ key: `dao${sx}`, id: 'aorta-dortsalak', mesh: vessel(da, 0.11, 12), color: T.aorta, deep: T.aortaDeep, tissue: 'vessel', opacity: ao });
+      items.push({ key: `dao${sx}`, id: 'aorta-dortsalak', ...vessel(da, 0.11, 12), color: T.aorta, deep: T.aortaDeep, tissue: 'vessel', opacity: ao });
       for (let k = 0; k < 3; k++) {
         const g = clamp01(n - k);
         if (g <= 0.01) continue;
         const y0 = sac[1] + 0.32 - k * 0.3;
         const arch = path([sac, [sx * 0.22, y0 + 0.08, sac[2] - 0.05], [sx * 0.38, y0 + 0.18, -0.55], [sx * 0.4, y0 + 0.08, -1.12], [sx * 0.4, y0 - 0.06, -1.38]], 16);
         const part = arch.slice(0, Math.max(2, Math.round(arch.length * g)));
-        items.push({ key: `arch${k}${sx}`, id: 'aorta-arkuak', mesh: vessel(part, 0.075, 10), color: T.o2, deep: T.o2Deep, tissue: 'vessel', opacity: ao });
+        items.push({ key: `arch${k}${sx}`, id: 'aorta-arkuak', ...vessel(part, 0.075, 10), color: T.o2, deep: T.o2Deep, tissue: 'vessel', opacity: ao });
         if (k === 0) pts[`aorta-arkuak${sx}`] = arch[9];
       }
       pts[`aorta-dortsalak${sx}`] = da[12];
@@ -608,13 +631,13 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
   const gut = o.gut ?? 0;
   if (gut > 0.01) {
     const g = path([[0, 2.3, -0.82], [0, 1.0, -0.86], [0, -0.6, -0.9], [0, -2.4, -0.86]], 24);
-    items.push({ key: 'gut', id: 'aurreko-hestea', mesh: tube(g, { radius: (u) => lerp(0.24, 0.18, u), ref: [0, 0, 1], sides: 16, capStart: true, capEnd: true }), color: T.endo, deep: T.endoDeep, tissue: 'epithelium', opacity: gut * 0.85 });
+    items.push({ key: 'gut', id: 'aurreko-hestea', ...tubeParts(g, { radius: (u) => lerp(0.24, 0.18, u), ref: [0, 0, 1], sides: 16, capStart: true, capEnd: true }), color: T.endo, deep: T.endoDeep, tissue: 'epithelium', opacity: gut * 0.85 });
     pts['aurreko-hestea'] = g[6];
   }
   const noto = o.noto ?? 0;
   if (noto > 0.01) {
     const n = path([[0, 2.5, -1.78], [0, 0.4, -1.84], [0, -1.4, -1.82], [0, -2.7, -1.76]], 24);
-    items.push({ key: 'noto', id: 'notokorda', mesh: tube(n, { radius: () => 0.1, ref: [0, 0, 1], sides: 12, capStart: true, capEnd: true }), color: '#a855f7', deep: '#5b21b6', tissue: 'mesenchyme', opacity: noto });
+    items.push({ key: 'noto', id: 'notokorda', ...tubeParts(n, { radius: () => 0.1, ref: [0, 0, 1], sides: 12, capStart: true, capEnd: true }), color: '#a855f7', deep: '#5b21b6', tissue: 'mesenchyme', opacity: noto });
     pts['notokorda'] = n[9];
   }
   const cav = o.cavity ?? 0;
@@ -623,7 +646,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
     // Straight tube: the cavity ends at the ventricle–atrium boundary (u = 0.82): bulbus and ventricle inside,
     // the atrium and the sinus outside, in the septum transversum (notes 2, p9). The loop brings them in.
     const c: V3 = [lerp(0, -0.04, L), lerp(0.79, 0.42, L), lerp(0.28, 0.08, L)];
-    items.push({ key: 'cavity', id: 'perikardio-barrunbea', mesh: blob({ center: c, radii: [lerp(0.95, 1.25, L), lerp(1.24, 1.5, L), lerp(0.85, 1.22, L)], rings: 20, sides: 28 }), color: '#ffb3c4', deep: '#a3485e', tissue: 'membrane', opacity: 0.13 * cav, outline: false });
+    items.push({ key: 'cavity', id: 'perikardio-barrunbea', ...blobParts({ center: c, radii: [lerp(0.95, 1.25, L), lerp(1.24, 1.5, L), lerp(0.85, 1.22, L)], rings: 20, sides: 28 }), color: '#ffb3c4', deep: '#a3485e', tissue: 'membrane', opacity: 0.13 * cav, outline: false });
     pts['perikardio-barrunbea'] = add(c, [0.75, 0.6, 0.3]);
   }
   const st = o.septum ?? 0;
@@ -631,7 +654,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
     const L = clamp01(pose.loop);
     // Straight tube: it holds the atrial end of the tube, the paired atria and the sinus horns.
     const c: V3 = [0, lerp(-1.08, -1.3, L), lerp(-0.05, -0.3, L)];
-    items.push({ key: 'septum', id: 'septum-transversum', mesh: blob({ center: c, radii: [1.35, lerp(0.68, 0.36, L), 1.0], rings: 14, sides: 24 }), color: T.septum, deep: T.septumDeep, tissue: 'mesenchyme', opacity: 0.32 * st, outline: false });
+    items.push({ key: 'septum', id: 'septum-transversum', ...blobParts({ center: c, radii: [1.35, lerp(0.68, 0.36, L), 1.0], rings: 14, sides: 24 }), color: T.septum, deep: T.septumDeep, tissue: 'mesenchyme', opacity: 0.32 * st, outline: false });
     pts['septum-transversum'] = add(c, [-0.9, -0.05, 0.4]);
   }
 
@@ -655,7 +678,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
   // A faint copy of another pose (where the tube started).
   if (o.ghost) {
     const gl = centreline(o.ghost, 60);
-    items.push({ key: 'ghost', mesh: tube(gl, { radius: (u) => radiusAt(u, o.ghost!) * 0.98, ref: [0, 0, 1], sides: 16, capStart: true, capEnd: true }), color: '#e8eefc', deep: '#8c96b0', tissue: 'membrane', opacity: 0.14, outline: false });
+    items.push({ key: 'ghost', ...tubeParts(gl, { radius: (u) => radiusAt(u, o.ghost!) * 0.98, ref: [0, 0, 1], sides: 16, capStart: true, capEnd: true }), color: '#e8eefc', deep: '#8c96b0', tissue: 'membrane', opacity: 0.14, outline: false });
   }
 
   return { items, line, cd, pts };

@@ -1,3 +1,4 @@
+import { perfCount } from '@/lib/perf';
 import { add, cross, dot, mul, norm, perp, rotate, sub, type V3 } from './math';
 
 /**
@@ -207,6 +208,7 @@ export function grid(nu: number, nv: number, at: (u: number, v: number) => V3, f
 
 /** Smooth vertex normals from the triangles (seams of open parts keep their own). */
 function finish(pos: number[], uv: number[], idx: number[]): Mesh {
+  perfCount('meshBuild');
   const p = new Float32Array(pos);
   const n = new Float32Array(pos.length);
   for (let i = 0; i < idx.length; i += 3) {
@@ -266,6 +268,7 @@ export function curve3(keys: readonly V3[], n = 24): V3[] {
 
 /** Several meshes as one (e.g. the five digits of a hand, coloured and named together). */
 export function merge(ms: readonly Mesh[]): Mesh {
+  perfCount('meshMerge');
   const nv = ms.reduce((s, m) => s + m.pos.length, 0);
   const ni = ms.reduce((s, m) => s + m.idx.length, 0);
   const pos = new Float32Array(nv);

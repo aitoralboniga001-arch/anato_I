@@ -11,7 +11,9 @@ import {
   Vector3,
   WebGLRenderer,
 } from 'three';
+import { perfCount } from '@/lib/perf';
 import type { M4, V3 } from '@/lib/three-d/math';
+import { createWaker } from '@/lib/three-d/waker';
 import type { Mesh } from '@/lib/three-d/mesh';
 import { TISSUE_KIND, type Clip3, type Tissue3 } from '@/lib/three-d/scene';
 
@@ -296,7 +298,9 @@ function setClip(u: Record<string, { value: any }>, c: Clip3 | undefined) {
   }
 }
 
-const deepOf = (c: Color) => new Color().copy(c).multiplyScalar(0.42).lerp(new Color('#2a1420'), 0.25);
+const DEEP_TINT = new Color('#2a1420');
+/** The shaded side's colour for a colour that has no `deep` of its own (written into `out`). */
+const deepInto = (out: Color, c: string) => out.set(c).multiplyScalar(0.42).lerp(DEEP_TINT, 0.25);
 
 const bodyMaterial = () =>
   new ShaderMaterial({
@@ -349,7 +353,6 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
   let frame: GLFrame | null = null;
   let sceneEl: SVGGElement | null = null;
   let dirty = true;
-  let raf = 0;
   let lastCtm = '';
   let size = { w: 0, h: 0 };
   let shown = false;
@@ -361,10 +364,14 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
     size = { w: Math.max(1, Math.round(r.width)), h: Math.max(1, Math.round(r.height)) };
     renderer.setSize(size.w, size.h, false);
     dirty = true;
+    kick();
   });
   ro.observe(host);
 
   const lightV = new Vector3();
+  // Scratch for the screen projection (no allocation per frame).
+  const screenM = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  const projOut = new Float32Array(16);
 
   // The shader programs are compiled before the first picture, without blocking the page where the
   // browser can compile in parallel (until then the SVG draws the flat picture): linking them in the
@@ -388,6 +395,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
     const done = () => {
       compiled = true;
       dirty = true;
+      kick();
     };
     renderer.compileAsync(warm, camera).then(done, done);
   }
@@ -397,6 +405,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
     for (const it of f.items) {
       let s = slots.get(it.key);
       if (s && s.mesh !== it.mesh) {
+        perfCount('glUpload');
         if (s.mesh.pos.length === it.mesh.pos.length && s.mesh.idx.length === it.mesh.idx.length) {
           (s.geo.getAttribute('position') as BufferAttribute).set(it.mesh.pos);
           (s.geo.getAttribute('normal') as BufferAttribute).set(it.mesh.nrm);
@@ -412,6 +421,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
         s.mesh = it.mesh;
       }
       if (!s) {
+        perfCount('glUpload');
         const geo = geometryOf(it.mesh);
         const mat = bodyMaterial();
         const edgeMat = edgeMaterial();
@@ -436,7 +446,8 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
       }
       const u = s.mat.uniforms;
       (u.uColor.value as Color).set(it.color);
-      (u.uDeep.value as Color).copy(it.deep ? new Color(it.deep) : deepOf(new Color(it.color)));
+      if (it.deep) (u.uDeep.value as Color).set(it.deep);
+      else deepInto(u.uDeep.value as Color, it.color);
       u.uKind.value = TISSUE_KIND[it.tissue];
       setClip(u, it.clip);
       setClip(s.edgeMat.uniforms, it.clip);
@@ -480,14 +491,16 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
     if (!frame || !compiled || (sceneEl && !sceneEl.isConnected)) return false;
     // The picture fades with its drawing (a view fading in, a camera move between views).
     const o = seen();
+    let faded = false;
     if (Math.abs(o - seenNow) > 0.004 || (o !== seenNow && (o === 0 || o === 1))) {
+      faded = true;
       seenNow = o;
       canvas.style.opacity = o >= 0.999 ? '' : o.toFixed(3);
       // Frame by frame with the drawing: the canvas's own fade-in would lag behind it.
       canvas.style.transition = o >= 0.999 ? '' : 'none';
     }
     const m = ctmNow();
-    if (!m || !size.w) return false;
+    if (!m || !size.w) return faded;
     const key = `${m.a.toFixed(4)},${m.d.toFixed(4)},${m.e.toFixed(2)},${m.f.toFixed(2)},${size.w},${size.h}`;
     // Highlight states glide like the CSS transitions of the 2D parts (≈0.22 s).
     const k = 1 - Math.exp(-dt / 70);
@@ -515,7 +528,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
       s.body.visible = next.op > 0.01;
       (u.uLight.value as Vector3).copy(lightV);
     }
-    if (!dirty && !moving && key === lastCtm) return false;
+    if (!dirty && !moving && key === lastCtm) return faded;
     lastCtm = key;
     dirty = false;
     // Frame coordinates → this canvas: the projection is followed by the same 2D transform the SVG
@@ -528,8 +541,12 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
     const tx = (2 / W) * (500 * m.a + 320 * m.c + m.e) - 1;
     const ty = 1 - (2 / H) * (500 * m.b + 320 * m.d + m.f);
     // Rows of the screen matrix S (column-major multiply S × P).
-    const S = [sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1];
-    const out = new Float32Array(16);
+    const S = screenM;
+    S[0] = sx;
+    S[5] = sy;
+    S[12] = tx;
+    S[13] = ty;
+    const out = projOut;
     for (let c = 0; c < 4; c++)
       for (let r = 0; r < 4; r++) {
         let s = 0;
@@ -541,6 +558,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
     camera.matrixWorldInverse.fromArray(frame.view);
     camera.matrixWorld.copy(camera.matrixWorldInverse).invert();
     renderer.render(scene, camera);
+    perfCount('glRender');
     if (!shown) {
       shown = true;
       canvas.classList.add('is-ready');
@@ -551,16 +569,39 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
       canvas.style.visibility = '';
       onReady();
     }
-    return moving;
+    return true;
   }
 
-  const loop = (now: number) => {
+  // Frames are drawn only while something can change on screen: a new frame from the scene, a highlight
+  // still gliding, the drawing it follows moving or fading. Then the loop stops; a still picture costs
+  // nothing. Whatever can change it wakes the loop again (`kick`).
+  const waker = createWaker((now) => {
+    perfCount('glTick');
     const dt = Math.min(100, now - lastT);
     lastT = now;
-    draw(dt);
-    raf = requestAnimationFrame(loop);
+    return draw(dt);
+  });
+  const kick = () => {
+    // Back from sleep: the highlight glides go on from now, not from when the loop stopped.
+    if (!waker.awake) lastT = performance.now();
+    waker.kick();
   };
-  raf = requestAnimationFrame(loop);
+  // The drawing's place and opacity can change without a new frame: a camera move between views or a
+  // zoom sets transforms and opacities straight on the SVG; CSS transitions fade it; the page reflows.
+  // Only changes to the followed drawing or to what holds it count: the rest of the frame (Kimu's
+  // breathing, a label's pulse) animates on its own without waking the 3D layer.
+  const watched = host.parentElement ?? host;
+  const holds = (t: EventTarget | null) => !sceneEl || (t instanceof Node && t.contains(sceneEl));
+  const mo = new MutationObserver((records) => {
+    if (records.some((r) => r.target !== canvas && holds(r.target))) kick();
+  });
+  mo.observe(watched, { attributes: true, subtree: true, attributeFilter: ['transform', 'style', 'opacity', 'class', 'viewBox', 'width', 'height', 'x', 'y'] });
+  const CSS_EVENTS = ['transitionrun', 'transitionstart', 'animationstart', 'animationiteration'] as const;
+  const onCss = (e: Event) => holds(e.target) && kick();
+  CSS_EVENTS.forEach((e) => watched.addEventListener(e, onCss, true));
+  window.addEventListener('resize', kick);
+  const svgRo = new ResizeObserver(kick);
+  kick();
 
   return {
     frame(f) {
@@ -568,10 +609,14 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
       lightV.set(f.light[0], f.light[1], f.light[2]).normalize();
       sync(f);
       dirty = true;
+      kick();
     },
     follow(el) {
       sceneEl = el;
+      svgRo.disconnect();
+      if (el?.ownerSVGElement) svgRo.observe(el.ownerSVGElement);
       dirty = true;
+      kick();
     },
     park() {
       frame = null;
@@ -587,10 +632,15 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
       onReady = cb;
       waking = true;
       dirty = true;
+      kick();
     },
     dispose() {
-      cancelAnimationFrame(raf);
+      waker.stop();
       ro.disconnect();
+      svgRo.disconnect();
+      mo.disconnect();
+      CSS_EVENTS.forEach((e) => watched.removeEventListener(e, onCss, true));
+      window.removeEventListener('resize', kick);
       for (const s of slots.values()) {
         s.geo.dispose();
         s.mat.dispose();

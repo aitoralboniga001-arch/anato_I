@@ -1,0 +1,632 @@
+{
+  "base": "http://localhost:3100",
+  "at": 0.55,
+  "date": "2026-10-16T21:04:53.104Z",
+  "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (0x00001900) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "runs": [
+    {
+      "viewport": "pc",
+      "stage": "bihotz-hodia",
+      "hold": {
+        "mainThreadMsPerS": 107.8,
+        "scriptMsPerS": 18.9,
+        "styleLayoutMsPerS": 20.8,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 298.5,
+        "scriptMsPerS": 145.2,
+        "styleLayoutMsPerS": 25.1,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 33.3,
+          "max": 66.6,
+          "n": 100
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "play": {
+        "mainThreadMsPerS": 1041.2,
+        "scriptMsPerS": 977.5,
+        "styleLayoutMsPerS": 11.6,
+        "frameMs": {
+          "p50": 33.4,
+          "p95": 50.1,
+          "max": 66.8,
+          "n": 81
+        },
+        "longTasks": {
+          "n": 2,
+          "totalMs": 119
+        },
+        "perS": {}
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "zirkulazio-goiztiarra",
+      "hold": {
+        "mainThreadMsPerS": 201.6,
+        "scriptMsPerS": 122.2,
+        "styleLayoutMsPerS": 17.2,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 317
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 551.8,
+        "scriptMsPerS": 349.3,
+        "styleLayoutMsPerS": 62.7,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17.2,
+          "max": 33.5,
+          "n": 104
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "play": {
+        "mainThreadMsPerS": 1043,
+        "scriptMsPerS": 996.7,
+        "styleLayoutMsPerS": 7.4,
+        "frameMs": {
+          "p50": 49.9,
+          "p95": 50.2,
+          "max": 66.5,
+          "n": 72
+        },
+        "longTasks": {
+          "n": 3,
+          "totalMs": 153
+        },
+        "perS": {}
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "bihotz-atalak",
+      "hold": {
+        "mainThreadMsPerS": 182.9,
+        "scriptMsPerS": 99.8,
+        "styleLayoutMsPerS": 18.9,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 251
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 719.9,
+        "scriptMsPerS": 515.5,
+        "styleLayoutMsPerS": 69.2,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 16.9,
+          "n": 108
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "play": {
+        "mainThreadMsPerS": 1038.5,
+        "scriptMsPerS": 965.4,
+        "styleLayoutMsPerS": 19.6,
+        "frameMs": {
+          "p50": 33.4,
+          "p95": 50.1,
+          "max": 66.7,
+          "n": 78
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "bihotz-lakioa",
+      "hold": {
+        "mainThreadMsPerS": 198.2,
+        "scriptMsPerS": 115.1,
+        "styleLayoutMsPerS": 18.7,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 292
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 623,
+        "scriptMsPerS": 398.7,
+        "styleLayoutMsPerS": 75.1,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17.2,
+          "max": 66.7,
+          "n": 102
+        },
+        "longTasks": {
+          "n": 2,
+          "totalMs": 115
+        },
+        "perS": {}
+      },
+      "play": {
+        "mainThreadMsPerS": 1032.8,
+        "scriptMsPerS": 984.2,
+        "styleLayoutMsPerS": 10.3,
+        "frameMs": {
+          "p50": 33.4,
+          "p95": 50.2,
+          "max": 66.8,
+          "n": 79
+        },
+        "longTasks": {
+          "n": 2,
+          "totalMs": 106
+        },
+        "perS": {}
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "atal-bulbarra",
+      "hold": {
+        "mainThreadMsPerS": 218.8,
+        "scriptMsPerS": 129.6,
+        "styleLayoutMsPerS": 18.6,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 333
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 645.4,
+        "scriptMsPerS": 424.3,
+        "styleLayoutMsPerS": 73.5,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 50.1,
+          "n": 104
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "play": {
+        "mainThreadMsPerS": 1044.9,
+        "scriptMsPerS": 988.5,
+        "styleLayoutMsPerS": 7.2,
+        "frameMs": {
+          "p50": 49.9,
+          "p95": 66.7,
+          "max": 100,
+          "n": 70
+        },
+        "longTasks": {
+          "n": 7,
+          "totalMs": 436
+        },
+        "perS": {}
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "atal-bentrikularra",
+      "hold": {
+        "mainThreadMsPerS": 222.9,
+        "scriptMsPerS": 138.9,
+        "styleLayoutMsPerS": 17.9,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 365
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 668.5,
+        "scriptMsPerS": 450.9,
+        "styleLayoutMsPerS": 71.6,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 83.4,
+          "n": 101
+        },
+        "longTasks": {
+          "n": 2,
+          "totalMs": 148
+        },
+        "perS": {}
+      },
+      "play": {
+        "mainThreadMsPerS": 1057.1,
+        "scriptMsPerS": 1028.4,
+        "styleLayoutMsPerS": 5.6,
+        "frameMs": {
+          "p50": 66.7,
+          "p95": 83.4,
+          "max": 83.5,
+          "n": 45
+        },
+        "longTasks": {
+          "n": 48,
+          "totalMs": 3064
+        },
+        "perS": {}
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "atal-aurikularra",
+      "hold": {
+        "mainThreadMsPerS": 210.9,
+        "scriptMsPerS": 116.6,
+        "styleLayoutMsPerS": 16.3,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 300
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 706.6,
+        "scriptMsPerS": 454.6,
+        "styleLayoutMsPerS": 85.4,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17,
+          "max": 50.1,
+          "n": 101
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "play": {
+        "mainThreadMsPerS": 1052.8,
+        "scriptMsPerS": 992,
+        "styleLayoutMsPerS": 7.7,
+        "frameMs": {
+          "p50": 50,
+          "p95": 66.7,
+          "max": 83.4,
+          "n": 65
+        },
+        "longTasks": {
+          "n": 9,
+          "totalMs": 512
+        },
+        "perS": {}
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "zain-sinua",
+      "hold": {
+        "mainThreadMsPerS": 183.4,
+        "scriptMsPerS": 99.7,
+        "styleLayoutMsPerS": 17,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 247
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 641.8,
+        "scriptMsPerS": 431.8,
+        "styleLayoutMsPerS": 70.3,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.9,
+          "max": 66.7,
+          "n": 102
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "play": {
+        "mainThreadMsPerS": 1047.5,
+        "scriptMsPerS": 995.9,
+        "styleLayoutMsPerS": 14.5,
+        "frameMs": {
+          "p50": 50,
+          "p95": 66.7,
+          "max": 83.4,
+          "n": 63
+        },
+        "longTasks": {
+          "n": 10,
+          "totalMs": 573
+        },
+        "perS": {}
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "eskuineko-aurikula",
+      "hold": {
+        "mainThreadMsPerS": 221.9,
+        "scriptMsPerS": 133.5,
+        "styleLayoutMsPerS": 19.7,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 352
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 624,
+        "scriptMsPerS": 393.4,
+        "styleLayoutMsPerS": 71.7,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.9,
+          "max": 33.5,
+          "n": 107
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "play": {
+        "mainThreadMsPerS": 1025.2,
+        "scriptMsPerS": 945.2,
+        "styleLayoutMsPerS": 12.4,
+        "frameMs": {
+          "p50": 33,
+          "p95": 33.6,
+          "max": 50,
+          "n": 118
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      }
+    },
+    {
+      "viewport": "tablet",
+      "stage": "zirkulazio-goiztiarra",
+      "hold": {
+        "mainThreadMsPerS": 175.1,
+        "scriptMsPerS": 97.7,
+        "styleLayoutMsPerS": 21.3,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 242
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 550.1,
+        "scriptMsPerS": 356.2,
+        "styleLayoutMsPerS": 67.3,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17.1,
+          "max": 33.5,
+          "n": 106
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "play": {
+        "mainThreadMsPerS": 1032.6,
+        "scriptMsPerS": 986.7,
+        "styleLayoutMsPerS": 9.6,
+        "frameMs": {
+          "p50": 33.4,
+          "p95": 50.2,
+          "max": 83.2,
+          "n": 77
+        },
+        "longTasks": {
+          "n": 4,
+          "totalMs": 218
+        },
+        "perS": {}
+      }
+    },
+    {
+      "viewport": "tablet",
+      "stage": "bihotz-lakioa",
+      "hold": {
+        "mainThreadMsPerS": 196.5,
+        "scriptMsPerS": 119.2,
+        "styleLayoutMsPerS": 20.1,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 305
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 649.4,
+        "scriptMsPerS": 418.4,
+        "styleLayoutMsPerS": 82.5,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17.3,
+          "max": 50,
+          "n": 104
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "play": {
+        "mainThreadMsPerS": 1042.3,
+        "scriptMsPerS": 987.3,
+        "styleLayoutMsPerS": 9.2,
+        "frameMs": {
+          "p50": 33.4,
+          "p95": 50.1,
+          "max": 83.4,
+          "n": 76
+        },
+        "longTasks": {
+          "n": 4,
+          "totalMs": 205
+        },
+        "perS": {}
+      }
+    },
+    {
+      "viewport": "tablet",
+      "stage": "eskuineko-aurikula",
+      "hold": {
+        "mainThreadMsPerS": 188.6,
+        "scriptMsPerS": 113.9,
+        "styleLayoutMsPerS": 21.8,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 298
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 548.4,
+        "scriptMsPerS": 346.2,
+        "styleLayoutMsPerS": 73.4,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.9,
+          "max": 17.3,
+          "n": 108
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "play": {
+        "mainThreadMsPerS": 1021.2,
+        "scriptMsPerS": 952,
+        "styleLayoutMsPerS": 16,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 33.5,
+          "max": 66.8,
+          "n": 126
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      }
+    }
+  ]
+}

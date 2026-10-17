@@ -1,3 +1,4 @@
+import { perfCount } from '@/lib/perf';
 import { apply4, dot, mulM, norm, type Camera3, type M4, type V3, type View3 } from './math';
 import type { Mesh } from './mesh';
 
@@ -115,6 +116,7 @@ const f1 = (v: number) => (Math.round(v * 10) / 10).toString();
  * the tissue) only the pointing outline is made: the lit bands are left empty.
  */
 export function projectItem(item: Item3, v: View3, light: V3, flat = true): Projected {
+  perfCount('project');
   const mesh = item.hit ?? item.mesh;
   const m = item.matrix ? mulM(v.vp, item.matrix) : v.vp;
   const mv = item.matrix ? mulM(v.view, item.matrix) : v.view;

@@ -129,8 +129,21 @@ export const DIRS = {
   eskuinera: [-1, 0, 0] as V3,
 };
 
+const travels = new Map<string, V3[]>();
+
 /** Where a point of the tube goes as the loop runs (for the trails): u along the tube, loop range. */
 export function travel(u: number, from: number, to: number, base: Partial<HeartPose> = {}, n = 16, tail = false): V3[] {
+  // The same trail every frame of a step: worked out once.
+  const key = JSON.stringify([u, from, to, base, n, tail]);
+  const known = travels.get(key);
+  if (known) return known;
+  if (travels.size > 64) travels.clear();
+  const out = travelPath(u, from, to, base, n, tail);
+  travels.set(key, out);
+  return out;
+}
+
+function travelPath(u: number, from: number, to: number, base: Partial<HeartPose>, n: number, tail: boolean): V3[] {
   return Array.from({ length: n }, (_, i) => {
     const L = from + ((to - from) * i) / (n - 1);
     const pose: HeartPose = { ...POSE0, ...base, loop: tail ? (base.loop ?? 0) : L, loopTail: tail ? L : undefined };

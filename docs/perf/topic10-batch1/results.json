@@ -1,0 +1,762 @@
+{
+  "base": "http://localhost:3100",
+  "at": 0.55,
+  "date": "2026-10-16T21:09:23.741Z",
+  "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (0x00001900) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "runs": [
+    {
+      "viewport": "pc",
+      "stage": "bihotz-hodia",
+      "hold": {
+        "mainThreadMsPerS": 5.9,
+        "scriptMsPerS": 0.3,
+        "styleLayoutMsPerS": 0.8,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 229.3,
+        "scriptMsPerS": 72.9,
+        "styleLayoutMsPerS": 28.6,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 33.3,
+          "max": 50.2,
+          "n": 100
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "heartModel": 2.2,
+          "meshCacheHit": 102.2,
+          "glTick": 49.4,
+          "glRender": 28.9
+        }
+      },
+      "play": {
+        "mainThreadMsPerS": 506.9,
+        "scriptMsPerS": 365.5,
+        "styleLayoutMsPerS": 26.3,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 33.2,
+          "max": 50,
+          "n": 171
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "glTick": 57.3,
+          "glRender": 57.3,
+          "heartModel": 57.7,
+          "meshCacheHit": 2652.7
+        }
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "zirkulazio-goiztiarra",
+      "hold": {
+        "mainThreadMsPerS": 98.9,
+        "scriptMsPerS": 89.5,
+        "styleLayoutMsPerS": 1.5,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 265
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 393.6,
+        "scriptMsPerS": 203.3,
+        "styleLayoutMsPerS": 51.6,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17.1,
+          "max": 33.2,
+          "n": 106
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "heartModel": 1.1,
+          "meshCacheHit": 71.1,
+          "glTick": 72.2,
+          "glRender": 32.2,
+          "project": 650
+        }
+      },
+      "play": {
+        "mainThreadMsPerS": 512.9,
+        "scriptMsPerS": 380.2,
+        "styleLayoutMsPerS": 25.6,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17,
+          "max": 33.4,
+          "n": 180
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "glTick": 60.7,
+          "glRender": 60.7,
+          "heartModel": 60.7,
+          "meshCacheHit": 3882.7
+        }
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "bihotz-atalak",
+      "hold": {
+        "mainThreadMsPerS": 102.4,
+        "scriptMsPerS": 85.3,
+        "styleLayoutMsPerS": 3.9,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 252
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 637.1,
+        "scriptMsPerS": 419.2,
+        "styleLayoutMsPerS": 62.9,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.9,
+          "max": 17.1,
+          "n": 108
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "project": 606.7,
+          "glTick": 72.8,
+          "glRender": 21.7
+        }
+      },
+      "play": {
+        "mainThreadMsPerS": 638.5,
+        "scriptMsPerS": 420.5,
+        "styleLayoutMsPerS": 67.9,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17.1,
+          "max": 33.4,
+          "n": 177
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "heartModel": 60,
+          "meshCacheHit": 3600,
+          "glTick": 59.7,
+          "glRender": 59.7
+        }
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "bihotz-lakioa",
+      "hold": {
+        "mainThreadMsPerS": 117.8,
+        "scriptMsPerS": 103.6,
+        "styleLayoutMsPerS": 3,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 306
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 458.5,
+        "scriptMsPerS": 238.3,
+        "styleLayoutMsPerS": 71.5,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17.5,
+          "max": 49.9,
+          "n": 106
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "heartModel": 1.1,
+          "meshCacheHit": 66.7,
+          "glTick": 71.7,
+          "glRender": 30,
+          "project": 606.7
+        }
+      },
+      "play": {
+        "mainThreadMsPerS": 518.5,
+        "scriptMsPerS": 375,
+        "styleLayoutMsPerS": 28.4,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 33.3,
+          "n": 179
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "glTick": 60,
+          "glRender": 60,
+          "heartModel": 60,
+          "meshCacheHit": 3600
+        }
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "atal-bulbarra",
+      "hold": {
+        "mainThreadMsPerS": 120.2,
+        "scriptMsPerS": 104.6,
+        "styleLayoutMsPerS": 3.1,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 310
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 474,
+        "scriptMsPerS": 245.4,
+        "styleLayoutMsPerS": 63.9,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17.1,
+          "max": 36.7,
+          "n": 107
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "heartModel": 1.1,
+          "meshCacheHit": 93.3,
+          "glTick": 74.4,
+          "glRender": 33.3,
+          "project": 693.3
+        }
+      },
+      "play": {
+        "mainThreadMsPerS": 562.3,
+        "scriptMsPerS": 422.5,
+        "styleLayoutMsPerS": 23.4,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 83.8,
+          "n": 176
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 55
+        },
+        "perS": {
+          "glTick": 59.3,
+          "glRender": 59.3,
+          "heartModel": 59.3,
+          "meshCacheHit": 4984
+        }
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "atal-bentrikularra",
+      "hold": {
+        "mainThreadMsPerS": 114.2,
+        "scriptMsPerS": 102.4,
+        "styleLayoutMsPerS": 2,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 302
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 419.9,
+        "scriptMsPerS": 229.4,
+        "styleLayoutMsPerS": 57.4,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17.2,
+          "max": 66.8,
+          "n": 105
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "heartModel": 2.2,
+          "meshCacheHit": 164.4,
+          "glTick": 70.6,
+          "glRender": 29.4,
+          "project": 736.7
+        }
+      },
+      "play": {
+        "mainThreadMsPerS": 560.5,
+        "scriptMsPerS": 418.9,
+        "styleLayoutMsPerS": 22.6,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.9,
+          "max": 33.4,
+          "n": 174
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "glTick": 58.3,
+          "glRender": 58.3,
+          "heartModel": 117.3,
+          "meshCacheHit": 8682.7
+        }
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "atal-aurikularra",
+      "hold": {
+        "mainThreadMsPerS": 134.4,
+        "scriptMsPerS": 120.3,
+        "styleLayoutMsPerS": 2,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 351
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 481.3,
+        "scriptMsPerS": 246,
+        "styleLayoutMsPerS": 65.8,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.9,
+          "max": 50,
+          "n": 106
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "heartModel": 1.1,
+          "meshCacheHit": 86.7,
+          "glTick": 72.2,
+          "glRender": 31.1,
+          "project": 780
+        }
+      },
+      "play": {
+        "mainThreadMsPerS": 580,
+        "scriptMsPerS": 408.3,
+        "styleLayoutMsPerS": 19.4,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17,
+          "max": 49.8,
+          "n": 172
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "glTick": 57.7,
+          "glRender": 57.7,
+          "heartModel": 57.7,
+          "meshCacheHit": 4498
+        }
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "zain-sinua",
+      "hold": {
+        "mainThreadMsPerS": 8.3,
+        "scriptMsPerS": 0.3,
+        "styleLayoutMsPerS": 0.7,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 445.4,
+        "scriptMsPerS": 231.9,
+        "styleLayoutMsPerS": 69.9,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 33.5,
+          "n": 107
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "heartModel": 1.1,
+          "meshCacheHit": 88.9,
+          "glTick": 72.2,
+          "glRender": 30.6,
+          "project": 801.7
+        }
+      },
+      "play": {
+        "mainThreadMsPerS": 615.4,
+        "scriptMsPerS": 431.3,
+        "styleLayoutMsPerS": 37.5,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 33,
+          "max": 50.1,
+          "n": 167
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 76
+        },
+        "perS": {
+          "heartModel": 56.3,
+          "meshCacheHit": 4619.3,
+          "project": 430.7,
+          "glTick": 56,
+          "glRender": 56
+        }
+      }
+    },
+    {
+      "viewport": "pc",
+      "stage": "eskuineko-aurikula",
+      "hold": {
+        "mainThreadMsPerS": 134.2,
+        "scriptMsPerS": 117.3,
+        "styleLayoutMsPerS": 2.8,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 347
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 480.6,
+        "scriptMsPerS": 264.8,
+        "styleLayoutMsPerS": 63.2,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 16.9,
+          "n": 108
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "atriumModel": 1.1,
+          "meshCacheHit": 33.3,
+          "glTick": 70.6,
+          "glRender": 31.1,
+          "project": 476.7
+        }
+      },
+      "play": {
+        "mainThreadMsPerS": 516.1,
+        "scriptMsPerS": 378.8,
+        "styleLayoutMsPerS": 23.3,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.9,
+          "max": 33.3,
+          "n": 179
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "glTick": 60,
+          "glRender": 60,
+          "atriumModel": 60,
+          "meshCacheHit": 1800
+        }
+      }
+    },
+    {
+      "viewport": "tablet",
+      "stage": "zirkulazio-goiztiarra",
+      "hold": {
+        "mainThreadMsPerS": 122.4,
+        "scriptMsPerS": 110.1,
+        "styleLayoutMsPerS": 2.3,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 327
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 384.7,
+        "scriptMsPerS": 201.7,
+        "styleLayoutMsPerS": 56.6,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.9,
+          "max": 33.3,
+          "n": 107
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "heartModel": 1.1,
+          "meshCacheHit": 71.1,
+          "glTick": 75.6,
+          "glRender": 32.2,
+          "project": 650
+        }
+      },
+      "play": {
+        "mainThreadMsPerS": 523,
+        "scriptMsPerS": 388.6,
+        "styleLayoutMsPerS": 27.2,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.9,
+          "max": 33.4,
+          "n": 177
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "glTick": 59.7,
+          "glRender": 59.7,
+          "heartModel": 59.7,
+          "meshCacheHit": 3818.7
+        }
+      }
+    },
+    {
+      "viewport": "tablet",
+      "stage": "bihotz-lakioa",
+      "hold": {
+        "mainThreadMsPerS": 120,
+        "scriptMsPerS": 104.7,
+        "styleLayoutMsPerS": 2.5,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 311
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 468.6,
+        "scriptMsPerS": 238.9,
+        "styleLayoutMsPerS": 71.6,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 33.4,
+          "n": 107
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "heartModel": 1.1,
+          "meshCacheHit": 66.7,
+          "glTick": 73.9,
+          "glRender": 31.7,
+          "project": 606.7
+        }
+      },
+      "play": {
+        "mainThreadMsPerS": 551.4,
+        "scriptMsPerS": 415.3,
+        "styleLayoutMsPerS": 24.2,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17.1,
+          "max": 33.4,
+          "n": 178
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "glTick": 60,
+          "glRender": 60,
+          "heartModel": 60,
+          "meshCacheHit": 3600
+        }
+      }
+    },
+    {
+      "viewport": "tablet",
+      "stage": "eskuineko-aurikula",
+      "hold": {
+        "mainThreadMsPerS": 138.5,
+        "scriptMsPerS": 113.6,
+        "styleLayoutMsPerS": 2.8,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 332
+        },
+        "perS": {}
+      },
+      "drag": {
+        "mainThreadMsPerS": 414.3,
+        "scriptMsPerS": 216.4,
+        "styleLayoutMsPerS": 57.6,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.9,
+          "max": 17.3,
+          "n": 109
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "atriumModel": 1.1,
+          "meshCacheHit": 33.3,
+          "glTick": 73.3,
+          "glRender": 32.2,
+          "project": 476.7
+        }
+      },
+      "play": {
+        "mainThreadMsPerS": 534.7,
+        "scriptMsPerS": 387.4,
+        "styleLayoutMsPerS": 31.2,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 17.1,
+          "max": 33.3,
+          "n": 177
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "atriumModel": 60,
+          "meshCacheHit": 1800,
+          "glTick": 59.7,
+          "glRender": 59.7
+        }
+      }
+    }
+  ]
+}
