@@ -1,6 +1,6 @@
 # Topic 10: better 3D for less compute — exec plan
 
-Date: 2026-10-16. Status: Batches 0 and 1 done (2026-10-16), Batches 2–4 done (2026-10-17); results in `docs/perf/README.md`.
+Date: 2026-10-16. Status: Batches 0 and 1 done (2026-10-16), Batches 2–4 done (2026-10-17), plus Batch 5 (the two remaining hot spots); results in `docs/perf/README.md`.
 
 **What Batch 1 changed.**
 - `lib/three-d/mesh-cache.ts`: meshes fingerprinted on every input, so the same inputs give the same object.
@@ -14,7 +14,7 @@ Date: 2026-10-16. Status: Batches 0 and 1 done (2026-10-16), Batches 2–4 done 
 **Learned while doing it.**
 - The biggest cost was CPU work (rebuild + SVG re-projection), not GPU.
 - A frame-sampling harness distorts idle measurements.
-- The remaining drag cost is the per-frame SVG projection; a candidate for the next batch is to project hit paths only when the pointer can use them. Scope: topic 10 (`components/scenes/week10/`) and the shared 3D kit it draws through (`components/kit/three/`, `lib/three-d/`). Other topics' content is not touched. Kit changes get checks on topics 7–9 and 11 too.
+- The remaining drag cost was the per-frame SVG projection; Batch 5 projects hit paths only when the pointer can use them. Scope: topic 10 (`components/scenes/week10/`) and the shared 3D kit it draws through (`components/kit/three/`, `lib/three-d/`). Other topics' content is not touched. Kit changes get checks on topics 7–9 and 11 too.
 
 This plan builds on `docs/review/topic-10-low-compute-executive-plan.md` (the "earlier plan"). It keeps that plan's direction and adds findings from a fresh read of both codebases. Reference paths `ref/…` mean `C:/Users/aitor/Downloads/natural-disasters/src/…` ("ABYSSAL", a Three.js ocean/storm demo). Four Haiku 5.5 readers collected facts; every fact a decision rests on was re-checked in the source.
 
@@ -112,6 +112,16 @@ Each batch has a finish line. Measure, then report what landed, and only then pi
   - **Stage 5:** reviewed, no change. The start ghost is cached (Batch 1). The camera glides for only 0.035 of the stage after each key and then holds while the loop forms; moving the loop's timing would desync the narration.
   - **Stage 10:** the thin walls are from Batch 3. Selective reveal (`lateralGlass` turns only the lateral wall to glass) and the smooth-versus-rough wall contrast (epithelium versus fibred muscle plus pectinate ridges) already existed.
   - **Proof:** tests in `tests/render-cost.test.ts`; full vitest passes; browser shots at 1440×900 and 768×1024 are clean, with no console errors.
+
+### Batch 5: the remaining hot spots (added and done 2026-10-17)
+After Batch 4, two costs were left. The first was turning the model: every item was re-projected to SVG each frame, about 370 projections/s. The second was stage 9's closing veins: the anatomy changes every frame, about 1000 ms/s of main thread, at 30 fps. A CPU profile showed that half of the second was one function: smooth-normal welding built a `toFixed(4)` string key for every vertex of every rebuilt mesh.
+- **Pointing outlines** (`Stage3D.tsx` `projectCached`). While the picture is turned, they are held: the pointer belongs to the turn. While it plays, they refresh at most every 100 ms. They are all brought up to date as soon as things settle; a timer catches the last frame. The flat fallback always projects.
+  - Checked in Chrome: the outlines are held during a drag and current within 40 ms of release.
+- **Normal welding** (`lib/three-d/mesh.ts` `finish`). An integer hash table on the same 1e-4 grid, with the same summation order, replaces the strings. A test checks every vertex of the heart against the old algorithm. One deliberate difference: a point on a plane of symmetry ("-0.0000" vs "0.0000") is no longer split in two, which removes a faint midline crease.
+- **Result.**
+  - Turning: script 220 → 144 ms/s, projections 373 → 10 per second.
+  - Stage 9 closing: main thread 1021 → 798 ms/s, frame p95 36 → 18 ms (60 fps).
+  - Pictures: within 0.13%.
 
 ### Deferred, with a reason
 - Vertex-shader tube deformation (R7): needs a CPU mirror for labels, hits and clips; only if batch 1 isn't enough.

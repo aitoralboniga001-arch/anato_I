@@ -207,6 +207,10 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
   // A parked layer is waiting for this view: no "preparing" spinner, the picture is there next frame.
   const [warm] = useState(() => !!ul?.host && (parked.has(ul.host) || (live.get(ul.host) ?? 0) > 0));
   const drag = useRef<{ x: number; y: number; yaw: number; pitch: number; moved: boolean } | null>(null);
+  // While the viewer turns the picture, the pointer is held by the turn: nothing can be pointed at.
+  const [turning, setTurning] = useState(false);
+  // Bumped once things settle, to bring outlines left behind during a turn or playback up to date.
+  const [, setSettled] = useState(0);
   // Turns asked for with the buttons or a reset glide there (a drag follows the pointer at once).
   const turnNow = useRef(turn);
   turnNow.current = turn;
@@ -356,10 +360,24 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
   const flat = !ready && (!host || flatOnly);
   // Starting up: the spinner stands in for the picture, and its names wait for it.
   const waiting = !!host && !ready && !flatOnly && !warm;
+  // The outlines for pointing are projected again when their item moved, but not while the picture is
+  // being turned (nothing can be pointed at then) and at most every 100 ms while it plays; once things
+  // settle they are all brought up to date. The flat picture (no WebGL) is drawn from them: always current.
+  let behind = false;
   const drawn = scene.items
     .filter((it) => (it.show ?? 1) * (it.opacity ?? 1) > 0.01)
-    .map((it) => ({ it, pr: it.stream ? UNPROJECTED : projectCached(it, view, light, flat) }))
+    .map((it) => {
+      if (it.stream) return { it, pr: UNPROJECTED };
+      const r = projectCached(it, view, light, flat, flat ? 'now' : turning ? 'hold' : 'soon');
+      behind ||= r.behind;
+      return { it, pr: r.pr };
+    })
     .sort((a, b) => b.pr.depth - a.pr.depth);
+  useEffect(() => {
+    if (!behind) return;
+    const id = window.setTimeout(() => setSettled((n) => n + 1), 120);
+    return () => window.clearTimeout(id);
+  });
 
   useEffect(() => {
     if (!host) return;
@@ -458,13 +476,23 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
         if (!d.moved) {
           d.moved = true;
           turnedOnce = true;
+          setTurning(true);
           (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
         }
         setTurn({ yaw: d.yaw - dx * 0.007, pitch: Math.max(-1.1, Math.min(1.1, d.pitch + dy * 0.006)) });
       }}
-      onPointerUp={() => setTimeout(() => (drag.current = null), 0)}
-      onPointerCancel={() => { drag.current = null; }}
-      onLostPointerCapture={() => { setTimeout(() => (drag.current = null), 0); }}
+      onPointerUp={() => {
+        setTurning(false);
+        setTimeout(() => (drag.current = null), 0);
+      }}
+      onPointerCancel={() => {
+        setTurning(false);
+        drag.current = null;
+      }}
+      onLostPointerCapture={() => {
+        setTurning(false);
+        setTimeout(() => (drag.current = null), 0);
+      }}
       onClickCapture={(e) => {
         // A drag that turned the picture is not a click on what it started on.
         if (drag.current?.moved) e.stopPropagation();
@@ -507,17 +535,23 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
  * The last projection of each item: while the camera, the item's matrix and its cut stay the same (most
  * frames of a played view: only highlights and visibility change), its outlines are not projected again.
  */
-const projections = new Map<string, { mesh: object; sig: string; pr: Projected }>();
+const projections = new Map<string, { mesh: object; sig: string; pr: Projected; at: number }>();
 /** A stream (blood cells) is placed by the GPU alone: nothing to point at, nothing drawn flat. */
 const UNPROJECTED: Projected = { d: '', bands: ['', '', ''], depth: 0, any: false };
-function projectCached(it: Item3, view: View3, light: V3, flat: boolean) {
+/**
+ * `when`: 'now' projects a moved item at once; 'soon' at most every 100 ms; 'hold' keeps its last
+ * outline (`behind` then says the outline is out of date).
+ */
+function projectCached(it: Item3, view: View3, light: V3, flat: boolean, when: 'now' | 'soon' | 'hold'): { pr: Projected; behind: boolean } {
   const mesh = it.hit ?? it.mesh;
   const sig = `${flat ? 1 : 0}|${Array.prototype.join.call(view.vp, ',')}|${it.matrix ? Array.prototype.join.call(it.matrix, ',') : ''}|${light.join(',')}|${it.clip ? JSON.stringify(it.clip) : ''}`;
   const last = projections.get(it.key);
-  if (last && last.mesh === mesh && last.sig === sig) return last.pr;
+  if (last && last.mesh === mesh && last.sig === sig) return { pr: last.pr, behind: false };
+  const now = performance.now();
+  if (last && last.sig.startsWith(flat ? '1' : '0') && (when === 'hold' || (when === 'soon' && now - last.at < 100))) return { pr: last.pr, behind: true };
   const pr = projectItem(it, view, light, flat);
-  projections.set(it.key, { mesh, sig, pr });
-  return pr;
+  projections.set(it.key, { mesh, sig, pr, at: now });
+  return { pr, behind: false };
 }
 
 /** Shown for the moment a 3D view's geometry is still being built (off the main thread). */

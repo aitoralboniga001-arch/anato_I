@@ -195,6 +195,40 @@ describe('meshes are kept while their inputs are unchanged', () => {
     last(r).forEach((v, k) => expect(v).toBeCloseTo(last(r0)[k], 5));
   });
 
+  it('smooth normals: coincident vertices welded through the integer grid give the string-keyed result', () => {
+    // The previous welding, keyed on each coordinate's toFixed(4); except that "-0.0000" now counts as
+    // "0.0000": the old key split a point lying on a plane of symmetry in two, giving it two normals (a crease).
+    const reference = (m: { pos: Float32Array; idx: Uint32Array }) => {
+      const p = m.pos;
+      const n = new Float64Array(p.length);
+      for (let i = 0; i < m.idx.length; i += 3) {
+        const [a, b, c] = [m.idx[i] * 3, m.idx[i + 1] * 3, m.idx[i + 2] * 3];
+        const e1 = [p[b] - p[a], p[b + 1] - p[a + 1], p[b + 2] - p[a + 2]];
+        const e2 = [p[c] - p[a], p[c + 1] - p[a + 1], p[c + 2] - p[a + 2]];
+        const f = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+        for (const v of [a, b, c]) for (let k = 0; k < 3; k++) n[v + k] += f[k];
+      }
+      const fx = (x: number) => x.toFixed(4).replace(/^-(0\.0000)$/, '$1');
+      const key = (i: number) => `${fx(p[i])},${fx(p[i + 1])},${fx(p[i + 2])}`;
+      const acc = new Map<string, number[]>();
+      for (let i = 0; i < p.length; i += 3) {
+        const s0 = acc.get(key(i)) ?? [0, 0, 0];
+        for (let k = 0; k < 3; k++) s0[k] += n[i + k];
+        acc.set(key(i), s0);
+      }
+      return Array.from({ length: p.length }, (_, i) => {
+        const s0 = acc.get(key(i - (i % 3)))!;
+        return s0[i % 3] / (Math.hypot(s0[0], s0[1], s0[2]) || 1);
+      });
+    };
+    const heart = heartModel({ ...POSE0, segs: 1, colour: 1, loop: 0.6, arches: 2, veins: 1 }, { cavity: 1, septum: 1, gut: 1, aortas: 1 });
+    const meshes = [tube([[0, 0, 0], [0.5, 1, 0.2], [1, 2.5, -0.3]], { radius: () => 0.3, ref: [0, 0, 1], capStart: true, capEnd: true }), blob({ center: [0.2, -0.1, 0.3], radii: [1, 0.6, 0.8] }), ...heart.items.map((it) => it.mesh)];
+    for (const m of meshes) {
+      const want = reference(m);
+      for (let i = 0; i < want.length; i++) expect(Math.abs(m.nrm[i] - want[i])).toBeLessThan(1e-6);
+    }
+  });
+
   it('a vessel route is resampled evenly by length, so the cells keep one speed', () => {
     const pts: V3[] = [[0, 0, 0], [0.1, 0, 0], [3, 0, 0]];
     const r = vesselRouteOf(pts);

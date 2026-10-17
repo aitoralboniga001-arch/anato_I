@@ -224,23 +224,45 @@ function finish(pos: number[], uv: number[], idx: number[]): Mesh {
       n[v + 2] += f[2];
     }
   }
-  // Coincident vertices (a closed tube's seam, the poles of a blob) share one normal.
-  const key = (i: number) => `${p[i].toFixed(4)},${p[i + 1].toFixed(4)},${p[i + 2].toFixed(4)}`;
-  const acc = new Map<string, [number, number, number]>();
-  for (let i = 0; i < p.length; i += 3) {
-    const k = key(i);
-    const s = acc.get(k) ?? [0, 0, 0];
-    s[0] += n[i];
-    s[1] += n[i + 1];
-    s[2] += n[i + 2];
-    acc.set(k, s);
+  // Coincident vertices (a closed tube's seam, the poles of a blob) share one normal: vertices on the same
+  // point of a 1e-4 grid are found through a hash table of the grid's integers (no strings: this runs for
+  // every vertex of every mesh built while a shape changes).
+  const N = p.length / 3;
+  const q = new Int32Array(p.length);
+  for (let i = 0; i < p.length; i++) q[i] = Math.round(p[i] * 1e4);
+  let size = 1;
+  while (size < N * 2) size <<= 1;
+  const table = new Int32Array(size).fill(-1);
+  const group = new Int32Array(N);
+  const acc = new Float64Array(p.length);
+  for (let v = 0; v < N; v++) {
+    const i = v * 3;
+    let h = (Math.imul(q[i], 73856093) ^ Math.imul(q[i + 1], 19349663) ^ Math.imul(q[i + 2], 83492791)) & (size - 1);
+    for (;;) {
+      const w = table[h];
+      if (w < 0) {
+        table[h] = v;
+        group[v] = v;
+        break;
+      }
+      if (q[w * 3] === q[i] && q[w * 3 + 1] === q[i + 1] && q[w * 3 + 2] === q[i + 2]) {
+        group[v] = w;
+        break;
+      }
+      h = (h + 1) & (size - 1);
+    }
+    const g = group[v] * 3;
+    acc[g] += n[i];
+    acc[g + 1] += n[i + 1];
+    acc[g + 2] += n[i + 2];
   }
-  for (let i = 0; i < p.length; i += 3) {
-    const s = acc.get(key(i))!;
-    const l = Math.hypot(s[0], s[1], s[2]) || 1;
-    n[i] = s[0] / l;
-    n[i + 1] = s[1] / l;
-    n[i + 2] = s[2] / l;
+  for (let v = 0; v < N; v++) {
+    const i = v * 3;
+    const g = group[v] * 3;
+    const l = Math.hypot(acc[g], acc[g + 1], acc[g + 2]) || 1;
+    n[i] = acc[g] / l;
+    n[i + 1] = acc[g + 1] / l;
+    n[i + 2] = acc[g + 2] / l;
   }
   return { pos: p, nrm: n, uv: new Float32Array(uv), idx: new Uint32Array(idx) };
 }

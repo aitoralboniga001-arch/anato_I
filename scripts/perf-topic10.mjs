@@ -231,7 +231,9 @@ async function run(base, out) {
       await sleep(2500);
       row.gpuMs = await gpu(c);
       const shot = await c.send('Page.captureScreenshot', { format: 'png' });
-      writeFileSync(join(outDir, 'shots', `flow-${stage}.png`), Buffer.from(shot.data, 'base64'));
+      // A stage's first point keeps the plain name (comparable with earlier runs); later ones add their time.
+      const first = FLOW.find(([s]) => s === stage)[1] === at;
+      writeFileSync(join(outDir, 'shots', first ? `flow-${stage}.png` : `flow-${stage}@${at}.png`), Buffer.from(shot.data, 'base64'));
       if (await open(c, base, stage, true, at)) {
         await sleep(300);
         row.play = await measure(c, PLAY_MS);

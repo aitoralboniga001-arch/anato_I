@@ -14,6 +14,7 @@ Measured with `scripts/perf-topic10.mjs`: headless Chrome on a production build 
 | `topic10-batch2/` | After Batch 2 (blood cells drawn by the GPU). |
 | `topic10-batch3-before/`, `-before-dpr2/` | Batch 2 code with the GPU bench, at DPR 1 and 2: the "before" for Batch 3. |
 | `topic10-batch3/`, `-dpr2/` | After Batch 3 (shader detail fade, thin walls, shared light). |
+| `topic10-batch5/` | After Batch 5 (pointing outlines held while turning, normal welding without strings). |
 | `topic10-batch4/` | After Batch 4 (blood in the vessels at stages 3 and 9); adds the stage 9 rerouting point (une 0.45). |
 
 Screenshots (`shots/`) are written next to each `results.json` but are not kept in git. Compare two runs' pictures with `node scripts/perf-topic10.mjs compare <dirA> <dirB>`.
@@ -77,4 +78,16 @@ Averages over the six blood-flow views (stages 3, 4, 6, 7, 8 and 9; playing, 144
 
 - **Stage 3 at une 0.9** (the vessel cells on): about 90 more cells, each drawn as part of an instanced stream. Main thread 702 → 631 ms/s (run-to-run noise; no cost visible). GPU 0.67 → 0.84 ms per picture, from the extra instanced draws; still under 1 ms.
 - **Stage 9 at une 0.45** (new point): about 1000 ms/s main thread and 1100 mesh builds/s while playing. This is the anatomy changing shape every frame: the horns shift and the left veins close, over about 0.07 of the stage. The vessel cells add no mesh builds. It is the remaining playback hot spot.
+
+## Batch 5 (2026-10-17): turning and the closing veins
+
+| | Before (Batch 4) | After |
+|---|---|---|
+| Dragged: script | 220 ms/s | 144 ms/s |
+| Dragged: SVG projections per s | 373 | 10 |
+| Stage 9 closing (une 0.45, played): main thread | 1021 ms/s | 798 ms/s |
+| Stage 9 closing: frame p95 | 36 ms (30 fps) | 18 ms (60 fps) |
+| Played, all views: SVG projections per s | 65 | 14 |
+
+Pictures are within 0.13% of Batch 4. From this run on, a stage's later blood point gets its own shot (`flow-zain-sinua@0.45.png`). Before, it overwrote the first one.
 
