@@ -122,6 +122,7 @@ After Batch 4, two costs were left. The first was turning the model: every item 
   - Turning: script 220 → 144 ms/s, projections 373 → 10 per second.
   - Stage 9 closing: main thread 1021 → 798 ms/s, frame p95 36 → 18 ms (60 fps).
   - Pictures: within 0.13%.
+- **Shared kit smoke check (acceptance).** The 3D views of topics 7 (dome), 8 (calvaria, limb rotation), 9 (domains) and 10 were opened in headless Chrome at 1440 px. Each one: canvas ready, no page errors, outlines held during a drag and current after it, shading smooth. Topic 11 has no 3D view.
 
 ### Deferred, with a reason
 - Vertex-shader tube deformation (R7): needs a CPU mirror for labels, hits and clips; only if batch 1 isn't enough.
