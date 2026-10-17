@@ -241,7 +241,16 @@ export function SinusBack({ t }: SceneProps) {
     glass: 0.45 * vis(t, S9[1], S9[2]),
   };
   const mixing = vis(t, S9[1], S9[2]);
-  const opts: HeartOpts = { cavity: 0.15, septum: 0.35, gut: 0.2, aortas: 0.35, flow: mixing > 0.01 ? { phase: t * 26, show: mixing, mixed: true } : null };
+  // While the anastomoses form and the left veins close: the blood in the veins, the left side's crossing
+  // to the right horn as each of its veins closes.
+  const rerouting = vis(t, S9[2], S9[3]);
+  const opts: HeartOpts = {
+    cavity: 0.15,
+    septum: 0.35,
+    gut: 0.2,
+    aortas: 0.35,
+    flow: mixing > 0.01 || rerouting > 0.01 ? { phase: t * 26, show: mixing, mixed: true, vessels: rerouting } : null,
+  };
   const camera = cameraAt(t, [
     // Stage 8 ends seen from behind (and says so): start there, then settle straight behind.
     [0, orbit(165, 20, 10.4, [0, 0, -0.3], [40, 0])],

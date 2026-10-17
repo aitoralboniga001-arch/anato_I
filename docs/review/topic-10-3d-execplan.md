@@ -1,6 +1,6 @@
 # Topic 10: better 3D for less compute — exec plan
 
-Date: 2026-10-16. Status: Batches 0 and 1 done (2026-10-16), Batches 2 and 3 done (2026-10-17); results in `docs/perf/README.md`. Batch 4 not started.
+Date: 2026-10-16. Status: Batches 0 and 1 done (2026-10-16), Batches 2–4 done (2026-10-17); results in `docs/perf/README.md`.
 
 **What Batch 1 changed.**
 - `lib/three-d/mesh-cache.ts`: meshes fingerprinted on every input, so the same inputs give the same object.
@@ -103,6 +103,15 @@ Each batch has a finish line. Measure, then report what landed, and only then pi
 - **Stage 9 (sinus venosus):** a shared vein route graph. Rerouted veins keep their colour. Vanishing stretches fade per instance and segment, with no rebuild.
 - **Stage 10 (right atrium room):** backlit thin walls, selective reveal (hide only the blocking wall), footprint-faded trabeculae texture on the rough part vs the smooth sinus part. That is the teaching contrast, now cheaper.
 - **Finish line:** each stage passes the visibility guard, the label-zone and named-side tests, and browser proof at 768 and 1440 px.
+- **Done (2026-10-17).** Per stage:
+  - **Stage 3 (step 11).** Blood cells run down every real vessel as the walls turn to glass. Red cells come in through the umbilical veins; blue cells through the vitelline, anterior and posterior cardinal veins. They follow each horn into its atrium. Mostly red cells leave through the first arches and down the dorsal aortas (oxygenated, a few poorer cells, as the notes say).
+    - How: `HeartOpts.flow.vessels` / `.arteries`. Each vessel route is resampled evenly by length (`vesselRouteOf`), and cells keep the tube's speed.
+  - **Stage 9 (step 3, the anastomoses).** The veins carry blood. As the right umbilical and left vitelline close, and later the left common cardinal, the old ways' cells go one by one. The left blood then comes across the anastomoses into the right veins and the right horn (`LINK` / `anastomoses()`, shared with the drawn vessels).
+  - **Pulse (R8): not added.** The cells already show each route's direction, and the existing trails mark the way in and out.
+  - **Stage 4:** already done by Batches 1–2 (cached geometry, GPU cells).
+  - **Stage 5:** reviewed, no change. The start ghost is cached (Batch 1). The camera glides for only 0.035 of the stage after each key and then holds while the loop forms; moving the loop's timing would desync the narration.
+  - **Stage 10:** the thin walls are from Batch 3. Selective reveal (`lateralGlass` turns only the lateral wall to glass) and the smooth-versus-rough wall contrast (epithelium versus fibred muscle plus pectinate ridges) already existed.
+  - **Proof:** tests in `tests/render-cost.test.ts`; full vitest passes; browser shots at 1440×900 and 768×1024 are clean, with no console errors.
 
 ### Deferred, with a reason
 - Vertex-shader tube deformation (R7): needs a CPU mirror for labels, hits and clips; only if batch 1 isn't enough.

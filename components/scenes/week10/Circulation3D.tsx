@@ -37,7 +37,7 @@ export function CirculationFront({ t }: SceneProps) {
     septum: 1,
     gut: 0.45,
     aortas: 1,
-    flow: mix > 0 ? { phase: t * 26, show: mix, mixed: true } : null,
+    flow: mix > 0 ? { phase: t * 26, show: mix, mixed: true, vessels: mix, arteries: true } : null,
   };
   const camera = cameraAt(t, [
     [0, orbit(8, 6, 12.2, [0, -0.15, -0.2], [40, 4])],

@@ -30,6 +30,7 @@ const FLOW = [
   ['atal-bentrikularra', 0.75],
   ['atal-aurikularra', 0.85],
   ['zain-sinua', 0.25],
+  ['zain-sinua', 0.45],
 ];
 /** Screen density (DPR) to emulate: `DPR=2 node scripts/perf-topic10.mjs run …` for a tablet/retina screen. */
 const DPR = Number(process.env.DPR ?? 1);

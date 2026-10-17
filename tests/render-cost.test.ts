@@ -3,7 +3,7 @@ import { blob, tube } from '@/lib/three-d/mesh';
 import { cachedBlob, cachedMerge, cachedMesh, cachedTube } from '@/lib/three-d/mesh-cache';
 import { createWaker } from '@/lib/three-d/waker';
 import { A0, atriumModel } from '@/components/scenes/week10/atrium3d';
-import { POSE0, centreline, heartModel, routeOf, type HeartOpts, type HeartPose } from '@/components/scenes/week10/model3d';
+import { POSE0, centreline, heartModel, routeLength, routeOf, vesselRouteOf, type HeartOpts, type HeartPose } from '@/components/scenes/week10/model3d';
 import { STREAM_ROUTE_N } from '@/lib/three-d/scene';
 import type { V3 } from '@/lib/three-d/math';
 
@@ -170,6 +170,38 @@ describe('meshes are kept while their inputs are unchanged', () => {
       expect(it.hit, it.key).toBeDefined();
       expect(it.hit!.idx.length, it.key).toBeLessThan(it.mesh.idx.length);
     }
+  });
+
+  it('blood in the vessels: veins into their horn, arteries out, the left blood rerouted right once its veins close', () => {
+    const pose: HeartPose = { ...POSE0, segs: 1, arches: 2, veins: 1 };
+    const keysOf = (p: HeartPose, f: HeartOpts['flow']) => heartModel(p, { aortas: 1, flow: f }).items.filter((it) => it.stream).map((it) => it.key);
+    const open = keysOf(pose, { phase: 0.2, show: 1, mixed: true, vessels: 1, arteries: true });
+    expect(open).toEqual(expect.arrayContaining(['flow-umb0O2', 'flow-umb1O2', 'flow-vit0', 'flow-vit1', 'flow-ant0', 'flow-post1', 'flow-art-1O2', 'flow-art1']));
+    expect(open.some((k) => k.endsWith('x') || k.endsWith('xO2'))).toBe(false);
+    // Without `arteries`, no arterial cells; without `vessels`, only the tube's.
+    expect(keysOf(pose, { phase: 0.2, show: 1, vessels: 1 }).some((k) => k.startsWith('flow-art'))).toBe(false);
+    expect(keysOf(pose, { phase: 0.2, show: 1 })).toEqual(['flow']);
+    // Both closings done and the anastomoses there: the right umbilical and the left veins' old ways carry
+    // nothing; the left blood crosses to the right horn.
+    const closed: HeartPose = { ...pose, obliterate: [1, 1], anast: 1 };
+    const m = heartModel(closed, { aortas: 1, flow: { phase: 0.2, show: 0, vessels: 1 } });
+    const ks = m.items.filter((it) => it.stream).map((it) => it.key);
+    expect(ks).toEqual(expect.arrayContaining(['flow-umb1xO2', 'flow-vit1x', 'flow-ant1x', 'flow-vit0']));
+    for (const gone of ['flow-umb0O2', 'flow-umb1O2', 'flow-vit1', 'flow-ant1', 'flow-post1', 'flow']) expect(ks, gone).not.toContain(gone);
+    // A rerouted way ends in the right atrium, like the right veins' own.
+    const r = m.items.find((it) => it.key === 'flow-vit1x')!.stream!.route;
+    const r0 = m.items.find((it) => it.key === 'flow-vit0')!.stream!.route;
+    const last = (x: Float32Array) => Array.from(x.slice(-3));
+    last(r).forEach((v, k) => expect(v).toBeCloseTo(last(r0)[k], 5));
+  });
+
+  it('a vessel route is resampled evenly by length, so the cells keep one speed', () => {
+    const pts: V3[] = [[0, 0, 0], [0.1, 0, 0], [3, 0, 0]];
+    const r = vesselRouteOf(pts);
+    const step = (j: number) => r[(j + 1) * 3] - r[j * 3];
+    for (let j = 0; j < STREAM_ROUTE_N - 1; j++) expect(step(j)).toBeCloseTo(3 / (STREAM_ROUTE_N - 1), 5);
+    expect(routeLength(r)).toBeCloseTo(3, 5);
+    expect(vesselRouteOf(pts.map((p) => [...p] as V3))).toBe(r);
   });
 
   it('in the atrium room, the thin parts let light through (membrane, valves) and the muscular walls do not', () => {

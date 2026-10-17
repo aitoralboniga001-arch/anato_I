@@ -267,6 +267,25 @@ export function veins(h: V3, sx: number) {
   };
 }
 
+/** Where each anastomosis leaves a left vein and joins a right one (indices along the veins from the horn). */
+const LINK = { vit: [10, 10], ant: [12, 9], umb: [10, 13] } as const;
+/**
+ * The anastomoses: vitelline to vitelline, anterior cardinal to anterior cardinal, and the left umbilical
+ * to the right vitelline (through the liver): every left vein that stays reaches the right horn.
+ */
+function anastomoses(L: ReturnType<typeof veins>, R: ReturnType<typeof veins>) {
+  const cross = (a: V3, b: V3): V3[] => path([a, add(mix3(a, b, 0.5), [0, -0.12, 0.08]), b], 12);
+  return [cross(L.vitelline[LINK.vit[0]], R.vitelline[LINK.vit[1]]), cross(L.anterior[LINK.ant[0]], R.anterior[LINK.ant[1]]), cross(L.umbilical[LINK.umb[0]], R.vitelline[LINK.umb[1]])];
+}
+
+/** One side's dorsal aorta and its k-th aortic arch (from the aortic sac round the foregut to the aorta). */
+function arterial(sac: V3, sx: number, k: number) {
+  const da = path([[sx * 0.4, sac[1] + 0.5, -1.38], [sx * 0.42, 0.2, -1.42], [sx * 0.38, -1.6, -1.4], [sx * 0.3, -2.6, -1.36]], 24);
+  const y0 = sac[1] + 0.32 - k * 0.3;
+  const arch = path([sac, [sx * 0.22, y0 + 0.08, sac[2] - 0.05], [sx * 0.38, y0 + 0.18, -0.55], [sx * 0.4, y0 + 0.08, -1.12], [sx * 0.4, y0 - 0.06, -1.38]], 16);
+  return { da, arch };
+}
+
 // ———————————————————————————— items ————————————————————————————
 
 export interface HeartOpts {
@@ -280,7 +299,13 @@ export interface HeartOpts {
   /** Faint copy of a pose (the start of the looping). */
   ghost?: HeartPose | null;
   /** Blood cells in the lumen: phase (stage time × speed) and visibility. */
-  flow?: { phase: number; show: number; mixed?: boolean } | null;
+  /**
+   * Blood cells: along the tube (`show`); with `vessels` also in from the veins (umbilical red, vitelline
+   * and cardinal blue; once the left veins close, the left blood takes the anastomoses to the right horn),
+   * and with `arteries` out through the arches into the dorsal aortas. The vessels turn to glass to show
+   * them (0..1, cells appearing one by one).
+   */
+  flow?: { phase: number; show: number; mixed?: boolean; vessels?: number; arteries?: boolean } | null;
   /** Show the 2-tube endocardium inside the myocardium while fusing. */
   endocardium?: number;
   /** Dorsal mesocardium (0..1, and broken 0..1). */
@@ -543,6 +568,9 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
 
   // The veins of each side, at the tips of the horns.
   const vShow = clamp01(pose.veins);
+  // With blood shown in the vessels, their walls turn to glass so the cells show through.
+  const vesselFlow = clamp01(o.flow?.vessels ?? 0);
+  const vesselWall = 1 - 0.5 * vesselFlow;
   if (vShow > 0.01) {
     for (let i = 0; i < 2; i++) {
       const sx = i ? 1 : -1;
@@ -562,7 +590,7 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
       const v = (key: string, id: string, pts0: V3[], color: string, deep: string, r: number, gone0: number) => {
         if (gone0 >= 0.98) return;
         const g = own[key];
-        items.push({ key: `${key}${i}`, id, groups: g ? [g] : undefined, ...vessel(pts0, (u) => r * big * (1 - 0.75 * gone0) * lerp(1, 0.75, u), 10), color, deep, tissue: 'vessel', opacity: vShow * (1 - 0.6 * gone0) });
+        items.push({ key: `${key}${i}`, id, groups: g ? [g] : undefined, ...vessel(pts0, (u) => r * big * (1 - 0.75 * gone0) * lerp(1, 0.75, u), 10), color, deep, tissue: 'vessel', opacity: vShow * (1 - 0.6 * gone0) * vesselWall });
         if (g) pts[g] = pts0[Math.min(pts0.length - 1, 10)];
       };
       v('card', 'bena-kardinal-komuna', V.cardinal, T.deo2, T.deo2Deep, 0.1, cardGone);
@@ -595,14 +623,10 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
     if (an > 0.01) {
       const L = veins(cd.horn[1], 1);
       const R = veins(cd.horn[0], -1);
-      const cross = (a: V3, b: V3): V3[] => path([a, add(mix3(a, b, 0.5), [0, -0.12, 0.08]), b], 12);
-      // Vitelline to vitelline, anterior cardinal to anterior cardinal, and the left umbilical to the right
-      // vitelline (through the liver): every left vein that stays reaches the right horn.
-      const links = [cross(L.vitelline[10], R.vitelline[10]), cross(L.anterior[12], R.anterior[9]), cross(L.umbilical[10], R.vitelline[13])];
-      links.forEach((c, k) => {
+      anastomoses(L, R).forEach((c, k) => {
         const part = c.slice(0, Math.max(2, Math.round(c.length * an)));
         // The umbilical one carries the placenta's oxygenated blood (red), the others venous blood.
-        items.push({ key: `anast${k}`, id: 'anastomosiak', ...vessel(part, k === 2 ? 0.07 : 0.06, 10), color: k === 2 ? T.o2 : T.deo2, deep: k === 2 ? T.o2Deep : T.deo2Deep, tissue: 'vessel', opacity: vShow });
+        items.push({ key: `anast${k}`, id: 'anastomosiak', ...vessel(part, k === 2 ? 0.07 : 0.06, 10), color: k === 2 ? T.o2 : T.deo2, deep: k === 2 ? T.o2Deep : T.deo2Deep, tissue: 'vessel', opacity: vShow * vesselWall });
       });
       pts['anastomosiak'] = mix3(L.vitelline[10], R.vitelline[10], 0.3);
     }
@@ -614,15 +638,14 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
     const sac = line[0];
     const n = Math.max(0, Math.min(3, pose.arches));
     for (const sx of [-1, 1]) {
-      const da = path([[sx * 0.4, sac[1] + 0.5, -1.38], [sx * 0.42, 0.2, -1.42], [sx * 0.38, -1.6, -1.4], [sx * 0.3, -2.6, -1.36]], 24);
-      items.push({ key: `dao${sx}`, id: 'aorta-dortsalak', ...vessel(da, 0.11, 12), color: T.aorta, deep: T.aortaDeep, tissue: 'vessel', opacity: ao });
+      const { da } = arterial(sac, sx, 0);
+      items.push({ key: `dao${sx}`, id: 'aorta-dortsalak', ...vessel(da, 0.11, 12), color: T.aorta, deep: T.aortaDeep, tissue: 'vessel', opacity: ao * vesselWall });
       for (let k = 0; k < 3; k++) {
         const g = clamp01(n - k);
         if (g <= 0.01) continue;
-        const y0 = sac[1] + 0.32 - k * 0.3;
-        const arch = path([sac, [sx * 0.22, y0 + 0.08, sac[2] - 0.05], [sx * 0.38, y0 + 0.18, -0.55], [sx * 0.4, y0 + 0.08, -1.12], [sx * 0.4, y0 - 0.06, -1.38]], 16);
+        const { arch } = arterial(sac, sx, k);
         const part = arch.slice(0, Math.max(2, Math.round(arch.length * g)));
-        items.push({ key: `arch${k}${sx}`, id: 'aorta-arkuak', ...vessel(part, 0.075, 10), color: T.o2, deep: T.o2Deep, tissue: 'vessel', opacity: ao });
+        items.push({ key: `arch${k}${sx}`, id: 'aorta-arkuak', ...vessel(part, 0.075, 10), color: T.o2, deep: T.o2Deep, tissue: 'vessel', opacity: ao * vesselWall });
         if (k === 0) pts[`aorta-arkuak${sx}`] = arch[9];
       }
       pts[`aorta-dortsalak${sx}`] = da[12];
@@ -660,11 +683,65 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
 
   // Blood in the lumen: cells along the centreline from the horns to the aortic sac, placed by the GPU
   // from the phase (one cell mesh drawn once per cell); they appear one by one as the flow starts.
-  if (o.flow && o.flow.show > 0.01) {
+  if (o.flow && (o.flow.show > 0.01 || vesselFlow > 0.01)) {
     const run = { route: routeOf(line), phase: o.flow.phase, grow: clamp01(o.flow.show) };
     const cell = cachedBlob({ center: [0, 0, 0], radii: [0.055, 0.04, 0.055], rings: 6, sides: 8 });
-    items.push({ key: 'flow', mesh: cell, color: T.deo2, deep: T.deo2Deep, tissue: 'skin', stream: { ...run, ...(o.flow.mixed ? CELLS.deo2 : CELLS.all) } });
-    if (o.flow.mixed) items.push({ key: 'flowO2', mesh: cell, color: T.o2, deep: T.o2Deep, tissue: 'skin', stream: { ...run, ...CELLS.o2 } });
+    if (o.flow.show > 0.01) {
+      items.push({ key: 'flow', mesh: cell, color: T.deo2, deep: T.deo2Deep, tissue: 'skin', stream: { ...run, ...(o.flow.mixed ? CELLS.deo2 : CELLS.all) } });
+      if (o.flow.mixed) items.push({ key: 'flowO2', mesh: cell, color: T.o2, deep: T.o2Deep, tissue: 'skin', stream: { ...run, ...CELLS.o2 } });
+    }
+    // In the vessels the cells keep the tube's speed (same distance per stage time, whatever the route's length).
+    if (vesselFlow > 0.01) {
+      const speed = o.flow.phase * routeLength(run.route);
+      const along = (key: string, pts: V3[], sets: [Cells, string, string][], grow = vesselFlow) => {
+        if (grow <= 0.01) return;
+        const route = vesselRouteOf(pts);
+        const sr = { route, phase: speed / routeLength(route), grow };
+        for (const [set, color, deep] of sets) items.push({ key: `flow-${key}${color === T.o2 ? 'O2' : ''}`, mesh: cell, color, deep, tissue: 'skin', stream: { ...sr, ...set } });
+      };
+      const red: [Cells, string, string][] = [[VESSEL_CELLS.all, T.o2, T.o2Deep]];
+      const blue: [Cells, string, string][] = [[VESSEL_CELLS.all, T.deo2, T.deo2Deep]];
+      if (vShow > 0.01) {
+        const R = veins(cd.horn[0], -1);
+        const L = veins(cd.horn[1], 1);
+        const [vitLink, antLink, umbLink] = anastomoses(L, R);
+        // A vein's blood from its far end down to index k (towards the horn), reversed into the blood's direction.
+        const from = (p: V3[], k = 0) => [...p.slice(k)].reverse();
+        const intoRight = (p: V3[]) => [...p, cd.sinusIn[0], cd.atrium[0]];
+        const intoLeft = (p: V3[]) => [...p, cd.sinusIn[1], cd.atrium[1]];
+        // As a vein closes, the cells on its old way go one by one and those on its new way (across an
+        // anastomosis, once it is there) come one by one: no cell jumps from one way to the other.
+        const linked = ss(0.6, 1, clamp01(pose.anast ?? 0));
+        const old4 = vesselFlow * (1 - ss(0.25, 0.6, pose.obliterate[0]));
+        const new4 = vesselFlow * ss(0.4, 0.75, pose.obliterate[0]) * linked;
+        const old10 = vesselFlow * (1 - ss(0.25, 0.6, pose.obliterate[1]));
+        const new10 = vesselFlow * ss(0.4, 0.75, pose.obliterate[1]) * linked;
+        // Right side: the right umbilical closes in the 4th week; the others stay.
+        along('umb0', intoRight(from(R.umbilical)), red, old4);
+        along('vit0', intoRight(from(R.vitelline)), blue);
+        along('ant0', intoRight([...from(R.anterior), ...from(R.cardinal)]), blue);
+        along('post0', intoRight([...from(R.posterior), ...from(R.cardinal)]), blue);
+        // Left side: straight into the left horn while its veins are open; once they close, across an
+        // anastomosis into the right vein beside it and on to the right horn.
+        along('umb1', intoLeft(from(L.umbilical)), red, old4);
+        along('vit1', intoLeft(from(L.vitelline)), blue, old4);
+        along('umb1x', intoRight([...from(L.umbilical, LINK.umb[0]), ...umbLink, ...from(R.vitelline.slice(0, LINK.umb[1] + 1))]), red, new4);
+        along('vit1x', intoRight([...from(L.vitelline, LINK.vit[0]), ...vitLink, ...from(R.vitelline.slice(0, LINK.vit[1] + 1))]), blue, new4);
+        along('ant1', intoLeft([...from(L.anterior), ...from(L.cardinal)]), blue, old10);
+        along('post1', intoLeft([...from(L.posterior), ...from(L.cardinal)]), blue, old10);
+        along('ant1x', intoRight([...from(L.anterior, LINK.ant[0]), ...antLink, ...from(R.anterior.slice(0, LINK.ant[1] + 1)), ...from(R.cardinal)]), blue, new10);
+      }
+      // Out through the first arch of each side and down its dorsal aorta: oxygenated, a few cells poorer.
+      if (o.flow.arteries && ao > 0.01 && pose.arches >= 1)
+        for (const sx of [-1, 1]) {
+          const { arch, da } = arterial(line[0], sx, 0);
+          const end = arch[arch.length - 1][1];
+          along(`art${sx}`, [...arch, ...da.filter((p) => p[1] < end - 0.05)], [
+            [VESSEL_CELLS.mostO2, T.o2, T.o2Deep],
+            [VESSEL_CELLS.someDeo2, T.deo2, T.deo2Deep],
+          ]);
+        }
+    }
   }
 
   // A faint copy of another pose (where the tube started).
@@ -678,25 +755,65 @@ export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
 
 // ———————————————————————————— blood in the lumen ————————————————————————————
 
-const CELL_N = 26;
+type Cells = { cells: Float32Array; gates: Float32Array };
 
-/** Per cell (constant): where along the route it starts, its fixed offset from the centreline, when it appears. */
-function cellSet(pick: (i: number) => boolean) {
-  const idx = Array.from({ length: CELL_N }, (_, i) => i).filter(pick);
+/**
+ * Per cell (constant): where along the route it starts, its fixed offset from the centreline (`jit` of the
+ * tube's: a vessel's lumen is narrower), when it appears.
+ */
+function cellSet(n: number, pick: (i: number) => boolean, jit = 1): Cells {
+  const idx = Array.from({ length: n }, (_, i) => i).filter(pick);
   const cells = new Float32Array(idx.length * 4);
   const gates = new Float32Array(idx.length);
   idx.forEach((i, k) => {
-    cells.set([i / CELL_N, Math.sin(i * 12.9) * 0.07, Math.cos(i * 7.3) * 0.05, Math.sin(i * 3.1) * 0.07], k * 4);
+    cells.set([i / n, Math.sin(i * 12.9) * 0.07 * jit, Math.cos(i * 7.3) * 0.05 * jit, Math.sin(i * 3.1) * 0.07 * jit], k * 4);
     // Spread evenly over the flow's start, but not in order along the route: here and there.
     gates[k] = ((i * 0.618034) % 1) * 0.85;
   });
   return { cells, gates };
 }
 
-/** Mixed blood: every third cell oxygenated. */
-const CELLS = { all: cellSet(() => true), deo2: cellSet((i) => i % 3 !== 0), o2: cellSet((i) => i % 3 === 0) };
+/** In the tube, 26 cells; mixed blood: every third cell oxygenated. */
+const CELLS = { all: cellSet(26, () => true), deo2: cellSet(26, (i) => i % 3 !== 0), o2: cellSet(26, (i) => i % 3 === 0) };
+/** In a vessel, 7 cells; arteries carry oxygenated blood with a few poorer cells (every fourth). */
+const VESSEL_CELLS = { all: cellSet(7, () => true, 0.3), mostO2: cellSet(8, (i) => i % 4 !== 1, 0.3), someDeo2: cellSet(8, (i) => i % 4 === 1, 0.3) };
 
 const routes = new Map<string, Float32Array>();
+const lengths = new WeakMap<Float32Array, number>();
+/** Length of a resampled route (along its points). */
+export function routeLength(r: Float32Array): number {
+  let L = lengths.get(r);
+  if (L === undefined) {
+    L = 0;
+    for (let j = 1; j < STREAM_ROUTE_N; j++) L += Math.hypot(r[j * 3] - r[j * 3 - 3], r[j * 3 + 1] - r[j * 3 - 2], r[j * 3 + 2] - r[j * 3 - 1]);
+    lengths.set(r, L);
+  }
+  return L;
+}
+const remember = (key: string, r: Float32Array) => {
+  if (routes.size >= 64) routes.delete(routes.keys().next().value!);
+  routes.set(key, r);
+  return r;
+};
+
+/** A vessel's route, in the blood's direction, resampled evenly by length (cells keep one speed along it). */
+export function vesselRouteOf(pts: readonly V3[]): Float32Array {
+  const key = new Sig().str('vessel').pts(pts).key();
+  const known = routes.get(key);
+  if (known) return known;
+  const acc = [0];
+  for (let i = 1; i < pts.length; i++) acc.push(acc[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1], pts[i][2] - pts[i - 1][2]));
+  const total = acc[acc.length - 1] || 1;
+  const r = new Float32Array(STREAM_ROUTE_N * 3);
+  let i = 1;
+  for (let j = 0; j < STREAM_ROUTE_N; j++) {
+    const d = (j / (STREAM_ROUTE_N - 1)) * total;
+    while (i < pts.length - 1 && acc[i] < d) i++;
+    const seg = acc[i] - acc[i - 1];
+    r.set(mix3(pts[i - 1], pts[i], seg > 0 ? clamp01((d - acc[i - 1]) / seg) : 0), j * 3);
+  }
+  return remember(key, r);
+}
 /**
  * The cells' route: the centreline run backwards (the blood goes from the atrial end up to the sac),
  * resampled for the GPU. The same array while the line keeps its shape, so it is sent to the GPU once.
@@ -712,9 +829,7 @@ export function routeOf(line: readonly V3[]): Float32Array {
     const lo = Math.min(n - 1, Math.floor(g));
     r.set(mix3(line[lo], line[lo + 1], g - lo), j * 3);
   }
-  if (routes.size >= 16) routes.delete(routes.keys().next().value!);
-  routes.set(key, r);
-  return r;
+  return remember(key, r);
 }
 
 /** Unit direction helper for arrows. */

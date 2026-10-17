@@ -14,6 +14,7 @@ Measured with `scripts/perf-topic10.mjs`: headless Chrome on a production build 
 | `topic10-batch2/` | After Batch 2 (blood cells drawn by the GPU). |
 | `topic10-batch3-before/`, `-before-dpr2/` | Batch 2 code with the GPU bench, at DPR 1 and 2: the "before" for Batch 3. |
 | `topic10-batch3/`, `-dpr2/` | After Batch 3 (shader detail fade, thin walls, shared light). |
+| `topic10-batch4/` | After Batch 4 (blood in the vessels at stages 3 and 9); adds the stage 9 rerouting point (une 0.45). |
 
 Screenshots (`shots/`) are written next to each `results.json` but are not kept in git. Compare two runs' pictures with `node scripts/perf-topic10.mjs compare <dirA> <dirB>`.
 
@@ -71,4 +72,9 @@ Averages over the six blood-flow views (stages 3, 4, 6, 7, 8 and 9; playing, 144
 - **The changes are cost-neutral within noise.** About half the views are faster and half slower, with swings of up to ±15% between runs.
 - **Pictures:** they differ by at most 1% of pixels (cell timing and labels).
 - **Not done:** a texture bake and a DPR cap below 2 would save almost nothing, so neither was done.
+
+## Batch 4 (2026-10-17): blood in the vessels
+
+- **Stage 3 at une 0.9** (the vessel cells on): about 90 more cells, each drawn as part of an instanced stream. Main thread 702 → 631 ms/s (run-to-run noise; no cost visible). GPU 0.67 → 0.84 ms per picture, from the extra instanced draws; still under 1 ms.
+- **Stage 9 at une 0.45** (new point): about 1000 ms/s main thread and 1100 mesh builds/s while playing. This is the anatomy changing shape every frame: the horns shift and the left veins close, over about 0.07 of the stage. The vessel cells add no mesh builds. It is the remaining playback hot spot.
 
