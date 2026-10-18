@@ -1,5 +1,5 @@
-import { deg, type V3 } from '@/lib/three-d/math';
-import { grid, merge, type Mesh } from '@/lib/three-d/mesh';
+import { deg, mix3, type V3 } from '@/lib/three-d/math';
+import { curve3, grid, merge, type Mesh } from '@/lib/three-d/mesh';
 import { cachedBlob, cachedMerge, cachedMesh } from '@/lib/three-d/mesh-cache';
 import type { Item3 } from '@/lib/three-d/scene';
 import { perfCount } from '@/lib/perf';
@@ -20,6 +20,11 @@ import { K } from './common';
  * The septa lie in sagittal planes: septum primum at x = XP (a thin membrane), septum secundum at
  * x = XS, on the primum's right (a thick muscular crescent). A septum point is named in its plane by
  * (y, z); its holes are ellipses round a centre.
+ * Stage 5 (notes 2.2 p8–p15) adds the walls' two origins: in the right atrium the sinus venosus taken into
+ * the back wall (smooth, violet, with the cavae and the coronary sinus) and the trabeculated rest (the
+ * atrial part's orange, pectinate muscles, the auricle), the crista terminalis between them and the sinus
+ * node at its top; in the left atrium the primitive pulmonary vein budding from the back wall, branching
+ * to the lung buds and taken into the wall, so four veins open into its smooth part.
  */
 
 const RX = 2.05;
@@ -229,9 +234,60 @@ export interface AtriaState {
   /** A wall goes clear so the septum is seen through it. */
   glassRA: number;
   glassLA: number;
+  /** Stage 5: the sinus venosus as a sac behind the right atrium (1), taken into its back wall (0). */
+  sinus: number;
+  /** The right atrium's smooth part spreads over the back wall (0 = the strip of stages 2–4). */
+  smoothWide: number;
+  /** The walls named by their two origins (smooth / trabeculated). */
+  walls: boolean;
+  /** Coronary sinus opening; crista terminalis; sinus node; pectinate muscles and auricle (right, left). */
+  cs: number;
+  crista: number;
+  node: number;
+  pect: number;
+  laPect: number;
+  /** The primitive pulmonary vein: one bud out of the left atrium's back wall (to 0.35), branching to the lung buds (1). */
+  pvGrow: number;
+  /** Its trunk and first branches taken into the wall: four separate openings. */
+  pvIncorp: number;
+  /** The lung buds behind the heart, with their own veins. */
+  lungs: number;
+  /** The left atrium's smooth part round the four openings. */
+  laSmooth: number;
+  /** The dorsal mesocardium behind the left atrium (grey sentences of the notes). */
+  meso: number;
 }
 
-export const AT0: AtriaState = { primum: 0, cushions: 0.35, cushionFuse: 0, os2: 0, closeOP: 0, secundum: 0, spurium: 0, stub: 0, press: 0, fuse: 0, patent: false, pulmonary: 0, adult: false, glassRA: 0, glassLA: 0 };
+export const AT0: AtriaState = {
+  primum: 0,
+  cushions: 0.35,
+  cushionFuse: 0,
+  os2: 0,
+  closeOP: 0,
+  secundum: 0,
+  spurium: 0,
+  stub: 0,
+  press: 0,
+  fuse: 0,
+  patent: false,
+  pulmonary: 0,
+  adult: false,
+  glassRA: 0,
+  glassLA: 0,
+  sinus: 0,
+  smoothWide: 0,
+  walls: false,
+  cs: 0,
+  crista: 0,
+  node: 0,
+  pect: 0,
+  laPect: 0,
+  pvGrow: 0,
+  pvIncorp: 0,
+  lungs: 0,
+  laSmooth: 0,
+  meso: 0,
+};
 
 /** Blood: how much of each way is running, and the stage time (cells move with it). */
 export interface AtriaFlow {
@@ -382,29 +438,88 @@ const patch = (phi: number, th: number, ea: number, eb: number, k: number) =>
 /** Openings of veins in the wall: centre (φ, θ), half-extents, where the vein comes from outside. */
 const SVC = { phi: 214, th: 32, ea: 11, eb: 9, out: [-0.75, 2.15, -0.85] as V3 };
 const IVC = { phi: 212, th: 142, ea: 12, eb: 9, out: [-0.8, -2.15, -0.95] as V3 };
+/** The four pulmonary veins: the lateral two to the left lung, the medial two (behind the right atrium) to the right one. */
 const PVS = [
-  { phi: 146, th: 66, ea: 6, eb: 6, out: [1.35, 1.0, -1.7] as V3 },
-  { phi: 160, th: 64, ea: 6, eb: 6, out: [0.8, 1.05, -1.8] as V3 },
-  { phi: 146, th: 104, ea: 6, eb: 6, out: [1.35, -0.6, -1.75] as V3 },
-  { phi: 160, th: 106, ea: 6, eb: 6, out: [0.8, -0.65, -1.85] as V3 },
+  { phi: 146, th: 66, ea: 6, eb: 6, out: [1.4, 0.58, -2.12] as V3 },
+  { phi: 160, th: 64, ea: 6, eb: 6, out: [-0.36, 0.58, -2.22] as V3 },
+  { phi: 146, th: 104, ea: 6, eb: 6, out: [1.4, -0.22, -2.16] as V3 },
+  { phi: 160, th: 106, ea: 6, eb: 6, out: [-0.36, -0.22, -2.26] as V3 },
 ];
+/** The coronary sinus: low in the right atrium's back wall, near the septum. */
+const CS = { phi: 197, th: 126, ea: 7, eb: 6.5, out: [0.45, -1.3, -1.4] as V3 };
+/** The primitive pulmonary vein: where it leaves the left atrium, where it branches (left lung, right lung). */
+const PV_O = { phi: 153, th: 85 };
+const PV_T: V3 = [0.86, 0.1, -1.32];
+const PV_B: V3[] = [
+  [1.2, 0.14, -1.66],
+  [0.22, 0.14, -1.76],
+];
+const PV_SIDE = [0, 1, 0, 1];
+const LUNGS: V3[] = [
+  [1.66, 0.18, -2.3],
+  [-0.62, 0.18, -2.42],
+];
+/** The crista terminalis on the right atrium's wall, roof to floor (φ, θ), at the smooth part's lateral edge. */
+const CRISTA: [number, number][] = [
+  [247, 24],
+  [250, 56],
+  [251, 92],
+  [249, 128],
+  [243, 150],
+];
+
+/** A line on the room's wall through (φ, θ) keys, `k` inside it. */
+function alongWall(keys: readonly (readonly [number, number])[], k: number, n = 24): V3[] {
+  const out: V3[] = [];
+  for (let i = 0; i <= n; i++) {
+    const x = (i / n) * (keys.length - 1);
+    const j = Math.min(keys.length - 2, Math.floor(x));
+    const g = (1 - Math.cos((x - j) * Math.PI)) / 2;
+    out.push(chamber(lerp(keys[j][0], keys[j + 1][0], g), lerp(keys[j][1], keys[j + 1][1], g), k));
+  }
+  return out;
+}
+/** The first share `f` of a path's length. */
+function trim(path: readonly V3[], f: number): V3[] {
+  const L: number[] = [0];
+  for (let i = 1; i < path.length; i++) L.push(L[i - 1] + Math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1], path[i][2] - path[i - 1][2]));
+  const want = L[L.length - 1] * clamp01(f);
+  const out: V3[] = [path[0]];
+  for (let i = 1; i < path.length; i++) {
+    if (L[i] < want) {
+      out.push(path[i]);
+      continue;
+    }
+    const k = (want - L[i - 1]) / Math.max(1e-6, L[i] - L[i - 1]);
+    out.push(mix3(path[i - 1], path[i], k));
+    break;
+  }
+  return out;
+}
+/** The way of pulmonary vein `i`: through the common trunk and its side's branch while not yet taken in (k = 0), straight from its own opening (k = 1). */
+function pvPath(i: number, k: number): V3[] {
+  const o = PVS[i];
+  const a = chamber(lerp(PV_O.phi, o.phi, k), lerp(PV_O.th, o.th, k), 1.0);
+  return curve3([a, mix3(PV_T, mix3(a, o.out, 0.3), k), mix3(PV_B[PV_SIDE[i]], mix3(a, o.out, 0.65), k), o.out], 22);
+}
 
 function buildAtria(s: AtriaState): AtriaModel {
   const W = wallsOnce();
   const items: Item3[] = [];
   const pts: Record<string, V3> = {};
-  const raId = s.adult ? 'eskuineko-aurikula' : 'hasierako-eskuineko-aurikula';
-  const laId = s.adult ? 'ezkerreko-aurikula-jaiotakoan' : 'hasierako-ezkerreko-aurikula';
+  const raId = s.walls ? 'atal-trabekulatua' : s.adult ? 'eskuineko-aurikula' : 'hasierako-eskuineko-aurikula';
+  const laId = s.walls ? 'ezkerreko-aurikularen-atal-trabekulatua' : s.adult ? 'ezkerreko-aurikula-jaiotakoan' : 'hasierako-ezkerreko-aurikula';
+  const owner = (base: string) => (s.walls ? [base, 'aurikula-komuna'] : ['aurikula-komuna']);
   const ra = 1 - 0.85 * s.glassRA;
   const la = 1 - 0.85 * s.glassLA;
 
   // The walls: the right atrium and the left, the cut edge of the opened front, the AV canal below.
-  items.push({ key: 'ra', id: raId, groups: ['aurikula-komuna'], ...W.ra, color: T.atrium, deep: T.atriumDeep, tissue: 'muscle', opacity: ra });
-  items.push({ key: 'la', id: laId, groups: ['aurikula-komuna'], ...W.la, color: mixHex(T.atrium, '#d8662a', 0.4), deep: T.atriumDeep, tissue: 'muscle', opacity: la });
+  items.push({ key: 'ra', id: raId, groups: owner('hasierako-eskuineko-aurikula'), ...W.ra, color: T.atrium, deep: T.atriumDeep, tissue: 'muscle', opacity: ra });
+  items.push({ key: 'la', id: laId, groups: owner('hasierako-ezkerreko-aurikula'), ...W.la, color: mixHex(T.atrium, '#d8662a', 0.4), deep: T.atriumDeep, tissue: 'muscle', opacity: la });
   items.push({ key: 'rim', ...W.rim, color: '#f2a27e', deep: '#9a4a28', tissue: 'muscle', opacity: Math.min(ra, la), outline: false });
   items.push({ key: 'canal', id: 'erreten-aurikulubentrikularra', ...W.canal, color: mixHex(T.atrium, T.ventricle, 0.45), deep: mixHex(T.atriumDeep, T.ventricleDeep, 0.5), tissue: 'muscle' });
-  pts[raId] = chamber(258, 96, 0.96);
-  pts[laId] = chamber(102, 96, 0.96);
+  pts[raId] = s.walls ? chamber(266, 112, 0.96) : chamber(258, 96, 0.96);
+  pts[laId] = s.walls ? chamber(96, 112, 0.96) : chamber(102, 96, 0.96);
   pts['aurikula-komuna'] = chamber(180, 60, 0.95);
   pts['erreten-aurikulubentrikularra'] = [-0.28, YF - 0.33, 0.37];
 
@@ -437,8 +552,13 @@ function buildAtria(s: AtriaState): AtriaModel {
   opening('ivc', 'beheko-kaba-zaina', [IVC], 1, false);
   opening('pv', 'birika-zainak', PVS, s.pulmonary, true);
   if (s.pulmonary > 0.01) pts['birika-zainak'] = chamber(153, 84, 0.96);
-  // The smooth (sinus) part round the cavae in the right atrium's back wall (topic 10, stage 10).
-  items.push({ key: 'smooth', id: 'atal-lisoa', groups: ['zain-sinua'], quiet: true, mesh: patch(222, 88, 10, 56, 0.99), color: K.smoothRA, deep: K.smoothDeep, tissue: 'epithelium', outline: false, opacity: ra });
+  // The smooth (sinus) part round the cavae in the right atrium's back wall (topic 10, stage 10); in
+  // stage 5 it spreads as the sinus is taken in, up to the crista terminalis.
+  const sea = lerp(10, 24, s.smoothWide);
+  const seb = lerp(56, 62, s.smoothWide);
+  items.push({ key: 'smooth', id: 'atal-lisoa', groups: ['zain-sinua'], quiet: !s.walls, mesh: patch(222, 88, sea, seb, 0.99), color: K.smoothRA, deep: K.smoothDeep, tissue: 'epithelium', outline: false, opacity: Math.max(ra, s.sinus > 0.01 ? 1 : 0) });
+  pts['atal-lisoa'] = chamber(222 + 0.55 * sea, 100, 0.96);
+  walls5(s, items, pts, opening, ra, la);
 
   // The AV cushions at the canal's front (superior) and back (inferior) lips; fused, a bar across it.
   const c = clamp01(s.cushions);
@@ -594,6 +714,117 @@ function buildAtria(s: AtriaState): AtriaModel {
   }
   pts['aurikula-arteko-trenkada'] = [XS, 0.5, -0.35];
   return { items, pts };
+}
+
+// ———————————————————————————— stage 5: the walls' two origins ————————————————————————————
+
+type Opening = (key: string, id: string, os: { phi: number; th: number; ea: number; eb: number; out: V3 }[], k: number, red: boolean) => void;
+
+function walls5(s: AtriaState, items: Item3[], pts: Record<string, V3>, opening: Opening, ra: number, la: number) {
+  // The sinus venosus behind the right atrium, opening into it by the sinoatrial orifice (the violet strip);
+  // taken into the back wall, it is gone as a sac and the smooth part spreads.
+  if (s.sinus > 0.01) {
+    const k = s.sinus;
+    // Pressed against the back wall, flat front to back (it sinks into the wall as it is taken in).
+    const w = chamber(220, 90, 1);
+    const c: V3 = [w[0] * 0.92, w[1], w[2] - 0.08 - 0.2 * k];
+    items.push({ key: 'sinus', id: 'zain-sinua', ...blobParts({ center: c, radii: [0.1 + 0.38 * k, 0.2 + 0.72 * k, 0.05 + 0.2 * k], rings: 14, sides: 20 }), color: K.smoothRA, deep: K.smoothDeep, tissue: 'vessel', opacity: Math.min(1, k * 1.6) });
+    pts['zain-sinua'] = [c[0], c[1] - 0.25 * k, c[2]];
+    const sea = lerp(10, 24, s.smoothWide);
+    const ring = Array.from({ length: 41 }, (_, i) => {
+      const a = (i / 40) * Math.PI * 2;
+      return chamber(222 + sea * Math.cos(a), 88 - 40 * Math.sin(a), 0.982);
+    });
+    items.push({ key: 'sa-rim', id: 'zulo-sinoaurikularra', ...ridge(ring, 0.026), color: '#1a0710', deep: '#000000', tissue: 'vessel', opacity: Math.min(1, k * 2) });
+    pts['zulo-sinoaurikularra'] = chamber(222 - sea, 104, 0.975);
+  } else if (s.walls || s.smoothWide > 0.01) {
+    // Taken in: the sinus is the smooth part now.
+    pts['zain-sinua'] = chamber(222 + 0.3 * lerp(10, 24, s.smoothWide), 76, 0.96);
+  }
+  opening('cs', 'sinu-koronarioa', [CS], s.cs, false);
+
+  // Right atrium: the crista terminalis between the two parts, the sinus node at its top.
+  if (s.crista > 0.01) {
+    const cr = alongWall(CRISTA, 0.972, 30);
+    const n = Math.max(2, Math.round(cr.length * s.crista));
+    items.push({ key: 'crista', id: 'gandor-terminala', ...ridge(cr.slice(0, n), 0.055, 10), color: '#f08a4b', deep: '#7a2e10', tissue: 'muscle' });
+    pts['gandor-terminala'] = cr[Math.min(n - 1, 17)];
+  }
+  if (s.node > 0.01) {
+    const c = chamber(CRISTA[0][0] + 5, CRISTA[0][1] + 5, 0.955);
+    items.push({ key: 'node', id: 'nodulu-sinusala', ...blobParts({ center: c, radii: [0.17 * s.node, 0.12 * s.node, 0.14 * s.node], rings: 10, sides: 14 }), color: '#ffd27a', deep: '#a36a00', tissue: 'nerve' });
+    pts['nodulu-sinusala'] = c;
+  }
+  // Pectinate muscles: parallel ridges from the crista over the lateral wall towards the front (right),
+  // over the left atrium's lateral wall (left); and each auricle, a pouch at the upper front.
+  const pectinate = (right: boolean, k: number) => {
+    const parts: { mesh: Mesh; hit: Mesh }[] = [];
+    for (let i = 0; i < 9; i++) {
+      const th = 36 + i * 13;
+      const edge = 360 - phi0(th) - 5;
+      const start = right ? CRISTA[2][0] + 4 : 360 - (CRISTA[2][0] + 4);
+      const end = right ? edge : 360 - edge;
+      const len = (0.75 + 0.25 * Math.sin(i * 1.7)) * k;
+      const to = lerp(start, end, len);
+      parts.push(ridge(alongWall([[start, th], [lerp(start, to, 0.5), th + 2.5], [to, th + 5]], 0.978, 12), 0.032, 7));
+    }
+    return parts;
+  };
+  if (s.pect > 0.01) {
+    const parts = pectinate(true, s.pect);
+    items.push({ key: 'pect', id: 'muskulu-pektinioak', groups: ['atal-trabekulatua'], mesh: cachedMerge(parts.map((p) => p.mesh)), hit: cachedMerge(parts.map((p) => p.hit)), color: '#ffa765', deep: '#7a2e10', tissue: 'muscle', opacity: ra });
+    pts['muskulu-pektinioak'] = chamber(276, 75, 0.972);
+    // A flattened ear-shaped pouch on the wall's upper front, not a ball.
+    const c = chamber(302, 42, 1.0);
+    items.push({ key: 'auricle', id: 'belarritxoa', groups: ['atal-trabekulatua'], ...blobParts({ center: c, radii: [0.14 + 0.16 * s.pect, 0.1 + 0.12 * s.pect, 0.16 + 0.16 * s.pect], axes: [[0.8, 0.45, 0.4], [-0.45, 0.89, 0], [-0.36, -0.2, 0.91]], rings: 14, sides: 20 }), color: T.atrium, deep: T.atriumDeep, tissue: 'muscle' });
+    pts['belarritxoa'] = [c[0] - 0.08, c[1] + 0.06, c[2] + 0.06];
+  }
+  if (s.laPect > 0.01) {
+    const parts = pectinate(false, s.laPect);
+    items.push({ key: 'la-pect', id: 'muskulu-pektinioak', groups: ['ezkerreko-aurikularen-atal-trabekulatua'], mesh: cachedMerge(parts.map((p) => p.mesh)), hit: cachedMerge(parts.map((p) => p.hit)), color: mixHex('#ffa765', '#d8662a', 0.35), deep: '#7a2e10', tissue: 'muscle', opacity: la });
+    pts['la-pect'] = chamber(80, 58, 0.972);
+    const c = chamber(58, 42, 1.0);
+    items.push({ key: 'la-auricle', id: 'ezkerreko-aurikularen-atal-trabekulatua', groups: ['belarritxoa'], ...blobParts({ center: c, radii: [0.12 + 0.14 * s.laPect, 0.1 + 0.1 * s.laPect, 0.14 + 0.14 * s.laPect], axes: [[0.8, 0.45, -0.4], [-0.45, 0.89, 0], [0.36, 0.2, 0.91]], rings: 14, sides: 20 }), color: mixHex(T.atrium, '#d8662a', 0.4), deep: T.atriumDeep, tissue: 'muscle' });
+  }
+
+  // Left atrium: the primitive pulmonary vein buds from the back wall, branches (2, then 4) to the lung
+  // buds' veins, and is taken into the wall: four openings in the smooth part.
+  if (s.lungs > 0.01) {
+    const buds = LUNGS.map((c) => blobParts({ center: c, radii: [0.32, 0.62, 0.3], rings: 16, sides: 22 }));
+    items.push({ key: 'lungs', id: 'birika-hastapenak', mesh: cachedMerge(buds.map((b) => b.mesh)), hit: cachedMerge(buds.map((b) => b.hit)), color: '#f4a6b8', deep: '#9a4a5e', tissue: 'epithelium', opacity: s.lungs });
+    pts['birika-hastapenak'] = [LUNGS[0][0] + 0.12, LUNGS[0][1] - 0.2, LUNGS[0][2] + 0.18];
+    // Their own veins (two in each bud), which the branches meet.
+    const own = PVS.map((o, i) => tubeParts([o.out, mix3(o.out, LUNGS[PV_SIDE[i]], 0.55), [LUNGS[PV_SIDE[i]][0], o.out[1] + 0.05, LUNGS[PV_SIDE[i]][2]]], { radius: () => 0.05, ref: [0, 0, 1], sides: 10, capStart: true, capEnd: true }));
+    items.push({ key: 'lung-veins', id: 'birika-zainak', groups: ['birika-hastapenak'], mesh: cachedMerge(own.map((r) => r.mesh)), hit: cachedMerge(own.map((r) => r.hit)), color: T.o2, deep: T.o2Deep, tissue: 'vessel', opacity: s.lungs });
+    pts['lung-veins'] = mix3(PVS[0].out, LUNGS[0], 0.4);
+  }
+  if (s.pvGrow > 0.01 && s.pvIncorp < 0.999) {
+    const k = s.pvIncorp;
+    const paths = PVS.map((_, i) => trim(pvPath(i, k), s.pvGrow));
+    const id = k < 0.5 ? 'birika-zain-primitiboa' : 'birika-zainak';
+    const tubes = paths.map((p) => tubeParts(p, { radius: (u) => 0.1 - 0.02 * u, ref: [0, 0, 1], sides: 14, capEnd: true }));
+    items.push({ key: 'pv-tree', id, mesh: cachedMerge(tubes.map((r) => r.mesh)), hit: cachedMerge(tubes.map((r) => r.hit)), color: mixHex(T.o2, '#ffb0b0', 0.15), deep: T.o2Deep, tissue: 'vessel' });
+    // Its opening(s) in the wall: one, then four apart.
+    const hk = Math.min(1, s.pvGrow * 4);
+    const holes = PVS.map((o) => patch(lerp(PV_O.phi, o.phi, k), lerp(PV_O.th, o.th, k), lerp(8, o.ea, k) * hk, lerp(8, o.eb, k) * hk, 0.985));
+    items.push({ key: 'pv-hole', id, mesh: cachedMerge(holes), color: '#12070c', deep: '#000000', tissue: 'vessel', outline: false });
+    const trunk = trim(pvPath(0, k), Math.min(s.pvGrow, 0.3));
+    pts['birika-zain-primitiboa'] = trunk[Math.floor(trunk.length * 0.7)];
+    // The veins named at the first one's opening (the trunk's, until they part).
+    pts['birika-zainak'] = chamber(lerp(PV_O.phi, PVS[0].phi, k), lerp(PV_O.th, PVS[0].th, k), 0.96);
+  } else if (s.pvIncorp >= 0.999 && s.pulmonary < 0.01) {
+    opening('pv', 'birika-zainak', PVS, 1, true);
+  }
+  if (s.laSmooth > 0.01) {
+    const m = s.laSmooth;
+    items.push({ key: 'la-smooth', id: 'ezkerreko-aurikularen-atal-lisoa', mesh: patch(PV_O.phi, PV_O.th, 15 * m, 32 * m, 0.99), color: mixHex(T.o2, '#5a1820', 0.12), deep: T.o2Deep, tissue: 'epithelium', outline: false, opacity: Math.min(1, m * 1.5) });
+    pts['ezkerreko-aurikularen-atal-lisoa'] = chamber(PV_O.phi, PV_O.th, 0.96);
+  }
+  if (s.meso > 0.01) {
+    const sheetAt = (coarse: number) => grid(Math.round(16 / coarse), Math.round(20 / coarse), (u, v) => [lerp(0.3, 1.45, u), lerp(-0.8, 0.95, v), -1.12 - 0.08 * Math.sin(u * Math.PI)], [0.9, 0, 3]);
+    items.push({ key: 'meso', id: 'mesokardio-dortsala', mesh: cachedMesh('atria meso', [], () => twoSided(sheetAt(1))), hit: cachedMesh('atria meso hit', [], () => sheetAt(3)), color: '#d98a9a', deep: '#7a3a4a', tissue: 'membrane', thin: 1, opacity: 0.55 * s.meso, outline: false });
+    pts['mesokardio-dortsala'] = [1.25, -0.55, -1.15];
+  }
 }
 
 // ———————————————————————————— blood ————————————————————————————

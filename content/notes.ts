@@ -132,9 +132,10 @@ export const NOTES: Record<number, NotesSection[]> = {
     { n: '3.4', title: 'Atal zain-sinutik', depth: 1, stages: ['zain-sinua', 'eskuineko-aurikula'] },
   ],
   11: [
+    { n: '1', title: 'Sarrera', depth: 0, stages: ['trenkadatze-mekanismoak'] },
     { n: '2', title: 'Aurikula komunaren trenkadak', depth: 0, stages: [] },
     { n: '2.1', title: 'Septum Primum-aren sorrera', depth: 1, stages: ['septum-primum'] },
-    { n: '2.2', title: 'Septum secundum-aren sorrera', depth: 1, stages: ['zulo-obala', 'jaiotza'] },
+    { n: '2.2', title: 'Septum secundum-aren sorrera', depth: 1, stages: ['zulo-obala', 'jaiotza', 'aurikulen-paretak'] },
   ],
 };
 

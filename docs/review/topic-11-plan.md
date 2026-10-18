@@ -82,3 +82,9 @@ The other model's Batches 6–9 were reviewed before committing:
 - Fixed: `createGL` refused to start in a hidden tab, so a topic opened in a background tab stayed flat for good. It now creates a sleeping layer.
 - Kept as the user's decision: the 30 Hz draw and pose ceiling (user-requested 30 vs 40 comparison; default 30). Drags are also capped at 30 Hz; watch for "clunky" feedback.
 - Removed prewarm: the first 3D view of a visit compiles on demand. Watch for a "prestatzen" moment in the middle of a bridge.
+
+## 6. Progress
+- **B1 (done, d6a3766):** M1 `atria3d.ts` + `Septa3D.tsx`, 3D main views for stages 2–4.
+- **B2 (done):** M0 `mechanism3d.ts` + `Mechanisms3D.tsx` (stage 1 `trenkadatze-mekanismoak`: topic 10 loop → three chambers A/B/C, cut faces show matrix + endocardium, cells stop in A/B and keep crossing in C). Stage 5 `aurikulen-paretak` on M1 (`Walls3D`): sinus taken in, smooth/trabeculated parts, CS, crista + SA node, pectinate muscles and auricles; primitive pulmonary vein bud → 4 branches → lung buds → incorporated (4 openings, LA smooth part); the grey p14–p15 step replays the vein's growth out of the dorsal mesocardium. The pulmonary veins now run two to each lung (stage 4 too). Notes sections: '1' added, '2.2' gets `aurikulen-paretak`; beat count 635.
+  - Stage 5 has no 2D alternative yet (3D only): decide in B7.
+  - Silent check flags still open for B7: septum-primum #1 #3, zulo-obala #2 #3, jaiotza #1 #3 #6 (aurikulen-paretak #1 mild).
