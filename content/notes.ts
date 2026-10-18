@@ -137,6 +137,9 @@ export const NOTES: Record<number, NotesSection[]> = {
     { n: '2.1', title: 'Septum Primum-aren sorrera', depth: 1, stages: ['septum-primum'] },
     { n: '2.2', title: 'Septum secundum-aren sorrera', depth: 1, stages: ['zulo-obala', 'jaiotza', 'aurikulen-paretak'] },
     { n: '3', title: 'Erreten aurikulubentrikularraren trenkadak', depth: 0, stages: ['erreten-ab', 'balbula-ab'] },
+    { n: '4', title: 'Bentrikuluaren trenkadak', depth: 0, stages: ['bentrikulu-arteko-trenkada'] },
+    { n: '5', title: 'Atal bulbarraren trenkadatze prozesua', depth: 0, stages: [] },
+    { n: '5.1', title: 'Arteria Konoaren trenkadak', depth: 1, stages: ['arteria-konoa'] },
   ],
 };
 

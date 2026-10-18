@@ -6,6 +6,7 @@ import { perfCount } from '@/lib/perf';
 import { T } from '@/components/scenes/week10/common';
 import { blobParts, mixHex, routeLength, tubeParts, vesselRouteOf } from '@/components/scenes/week10/model3d';
 import { K } from './common';
+import { CONUS_R, CONUS_Z, outflowParts, outflowRoutes, type Conus } from './outflow3d';
 
 /**
  * M2 of topic 11 (notes 3): the AV canal and its valves. The two primitive ventricles are one chamber cut
@@ -115,8 +116,51 @@ export interface CanalState {
   foramen: number;
   /** The right ventricle's wall seen through (side views: the canal and its cushions behind it). */
   glassR: number;
+  /** Stages 8–9: the heart turned about the vertical (0–1; the right ventricle comes a little forward). */
+  turn: number;
+  /** Trabeculae on the ventricles' walls. */
+  trab: number;
+  /** The muscular IV septum rising where the ridge was (0 the flattened ridge, 1 grown). */
+  septum: number;
+  /** The membranous part filling the gap over it (the conus septum's lower end). */
+  membranous: number;
+  /** The conus over the right ventricle (0) or over the septum (1). */
+  align: number;
+  /** The conus ridges and their fusion; the conus seen through; its top cut across (the truncus left out). */
+  conusRidges: number;
+  conusFuse: number;
+  conusGlass: number;
+  conusCut: number;
+  /** Blood up the conus: one way up its middle (0), one up each infundibulum (1). */
+  split: number;
 }
-export const CN0: CanalState = { flatten: 0, shift: 0, cushions: 0, fuse: 0, swell: 0, leaflets: 0, hollow: 0, papillary: 0, chordae: 0, fibrous: 0, pull: 0, order: 0, frontal: 0, foramen: 0, glassR: 0 };
+export const CN0: CanalState = {
+  flatten: 0,
+  shift: 0,
+  cushions: 0,
+  fuse: 0,
+  swell: 0,
+  leaflets: 0,
+  hollow: 0,
+  papillary: 0,
+  chordae: 0,
+  fibrous: 0,
+  pull: 0,
+  order: 0,
+  frontal: 0,
+  foramen: 0,
+  glassR: 0,
+  turn: 0,
+  trab: 0,
+  septum: 0,
+  membranous: 0,
+  align: 0,
+  conusRidges: 0,
+  conusFuse: 0,
+  conusGlass: 0,
+  conusCut: 0,
+  split: 0,
+};
 
 export interface CanalFlow {
   phase: number;
@@ -135,18 +179,36 @@ const xOpen = (s: CanalState) => lerp(0.72, 0, clamp01(s.shift));
 const orifice = (s: CanalState, right: boolean) => ({ x: xOpen(s) + (right ? -1 : 1) * 0.33, y: YO, ea: 0.2, eb: 0.33 });
 
 const ATRIUM: V3 = [0.12, 0.92, -2.0];
-/** Where the outflow leaves the right ventricle's roof. */
-const OUT_X = -0.78;
-const OUT_Z = -0.02;
 const RIDGE_X = 0;
+/** The inner roof's height over (x, z). */
+const roofAt = (x: number, z: number) => 2 * C[1] - floorAt(x, z);
+/** The conus's root across x: over the right ventricle, then over the septum (stage 8). */
+const conusX = (s: CanalState) => lerp(-0.62, 0, clamp01(s.align));
+/** In front of this depth the grown septum reaches the roof; behind it (under the conus, up to the canal) it leaves a gap. */
+const Z_FULL = CONUS_Z + CONUS_R + 0.06;
 
-/** The ridge on the floor between the ventricles: a = −90°…90° across it, z back to front. */
+/** The septum's top at depth z: the flattened ridge growing into the muscular septum. */
+function crest(s: CanalState, z: number, ridgeH: number): number {
+  const base = floorAt(0, z) - 0.03;
+  const k = Math.min(1, Math.max(0, (z - (Z_FULL - 0.14)) / 0.14));
+  const smooth = k * k * (3 - 2 * k);
+  const roof = roofAt(0, z);
+  const grown = lerp(lerp(base, roof, 0.6), roof - 0.012, smooth);
+  return lerp(base + ridgeH, grown, clamp01(s.septum));
+}
+
+/** The ridge on the floor between the ventricles (later the muscular septum): a = −90°…90° across it, z back to front. */
 function ridgePoint(s: CanalState, a: number, z: number): V3 {
-  const w = lerp(0.16, 0.36, clamp01(s.flatten));
+  const sep = clamp01(s.septum);
+  const w = lerp(lerp(0.16, 0.36, clamp01(s.flatten)), 0.15, sep);
   const h = lerp(0.95, 0.32, clamp01(s.flatten));
   const taper = Math.min(1, 1.6 * Math.sqrt(Math.max(0, 1 - ((z - C[2]) / RZ) ** 2)));
   const x = RIDGE_X + w * taper * Math.sin(a);
-  return [x, floorAt(x, z) - 0.03 + h * taper * Math.cos(a), z];
+  const base = floorAt(x, z) - 0.03;
+  const top = crest(s, z, h * taper);
+  // A rounded ridge, then a wall with a rounded crest.
+  const c = Math.max(0, Math.cos(a));
+  return [x, base + (top - base) * Math.pow(c, lerp(1, 0.28, sep)), z];
 }
 /** Top of the ridge at depth z. */
 const ridgeTop = (s: CanalState, z: number) => ridgePoint(s, 0, z)[1];
@@ -173,39 +235,73 @@ export function canalModel(s: CanalState, flow: CanalFlow): CanalModel {
   pts['hasierako-eskuineko-bentrikulua'] = inner(258, 118, -0.04);
   pts['hasierako-ezkerreko-bentrikulua'] = inner(102, 118, -0.04);
 
-  // —— the bulboventricular ridge on the floor (it flattens) ——
+  // —— the bulboventricular ridge on the floor (it flattens); where it was, the muscular septum rises ——
   {
-    const dep = [q(s.flatten)];
+    const dep = [q(s.flatten), q(s.septum)];
+    const sep = clamp01(s.septum);
     const zAt = (v: number) => lerp(C[2] - RZ * 0.985, ZC, v);
-    const build = (coarse: number) => grid(Math.round(32 / coarse), Math.round(20 / coarse), (u, v) => ridgePoint(s, lerp(-Math.PI / 2, Math.PI / 2, u), zAt(v)), [0, 9, 0]);
-    const cap = () => grid(30, 3, (u, v) => {
-      const p = ridgePoint(s, lerp(-Math.PI / 2, Math.PI / 2, u), ZC);
+    // Each face its ventricle's colour once it is a septum: the right one green, the left one cyan.
+    const half = (from: number, to: number) => (coarse: number) => grid(Math.round(18 / coarse), Math.round(24 / coarse), (u, v) => ridgePoint(s, lerp(from, to, u), zAt(v)), [from < 0 ? -9 : 9, 3, 0]);
+    const cap = (from: number, to: number) => () => grid(16, 3, (u, v) => {
+      const p = ridgePoint(s, lerp(from, to, u), ZC);
       return [p[0], lerp(floorAt(p[0], ZC) - 0.03, p[1], v), ZC + 0.003];
     }, [0, 0, 9]);
     const RIDGE = '#2fb3a0';
-    items.push({ key: 'ridge', id: 'ertz-bulbobentrikularra', mesh: cachedMesh('canal ridge', dep, () => build(1)), hit: cachedMesh('canal ridge hit', dep, () => build(3)), color: RIDGE, deep: '#14695d', tissue: 'muscle' });
-    items.push({ key: 'ridge-cap', groups: ['ertz-bulbobentrikularra'], mesh: cachedMesh('canal ridge cap', dep, cap), color: mixHex(RIDGE, '#ffffff', 0.22), deep: '#14695d', tissue: 'muscle', outline: false });
+    const id = sep > 0.5 ? 'trenkada-muskularra' : 'ertz-bulbobentrikularra';
+    const groups = sep > 0.5 ? ['bentrikulu-arteko-trenkada'] : undefined;
+    const sides: [string, number, number, string, string][] = [
+      ['r', -Math.PI / 2, 0, mixHex(RIDGE, T.proximal, sep), mixHex('#14695d', T.bulbusDeep, sep)],
+      ['l', 0, Math.PI / 2, mixHex(RIDGE, T.ventricle, sep), mixHex('#14695d', T.ventricleDeep, sep)],
+    ];
+    for (const [k, from, to, color, deep] of sides) {
+      items.push({ key: `ridge-${k}`, id, groups, mesh: cachedMesh(`canal ridge ${k}`, dep, () => half(from, to)(1)), hit: cachedMesh(`canal ridge hit ${k}`, dep, () => half(from, to)(3)), color, deep, tissue: 'muscle' });
+      items.push({ key: `ridge-cap-${k}`, groups: [id], mesh: cachedMesh(`canal ridge cap ${k}`, dep, cap(from, to)), color: mixHex(color, '#ffffff', 0.22), deep, tissue: 'muscle', outline: false });
+    }
     const top = ridgeTop(s, ZC);
     pts['ertz-bulbobentrikularra'] = [0, lerp(floorAt(0, ZC), top, 0.55), ZC + 0.01];
+    pts['trenkada-muskularra'] = [-0.02, lerp(floorAt(0, ZC), top, 0.5), ZC + 0.01];
+    pts['bentrikulu-arteko-trenkada'] = pts['trenkada-muskularra'];
+    // Behind the full part, over the crest: the gap left between the two ventricles.
+    const zGap = lerp(ZC - 0.02, Z_FULL - 0.1, sep);
+    const zMid = lerp(-0.2, (C[2] - RZ * 0.8 + zGap) / 2, sep);
+    pts['bentrikulu-arteko-zulo-primarioa'] = [0, (ridgeTop(s, zMid) + roofAt(0, zMid)) / 2, zMid];
+    // The membranous part: from the roof (the conus septum's lower end) down to the crest, closing the gap.
+    if (s.membranous > 0.01) {
+      const m = clamp01(s.membranous);
+      const mem = cachedMesh('canal membranous', [...dep, q(m)], () => {
+        const g = grid(16, 8, (u, v) => {
+          const z = lerp(C[2] - RZ * 0.86, zGap + 0.02, u);
+          const roof = roofAt(0, z) - 0.01;
+          return [0, lerp(roof, ridgeTop(s, z) - 0.02, v * m), z];
+        }, [9, 0, 0]);
+        return merge([g, { ...g, idx: flipIdx(g.idx), nrm: g.nrm.map((n) => -n) }]);
+      });
+      items.push({ key: 'membranous', id: 'mintzezko-trenkada', groups: ['bentrikulu-arteko-trenkada'], mesh: mem, color: '#dcfff6', deep: '#3d8f84', tissue: 'membrane' });
+      pts['mintzezko-trenkada'] = [0, lerp(roofAt(0, zMid), ridgeTop(s, zMid), 0.4 * m + 0.1), zMid];
+    }
     // The primary interventricular foramen: the way over the ridge, between the two ventricles.
     pts['bentrikulu-arteko-zulo-primarioa'] = [0, (ridgeTop(s, -0.2) + C[1] + RY * 0.8) / 2, -0.2];
     // The way over the ridge, as a faint doorway between the two ventricles (seen from either side).
-    if (s.foramen > 0.01) {
+    if (s.foramen > 0.01 && s.membranous < 0.95) {
       const door = cachedMesh('canal foramen', dep, () => {
         const m = grid(14, 10, (u, v) => {
-          const z = lerp(C[2] - RZ * 0.9, ZC - 0.02, u);
+          const z = lerp(C[2] - RZ * 0.9, zGap, u);
           const roof = C[1] + RY * 0.96 * Math.sqrt(Math.max(0, 1 - ((z - C[2]) / RZ) ** 2));
           return [0, lerp(ridgeTop(s, z) + 0.02, roof, v), z];
         }, [9, 0, 0]);
         return merge([m, { ...m, idx: flipIdx(m.idx), nrm: m.nrm.map((n) => -n) }]);
       });
-      items.push({ key: 'foramen', id: 'bentrikulu-arteko-zulo-primarioa', mesh: door, color: '#ffe7a3', deep: '#9a7a2a', tissue: 'membrane', thin: 1, opacity: 0.3 * s.foramen, outline: false });
+      items.push({ key: 'foramen', id: 'bentrikulu-arteko-zulo-primarioa', mesh: door, color: '#ffe7a3', deep: '#9a7a2a', tissue: 'membrane', thin: 1, opacity: 0.3 * s.foramen * (1 - clamp01(s.membranous)), outline: false });
     }
   }
+
+  // —— trabeculae: muscle ridges on the lower walls of both ventricles ——
+  if (s.trab > 0.01) trabeculae(s, items, pts);
 
   // —— the AV canal: its opening in the back wall (a frontal plane), the duct back and up to the atrium ——
   const xo = xOpen(s);
   const fused = s.fuse > 0.5;
+  let conus: Conus;
   {
     const half = (right: boolean) => cachedMesh('canal opening', [q(xo), right ? 1 : 0], () =>
       grid(8, 18, (r, t) => {
@@ -235,21 +331,9 @@ export function canalModel(s: CanalState, flow: CanalFlow): CanalModel {
     items.push({ key: 'atrium', id: 'aurikula-komuna', groups: ['atal-aurikularra'], ...blobParts({ center: ATRIUM, radii: [1.45, 0.62, 0.55], rings: 18, sides: 26 }), color: T.atrium, deep: T.atriumDeep, tissue: 'muscle' });
     pts['aurikula-komuna'] = [ATRIUM[0] - 0.9, ATRIUM[1] + 0.25, ATRIUM[2] + 0.2];
     pts['erreten-duct'] = [lerp(xo, ATRIUM[0], 0.5), 0.12, -1.55];
-    // The outflow from the right ventricle's roof: the conus, then the truncus (topic 10 colours).
-    const outRoot: V3 = [OUT_X, 0.33, OUT_Z];
-    const conus = tubeParts([outRoot, [-0.72, 0.62, 0.1], [-0.55, 0.95, 0.3]], { radius: (u) => 0.3 - 0.04 * u, ref: [1, 0, 0], sides: 18 });
-    const truncus = tubeParts([[-0.55, 0.92, 0.29], [-0.38, 1.35, 0.4], [-0.1, 1.72, 0.42]], { radius: () => 0.24, ref: [1, 0, 0], sides: 18, capEnd: true });
-    items.push({ key: 'conus', id: 'arteria-konoa', groups: ['atal-bulbarra'], ...conus, color: T.conus, deep: '#4d6a12', tissue: 'muscle' });
-    items.push({ key: 'truncus', id: 'enbor-arteriosoa', groups: ['atal-bulbarra'], ...truncus, color: '#efe6cf', deep: '#8a7a55', tissue: 'muscle' });
-    pts['arteria-konoa'] = [-0.7, 0.62, 0.32];
-    pts['enbor-arteriosoa'] = [-0.3, 1.5, 0.42];
-    // Its way out of the right ventricle: a dark mouth in the inner roof.
-    const mouth = cachedMesh('canal mouth', [], () => grid(6, 24, (r, a) => {
-      const x = OUT_X + 0.27 * r * Math.cos(a * Math.PI * 2);
-      const z = OUT_Z + 0.25 * r * Math.sin(a * Math.PI * 2);
-      return [x, -floorAt(x, z) + 2 * C[1] - 0.012, z];
-    }, C));
-    items.push({ key: 'mouth', id: 'arteria-konoa', mesh: mouth, color: '#12070c', deep: '#000000', tissue: 'vessel', outline: false });
+    // The outflow from the ventricles' roof: the conus (M4, outflow3d.ts), then the truncus.
+    const cx = conusX(s);
+    conus = outflowParts({ x: cx, roof: roofAt(cx, CONUS_Z), ridges: s.conusRidges, fuse: s.conusFuse, glass: s.conusGlass, cut: s.conusCut }, items, pts);
     // A frontal plane through the opening (seen from the side, the canal faces forward, not up).
     if (s.frontal > 0.01) {
       const z = back(xo, YO, 1)[2];
@@ -294,8 +378,43 @@ export function canalModel(s: CanalState, flow: CanalFlow): CanalModel {
   // —— stage 7: the valves ——
   if (s.swell > 0.01) valves(s, items, pts);
 
-  items.push(...streams(s, flow));
+  items.push(...streams(s, flow, conus));
+  // Stages 8–9: the heart a little turned (notes 5.2 p9): the right ventricle a little in front of the left.
+  if (s.turn > 0.001) {
+    const a = ((18 * clamp01(s.turn)) * Math.PI) / 180;
+    const c = Math.cos(a);
+    const sn = Math.sin(a);
+    const matrix = new Float32Array([c, 0, -sn, 0, 0, 1, 0, 0, sn, 0, c, 0, 0, 0, 0, 1]);
+    for (const it of items) it.matrix = matrix;
+    for (const k of Object.keys(pts)) {
+      const p = pts[k];
+      pts[k] = [c * p[0] + sn * p[2], p[1], -sn * p[0] + c * p[2]];
+    }
+  }
   return { items, pts };
+}
+
+// ———————————————————————————— trabeculae (stage 8) ————————————————————————————
+
+function trabeculae(s: CanalState, items: Item3[], pts: Record<string, V3>) {
+  const g = clamp01(s.trab);
+  const build = (right: boolean) => cachedMesh('canal trabeculae', [right ? 1 : 0, q(g)], () => {
+    const parts: Mesh[] = [];
+    for (let i = 0; i < 9; i++) {
+      // Along the lower wall, from the floor up the side, each with its own wobble.
+      const phi0 = right ? lerp(205, 330, i / 8) : lerp(30, 155, i / 8);
+      const path = Array.from({ length: 9 }, (_, j) => {
+        const th = lerp(168, lerp(122, 132, (i * 0.37) % 1), j / 8) ;
+        return inner(phi0 + 9 * Math.sin(j * 0.9 + i), th, -0.025);
+      });
+      parts.push(tubeParts(path, { radius: (u) => (0.022 + 0.012 * Math.sin(u * Math.PI)) * g, ref: [0, 1, 0], sides: 7, capStart: true, capEnd: true }).mesh);
+    }
+    return merge(parts);
+  });
+  const seeR = s.glassR > 0.01 ? { opacity: 1 - 0.8 * clamp01(s.glassR) } : {};
+  items.push({ key: 'trab-r', id: 'muskulu-trenkadak', ...seeR, mesh: build(true), color: mixHex(T.proximal, '#ffffff', 0.12), deep: T.bulbusDeep, tissue: 'muscle', outline: false });
+  items.push({ key: 'trab-l', id: 'muskulu-trenkadak', mesh: build(false), color: mixHex(T.ventricle, '#ffffff', 0.12), deep: T.ventricleDeep, tissue: 'muscle', outline: false });
+  pts['muskulu-trenkadak'] = inner(118, 150, -0.05);
 }
 
 // ———————————————————————————— valves (stage 7) ————————————————————————————
@@ -319,6 +438,13 @@ const MIT: [number, number][] = [
 ];
 
 function valves(s: CanalState, items: Item3[], pts: Record<string, V3>) {
+  const from = items.length;
+  valvesOf(s, items, pts);
+  // With the right ventricle's wall clear, its valve, chordae and papillary muscles fade with it.
+  if (s.glassR > 0.01) for (let i = from; i < items.length; i++) if (/-r(-|$)/.test(items[i].key)) items[i] = { ...items[i], opacity: 1 - 0.8 * clamp01(s.glassR) };
+}
+
+function valvesOf(s: CanalState, items: Item3[], pts: Record<string, V3>) {
   const g = clamp01(s.swell);
   const L = clamp01(s.leaflets);
   const thin = clamp01(s.hollow);
@@ -430,9 +556,7 @@ const RED = cellSet(14, (i) => i % 3 !== 0, 0.6);
 const BLUE = cellSet(14, (i) => i % 3 === 0, 0.6);
 const CELL = () => cachedBlob({ center: [0, 0, 0], radii: [0.05, 0.036, 0.05], rings: 6, sides: 8 });
 const SPEED = 30;
-const OUT: V3[] = [[-0.8, -0.25, -0.02], [-0.78, 0.3, -0.02], [-0.72, 0.62, 0.1], [-0.55, 0.95, 0.3], [-0.38, 1.35, 0.4], [-0.1, 1.72, 0.42]];
-
-function streams(s: CanalState, f: CanalFlow): Item3[] {
+function streams(s: CanalState, f: CanalFlow, conus: Conus): Item3[] {
   if (f.show <= 0.01) return [];
   const out: Item3[] = [];
   const cell = CELL();
@@ -443,13 +567,29 @@ function streams(s: CanalState, f: CanalFlow): Item3[] {
     out.push({ key: `flow-${key}-o2`, mesh: cell, color: T.o2, deep: T.o2Deep, tissue: 'skin', stream: { ...run, ...RED } });
     out.push({ key: `flow-${key}-de`, mesh: cell, color: T.deo2, deep: T.deo2Deep, tissue: 'skin', stream: { ...run, ...BLUE } });
   };
+  const r2 = (p: V3): V3 => [Math.round(p[0] * 40) / 40, Math.round(p[1] * 40) / 40, Math.round(p[2] * 40) / 40];
   const xo = Math.round(xOpen(s) * 20) / 20;
   const inAt = (x: number): V3[] => [[ATRIUM[0], ATRIUM[1] - 0.1, ATRIUM[2] + 0.2], [lerp(x, ATRIUM[0], 0.6), 0.4, -1.65], [x, YO + 0.05, -1.2], back(x, YO, 0.85)];
-  const over = Math.round((ridgeTop(s, -0.25) + 0.22) * 20) / 20;
-  // Into the left ventricle, over the ridge (the primary interventricular foramen) into the right one, out.
-  const left = Math.max(0.12, xo + (s.fuse > 0.5 ? 0.3 : 0.15));
-  add('left', [...inAt(left), [left + 0.25, -0.75, -0.2], [0.35, over, -0.25], [-0.35, over, -0.2], [-0.8, -0.55, -0.05], ...OUT], f.show);
-  // Once the canal opens over both: straight into the right ventricle too.
-  add('right', [...inAt(xo - 0.3), [-0.5, -0.7, -0.25], [-0.85, -0.45, -0.05], ...OUT], f.show * clamp01((s.shift - 0.6) / 0.4));
+  const R = outflowRoutes(conus, clamp01(s.split));
+  const cx = conusX(s);
+  const roof = roofAt(cx, CONUS_Z);
+  /** Up into the conus from under its mouth (k: −1 its right half, 1 its left half, 0 the middle). */
+  const upFrom = (k: number): V3[] => [r2([cx + k * 0.16, roof - 0.32, CONUS_Z]), ...(s.split > 0.5 && k ? (k < 0 ? R.right : R.left) : R.mid).map(r2)];
+  if (s.septum < 0.01) {
+    const over = Math.round((ridgeTop(s, -0.25) + 0.22) * 20) / 20;
+    // Into the left ventricle, over the ridge (the primary interventricular foramen) into the right one, out.
+    const left = Math.max(0.12, xo + (s.fuse > 0.5 ? 0.3 : 0.15));
+    add('left', [...inAt(left), [left + 0.25, -0.75, -0.2], [0.35, over, -0.25], [-0.35, over, -0.2], [cx - 0.1, -0.55, -0.05], ...upFrom(0)], f.show);
+    // Once the canal opens over both: straight into the right ventricle too.
+    add('right', [...inAt(xo - 0.3), [-0.5, -0.7, -0.25], [cx - 0.15, -0.45, -0.05], ...upFrom(0)], f.show * clamp01((s.shift - 0.6) / 0.4));
+    return out;
+  }
+  // Stages 8–9: each ventricle fills from its own orifice and empties up its own half of the conus.
+  add('right', [...inAt(xo - 0.33), [-0.55, -0.72, -0.25], [-0.62, -0.42, 0.02], ...upFrom(-1)], f.show);
+  add('left', [...inAt(xo + 0.33), [0.55, -0.72, -0.25], [0.62, -0.42, -0.05], ...upFrom(1)], f.show);
+  // While the septum is incomplete, blood also passes over it from the right ventricle to the left (notes 4 p6 s3).
+  const z = -0.42;
+  const over = Math.round((ridgeTop(s, z) + 0.2) * 20) / 20;
+  add('cross', [[-0.6, -0.75, -0.3], [-0.3, over - 0.05, z], [0, over, z], [0.3, over - 0.05, z], [0.6, -0.75, -0.3]], f.show * clamp01(s.septum * 2) * (1 - clamp01(s.membranous * 1.4)));
   return out;
 }
