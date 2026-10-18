@@ -19,7 +19,7 @@ type Pane = 'L' | 'R';
 /** Beat starts of the stage (content/weeks/week11.ts uses the same values). */
 export const P1 = [0, 0.14, 0.3, 0.46, 0.58, 0.7, 0.84] as const;
 
-function primumStage(t: number) {
+export function primumStage(t: number) {
   const primum = lerp(0, 0.3, seg(t, P1[1], P1[2] - 0.02)) + lerp(0, 0.44, seg(t, P1[2], P1[3] - 0.02)) + lerp(0, 0.08, seg(t, P1[4], P1[5] - 0.02));
   const cushions = lerp(0.35, 1, seg(t, P1[3], P1[4] - 0.02));
   const cushionFuse = seg(t, P1[3] + 0.04, P1[4] - 0.01);
@@ -37,7 +37,7 @@ const face1 = (t: number): FaceState => {
   return { ...k, stub: 0, secundum: 0, spurium: 0, press: 0, fuse: 0, flow: 1 };
 };
 
-const STEPS1: [number, string][] = [
+export const STEPS1: [number, string][] = [
   [P1[0], 'Aurikula komuna: bi alboko zabalkuntza, baina trenkadarik ez'],
   [P1[1], '4. astearen amaiera: sabaian septum primuma'],
   [P1[2], 'Septum primuma behera hazten da, erreten AB-rantz'],
@@ -89,7 +89,7 @@ export function PrimumFace({ t, pane }: SceneProps & { pane?: Pane }) {
 
 export const P2 = [0, 0.12, 0.27, 0.42, 0.55, 0.67, 0.82] as const;
 
-function secundumStage(t: number) {
+export function secundumStage(t: number) {
   const secundum = lerp(0, 0.45, seg(t, P2[1], P2[2] - 0.02)) + lerp(0, 0.55, seg(t, P2[2], P2[3] - 0.02));
   const spurium = seg(t, P2[3], P2[4] - 0.02);
   const stub = seg(t, P2[6], 0.97);
@@ -104,7 +104,7 @@ const face2 = (t: number): FaceState => {
   return { primum: 0.8, closeOP: 1, os2: 1, cushions: 1, secundum: k.secundum, spurium: k.spurium, stub: k.stub, press: 0, fuse: 0, flow: 1 };
 };
 
-const STEPS2: [number, string][] = [
+export const STEPS2: [number, string][] = [
   [P2[0], 'Abiapuntua: septum primuma, ostium secunduma goian; ostium primuma itxita'],
   [P2[1], 'Septum primumaren eskuinaldean, sabaitik: septum secunduma'],
   [P2[2], 'Septum secunduma ere ez da osoa: beheko aldean zulo obala'],

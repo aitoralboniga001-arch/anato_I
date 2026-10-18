@@ -181,6 +181,8 @@ type ViewProps = {
   /** `asked`: 1 while the picture is seen as the step shows it, fading to 0 as the viewer turns it away. */
   over?: (at: At3, asked: number) => React.ReactNode;
   caption?: string;
+  /** The right column's span (top, bottom); a view can keep it above the camera keys (bottom right). */
+  right?: [number, number];
 };
 
 /** One 3D heart view: the model for a pose, a camera, and the names. */
@@ -196,6 +198,7 @@ export function ModelView({
   names,
   over,
   caption,
+  right,
 }: ViewProps & { model: { items: Scene3['items']; pts: Record<string, V3> }; continuity: string }) {
   const scene: Scene3 = { camera, items: model.items };
   return (
@@ -217,7 +220,7 @@ export function ModelView({
           return (
             <>
               {over?.(at, asked)}
-              <Callouts items={items} left={[120, 580]} right={[240, 580]} />
+              <Callouts items={items} left={[120, 580]} right={right ?? [240, 580]} />
               {caption && (
                 <Note x={24} y={24} size={12.5} align="start" show={0.35 + 0.65 * asked}>
                   {caption}

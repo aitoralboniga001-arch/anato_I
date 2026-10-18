@@ -1,6 +1,7 @@
 import type { WeekDef } from '@/lib/sim/types';
 import { P1, P2, PrimumBoth, PrimumFace, PrimumFrontal, SecundumBoth, SecundumFace, SecundumFrontal } from '@/components/scenes/week11/Atria';
 import { BirthBoth, BirthFace, BirthFrontal, P3 } from '@/components/scenes/week11/Birth';
+import { Birth3D, Primum3D, Secundum3D } from '@/components/scenes/week11/Septa3D';
 import { structures11 } from './week11-structures';
 
 const FILE = '11. GAIA. ZIRKULAZIO-SISTEMA (II) (zuzenduta).pdf';
@@ -9,6 +10,8 @@ const src = (section: string) => ({ file: FILE, section });
 const GREY = 'Apunteetan grisez dago: aurten klasean ez da aipatu. Prozesua ulertzeko erakusten da.';
 
 const FRONTAL = 'Bihotzaren mozketa frontala, aurretik ikusita (eskuina ezkerrean): goian aurikulak, erdian erreten aurikulubentrikularra, behean bi hasierako bentrikuluak.';
+const D3 = 'Bi aurikulak 3D ereduan, aurretik irekita (enbrioiaren eskuina zure ezkerrean): trenkadak haien artean hazten dira, eta odol zelulek irekita dagoen bidea hartzen dute. Kamerak urrats bakoitzean biratzen du: aurretik trenkadak mozketa frontalaren bi lerroak dira; eskuineko aurikulatik (haren pareta gardena) aurrez aurre ikusten dira. Arrastatu biratzeko.';
+/** The 2D drawings stay as the notes draw them (frontal section, the view from the right atrium): the student meets them in the exam's figures. */
 const FACE = 'Aurikula arteko trenkada, eskuineko aurikularen barrutik ikusita: trenkada irudiaren planoan dago; ezkerrean atzekoa, eskuinean aurrekoa. Zulo bakoitzaren atzean ezkerreko aurikula ilun ikusten da.';
 
 export const week11: WeekDef = {
@@ -34,6 +37,15 @@ export const week11: WeekDef = {
       source: src('2.1. Septum Primum-aren sorrera'),
       views: [
         {
+          id: '3d',
+          label: 'Aurikulak 3D',
+          plane: 'eskema',
+          description: D3,
+          orientation: { top: 'Kraneala', bottom: 'Kaudala' },
+          scene: Primum3D,
+          travel: false,
+        },
+        {
           id: 'biak',
           label: 'Bi ikuspegiak',
           plane: 'koronala',
@@ -41,6 +53,7 @@ export const week11: WeekDef = {
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: PrimumBoth,
           travel: false,
+          bridges: [{ from: '3d', part: 'aurikula-komuna', look: 'front' }],
         },
         {
           id: 'frontala',
@@ -50,6 +63,7 @@ export const week11: WeekDef = {
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Eskuina', right: 'Ezkerra' },
           scene: PrimumFrontal,
           travel: false,
+          bridges: [{ from: '3d', part: 'aurikula-komuna', section: true, look: 'front' }],
         },
         {
           id: 'eskuinetik',
@@ -59,6 +73,7 @@ export const week11: WeekDef = {
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Atzekoa', right: 'Aurrekoa' },
           scene: PrimumFace,
           travel: false,
+          bridges: [{ from: '3d', part: 'aurikula-komuna', look: 'otherSide' }],
         },
       ],
       beats: [
@@ -72,7 +87,7 @@ export const week11: WeekDef = {
           focus: ['hasierako-eskuineko-aurikula', 'hasierako-ezkerreko-aurikula'],
           tour: ['hasierako-eskuineko-aurikula', 'hasierako-ezkerreko-aurikula', 'kuxin-aurikulubentrikularrak', 'hasierako-eskuineko-bentrikulua', 'hasierako-ezkerreko-bentrikulua', 'goiko-kaba-zaina', 'beheko-kaba-zaina'],
           tourAt: 0.08,
-          view: 'frontala',
+          view: '3d',
         },
         {
           at: P1[1],
@@ -81,7 +96,7 @@ export const week11: WeekDef = {
           text: '4. astearen amaieran, aurikula komunaren sabaian hasierako trenkada bat eratzen da, endokardio goragune bat: septum primuma. Ikuspegi bietan agertzen da: mozketan sabaitik zintzilik, eta eskuineko aurikulatik ikusita ilargi-erdi bat bezala.',
           focus: ['septum-primum'],
           exam: 'Septum primuma: 4. astearen amaieran, aurikula komunaren sabaian, endokardio goragune gisa.',
-          view: 'biak',
+          view: '3d',
         },
         {
           at: P1[2],
@@ -89,7 +104,7 @@ export const week11: WeekDef = {
           idea: 'Septum primuma behera luzatzen da, erreten aurikulubentrikularrera heldu arte.',
           text: 'Gandor hau behera luzatzen da erreten aurikulubentrikularrerantz. Erreten honek aurikula komuna eta hasierako ezkerreko bentrikulua (atal bentrikularra) komunikatzen ditu.',
           focus: ['septum-primum', 'kuxin-aurikulubentrikularrak'],
-          view: 'biak',
+          view: '3d',
         },
         {
           at: P1[3],
@@ -98,7 +113,7 @@ export const week11: WeekDef = {
           key: 'Septum primuma ez da beherantz hazten hutsera: kuxinetara doa, haiekin elkartzeko.',
           text: 'Horrez gain, erreten aurikulubentrikularraren inguruan bi endokardio goragune agertzen dira, endokardio almoadilatxoak edo endokardio kuxinak: bat goikoa eta bestea behekoa. Mozketan bata bestearen gainean ikusten dira, erretenaren erdian.',
           focus: ['kuxin-aurikulubentrikularrak'],
-          view: 'frontala',
+          view: '3d',
         },
         {
           at: P1[4],
@@ -119,7 +134,7 @@ export const week11: WeekDef = {
           text: 'Septum primumaren beheko zonaldean, trenkadaren eta endokardio kuxinen artean, zulo bat eratzen da: ostium primuma. Septum primuma ez da trenkada oso bat: bertatik eskuineko aurikulako odola ezkerreko aurikulara igaro daiteke.',
           focus: ['ostium-primuma', 'septum-primum'],
           exam: 'Ostium primuma: septum primumaren beheko ertzaren eta endokardio kuxinen artean; eskuineko aurikulako odola ezkerrekora igarotzen da.',
-          view: 'biak',
+          view: '3d',
         },
         {
           at: P1[5],
@@ -128,7 +143,7 @@ export const week11: WeekDef = {
           key: 'Bigarren zuloa lehena itxi AURRETIK irekitzen da: odolak beti du bide bat eskuinetik ezkerrera.',
           text: 'Itxiera gertatu aurretik, septum primumaren goiko aldean beste zulo bat agertzen da: ostium secunduma. Zulo txikiak bata bestearekin bat egiten dute zulo bakarra osatu arte. Zulo honen bitartez ere eskuineko aurikulako odola ezkerreko aurikulara pasa daiteke.',
           focus: ['ostium-secunduma', 'septum-primum'],
-          view: 'biak',
+          view: '3d',
         },
         {
           at: P1[6],
@@ -148,7 +163,7 @@ export const week11: WeekDef = {
           text: 'Garapenean, erreteneko kuxinetatik irteten diren luzapen batzuk septum primumaren ertz askeraino hazten dira, eta haren azpiko zuloa ixten dute. Orain odola goitik bakarrik igarotzen da, ostium secundumetik.',
           focus: ['kuxin-aurikulubentrikularrak', 'ostium-secunduma'],
           exam: 'Ostium primuma kuxinen luzapenek ixten dute; aurretik ostium secunduma ireki da septum primumaren goiko aldean.',
-          view: 'biak',
+          view: '3d',
         },
       ],
       structures: [
@@ -185,6 +200,15 @@ export const week11: WeekDef = {
       source: src('2.2. Septum secundum-aren sorrera'),
       views: [
         {
+          id: '3d',
+          label: 'Aurikulak 3D',
+          plane: 'eskema',
+          description: D3,
+          orientation: { top: 'Kraneala', bottom: 'Kaudala' },
+          scene: Secundum3D,
+          travel: false,
+        },
+        {
           id: 'biak',
           label: 'Bi ikuspegiak',
           plane: 'koronala',
@@ -192,6 +216,7 @@ export const week11: WeekDef = {
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: SecundumBoth,
           travel: false,
+          bridges: [{ from: '3d', part: 'aurikula-komuna', look: 'front' }],
         },
         {
           id: 'frontala',
@@ -201,6 +226,7 @@ export const week11: WeekDef = {
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Eskuina', right: 'Ezkerra' },
           scene: SecundumFrontal,
           travel: false,
+          bridges: [{ from: '3d', part: 'aurikula-komuna', section: true, look: 'front' }],
         },
         {
           id: 'eskuinetik',
@@ -210,6 +236,7 @@ export const week11: WeekDef = {
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Atzekoa', right: 'Aurrekoa' },
           scene: SecundumFace,
           travel: false,
+          bridges: [{ from: '3d', part: 'aurikula-komuna', look: 'otherSide' }],
         },
       ],
       beats: [
@@ -221,7 +248,7 @@ export const week11: WeekDef = {
           text: 'Aurreko etaparen amaieratik abiatzen gara: septum primuma erretenaraino iritsi da, ostium primuma itxita dago eta goian ostium secunduma irekita. Hasiera batean aurikula komunaren atzealdean dagoen zain sinua eskuineko aurikularen atzeko paretara inkorporatzen joango da.',
           focus: ['septum-primum', 'ostium-secunduma'],
           more: GREY,
-          view: 'frontala',
+          view: '3d',
         },
         {
           at: P2[1],
@@ -231,7 +258,7 @@ export const week11: WeekDef = {
           text: 'Hori gertatzen denean, septum primumaren eskuineko aldean eta aurikularen sabaitik hasita, bigarren trenkada bat eratzen da: septum secunduma. Lodiagoa da eta septum primumaren eskuinaldean kokatzen da; eskuineko aurikulatik ikusita, septum primumaren aurrean.',
           focus: ['septum-secundum', 'septum-primum'],
           exam: 'Septum secunduma: septum primumaren eskuinaldean, aurikularen sabaitik.',
-          view: 'biak',
+          view: '3d',
         },
         {
           at: P2[2],
@@ -251,7 +278,7 @@ export const week11: WeekDef = {
           text: 'Septum secunduma ere beherantz hedatzen da, erreten aurikulubentrikularrerantz, baina honek ere ez ditu guztiz banatzen bi aurikulak: haren beheko aldean zulo bat du, zulo obala.',
           focus: ['zulo-obala', 'septum-secundum'],
           exam: 'Zulo obala: septum secundumaren beheko aldean.',
-          view: 'biak',
+          view: '3d',
         },
         {
           at: P2[3],
@@ -261,7 +288,7 @@ export const week11: WeekDef = {
           text: 'Gogoratu septum secunduma eskuineko aurikulan kokatzen diren egitura batzuekin fusionatzen dela: septum spuriuma eta ezkerreko zain balbula. Eskuineko aurikulatik ikusita, atzeko ertzean ikusten dira, septum secundumarekin bat egiten.',
           focus: ['septum-spurium', 'ezkerreko-zain-balbula', 'septum-secundum'],
           more: `${GREY} ("Goian azaldutako egitura guztiak batera hazi eta erreten aurikulobentrikularrerantz abiatuko dira.")`,
-          view: 'eskuinetik',
+          view: '3d',
         },
         {
           at: P2[4],
@@ -271,7 +298,7 @@ export const week11: WeekDef = {
           text: 'Beraz, bi aurikulen artean bi trenkada daude: septum primuma, goiko partean ostium secundumarekin, eta bere eskuinaldean septum secunduma, beheko aldean zulo obalarekin. Hauek aurikula arteko trenkada osatzen dute. Eskuineko aurikulatik ikusita, septum secundumaren atzean ostium secundumaren ertza ikusten da: ez dago zulo obalaren parean.',
           focus: ['septum-primum', 'septum-secundum', 'ostium-secunduma', 'zulo-obala'],
           exam: 'Aurikula arteko trenkada = septum primuma (ostium secunduma goian) + septum secunduma (zulo obala behean, eskuinaldean).',
-          view: 'biak',
+          view: '3d',
         },
         {
           at: P2[5],
@@ -292,7 +319,7 @@ export const week11: WeekDef = {
           text: 'Hortaz, jaio arte, eskuineko aurikulako odolak ezkerreko aurikulara igarotzeko ibilbide lapran ("oblicuo") bat jarraitzen du: lehenik septum secundumaren beheko aldeko zulo obaletik pasatzen da, eta gero septum primumaren goiko aldeko ostium secundumetik.',
           focus: ['zulo-obala', 'ostium-secunduma'],
           exam: 'Jaio arte: eskuineko aurikula → zulo obala → ostium secunduma → ezkerreko aurikula (ibilbide laprana).',
-          view: 'biak',
+          view: '3d',
         },
         {
           at: P2[6],
@@ -302,7 +329,7 @@ export const week11: WeekDef = {
           text: 'Liburu batzuetan (ez guztietan) deskribatzen den bezala, septum primumaren goiko ataltxoa desagertu egiten da, eta geratzen den beheko atala (zulo obalaren parean) zulo obalaren balbula bilakatzen da: balbula efektua egiten du. Hala ere, odolak septumetatik igarotzen jarraitzen du, komunikatuta daudelako.',
           focus: ['zulo-obalaren-balbula', 'zulo-obala'],
           exam: 'Zulo obalaren balbula = septum primumaren beheko atala.',
-          view: 'biak',
+          view: '3d',
         },
       ],
       structures: [
@@ -341,6 +368,15 @@ export const week11: WeekDef = {
       source: src('2.2. Septum secundum-aren sorrera'),
       views: [
         {
+          id: '3d',
+          label: 'Aurikulak 3D',
+          plane: 'eskema',
+          description: D3,
+          orientation: { top: 'Kraneala', bottom: 'Kaudala' },
+          scene: Birth3D,
+          travel: false,
+        },
+        {
           id: 'frontala',
           label: 'Mozketa frontala',
           plane: 'koronala',
@@ -348,15 +384,17 @@ export const week11: WeekDef = {
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Eskuina', right: 'Ezkerra' },
           scene: BirthFrontal,
           travel: false,
+          bridges: [{ from: '3d', part: 'aurikula-komuna', section: true, look: 'front' }],
         },
         {
           id: 'biak',
           label: 'Bi ikuspegiak',
           plane: 'koronala',
-          description: 'Une bera bi aldetatik: ezkerrean mozketa frontala (balbula septum secundumaren aurka), eskuinean aurikula arteko trenkada eskuineko aurikularen barrutik (zulo obala ixten).',
+          description: 'Une bera bi aldetatik: ezkerrean mozketa frontala (balbula septum secundumaren aurka), eskuinean lupa bi trenkadetan (balbula septum secundumaren aurka bultzatzen eta fusionatzen).',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: BirthBoth,
           travel: false,
+          bridges: [{ from: '3d', part: 'aurikula-komuna', look: 'front' }],
         },
         {
           id: 'eskuinetik',
@@ -366,6 +404,7 @@ export const week11: WeekDef = {
           orientation: { top: 'Kraneala', bottom: 'Kaudala', left: 'Atzekoa', right: 'Aurrekoa' },
           scene: BirthFace,
           travel: false,
+          bridges: [{ from: '3d', part: 'aurikula-komuna', look: 'otherSide' }],
         },
       ],
       beats: [
@@ -378,7 +417,7 @@ export const week11: WeekDef = {
           focus: ['birika-zainak', 'ezkerreko-aurikula-jaiotakoan'],
           tour: ['eskuineko-aurikula', 'ezkerreko-aurikula-jaiotakoan', 'birika-zainak', 'septum-secundum', 'zulo-obala', 'zulo-obalaren-balbula'],
           tourAt: 0.09,
-          view: 'frontala',
+          view: '3d',
         },
         {
           at: P3[1],
@@ -386,7 +425,7 @@ export const week11: WeekDef = {
           idea: 'Odol oxigenatua birika zainetatik ezkerreko aurikularen atzeko paretara iristen da.',
           text: 'Odol oxigenatu hori biriketatik birika zainen bitartez irteten da, eta zain horiek ezkerreko aurikularen atzeko paretara iristen dira.',
           focus: ['birika-zainak'],
-          view: 'frontala',
+          view: '3d',
         },
         {
           at: P3[2],
@@ -395,7 +434,7 @@ export const week11: WeekDef = {
           key: 'Presio aldaketa da gakoa: orain ezkerreko aurikulan dago presio handiena.',
           text: 'Prozesu honen ondorioz, ezkerreko aurikulara iristen den odol kopurua gero eta handiagoa da, eta ezkerreko aurikulako presioa handituz joaten da.',
           focus: ['ezkerreko-aurikula-jaiotakoan'],
-          view: 'frontala',
+          view: '3d',
         },
         {
           at: P3[3],
@@ -415,7 +454,7 @@ export const week11: WeekDef = {
           text: 'Horregatik, septum primuma septum secundumaren aurka presionatzen da: zulo obalaren balbula zulo obalaren aurka bultzatzen da, eta eskuinetik ezkerrerako bidea ixten da.',
           focus: ['zulo-obalaren-balbula', 'septum-secundum'],
           exam: 'Jaiotzean ezkerreko aurikulako presioa handitzen da → septum primuma (balbula) septum secundumaren aurka.',
-          view: 'biak',
+          view: '3d',
         },
         {
           at: P3[4],
@@ -425,7 +464,7 @@ export const week11: WeekDef = {
           text: 'Ondorioz, septum primuma eta septum secunduma fusionatzen hasten dira, eta bi aurikulen arteko komunikazioa ixten da. Prozesu luzea da: jaio ondoren eta lehenengo urtean zehar jarraitzen du.',
           focus: ['zulo-obalaren-balbula', 'septum-secundum'],
           exam: 'Zulo obalaren itxiera: jaiotzean presioz, eta fusioz jaio ondoren eta 1. urtean zehar.',
-          view: 'biak',
+          view: '3d',
         },
         {
           at: P3[5],
@@ -446,7 +485,7 @@ export const week11: WeekDef = {
           text: 'Bi trenkada hauen fusioa askotan ez da osoa izaten jaio ostean (kasuen %20an), eta ondorioz eskuineko aurikulatik ezkerreko aurikulara pasu bat (arraildura txiki bat) mantentzen da.',
           focus: ['zulo-obala'],
           exam: 'Kasuen %20an fusioa ez da osoa: arraildura txiki bat eskuineko aurikulatik ezkerrekora.',
-          view: 'biak',
+          view: '3d',
         },
         {
           at: P3[6],
@@ -455,7 +494,7 @@ export const week11: WeekDef = {
           text: 'Horregatik, ezkerreko aurikulan biriketatik datorren odol oxigenatua eta eskuineko aurikulako zain odola nahasten dira. Odol nahaste honen ondorioz, jaioberriaren kolorea urdinxka izaten da: zianosia (jaioberri zianotikoa).',
           focus: ['ezkerreko-aurikula-jaiotakoan', 'zulo-obala'],
           exam: 'Fusioa osatu ezean: odola ezkerreko aurikulan nahasten da → zianosia.',
-          view: 'frontala',
+          view: '3d',
         },
       ],
       structures: ['eskuineko-aurikula', 'ezkerreko-aurikula-jaiotakoan', 'birika-zainak', 'septum-primum', 'septum-secundum', 'zulo-obala', 'zulo-obalaren-balbula', 'goiko-kaba-zaina', 'beheko-kaba-zaina'],

@@ -17,7 +17,7 @@ type Pane = 'L' | 'R';
 /** Beat starts of the stage (content/weeks/week11.ts uses the same values). */
 export const P3 = [0, 0.13, 0.27, 0.41, 0.55, 0.71, 0.85] as const;
 
-function birthStage(t: number) {
+export function birthStage(t: number) {
   const born = t >= P3[0] + 0.05;
   const laFill = lerp(0.15, 0.5, seg(t, P3[1], P3[2] - 0.02)) + lerp(0, 0.5, seg(t, P3[2], P3[3] - 0.02));
   const press = lerp(0, 0.3, seg(t, P3[2] + 0.03, P3[3] - 0.02)) + lerp(0, 0.7, seg(t, P3[3], P3[4] - 0.03));
@@ -59,7 +59,7 @@ const face = (t: number): FaceState => {
   return { primum: 0.8, closeOP: 1, os2: 1, stub: 1, secundum: 1, spurium: 1, cushions: 1, press: k.press, fuse: k.fuse, patent: k.patent, flow: 1, adult: true };
 };
 
-const STEPS: [number, string][] = [
+export const STEPS3: [number, string][] = [
   [P3[0], 'Jaiotza: birika zirkulazioa eratzen da'],
   [P3[1], 'Odol oxigenatua birika zainetatik ezkerreko aurikulara'],
   [P3[2], 'Odol gehiago → ezkerreko aurikulako presioa handitzen da'],
@@ -82,7 +82,7 @@ export function BirthFrontal({ t, pane }: SceneProps & { pane?: Pane }) {
         </Note>
       )}
       {/* In a dual view the left pane gives the step caption (lifted as a note), the right pane none. */}
-      {pane !== 'R' && Steps({ t, steps: STEPS, y: 630 })}
+      {pane !== 'R' && Steps({ t, steps: STEPS3, y: 630 })}
     </g>
   );
 }
@@ -100,7 +100,7 @@ export function BirthFace({ t, pane }: SceneProps & { pane?: Pane }) {
         </Note>
       )}
       {/* In a dual view the left pane gives the step caption (lifted as a note), the right pane none. */}
-      {pane !== 'R' && Steps({ t, steps: STEPS, y: 630 })}
+      {pane !== 'R' && Steps({ t, steps: STEPS3, y: 630 })}
     </g>
   );
 }
