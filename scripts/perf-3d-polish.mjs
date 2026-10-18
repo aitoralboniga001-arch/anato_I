@@ -12,6 +12,8 @@ const out = resolve(dest);
 const width = Number(process.env.WIDTH ?? 1536);
 const height = Number(process.env.HEIGHT ?? 960);
 const reduced = process.env.REDUCED === '1';
+const at = Number(process.env.AT ?? 0.55);
+if (!Number.isFinite(at) || at < 0 || at > 1) throw new Error('AT must be a stage position from 0 to 1');
 mkdirSync(join(out, 'shots'), { recursive: true });
 const views = [
   [7, 'diafragma-eraketa', 'kupula'],
@@ -25,7 +27,7 @@ mkdirSync(profile, { recursive: true });
 const { proc, ws } = await launch(profile);
 const c = cdp(ws);
 await c.open;
-const result = { date: new Date().toISOString(), base, width, height, dpr: 2, reduced, gpuSamples: 'median of 3 x 8 draws (CPU submission + GPU completion)', runs: [] };
+const result = { date: new Date().toISOString(), base, width, height, dpr: 2, at, reduced, gpuSamples: 'median of 3 x 8 draws (CPU submission + GPU completion)', runs: [] };
 const errors = [];
 c.on('Runtime.exceptionThrown', e => errors.push(e.exceptionDetails?.exception?.description ?? e.exceptionDetails?.text ?? 'runtime error'));
 try {
@@ -38,7 +40,7 @@ try {
   async function open(v, play = false) {
     const [w, stage, view] = v;
     const loaded = c.once('Page.loadEventFired', 30000);
-    await c.send('Page.navigate', { url: `${base}/astea/${w}?etapa=${stage}&ikuspegia=${view}&une=0.55${play ? '&jolastu=1' : ''}` });
+    await c.send('Page.navigate', { url: `${base}/astea/${w}?etapa=${stage}&ikuspegia=${view}&une=${at}${play ? '&jolastu=1' : ''}` });
     await loaded;
     for (let i = 0; i < 250; i++) {
       if (await evaluate(c, `!!document.querySelector('.viewport-underlay canvas.is-ready')`).catch(() => false)) return;

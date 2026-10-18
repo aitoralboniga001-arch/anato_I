@@ -1,0 +1,164 @@
+{
+  "date": "2026-10-17T16:32:57.887Z",
+  "base": "http://localhost:3120",
+  "width": 1536,
+  "height": 960,
+  "dpr": 2,
+  "reduced": false,
+  "gpuSamples": "median of 3 x 8 draws (CPU submission + GPU completion)",
+  "runs": [
+    {
+      "week": 8,
+      "stage": "buru-ganga",
+      "view": "kupula",
+      "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (0x00001900) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "info": {
+        "calls": 35,
+        "triangles": 240544,
+        "w": 2316,
+        "h": 1134,
+        "geometries": 24,
+        "programs": 6
+      },
+      "hold": {
+        "mainThreadMsPerS": 44.7,
+        "scriptMsPerS": 15.2,
+        "styleLayoutMsPerS": 5.3,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "gpuMs": 2.513,
+      "play": {
+        "mainThreadMsPerS": 572.7,
+        "scriptMsPerS": 504.9,
+        "styleLayoutMsPerS": 9.4,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 283.3,
+          "n": 104
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 302
+        },
+        "perS": {
+          "glTick": 53,
+          "glRender": 53
+        }
+      }
+    },
+    {
+      "week": 9,
+      "stage": "domeinuak",
+      "view": "domeinuak-3d",
+      "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (0x00001900) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "info": {
+        "calls": 92,
+        "triangles": 555704,
+        "w": 2316,
+        "h": 1086,
+        "geometries": 48,
+        "programs": 6
+      },
+      "hold": {
+        "mainThreadMsPerS": 1.3,
+        "scriptMsPerS": 0.4,
+        "styleLayoutMsPerS": 0,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "gpuMs": 5.287,
+      "play": {
+        "mainThreadMsPerS": 649.2,
+        "scriptMsPerS": 458.9,
+        "styleLayoutMsPerS": 27.8,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 16.9,
+          "n": 120
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "glTick": 60.5,
+          "glRender": 60.5
+        }
+      }
+    },
+    {
+      "week": 10,
+      "stage": "atal-bentrikularra",
+      "view": "3d",
+      "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (0x00001900) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "info": {
+        "calls": 62,
+        "triangles": 37832,
+        "w": 2316,
+        "h": 1208,
+        "geometries": 34,
+        "programs": 6
+      },
+      "hold": {
+        "mainThreadMsPerS": 265.2,
+        "scriptMsPerS": 254.1,
+        "styleLayoutMsPerS": 3.6,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 375
+        },
+        "perS": {}
+      },
+      "gpuMs": 1.875,
+      "play": {
+        "mainThreadMsPerS": 673.6,
+        "scriptMsPerS": 545.5,
+        "styleLayoutMsPerS": 21.2,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 333.4,
+          "n": 106
+        },
+        "longTasks": {
+          "n": 1,
+          "totalMs": 348
+        },
+        "perS": {
+          "glTick": 54.5,
+          "glRender": 54.5,
+          "heartModel": 108,
+          "meshCacheHit": 7992
+        }
+      }
+    }
+  ],
+  "errors": []
+}

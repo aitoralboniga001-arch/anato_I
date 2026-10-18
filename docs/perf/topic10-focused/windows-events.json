@@ -1,0 +1,11 @@
+{
+  "checked": "2026-10-17T19:45:17.4281240+02:00",
+  "since": "2026-10-17T19:20:00.0000000",
+  "eventIds": [
+    41,
+    1001,
+    4101
+  ],
+  "count": 0,
+  "note": "No attribution or future crash guarantee; Windows System log snapshot only."
+}

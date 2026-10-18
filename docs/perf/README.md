@@ -128,3 +128,54 @@ The Windows event was re-read: Kernel-Power 41 records bugcheck 307 (`0x133`, `D
 
 Lessons for the next batch: cache deformation by pose inputs; throttle expensive label arrangement, then settle it; distinguish outline-hull artifacts from geometry cracks; avoid coincident sleeves over existing walls; clip material boundaries instead of colouring whole triangles; cap pixels independently of DPR; and verify context-loss disposal with an actual browser event.
 
+
+## Batch 7: all-model workload limits and GPU resilience (2026-10-17)
+
+Audit and implementation: [all-model report](../review/3d-performance-resilience.md). Every current Stage3D view is covered. Source/build validation: **1115 tests in 33 files pass**, production build including TypeScript passes; focused new/shared-code lint passes. The expanded shell/Stage3D scope retains nine pre-existing errors (seven Stage3D, one Simulator, one Viewport), with the shell findings reproduced from HEAD. No new runtime dependency, anatomy sampling reduction, render pass, push or deployment.
+
+The final 13-view survey uses the same bounded harness, 1536x960 CSS, DPR 2, stage time 0.55. Its baseline is the committed Batch 6 after result (`polish-batch6/results.json`, code at `5b97561`). New representative baseline samples of calvaria, domains and ventricle are in `renderer-audit-before/results.json`; keep these separate from the full 13-view baseline. `renderer-audit/comparison.json` records both rather than mixing them into one mean.
+
+**Mean main-thread work over the 13 two-second playback samples: 609.7 -> 244.4 ms/s (59.9% less).** These samples include reading holds and phases whose anatomy is static. This is not a claim of that percentage for every continuously deforming pose, overall machine CPU, battery power or GPU utilization. The calvaria sample is already in a manual reading hold: its published poses and GPU draws both fall to zero. Short-run machine/thermal variation remains.
+
+| Topic / 3D view | Prior Batch 6 CPU ms/s | Final CPU ms/s | Final GPU draw+completion ms | Draws/s during playback |
+|---|---:|---:|---:|---:|
+| 7 / diafragma-eraketa | 591 | 242 | 1.225 | 0 |
+| 8 / buru-ganga | 483.8 | 72.4 | 2.45 | 0 |
+| 8 / gorputz-adarrak | 607.4 | 278.4 | 1.363 | 0 |
+| 9 / domeinuak | 756.5 | 208.4 | 3.512 | 0 |
+| 10 / bihotz-hodia | 516 | 317.2 | 1.2 | 0.5 |
+| 10 / zirkulazio-goiztiarra | 614.7 | 142.3 | 0.9 | 0.5 |
+| 10 / bihotz-atalak | 675.1 | 372.6 | 1.013 | 27 |
+| 10 / bihotz-lakioa | 641.6 | 146.8 | 1.138 | 1 |
+| 10 / atal-bulbarra | 654.8 | 152.5 | 1.537 | 0.5 |
+| 10 / atal-bentrikularra | 577.5 | 343.8 | 1.375 | 1 |
+| 10 / atal-aurikularra | 615.1 | 344.6 | 1.525 | 1 |
+| 10 / zain-sinua | 585.4 | 408.1 | 1.712 | 12 |
+| 10 / eskuineko-aurikula | 607.6 | 147.6 | 1.512 | 1 |
+
+The fresh three-view baselines are calvaria 572.7, domains 649.2 and ventricle 673.6 ms/s, versus final 72.4, 208.4 and 343.8. The calvaria baseline also caught a one-off 302 ms startup task. These numbers are individual diagnostics, not the denominator of the 13-view mean. Its automatic Kimu search-index warm is now triggered by hover/focus/open rather than a timer.
+
+GPU timings are bounded CPU-submission + completion-readback samples, not hardware timer queries. Domains remains the most expensive held picture at 3.512 ms and 555,704 drawn triangles. The pixel cap lowers raster resolution; no teaching geometry was coarsened in this batch. Motion presentation and pose publishing deliberately use a nominal 30 Hz ceiling; sample counters can show 30.5/s at a measurement-window boundary. The independent page RAF frame metric is not the 3D presentation rate.
+
+The separately checked closing-vein phase (`AT=0.45 FILTER=zain-sinua`) records **556.4 ms/s**, about **29 pose updates and GPU draws/s**, **754 mesh builds/s** and **377 slot uploads/s**. Its p95 page RAF interval is 17 ms, with no runtime exceptions or long tasks in the sampled interval. See `renderer-audit-flow/results.json`. This is still meaningful procedural construction work: persistent deformation buffers remain a measured next candidate. The historical 798 ms/s figure used a different viewport/harness, so it is not presented as a matched before/after percentage.
+
+Implemented shared protections: unchanged-frame comparison and coalesced uploads; 30 Hz drawing and both simulator/class pose loops; duplicate reading-hold positions suppressed; explicit document/intersection suspension; 2M-pixel final and intermediate buffers with device dimension limits; browser-default power preference and refusal of major performance caveats; lazy context/geometry requests; worker termination after delivery; GPU buffer/material release after 180 ms parked, context disposal after 5 s, immediate disposal for detached hosts; weak host metadata; immutable cached-pose ownership and correct UV/index updates; session-persistent flat fallback after loss/creation failure.
+
+Browser evidence:
+
+- `renderer-audit/resilience.json`: 2D topics 1/7/8/9/11 create zero WebGL contexts/workers; domains creates and terminates one geometry worker; all tested final and intermediate buffers stay below 2M pixels; held/offscreen/hidden rendering sleeps; parked geometry releases and the context disposes; real context loss and context refusal both retain flat fallback after reload.
+- `renderer-audit/playback.json`: real timeline progress matches elapsed-time playback; hidden pause/resume does not jump; a manual hold stays exactly at t=0.5249 with no pose updates/draws; camera turn wakes and settles; SPA navigation immediately loses the detached context; topic 10 class publishes 30 poses/s and stops on pause. Class speech uses the supported subtitle/timer fallback in the diagnostic browser.
+- All 13 final held/zoomed views load with zero runtime exceptions, and every measured buffer stays below 2M pixels. Held skull/domains and the ventricular heart close-up were visually inspected; small views keep DPR 2 while large views are somewhat softer.
+- `renderer-audit/pixel-diff.txt` records all 26 held/zoomed view comparisons against Batch 6: 0.349–1.370% of pixels differ by more than 2 colour levels, and at most 0.142% by more than 40. This is consistent with the intentional raster-resolution change, not pixel equivalence. The baseline's auxiliary `contact.png` montage is outside the 26-view comparison set and has no matching after montage.
+
+The existing Windows bugcheck 0x133 still has an UNKNOWN responsible driver. Lower bounded workload and tested WebGL recovery are app-side mitigation; an OS-level crash can occur before JavaScript receives any context-loss event. No driver, registry or browser blocklist setting was changed. See the audit for the remaining driver/dump diagnostic boundary.
+
+## Batch 8: Topic 10 CPU follow-up (2026-10-17)
+
+[Scoped implementation and evidence](../review/topic10-performance-followup.md). The final nine-view survey is in `topic10-focused/results.json`; `comparison.json` retains the earlier Batch 7 comparison and the separate fresh closing-vein baseline/final/repeat. Mean sampled main-thread work is 263.9 -> 236.0 ms/s (10.6% less). The continuous closing-vein phase is 538.9 -> 492.4 / 474.5 ms/s (8.6–12.0% less). GPU and frame-time readings vary; triangle counts are unchanged. These are modest CPU savings in bounded samples, not a universal frame-rate/GPU claim.
+
+Topic 10-only changes reuse tube plans/layouts, bounded complete heart/atrium snapshots and centrelines, and the per-lesson class estimate. Shared renderer safeguards remain unchanged in this pass. All 1,171 tests in 35 files, final build/TypeScript and focused lint pass. `topic10-focused/fallback.json`, `playback.json` and `pixel-diff.txt` record actual context loss, class pause and all 18 Topic 10 visual pairs. No subagents, commit, push or deployment.
+
+## Batch 9: Topic 10 30/40 fps experiment (2026-10-17)
+
+[Method, results and limits](../review/topic10-30-vs-40-fps.md). `topic10-fps/results.json` contains the 52-sample comparison plus class/control/recovery checks; `topic10-fps-atrium/results.json` retains four corrected early-valve samples. `topic10-fps/summary.json` separates continuous motion from static/reading phases. True 40 fps draws about 39–40 times/s, with 12–24% higher main-thread work in four moving cases and about 45% higher work in a separate short class glide. GPU submission counts rise; exact GPU utilization was not measured. Default stays 30. All 1,176 tests, build/TypeScript and focused lint pass; class pause, hidden/resume and actual context-loss/reload fallback pass at 40. No subagents, commit, push or deployment.

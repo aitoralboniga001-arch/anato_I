@@ -33,6 +33,35 @@ function clock() {
 }
 
 describe('the 3D layer sleeps when nothing changes', () => {
+  it('caps moving pictures at 30 draws per second even on a 120 Hz display', () => {
+    const c = clock();
+    let ticks = 0;
+    const w = createWaker(() => (ticks++, true), { minFrameMs: 1000 / 30, now: c.now, raf: c.raf, caf: c.caf });
+    w.kick();
+    for (let i = 0; i < 240; i++) c.frame(1000 / 120);
+    expect(ticks).toBe(60);
+    w.stop();
+  });
+
+  it('suspends all ticks when disabled and draws the latest picture on resume', () => {
+    const c = clock();
+    let ticks = 0;
+    const w = createWaker(() => (ticks++, true), { minFrameMs: 1000 / 30, now: c.now, raf: c.raf, caf: c.caf });
+    w.kick(); c.frame();
+    w.setEnabled(false);
+    w.kick();
+    for (let i = 0; i < 120; i++) c.frame();
+    expect(ticks).toBe(1);
+    expect(c.pending).toBe(0);
+    w.setEnabled(true);
+    expect(c.pending).toBe(1);
+    c.frame();
+    expect(ticks).toBe(2);
+    w.stop();
+    w.setEnabled(false); w.setEnabled(true); w.kick();
+    expect(c.pending).toBe(0);
+  });
+
   it('stops asking for frames once a still picture has been drawn, and wakes on a kick', () => {
     const c = clock();
     let changes = 3;

@@ -3,7 +3,6 @@
 import { forwardRef, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from 'react';
 import { Defs } from '@/components/kit/Defs';
 import { LabelScaleContext, TextLayerContext, UnderlayContext, type LookSide, type Underlay } from '@/components/kit/context';
-import { prewarm3D } from '@/components/kit/three/Stage3D';
 import type { Orientation } from '@/lib/sim/types';
 import { IconFit, IconZoomIn, IconZoomOut } from './icons';
 
@@ -249,12 +248,6 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   // 3D views draw their shaded tissue here, behind the SVG that keeps the names and the pointing.
   const [underHost, setUnderHost] = useState<HTMLDivElement | null>(null);
   const [sceneEl, setSceneEl] = useState<SVGGElement | null>(null);
-  // WebGL made ready once the page is quiet, so no 3D view (or camera move into one) waits for it.
-  useEffect(() => {
-    if (!underHost) return;
-    const id = window.setTimeout(() => prewarm3D(underHost), 1200);
-    return () => window.clearTimeout(id);
-  }, [underHost]);
   const sceneRef = useCallback((el: SVGGElement | null) => {
     scene.current = el;
     setSceneEl(el);

@@ -33,7 +33,7 @@ try {
     await c.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 2, mobile: false });
     await sleep(1000);
     const info = await evaluate(c, 'window.__glInfo()');
-    assert.ok(info.w * info.h <= 3200000, JSON.stringify(info));
+    assert.ok(info.w * info.h <= 2000000, JSON.stringify(info));
     result[`${width}x${height}`] = info;
   }
   assert.ok(await evaluate(c, `(() => { const g = document.querySelector('.viewport-underlay canvas').getContext('webgl2'); const ext = g.getExtension('WEBGL_lose_context'); if (!ext) return false; ext.loseContext(); return true; })()`));

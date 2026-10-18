@@ -6,20 +6,30 @@ import { adoptGeo, buildIdle, geoReady, setGeoRequester } from './offthread';
  */
 let worker: Worker | null | undefined;
 const asked = new Set<string>();
+const pending = new Set<string>();
 
 function getWorker(): Worker | null {
   if (worker !== undefined) return worker;
   try {
-    worker = new Worker(new URL('./geo.worker.ts', import.meta.url), { type: 'module' });
-    worker.onmessage = (e: MessageEvent<{ key: string; data?: unknown; error?: string }>) => {
+    const w = new Worker(new URL('./geo.worker.ts', import.meta.url), { type: 'module' });
+    worker = w;
+    w.onmessage = (e: MessageEvent<{ key: string; data?: unknown; error?: string }>) => {
+      if (worker !== w) return;
       const { key, data, error } = e.data;
+      pending.delete(key);
       if (error) buildIdle(key);
       else adoptGeo(key, data);
+      // The page owns the delivered meshes. Release the worker's duplicate meshes, fields and
+      // module caches after this batch; another requested view can start a fresh worker later.
+      if (!pending.size) { w.terminate(); worker = undefined; }
     };
-    worker.onerror = () => {
+    w.onerror = () => {
+      if (worker !== w) return;
       // The worker could not start: whatever is still missing is built here instead.
+      w.terminate();
       worker = null;
-      for (const k of asked) if (!geoReady(k)) buildIdle(k);
+      for (const k of pending) if (!geoReady(k)) buildIdle(k);
+      pending.clear();
     };
   } catch {
     worker = null;
@@ -34,7 +44,7 @@ export function warmGeo(keys: string[]) {
     if (asked.has(key) || geoReady(key)) continue;
     asked.add(key);
     const w = getWorker();
-    if (w) w.postMessage({ key });
+    if (w) { pending.add(key); w.postMessage({ key }); }
     else buildIdle(key);
   }
 }

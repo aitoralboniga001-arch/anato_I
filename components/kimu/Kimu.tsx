@@ -211,13 +211,7 @@ export function Kimu() {
     } catch {}
   }, [msgs]);
 
-  // In the simulator Kimu is one key away: get the notes ready while the student watches.
-  useEffect(() => {
-    if (!inSim) return;
-    const id = window.setTimeout(() => void warm(), 4000);
-    return () => window.clearTimeout(id);
-  }, [inSim]);
-
+  // Build the search index on hover/focus/open, not in the middle of a student's animation.
   useEffect(() => {
     if (!open) return;
     void warm();

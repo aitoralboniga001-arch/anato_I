@@ -1,0 +1,223 @@
+{
+  "date": "2026-10-17T17:18:47.456Z",
+  "status": "passed",
+  "errors": [],
+  "twoDimensional": [
+    {
+      "week": 1,
+      "contexts": 0,
+      "workers": 0,
+      "terminated": 0,
+      "maxPixels": 0,
+      "failures": 0
+    },
+    {
+      "week": 7,
+      "contexts": 0,
+      "workers": 0,
+      "terminated": 0,
+      "maxPixels": 0,
+      "failures": 0
+    },
+    {
+      "week": 8,
+      "contexts": 0,
+      "workers": 0,
+      "terminated": 0,
+      "maxPixels": 0,
+      "failures": 0
+    },
+    {
+      "week": 9,
+      "contexts": 0,
+      "workers": 0,
+      "terminated": 0,
+      "maxPixels": 0,
+      "failures": 0
+    },
+    {
+      "week": 11,
+      "contexts": 0,
+      "workers": 0,
+      "terminated": 0,
+      "maxPixels": 0,
+      "failures": 0
+    }
+  ],
+  "workerReleased": {
+    "contexts": 1,
+    "workers": 1,
+    "terminated": 1,
+    "maxPixels": 1998920,
+    "failures": 0
+  },
+  "buffers": [
+    {
+      "width": 2400,
+      "height": 1600,
+      "calls": 62,
+      "triangles": 37832,
+      "w": 1803,
+      "h": 1108,
+      "geometries": 34,
+      "programs": 6
+    },
+    {
+      "width": 700,
+      "height": 1800,
+      "calls": 62,
+      "triangles": 37832,
+      "w": 1348,
+      "h": 974,
+      "geometries": 34,
+      "programs": 6
+    },
+    {
+      "width": 2200,
+      "height": 700,
+      "calls": 62,
+      "triangles": 37832,
+      "w": 3196,
+      "h": 625,
+      "geometries": 34,
+      "programs": 6
+    },
+    {
+      "width": 1536,
+      "height": 960,
+      "calls": 62,
+      "triangles": 37832,
+      "w": 1958,
+      "h": 1021,
+      "geometries": 34,
+      "programs": 6
+    }
+  ],
+  "transientBuffers": {
+    "contexts": 1,
+    "workers": 0,
+    "terminated": 0,
+    "maxPixels": 1999118,
+    "failures": 0
+  },
+  "held": {
+    "mainThreadMsPerS": 2.6,
+    "scriptMsPerS": 0.4,
+    "styleLayoutMsPerS": 0,
+    "frameMs": {
+      "p50": 0,
+      "p95": 0,
+      "max": 0,
+      "n": 0
+    },
+    "longTasks": {
+      "n": 0,
+      "totalMs": 0
+    },
+    "perS": {}
+  },
+  "offscreen": {
+    "mainThreadMsPerS": 7.6,
+    "scriptMsPerS": 0.6,
+    "styleLayoutMsPerS": 1,
+    "frameMs": {
+      "p50": 0,
+      "p95": 0,
+      "max": 0,
+      "n": 0
+    },
+    "longTasks": {
+      "n": 0,
+      "totalMs": 0
+    },
+    "perS": {}
+  },
+  "hidden": {
+    "mainThreadMsPerS": 10.8,
+    "scriptMsPerS": 2.9,
+    "styleLayoutMsPerS": 1.3,
+    "frameMs": {
+      "p50": 0,
+      "p95": 0,
+      "max": 0,
+      "n": 0
+    },
+    "longTasks": {
+      "n": 0,
+      "totalMs": 0
+    },
+    "perS": {}
+  },
+  "parked": {
+    "canvas": true,
+    "info": {
+      "calls": 62,
+      "triangles": 37832,
+      "w": 1,
+      "h": 1,
+      "geometries": 0,
+      "programs": 6
+    },
+    "counters": {
+      "heartModel": 6,
+      "meshCacheHit": 444,
+      "glTick": 109,
+      "glRender": 70,
+      "project": 374
+    }
+  },
+  "disposedAfterPark": true,
+  "reopened": {
+    "calls": 62,
+    "triangles": 37832,
+    "w": 1958,
+    "h": 1021,
+    "geometries": 34,
+    "programs": 6
+  },
+  "playing": {
+    "mainThreadMsPerS": 300.3,
+    "scriptMsPerS": 188,
+    "styleLayoutMsPerS": 22,
+    "frameMs": {
+      "p50": 16.7,
+      "p95": 33.3,
+      "max": 50.1,
+      "n": 110
+    },
+    "longTasks": {
+      "n": 0,
+      "totalMs": 0
+    },
+    "perS": {
+      "glTick": 7.5,
+      "glRender": 1,
+      "simFrame": 28,
+      "heartModel": 56,
+      "meshCacheHit": 4144
+    }
+  },
+  "lostContextFallback": true,
+  "viewSwitchFallback": true,
+  "reloadFallback": {
+    "contexts": 0,
+    "workers": 0,
+    "terminated": 0,
+    "maxPixels": 0,
+    "failures": 0
+  },
+  "creationFailure": {
+    "contexts": 2,
+    "workers": 0,
+    "terminated": 0,
+    "maxPixels": 0,
+    "failures": 0
+  },
+  "creationFailureReload": {
+    "contexts": 0,
+    "workers": 0,
+    "terminated": 0,
+    "maxPixels": 0,
+    "failures": 0
+  }
+}

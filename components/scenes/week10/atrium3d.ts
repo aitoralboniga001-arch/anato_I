@@ -117,6 +117,22 @@ export interface AtriumModel {
 
 export function atriumModel(s: AtriumState): AtriumModel {
   perfCount('atriumModel');
+  const key = JSON.stringify(s, (_key, value) => Object.is(value, -0) ? '-0' : value);
+  const known = snapshots.get(key);
+  if (known) {
+    snapshots.delete(key); snapshots.set(key, known);
+    perfCount('atriumModelCacheHit');
+    return known;
+  }
+  perfCount('atriumModelBuild');
+  const model = buildAtriumModel(s);
+  if (snapshots.size >= 2) snapshots.delete(snapshots.keys().next().value!);
+  snapshots.set(key, model);
+  return model;
+}
+const snapshots = new Map<string, AtriumModel>();
+
+function buildAtriumModel(s: AtriumState): AtriumModel {
   const W = wallsOnce();
   const items: Item3[] = [];
   const pts: Record<string, V3> = {};

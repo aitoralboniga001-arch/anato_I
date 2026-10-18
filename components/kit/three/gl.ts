@@ -16,6 +16,9 @@ import {
 import { perfCount } from '@/lib/perf';
 import type { M4, V3 } from '@/lib/three-d/math';
 import { createWaker } from '@/lib/three-d/waker';
+import { createRenderCircuit, renderRatio, renderTiming } from '@/lib/three-d/render-policy';
+import { sameGLFrame } from './frame-state';
+import { geometryOf, updateGeometry } from './geometry';
 import type { Mesh } from '@/lib/three-d/mesh';
 import { STREAM_ROUTE_N, TISSUE_KIND, type Clip3, type Stream3, type Tissue3 } from '@/lib/three-d/scene';
 
@@ -296,6 +299,7 @@ interface Slot {
   mesh: Mesh;
   /** A stream's constant per-copy data (its geometry is built with it) and the route last copied in. */
   cells?: Float32Array;
+  gates?: Float32Array;
   route?: Float32Array;
   geo: BufferGeometry;
   body: TMesh;
@@ -305,20 +309,6 @@ interface Slot {
   cur: { sat: number; bright: number; amt: number; op: number };
   goal: GLItem;
   seen: number;
-}
-
-function geometryOf(m: Mesh, st?: Stream3) {
-  const g = st ? new InstancedBufferGeometry() : new BufferGeometry();
-  g.setAttribute('position', new BufferAttribute(m.pos, 3));
-  g.setAttribute('normal', new BufferAttribute(m.nrm, 3));
-  g.setAttribute('uv', new BufferAttribute(m.uv, 2));
-  g.setIndex(new BufferAttribute(m.idx, 1));
-  if (st && g instanceof InstancedBufferGeometry) {
-    g.setAttribute('aCell', new InstancedBufferAttribute(st.cells, 4));
-    g.setAttribute('aGate', new InstancedBufferAttribute(st.gates, 1));
-    g.instanceCount = st.gates.length;
-  }
-  return g;
 }
 
 /** A stream's uniforms: one set, shared by reference between its body and its outline. */
@@ -412,28 +402,23 @@ const edgeMaterial = (stream?: StreamUniforms) =>
   });
 
 /**
- * The most pixels a 3D picture is drawn with (drawing buffer, before multisampling). A view at its usual
- * size on a 2× screen stays under it and keeps the full density; a picture blown up (full screen on a
- * large high-density screen) is drawn a little softer instead of with up to twice the pixels: the GPU of
- * a thin laptop shares its memory and its heat with everything else.
- */
-const PIXEL_BUDGET = 3.2e6;
-
-/**
  * Once a WebGL context has been lost (the GPU driver reset, or the browser took it back), the 3D views
- * draw their flat picture for the rest of the visit: asking the GPU again right away could make it fail again.
+ * draw their flat picture for the rest of this tab's session, including reloads.
  */
-let glLost = false;
-const lostListeners = new Set<() => void>();
-export const glWasLost = () => glLost;
+const failureStore = () => {
+  try { return typeof window === 'undefined' ? null : window.sessionStorage; } catch { return null; }
+};
+const circuit = createRenderCircuit(failureStore());
+export const glWasLost = () => circuit.blocked;
 /** Called once if the GPU is lost; returns the unsubscribe. */
 export function onGLLost(cb: () => void) {
-  lostListeners.add(cb);
-  return () => lostListeners.delete(cb);
+  return circuit.subscribe(cb);
 }
 
 export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null {
-  if (glLost) return null;
+  // A tab opened in the background still gets its layer: it sleeps until shown (`updateActivity`).
+  // Refusing here would leave that view on the flat picture for good.
+  if (circuit.blocked) return null;
   let onReady = ready;
   let hideTimer = 0;
   // Woken from the pool: the first frame drawn for the new view shows the canvas again.
@@ -441,21 +426,27 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
   const canvas = document.createElement('canvas');
   let renderer: WebGLRenderer;
   try {
-    renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, premultipliedAlpha: true, powerPreference: 'high-performance' });
+    renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, premultipliedAlpha: true, powerPreference: 'default', failIfMajorPerformanceCaveat: true });
   } catch {
+    circuit.trip();
     return null;
   }
-  const ratioFor = (w: number, h: number) => Math.min(2, window.devicePixelRatio || 1, Math.sqrt(PIXEL_BUDGET / Math.max(1, w * h)));
+  const maxDimension = Math.min(renderer.capabilities.maxTextureSize, renderer.getContext().getParameter(renderer.getContext().MAX_RENDERBUFFER_SIZE));
+  const ratioFor = (w: number, h: number) => renderRatio(w, h, window.devicePixelRatio || 1, maxDimension);
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   renderer.setClearColor(0x000000, 0);
   host.appendChild(canvas);
   let lost = false;
+  let disposed = false;
+  let parked = false;
+  let intersecting = true;
+  let active = false;
   const onLost = () => {
     if (lost) return;
     lost = true;
-    glLost = true;
     canvas.style.visibility = 'hidden';
-    lostListeners.forEach((cb) => cb());
+    waker.stop();
+    circuit.trip();
   };
   canvas.addEventListener('webglcontextlost', onLost);
   const scene = new Scene();
@@ -464,6 +455,8 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
   camera.matrixWorldAutoUpdate = false;
   const slots = new Map<string, Slot>();
   let frame: GLFrame | null = null;
+  let applied: GLFrame | null = null;
+  let pending = false;
   let sceneEl: SVGGElement | null = null;
   let dirty = true;
   let lastCtm = '';
@@ -472,15 +465,21 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
   let tick = 0;
   let lastT = performance.now();
 
-  const ro = new ResizeObserver(() => {
+  const resize = () => {
+    if (disposed || lost || parked || document.hidden) return;
     const r = host.getBoundingClientRect();
-    size = { w: Math.max(1, Math.round(r.width)), h: Math.max(1, Math.round(r.height)) };
-    const ratio = ratioFor(size.w, size.h);
-    if (Math.abs(renderer.getPixelRatio() - ratio) > 0.01) renderer.setPixelRatio(ratio);
-    renderer.setSize(size.w, size.h, false);
+    const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+    const ratio = ratioFor(w, h);
+    if (size.w === w && size.h === h && renderer.getPixelRatio() === ratio) return;
+    size = { w, h };
+    // setPixelRatio resizes the OLD logical dimensions first, potentially allocating a huge
+    // intermediate buffer. Shrink first, then set size + ratio together, even on aspect changes.
+    renderer.setDrawingBufferSize(1, 1, 1);
+    renderer.setDrawingBufferSize(w, h, ratio);
     dirty = true;
     kick();
-  });
+  };
+  const ro = new ResizeObserver(resize);
   ro.observe(host);
 
   const lightV = new Vector3();
@@ -518,11 +517,14 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
     mats.forEach((m) => warm.add(new TMesh(warmTri, m)));
     warmStreamMats.forEach((m) => warm.add(new TMesh(warmTris, m)));
     const done = () => {
+      if (disposed || lost) return;
       compiled = true;
       dirty = true;
       kick();
     };
-    renderer.compileAsync(warm, camera).then(done, done);
+    renderer.compileAsync(warm, camera).then(done, () => {
+      if (!disposed) circuit.trip();
+    });
   }
 
   function sync(f: GLFrame) {
@@ -530,18 +532,16 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
     for (const it of f.items) {
       let s = slots.get(it.key);
       // A stream's geometry carries its copies: another set of copies (or none) needs a new slot.
-      if (s && s.cells !== it.stream?.cells) {
+      if (s && (s.cells !== it.stream?.cells || s.gates !== it.stream?.gates || s.mesh.uv.length !== it.mesh.uv.length)) {
         drop(it.key, s);
         s = undefined;
       }
       if (s && s.mesh !== it.mesh) {
         perfCount('glUpload');
         if (s.mesh.pos.length === it.mesh.pos.length && s.mesh.idx.length === it.mesh.idx.length) {
-          (s.geo.getAttribute('position') as BufferAttribute).set(it.mesh.pos);
-          (s.geo.getAttribute('normal') as BufferAttribute).set(it.mesh.nrm);
-          s.geo.getAttribute('position').needsUpdate = true;
-          s.geo.getAttribute('normal').needsUpdate = true;
-          s.geo.computeBoundingSphere();
+          // Geometry owns references, not copies into the old mesh-cache entry. Also update UVs
+          // and indices: equal counts do not imply identical topology. Frustum bounds are unused.
+          updateGeometry(s.geo, it.mesh);
         } else {
           s.geo.dispose();
           s.geo = geometryOf(it.mesh, it.stream);
@@ -565,7 +565,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
           scene.add(m);
         }
         const t = TARGET[it.state];
-        s = { mesh: it.mesh, cells: it.stream?.cells, geo, body, edge, mat, edgeMat, cur: { sat: t.sat, bright: t.bright, amt: t.amt, op: it.opacity }, goal: it, seen: tick };
+        s = { mesh: it.mesh, cells: it.stream?.cells, gates: it.stream?.gates, geo, body, edge, mat, edgeMat, cur: { sat: t.sat, bright: t.bright, amt: t.amt, op: it.opacity }, goal: it, seen: tick };
         slots.set(it.key, s);
       }
       s.goal = it;
@@ -631,7 +631,14 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
 
   function draw(dt: number) {
     // The followed drawing just left the page (its view is being replaced): keep the last picture.
-    if (lost || !frame || !compiled || (sceneEl && !sceneEl.isConnected)) return false;
+    if (disposed || lost || !active || !frame || !compiled || (sceneEl && !sceneEl.isConnected)) return false;
+    if (pending) {
+      lightV.set(frame.light[0], frame.light[1], frame.light[2]).normalize();
+      sync(frame);
+      applied = frame;
+      pending = false;
+      dirty = true;
+    }
     // The picture fades with its drawing (a view fading in, a camera move between views).
     const o = seen();
     let faded = false;
@@ -642,6 +649,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
       // Frame by frame with the drawing: the canvas's own fade-in would lag behind it.
       canvas.style.transition = o >= 0.999 ? '' : 'none';
     }
+    if (o <= 0.001) return faded;
     const m = ctmNow();
     if (!m || !size.w) return faded;
     const key = `${m.a.toFixed(4)},${m.d.toFixed(4)},${m.e.toFixed(2)},${m.f.toFixed(2)},${size.w},${size.h}`;
@@ -732,7 +740,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
    * read makes it), giving the time per picture. Never called by the app.
    */
   function bench(n = 30) {
-    if (lost || !frame || !shown) return null;
+    if (disposed || lost || !frame || !shown) return null;
     const gl = renderer.getContext();
     const px = new Uint8Array(4);
     renderer.render(scene, camera);
@@ -746,17 +754,33 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
   // Frames are drawn only while something can change on screen: a new frame from the scene, a highlight
   // still gliding, the drawing it follows moving or fading. Then the loop stops; a still picture costs
   // nothing. Whatever can change it wakes the loop again (`kick`).
+  const timing = renderTiming();
   const waker = createWaker((now) => {
     perfCount('glTick');
     const dt = Math.min(100, now - lastT);
     lastT = now;
     return draw(dt);
-  });
+  }, { minFrameMs: timing.frameMs, preserveCadence: timing.preserveCadence });
   const kick = () => {
     // Back from sleep: the highlight glides go on from now, not from when the loop stopped.
     if (!waker.awake) lastT = performance.now();
     waker.kick();
   };
+  const updateActivity = () => {
+    const next = !disposed && !lost && !parked && !document.hidden && intersecting && !!sceneEl?.isConnected;
+    if (next === active) return;
+    active = next;
+    waker.setEnabled(active);
+    if (active) { resize(); dirty = true; kick(); }
+  };
+  waker.setEnabled(false);
+  const onVisibility = () => updateActivity();
+  document.addEventListener('visibilitychange', onVisibility);
+  const io = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver(([entry]) => {
+    intersecting = entry.isIntersecting;
+    updateActivity();
+  });
+  io?.observe(host);
   // The drawing's place and opacity can change without a new frame: a camera move between views or a
   // zoom sets transforms and opacities straight on the SVG; CSS transitions fade it; the page reflows.
   // Only changes to the followed drawing or to what holds it count: the rest of the frame (Kimu's
@@ -776,38 +800,56 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
 
   return {
     frame(f) {
-      if (lost) return;
+      if (disposed || lost) return;
       frame = f;
-      lightV.set(f.light[0], f.light[1], f.light[2]).normalize();
-      sync(f);
-      dirty = true;
-      kick();
+      pending = !sameGLFrame(applied, f);
+      if (pending) kick();
     },
     follow(el) {
       sceneEl = el;
       svgRo.disconnect();
       if (el?.ownerSVGElement) svgRo.observe(el.ownerSVGElement);
       dirty = true;
+      updateActivity();
       kick();
     },
     park() {
       frame = null;
+      applied = null;
+      pending = false;
       sceneEl = null;
       waking = false;
+      parked = true;
+      updateActivity();
       // The last picture stays a moment: handed straight to the next view (a camera move ending, the
       // same view drawn again), there is no blank frame; otherwise it goes.
       window.clearTimeout(hideTimer);
-      hideTimer = window.setTimeout(() => (canvas.style.visibility = 'hidden'), 180);
+      hideTimer = window.setTimeout(() => {
+        if (disposed || !parked) return;
+        canvas.style.visibility = 'hidden';
+        for (const [key, slot] of slots) drop(key, slot);
+        renderer.renderLists.dispose();
+        renderer.setDrawingBufferSize(1, 1, 1);
+        size = { w: 0, h: 0 };
+      }, 180);
     },
     wake(cb) {
       window.clearTimeout(hideTimer);
       onReady = cb;
+      parked = false;
       waking = true;
       dirty = true;
+      resize();
+      updateActivity();
       kick();
     },
     dispose() {
+      if (disposed) return;
+      disposed = true;
       waker.stop();
+      window.clearTimeout(hideTimer);
+      io?.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
       canvas.removeEventListener('webglcontextlost', onLost);
       ro.disconnect();
       svgRo.disconnect();
@@ -824,7 +866,7 @@ export function createGL(host: HTMLDivElement, ready: () => void): GLApi | null 
       warmTri.dispose();
       warmTris.dispose();
       renderer.dispose();
-      renderer.forceContextLoss();
+      if (!lost) renderer.forceContextLoss();
       canvas.remove();
     },
   };

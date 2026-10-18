@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { MODES, ModeIcon } from '@/components/shell/Player';
 import { Popover } from '@/components/shell/Popover';
 import { IconChevron, IconNext, IconPause, IconPlay, IconPrev } from '@/components/shell/icons';
@@ -41,9 +41,12 @@ export function ClassDock({ k, mode, onMode, holdReason, onAskKimu }: {
   const { lesson, cmd, state } = k;
   const [sheet, setSheet] = useState(false);
 
-  const minutes = classMinutes(lesson);
-  const steps = stepsOf(lesson);
-  const checkCount = steps.filter((s) => s.kind === 'check').length;
+  // Topic 10's scene clock re-renders this dock. Its immutable lesson estimate and check count
+  // do not change with the heart pose: do not rescan/syllabify every sentence on every frame.
+  const { minutes, checkCount } = useMemo(() => ({
+    minutes: classMinutes(lesson),
+    checkCount: stepsOf(lesson).filter((s) => s.kind === 'check').length,
+  }), [lesson]);
 
   const sheetEl = sheet && (
     <Sheet

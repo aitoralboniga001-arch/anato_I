@@ -1,0 +1,281 @@
+{
+  "baseline": "../renderer-audit/results.json",
+  "after": "results.json",
+  "note": "Earlier Batch 7 survey versus final Batch 8. Short samples include static anatomy/reading holds; not matched continuous-deformation savings.",
+  "meanBefore": 263.9,
+  "meanAfter": 236.0,
+  "cpuReductionPercent": 10.6,
+  "runs": [
+    {
+      "stage": "bihotz-hodia",
+      "beforeCpu": 317.2,
+      "afterCpu": 272.4,
+      "beforeP95": 33.3,
+      "afterP95": 33.3,
+      "beforeGpu": 1.2,
+      "afterGpu": 1.15,
+      "triangles": 32600
+    },
+    {
+      "stage": "zirkulazio-goiztiarra",
+      "beforeCpu": 142.3,
+      "afterCpu": 135.5,
+      "beforeP95": 17,
+      "afterP95": 16.8,
+      "beforeGpu": 0.9,
+      "afterGpu": 1.225,
+      "triangles": 37736
+    },
+    {
+      "stage": "bihotz-atalak",
+      "beforeCpu": 372.6,
+      "afterCpu": 317.6,
+      "beforeP95": 16.8,
+      "afterP95": 16.8,
+      "beforeGpu": 1.013,
+      "afterGpu": 1.225,
+      "triangles": 35896
+    },
+    {
+      "stage": "bihotz-lakioa",
+      "beforeCpu": 146.8,
+      "afterCpu": 134.8,
+      "beforeP95": 17.1,
+      "afterP95": 16.9,
+      "beforeGpu": 1.138,
+      "afterGpu": 1.188,
+      "triangles": 31592
+    },
+    {
+      "stage": "atal-bulbarra",
+      "beforeCpu": 152.5,
+      "afterCpu": 144.1,
+      "beforeP95": 17.3,
+      "afterP95": 17.1,
+      "beforeGpu": 1.537,
+      "afterGpu": 1.575,
+      "triangles": 39536
+    },
+    {
+      "stage": "atal-bentrikularra",
+      "beforeCpu": 343.8,
+      "afterCpu": 283,
+      "beforeP95": 33.4,
+      "afterP95": 33.4,
+      "beforeGpu": 1.375,
+      "afterGpu": 1.387,
+      "triangles": 37832
+    },
+    {
+      "stage": "atal-aurikularra",
+      "beforeCpu": 344.6,
+      "afterCpu": 311.2,
+      "beforeP95": 16.9,
+      "afterP95": 16.9,
+      "beforeGpu": 1.525,
+      "afterGpu": 1.487,
+      "triangles": 39912
+    },
+    {
+      "stage": "zain-sinua",
+      "beforeCpu": 408.1,
+      "afterCpu": 373,
+      "beforeP95": 33.4,
+      "afterP95": 33.4,
+      "beforeGpu": 1.712,
+      "afterGpu": 1.612,
+      "triangles": 40584
+    },
+    {
+      "stage": "eskuineko-aurikula",
+      "beforeCpu": 147.6,
+      "afterCpu": 152.3,
+      "beforeP95": 17,
+      "afterP95": 17.1,
+      "beforeGpu": 1.512,
+      "afterGpu": 1.625,
+      "triangles": 26776
+    }
+  ],
+  "closingVein": {
+    "baseline": "../topic10-focused-before/results.json",
+    "after": "../topic10-focused-flow/results.json",
+    "before": {
+      "week": 10,
+      "stage": "zain-sinua",
+      "view": "3d",
+      "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (0x00001900) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "info": {
+        "calls": 88,
+        "triangles": 50824,
+        "w": 1958,
+        "h": 1021,
+        "geometries": 47,
+        "programs": 6
+      },
+      "hold": {
+        "mainThreadMsPerS": 7.8,
+        "scriptMsPerS": 0.4,
+        "styleLayoutMsPerS": 1,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "gpuMs": 1.688,
+      "play": {
+        "mainThreadMsPerS": 538.9,
+        "scriptMsPerS": 392.6,
+        "styleLayoutMsPerS": 32,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.9,
+          "max": 50,
+          "n": 108
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "glTick": 28.5,
+          "glUpload": 370.5,
+          "glRender": 28.5,
+          "simFrame": 28.5,
+          "heartModel": 29,
+          "meshCacheHit": 1666,
+          "meshCacheMiss": 741,
+          "meshBuild": 741,
+          "project": 104
+        }
+      }
+    },
+    "final": {
+      "week": 10,
+      "stage": "zain-sinua",
+      "view": "3d",
+      "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (0x00001900) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "info": {
+        "calls": 88,
+        "triangles": 50824,
+        "w": 1958,
+        "h": 1021,
+        "geometries": 47,
+        "programs": 6
+      },
+      "hold": {
+        "mainThreadMsPerS": 5.4,
+        "scriptMsPerS": 0.3,
+        "styleLayoutMsPerS": 0.6,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "gpuMs": 1.75,
+      "play": {
+        "mainThreadMsPerS": 492.4,
+        "scriptMsPerS": 325.6,
+        "styleLayoutMsPerS": 41.4,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 33.3,
+          "max": 33.4,
+          "n": 113
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "glTick": 28.5,
+          "glUpload": 370.5,
+          "glRender": 28.5,
+          "simFrame": 28.5,
+          "heartModel": 28.5,
+          "heartModelBuild": 28.5,
+          "meshCacheHit": 1624.5,
+          "meshCacheMiss": 741,
+          "meshBuild": 741,
+          "heartTubeBuild": 684,
+          "project": 110.5
+        }
+      }
+    },
+    "repeatPath": "../topic10-focused-flow-repeat/results.json",
+    "repeat": {
+      "week": 10,
+      "stage": "zain-sinua",
+      "view": "3d",
+      "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (0x00001900) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "info": {
+        "calls": 88,
+        "triangles": 50824,
+        "w": 1958,
+        "h": 1021,
+        "geometries": 47,
+        "programs": 6
+      },
+      "hold": {
+        "mainThreadMsPerS": 12.5,
+        "scriptMsPerS": 0.3,
+        "styleLayoutMsPerS": 1.9,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "gpuMs": 1.537,
+      "play": {
+        "mainThreadMsPerS": 474.5,
+        "scriptMsPerS": 323.3,
+        "styleLayoutMsPerS": 32.5,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 50,
+          "n": 112
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "heartModel": 30,
+          "heartModelBuild": 29.5,
+          "meshCacheHit": 1681.5,
+          "meshCacheMiss": 767,
+          "meshBuild": 767,
+          "heartTubeBuild": 708,
+          "project": 110.5,
+          "glTick": 29,
+          "glUpload": 377,
+          "glRender": 29,
+          "simFrame": 29,
+          "heartModelCacheHit": 0.5
+        }
+      }
+    }
+  }
+}

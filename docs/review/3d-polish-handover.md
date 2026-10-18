@@ -4,7 +4,7 @@ The user reported two problems:
 - A close-up of a topic 10 heart model with glitches: ring stripes, jagged teeth at seams, and a black crack.
 - "My computer crashed in one of those, we still need to tackle performance."
 
-Original handover state: usage ran out mid-batch; the changes below were uncommitted on top of `25fae30`. The continuation record at the end supersedes the original pending list.
+Original handover state: usage ran out mid-batch; the changes below were uncommitted on top of `25fae30`. The continuation records at the end supersede the original pending list. The latest continuation is the [Topic 10 30/40 fps experiment](topic10-30-vs-40-fps.md). The normal production default remains 30 fps.
 
 ## What the crash was
 - Windows System log, 17/10/2026 10:29:
@@ -92,3 +92,35 @@ Taken at 1536×960 CSS, DPR 2, on the real 780M:
 - Domains' bounded draw+completion measurement is **7.46→3.64 ms**, not the hoped-for 2 ms. It includes CPU submission and readback; it is not a hardware GPU query. An earlier after-pass was 7.10 ms, so a repeatable GPU-time saving of a particular size has not been established. The final CPU reduction is about 43% for diaphragm and 27% for domains; an earlier repeat was about 49–50%.
 - Some coarse venous junctions and anatomical suture edges remain visible at high magnification. The survey is not a claim that every vascular junction has been remeshed into a seamless union.
 - The eight existing lint errors remain outside this polish batch. Publication beyond the requested local commit is not part of this continuation.
+
+## Further performance/resilience follow-up (2026-10-17)
+
+The user's subsequent request covers all 13 models and further crash mitigation, with no subagents. See [the all-model audit](3d-performance-resilience.md) and Batch 7 in `docs/perf/README.md` for the new evidence and remaining candidates.
+
+- Shared renderer: unchanged-frame suppression, coalesced uploads, 30 Hz drawing, explicit hidden/intersection suspension, 2M-pixel buffers with safe intermediate resizing, and session-persistent fallback after context loss or failed creation.
+- Work is requested by the visible 3D view. Ordinary 2D pages no longer create a context or prebuild the whole topic. Geometry workers release their duplicate caches after delivering a batch. Parked models release GPU buffers/materials after 180 ms, and contexts after 5 seconds; detached viewports dispose immediately.
+- Both normal playback and the class/manual-step glide loop publish 3D poses at the same 30 Hz ceiling, using elapsed time. Duplicate positions in reading/narration holds are suppressed. Kimu's automatic search-index warm is demand-driven.
+- Fixed cached-pose corruption in same-sized GPU geometry updates; UVs and topology are updated as well. Scrubbing backwards no longer inherits a later pose's writes into an older cached mesh.
+- Final source passes **1115 tests in 33 files** and the production build's TypeScript check. New helpers/shared GL/worker code pass focused ESLint. The expanded Stage3D/Simulator/Viewport lint scope has nine pre-existing errors; the Simulator and Viewport findings were also reproduced from `HEAD`. This differs from Batch 6's narrower eight-error scope, which included columns instead of the two shell files.
+- Browser lifecycle and playback proofs are in `docs/perf/renderer-audit/resilience.json` and `playback.json`; performance results and close-ups are in the same directory. The real class UI was exercised using its supported subtitle/timer fallback, not audible narration.
+- This follow-up is local. No push, deployment, driver or OS-setting change was performed. The earlier 0x133 watchdog still has an UNKNOWN responsible driver; app-side mitigation cannot guarantee prevention of an OS-level crash.
+
+## Topic 10-only continuation (Batch 8, 2026-10-17)
+
+The user narrowed further performance work to Topic 10 only and retained the no-subagent instruction. See [the scoped report](topic10-performance-followup.md) for exact changes, raw-result paths and limits.
+
+- Heart tubes reuse path frames/layouts/welding scratch space while preserving reference positions, normals, UVs, indices and older poses. Heart/right-atrium snapshots and centrelines are bounded; blood-phase-only updates retain static anatomy. Topic 10's class duration estimate is retained per lesson.
+- Nine-view sample mean: **263.9 -> 236.0 ms/s (10.6% lower)** against the earlier Batch 7 survey. Fresh continuous closing-vein baseline: **538.9 -> 492.4 / 474.5 ms/s (8.6–12.0% lower)** in two final samples. GPU/frame timing varies; no uniform GPU or frame-time improvement is claimed.
+- All nine views load without runtime errors, with unchanged triangle counts. All 18 held/zoomed pairs remain near-identical to Batch 7. Actual class pause and context-loss/view-switch fallback pass.
+- **1,171 tests in 35 files**, final production build/TypeScript and lint of all six files changed in this pass pass. New implementation is limited to Topic 10 and its class dock; prior pending all-model work remains. Local only, no commit/push/deployment.
+- The 30 fps ceiling remains a conservative workload choice, not an OS crash-prevention guarantee. 40 fps has not been benchmarked. The earlier Windows watchdog's responsible driver remains UNKNOWN.
+
+## Topic 10 30/40 fps experiment (Batch 9, 2026-10-17)
+
+The user explicitly requested a 40-versus-30 comparison without subagents. [Full method and results](topic10-30-vs-40-fps.md); raw evidence in `docs/perf/topic10-fps` and the corrected early-valve phase in `docs/perf/topic10-fps-atrium`.
+
+- A simple 25 ms gate would still quantize to about 30 fps on the tested 60 Hz clock. Both diagnostic targets instead preserve deadlines. This is opt-in through the harness, exact Topic 10 route and numeric 30/40 flag; ordinary production pacing stays unchanged at 30.
+- 56 three-second playback samples cover all nine views and extra phases. Four continuous-motion cases deliver about **39–40 draws/s versus 30**, using **12–24% more main-thread CPU**. Class glide's separate short sample costs about **45% more**; pause stops work at both settings. Static/reading samples are reported separately, without an overall percentage.
+- More frames produce about 30–33% more GL submissions in moving scenes. Held per-draw completion timing varies; hardware utilization was not measured. On the current 60 Hz display, 40 fps mixes roughly 17/33 ms gaps instead of even 25 ms intervals.
+- All 1,176 tests in 36 files, final build/TypeScript and focused policy/waker/GL/test/harness lint pass. Simulator retains its known purity lint error. Held triangle counts match; screenshots remain near-identical. Hidden/resume, actual context loss and reload fallback pass at 40, with zero runtime exceptions.
+- Default remains 30 for the existing low-compute goal. No subagents, commit, push, deployment, driver or OS-setting changes. The previous watchdog's responsible driver remains UNKNOWN; neither target establishes crash prevention.

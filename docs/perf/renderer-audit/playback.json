@@ -1,0 +1,143 @@
+{
+  "date": "2026-10-17T17:13:10.358Z",
+  "status": "passed",
+  "errors": [],
+  "clock": {
+    "from": {
+      "t": 0.483412,
+      "now": 5408
+    },
+    "to": {
+      "t": 0.501193,
+      "now": 7413.300000000745
+    },
+    "expectedDelta": 0.017824888888895513
+  },
+  "hidden": {
+    "mainThreadMsPerS": 4,
+    "scriptMsPerS": 1.1,
+    "styleLayoutMsPerS": 0,
+    "frameMs": {
+      "p50": 0,
+      "p95": 0,
+      "max": 0,
+      "n": 0
+    },
+    "longTasks": {
+      "n": 0,
+      "totalMs": 0
+    },
+    "perS": {}
+  },
+  "resume": {
+    "hiddenFrom": {
+      "t": 0.501193,
+      "now": 7518.89999999851
+    },
+    "hiddenTo": {
+      "t": 0.501193,
+      "now": 9532
+    },
+    "resumed": {
+      "t": 0.50291,
+      "now": 9758
+    }
+  },
+  "readingHold": {
+    "mainThreadMsPerS": 60.3,
+    "scriptMsPerS": 4.1,
+    "styleLayoutMsPerS": 12.7,
+    "frameMs": {
+      "p50": 0,
+      "p95": 0,
+      "max": 0,
+      "n": 0
+    },
+    "longTasks": {
+      "n": 0,
+      "totalMs": 0
+    },
+    "perS": {}
+  },
+  "readingPosition": 0.5249,
+  "turn": {
+    "mainThreadMsPerS": 209.2,
+    "scriptMsPerS": 134.8,
+    "styleLayoutMsPerS": 25.3,
+    "frameMs": {
+      "p50": 16.7,
+      "p95": 16.8,
+      "max": 16.8,
+      "n": 60
+    },
+    "longTasks": {
+      "n": 0,
+      "totalMs": 0
+    },
+    "perS": {
+      "project": 120,
+      "glTick": 29,
+      "glRender": 14
+    }
+  },
+  "turnSettled": {
+    "mainThreadMsPerS": 37.8,
+    "scriptMsPerS": 4,
+    "styleLayoutMsPerS": 7.1,
+    "frameMs": {
+      "p50": 0,
+      "p95": 0,
+      "max": 0,
+      "n": 0
+    },
+    "longTasks": {
+      "n": 0,
+      "totalMs": 0
+    },
+    "perS": {}
+  },
+  "detached": {
+    "connected": false,
+    "lost": true,
+    "underlayCanvases": 0
+  },
+  "classMotion": {
+    "mainThreadMsPerS": 282.1,
+    "scriptMsPerS": 133.6,
+    "styleLayoutMsPerS": 25.6,
+    "frameMs": {
+      "p50": 16.7,
+      "p95": 16.8,
+      "max": 33.3,
+      "n": 88
+    },
+    "longTasks": {
+      "n": 0,
+      "totalMs": 0
+    },
+    "perS": {
+      "glTick": 12.7,
+      "glRender": 2.7,
+      "glideFrame": 30,
+      "heartModel": 30,
+      "meshCacheHit": 1920
+    }
+  },
+  "classPaused": {
+    "mainThreadMsPerS": 34.9,
+    "scriptMsPerS": 0.4,
+    "styleLayoutMsPerS": 1.1,
+    "frameMs": {
+      "p50": 0,
+      "p95": 0,
+      "max": 0,
+      "n": 0
+    },
+    "longTasks": {
+      "n": 0,
+      "totalMs": 0
+    },
+    "perS": {}
+  },
+  "classVoice": "timer/subtitle fallback"
+}

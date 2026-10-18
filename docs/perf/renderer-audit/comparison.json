@@ -1,0 +1,155 @@
+{
+  "baselineCommit": "5b97561",
+  "beforeAll13": "polish-batch6/results.json",
+  "beforeRepresentative3": "renderer-audit-before/results.json",
+  "after": "renderer-audit/results.json",
+  "beforeMeanMsPerS": 609.7,
+  "afterMeanMsPerS": 244.4,
+  "reductionPercent": 59.9,
+  "rows": [
+    {
+      "week": 7,
+      "stage": "diafragma-eraketa",
+      "beforePrior13": 591,
+      "beforeCurrent": null,
+      "after": 242,
+      "gpuMsAfter": 1.225,
+      "drawsPerSAfter": 0,
+      "simFramesPerS": 30,
+      "triangles": 95692
+    },
+    {
+      "week": 8,
+      "stage": "buru-ganga",
+      "beforePrior13": 483.8,
+      "beforeCurrent": 572.7,
+      "after": 72.4,
+      "gpuMsAfter": 2.45,
+      "drawsPerSAfter": 0,
+      "simFramesPerS": 0,
+      "triangles": 240544
+    },
+    {
+      "week": 8,
+      "stage": "gorputz-adarrak",
+      "beforePrior13": 607.4,
+      "beforeCurrent": null,
+      "after": 278.4,
+      "gpuMsAfter": 1.363,
+      "drawsPerSAfter": 0,
+      "simFramesPerS": 29,
+      "triangles": 134312
+    },
+    {
+      "week": 9,
+      "stage": "domeinuak",
+      "beforePrior13": 756.5,
+      "beforeCurrent": 649.2,
+      "after": 208.4,
+      "gpuMsAfter": 3.512,
+      "drawsPerSAfter": 0,
+      "simFramesPerS": 30,
+      "triangles": 555704
+    },
+    {
+      "week": 10,
+      "stage": "bihotz-hodia",
+      "beforePrior13": 516,
+      "beforeCurrent": null,
+      "after": 317.2,
+      "gpuMsAfter": 1.2,
+      "drawsPerSAfter": 0.5,
+      "simFramesPerS": 29,
+      "triangles": 32600
+    },
+    {
+      "week": 10,
+      "stage": "zirkulazio-goiztiarra",
+      "beforePrior13": 614.7,
+      "beforeCurrent": null,
+      "after": 142.3,
+      "gpuMsAfter": 0.9,
+      "drawsPerSAfter": 0.5,
+      "simFramesPerS": 0,
+      "triangles": 37736
+    },
+    {
+      "week": 10,
+      "stage": "bihotz-atalak",
+      "beforePrior13": 675.1,
+      "beforeCurrent": null,
+      "after": 372.6,
+      "gpuMsAfter": 1.013,
+      "drawsPerSAfter": 27,
+      "simFramesPerS": 30.5,
+      "triangles": 35896
+    },
+    {
+      "week": 10,
+      "stage": "bihotz-lakioa",
+      "beforePrior13": 641.6,
+      "beforeCurrent": null,
+      "after": 146.8,
+      "gpuMsAfter": 1.138,
+      "drawsPerSAfter": 1,
+      "simFramesPerS": 0,
+      "triangles": 31592
+    },
+    {
+      "week": 10,
+      "stage": "atal-bulbarra",
+      "beforePrior13": 654.8,
+      "beforeCurrent": null,
+      "after": 152.5,
+      "gpuMsAfter": 1.537,
+      "drawsPerSAfter": 0.5,
+      "simFramesPerS": 0,
+      "triangles": 39536
+    },
+    {
+      "week": 10,
+      "stage": "atal-bentrikularra",
+      "beforePrior13": 577.5,
+      "beforeCurrent": 673.6,
+      "after": 343.8,
+      "gpuMsAfter": 1.375,
+      "drawsPerSAfter": 1,
+      "simFramesPerS": 29.5,
+      "triangles": 37832
+    },
+    {
+      "week": 10,
+      "stage": "atal-aurikularra",
+      "beforePrior13": 615.1,
+      "beforeCurrent": null,
+      "after": 344.6,
+      "gpuMsAfter": 1.525,
+      "drawsPerSAfter": 1,
+      "simFramesPerS": 30,
+      "triangles": 39912
+    },
+    {
+      "week": 10,
+      "stage": "zain-sinua",
+      "beforePrior13": 585.4,
+      "beforeCurrent": null,
+      "after": 408.1,
+      "gpuMsAfter": 1.712,
+      "drawsPerSAfter": 12,
+      "simFramesPerS": 29.5,
+      "triangles": 40584
+    },
+    {
+      "week": 10,
+      "stage": "eskuineko-aurikula",
+      "beforePrior13": 607.6,
+      "beforeCurrent": null,
+      "after": 147.6,
+      "gpuMsAfter": 1.512,
+      "drawsPerSAfter": 1,
+      "simFramesPerS": 0,
+      "triangles": 26776
+    }
+  ],
+  "afterBuildId": "rU9JabcKnw9d3QZxlG0u-"
+}

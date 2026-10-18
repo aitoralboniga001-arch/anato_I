@@ -1,0 +1,13 @@
+atal-aurikularra.png: {"diffPct":0.003,"bigPct":0}
+atal-bentrikularra.png: {"diffPct":0.003,"bigPct":0}
+atal-bulbarra.png: {"diffPct":0,"bigPct":0}
+atrium-valves.png: {"diffPct":0.001,"bigPct":0}
+bihotz-atalak.png: {"diffPct":0.459,"bigPct":0.094}
+bihotz-hodia.png: {"diffPct":0.001,"bigPct":0}
+bihotz-lakioa.png: {"diffPct":0,"bigPct":0}
+closing-veins.png: {"diffPct":0.137,"bigPct":0.035}
+eskuineko-aurikula.png: {"diffPct":0.079,"bigPct":0}
+looping.png: {"diffPct":0.139,"bigPct":0.017}
+ventricular-flow.png: {"diffPct":0.105,"bigPct":0}
+zain-sinua.png: {"diffPct":0.086,"bigPct":0}
+zirkulazio-goiztiarra.png: {"diffPct":0.208,"bigPct":0.054}

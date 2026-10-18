@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-17T19:47:04.4676069+02:00",
+  "tests": {
+    "files": 35,
+    "command": "npx vitest run --maxWorkers=2 --testTimeout=20000",
+    "passed": 1171
+  },
+  "build": {
+    "command": "npm run build",
+    "status": "passed"
+  },
+  "lint": {
+    "scope": [
+      "components/scenes/week10/model3d.ts",
+      "components/scenes/week10/atrium3d.ts",
+      "components/scenes/week10/tube-geometry.ts",
+      "components/klasea/ClassDock.tsx",
+      "tests/topic10-model-reuse.test.ts",
+      "tests/topic10-tube-geometry.test.ts"
+    ],
+    "status": "passed"
+  },
+  "files": [
+    {
+      "path": "components/scenes/week10/model3d.ts",
+      "sha256": "3a9f2c89fd1ee885afb57141283877e673ff0f3f003840efd790f045b8568f33"
+    },
+    {
+      "path": "components/scenes/week10/atrium3d.ts",
+      "sha256": "71b0dbaa469296e4955227015f8cb4d1187b1c1cf9cb39dcf4323a0b07020585"
+    },
+    {
+      "path": "components/scenes/week10/tube-geometry.ts",
+      "sha256": "48cb55048b7f53dd7130d625c1fcdf9cc7785064b3e3306bf9615e8ac81ce1be"
+    },
+    {
+      "path": "components/klasea/ClassDock.tsx",
+      "sha256": "302ae5447c47ec71681d1b0d907fc2058d9c501d5ab19973b5b59e7f39094546"
+    },
+    {
+      "path": "tests/topic10-model-reuse.test.ts",
+      "sha256": "688a7674c4d8536f0fb07a24870ba7761158ec591ef91ead34565cc84ac881a0"
+    },
+    {
+      "path": "tests/topic10-tube-geometry.test.ts",
+      "sha256": "40d7bb209fe5b3423e1f8d64f48cb385fa733b06eafa4fc97bd06ef93a97c69c"
+    }
+  ]
+}

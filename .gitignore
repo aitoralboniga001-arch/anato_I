@@ -22,3 +22,6 @@ scripts/narration/__pycache__/
 
 # Performance harness screenshots (scripts/perf-topic10.mjs): compared locally, not kept
 docs/perf/**/shots/
+docs/perf/**/*.cpuprofile
+# Close-up pictures of perf/polish runs (about 100 MB): compared locally, not kept
+docs/perf/**/*.png

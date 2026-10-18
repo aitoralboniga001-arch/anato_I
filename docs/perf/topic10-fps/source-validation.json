@@ -1,0 +1,40 @@
+{
+  "checked": "2026-10-17T20:09:28.7984295+02:00",
+  "tests": {
+    "files": 36,
+    "command": "npx vitest run --maxWorkers=2 --testTimeout=20000",
+    "passed": 1176
+  },
+  "build": "npm run build passed including TypeScript",
+  "lint": "Policy, waker, GL, new test and harness pass. Simulator retains its known Math.random purity error.",
+  "earlierTopic10Files": "All six Batch 8 source/test file hashes still match the earlier validation artifact.",
+  "default": "30 fps; diagnostic 30/40 only under __perf at exact Topic 10 route",
+  "mainRunAtriumAt": 0.3,
+  "followupAndCurrentHarnessAtriumAt": 0.12,
+  "sources": [
+    {
+      "path": "lib/three-d/render-policy.ts",
+      "sha256": "0490931777333f854a0b58b32a603eab7de6de5067b856ab81d5caa255c964ca"
+    },
+    {
+      "path": "lib/three-d/waker.ts",
+      "sha256": "213432e2f7e10b55ecb945119fda8b7c0ceda79dcfffabf2e4691c66a49593b8"
+    },
+    {
+      "path": "components/kit/three/gl.ts",
+      "sha256": "42804b4f3e3fc1381a0e2840a66bf681405860f2970d06d1d6487733cbdb61f2"
+    },
+    {
+      "path": "components/shell/Simulator.tsx",
+      "sha256": "eb0b981775eae6cad0a4869870636e04945f1ba780cc1511437d73966b65c6c6"
+    },
+    {
+      "path": "tests/topic10-fps.test.ts",
+      "sha256": "0d8b4bfbf6b649d0a3975ac08b48cea7116f821d45198a80628cd38bf49a28a3"
+    },
+    {
+      "path": "scripts/compare-topic10-fps.mjs",
+      "sha256": "ac3c151637b85123d0897e0da29b9b151b76b68a7aa52b68d28135e65a4db82c"
+    }
+  ]
+}

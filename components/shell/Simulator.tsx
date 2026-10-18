@@ -26,7 +26,10 @@ import type { NotesAnchor } from '@/content/notes-text';
 import { NowCard } from './NowCard';
 import { Locator, type CutStop, type Crumb } from './Locator';
 import { shapeFor } from './Specimen';
-import { warmGeo } from '@/lib/three-d/geo-client';
+// Register the worker requester; meshes are built only when a 3D view actually asks for them.
+import '@/lib/three-d/geo-client';
+import { nextRenderDeadline, renderTiming } from '@/lib/three-d/render-policy';
+import { perfCount } from '@/lib/perf';
 import type { ViewSnap } from './ViewBridge';
 import { ViewTravel, revealPlan, travelPlan, type TravelPlan } from './ViewTravel';
 import { ViewZoom, zoomPlan, type ZoomPlan } from './ViewZoom';
@@ -484,6 +487,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const stage = week.stages[pos.i];
   const view = stage.views.find((v) => v.id === viewByStage[stage.id]) ?? stage.views[0];
   const Scene = view.scene;
+  // Heart views use `3d`; the other 3D views declare their off-thread geometry.
+  const { frameMs, preserveCadence } = renderTiming();
+  const modelFrameMs = view.id === '3d' || (view.scene as { geo?: string[] }).geo?.length ? frameMs : 0;
   const activeBeat = beatIndexAt(stage, pos.t);
   const beat = stage.beats[activeBeat];
   /** Where the stage sits in the notes, and the exam dates the current step shows. */
@@ -589,19 +595,6 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     if (linkPos) live.current = linkPos;
   }, [linkPos]);
 
-  // The topic's 3D views: their geometry is built off the main thread as soon as the topic opens (the
-  // current stage first), and the WebGL layer's code is fetched while the page is idle, so opening one
-  // never freezes the page.
-  useEffect(() => {
-    const order = [week.stages[pos.i], ...week.stages.filter((_, i) => i !== pos.i)];
-    const keys = order.flatMap((s) => s.views.flatMap((v) => (v.scene as { geo?: string[] }).geo ?? []));
-    if (!keys.length) return;
-    warmGeo(keys);
-    const idle = window.requestIdleCallback ?? ((fn: () => void) => window.setTimeout(fn, 1500));
-    idle(() => void import('@/components/kit/three/gl').catch(() => {}));
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per topic; the stage only orders the queue
-  }, [week]);
-
   // Narrated pauses retain the current audio sample and observation interval.
   useEffect(() => {
     if (voice && voiceStarted) { if (playing) transport.resume(); else transport.pause(); return; }
@@ -617,13 +610,24 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     if (!playing) return;
     let raf = 0;
     let last = performance.now();
+    let nextFrame = -Infinity;
+    const publish = (next: Pos) => {
+      if (next.i === live.current.i && next.t === live.current.t) return;
+      live.current = next;
+      perfCount('simFrame');
+      setPos(next);
+    };
     const step = (now: number) => {
+      raf = 0;
+      if (document.hidden) return;
+      raf = requestAnimationFrame(step);
+      if (now + 0.25 < nextFrame) return;
+      nextFrame = nextRenderDeadline(now, nextFrame, modelFrameMs, preserveCadence);
       // A frame's timestamp is when the frame began, which can be earlier than `last` when the loop
       // restarts after a long render (a view change): never step backwards, or the time slips back
       // under the step's start, the previous view returns, and the two views take turns for ever.
       const dt = Math.max(0, Math.min(0.1, (now - last) / 1000));
       last = Math.max(last, now);
-      raf = requestAnimationFrame(step);
 
       // Speech samples drive scene movement; observation time only advances while playing.
       if (voice && !formation && !find) {
@@ -649,15 +653,15 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           return;
         }
         const t = narratedFrame(st.beats[k].at, doneAt(st, k), audio.segment, audio.count, fraction);
-        live.current = { i: p.i, t }; setPos(live.current);
+        publish({ i: p.i, t });
         if (audio.status !== 'done') return;
         setWaiting(true);
         if (!skipHold.current && guided) return;
         transport.cancel(); setWaiting(false);
         if (k + 1 < st.beats.length) {
-          live.current = { i: p.i, t: st.beats[k + 1].at + .000001 }; setPos(live.current);
+          publish({ i: p.i, t: st.beats[k + 1].at + .000001 });
         } else if (autoContinue && p.i + 1 < week.stages.length) {
-          live.current = { i: p.i + 1, t: 0 }; setPos(live.current);
+          publish({ i: p.i + 1, t: 0 });
           introRef.current = 0; setIntro(0);
         } else setPlaying(false);
         return;
@@ -669,8 +673,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
         const st = week.stages[p.i];
         if (formation.week !== week.week || formation.stage !== st.id) { setPlaying(false); return; }
         const t = formationFrame(formation, p.t, dt, speed);
-        live.current = { i: p.i, t };
-        setPos(live.current);
+        publish({ i: p.i, t });
         if (t >= formation.end) setPlaying(false);
         return;
       }
@@ -736,12 +739,16 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           setIntro(0);
         }
       }
-      live.current = next;
-      setPos(next);
+      publish(next);
     };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [playing, speed, autoContinue, week, guided, quick, voice, formation, find, voiceStarted, voiceConfigured, transport, view.id]);
+    const onVisibility = () => {
+      if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }
+      else if (!raf) { last = performance.now(); nextFrame = -Infinity; raf = requestAnimationFrame(step); }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    onVisibility();
+    return () => { cancelAnimationFrame(raf); document.removeEventListener('visibilitychange', onVisibility); };
+  }, [playing, speed, autoContinue, week, guided, quick, voice, formation, find, voiceStarted, voiceConfigured, transport, view.id, modelFrameMs, preserveCadence]);
 
   // Auto-stop at the end of the stage (or of the week, when auto-continuing).
   if (playing && !voice && intro === null && pos.t >= 1 && (!autoContinue || pos.i === week.stages.length - 1)) setPlaying(false);
@@ -759,9 +766,14 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   useEffect(() => {
     if (!glideRun) return;
     let raf = 0;
+    let nextFrame = -Infinity;
     const tick = (now: number) => {
       const g = glideRef.current;
       if (!g || g.w !== week.week) return;
+      // Class narration and manual step glides share the same pose budget as normal playback.
+      // Absolute elapsed time still determines the pose and the exact completed frame.
+      if (now + 0.25 < nextFrame) { raf = requestAnimationFrame(tick); return; }
+      nextFrame = nextRenderDeadline(now, nextFrame, modelFrameMs, preserveCadence);
       // A step that changes the view starts once the camera has arrived.
       if (travelRef.current) {
         raf = requestAnimationFrame(tick);
@@ -771,6 +783,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       const x = Math.min(1, (now - g.start) / g.ms);
       const next = { i: g.i, t: g.from + (g.to - g.from) * steady(x) };
       live.current = next;
+      perfCount('glideFrame');
       setPos(next);
       if (x < 1) {
         raf = requestAnimationFrame(tick);
@@ -782,7 +795,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [glideRun, week.week]);
+  }, [glideRun, week.week, modelFrameMs, preserveCadence]);
   const stopGlide = () => {
     if (!glideRef.current) return;
     glideRef.current = null;

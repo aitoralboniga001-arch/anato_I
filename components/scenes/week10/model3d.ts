@@ -1,6 +1,7 @@
 import { add, cross, mix3, mul, norm, sub, type V3 } from '@/lib/three-d/math';
 import { blob, curve3, merge, type BlobOptions, type Mesh, type TubeOptions } from '@/lib/three-d/mesh';
-import { cachedBlob, cachedMerge, cachedTube, Sig } from '@/lib/three-d/mesh-cache';
+import { cachedBlob, cachedMerge, Sig } from '@/lib/three-d/mesh-cache';
+import { heartTube } from './tube-geometry';
 import { STREAM_ROUTE_N, type Item3 } from '@/lib/three-d/scene';
 import { perfCount } from '@/lib/perf';
 import { T } from './common';
@@ -163,6 +164,9 @@ function keys(pose: HeartPose): V3[] {
 
 /** The centreline, sampled at n + 1 points uniformly in u (u = 0 cranial end, 1 atrial end). */
 export function centreline(pose: HeartPose, n = 120): V3[] {
+  const key = new Sig().num(pose.loop).num(pose.loopTail ?? pose.loop).num(pose.truncusMid).num(n).key();
+  const known = lines.get(key);
+  if (known) return known;
   const K = keys(pose);
   // Catmull-Rom through the keys, then resampled by u (the keys are not evenly spaced in u).
   const dense = curve3(K, (K.length - 1) * 24 + 1);
@@ -177,36 +181,30 @@ export function centreline(pose: HeartPose, n = 120): V3[] {
     const hi = Math.min(dense.length - 1, lo + 1);
     out.push(mix3(dense[Math.min(lo, dense.length - 1)], dense[hi], g - lo));
   }
+  if (lines.size >= 8) lines.delete(lines.keys().next().value!);
+  lines.set(key, out);
   return out;
 }
+const lines = new Map<string, V3[]>();
+
+const RADIUS_EDGES = [U.sac, U.truncus, U.conus, U.proximal, U.ventricle];
+const RADII = [0.17, 0.15, 0.19, 0.31, 0.37, 0.29];
 
 /** Tube radius at u: even at first; with `segs`, the dilatations and the sulci between them. */
 export function radiusAt(u: number, pose: HeartPose): number {
   const base = 0.21;
-  const seg =
-    u < U.sac
-      ? 0.17
-      : u < U.truncus
-        ? 0.15
-        : u < U.conus
-          ? 0.19
-          : u < U.proximal
-            ? 0.31
-            : u < U.ventricle
-              ? 0.37
-              : 0.29;
   // The sulci: narrow waists at the bulboventricular and atrioventricular borders, softer at the bulbus' own borders.
   const dip = (c: number, w: number, d: number) => d * Math.exp(-(((u - c) / w) ** 2));
   const waist = dip(U.proximal, 0.028, 0.13) + dip(U.ventricle, 0.03, 0.13) + dip(U.conus, 0.03, 0.04);
   // Smooth the steps between segment radii.
   const sm = (x: number) => {
-    const edges = [U.sac, U.truncus, U.conus, U.proximal, U.ventricle];
-    const rs = [0.17, 0.15, 0.19, 0.31, 0.37, 0.29];
-    let r = rs[0];
-    edges.forEach((e, i) => (r += (rs[i + 1] - rs[i]) * ss(e - 0.04, e + 0.04, x)));
+    let r = RADII[0];
+    for (let i = 0; i < RADIUS_EDGES.length; i++) {
+      const e = RADIUS_EDGES[i];
+      r += (RADII[i + 1] - RADII[i]) * ss(e - 0.04, e + 0.04, x);
+    }
     return r;
   };
-  void seg;
   const s = clamp01(pose.segs);
   // The tube grows a little as it loops (the heart enlarges).
   const grow = 1 + 0.08 * clamp01(pose.loop);
@@ -320,7 +318,7 @@ const sparse = (p: readonly V3[]) => (p.length <= 7 ? p : p.filter((_, i) => i %
  * moves). Both are kept while their inputs are unchanged, so a played stage rebuilds only what moves.
  */
 export function tubeParts(path: readonly V3[], o: TubeOptions): { mesh: Mesh; hit: Mesh } {
-  return { mesh: cachedTube(path, o), hit: cachedTube(sparse(path), { ...o, sides: Math.min(o.sides ?? 18, 10) }) };
+  return { mesh: heartTube(path, o), hit: heartTube(sparse(path), { ...o, sides: Math.min(o.sides ?? 18, 10) }) };
 }
 
 /** A blob as drawn and its coarse copy (see `tubeParts`); `shapeId` names a `shape` function. */
@@ -359,6 +357,33 @@ const WHOLE = ['bihotz-hodia', 'bihotz-lakioa'];
 /** All items of the heart for a pose. */
 export function heartModel(pose: HeartPose, o: HeartOpts = {}): HeartModel {
   perfCount('heartModel');
+  // Phase alone moves cells in the shader. Preserve the complete geometry/label snapshot instead
+  // of rebuilding paths and re-hashing every static tube for each blood-flow frame or React repeat.
+  const phase = o.flow?.phase;
+  const key = JSON.stringify([pose, { ...o, flow: o.flow ? { ...o.flow, phase: 0 } : o.flow }], (_key, value) => Object.is(value, -0) ? '-0' : value);
+  const known = models.get(key);
+  if (known) {
+    models.delete(key); models.set(key, known);
+    perfCount('heartModelCacheHit');
+    if (Object.is(phase, known.phase) || !known.hasStreams) return known.current;
+    const items = known.base.items.map(it => !it.stream ? it : { ...it, stream: {
+      ...it.stream,
+      phase: it.key === 'flow' || it.key === 'flowO2' ? phase! : phase! * known.length / routeLength(it.stream.route),
+    } });
+    known.phase = phase;
+    return (known.current = { ...known.base, items });
+  }
+  perfCount('heartModelBuild');
+  const model = buildHeartModel(pose, o);
+  const hasStreams = model.items.some(it => !!it.stream);
+  const length = hasStreams ? routeLength(routeOf(model.line)) : 0;
+  if (models.size >= 2) models.delete(models.keys().next().value!);
+  models.set(key, { base: model, current: model, phase, hasStreams, length });
+  return model;
+}
+const models = new Map<string, { base: HeartModel; current: HeartModel; phase: number | undefined; hasStreams: boolean; length: number }>();
+
+function buildHeartModel(pose: HeartPose, o: HeartOpts): HeartModel {
   const line = centreline(pose);
   const cd = caudal(pose, line);
   const items: Item3[] = [];

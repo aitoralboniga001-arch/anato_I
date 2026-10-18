@@ -1,0 +1,2 @@
+10-zain-sinua-3d-zoom.png: {"diffPct":0.053,"bigPct":0.002}
+10-zain-sinua-3d.png: {"diffPct":0.051,"bigPct":0.002}

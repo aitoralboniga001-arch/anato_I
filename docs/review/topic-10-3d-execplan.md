@@ -164,3 +164,24 @@ After Batch 4, two costs were left. The first was turning the model: every item 
 | Rough edges | DOF and motion-blur preset flags are read only in debug mode. The `gl.finish()` profiler fallback stalls. History is a single import commit, so there is no evolution to learn from | No performance measurement at all; no quality presets |
 
 **Verdict:** borrow its rendering techniques and its measurement habits, not its architecture. Its renderer is an expert one. Its budget (57 FFT passes and about 27 post passes per frame) is the opposite of our goal.
+
+## Batch 7 follow-up: all-model performance and resilience (2026-10-17)
+
+Implemented and measured across all 13 current Stage3D views; see [the audit](3d-performance-resilience.md) and [Batch 7 evidence](../perf/README.md#batch-7-all-model-workload-limits-and-gpu-resilience-2026-10-17).
+
+- Mean main-thread work in the fixed two-second playback samples: **609.7 -> 244.4 ms/s (59.9% less)** against the committed Batch 6 after result. The samples include reading holds/static anatomy; this is not a universal saving for all continuously deforming phases. New representative three-view baselines are retained separately.
+- Shared frame comparison/coalesced uploads, a nominal 30 Hz renderer ceiling, and the same pose-publishing ceiling in both normal playback and class/manual-step glides. Playback still advances by elapsed time. A real class UI check records 30 poses/s and no further pose updates/draws after pause.
+- 2M-pixel drawing buffers, including intermediate resizes and hardware dimension limits; hidden/intersection suspension; browser-default power choice and major-performance-caveat refusal; session-persistent flat fallback after context loss/failed creation.
+- Lazy context and geometry requests; duplicate worker caches released after delivery; model GPU resources released after 180 ms parked, contexts after 5 s, detached viewports immediately; weak host metadata. Same-sized GPU updates preserve older cached poses and update UV/index buffers correctly.
+- Duplicate hold positions suppressed; Kimu's automatic index warm becomes demand-driven. No new anatomy sampling reduction, render pass or runtime dependency.
+- Actual lost context, refused context, view switches/reloads, final/intermediate resize bounds, worker lifecycle, camera wake/settle, manual holds, real-time clock progression, hidden pause/resume and SPA disposal are covered by the two production-browser regression scripts. Full tests: **1115 in 33 files**, production build/TypeScript pass. Focused new/shared code lint passes; the expanded shell/Stage3D lint scope retains nine pre-existing errors.
+- The separate closing-vein phase at t=0.45 still costs **556.4 ms/s**, about 29 draws/s, 754 mesh builds/s and 377 slot uploads/s. Persistent deformation buffers remain the clearest measured next step. Domains still draws 555,704 triangles and many translucent items; any batching must preserve sort order, structure picking, clipping and teaching colours.
+- These are per-renderer app safeguards. The earlier 0x133 watchdog still has an UNKNOWN responsible driver; no driver/OS change or guarantee against future OS-level crashes is claimed. The work is local; no push or deployment.
+
+## Batch 8: Topic 10 CPU follow-up (2026-10-17)
+
+The user's narrowed scope is Topic 10 only, with no subagents. See the [implementation, measurements and validation](topic10-performance-followup.md). Heart tubes reuse fixed path/layout work with reference-equivalent geometry; heart and right-atrium builders keep bounded complete snapshots; phase-only blood flow reuses static anatomy; the class dock retains its per-lesson duration estimate. The 30 Hz/pixel/fallback safeguards from Batch 7 remain. No new shared-renderer implementation, other-topic change, geometry coarsening, runtime dependency, push or deployment was added in this pass.
+
+## Batch 9: requested 30-versus-40 fps test (2026-10-17)
+
+[Comparison and raw-evidence pointers](topic10-30-vs-40-fps.md). A Topic 10-only harness gate tests genuine 30/40 deadline pacing while preserving ordinary production behaviour at 30. Actual moving-scene draws rise to about 39–40/s for 12–24% more main-thread CPU across four continuous phases; the short class sample costs about 45% more. All nine views were exercised, with static/hold cases kept separate. 1,176 tests, build/TypeScript, focused lint and 40 fps pause/hidden/context-loss/reload checks pass. The measured tradeoff is retained as an experiment; no default change or crash-prevention guarantee is made.

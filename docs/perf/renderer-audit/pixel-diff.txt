@@ -1,0 +1,27 @@
+10-atal-aurikularra-3d-zoom.png: {"diffPct":0.85,"bigPct":0.035}
+10-atal-aurikularra-3d.png: {"diffPct":0.663,"bigPct":0.021}
+10-atal-bentrikularra-3d-zoom.png: {"diffPct":0.581,"bigPct":0.026}
+10-atal-bentrikularra-3d.png: {"diffPct":0.512,"bigPct":0.012}
+10-atal-bulbarra-3d-zoom.png: {"diffPct":0.998,"bigPct":0.009}
+10-atal-bulbarra-3d.png: {"diffPct":0.683,"bigPct":0.003}
+10-bihotz-atalak-3d-zoom.png: {"diffPct":0.707,"bigPct":0.03}
+10-bihotz-atalak-3d.png: {"diffPct":0.853,"bigPct":0.054}
+10-bihotz-hodia-3d-zoom.png: {"diffPct":0.498,"bigPct":0.015}
+10-bihotz-hodia-3d.png: {"diffPct":0.349,"bigPct":0.012}
+10-bihotz-lakioa-3d-zoom.png: {"diffPct":0.728,"bigPct":0.034}
+10-bihotz-lakioa-3d.png: {"diffPct":0.45,"bigPct":0.017}
+10-eskuineko-aurikula-3d-zoom.png: {"diffPct":0.72,"bigPct":0.074}
+10-eskuineko-aurikula-3d.png: {"diffPct":0.533,"bigPct":0.048}
+10-zain-sinua-3d-zoom.png: {"diffPct":0.907,"bigPct":0.062}
+10-zain-sinua-3d.png: {"diffPct":0.874,"bigPct":0.058}
+10-zirkulazio-goiztiarra-3d-zoom.png: {"diffPct":0.838,"bigPct":0.038}
+10-zirkulazio-goiztiarra-3d.png: {"diffPct":0.618,"bigPct":0.023}
+7-diafragma-eraketa-kupula-zoom.png: {"diffPct":0.475,"bigPct":0.034}
+7-diafragma-eraketa-kupula.png: {"diffPct":0.372,"bigPct":0.022}
+8-buru-ganga-kupula-zoom.png: {"diffPct":0.807,"bigPct":0.142}
+8-buru-ganga-kupula.png: {"diffPct":0.467,"bigPct":0.108}
+8-gorputz-adarrak-biraketa-zoom.png: {"diffPct":0.638,"bigPct":0.083}
+8-gorputz-adarrak-biraketa.png: {"diffPct":0.443,"bigPct":0.056}
+9-domeinuak-domeinuak-3d-zoom.png: {"diffPct":1.37,"bigPct":0.038}
+9-domeinuak-domeinuak-3d.png: {"diffPct":1.194,"bigPct":0.036}
+contact.png: missing in C:\Users\aitor\Downloads\1 MEDICINA\docs\perf\renderer-audit

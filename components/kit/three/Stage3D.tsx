@@ -117,11 +117,13 @@ const ease = (x: number) => x * x * x * (x * (x * 6 - 15) + 10);
  * then shows at once, with no "preparing" moment in the middle of the move.
  */
 const parked = new Map<HTMLDivElement, { api: GLApi; timer: number }>();
-const PARK_MS = 60000;
+const PARK_MS = 5000;
 /** 3D views on screen per frame: one still there when another mounts will hand its layer over. */
-const live = new Map<HTMLDivElement, number>();
+const live = new WeakMap<HTMLDivElement, number>();
 
 function park(host: HTMLDivElement, api: GLApi) {
+  // A route change removed the whole viewport: no successor can take over this host.
+  if (!host.isConnected) { api.dispose(); return; }
   api.park();
   const old = parked.get(host);
   if (old && old.api !== api) {
@@ -137,23 +139,8 @@ function park(host: HTMLDivElement, api: GLApi) {
   });
 }
 
-/**
- * A WebGL layer made ready in the background (its shader programs compile while nothing else is going
- * on), parked for the first 3D view: that view, or a camera move into it, never waits for WebGL.
- */
-export function prewarm3D(host: HTMLDivElement) {
-  if (parked.has(host) || (live.get(host) ?? 0) > 0) return;
-  import('./gl')
-    .then((m) => {
-      if (parked.has(host) || (live.get(host) ?? 0) > 0 || !host.isConnected) return;
-      const api = m.createGL(host, () => {});
-      if (api) park(host, api);
-    })
-    .catch(() => {});
-}
-
 /** The camera each frame's 3D view last showed (and its specimen key), for the next view to start from. */
-const lastCam = new Map<HTMLDivElement, { key: string; cam: Camera3; at: number; live: number }>();
+const lastCam = new WeakMap<HTMLDivElement, { key: string; cam: Camera3; at: number; live: number }>();
 const ENTER_MS = 1100;
 const differs = (a: Camera3, b: Camera3) => {
   const ea = norm(sub(a.eye, a.target));
@@ -163,7 +150,7 @@ const differs = (a: Camera3, b: Camera3) => {
 
 type Pub = { orient: Edges | null; look: { names: Record<LookSide, string>; facing?: LookSide } | null };
 /** The 3D views on each frame, oldest first: the last one sets the frame's side names and camera keys. */
-const pubs = new Map<HTMLDivElement, Pub[]>();
+const pubs = new WeakMap<HTMLDivElement, Pub[]>();
 
 const noSubscribe = () => () => {};
 const zero = () => 0;

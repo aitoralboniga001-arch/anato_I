@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-17T17:44:14.747Z",
+  "base": "http://localhost:3122",
+  "width": 1536,
+  "height": 960,
+  "dpr": 2,
+  "at": 0.45,
+  "reduced": false,
+  "gpuSamples": "median of 3 x 8 draws (CPU submission + GPU completion)",
+  "runs": [
+    {
+      "week": 10,
+      "stage": "zain-sinua",
+      "view": "3d",
+      "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (0x00001900) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "info": {
+        "calls": 88,
+        "triangles": 50824,
+        "w": 1958,
+        "h": 1021,
+        "geometries": 47,
+        "programs": 6
+      },
+      "hold": {
+        "mainThreadMsPerS": 12.5,
+        "scriptMsPerS": 0.3,
+        "styleLayoutMsPerS": 1.9,
+        "frameMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "n": 0
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {}
+      },
+      "gpuMs": 1.537,
+      "play": {
+        "mainThreadMsPerS": 474.5,
+        "scriptMsPerS": 323.3,
+        "styleLayoutMsPerS": 32.5,
+        "frameMs": {
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 50,
+          "n": 112
+        },
+        "longTasks": {
+          "n": 0,
+          "totalMs": 0
+        },
+        "perS": {
+          "heartModel": 30,
+          "heartModelBuild": 29.5,
+          "meshCacheHit": 1681.5,
+          "meshCacheMiss": 767,
+          "meshBuild": 767,
+          "heartTubeBuild": 708,
+          "project": 110.5,
+          "glTick": 29,
+          "glUpload": 377,
+          "glRender": 29,
+          "simFrame": 29,
+          "heartModelCacheHit": 0.5
+        }
+      }
+    }
+  ],
+  "errors": []
+}

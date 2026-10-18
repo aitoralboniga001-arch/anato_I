@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-17T17:43:07.580Z",
+  "errors": [],
+  "2400x1600": {
+    "calls": 62,
+    "triangles": 37832,
+    "w": 1803,
+    "h": 1108,
+    "geometries": 34,
+    "programs": 6
+  },
+  "1536x960": {
+    "calls": 62,
+    "triangles": 37832,
+    "w": 1958,
+    "h": 1021,
+    "geometries": 34,
+    "programs": 6
+  },
+  "lostContextFallback": true,
+  "viewSwitchFallback": true,
+  "flatParts": 34
+}
