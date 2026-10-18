@@ -560,17 +560,20 @@ function buildAtria(s: AtriaState): AtriaModel {
   pts['atal-lisoa'] = chamber(222 + 0.55 * sea, 100, 0.96);
   walls5(s, items, pts, opening, ra, la);
 
-  // The AV cushions at the canal's front (superior) and back (inferior) lips; fused, a bar across it.
+  // The AV cushions at the canal's back (superior, dorsal) and front (inferior) lips; fused, a bar across it.
   const c = clamp01(s.cushions);
   const f = clamp01(s.cushionFuse);
   const cush = (key: string, id: string, z0: number) => {
     const z = lerp(z0, Math.sign(z0) * 0.13, f);
     const center: V3 = [0, YF + 0.04 + 0.05 * c, z];
     items.push({ key, id, groups: ['kuxin-aurikulubentrikularrak', 'endokardio-kuxinak'], ...blobParts({ center, radii: [lerp(0.2, 0.36, c), lerp(0.08, 0.16, c), lerp(0.08, 0.2, c) + 0.05 * f], rings: 14, sides: 20 }), color: K.cushion, deep: K.cushionDeep, tissue: 'mesenchyme' });
-    pts[id] = [0, center[1] + 0.06, z];
+    // The back one's dot on its right-atrium half: the septum primum hangs over its middle.
+    pts[id] = [z0 < 0 ? -lerp(0.1, 0.2, c) : 0, center[1] + 0.06, z];
   };
-  cush('cush-sup', 'goiko-kuxina', 0.3);
-  cush('cush-inf', 'beheko-kuxina', -0.32);
+  // The canal faces forward and down (its opening in a near-frontal plane, notes 3 p10): its upper lip is
+  // the dorsal one. Seen in this floor, the superior (dorsal) cushion is at the back, the inferior at the front.
+  cush('cush-sup', 'goiko-kuxina', -0.32);
+  cush('cush-inf', 'beheko-kuxina', 0.3);
   pts['kuxin-aurikulubentrikularrak'] = [0, YF + 0.12, f > 0.5 ? 0 : 0.3];
 
   // —— septum primum: a thin cream membrane hanging from the roof, its free edge over the cushions ——

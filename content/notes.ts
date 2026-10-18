@@ -136,6 +136,7 @@ export const NOTES: Record<number, NotesSection[]> = {
     { n: '2', title: 'Aurikula komunaren trenkadak', depth: 0, stages: [] },
     { n: '2.1', title: 'Septum Primum-aren sorrera', depth: 1, stages: ['septum-primum'] },
     { n: '2.2', title: 'Septum secundum-aren sorrera', depth: 1, stages: ['zulo-obala', 'jaiotza', 'aurikulen-paretak'] },
+    { n: '3', title: 'Erreten aurikulubentrikularraren trenkadak', depth: 0, stages: ['erreten-ab', 'balbula-ab'] },
   ],
 };
 

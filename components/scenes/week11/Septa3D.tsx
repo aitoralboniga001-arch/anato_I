@@ -75,9 +75,9 @@ export function Primum3D({ t }: SceneProps) {
     { id: 'erreten-aurikulubentrikularra', p: 'erreten-aurikulubentrikularra', show: vis(t, 0, P1[1]) + vis(t, P1[2] + 0.04, P1[4]) },
     { id: 'septum-primum', p: 'septum-primum', show: vis(t, P1[1] + 0.03) },
     // Looking into the canal, the pair is named by its two members (the front one carries the pair's name).
-    { id: 'beheko-kuxina', p: 'beheko-kuxina', show: vis(t, P1[3] + 0.03, P1[4]), small: true },
+    { id: 'goiko-kuxina', p: 'goiko-kuxina', show: vis(t, P1[3] + 0.03, P1[4]), small: true },
     { id: 'kuxin-aurikulubentrikularrak', p: 'kuxin-aurikulubentrikularrak', show: vis(t, 0, P1[1]) + vis(t, P1[2], P1[3]) + vis(t, P1[6]) },
-    { id: 'kuxin-aurikulubentrikularrak', key: 'kuxinak-goikoa', p: 'goiko-kuxina', text: 'Kuxin AB: goikoa', show: vis(t, P1[3], P1[4]) },
+    { id: 'kuxin-aurikulubentrikularrak', key: 'kuxinak-behekoa', p: 'beheko-kuxina', text: 'Kuxin AB: behekoa', show: vis(t, P1[3], P1[4]) },
     { id: 'ostium-primuma', p: 'ostium-primuma', show: vis(t, P1[4] + 0.03, P1[6] + 0.08) },
     { id: 'ostium-secunduma', p: 'ostium-secunduma', show: vis(t, P1[5] + 0.03) },
   ];
@@ -97,7 +97,7 @@ export function Primum3D({ t }: SceneProps) {
             Eskuinetik eta aurretik: eskuineko aurikularen pareta gardena, trenkada zeiharka
           </Note>
           <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, P1[3], P1[4]) * asked}>
-            Goitik, erreten aurikulubentrikularraren barrura: aurrean goiko kuxina, atzean behekoa
+            Goitik, erreten aurikulubentrikularraren barrura: atzean goiko kuxina (dortsala), aurrean behekoa
           </Note>
           <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, P1[4]) * asked}>
             Eskuineko aurikulatik, trenkada aurrez aurre: atzea zure ezkerrean, aurrea eskuinean
