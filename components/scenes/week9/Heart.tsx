@@ -459,12 +459,12 @@ export function HeartConduction({ t }: SceneProps) {
           ))}
         </Part>
         <Part id="nodulu-sinusala" show={sys} groups={['eroapen-sistema']}>
-          <ellipse cx={SA[0]} cy={SA[1]} rx={16 + 6 * sa} ry={11 + 4 * sa} fill="#fff" opacity={0.3 * sa} />
-          <ellipse cx={SA[0]} cy={SA[1]} rx={13} ry={9} fill={CONDUCT} stroke="#0b3b47" strokeWidth={2} />
+          <ellipse cx={SA[0]} cy={SA[1]} rx={20 + 6 * sa} ry={14 + 4 * sa} fill="#fff" opacity={0.3 * sa} />
+          <ellipse cx={SA[0]} cy={SA[1]} rx={17} ry={12} fill={CONDUCT} stroke="#0b3b47" strokeWidth={2} />
         </Part>
         <Part id="nodulu-aurikobentrikularra" show={sys} groups={['eroapen-sistema']}>
-          <ellipse cx={AV[0]} cy={AV[1]} rx={15 + 5 * avGlow} ry={10 + 4 * avGlow} fill="#fff" opacity={0.3 * avGlow} />
-          <ellipse cx={AV[0]} cy={AV[1]} rx={12} ry={8} fill={CONDUCT} stroke="#0b3b47" strokeWidth={2} />
+          <ellipse cx={AV[0]} cy={AV[1]} rx={19 + 5 * avGlow} ry={13 + 4 * avGlow} fill="#fff" opacity={0.3 * avGlow} />
+          <ellipse cx={AV[0]} cy={AV[1]} rx={16} ry={11} fill={CONDUCT} stroke="#0b3b47" strokeWidth={2} />
         </Part>
         <Part id="eroapen-sistema" show={sys} quiet>
           <circle cx={AV[0]} cy={AV[1]} r={1} fill="none" />

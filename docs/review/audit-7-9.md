@@ -309,3 +309,23 @@ Each batch ends with:
 **Not done (kept for later):**
 - A `look` bridge or a 3D turn from "slice" to "looking down": the growing septum and the notes' "goitik ikusita" do that job now. Revisit if the owner still finds the jump hard.
 - The notes' clause "hasieran ez du guztiz inguratzen hestea".
+
+## 5. Batch 3 results (J for topics 8 and 9), 2026-10-19
+
+**Done:**
+- **`errai-kraneoa` (topic 8), the ossicles.**
+  - Steps 6–8: the camera moves in on the face and the ear (×1.45), so the three ossicles are about 1.5 times bigger. The bones the steps name stay in the frame.
+  - Step 9: the close-up of the middle ear is ×3.3 instead of ×6.5. The jaw, the cheekbone, the temporal bone and the styloid stay around it, so the student can see where it is.
+- **`kondrokraneoa` (topic 8).**
+  - Step 1 no longer lights an empty oval: a faint preview shows where every piece of the floor will form (both sides).
+  - Step 4 zooms in more on the pituitary (×2.9, was ×2.2), and the key is larger.
+- **`somitomeroak-burua` 7 (topic 9).**
+  - Each arch's muscles take its colour in turn: arch 1 (temporalis, masseter, pterygoids), then arch 2 (expression muscles, jaw depressors), then arch 3 (stylopharyngeus).
+  - The muscles are grouped under their arch, so naming an arch lights its muscles.
+- **`nerbio-espinala` 4–8 (topic 9).**
+  - The camera moves in on the cord (×1.6) while the steps are about the cord itself, and back out when the roots and the nerve leave it.
+  - The names that would sit on the enlarged cord move aside.
+- **`okzipitalak` 4 (topic 9):** the nerve badges are larger, with full-size numerals. The X and XII nerves were already drawn as nerves.
+- **`bihotz-muskulua` (topic 9):** the sinoatrial and AV nodes are about 30% larger.
+
+**Not changed (judged fine in the sweep):** `buru-ganga` 2 and 7, `somitomeroak-burua` 4, `muskulu-lisoa` 4, `ildaskatuak` 3 and 5, `somitaren-paretak` 4 and 6, `ehun-konektiboa` 1, and the `domeinuak` table rows.

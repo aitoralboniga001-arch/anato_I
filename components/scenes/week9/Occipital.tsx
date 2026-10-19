@@ -101,9 +101,9 @@ export function OccipitalHead({ t }: SceneProps) {
       {plugAt.map(([id, num, p, c]) => (
         <g key={id}>
           <Part id={id} show={plugs} groups={['nerbio-kranialak']}>
-            <circle cx={f1(p[0])} cy={f1(p[1])} r={15} fill={c} stroke="#1a1405" strokeWidth={2} />
+            <circle cx={f1(p[0])} cy={f1(p[1])} r={19} fill={c} stroke="#1a1405" strokeWidth={2} />
           </Part>
-          <Label id={id} x={p[0]} y={p[1]} align="middle" text={num} show={plugs} small />
+          <Label id={id} x={p[0]} y={p[1]} align="middle" text={num} show={plugs} />
         </g>
       ))}
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useId } from 'react';
-import { Label, Note, Part, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Label, Note, Part, lerp, seg, smoothPath, zoom, type Pt, type SceneProps } from '@/components/kit';
 import { VertebraBack, VertebraTop } from '@/components/scenes/week8/Vertebra';
 import { HUE, Steps, SummaryTable, W, along, f1, vis } from './common';
 import { retell } from './Somite';
@@ -386,17 +386,27 @@ export function SpinalCord({ t }: SceneProps) {
     rami: 0,
     dom: 0,
   };
-  const L = (id: string, x: number, y: number, at: Pt, show = 1, small = false) => <Label key={id} id={id} x={x} y={y} ax={at[0]} ay={at[1]} show={show} small={small} align="start" />;
+  // Steps 4–8 are about the cord itself (grey matter, horns, canal, white matter): the camera moves in on it,
+  // then back out when the roots and the nerve leave it for the muscles.
+  const zm = seg(t, 0.2, 0.24) * (1 - seg(t, 0.585, 0.62));
+  const z = zoom(C[0], C[1], lerp(1, 1.6, zm), lerp(C[0], 400, zm), C[1]);
+  const Z = (p: Pt): Pt => z.at(p[0], p[1]);
+  const L = (id: string, x: number, y: number, at: Pt, show = 1, small = false) => {
+    const a = Z(at);
+    return <Label key={id} id={id} x={x} y={y} ax={a[0]} ay={a[1]} show={show} small={small} align="start" />;
+  };
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="#120f18" />
-      <Section s={s} uid={uid} ids={{ back: 'muskulu-ildaskatuak', wall: 'muskulu-ildaskatuak' }} />
-      <Impulse t={t} a={0.66} b={0.76} period={0.03} pts={MOTOR_AXON} color={FIB.m} />
-      <Impulse t={t} a={0.9} b={1} period={0.04} pts={SENS_IN} color={FIB.s} />
+      <g transform={z.transform}>
+        <Section s={s} uid={uid} ids={{ back: 'muskulu-ildaskatuak', wall: 'muskulu-ildaskatuak' }} />
+        <Impulse t={t} a={0.66} b={0.76} period={0.03} pts={MOTOR_AXON} color={FIB.m} />
+        <Impulse t={t} a={0.9} b={1} period={0.04} pts={SENS_IN} color={FIB.s} />
+      </g>
       <Note x={340} y={24} size={12.5} tone="accent">
         Ornomuina zeharka ebakita (atzea goian)
       </Note>
-      <Note x={340} y={470} size={12} tone="dim" show={s.white}>
+      <Note x={lerp(340, 770, zm)} y={lerp(470, 540, zm)} size={12} tone="dim" show={s.white}>
         ⊙ goranzko traktua · ⊗ beheranzkoa
       </Note>
       <Steps
@@ -429,12 +439,12 @@ export function SpinalCord({ t }: SceneProps) {
       {L('luzapen-zentripetoa', 480, 64, along(CENTRIPETAL, 0.15), s.sensFibres, true)}
       {L('gongoil-errakideoak', 700, 64, [GANG[0] + 14, GANG[1] - 14], s.dr)}
       {L('atzeko-sustraia', 380, 150, along(DR, 0.3), s.dr, true)}
-      {L('neurona-begetatiboak', 560, 250, VEG, s.lat, true)}
-      {L('traktuak', 560, 290, TRACT_UP, s.white, true)}
+      {L('neurona-begetatiboak', lerp(560, 680, zm), 250, VEG, s.lat, true)}
+      {L('traktuak', lerp(560, 680, zm), 290, TRACT_UP, s.white, true)}
       {L('nerbio-espinalak', 700, 380, along(TRUNK, 0.5), s.vr)}
       {L('luzapen-zentrifugoa', 850, 400, along(CENTRIFUGAL, 0.62), s.sensFibres, true)}
       {L('muskulu-ildaskatuak', 850, 450, [870, 490], s.vr, true)}
-      {L('neurona-motoreak', 470, 560, MOTOR, s.ant, true)}
+      {L('neurona-motoreak', lerp(470, 680, zm), lerp(560, 410, zm), MOTOR, s.ant, true)}
       {L('aurreko-sustraia', 600, 520, along(VR, 0.75), s.vr, true)}
       {L('axoi-motoreak', 760, 600, along(MOTOR_AXON, 0.9), s.vr, true)}
     </g>

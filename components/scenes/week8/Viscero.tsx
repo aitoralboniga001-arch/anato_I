@@ -376,8 +376,11 @@ export function FaceSkull({ t }: SceneProps) {
   const push = seg(t, VK_T.ear + 0.01, VK_T.ear + 0.035) * (1 - seg(t, VK_T.growth - 0.02, VK_T.growth + 0.005));
   const grow = seg(t, VK_T.growth + 0.015, VK_T.growth + 0.075);
   const orig = seg(t, VK_T.origin + 0.005, VK_T.origin + 0.04);
-  const zs = lerp(1, 6.5, push);
-  const z = zoom(lerp(500, EAR_C[0], push), lerp(320, EAR_C[1], push), zs, 500, 300);
+  // While the bones form (steps 6–8) the camera moves in on the face and the ear, so the three ossicles are big
+  // enough to see; the ear step then closes in on the middle ear with the skull round it still in view.
+  const near = seg(t, VK_T.maxD + 0.003, VK_T.maxD + 0.03) * (1 - seg(t, VK_T.growth - 0.02, VK_T.growth + 0.005));
+  const zs = lerp(1, 1.45, near) * lerp(1, 2.3, push);
+  const z = zoom(lerp(lerp(500, 450, near), EAR_C[0], push), lerp(lerp(320, 375, near), EAR_C[1], push), zs, 500, 300);
   const A = (p: Pt) => z.at(p[0], p[1]);
   const inFrame = (p: Pt) => 1 - Math.min(1, Math.max(30 - p[0], p[0] - 970, 40 - p[1], p[1] - 590, 0) / 24);
   // Colours: arch family, then germ origin at the last step (crest teal / paraxial coral).

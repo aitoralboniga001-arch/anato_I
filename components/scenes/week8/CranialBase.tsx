@@ -214,11 +214,12 @@ export function CranialBase({ t, reduced }: SceneProps) {
   const holes = seg(t, CB_T.holes + 0.005, CB_T.holes + 0.03);
   const nv = seg(t, CB_T.holes + 0.02, CB_T.holes + 0.08);
   const ghost = seg(t, CB_T.holes + 0.01, CB_T.holes + 0.03);
+  const preview = vis(t, 0.045, CB_T.scl + 0.01, 0.025);
   const ear = seg(t, PIECE.peri.c0, PIECE.peri.c0 + 0.035);
   const sella = ossL(PIECE.hyp);
   // Push-in on the sphenoid body while the hypophyseal fossa and the gland take shape.
   const push = seg(t, CB_T.hyp + 0.015, CB_T.hyp + 0.04) * (1 - seg(t, CB_T.trab - 0.03, CB_T.trab - 0.005));
-  const z = zoom(CX, lerp(CY, SELLA[1], push), lerp(1, 2.2, push), 500, 320);
+  const z = zoom(CX, lerp(CY, SELLA[1], push), lerp(1, 2.9, push), 500, 320);
   const A = (p: Pt) => z.at(p[0], p[1]);
   const L = (p: Pt) => A(p);
   void reduced;
@@ -280,6 +281,14 @@ export function CranialBase({ t, reduced }: SceneProps) {
           <path d={closed(FLOOR)} fill="#d6c9ab" opacity={fuse} />
           <path d={closed(FLOOR)} fill="url(#w8-bone)" opacity={fuse} />
           <path d={closed(FLOOR)} fill="url(#w8-light)" />
+          {/* Step 1, before any piece exists: where the floor's pieces will be (both sides), as a faint preview. */}
+          {preview > 0.02 && (
+            <g opacity={preview} pointerEvents="none">
+              {PIECES.flatMap((p) => [p.B, p.B.map(mx)]).map((B, i) => (
+                <path key={i} d={smoothPath(B, true, 0.25)} fill="#d6c9ab" fillOpacity={0.14} stroke="#e9dcc0" strokeWidth={1.6} strokeOpacity={0.7} />
+              ))}
+            </g>
+          )}
         </Part>
         <Part id="buru-ganga" quiet>
           <path d={`${closed(OUTER)}${closed(FLOOR)}`} fillRule="evenodd" fill="#cfc3a6" stroke={Q.boneDeep} strokeWidth={1.5} />
@@ -469,7 +478,7 @@ export function CranialBase({ t, reduced }: SceneProps) {
           </text>
         ))}
       {push > 0.4 && (
-        <g opacity={seg(push, 0.4, 1)} fontSize={12.5} fontWeight={600} stroke="#0f0f11" strokeWidth={3} paintOrder="stroke">
+        <g opacity={seg(push, 0.4, 1)} fontSize={14} fontWeight={600} stroke="#0f0f11" strokeWidth={3} paintOrder="stroke">
           {[
             { s: 'adenohipofisia (aurrea)', c: '#e879f9', y: 304 },
             { s: 'neurohipofisia (atzea)', c: '#a78bfa', y: 312 },

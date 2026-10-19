@@ -79,9 +79,10 @@ const fan = (from: Pt[], to: Pt, n: number): [Pt, Pt][] =>
 const sheet = (a0: Pt, a1: Pt, b0: Pt, b1: Pt, n: number): [Pt, Pt][] => Array.from({ length: n }, (_, i) => [lerpPt(a0, a1, i / (n - 1)), lerpPt(b0, b1, i / (n - 1))]);
 
 export function AdultHead({ t }: SceneProps) {
-  const a1 = seg(t, 0.66, 0.71);
-  const a2 = seg(t, 0.76, 0.81);
-  const a3 = seg(t, 0.86, 0.91);
+  // Step 7 names the three arches: each one's muscles take its colour in turn (and stay), then steps 8–10 take one each.
+  const a1 = Math.max(seg(t, 0.66, 0.71), seg(t, 0.568, 0.585));
+  const a2 = Math.max(seg(t, 0.76, 0.81), seg(t, 0.592, 0.609));
+  const a3 = Math.max(seg(t, 0.86, 0.91), seg(t, 0.616, 0.633));
   const n1 = seg(t, 0.69, 0.74);
   const n2 = seg(t, 0.79, 0.84);
   const n3 = seg(t, 0.89, 0.94);
@@ -131,7 +132,7 @@ export function AdultHead({ t }: SceneProps) {
       ))}
 
       {/* Arch 1 (somitomere 4): temporalis — under the zygomatic arch, so it is drawn first. */}
-      <Part id="loki-muskulua" show={0.3 + 0.7 * a1} groups={['muskulu-murtsikatzaileak']}>
+      <Part id="loki-muskulua" show={0.3 + 0.7 * a1} groups={['muskulu-murtsikatzaileak', 'lehen-faringe-arkua']}>
         <Muscle id="temp" d={P(TEMPORALIS, true, 0.18)} color={SM_COLOR[3]} fibres={fan(T_LINE, CORONOID, 26)} />
       </Part>
 
@@ -154,17 +155,17 @@ export function AdultHead({ t }: SceneProps) {
       </g>
 
       {/* Arch 1: masseter, on the outside of the ramus. */}
-      <Part id="maseter-muskulua" show={0.3 + 0.7 * a1} groups={['muskulu-murtsikatzaileak']}>
+      <Part id="maseter-muskulua" show={0.3 + 0.7 * a1} groups={['muskulu-murtsikatzaileak', 'lehen-faringe-arkua']}>
         <Muscle id="mass" d={P(MASSETER, true, 0.2)} color={SM_COLOR[3]} fibres={sheet([608, 350], [728, 350], [594, 480], [712, 486], 16)} />
       </Part>
 
       {/* Arch 3 (somitomere 7): stylopharyngeus, from the styloid process down into the pharynx wall. */}
-      <Part id="muskulu-estilofaringeoa" show={0.3 + 0.7 * a3}>
+      <Part id="muskulu-estilofaringeoa" show={0.3 + 0.7 * a3} groups={['hirugarren-faringe-arkua']}>
         <Muscle id="stph" d={P([[596, 410], [606, 408], [650, 548], [640, 556]], true, 0.2)} color={SM_COLOR[6]} fibres={sheet([598, 408], [606, 408], [638, 556], [650, 552], 4)} />
       </Part>
 
       {/* Arch 2 (somitomere 6): muscles of facial expression and the jaw depressors. */}
-      <Part id="muskulu-mimikoak" show={0.3 + 0.7 * a2}>
+      <Part id="muskulu-mimikoak" show={0.3 + 0.7 * a2} groups={['hioide-arkua']}>
         {/* Frontal belly on the forehead. */}
         <Muscle id="front" d={P([[752, 96], [812, 128], [842, 198], [840, 234], [792, 222], [744, 212], [726, 150]], true, 0.2)} color={mim} fibres={sheet([740, 100], [840, 160], [736, 214], [842, 236], 14)} />
         {/* Orbicularis oculi: a ring round the orbit. */}
@@ -178,7 +179,7 @@ export function AdultHead({ t }: SceneProps) {
         {/* Platysma: a thin sheet over the neck. */}
         <path d={P([[706, 506], [858, 512], [826, 560], [748, 620], [690, 632], [672, 560]], true, 0.2)} fill={mim} opacity={0.45} />
       </Part>
-      <Part id="barailaren-muskulu-jeistaileak" show={0.3 + 0.7 * a2}>
+      <Part id="barailaren-muskulu-jeistaileak" show={0.3 + 0.7 * a2} groups={['hioide-arkua']}>
         {/* Posterior belly of the digastric (mastoid → hyoid) and the stylohyoid (styloid → hyoid). */}
         <Muscle id="dig" d={P([[562, 424], [576, 418], [690, 552], [680, 558]], true, 0.2)} color={mim} fibres={sheet([562, 422], [576, 418], [680, 556], [690, 552], 4)} />
         <Muscle id="sth" d={P([[612, 452], [618, 450], [682, 548], [676, 552]], true, 0.2)} color="#1fa37f" fibres={[]} />
@@ -233,7 +234,7 @@ export function AdultHead({ t }: SceneProps) {
       </Note>
       <path d={P([[44, 440], [212, 440], [212, 470], [44, 476]])} fill="url(#w9a-bone)" opacity={0.85} />
       <path d={P([[60, 476], [80, 474], [92, 590], [70, 592]], true, 0.2)} fill="url(#w9a-bone)" opacity={0.85} />
-      <Part id="muskulu-pterigoideoak" show={0.3 + 0.7 * a1} groups={['muskulu-murtsikatzaileak']}>
+      <Part id="muskulu-pterigoideoak" show={0.3 + 0.7 * a1} groups={['muskulu-murtsikatzaileak', 'lehen-faringe-arkua']}>
         <Muscle id="ptl" d={P([[84, 482], [196, 470], [204, 492], [88, 512]], true, 0.2)} color={SM_COLOR[3]} fibres={sheet([84, 480], [88, 512], [198, 470], [204, 492], 6)} />
         <Muscle id="ptm" d={P([[90, 520], [112, 514], [200, 584], [176, 594]], true, 0.2)} color="#c72f78" fibres={sheet([90, 518], [112, 514], [176, 592], [200, 584], 6)} />
       </Part>
