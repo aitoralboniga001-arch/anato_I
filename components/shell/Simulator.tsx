@@ -359,6 +359,15 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const [viewByStage, setViewByStage] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
+  // Hovering the picture waits a beat (90 ms in, 140 ms out): a pointer crossing parts, or parts moving
+  // under a resting pointer while a step plays or the model turns, no longer makes every name blink
+  // between the step's highlight and the hover look.
+  const hoverTimer = useRef<number | undefined>(undefined);
+  const hoverScene = (id: string | null) => {
+    window.clearTimeout(hoverTimer.current);
+    hoverTimer.current = window.setTimeout(() => setHovered(id), id ? 90 : 140);
+  };
+  useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
   // Only highlight (and dim the rest) when the picked structure is actually drawn in this view.
   const [selectedLit, setSelectedLit] = useState(false);
   // Names in the picture: step by step as the study names them (default), all of them, or none.
@@ -1070,6 +1079,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     setQuestionsOpen(false);
     setGlossaryOpen(false);
     setFind(null);
+    window.clearTimeout(hoverTimer.current);
     setHovered(null);
     transport.cancel();
     speaking.current = false;
@@ -1605,7 +1615,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     isSpace,
     partsOf,
     onSelect,
-    onHover: setHovered,
+    onHover: hoverScene,
   };
 
   // Rings for step structures drawn too small to notice: the tour's current one, else the selection, else the step's.

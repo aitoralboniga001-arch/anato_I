@@ -402,7 +402,7 @@ function DiaphragmDome3DView({ t, reduced }: SceneProps) {
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="none" />
-      <Stage3D scene={scene} axes={{ up: 'kraneala', front: 'bentrala', side: 'ezkerra', sideDir: [1, 0, 0] }}>
+      <Stage3D scene={scene} axes={{ up: 'kraneala', front: 'bentrala', side: 'ezkerra', sideDir: [1, 0, 0], edges: { up: 'Kraneala', down: 'Kaudala', front: 'Bentrala', back: 'Dortsala', side: 'Ezkerra', otherSide: 'Eskuina' } }}>
         {(at) => {
           const sept = at(top(X(560), Z(500), 0.06));
           const mes = at(top(X(500), Z(330), 0.05));

@@ -74,6 +74,11 @@ const FROM: Record<string, string> = {
   Eskuina: 'Eskuinetik',
   Kraneala: 'Goitik',
   Kaudala: 'Behetik',
+  // Plain sides (the newborn skull): the same words.
+  Aurrea: 'Aurretik',
+  Atzea: 'Atzetik',
+  Goia: 'Goitik',
+  Behea: 'Behetik',
 };
 const fromWord = (name: string) => FROM[name] ?? `${name}etik`;
 /** Key order: front and back, the two sides (the embryo's left first), above and below. */
@@ -369,7 +374,29 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   const edges = orientation && liveOrient?.key === resetKey ? liveOrient.o : orientation;
   const pillL = !!edges?.left;
   const pillR = !!edges?.right;
-  const labelScale = useMemo(() => ({ k: labelK, left: pillL, right: pillR }), [labelK, pillL, pillR]);
+  // Where the named camera keys (bottom right, over the frame above 820 px) begin, in frame units: the
+  // right column of names ends above them instead of running under the panel.
+  const lookRef = useRef<HTMLDivElement>(null);
+  const [keysTop, setKeysTop] = useState<number | undefined>(undefined);
+  useEffect(() => {
+    const el = lookRef.current;
+    const svg = wrap.current?.querySelector<SVGSVGElement>('svg.viewport-svg');
+    if (!el || !svg) return setKeysTop(undefined);
+    const measure = () => {
+      const r = svg.getBoundingClientRect();
+      const s = Math.min(r.width / W, r.height / H);
+      if (!s) return;
+      const top = (el.getBoundingClientRect().top - (r.top + (r.height - H * s) / 2)) / s;
+      // Under the frame (narrow screens) the keys cover no name.
+      setKeysTop(top < H - 4 ? Math.round(top) : undefined);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    ro.observe(svg);
+    return () => ro.disconnect();
+  }, [size, look, interactive3d]);
+  const labelScale = useMemo(() => ({ k: labelK, left: pillL, right: pillR, keysTop }), [labelK, pillL, pillR, keysTop]);
 
   const changed = useEffectEvent((on: boolean) => onFullscreenChange?.(on));
 
@@ -612,7 +639,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
       {interactive3d && look && (
         // Named sides: "see it from the front, from behind, from its left…" — the words a student
         // studies with, and the lit key always says where the picture is seen from now.
-        <div className="look-controls" role="group" aria-label="Ikusi alde batetik" onPointerDown={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
+        <div ref={lookRef} className="look-controls" role="group" aria-label="Ikusi alde batetik" onPointerDown={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
           <span className="look-title">{look.facing ? `${fromWord(look.names[look.facing])} ikusita` : 'Ikusi'}</span>
           <div className="look-keys">
             {LOOK_ORDER(look.names).map((side) => (

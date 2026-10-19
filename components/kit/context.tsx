@@ -56,6 +56,8 @@ export interface LabelScale {
   k: number;
   left: boolean;
   right: boolean;
+  /** Top of the named camera keys over the frame (frame units), when they are shown there. */
+  keysTop?: number;
 }
 
 export const LabelScaleContext = createContext<LabelScale>({ k: 1, left: false, right: false });

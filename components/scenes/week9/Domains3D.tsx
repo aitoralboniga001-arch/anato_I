@@ -335,7 +335,7 @@ function Domains3DView({ t, reduced }: SceneProps) {
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="none" />
-      <Stage3D scene={scene} axes={{ up: 'dortsala', front: 'kraneala', side: 'ezkerra', sideDir: [1, 0, 0] }}>
+      <Stage3D scene={scene} axes={{ up: 'dortsala', front: 'kraneala', side: 'ezkerra', sideDir: [1, 0, 0], edges: { up: 'Dortsala', down: 'Bentrala', front: 'Kraneala', back: 'Kaudala', side: 'Ezkerra', otherSide: 'Eskuina' } }}>
         {(at, view) => {
           // Both cut faces and both sides exist: labels follow the side the learner is viewing.
           const side = view.eye[0] >= 0 ? 1 : -1;

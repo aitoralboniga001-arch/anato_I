@@ -500,7 +500,7 @@ function Calvaria3DView({ t, reduced }: SceneProps) {
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="none" />
-      <Stage3D scene={scene} axes={{ up: 'goia', front: 'aurrea', side: 'ezkerra', sideDir: [1, 0, 0] }}>
+      <Stage3D scene={scene} axes={{ up: 'goia', front: 'aurrea', side: 'ezkerra', sideDir: [1, 0, 0], edges: { up: 'Goia', down: 'Behea', front: 'Aurrea', back: 'Atzea', side: 'Ezkerra', otherSide: 'Eskuina' } }}>
         {(at, camera) => {
           // Follow the actual camera, including manual orbit and the structure tour.
           const view = norm(sub(camera.eye, O));

@@ -139,7 +139,11 @@ export function Callouts({ items, dim = 1, ...o }: Opts & { items: Callout[]; di
   // drawn (the larger k), the more frame units they cover. Half the pill plus half a name, with air.
   const r = 30 * pills.k;
   const band: [number, number] = [320 - r, 320 + r];
-  const pos = layoutCallouts(live, { width, bandL: pills.left ? band : undefined, bandR: pills.right ? band : undefined, ...o });
+  // The right column ends above the camera keys (a name plate is ~14 label units tall either side of its line).
+  const right = o.right ?? [240, 590];
+  const keysEnd = pills.keysTop != null ? pills.keysTop - 20 * pills.k : undefined;
+  const rightCol: [number, number] = keysEnd != null && keysEnd < right[1] ? [Math.min(right[0], keysEnd - 40), keysEnd] : right;
+  const pos = layoutCallouts(live, { width, bandL: pills.left ? band : undefined, bandR: pills.right ? band : undefined, ...o, right: rightCol });
   return (
     <>
       {live.map((c) => {

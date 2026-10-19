@@ -291,7 +291,8 @@ export function buildLimbRotation(t: number): { scene: Scene3; turn: { up: numbe
   const target = mix3([0.08, 0.18, 0.12], [0.08, -0.28, 0.16], focusLow);
   // While the legs turn, the camera goes round with them to the back-left: the flexors end up behind,
   // and the step names them, so the student must see both masses at its end (not only after turning by hand).
-  const lowSeen = seg(t, ROT3.low[0] + 0.025, ROT3.low[1] - 0.012);
+  // The 90-degree turn spans the whole leg rotation (~4 s, peak ~32 deg/s): a quick swing loses the student.
+  const lowSeen = seg(t, ROT3.low[0], ROT3.low[1] + 0.008);
   const yaw = deg(50 + 6 * focusLow + 90 * lowSeen);
   const pitch = deg(14 - 4 * focusLow);
   const dist = 7.0;
@@ -312,7 +313,7 @@ function LimbRotation3DView({ t }: SceneProps) {
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="none" />
-      <Stage3D scene={scene} axes={{ up: 'kraneala', front: 'bentrala', side: 'ezkerra', sideDir: [1, 0, 0] }}>
+      <Stage3D scene={scene} axes={{ up: 'kraneala', front: 'bentrala', side: 'ezkerra', sideDir: [1, 0, 0], edges: { up: 'Kraneala', down: 'Kaudala', front: 'Bentrala', back: 'Dortsala', side: 'Ezkerra', otherSide: 'Eskuina' } }}>
         {(at, view) => {
           const occluders = scene.items.filter((item) => item.key === 'body' || item.key.endsWith('-flex') || item.key.endsWith('-ext'));
           // A point on the surface of one muscle mass, on whichever limb of the pair (and segment) shows
