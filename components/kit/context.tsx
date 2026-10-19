@@ -120,6 +120,8 @@ export type LookSide = 'front' | 'back' | 'side' | 'otherSide' | 'up' | 'down';
  */
 export interface BridgeLook {
   side: LookSide;
+  /** The side the picture is already turned to when the move starts (it turns from there, not from its own camera). */
+  from?: LookSide;
   get: () => number;
   subscribe: (cb: () => void) => () => void;
 }

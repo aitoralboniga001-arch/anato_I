@@ -32,7 +32,7 @@ import { nextRenderDeadline, renderTiming } from '@/lib/three-d/render-policy';
 import { perfCount } from '@/lib/perf';
 import type { ViewSnap } from './ViewBridge';
 import { ViewTravel, revealPlan, travelPlan, type TravelPlan } from './ViewTravel';
-import { ViewZoom, zoomPlan, type ZoomPlan } from './ViewZoom';
+import { ViewZoom, hubPlan, zoomPlan, type ZoomPlan } from './ViewZoom';
 import { CavityRoad } from './CavityRoad';
 import { IconRail, Outline, StageInfo, StageNav } from './SidePanel';
 import { Viewport } from './Viewport';
@@ -548,7 +548,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     setShown({ key: sceneKey, w: week.week, i: pos.i, view: view.id });
   }
   /** The camera move between two views (see ViewTravel), while it plays; playback waits for it. */
-  const [travel, setTravel] = useState<{ key: string; plan?: TravelPlan; zoom?: ZoomPlan } | null>(null);
+  // `via`: the move goes through another view of the stage first (see `hubPlan`), then on with `next`.
+  const [travel, setTravel] = useState<{ key: string; plan?: TravelPlan; zoom?: ZoomPlan; via?: { view: string; next: ZoomPlan } } | null>(null);
   const travelRef = useRef(false);
   useEffect(() => {
     travelRef.current = !!travel;
@@ -1626,10 +1627,12 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   const legend = legendOf(stage.structures);
 
   const day = lerpDay(stage.dayRange, pos.t);
+  /** The body this view is a cut of: younger than the running day when the drawing says so. */
+  const bodyDay = typeof view.age === 'number' ? view.age : (view.body ?? day);
 
   // A view change: the camera moves (travel or zoom) when it can; the live map in the stage bar shows
   // the old and the new plane on the body either way, so no card covers the picture.
-  const snap: ViewSnap = { key: sceneKey, week: week.week, stageTitle: stage.title, label: view.label, plane: view.plane, day, level: view.locator?.level, orientation: view.orientation };
+  const snap: ViewSnap = { key: sceneKey, week: week.week, stageTitle: stage.title, label: view.label, plane: view.plane, day: bodyDay, level: view.locator?.level, orientation: view.orientation };
   const [seenView, setSeenView] = useState<ViewSnap | null>(null);
   // Only once the deep link has been applied: the view a link replaces was never on screen.
   if (mounted && linkedWeek === week.week && seenView?.key !== sceneKey) {
@@ -1638,13 +1641,16 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     const [fw, fs, fv] = seenView?.key.split('/') ?? [];
     const fromView = Number(fw) === week.week ? week.stages.find((x) => x.id === fs)?.views.find((x) => x.id === fv) : undefined;
     const may = !formation && !reduced && !travel && intro === null && fromView && seenView;
-    const plan = may ? travelPlan(week.week, day, fromView, view, seenView.day) : null;
+    const plan = may ? travelPlan(week.week, bodyDay, fromView, view, seenView.day) : null;
     // A close-up of another view (of this stage, or one it names across a stage change): the camera dives
     // into where it is (or pulls back out). Across a stage change it runs while the stage's preview starts.
     const crossing = fs !== stage.id && intro !== null;
     const zoom = (may || (crossing && !formation && !reduced && !travel && fromView && seenView)) && !plan ? zoomPlan(fromView!, view, fs, stage.id) : null;
+    // Two views with no move between them, both bridged to a third: out to it and in to the other.
+    const hub = may && !plan && !zoom && fs === stage.id ? hubPlan(fromView, view, stage.views) : null;
     if (plan) setTravel({ key: sceneKey, plan });
     else if (zoom) setTravel({ key: sceneKey, zoom });
+    else if (hub) setTravel({ key: sceneKey, zoom: hub.first, via: { view: hub.via, next: hub.next } });
     else if (travel) setTravel(null);
   }
   // Playback waits while the camera moves.
@@ -1652,7 +1658,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     bridgeHold.current = !!travel;
   }, [travel]);
   /** "Non nago?": out to the whole body (the plane on it) and back in, on the same view. */
-  const reveal = revealPlan(week.week, day, view);
+  const reveal = revealPlan(week.week, bodyDay, view);
   const startReveal = () => {
     if (!reveal || travel || reduced) return;
     setPlaying(false);
@@ -1703,7 +1709,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   // The path from the whole body to this view: the body (out and back), the region or the drawing a close-up came from, this view.
   const parentView = view.zoom ? stage.views.find((v) => v.id === view.zoom!.from) : undefined;
   const crumbs: Crumb[] = [
-    { label: shapeFor(week.week, day, view.plane) === 'fetua' ? 'Fetua' : 'Enbrioia', tip: reveal ? 'Kamera atzera: gorputz osoa eta planoa, eta berriro hona' : undefined, onClick: reveal && !reduced ? startReveal : undefined },
+    { label: shapeFor(week.week, bodyDay, view.plane) === 'fetua' ? 'Fetua' : 'Enbrioia', tip: reveal ? 'Kamera atzera: gorputz osoa eta planoa, eta berriro hona' : undefined, onClick: reveal && !reduced ? startReveal : undefined },
     ...(parentView ? [{ label: parentView.label, tip: `Itzuli ${parentView.label.toLowerCase()} ikuspegira`, onClick: () => chooseView(parentView.id) }] : view.locator?.note ? [{ label: view.locator.note }] : []),
     { label: view.label, tip: view.description },
   ];
@@ -1895,7 +1901,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
               <Locator
                 plane={view.plane}
                 week={week.week}
-                day={day}
+                day={bodyDay}
                 level={view.locator?.level}
                 orientation={view.orientation}
                 note={view.locator?.note}
@@ -2113,16 +2119,23 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
             >
               {travel?.key === sceneKey && travel.zoom && ghost && GhostScene ? (
                 <ViewZoom
-                  key={`zoom-${travel.key}`}
+                  key={`zoom-${travel.key}${travel.via ? '-via' : ''}`}
                   plan={travel.zoom}
                   old={<SceneView Scene={GhostScene} t={ghost.t} reduced={reduced} />}
                   onDone={() => {
+                    const via = travel.via;
+                    if (via) {
+                      // On from the view in between: it becomes the picture the next move leaves.
+                      setGhost({ key: `${week.week}/${stage.id}/${via.view}`, i: pos.i, view: via.view, t: sceneT });
+                      setTravel({ key: sceneKey, zoom: via.next });
+                      return;
+                    }
                     setTravel(null);
                     setGhost(null);
                     setArrived(sceneKey);
                   }}
                 >
-                  {mounted && <SceneView Scene={Scene} t={sceneT} reduced={reduced} />}
+                  {mounted && <SceneView Scene={(travel.via && stage.views.find((v) => v.id === travel.via!.view)?.scene) || Scene} t={sceneT} reduced={reduced} />}
                 </ViewZoom>
               ) : travel?.key === sceneKey && travel.plan && ghost && GhostScene ? (
                 <ViewTravel

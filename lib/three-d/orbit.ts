@@ -16,16 +16,18 @@ export function orbitCamera(camera: Camera3, turn: { yaw: number; pitch: number 
 
 /**
  * The turn (for `orbitCamera`) that puts the eye on `dir` as seen from the target: the camera looks at
- * the specimen from that side (as close to straight above or below as the orbit allows).
+ * the specimen from that side (as close to straight above or below as the orbit allows). `lean`: from
+ * straight above or below, the side the eye leans to (the far side ends at the top of the picture from
+ * above, the near side from below); without it the camera keeps its own.
  */
-export function lookTurn(camera: Camera3, dir: V3): { yaw: number; pitch: number } {
+export function lookTurn(camera: Camera3, dir: V3, lean?: V3): { yaw: number; pitch: number } {
   const up: V3 = norm(camera.up ?? [0, 1, 0]);
   const off = norm(sub(camera.eye, camera.target));
   const d = norm(dir);
   const flat = (v: V3): V3 => norm(sub(v, [up[0] * dot(v, up), up[1] * dot(v, up), up[2] * dot(v, up)]));
   const h0 = flat(off);
-  // Straight above or below has no side of its own: keep the camera's.
-  const h1 = Math.abs(dot(d, up)) > 0.999 ? h0 : flat(d);
+  // Straight above or below has no side of its own: lean the asked way, or keep the camera's.
+  const h1 = Math.abs(dot(d, up)) > 0.999 ? (lean ? flat(lean) : h0) : flat(d);
   const yaw = Math.atan2(dot(up, cross(h0, h1)), dot(h0, h1));
   const elev = (v: V3) => Math.asin(Math.max(-1, Math.min(1, dot(v, up))));
   return { yaw, pitch: elev(d) - elev(off) };

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useEffectEvent, useId, useLayoutEffect, useRef, type ReactNode } from 'react';
-import { PaneContext } from '@/components/kit/context';
+import { PaneContext, TextLayerContext } from '@/components/kit/context';
 import type { PlaneKind, ViewDef } from '@/lib/sim/types';
 import { PLANE_TEXT } from './Locator';
 import { cutOf, modelOf, poly, shapeFor, type Axis, type Model, type SpecimenShape, type V3 } from './Specimen';
@@ -877,9 +877,10 @@ export function ViewTravel({
       </defs>
 
       <rect {...ref('studio')} width={W} height={H} fill={`url(#${uid}studio)`} opacity={0} />
-      {/* The old view's names stay where they were for a moment and fade, instead of vanishing. */}
+      {/* The old view's names stay where they were for a moment and fade, instead of vanishing. Drawn here,
+          not in the viewport's top text layer, so they fade with this group instead of staying all the move. */}
       <g {...ref('old-names')} className="travel-names" pointerEvents="none">
-        {old}
+        <TextLayerContext.Provider value={null}>{old}</TextLayerContext.Provider>
       </g>
       <ellipse cx={500} cy={332} rx={330} ry={230} fill={`url(#${uid}halo)`} opacity={0} {...ref('halo')} />
 

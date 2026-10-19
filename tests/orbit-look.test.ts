@@ -29,4 +29,15 @@ describe('named views (lookTurn)', () => {
     const got = eyeDir(orbitCamera(c, lookTurn(c, [0, 1, 0])));
     expect(got[1]).toBeGreaterThan(0.99);
   });
+  it('from above or below leans the asked way, so the front ends at the top', () => {
+    for (const c of cams) {
+      const above = eyeDir(orbitCamera(c, lookTurn(c, [0, 1, 0], [0, 0, -1])));
+      expect(above[1]).toBeGreaterThan(0.99);
+      expect(above[2]).toBeLessThan(0);
+      expect(Math.abs(above[0])).toBeLessThan(1e-6);
+      const below = eyeDir(orbitCamera(c, lookTurn(c, [0, -1, 0], [0, 0, 1])));
+      expect(below[1]).toBeLessThan(-0.99);
+      expect(below[2]).toBeGreaterThan(0);
+    }
+  });
 });

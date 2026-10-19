@@ -345,3 +345,33 @@ Each batch ends with:
   - `tests/klasea.test.ts` runs the same guards for topic 7 as for 10 and 11. The x-words "toraxa", "toraxetik", "paraxiala" and the others are classified. `paraxial…` is now read /ks/ (`KS_STEMS`).
   - The source audit is in `docs/klasea/w7-audit.md`.
 - **Checked:** headless Chrome at 1280 px and 1024 px, playing the class from the septum, its fixings, the mesentery, the organs, the membranes, the components and the adult diaphragm chunks. The lit parts match each line, the board fills in, and there are no console errors.
+
+## 7. Batch 5 results (E + F for topic 8, the two pending captions), 2026-10-19
+
+- **Camera moves instead of cuts (E).** All 11 in-stage changes between two body pictures in topic 8 now move the camera. `tests/view-changes.test.ts` pins this for topic 8: every guided change must be a travel, a dive or a turn.
+  - `jatorriak`: the map → the transverse cut dives into the somites of the trunk and opens the cut ("BARRURA BEGIRATZEN · MOZKETA"). Going back, the cut shrinks into its place.
+  - `buru-ganga`:
+    - the 3D dome turns to its right side and the side drawing lands on it, front to the right as in the drawing;
+    - turned to its top, front up, the top drawing lands on it in the same way;
+    - top ↔ side (no model of their own) go through the dome: the drawing hands over to the dome seen from the same side, the dome turns once from one side to the other, and the other drawing lands on it (`hubPlan`).
+  - `errai-kraneoa`: the 5-week head grows into the newborn skull in place ("BURUA HAZTEN · 5. ASTETIK JAIOTZARA").
+  - `gorputz-adarrak`: the limb drawing hands over to the 3D embryo seen from the front (its left side), then the camera pulls back and turns to the usual view.
+  - `ornoa`: the vertebra from above shrinks into its level of the column seen from behind (a cut, so "KANPOTIK IKUSTEN · OSORIK").
+  - `bizkarrezurra`:
+    - transverse → coronal now travels inside the young embryo: the transverse plane turns into the coronal one through the back;
+    - coronal → curvatures pulls back from the column to the whole fetus.
+- **What changed in the shared code.**
+  - `ViewDef.body`: the day of the body a cut is taken from, when the drawing is younger than the stage's running day. The plane map, "Non nago?" and the travel use it, and the clock keeps running. The transverse column cut is now pinned to day 28 (`age`), as its drawing and the notes say ("4. astean"). Before, its clock read the 9th week.
+  - Bridges can carry their own caption header, for moves that are not a closer look (the same thing from the same side, the same head grown).
+  - "Goitik" and "Behetik" on any 3D model now put the front at the top of the picture, as the notes draw a skull from above. Before, the camera kept its own side, so the front could end up at the bottom-left. Topics 9–11 get this too.
+- **Fixed in passing (all plane travels, topics 7–11).** During a travel between planes, the old view's names were meant to fade in 0.4 s. Instead they stayed at full strength, without their leaders, for the whole move: they were drawn in the viewport's top text layer, outside the fading group. They now fade as designed.
+- **Recall links (F).** Every topic 8 stage opens with GOGORATU chips for what it builds on; a tap replays where that structure formed:
+  - origins: paraxial mesoderm, the parietal layer, the neural crest;
+  - ossification, long bones: the ossification centres;
+  - calvaria: the neural crest, the somitomeres;
+  - chondrocranium: the notochord, the somites;
+  - face: the pharyngeal arches, the neural crest;
+  - limbs: the upper and lower limb buds;
+  - vertebra: the sclerotome, the notochord; column: the somites, the sclerotome, the notochord; ribs: the sclerotome.
+- **The two pending captions.** The notes figures of the skull from above (`w8/3.1.1/p12`) and the chondrocranium from above (`w8/3.1.2/p5`) are now linked to their steps. `tests/notes.test.ts` no longer keeps a pending list: every caption of topics 8 and 9 must stay linked.
+- **Checked:** headless Chrome at 1280 px, frame by frame through every new move, including the two-leg move through the dome. In headless, the first entry into a 3D model waits up to ~3 s for WebGL to start, as every move into 3D does. The full test suite passes.

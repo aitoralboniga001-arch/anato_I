@@ -160,9 +160,7 @@ describe('figure parity: notes captions link to a matching step', () => {
   });
 
   it('keeps the linked captions of topics 8 and 9 linked', () => {
-    // Not yet linked in topic 8 (the audit's batch for topic 8 adds them): the skull from above, the chondrocranium from above.
-    const pending = new Set(['w8/3.1.1/p12', 'w8/3.1.2/p5']);
-    for (const week of [8, 9]) for (const b of captions(week)) if (!pending.has(b.id) && !blockText(b).trim().match(/^[\s○•*-]*$/)) {
+    for (const week of [8, 9]) for (const b of captions(week)) if (!blockText(b).trim().match(/^[\s○•*-]*$/)) {
       expect(linked(b), `${b.id}: ${blockText(b).slice(0, 60)}`).toBe(true);
     }
   });

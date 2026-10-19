@@ -66,6 +66,12 @@ export interface ViewDef {
    */
   age?: number | string | null;
   /**
+   * The day of the body this drawing is a cut of, when it is younger than the stage's running day and the
+   * clock should keep running (a numeric `age` counts too): the plane map, "Non nago?" and the camera's
+   * travel to and from the other planes then use that body.
+   */
+  body?: number;
+  /**
    * A close-up of one structure of another view of the same stage: moving between the two, the camera
    * dives into where `part` is drawn in view `from` (and back out), so the detail is never placeless.
    */
@@ -93,6 +99,8 @@ export interface ViewDef {
      * on the left) rolls round while the camera moves, so the student sees the turn instead of a cut.
      */
     roll?: number;
+    /** The caption's header going into this view and coming back out, when the move is not a closer look (the same thing from the same side, the same head grown). */
+    caption?: [string, string];
   }[];
 }
 

@@ -77,6 +77,8 @@ function lookDir(side: LookSide, sideDir: V3): V3 {
   return side === 'front' ? [0, 0, 1] : side === 'back' ? [0, 0, -1] : side === 'up' ? [0, 1, 0] : side === 'down' ? [0, -1, 0] : side === 'side' ? sideDir : neg(sideDir);
 }
 const SIDES: LookSide[] = ['front', 'back', 'side', 'otherSide', 'up', 'down'];
+/** From above the eye leans back and from below forward, so the front is at the top of the picture, as in the notes. */
+const leanOf = (side: LookSide): V3 | undefined => (side === 'up' ? [0, 0, -1] : side === 'down' ? [0, 0, 1] : undefined);
 
 /** The named side the camera looks from now (within ~20 degrees), if any. */
 function facingOf(m: M4, sideDir: V3): LookSide | undefined {
@@ -225,10 +227,13 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
   const bridgeK = useSyncExternalStore(bridge?.subscribe ?? noSubscribe, bridge?.get ?? zero, zero);
   // The camera the scene asks for, turned by the viewer's drag around its target.
   const cam = useMemo(() => {
-    if (!bridge || bridgeK <= 0 || !axes) return orbitCamera(scene.camera, turn);
-    const goal = lookTurn(scene.camera, lookDir(bridge.side, axes.sideDir));
-    const yaw = turn.yaw + Math.atan2(Math.sin(goal.yaw - turn.yaw), Math.cos(goal.yaw - turn.yaw));
-    return orbitCamera(scene.camera, { yaw: turn.yaw + (yaw - turn.yaw) * bridgeK, pitch: turn.pitch + (goal.pitch - turn.pitch) * bridgeK });
+    if (!bridge || !axes || (bridgeK <= 0 && !bridge.from)) return orbitCamera(scene.camera, turn);
+    const toward = (side: LookSide) => lookTurn(scene.camera, lookDir(side, axes.sideDir), leanOf(side));
+    const start = bridge.from ? toward(bridge.from) : turn;
+    const goal = toward(bridge.side);
+    // The short way round.
+    const yaw = start.yaw + Math.atan2(Math.sin(goal.yaw - start.yaw), Math.cos(goal.yaw - start.yaw));
+    return orbitCamera(scene.camera, { yaw: start.yaw + (yaw - start.yaw) * bridgeK, pitch: start.pitch + (goal.pitch - start.pitch) * bridgeK });
   }, [scene.camera, turn, bridge, bridgeK, axes]);
   const orbitRequest = ul?.orbitRequest;
   const [appliedOrbit, setAppliedOrbit] = useState<typeof orbitRequest>(undefined);
@@ -237,7 +242,7 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
     const { direction } = orbitRequest;
     // From where the last asked-for turn is heading (quick presses add up), not from mid-glide.
     const base = turnGoal && !drag.current ? turnGoal : turn;
-    const look = direction === 'look' && orbitRequest.look && axes ? lookTurn(scene.camera, lookDir(orbitRequest.look, axes.sideDir)) : null;
+    const look = direction === 'look' && orbitRequest.look && axes ? lookTurn(scene.camera, lookDir(orbitRequest.look, axes.sideDir), leanOf(orbitRequest.look)) : null;
     // The short way round from where the picture is now.
     const wrap = (a: number) => base.yaw + Math.atan2(Math.sin(a - base.yaw), Math.cos(a - base.yaw));
     glideTurn(look ? { yaw: wrap(look.yaw), pitch: look.pitch } : direction === 'reset' || direction === 'look' ? { yaw: 0, pitch: 0 } : {

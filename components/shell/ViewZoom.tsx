@@ -35,10 +35,18 @@ export interface ZoomPlan {
   look?: LookSide;
   /** Degrees the close-up is turned in the whole view (clockwise): the camera rolls with the move. */
   roll?: number;
+  /** The caption's header, when the move is not a closer look. */
+  caption?: string;
+  /** Out to a 3D picture that the next move turns on from (see `hubPlan`): it stays turned, and the move ends once the pictures have crossed. */
+  hold?: boolean;
+  /** Into a cut from a 3D picture already turned to this side by the move before. */
+  lookFrom?: LookSide;
 }
 
 /** Going into a cut seen from another side than the 3D picture: the turn comes first. */
 const TURN_MS = 1100;
+/** Out to a 3D picture the next move turns on from: over once the pictures have crossed. */
+const HOLD_MS = 900;
 
 /**
  * The zoom between two views, or null: one must be the other's close-up (`zoom`, same stage) or name the
@@ -50,9 +58,26 @@ export function zoomPlan(from: ViewDef, to: ViewDef, fromStage?: string, toStage
   if (same && from.zoom?.from === to.id) return { inward: false, part: from.zoom.part, at: from.zoom.at, fromLabel: from.label, toLabel: to.label };
   const names = (v: ViewDef, stage?: string) => (same ? [v.id] : [`${stage}/${v.id}`]);
   const into = to.bridges?.find((b) => names(from, fromStage).includes(b.from));
-  if (into) return { inward: true, part: into.part, at: into.at, fromLabel: from.label, toLabel: to.label, section: into.section, look: into.look, roll: into.roll };
+  if (into) return { inward: true, part: into.part, at: into.at, fromLabel: from.label, toLabel: to.label, section: into.section, look: into.look, roll: into.roll, caption: into.caption?.[0] };
   const out = from.bridges?.find((b) => names(to, toStage).includes(b.from));
-  if (out) return { inward: false, part: out.part, at: out.at, fromLabel: from.label, toLabel: to.label, section: out.section, look: out.look, roll: out.roll };
+  if (out) return { inward: false, part: out.part, at: out.at, fromLabel: from.label, toLabel: to.label, section: out.section, look: out.look, roll: out.roll, caption: out.caption?.[1] };
+  return null;
+}
+
+/**
+ * Two views of one stage with no move of their own, both bridged to a third (a 3D model drawn from two
+ * sides): the camera goes out to it and back in to the other, through the view `via`. When both moves
+ * turn the 3D picture, it turns once, from the first side straight to the second.
+ */
+export function hubPlan(from: ViewDef, to: ViewDef, views: ViewDef[]): { via: string; first: ZoomPlan; next: ZoomPlan } | null {
+  for (const v of views) {
+    if (v.id === from.id || v.id === to.id) continue;
+    const first = zoomPlan(from, v);
+    const next = first && zoomPlan(v, to);
+    if (!first || !next) continue;
+    const turn = !first.inward && next.inward && !!first.look && !!next.look;
+    return { via: v.id, first: turn ? { ...first, hold: true } : first, next: turn ? { ...next, lookFrom: first.look } : next };
+  }
   return null;
 }
 
@@ -132,12 +157,13 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   // Into a cut seen from another side: the 3D picture turns first, then the camera goes in.
   const pre = plan.look && plan.inward ? TURN_MS : 0;
-  const total = ZOOM_MS + pre;
+  const total = plan.hold ? HOLD_MS : ZOOM_MS + pre;
   const look = useMemo(() => {
     let k = plan.look && !plan.inward ? 1 : 0;
     const subs = new Set<() => void>();
     const store: BridgeLook & { set: (v: number) => void } = {
       side: plan.look ?? 'front',
+      from: plan.lookFrom,
       get: () => k,
       subscribe: (cb) => {
         subs.add(cb);
@@ -150,14 +176,14 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
       },
     };
     return store;
-  }, [plan.look, plan.inward]);
+  }, [plan.look, plan.inward, plan.lookFrom]);
 
   const draw = (msAll: number) => {
     const g = root.current;
     const r = reg.current;
     if (!g || !r) return;
     const ms = msAll - pre;
-    if (plan.look) look.set(plan.inward ? glide(msAll / TURN_MS) : 1 - glide((ms - 350) / 1200));
+    if (plan.look) look.set(plan.inward ? glide(msAll / TURN_MS) : plan.hold ? 1 : 1 - glide((ms - 350) / 1200));
     const q = (k: string) => g.querySelector<SVGElement>(`[data-z="${k}"]`);
     const set = (k: string, attrs: Record<string, string | number>) => {
       const el = q(k);
@@ -281,7 +307,7 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
       <g {...z('caption')} opacity={0}>
         <rect x={500 - pillW / 2} y={14} width={pillW} height={60} rx={16} fill="rgba(12,14,20,0.84)" stroke="rgba(255,255,255,0.09)" />
         <text x={500} y={35} textAnchor="middle" style={{ font: '600 10.5px var(--font-mono, monospace)', letterSpacing: '0.16em', fill: '#fbbf24' }}>
-          {plan.section ? (plan.inward ? 'BARRURA BEGIRATZEN · MOZKETA' : 'KANPOTIK IKUSTEN · OSORIK') : plan.inward ? 'GERTUTIK BEGIRATZEN' : 'OSORIK IKUSTEN'}
+          {plan.caption ?? (plan.section ? (plan.inward ? 'BARRURA BEGIRATZEN · MOZKETA' : 'KANPOTIK IKUSTEN · OSORIK') : plan.inward ? 'GERTUTIK BEGIRATZEN' : 'OSORIK IKUSTEN')}
         </text>
         <text x={500} y={60} textAnchor="middle" style={{ font: `650 19px ${sans}`, fill: '#e8eefc' }}>
           <tspan fill="rgba(232,238,252,0.85)">{plan.fromLabel}</tspan>

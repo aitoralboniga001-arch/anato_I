@@ -50,12 +50,14 @@ export const week8: WeekDef = {
           description: 'Enborraren zeharkako mozketa (4. astea), eskuineko somita gertutik: esklerotoma mesenkima bihurtu eta hodi neurala eta notokorda inguratzera migratzen du.',
           orientation: { top: 'Dortsala', bottom: 'Bentrala' },
           scene: OriginsSection,
+          bridges: [{ from: 'mapa', part: 'somitak', section: true, at: [330, 358, 120] }],
           locator: { level: 0.45, note: 'Enborraren maila' },
         },
       ],
       beats: [
         {
           at: 0,
+          recall: ['mesodermo-paraxiala', 'paretako-orria', 'gandor-neurala'],
           idea: 'Hezur guztiak mesenkimatik sortzen dira, eta mesenkima hiru lekutatik dator.',
           key: 'Hezur bakoitzaren jatorria jakitea ordena ezartzea da: gorputza → mesodermoa; aurpegia → gandor neurala.',
           ask: {
@@ -210,6 +212,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          recall: ['hezurtzapen-zentroak'],
           idea: 'Bi hezurtzapen mota daude, biak mesenkimatik hasten dira.',
           notes: ['w8/2/p2/s1'],
           text: 'Orokorrean bi hezurtzapen mota daude: mintzezkoa eta endokondrala. Bien abiapuntua mesenkima da.',
@@ -301,6 +304,8 @@ export const week8: WeekDef = {
           description: 'Jaioberriaren buru-ganga goitik (27. orriko A irudia): hezurrak hezurtzapen zentroetatik hazten dira; haien artean joskurak eta fontanelak.',
           orientation: { top: 'Aurrea', bottom: 'Atzea', left: 'Ezkerra', right: 'Eskuina' },
           scene: CalvariaTop,
+          // The dome turned to its top, front up: the drawing lies on it.
+          bridges: [{ from: 'kupula', part: 'buru-ganga', at: [500, 320, 1000], look: 'up', caption: ['ALDE BERETIK IKUSITA', '3D EREDUAN IKUSTEN'] }],
         },
         {
           id: 'albotik',
@@ -309,6 +314,8 @@ export const week8: WeekDef = {
           description: 'Jaioberriaren burezurra albotik (27. orriko B irudia): neurokraneoa eta errai kraneoa, alboko bi fontanelak.',
           orientation: { left: 'Atzea', right: 'Aurrea' },
           scene: CalvariaSide,
+          // The dome turned to its right side, front to the right as in the drawing.
+          bridges: [{ from: 'kupula', part: 'buru-ganga', at: [500, 320, 1000], look: 'otherSide', caption: ['ALDE BERETIK IKUSITA', '3D EREDUAN IKUSTEN'] }],
         },
         {
           id: 'kupula',
@@ -323,6 +330,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          recall: ['gandor-neurala', 'somitomeroak'],
           idea: 'Burezurra bi zati: neurokraneoa (burmuina babesten du) eta errai kraneoa (aurpegia).',
           notes: ['w8/3/p2/s1', 'w8/3/p3/s1-s4', 'w8/3/p4/s1', 'w8/3.1/p3/s1-s2'],
           text: 'Burezurreko hezurrak bi zatitan banatzen dira: neurokraneoa (entzefaloaren inguruan, burmuina babesten du) eta errai kraneoa (aurpegiaren eskeletoa). Neurokraneoa kutxa baten antzekoa da: goian eta alboetan buru-ganga, zoruan kondrokraneoa.',
@@ -387,7 +395,7 @@ export const week8: WeekDef = {
               'Ez: ez dira batera ixten.',
             ],
           },
-          notes: ['w8/3.1.1/p10/s1', 'w8/3.1.1/p13/s1', 'w8/3.1.1/p14/s1', 'w8/3.1.1/p15/s1', 'w8/3.1.1/p16/s1'],
+          notes: ['w8/3.1.1/p10/s1', 'w8/3.1.1/p11/s1', 'w8/3.1.1/p12/s1', 'w8/3.1.1/p13/s1', 'w8/3.1.1/p14/s1', 'w8/3.1.1/p15/s1', 'w8/3.1.1/p16/s1'],
           text: 'Fontanelak: ildo zabalagoak, bi hezur baino gehiago elkartzen diren lekuetan. Goitik: aurreko fontanela edo bregma (bi frontal eta bi parietalen artean; 18. hilabetean ixten da) eta atzeko fontanela edo lambda (bi parietalen eta okzipitalaren ezkataren artean; 1.–2. hilabetean ixten da).',
           focus: ['aurreko-fontanela', 'atzeko-fontanela'],
           view: 'goitik',
@@ -469,6 +477,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          recall: ['notokorda', 'somitak'],
           idea: 'Kondrokraneoa burezurraren zorua da: kartilagotik hezurrera (endokondrala).',
           ask: {
             q: 'Zein hezurtzapen mota du kondrokraneoak?',
@@ -480,7 +489,7 @@ export const week8: WeekDef = {
               'Ez: hezurtzapen bat du, endokondrala.',
             ],
           },
-          notes: ['w8/3.1.2/p2/s1-s2', 'w8/3.1.2/p3/s1', 'w8/3.1.2/p4/s1'],
+          notes: ['w8/3.1.2/p2/s1-s2', 'w8/3.1.2/p3/s1', 'w8/3.1.2/p4/s1', 'w8/3.1.2/p5/s1'],
           text: 'Kondrokraneoa neurokraneoaren oinaldean dago (kutxaren zorua). Hezurtzapen endokondralaren bidez sortzen da: mesenkimatik kartilagoa, eta kartilagotik hezurra. Buru-ganga kenduta, oinaldea goitik ikusten dugu; bi motatako kartilago plaketatik sortzen da.',
           focus: ['kondrokraneoa'],
         },
@@ -608,11 +617,14 @@ export const week8: WeekDef = {
           description: 'Jaioberriaren burezurra alboz (apunteetako irudia): kolore bakoitza kartilago edo prozesu batetik datozen hezurrak; hezurtxoen hurbilketa, aurpegiaren hazkuntza eta jatorriak.',
           orientation: { left: 'Aurrea', right: 'Atzea' },
           scene: FaceSkull,
+          // The 5-week head and the newborn skull are drawn on the same place and scale: one grows into the other.
+          bridges: [{ from: 'arkuak', part: 'faringe-arkuak', at: [500, 320, 1000], caption: ['BURUA HAZTEN · 5. ASTETIK JAIOTZARA', '5. ASTEKO BURURA ITZULTZEN'] }],
         },
       ],
       beats: [
         {
           at: 0,
+          recall: ['faringe-arkuak', 'gandor-neurala'],
           idea: 'Aurpegiko hezurrak arku faringeoetatik sortzen dira, gandor neuraleko zelulekin.',
           notes: ['w8/3.2/p2/s1-s5'],
           text: 'Errai kraneoa aurpegiko hezurrak dira. Lepo mailaren bi aldeetan arku faringeoak agertzen dira: mesenkimazko goraguneak, kanpotik azaleko ektodermoz estaliak. Haietara gandor neuraletako zelulak (ektodermikoak) iristen dira, eta haien mesenkimatik garatzen dira aurpegiko hezurrak; bertako mesodermotik muskuluak.',
@@ -798,6 +810,8 @@ export const week8: WeekDef = {
           description: 'Goiko eta beheko gorputz-adarrak gorputz-paretatik hazten, atzetik ikusita: hasikina, plakak, izpiak, kartilagoak eta hezurtzapen zentroak (4.–8. asteak).',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: LimbBuds,
+          // The embryo's left side seen from the front: the trunk's edge and its two limbs.
+          bridges: [{ from: 'biraketa', part: 'muskulu-tolestatzaileak', at: [489, 416, 430], look: 'front' }],
         },
         {
           id: 'biraketa',
@@ -821,6 +835,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          recall: ['goiko-gorputz-adarraren-hasikina', 'beheko-gorputz-adarraren-hasikina'],
           idea: 'Laugarren astean gorputz-adarren hasikinak agertzen dira; goikoak lehenago.',
           ask: {
             q: 'Zein hasikin agertzen da lehenago?',
@@ -993,6 +1008,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          recall: ['hezurtzapen-zentroak'],
           idea: 'Hezur luzeetan zentro primarioa kartilagoaren erdian agertzen da.',
           notes: ['w8/4/p18/s1'],
           text: '12. asterako hezur luze guztien erdiko atalean hezurtzapen zentro primarioak agertzen dira, kartilago ereduaren erdian.',
@@ -1089,6 +1105,7 @@ export const week8: WeekDef = {
           // One vertebra, not a cut of the whole body: no camera move.
           travel: false,
           scene: VertebraTop,
+          bridges: [{ from: 'atzetik', part: 'orno-gorputza', section: true, at: [500, 249, 360] }],
         },
         {
           id: 'atzetik',
@@ -1102,6 +1119,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          recall: ['esklerotoma', 'notokorda'],
           idea: 'Orno gorputza notokordaren inguruan eratzen da, aurrean.',
           notes: ['w8/5.1/p2/s1'],
           text: 'Orno gorputza ornoaren aurreko atala da, bentralerantz kokatuta: notokordaren inguruan eratzen da.',
@@ -1235,6 +1253,7 @@ export const week8: WeekDef = {
           plane: 'zeharkakoa',
           description: 'Zeharkako ebakidura 4. astean, goian atzea: somitak dermatoma, miotoma eta esklerotoma bihurtzen; esklerotomako zelulak erdialdera, hodi neurala eta notokorda inguratuz (mesenkima zutabea).',
           orientation: { top: 'Dortsala', bottom: 'Bentrala' },
+          age: 28,
           scene: ColumnSection,
         },
         {
@@ -1243,7 +1262,10 @@ export const week8: WeekDef = {
           plane: 'koronala',
           description: 'Ebakidura koronala notokordaren mailan: segmentu trinkoak eta segmentu arteko mesenkima, miotomak eta arteriak; birsegmentazioa, orno gorputzak bi segmentutatik, diskoa, gune pulposoa eta eraztun fibrosoa.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
+          // The column of the young embryo: the camera travels to it from the transverse cut (the clock runs on).
+          body: 30,
           scene: ColumnCoronal,
+          bridges: [{ from: 'makurdurak', part: 'zifosia', section: true, at: [543, 336, 300] }],
         },
         {
           id: 'makurdurak',
@@ -1257,6 +1279,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          recall: ['somitak'],
           idea: 'Somitak okzipitaletik behera sortzen dira, hiru zelula motarekin.',
           notes: ['w8/5.2/p2/s1-s2'],
           text: 'Mesodermo paraxiala alde okzipitaletik behera segmentatzen da eta somitak agertzen dira. Somitetako zelula guztiak berdinak dira hasieran, baina gero miotoma, dermatoma eta esklerotoma zelulak bereizten dira.',
@@ -1453,6 +1476,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          recall: ['esklerotoma'],
           idea: 'Saihetsak bi atal: hezurra (atzean) eta kartilagoa (aurrean).',
           notes: ['w8/5.4/p2/s1', 'w8/5.4/p3/s1', 'w8/5.4/p4/s1'],
           text: 'Saihetsetan bi atal bereizten dira. Atzeko atala hezurrezkoa da: saihets hezurra, gorputzaren atze eta aurreko paretan kokatuta. Aurrekoa kartilagozkoa: saihets kartilagoa.',

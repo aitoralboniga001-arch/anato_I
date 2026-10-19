@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { weeks } from '@/content/registry';
 import type { StageDef } from '@/lib/sim/types';
+import { travelPlan } from '@/components/shell/ViewTravel';
+import { hubPlan, zoomPlan } from '@/components/shell/ViewZoom';
 
 /**
  * A study that flows: the camera never moves to another place in the body on two steps running. A
@@ -37,6 +39,35 @@ describe('ikuspegi aldaketak', () => {
         const seq = viewsOf(stage);
         const bad: string[] = [];
         for (let k = 2; k < seq.length; k++) if (moves(stage, seq[k - 2], seq[k - 1]) && moves(stage, seq[k - 1], seq[k])) bad.push(`${k}–${k + 1}. urratsak: ${seq[k - 2]} → ${seq[k - 1]} → ${seq[k]}`);
+        expect(bad).toEqual([]);
+      });
+});
+
+/**
+ * Never get lost: in the topics pinned here, every change between two body pictures in the guided order
+ * is a camera move (travel between planes, a dive into a close-up or a cut, or a turn of the 3D model),
+ * never a cut. Tables and close-up figures are left out, as above.
+ */
+const MOVED = [8];
+
+describe('ikuspegi aldaketak: kamera mugitzen da', () => {
+  for (const w of weeks.filter((x) => MOVED.includes(x.week)))
+    for (const stage of w.stages)
+      it(`${w.week}/${stage.id}: ikuspegi aldaketa bakoitza kamera mugimendu bat da`, () => {
+        const seq = viewsOf(stage);
+        const bad: string[] = [];
+        for (let k = 1; k < seq.length; k++) {
+          if (seq[k] === seq[k - 1]) continue;
+          const a = stage.views.find((v) => v.id === seq[k - 1])!;
+          const b = stage.views.find((v) => v.id === seq[k])!;
+          const figure = (p: string) => p === 'eskema' || p === 'xehetasuna';
+          if (figure(a.plane) || figure(b.plane)) continue;
+          const at = stage.beats[k].at;
+          const day = stage.dayRange[0] + (stage.dayRange[1] - stage.dayRange[0]) * at;
+          const bodyOf = (v: typeof a) => (typeof v.age === 'number' ? v.age : (v.body ?? day));
+          const moved = travelPlan(w.week, bodyOf(b), a, b, bodyOf(a)) ?? zoomPlan(a, b, stage.id, stage.id) ?? hubPlan(a, b, stage.views);
+          if (!moved) bad.push(`${k + 1}. urratsa: ${a.id} → ${b.id}`);
+        }
         expect(bad).toEqual([]);
       });
 });
