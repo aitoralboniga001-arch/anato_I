@@ -152,7 +152,33 @@ Each item says what the student gains, so it passes the brief's test: **only if 
 - **Siblings to check in the same batch:** the same "slice ↔ looking down" change happens later, in `pleura-perikardioa` and `diafragma-eraketa` (the same `DiaphragmSection`). The canal colour must match there too.
 - **Cost:** fixes 1–2 are one scene file plus one view entry (`bridges`), with labels and visibility tests and real-WebGL shots of the whole stage-1 → stage-2 path at 1536 px and 1024 px.
 
-### Possible, lower value (only after A–H)
+#### I. Studying from the notes: each notes figure should have a picture that looks like it (owner request, 2026-10-19, high value)
+- **Owner's words:** "I study from the notes, and then I go checking the simulation while studying … I find it hard to locate myself, things are not in the same order … or there are things that don't appear, like mesenterio dortsala edo atzeko mesenterioa, or at least I find it hard to visualize it." The example is notes section 2.1, *Peritoneo barrunbea*, with its A → B → C figure: the open disc, then the folding, then the closed body with the gut hanging from the "Atzeko mesenterioa".
+- **What is already right:**
+  - **Stage order.** The topic 7 stages follow the notes' headings (1, 2, 2.1, 2.2, 3, 3.1), and inside a stage the steps follow the notes' sentences in order.
+  - **The dorsal mesentery is taught.** It is lit and named in `peritoneo-barrunbea` steps 2–3.
+  - **A notes reader exists.** The in-app notes reader (**Apunteak**, key N) shows the same text, lights the sentence being shown, and jumps to its step when a sentence is clicked. Figure captions get a "Simulazioan ikusi" link.
+- **What is wrong (why the student gets lost):**
+  1. **The notes' figure is in another stage.** The A → B → C sequence is drawn by `CoelomFold` in stage 1 (`zeloma`, notes section 1). In stage 2.1, where the notes print it, the student finds something different: a finished abdominal section with kidneys, aorta and cava. Its caption, "Atzeko mesenterioa ikusi daiteke", links to step 2 of that section, a picture that does not look like the figure.
+  2. **The change itself is never shown.** The notes say the gut is first held by a *wide* mesenchymal link, then by a *two-layer* link, the dorsal mesentery. In the simulator, step 1 shows the wide link and step 2 the thin one, but the student does not watch the first become the second. The notes' clause "hasieran ez du guztiz inguratzen hestea" (at first the splanchnic layer does not fully wrap the gut) is not shown either.
+  3. **The notes' second name never appears.** The notes and their figure say "atzeko mesenterioa"; the simulator's label says only "Mesenterio dortsala". The atlas has the alias (`week4b.ts:303`), but the picture never shows it.
+  4. **Some captions have no link** (no "Simulazioan ikusi"):
+     - topic 7, "Peritoneo barrunbea" (2.1);
+     - topic 8: 4 of 8, including "Kondrokraneoa goitik ikusita". The `kondrokraneoa` stage exists; its steps just do not cite the caption.
+     - In topic 9 all 23 captions are linked. Most are table fragments, not figures.
+- **Fix:**
+  - **2.1 opens on the notes' figure.** `peritoneo-barrunbea` step 1 starts from `CoelomFold`'s A → B → C, with the same colours as stage 1. The camera then moves into the abdominal section (a `zoom` / `look` bridge), and the student watches the wide link thin into the two-layer mesentery.
+  - **Both names.** The first time the label appears, it reads "Mesenterio dortsala (atzeko mesenterioa)" (keep-all-labels: add, never cut). The FUNTSEZKOA line names both too.
+  - **Caption links.** Every caption of a real figure links to the step whose picture matches it.
+  - **A new check, "figure parity", for every topic.** For each notes figure: name the view and step that reproduce it, and confirm by eye that a student can match them. Add a test listing the captions that must be linked.
+  - **The student's way of studying.** Show the Apunteak panel in the first-run guide ("study with the notes open here"). Reading the notes inside the app gives this student exactly the side-by-side they now get by hand from Word.
+- **Cost:**
+  - step 1 of 2.1: one scene opening plus a bridge;
+  - names and caption links: content only;
+  - the figure-parity check: one test.
+- **Same batch as H.** It is the same thread: coelom → septum → peritoneum, with the coelom kept in one colour.
+
+### Possible, lower value (only after A–I)
 
 - **Topic 9 front embryo (8 weeks):**
   - **Problem:** the front view on the `epaxial-hipaxiala` steps and the last `ehun-konektiboa` step reads as a doll (round head, tube limbs). The rule is that the embryo must look like an embryo.
@@ -180,9 +206,9 @@ Re-shot at 5–6 s, every one of these frames is clean. The DOM check found only
 ## 3. Suggested batches
 
 1. **A + B:** named sides on the four 3D views, fading "seen from" notes, and a slower limb turn. One short batch covering all four scenes, with tests and tablet shots.
-2. **H (topic 7, coelom → septum):** give the two cavities their own longer step with a key line, keep their names and colours in the section, keep the coelom's colour, grow the septum, and add a `look` bridge into the section. Check the sibling sections in `pleura-perikardioa` and `diafragma-eraketa`. This comes before the topic 7 class so the class can narrate the new transition.
+2. **H + I (topic 7, coelom → septum → peritoneum, and the notes' figures):** 2.1 opens on the notes' A → B → C figure, the mesentery is seen thinning, both names are shown, figure captions are linked, and a figure-parity test is added. Also: give the two cavities their own longer step with a key line, keep their names and colours in the section, keep the coelom's colour, grow the septum, and add a `look` bridge into the section. Check the sibling sections in `pleura-perikardioa` and `diafragma-eraketa`. This comes before the topic 7 class so the class can narrate the new transition.
 3. **C + D for topic 7:** the class with plain wording, plus key lines where they are missing.
-4. **E for topic 8:** the 11 in-stage bridges, starting with `errai-kraneoa`, plus the **F** recall links for topic 8.
+4. **E for topic 8:** the 11 in-stage bridges, starting with `errai-kraneoa`, plus the **F** recall links for topic 8 and the **I** caption links (`kondrokraneoa` and the others).
 5. **C + D for topic 9**, plus the **F** timeline milestones.
 6. **C + D for topic 8**, plus the **F** tours.
 7. **E for topic 9** and the crossings that change body or scale, plus **G** (name chips).
