@@ -202,9 +202,9 @@ function cutAt(t: number) {
 export function truncusStage(t: number): TruncusState {
   return {
     ...TR0,
-    ridges: seg(t, P10[1] + 0.01, P10[1] + 0.07),
+    ridges: seg(t, P10[1] + 0.01, P10[1] + 0.06),
     // Fused before the step ends (its text says so); the ridges' names stay on the septum's edges.
-    fuse: t >= P10[1] + 0.075 ? 1 : 0,
+    fuse: t >= P10[1] + 0.065 ? 1 : 0,
     cut: cutAt(t),
     // Seen through while the ridges grow and when the septum meets the conus's; solid when cut across.
     glass: 0.7 * (vis(t, 0.02, P10[2], 0.02) + vis(t, P10[5] + 0.02, P10[6], 0.02)),
@@ -247,7 +247,7 @@ export function Truncus3D({ t }: SceneProps) {
     { id: 'hasierako-ezkerreko-bentrikulua', p: 'hasierako-ezkerreko-bentrikulua', show: vis(t, 0.03, P10[1]), small: true },
     { id: 'enborraren-gandorrak', key: 'gandorra-1', p: 'enborraren-gandorrak', text: 'Enborraren gandorra', show: vis(t, P10[1] + 0.03, P10[2]) },
     { id: 'enborraren-gandorrak', key: 'gandorra-2', p: 'enborraren-gandorrak-2', text: 'Enborraren gandorra', show: vis(t, P10[1] + 0.03, P10[2]) },
-    { id: 'trenkada-aortikopulmonarra', p: 'trenkada-aortikopulmonarra', show: vis(t, P10[2] + 0.05, P10[5]) + vis(t, P10[5] + 0.04, P10[6]) * 0.999, small: true },
+    { id: 'trenkada-aortikopulmonarra', p: 'trenkada-aortikopulmonarra', show: vis(t, P10[1] + 0.065, P10[2]) + vis(t, P10[2] + 0.05, P10[5]) + vis(t, P10[5] + 0.04, P10[6]) * 0.999, small: true },
     { id: 'aorta', p: 'aorta', show: vis(t, P10[2] + 0.05, P10[6]) },
     { id: 'birika-arteria', p: 'birika-arteria', show: vis(t, P10[2] + 0.05, P10[6]) },
     { id: 'konoaren-trenkada', p: 'konoaren-trenkada', show: vis(t, P10[5] + 0.04, P10[6]), small: true },

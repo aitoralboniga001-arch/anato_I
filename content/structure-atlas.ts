@@ -145,6 +145,27 @@ relation('gorputz-adarren-mesenkima', 'femurra', 'origin', `${topic8}#femurra.or
 relation('gorputz-adarren-mesenkima', 'tibia', 'origin', `${topic8}#tibia.origin`);
 relation('gorputz-adarren-mesenkima', 'peroneoa', 'origin', `${topic8}#peroneoa.origin`);
 
+// 11. gaia: bihotzaren trenkadak.
+const topic11 = 'content/weeks/week11-structures.ts';
+relation('aurikula-komuna', 'hasierako-eskuineko-aurikula', 'development', `${topic11}#aurikula-komuna.fate`, 'Aurikulu arteko trenkadak banatuta.');
+relation('aurikula-komuna', 'hasierako-ezkerreko-aurikula', 'development', `${topic11}#aurikula-komuna.fate`, 'Aurikulu arteko trenkadak banatuta.');
+relation('hasierako-ezkerreko-aurikula', 'ezkerreko-aurikula-jaiotakoan', 'development', `${topic11}#ezkerreko-aurikula-jaiotakoan.origin`);
+relation('septum-primum', 'zulo-obalaren-balbula', 'transformation', `${topic11}#zulo-obalaren-balbula.origin`);
+relation('birika-zain-primitiboa', 'birika-zainak', 'development', `${topic11}#birika-zainak.origin`, 'Lau adar, birika hastapenetako zainekin kontaktatuta.');
+relation('birika-zainak', 'ezkerreko-aurikularen-atal-lisoa', 'origin', `${topic11}#ezkerreko-aurikularen-atal-lisoa.origin`, 'Paretara inkorporatuta.');
+relation('atal-aurikularra', 'ezkerreko-aurikularen-atal-trabekulatua', 'origin', `${topic11}#ezkerreko-aurikularen-atal-trabekulatua.origin`, 'Haren ezkerreko zabalkuntza.');
+relation('kuxin-aurikulubentrikularrak', 'balbula-aurikulubentrikularrak', 'origin', `${topic11}#kuxin-aurikulubentrikularrak.fate`, 'Zuloen inguruko mesenkima goraguneak.');
+relation('endokardio-kuxinak', 'balbula-trikuspidea', 'origin', `${topic11}#balbula-trikuspidea.origin`);
+relation('endokardio-kuxinak', 'balbula-mitrala', 'origin', `${topic11}#balbula-mitrala.origin`);
+relation('endokardio-kuxinak', 'balbula-semilunarrak', 'origin', `${topic11}#balbula-semilunarrak.origin`, 'Hiru gandor eta tuberkuluak, goitik zulatuta.');
+relation('miokardioa', 'trenkada-muskularra', 'origin', `${topic11}#trenkada-muskularra.origin`, 'Bi bentrikuluen barneko pareta muskularrak.');
+relation('konoaren-gandorrak', 'konoaren-trenkada', 'transformation', `${topic11}#konoaren-gandorrak.fate`, 'Hazi eta fusionatuta.');
+relation('konoaren-trenkada', 'mintzezko-trenkada', 'origin', `${topic11}#mintzezko-trenkada.origin`, 'Haren beheko ataltxoa.');
+relation('arteria-konoa', 'eskuineko-infundibulua', 'origin', `${topic11}#eskuineko-infundibulua.origin`);
+relation('arteria-konoa', 'ezkerreko-infundibulua', 'origin', `${topic11}#ezkerreko-infundibulua.origin`);
+relation('enborraren-gandorrak', 'trenkada-aortikopulmonarra', 'transformation', `${topic11}#enborraren-gandorrak.fate`, 'Trenkada kiribila.');
+relation('enbor-arteriosoa', 'birika-arteria', 'origin', `${topic11}#birika-arteria.origin`);
+
 /** Reuse the existing learning trees without upgrading their edges to cell ancestry. */
 const legacy: AtlasRelation[] = [];
 function walk(node: LNode) {

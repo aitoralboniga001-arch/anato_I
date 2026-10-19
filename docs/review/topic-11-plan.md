@@ -96,4 +96,11 @@ The other model's Batches 6–9 were reviewed before committing:
 - **B5 (done):** M4's upper half `truncus3d.ts` + `SpiralSeptum3D.tsx`, on the stage 8–9 heart (`canal3d.ts` takes an optional `truncus` state; `outflow3d.ts` gets `bare`). The aorticopulmonary septum's line turns 50° + 220°·u in the model; with the heart's 18° turn the body sees exactly 90° / 180° / 270° at `LEVELS` [0.1, 0.51, 0.92] (proximal transverse, pulmonary in front · middle front-to-back, aorta right · distal transverse, aorta in front). Stage 10 `enbor-arteriosoa` (5.2 p2–p10, 8 beats): two ridges spiral up the clear truncus and fuse (their names stay on the septum's edges); the truncus is cut at each level in turn, the section rising and turning under a top-down camera, while a strip of three small sections fills in at the top right; continuity with the conus septum (walls clear, from the right); the two vessels apart, twisted round each other; the p10 summary as a table. KONTUZ: the notes place the ridges "goi-atzean / behe-ezkerrean", which a 180° spiral cannot keep at every level, so both get the same neutral name. Stage 11 `balbula-semilunarrak` (p12): three tubercles per root, hollowed from above into pocket cusps (aortic posterior + 2 lateral, pulmonary anterior + 2 lateral, commissure Y lines), coronaries out of the aorta's right and left sinuses. Notes section 5.2; MENTION_ONLY for stage 10's intro beat; beat count 672.
   - Silent: all new beats move (5.8–25%).
   - Notes 5.2 p11 (Lagman) is only shown as stage 9's `more`, not anchored.
-
+- **B6 (done):** learning layer.
+  - Quiz: 13 mechanism questions (`w11-q-…`), one or two per stage.
+  - Chronology: day-28 "Bentrikuluen paretak" card.
+  - Atlas: 18 course relations from topic 11's origin/fate fields (cushions → valves, septum primum → flap, conus ridges → conus septum → membranous part, conus → infundibula, truncus → pulmonary artery …).
+  - Recall links on every stage's first step.
+  - Klasea: `content/klasea/w11.ts`, 13 chunks, ~19 min, 26 checks (9 contrast, 3 predict, 1 order, 1 fill table of the chambers' smooth/trabeculated parts, the rest from the pool). All 90 core sentences said (`docs/klasea/w11-audit.md`).
+  - `tests/klasea.test.ts` now runs every guard for each topic with a class (per-topic importance, pinned core, contrast start, SHOWN/SAME); `scripts/klasea/core-map.ts` prints the core per step to write a class from.
+  - Stage 8 step 4 and stage 10 step 1 now light what their text names (arteria konoa; the septum fuses earlier and keeps its name through the levels).

@@ -1,8 +1,9 @@
 import type { ContrastCheck, Lesson } from '@/lib/klasea/types';
 import { LESSON_W10 } from './w10';
+import { LESSON_W11 } from './w11';
 
 /** Topics that have a class: their guided mode is the class (docs/klasea-plan.md §2). */
-export const LESSONS: Record<number, Lesson> = { 10: LESSON_W10 };
+export const LESSONS: Record<number, Lesson> = { 10: LESSON_W10, 11: LESSON_W11 };
 
 export const lessonOf = (week: number): Lesson | undefined => LESSONS[week];
 export const hasClass = (week: number) => !!LESSONS[week];

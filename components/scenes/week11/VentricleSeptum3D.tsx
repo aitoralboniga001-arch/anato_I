@@ -86,7 +86,7 @@ export function Ventricles3D({ t }: SceneProps) {
     { id: 'muskulu-papilarrak', p: 'pap-l', show: vis(t, P8[2] + 0.02, P8[3]), small: true },
     { id: 'trenkada-muskularra', p: 'trenkada-muskularra', show: vis(t, P8[3] + 0.05, P8[4]) + vis(t, P8[4] + 0.08) * 0.999 },
     { id: 'bentrikulu-arteko-zulo-primarioa', p: 'bentrikulu-arteko-zulo-primarioa', show: vis(t, P8[3] + 0.06, P8[4] + 0.1) },
-    { id: 'arteria-konoa', p: 'arteria-konoa', show: vis(t, P8[4] + 0.02, P8[4] + 0.08) },
+    { id: 'arteria-konoa', p: 'arteria-konoa', show: vis(t, P8[4] + 0.02), small: true },
     { id: 'konoaren-trenkada', p: 'konoaren-trenkada', show: vis(t, P8[4] + 0.06, P8[4] + 0.1), small: true },
     { id: 'mintzezko-trenkada', p: 'mintzezko-trenkada', show: vis(t, P8[4] + 0.1) },
   ];
