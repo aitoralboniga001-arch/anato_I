@@ -3,6 +3,7 @@
 import { Note, seg, type SceneProps } from '@/components/kit';
 import type { Camera3 } from '@/lib/three-d/math';
 import { ModelView, Trail, cameraAt, orbit, type CalloutSpec } from '@/components/scenes/week10/Heart3D';
+import { blendCamera } from '@/lib/three-d/aim';
 import { Steps, vis } from './common';
 import { P1, P2, STEPS1, STEPS2, primumStage, secundumStage } from './Atria';
 import { P3, STEPS3, birthStage } from './Birth';
@@ -49,6 +50,15 @@ const CAM = {
 /** How clear a wall is while the camera looks through it (a step's key, fading in after the glide). */
 const glass = (t: number, spans: [number, number][]) => Math.min(1, spans.reduce((a, [from, to]) => a + vis(t, from + 0.02, to, 0.03), 0));
 
+/**
+ * A slow move across a whole step (eased from `from` at a to `to` at b), towards what the step is about:
+ * a held picture reads as "nothing happens", and the move says where to look.
+ */
+const drift = (t: number, a: number, b: number, from: Camera3, to: Camera3) => {
+  const e = seg(t, a, b);
+  return blendCamera(from, to, e * e * (3 - 2 * e));
+};
+
 // ———————————————————————————— 11:septum-primum ————————————————————————————
 
 export function Primum3D({ t }: SceneProps) {
@@ -56,7 +66,8 @@ export function Primum3D({ t }: SceneProps) {
   const s: AtriaState = { ...AT0, ...k, glassRA: glass(t, [[P1[1], P1[3]], [P1[4], 2]]) };
   const flow: AtriaFlow = { phase: t, low: 1 - seg(k.closeOP, 0, 0.7), high: seg(k.os2, 0.6, 0.95), down: 1, born: 0, slit: 0 };
   const camera = cameraAt(t, [
-    [0, CAM.front],
+    // The common atrium settles from above into the front view: its two side bulges, and no septum yet.
+    [0, drift(t, 0.01, P1[1] - 0.015, orbit(18, 28, 11.6, [0, 0.05, -0.05]), CAM.front)],
     [P1[1], CAM.rightFront],
     [P1[3], CAM.canal],
     [P1[4], CAM.right],
@@ -327,14 +338,16 @@ export function Birth3D({ t }: SceneProps) {
     slit: k.patent ? seg(t, P3[5] + 0.04, P3[5] + 0.08) : 0,
   };
   const camera = cameraAt(t, [
-    [0, CAM.front],
-    // The pulmonary veins fill the left atrium.
-    [P3[1], CAM.leftBack],
+    // From the front towards the left atrium, where the blood from the lungs now comes back.
+    [0, drift(t, 0.01, P3[1] - 0.015, CAM.front, orbit(18, 12, 8.6, [0.25, -0.1, -0.12]))],
+    // The pulmonary veins fill the left atrium; as its pressure rises, in towards the septa.
+    [P3[1], drift(t, P3[2] + 0.01, P3[3] - 0.01, CAM.leftBack, orbit(40, 12, 6.2, [0.1, -0.15, -0.16]))],
     // Its pressure on the valve: close to the two septa from the front and the left, the valve's left face
     // against septum secundum.
     [P3[3], orbit(30, 10, 4.4, [-0.08, -0.2, -0.14])],
     // The seam along the valve's upper edge, where they fuse (and where a slit may stay open).
-    [P3[4], orbit(34, 12, 3, [-0.08, 0.12, -0.17])],
+    // In the 20 % step, closer still to the slit left open along that seam.
+    [P3[4], drift(t, P3[5] + 0.01, P3[6] - 0.015, orbit(34, 12, 3, [-0.08, 0.12, -0.17]), orbit(24, 16, 2.2, [-0.08, 0.15, -0.17]))],
     [P3[6], CAM.front],
   ]);
   const names: CalloutSpec[] = [

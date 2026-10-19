@@ -22,12 +22,10 @@ export const week11: WeekDef = {
   week: 11,
   slug: '11',
   title: 'Zirkulazio-sistema (II)',
-  subtitle: 'Bihotzaren trenkaden sorrera: aurikula komunaren trenkadak eta zulo obalaren itxiera jaiotzean',
+  subtitle: 'Bihotzaren trenkaden sorrera: aurikulak eta zulo obala, erreten aurikulubentrikularra eta balbulak, bentrikuluak, konoa eta enbor arteriosoaren trenkada kiribila',
   dayRange: [27, 266],
   span: { long: '4.–5. asteak eta jaiotza', short: '4.–5. ast.' },
   source: src('1. Sarrera'),
-  // Only the atrial septation of the notes is built so far; the rest of the topic is still to come.
-  inPreparation: true,
   structures: structures11,
   stages: [
     {
