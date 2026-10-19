@@ -108,14 +108,22 @@ function Tube({ c, rx, ry, wall = '#7a3b48' }: { c: Pt; rx: number; ry: number; 
 }
 
 export function PeritoneumSection({ t }: SceneProps) {
-  const thin = seg(t, 0.19, 0.31);
-  const w = lerp(150, 18, thin);
-  const bw = lerp(78, 14, thin);
+  // The wide link thins into the mesentery: wide enough to see its two layers with the core between them.
+  const thin = seg(t, 0.19, 0.26);
+  const w = lerp(150, 40, thin);
+  const bw = lerp(78, 30, thin);
+  // Then the serous layer is followed: from the parietal wall down one side of the mesentery, round the gut,
+  // up the other side and back to the wall (the two layers = the visceral layer doubled back on itself).
+  const trace = seg(t, 0.26, 0.31);
+  const traceShow = vis(t, 0.255, 0.335, 0.02);
   const named = seg(t, 0.34, 0.4);
   const colons = seg(t, 0.49, 0.56);
   const k = seg(t, 0.78, 0.88);
   const cav = cavity(k);
   const gut = gutContour(w, bw);
+  const wallL = cav.filter(([x, y]) => x >= 400 && x < 500 && y < ROOT_Y + 20);
+  const wallR = cav.filter(([x, y]) => x > 500 && x <= 600 && y < ROOT_Y + 20);
+  const layerPath: Pt[] = [...wallL, ...gut, ...wallR];
   const colonL = colonAt(-1, k);
   const colonR = colonAt(1, k);
 
@@ -266,6 +274,19 @@ export function PeritoneumSection({ t }: SceneProps) {
             <path key={i} d={poly(arc(c[0], c[1], CR + 2, CR, lerp(-90, 0, k), lerp(270, 180, k), 30), false)} fill="none" stroke="#ffd29a" strokeWidth={3.2} opacity={colons} />
           ))}
       </Part>
+
+      {traceShow > 0.02 && (
+        <g opacity={traceShow} pointerEvents="none" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <path d={poly(layerPath, false)} pathLength={1} strokeDasharray={`${trace.toFixed(4)} 2`} stroke="#fff3c4" strokeWidth={10} opacity={0.35} />
+          <path d={poly(layerPath, false)} pathLength={1} strokeDasharray={`${trace.toFixed(4)} 2`} stroke="#fffbe8" strokeWidth={3} />
+        </g>
+      )}
+      <Note x={500 - w / 2 - 12} y={(ROOT_Y + GUT[1] - GR.y) / 2} size={12.5} align="end" tone="accent" show={vis(t, 0.27, 0.335, 0.02)}>
+        1. orria
+      </Note>
+      <Note x={500 + w / 2 + 12} y={(ROOT_Y + GUT[1] - GR.y) / 2 + 22} size={12.5} align="start" tone="accent" show={vis(t, 0.285, 0.335, 0.02)}>
+        2. orria
+      </Note>
 
       <path d={poly(BODY)} fill="url(#w7-light)" pointerEvents="none" />
 
