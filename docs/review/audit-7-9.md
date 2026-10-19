@@ -178,7 +178,44 @@ Each item says what the student gains, so it passes the brief's test: **only if 
   - the figure-parity check: one test.
 - **Same batch as H.** It is the same thread: coelom → septum → peritoneum, with the coelom kept in one colour.
 
-### Possible, lower value (only after A–I)
+#### J. Every named structure must be clearly seen (owner request, 2026-10-19: "must be solved in this iteration across topic 7 to 9")
+- **Owner's example:** `septum-transversum` step 5. "Erreten perikardioperitonealak" is lit, but the student sees only a fuzzy orange pool inside a large dark-blue area; no canal can be made out.
+- **Why it happens in the canals (`components/scenes/week7/Diaphragm.tsx`):**
+  - three different things carry the canal's id:
+    - the whole open cavity (`CAV_X`, line 630);
+    - the two canal shapes (`CANAL_L`, line 650);
+    - two `Mark` light pools (lines 678–679).
+  - When the step lights the canals, the outline of the whole cavity glows, so the space reads as one cavity wrapped around the oesophagus, not as two passages.
+  - The `Mark` blobs sit in the middle with no edge.
+  - `Mark` is meant for things with **no outline of their own** (a process, a direction); the canals have one.
+- **The rules this sweep enforces** (from no-drawn-pointers, anchor-inside and visibility-guard):
+  1. **A lit structure glows by its own shape.** Use an outline and a tint, never a pool of light, when the structure has a shape. `Mark` stays only for processes (e.g. `tolestura-laterala`).
+  2. **One id, one thing on screen.** A container must not carry the id of what is inside it.
+  3. **When a structure is the step's subject, it is big enough to see.** About 40 px or more at 1536 px wide and about 28 px or more at 1024 px. If it is small in the body, zoom in with a bridge (and keep context, see "never get lost").
+  4. **Its defining feature is visible.** If the text says "two-layer", "a canal", "an opening" or "fused", the picture shows two layers, a passage, a hole or the fusion.
+- **Found so far** (automatic check of every step plus the shots; full table to follow):
+  - **Topic 7, structures lit only by `Mark` blobs although they have shapes:**
+    - `erreten-perikardioperitonealak` (`septum-transversum` 5; `Diaphragm.tsx:678–679`): redraw as two separate dorsolateral passages beside the oesophageal mesenchyme. Give them depth shading (a passage going down to the peritoneal cavity) and the coelom colour (see H). Remove the id from `CAV_X`.
+    - `aortaren-hiatoa`, `hestegorriaren-hiatoa`, `beheko-kabaren-zuloa` (`diafragma-heldua` 4; `DiaphragmAdult.tsx:215–217`): the three openings are glowing dots on vessels about 15 px wide. Draw each as an opening in the muscle or tendon with the vessel passing through, and zoom in on the step.
+    - `bularrezur-atala`, `gerriko-atala` (`diafragma-heldua` 5, side view; `DiaphragmAdult.tsx:445–446`): blobs at the two ends of the arc. Light the muscle segments themselves.
+    - `peritoneo-atzeko-egiturak` (`peritoneo-barrunbea` 6; `Peritoneum.tsx:270–271`): blobs over the colons. Light the colons and the fused mesentery. Better still, show the fusion happening (ties to I).
+  - **Topic 7, too small to see:**
+    - `mesenterio-dortsala` in `zeloma` 5 is a pink stub of about 25 px between the aorta and the gut. Draw it as a two-layer sheet, continuous with the splanchnic layer round the gut (ties to I).
+  - **Topic 8:**
+    - `errai-kraneoa` 6–10: the three ossicles are dots inside a circle of about 15 px at the ear of the newborn skull.
+    - In `errai-kraneoa` 9 the close-up fills the screen with a magnified, unreadable piece of skull, so the student cannot tell where it is.
+    - Fix: a zoom bridge from the whole skull down to the middle ear. The ossicles sit in their place, big enough to see, and the skull outline stays as context.
+  - **Topic 8 `kondrokraneoa`:**
+    - Step 1 lights "Kondrokraneoa" on an empty dark oval: there is nothing to see yet.
+    - Step 4 (pituitary) is very zoomed. The "adenohipofisia / neurohipofisia" text is small, and "Hipofisi kartilagoak" are dots.
+  - **Topic 9 `ildaskatuak` 3 and 5:** the somites and occipital somites measure under 28 px on the paraxial view. Check them by eye.
+- **Method for the rest:**
+  - `focuscheck.mjs` (the scratchpad tool; to become a repeatable script under `scripts/`) loads every step in real Chrome and measures each lit structure's size and opacity. It also flags lighting by `Mark` alone.
+  - Then every flagged step is checked by eye.
+  - A test pins rule 1: `Mark` is not allowed on ids that also have a `Part` with a shape.
+- **Cost:** medium. Topic 7 has 5 scene fixes plus the canal redraw. Topic 8 has 2 zoom bridges. Topic 9 needs checking. These are scene edits, not new scenes.
+
+### Possible, lower value (only after A–J)
 
 - **Topic 9 front embryo (8 weeks):**
   - **Problem:** the front view on the `epaxial-hipaxiala` steps and the last `ehun-konektiboa` step reads as a doll (round head, tube limbs). The rule is that the embryo must look like an embryo.
@@ -206,13 +243,14 @@ Re-shot at 5–6 s, every one of these frames is clean. The DOM check found only
 ## 3. Suggested batches
 
 1. **A + B:** named sides on the four 3D views, fading "seen from" notes, and a slower limb turn. One short batch covering all four scenes, with tests and tablet shots.
-2. **H + I (topic 7, coelom → septum → peritoneum, and the notes' figures):** 2.1 opens on the notes' A → B → C figure, the mesentery is seen thinning, both names are shown, figure captions are linked, and a figure-parity test is added. Also: give the two cavities their own longer step with a key line, keep their names and colours in the section, keep the coelom's colour, grow the septum, and add a `look` bridge into the section. Check the sibling sections in `pleura-perikardioa` and `diafragma-eraketa`. This comes before the topic 7 class so the class can narrate the new transition.
-3. **C + D for topic 7:** the class with plain wording, plus key lines where they are missing.
-4. **E for topic 8:** the 11 in-stage bridges, starting with `errai-kraneoa`, plus the **F** recall links for topic 8 and the **I** caption links (`kondrokraneoa` and the others).
-5. **C + D for topic 9**, plus the **F** timeline milestones.
-6. **C + D for topic 8**, plus the **F** tours.
-7. **E for topic 9** and the crossings that change body or scale, plus **G** (name chips).
-8. Optional: the topic 9 front embryo and the 3D vertebra.
+2. **H + I + J for topic 7 (coelom → septum → peritoneum, the notes' figures, and clear structures):** the canals redrawn as two passages, the openings, the diaphragm parts and the mesentery lit by their own shapes and big enough, no `Mark` on shaped structures. 2.1 opens on the notes' A → B → C figure, the mesentery is seen thinning, both names are shown, figure captions are linked, and a figure-parity test is added. Also: give the two cavities their own longer step with a key line, keep their names and colours in the section, keep the coelom's colour, grow the septum, and add a `look` bridge into the section. Check the sibling sections in `pleura-perikardioa` and `diafragma-eraketa`. This comes before the topic 7 class so the class can narrate the new transition.
+3. **J for topics 8 and 9:** finish the automatic sweep, then fix every flagged structure. Start with the ossicles in `errai-kraneoa` and with `kondrokraneoa`. The owner wants J done across 7–9 in this iteration, before the classes.
+4. **C + D for topic 7:** the class with plain wording, plus key lines where they are missing.
+5. **E for topic 8:** the 11 in-stage bridges, starting with `errai-kraneoa`, plus the **F** recall links for topic 8 and the **I** caption links (`kondrokraneoa` and the others).
+6. **C + D for topic 9**, plus the **F** timeline milestones.
+7. **C + D for topic 8**, plus the **F** tours.
+8. **E for topic 9** and the crossings that change body or scale, plus **G** (name chips).
+9. Optional: the topic 9 front embryo and the 3D vertebra.
 
 Each batch ends with:
 - tests;
