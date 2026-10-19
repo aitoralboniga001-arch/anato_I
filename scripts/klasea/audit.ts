@@ -8,6 +8,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { sentence, sentenceText } from '@/content/notes-text';
 import { lessonOf } from '@/content/klasea';
+import { IMPORTANCE_W7 } from '@/content/klasea/importance/w7';
 import { IMPORTANCE_W10 } from '@/content/klasea/importance/w10';
 import { IMPORTANCE_W11 } from '@/content/klasea/importance/w11';
 import { speakSeconds } from '@/lib/klasea/voice';
@@ -15,7 +16,7 @@ import { speakSeconds } from '@/lib/klasea/voice';
 const week = Number(process.argv[2] ?? 10);
 const lesson = lessonOf(week);
 if (!lesson) throw new Error(`No class for topic ${week}`);
-const importance = { 10: IMPORTANCE_W10, 11: IMPORTANCE_W11 }[week] ?? {};
+const importance = { 7: IMPORTANCE_W7, 10: IMPORTANCE_W10, 11: IMPORTANCE_W11 }[week] ?? {};
 
 const tier = (id: string) => (importance[id]?.tier === 'funtsezkoa' ? '**F**' : importance[id] ? 'g' : '·');
 const cite = (ids: string[]) => ids.map((id) => `  - ${tier(id)} \`${id}\` ${sentence(id) ? sentenceText(sentence(id)!).trim() : '(ez dago)'}`).join('\n');

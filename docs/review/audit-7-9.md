@@ -329,3 +329,19 @@ Each batch ends with:
 - **`bihotz-muskulua` (topic 9):** the sinoatrial and AV nodes are about 30% larger.
 
 **Not changed (judged fine in the sweep):** `buru-ganga` 2 and 7, `somitomeroak-burua` 4, `muskulu-lisoa` 4, `ildaskatuak` 3 and 5, `somitaren-paretak` 4 and 6, `ehun-konektiboa` 1, and the `domeinuak` table rows.
+
+## 6. Batch 4 results (C + D for topic 7), 2026-10-19
+
+- **Key lines (D).** 23 steps of topic 7 gained a FUNTSEZKOA line (`exam`), so 37 of 44 steps now have one (before: 14).
+  - Every line is worded from the notes prose and rests on sentences that were already core, apart from three:
+    - the coelom being continuous with the chorionic cavity at first (1/p4/s4);
+    - where the septum is fixed (2/p4/s1);
+    - "peritoneo barruko egiturak" (2.1/p7/s2).
+  - The core is now 66 of 111 prose sentences (59.5 %), under the 60 % cap. The steps left without one are recaps, a repeated fold, or steps whose only sentences are not core (the lung's growth, the three muscle parts, the cavities above and below the diaphragm).
+- **Class (C).** `content/klasea/w7.ts`, "Gorputzaren barrunbeak eta diafragma" (13 chunks, ~19 min, 26 checks). Topic 7's guided mode is now this class.
+  - It covers all 66 core sentences, from the folding disc to the adult diaphragm. It runs in the stages' own order and uses the views of batch 2 (the notes' A → C figure, the growing septum, the two-layer mesentery).
+  - Every line has a "plain" wording. Every name it says is lit and already drawn.
+  - There is a contrast check in every chunk from "Bi orri eta zeloma" on. The last chunk fills the diaphragm table from memory (component → what it gives in the adult).
+  - `tests/klasea.test.ts` runs the same guards for topic 7 as for 10 and 11. The x-words "toraxa", "toraxetik", "paraxiala" and the others are classified. `paraxial…` is now read /ks/ (`KS_STEMS`).
+  - The source audit is in `docs/klasea/w7-audit.md`.
+- **Checked:** headless Chrome at 1280 px and 1024 px, playing the class from the septum, its fixings, the mesentery, the organs, the membranes, the components and the adult diaphragm chunks. The lit parts match each line, the board fills in, and there are no console errors.
