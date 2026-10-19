@@ -127,7 +127,23 @@ Each item says what the student gains, so it passes the brief's test: **only if 
 - **What the student gains:** a cleaner picture, in line with the no-drawn-pointers and consistent-style rules.
 - **Before cutting:** check with the labels test, and keep every name.
 
-### Possible, lower value (only after A–F)
+#### H. Topic 7: from the coelom section to the septum section (owner request, 2026-10-19, high value)
+- **Owner's words:** "me cuesta visualizar la transición entre estas dos vistas" (it is hard to picture how one view becomes the other). The two views are:
+  - `zeloma / zeharkakoa` (`CoelomFold`): the flat disc on day 20, with the coelom as a purple slit between the somatopleure and the splanchnopleure;
+  - `septum-transversum / zeharkakoa` (`SeptumSection`, `components/scenes/week7/Diaphragm.tsx:761`): a round body at C3–C5 with an orange septum, a green oesophageal mesenchyme and two dark-blue canals.
+- **Why the jump is hard (seen in the shots):**
+  1. **Two kinds of picture.** The coelom view is a slice through tissue. The septum view reads as a look *down onto a floor* with two holes in it. Nothing tells the student that the camera changed from "slice" to "looking down at a shelf".
+  2. **Nothing grows.** `SeptumSection` borrows the diaphragm section at its t = 0.5 (`early`), so the septum is already there, whole. The student never sees the round coelom of the closed body being partly closed by a shelf that grows in from the front wall.
+  3. **The coelom changes colour.** The canals are the leftover coelom, but they turn dark blue ("erretenak") instead of staying the purple coelom of stage 1. The somatopleure and splanchnopleure, the gut tube and the mesentery of stage 1's last step also disappear. That breaks the rule that the same structure looks the same.
+  4. **A different level and week with no link.** Stage 1 ends at the midgut level (day 28, closed tube). The septum section is at the neck level (C3–C5). The sagittal steps in between show the level line, but the section does not start from a picture the student already knows.
+- **Fix, in order of value:**
+  1. **Start the septum section from stage 1's last picture.** Same colours: coelom purple, the two layers, the gut in the middle. Then grow the septum from the front wall as an orange shelf. What is left open beside the oesophagus stays purple, and only then gets its name, "erretenak". This needs a `SeptumSection` that starts at an earlier state of `DiaphragmSection`, or a short opening built on `CoelomFold`'s closed-body frame.
+  2. **Say what the camera is doing.** Before the cut, the sagittal view shows the C3–C5 plane as a sheet seen edge-on. A `look` bridge then tilts down through it, so the student sees that they are looking at the shelf from above (cranial view) and that the two dark holes go down to the peritoneal cavity. Text above lines, no drawn pointers: the shelf and the holes glow.
+  3. **Best, if the 3D route is taken:** reuse the topic 7 diaphragm 3D model (`DiaphragmDome3D`) at its early state: a trunk slab with the septum as a horizontal shelf. The student turns it from the side (shelf edge-on) to the top (shelf and two canals). This is what "prefer 3D" means for the hardest topic. The cost is higher; do it only if fixes 1–2 are not enough.
+- **Siblings to check in the same batch:** the same "slice ↔ looking down" change happens later, in `pleura-perikardioa` and `diafragma-eraketa` (the same `DiaphragmSection`). The canal colour must match there too.
+- **Cost:** fixes 1–2 are one scene file plus one view entry (`bridges`), with labels and visibility tests and real-WebGL shots of the whole stage-1 → stage-2 path at 1536 px and 1024 px.
+
+### Possible, lower value (only after A–H)
 
 - **Topic 9 front embryo (8 weeks):**
   - **Problem:** the front view on the `epaxial-hipaxiala` steps and the last `ehun-konektiboa` step reads as a doll (round head, tube limbs). The rule is that the embryo must look like an embryo.
@@ -155,12 +171,13 @@ Re-shot at 5–6 s, every one of these frames is clean. The DOM check found only
 ## 3. Suggested batches
 
 1. **A + B:** named sides on the four 3D views, fading "seen from" notes, and a slower limb turn. One short batch covering all four scenes, with tests and tablet shots.
-2. **C + D for topic 7:** the class with plain wording, plus key lines where they are missing.
-3. **E for topic 8:** the 11 in-stage bridges, starting with `errai-kraneoa`, plus the **F** recall links for topic 8.
-4. **C + D for topic 9**, plus the **F** timeline milestones.
-5. **C + D for topic 8**, plus the **F** tours.
-6. **E for topic 9** and the crossings that change body or scale, plus **G** (name chips).
-7. Optional: the topic 9 front embryo and the 3D vertebra.
+2. **H (topic 7, coelom → septum):** keep the coelom's colour, grow the septum, and add a `look` bridge into the section. Check the sibling sections in `pleura-perikardioa` and `diafragma-eraketa`. This comes before the topic 7 class so the class can narrate the new transition.
+3. **C + D for topic 7:** the class with plain wording, plus key lines where they are missing.
+4. **E for topic 8:** the 11 in-stage bridges, starting with `errai-kraneoa`, plus the **F** recall links for topic 8.
+5. **C + D for topic 9**, plus the **F** timeline milestones.
+6. **C + D for topic 8**, plus the **F** tours.
+7. **E for topic 9** and the crossings that change body or scale, plus **G** (name chips).
+8. Optional: the topic 9 front embryo and the 3D vertebra.
 
 Each batch ends with:
 - tests;
