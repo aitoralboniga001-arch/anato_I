@@ -478,10 +478,12 @@ function coelomMap(script: Script): SceneComponent {
 /** 7:septum-transversum — one coelom; the septum grows across it; two cavities joined by two dorsal canals. */
 export const CoelomMapSeptum = coelomMap({
   gut: 'aurreko-hestea',
+  // In the stage's order: the plate, the two cavities (the plane visits the upper one, then the lower),
+  // how the plate is held, the canals.
   state: (t) => ({
-    one: 1 - seg(t, 0.54, 0.6),
+    one: 1 - seg(t, 0.37, 0.43),
     sep: seg(t, 0.18, 0.34),
-    split: seg(t, 0.54, 0.6),
+    split: seg(t, 0.37, 0.43),
     canal: seg(t, 0.72, 0.78),
     lung: 0,
     ppm: 0,
@@ -490,19 +492,19 @@ export const CoelomMapSeptum = coelomMap({
       [0, 0.7],
       [0.2, 0.7],
       [0.3, 0.47],
-      [0.54, 0.47],
-      [0.58, 0.7],
-      [0.62, 0.7],
-      [0.67, 0.26],
-      [0.7, 0.26],
-      [0.76, 0.47],
+      [0.36, 0.47],
+      [0.4, 0.7],
+      [0.44, 0.7],
+      [0.49, 0.26],
+      [0.52, 0.26],
+      [0.57, 0.47],
     ])(t),
   }),
   notes: [
     { a: 0, b: 0.18, text: 'Zeloma barrunbe bakarra da: toraxetik abdomenera' },
     { a: 0.18, b: 0.36, text: 'Septum transversuma: mesodermozko trenkada horizontala' },
-    { a: 0.36, b: 0.54, text: 'Aurrean eta alboetan paretan finkatuta; atzean hestegorri inguruko mesenkiman' },
-    { a: 0.54, b: 0.72, text: 'Goian hasierako perikardio barrunbea · behean peritoneo barrunbea' },
+    { a: 0.36, b: 0.54, text: 'Goian hasierako perikardio barrunbea · behean peritoneo barrunbea' },
+    { a: 0.54, b: 0.72, text: 'Aurrean eta alboetan paretan finkatuta; atzean hestegorri inguruko mesenkiman' },
     { a: 0.72, b: 2, text: 'Atze-alboetan bi erreten: goiko eta beheko barrunbeak komunikatuta' },
   ],
 });

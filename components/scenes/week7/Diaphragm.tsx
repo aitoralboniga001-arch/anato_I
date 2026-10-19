@@ -1,7 +1,7 @@
 'use client';
 
 import { useId } from 'react';
-import { Arrow, C, Label, Mark, Note, Part, clamp, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Arrow, C, Label, Note, Part, clamp, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { CavityKey, Defs7, KEY7, P, Sheet, f1, offset, poly, resample, sm, spline, vis } from './common';
 import { COELOM_ALL, SideEmbryo, backAt, placeXY, type Place, type SideState } from './SideEmbryo';
 
@@ -537,7 +537,8 @@ export const CAV_X = spline(
 );
 export const SEPT_EDGE: Pt[] = [[250, 396], [300, 356], [370, 334], [440, 342], [500, 354], [560, 342], [630, 334], [700, 356], [750, 396]];
 export const SEPTUM_X = [...spline(SEPT_EDGE, 8), ...spline([[750, 396], [724, 466], [664, 534], [580, 568], [500, 576], [420, 568], [336, 534], [276, 466], [250, 396]], 8)];
-export const MES = spline([[468, 222], [532, 222], [540, 262], [556, 300], [552, 340], [500, 356], [448, 340], [446, 300], [460, 262]], 8, true);
+// It reaches the back wall (by the aorta): the canals either side of it are two, not one space round it.
+export const MES = spline([[464, 212], [536, 212], [540, 262], [556, 300], [552, 340], [500, 356], [448, 340], [446, 300], [460, 262]], 8, true);
 export const ESO_X: Pt = [520, 296];
 export const IVC_X: Pt = [462, 378];
 export const AORTA_X: Pt = [500, 196];
@@ -547,8 +548,11 @@ const FOCUS_L: Pt = [432, 336];
 const CANAL_MID: Pt = [334, 272];
 const mx = (p: Pt): Pt => [1000 - p[0], p[1]];
 
-/** `early`: the section as the septum stage shows it (its own notes, none of this stage's). */
-export function DiaphragmSection({ t, reduced, early }: SceneProps & { early?: boolean }) {
+/**
+ * `early`: the section as the septum stage shows it (its own notes, none of this stage's): the open space is
+ * still the coelom (its purple) until the canals are named, and `grow` (0–1) raises the septum from the front wall.
+ */
+export function DiaphragmSection({ t, reduced, early, grow = 1 }: SceneProps & { early?: boolean; grow?: number }) {
   const c = seg(t, 0.74, 0.84);
   const mus = seg(t, 0.88, 0.95);
   const rim = lerp(0, 30, mus);
@@ -560,6 +564,9 @@ export function DiaphragmSection({ t, reduced, early }: SceneProps & { early?: b
   const migrate = vis(t, 0.88);
   // In the 4th week the tube is still the foregut (the future oesophagus).
   const esoId = early ? 'aurreko-hestea' : 'hestegorria';
+  const named = early ? seg(t, 0.6, 0.64) : 1;
+  // The plate's dorsal edge rises from the front wall (y 600) to its place.
+  const rise = lerp(600, 320, sm(grow));
 
   return (
     <g>
@@ -624,14 +631,15 @@ export function DiaphragmSection({ t, reduced, early }: SceneProps & { early?: b
         <circle cx={AORTA_X[0] - 4} cy={AORTA_X[1] - 5} r={3.5} fill="#ff8a9a" opacity={0.55} />
       </Part>
 
-      {/* Open cavity between the septum and the mesentery: the canals' way through until the membranes fill it. */}
-      {/* Once the membranes have closed them there are no canals: the space under the membranes is no longer one. */}
-      {canalsOpen > 0.5 ? (
-        <Part id="erreten-perikardioperitonealak">
-          <path d={poly(CAV_X)} fill={P.space} />
+      {/* The open cavity behind the plate. It is not the canals: only their own two shapes carry their name, so
+          lighting them outlines two passages, not one space wrapped round the oesophagus. */}
+      <path d={poly(CAV_X)} fill={P.space} pointerEvents="none" />
+      {/* The septum stage: still the one coelom of stage 1 (same purple) until the canals get their name. */}
+      {early && (
+        <Part id="enbrioi-barruko-zeloma" show={1 - named}>
+          <path d={poly(CAV_X)} fill={P.coelomSolid} opacity={0.6} />
+          <path d={poly(CAV_X)} fill="none" stroke={P.coelomEdge} strokeWidth={2} />
         </Part>
-      ) : (
-        <path d={poly(CAV_X)} fill={P.space} pointerEvents="none" />
       )}
       <clipPath id="w7-dia-cav">
         <path d={poly(CAV_X)} />
@@ -647,7 +655,7 @@ export function DiaphragmSection({ t, reduced, early }: SceneProps & { early?: b
           <rect x={front} y={0} width={1000 - 2 * front} height={640} />
         </clipPath>
       </defs>
-      <Part id="erreten-perikardioperitonealak" show={canalsOpen}>
+      <Part id="erreten-perikardioperitonealak" show={canalsOpen * named}>
         {[CANAL_L, CANAL_L.map(mx)].map((pts, i) => (
           <g key={i} clipPath="url(#w7-dia-cav)">
             <g clipPath={`url(#w7-dia-open${cid})`}>
@@ -675,10 +683,14 @@ export function DiaphragmSection({ t, reduced, early }: SceneProps & { early?: b
         </g>
         </Part>
       )}
-      <Mark id="erreten-perikardioperitonealak" x={360} y={276} rx={46} ry={40} show={vis(t, 0.62, 0.74)} />
-      <Mark id="erreten-perikardioperitonealak" x={640} y={276} rx={46} ry={40} show={vis(t, 0.62, 0.74)} />
 
       {/* Septum transversum: the large ventral plate (the IVC runs through it). */}
+      <defs>
+        <clipPath id={`w7-dia-grow${cid}`}>
+          <rect x={0} y={rise} width={1000} height={640 - rise} />
+        </clipPath>
+      </defs>
+      <g clipPath={grow < 1 ? `url(#w7-dia-grow${cid})` : undefined}>
       <Part id="septum-transversum">
         <path d={smoothPath(SEPTUM_X, true, 0.2)} fill={P.septum} stroke={P.septumDeep} strokeWidth={1.2} />
         <path d={smoothPath(SEPTUM_X, true, 0.2)} fill="url(#w7-mesench)" />
@@ -690,6 +702,7 @@ export function DiaphragmSection({ t, reduced, early }: SceneProps & { early?: b
         <ellipse cx={IVC_X[0]} cy={IVC_X[1] + 1} rx={8} ry={7} fill="#1d3f8a" />
         <circle cx={IVC_X[0] - 4} cy={IVC_X[1] - 4} r={3} fill="#9fbcff" opacity={0.5} />
       </Part>
+      </g>
 
       {/* Muscle from the body wall: a rim growing in from the periphery. */}
       <Part id="gorputz-paretako-mesodermoa" show={mus > 0.01 ? 1 : 0}>
@@ -710,6 +723,32 @@ export function DiaphragmSection({ t, reduced, early }: SceneProps & { early?: b
         <path d={`M${ESO_X[0] - 4},${ESO_X[1]} L${ESO_X[0] + 4},${ESO_X[1]} M${ESO_X[0]},${ESO_X[1] - 4} L${ESO_X[0]},${ESO_X[1] + 4} M${ESO_X[0] - 3},${ESO_X[1] - 3} L${ESO_X[0] + 3},${ESO_X[1] + 3}`} stroke="#1a1208" strokeWidth={1.8} strokeLinecap="round" />
       </Part>
 
+      {/* Each canal's own rim, where it meets the wall, the septum and the mesenchyme: two separate openings. */}
+      <defs>
+        {[CANAL_L, CANAL_L.map(mx)].map((pts, i) => (
+          <clipPath key={i} id={`w7-dia-canal${i}${cid}`}>
+            <path d={smoothPath(pts, true, 0.3)} />
+          </clipPath>
+        ))}
+        {/* Above the septum's free edge (just past it, so the edge's own line shows whole). */}
+        <clipPath id={`w7-dia-above${cid}`}>
+          <path d={poly([[0, 0], [1000, 0], [1000, 398], ...spline(SEPT_EDGE, 8).map(([x, y]): Pt => [x, y + 2]).reverse(), [0, 398]])} />
+        </clipPath>
+      </defs>
+      <Part id="erreten-perikardioperitonealak" show={canalsOpen * named}>
+        {[0, 1].map((i) => (
+          <g key={i} clipPath={`url(#w7-dia-canal${i}${cid})`} pointerEvents="none">
+            <g clipPath={`url(#w7-dia-open${cid})`}>
+              <g fill="none" clipPath={`url(#w7-dia-above${cid})`} stroke="#a8e2f8" strokeWidth={3} strokeLinejoin="round" opacity={0.9}>
+                <path d={poly(CAV_X)} />
+                <path d={smoothPath(SEPT_EDGE, false, 0.3)} />
+                <path d={poly(MES)} />
+              </g>
+            </g>
+          </g>
+        ))}
+      </Part>
+
       {/* Myocytes from the septum migrate into the pleuroperitoneal membranes. */}
       <Arrow from={[400, 430]} to={[332, 300]} color="#ff8a8a" width={2.4} show={migrate} bend={0.15} flow={!reduced} />
       <Arrow from={[600, 430]} to={[668, 300]} color="#ff8a8a" width={2.4} show={migrate} bend={-0.15} flow={!reduced} />
@@ -726,7 +765,7 @@ export function DiaphragmSection({ t, reduced, early }: SceneProps & { early?: b
       <path d={poly(BODY_X)} fill="url(#w7-light)" pointerEvents="none" />
 
       <Note x={500} y={612} tone="accent" show={early ? 0 : vis(t, 0, 0.74)}>
-        Erretenak zabalik: goiko barrunbea (pleura) ↔ beheko barrunbea (peritoneoa)
+        Erretenak zabalik: pleura barrunbea (goian) ↔ peritoneo barrunbea (behean)
       </Note>
       <Note x={500} y={612} tone="accent" show={vis(t, 0.74, 0.88)}>
         5. astea: mintz pleuroperitonealak hestegorri inguruko mesenkimarekin eta septumarekin fusionatzen dira
@@ -735,13 +774,14 @@ export function DiaphragmSection({ t, reduced, early }: SceneProps & { early?: b
         Lau osagai: septuma · mintz pleuroperitonealak · hestegorri inguruko mesenkima · gorputz pareta
       </Note>
 
-      <CavityKey rows={[canalsOpen > 0.5 && KEY7.canal, KEY7.septum]} quiet />
+      <CavityKey rows={[named < 0.5 && KEY7.zeloma, canalsOpen > 0.5 && named >= 0.5 && KEY7.canal, grow > 0.02 && KEY7.septum]} quiet />
       <Label id="mintz-pleuroperitonealak" x={202} y={196} ax={345} ay={250} show={seg(t, 0.72, 0.76)} />
-      <Label id="erreten-perikardioperitonealak" x={226} y={300} ax={Math.max(CANAL_MID[0], front + 24)} ay={lerp(CANAL_MID[1], FOCUS_L[1] - 30, c)} show={canalsOpen} small />
+      <Label id="erreten-perikardioperitonealak" x={226} y={300} ax={Math.max(CANAL_MID[0], front + 24)} ay={lerp(CANAL_MID[1], FOCUS_L[1] - 30, c)} show={canalsOpen * named} small />
+      {early && <Label id="enbrioi-barruko-zeloma" x={226} y={300} ax={CANAL_MID[0]} ay={CANAL_MID[1]} show={1 - named} small />}
       <Label id="miozitoak" x={190} y={352} ax={366} ay={366} show={migrate} small />
-      <Label id="beheko-kaba-zaina" x={190} y={400} ax={IVC_X[0] - 12} ay={IVC_X[1]} small />
+      <Label id="beheko-kaba-zaina" x={190} y={400} ax={IVC_X[0] - 12} ay={IVC_X[1]} show={seg(grow, 0.85, 1)} small />
       <Label id="gorputz-paretako-mesodermoa" x={228} y={470} ax={262 + rim * 0.4} ay={466} show={mus} small />
-      <Label id="septum-transversum" x={190} y={540} ax={380} ay={500} />
+      <Label id="septum-transversum" x={190} y={540} ax={380} ay={500} show={seg(grow, 0.15, 0.4)} />
       <Label id="hodi-neurala" x={810} y={96} ax={524} ay={100} small />
       <Label id="aorta" x={810} y={150} ax={AORTA_X[0] + 12} ay={AORTA_X[1] - 4} small />
       <Label id={esoId} x={810} y={196} ax={ESO_X[0] + 12} ay={ESO_X[1] - 6} />
@@ -760,12 +800,15 @@ const FIX_WALL = spline([[750, 396], [724, 466], [664, 534], [580, 568], [500, 5
  * that step); beside the mesenchyme the two canals stay open (marked at their step).
  */
 export function SeptumSection({ t, reduced }: SceneProps) {
-  // Its clock on the diaphragm section's: the septum and the open canals (0.5), then the canals marked (0.62–0.74).
+  // Its clock on the diaphragm section's: the open canals (0.5), then named (0.6–0.64) at step 5.
   const at = lerp(0.5, 0.7, seg(t, 0.72, 0.78));
-  const fix = vis(t, 0.38, 0.56, 0.04);
+  // Step 4 opens on stage 1's last picture (one round coelom) and the plate grows in from the front wall.
+  // Steps 2–3 (the side view's) already have the plate: there it is whole.
+  const grow = t < 0.36 ? seg(t, 0.18, 0.3) : seg(t, 0.37, 0.46);
+  const fix = vis(t, 0.48, 0.7, 0.04);
   return (
     <g>
-      <DiaphragmSection t={at} reduced={reduced} early />
+      <DiaphragmSection t={at} reduced={reduced} early grow={grow} />
       {fix > 0.02 && (
         <g opacity={fix} pointerEvents="none">
           <path d={smoothPath(FIX_WALL, false, 0.3)} fill="none" stroke="#ffd9a0" strokeWidth={22} strokeLinecap="round" opacity={0.35} />
@@ -773,11 +816,14 @@ export function SeptumSection({ t, reduced }: SceneProps) {
           <ellipse cx={500} cy={350} rx={58} ry={20} fill="#fff4dc" opacity={0.5} />
         </g>
       )}
-      <Note x={500} y={612} tone="accent" show={vis(t, 0, 0.56)}>
+      <Note x={500} y={612} tone="accent" show={vis(t, 0, 0.47)}>
+        C3–C5 mailan, goitik ikusita: zeloma barrunbe bakarra; septuma aurreko paretatik hazten da
+      </Note>
+      <Note x={500} y={612} tone="accent" show={vis(t, 0.47, 0.72)}>
         Aurrean eta alboetan gorputz paretan finkatuta; atzean, hestegorri inguruko mesenkiman
       </Note>
-      <Note x={500} y={612} tone="accent" show={vis(t, 0.56)}>
-        Banaketa partziala: hestegorriaren bi aldeetan bi erreten zabalik (goiko ↔ beheko barrunbea)
+      <Note x={500} y={612} tone="accent" show={vis(t, 0.72)}>
+        Bi erreten zabalik: hasierako perikardio barrunbea (goian) ↔ peritoneo barrunbea (behean)
       </Note>
     </g>
   );

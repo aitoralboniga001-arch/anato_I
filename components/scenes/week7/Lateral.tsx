@@ -268,19 +268,22 @@ export function SeptumLateral({ t, reduced }: SceneProps) {
   const place: Place = { dx: lerp(PLACE.dx, CLOSE.dx, f), dy: lerp(PLACE.dy, CLOSE.dy, f), s };
   const A = placeXY(place);
   const cells = seg(t, 0.185, 0.3);
-  const reach = seg(t, 0.2, 0.32) * 0.9 + 0.1 * seg(t, 0.41, 0.47);
+  // In the stage's order: the plate, the two cavities it makes (one at a time: above, then below), how it
+  // is held (the mesenchyme behind), then the canals.
+  const reach = seg(t, 0.2, 0.32) * 0.9 + 0.1 * seg(t, 0.58, 0.64);
   const solid = seg(t, 0.27, 0.34);
-  const eso = seg(t, 0.36, 0.42);
-  const anchors = vis(t, 0.44, 0.56, 0.04);
-  const split = seg(t, 0.55, 0.63);
+  const splitU = seg(t, 0.37, 0.42);
+  const splitL = seg(t, 0.44, 0.49);
+  const eso = seg(t, 0.54, 0.6);
+  const anchors = vis(t, 0.6, 0.72, 0.04);
   const canals = seg(t, 0.72, 0.77);
   const levels = vis(t, 0.18, 0.54);
-  const upper = mix(P.coelomSolid, P.periSolid, split);
+  const upper = mix(P.coelomSolid, P.periSolid, splitU);
   const st: SideState = {
     upper,
-    lower: mix(P.coelomSolid, P.peritoSolid, split),
+    lower: mix(P.coelomSolid, P.peritoSolid, splitL),
     side: mix(upper, '#56c8f0', 0.35 + 0.4 * canals),
-    sep: split,
+    sep: splitU,
     canal: canals,
     lung: 0,
     ppm: 0,
@@ -297,7 +300,7 @@ export function SeptumLateral({ t, reduced }: SceneProps) {
     [
       // The heart and the pericardial cavity are named from the dorsal side: from the ventral side the face is in the way.
       // In the cavity's lower part, below the heart: its leader runs under the heart's, clear of its anchor.
-      { id: 'hasierako-perikardio-barrunbea', a: A([572, 352]), show: split, small: true },
+      { id: 'hasierako-perikardio-barrunbea', a: A([572, 352]), show: splitU, small: true },
       { id: 'bihotza', a: A(HEART_AT) },
       // Close up the neck has left the frame: the cord is named down the back, beside the thorax.
       { id: 'hodi-neurala', a: A(bead(lerp(6.5, 9, near), 6).p) },
@@ -318,7 +321,7 @@ export function SeptumLateral({ t, reduced }: SceneProps) {
     <g>
       <Defs7 />
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
-      <SideEmbryo st={st} place={place} whole={1 - split} wholeId="enbrioi-barruko-zeloma" cells={cells} reach={reach} solid={solid} meso={eso} anchors={anchors} midgut beating={!reduced} reduced={reduced} flow={canals} />
+      <SideEmbryo st={st} place={place} whole={1 - splitU} wholeId="enbrioi-barruko-zeloma" cells={cells} reach={reach} solid={solid} meso={eso} anchors={anchors} midgut beating={!reduced} reduced={reduced} flow={canals} />
       {/* C3–C5: the levels the septum faces when it forms (the somites beside it). */}
       {levels > 0.02 &&
         tags.map((q) => (
@@ -330,21 +333,21 @@ export function SeptumLateral({ t, reduced }: SceneProps) {
         4. astea: lepo mailan (C3–C5) mesenkima trinkotu eta trenkada horizontala sortzen da
       </Note>
       <Note x={500} y={616} tone="accent" show={vis(t, 0.36, 0.54)}>
-        Aurrean eta alboetan gorputz paretan finkatuta; atzean, hestegorri inguruko mesenkiman
+        Goian hasierako perikardio barrunbea · behean peritoneo barrunbea
       </Note>
       <Note x={500} y={616} tone="accent" show={vis(t, 0.54, 0.72)}>
-        Goian hasierako perikardio barrunbea · behean peritoneo barrunbea
+        Aurrean eta alboetan gorputz paretan finkatuta; atzean, hestegorri inguruko mesenkiman
       </Note>
       <Note x={440} y={616} tone="accent" show={vis(t, 0.72)}>
         Banaketa partziala: bi erretenek goiko eta beheko barrunbeak lotzen dituzte
       </Note>
 
-      <CavityKey rows={split < 0.5 ? [KEY7.zeloma, cells > 0.02 && KEY7.septum] : [KEY7.hperi, canals > 0.02 && KEY7.canal, KEY7.perito, KEY7.septum]} />
-      <Label id="enbrioi-barruko-zeloma" x={236} y={366} ax={A([530, 346])[0]} ay={A([530, 346])[1]} show={1 - split} />
+      <CavityKey rows={splitU < 0.5 ? [KEY7.zeloma, cells > 0.02 && KEY7.septum] : [KEY7.hperi, canals > 0.02 && KEY7.canal, splitL > 0.02 && KEY7.perito, KEY7.septum]} />
+      <Label id="enbrioi-barruko-zeloma" x={236} y={366} ax={A([530, 346])[0]} ay={A([530, 346])[1]} show={1 - splitU} />
       {/* The septum's upper half: its leader passes above the vitelline duct's anchor, not over it; the name
           stays above the side orientation pill (y 302–338) however close the camera comes. */}
       <Label id="septum-transversum" x={236} y={Math.min(A([552, 382])[1], 290)} ax={A([552, 382])[0]} ay={A([552, 382])[1]} show={seg(t, 0.2, 0.24)} />
-      <Label id="peritoneo-barrunbea" x={236} y={470} ax={A([522, 462])[0]} ay={A([522, 462])[1]} show={split} small />
+      <Label id="peritoneo-barrunbea" x={236} y={470} ax={A([522, 462])[0]} ay={A([522, 462])[1]} show={splitL} small />
       <Label id="hodi-onfalomesenterikoa" x={236} y={530} ax={A(DUCT[2])[0]} ay={A(DUCT[2])[1]} small />
       {right.map((r) => (
         <Label key={r.id} id={r.id} x={790} y={r.y} ax={r.a[0]} ay={r.a[1]} show={r.show} small={r.small} noArrange />

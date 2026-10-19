@@ -181,12 +181,14 @@ export interface LabelEntry {
   align?: 'start' | 'middle' | 'end';
   show?: number;
   text?: string;
+  /** A second, smaller line under the name (see Label). */
+  sub?: string;
   small?: boolean;
   span?: [[number, number], [number, number]];
   /** Hand-placed: the label layer never moves it to another slot. */
   noArrange?: boolean;
 }
-const ENTRY_KEYS = ['id', 'x', 'y', 'ax', 'ay', 'align', 'show', 'text', 'small', 'noArrange'] as const;
+const ENTRY_KEYS = ['id', 'x', 'y', 'ax', 'ay', 'align', 'show', 'text', 'sub', 'small', 'noArrange'] as const;
 function sameEntry(a: LabelEntry, b: LabelEntry) {
   if (ENTRY_KEYS.some((k) => a[k] !== b[k])) return false;
   const p = a.span;

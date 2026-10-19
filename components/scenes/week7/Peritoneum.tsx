@@ -1,6 +1,6 @@
 'use client';
 
-import { Label, Mark, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Label, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { CavityKey, Defs7, KEY7, P, Serosa, Sheet, arc, f1, offset, poly, resample, spline, vis } from './common';
 
 /**
@@ -267,9 +267,6 @@ export function PeritoneumSection({ t }: SceneProps) {
           ))}
       </Part>
 
-      <Mark id="peritoneo-atzeko-egiturak" x={colonL[0]} y={colonL[1] - 18} rx={34} ry={16} show={vis(t, 0.78, 0.9)} />
-      <Mark id="peritoneo-atzeko-egiturak" x={colonR[0]} y={colonR[1] - 18} rx={34} ry={16} show={vis(t, 0.78, 0.9)} />
-
       <path d={poly(BODY)} fill="url(#w7-light)" pointerEvents="none" />
 
       <Note x={500} y={606} tone="accent" show={vis(t, 0, 0.17)}>
@@ -308,7 +305,7 @@ export function PeritoneumSection({ t }: SceneProps) {
       <Label id="hodi-neurala" x={810} y={92} ax={526} ay={100} small />
       <Label id="aorta" x={810} y={180} ax={AORTA[0] + 14} ay={AORTA[1] - 6} />
       <Label id="peritoneo-kanpoko-egiturak" x={804} y={240} ax={KIDNEY_R[0] + 20} ay={KIDNEY_R[1] + 4} show={extra} small />
-      <Label id="mesenterio-dortsala" x={810} y={290} ax={500 + w * 0.25} ay={ROOT_Y + 28} />
+      <Label id="mesenterio-dortsala" sub="atzeko mesenterioa" x={810} y={290} ax={500 + w * 0.25} ay={ROOT_Y + 28} />
       <Label id="beheranzko-kolona" x={810} y={360} ax={colonR[0] + CR - 13} ay={colonR[1] + 8} show={colons} />
       <Label id="erdiko-hestea" x={810} y={410} ax={GUT[0] + 20} ay={GUT[1]} />
       <Label id="errai-orria" x={810} y={452} ax={GUT[0] + 20} ay={GUT[1] + 28} show={1 - named} />

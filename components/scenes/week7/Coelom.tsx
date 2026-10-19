@@ -47,6 +47,10 @@ function bigScreen(g: FoldX) {
   return { k: k0 * s, X: (p: Pt): Pt => { const q = X0(p); return [500 + (q[0] - 500) * s, top + (q[1] - y0) * s + Math.max(0, y0 - top) * 0.4]; } };
 }
 
+/** The dorsal mesentery, long and wide enough to see its two layers back to back (topic 4: 30 long, 3.2 wide). */
+const MES_LEN = 42;
+const MES_WAIST = 7;
+
 /** Fold 0 → 0.9 (walls at the vitelline duct), then the section slides just below the umbilical region. */
 export function coelomTiming(t: number) {
   const f = 0.9 * Math.pow(lin(t, 0.05, 0.7), 1.08);
@@ -56,7 +60,7 @@ export function coelomTiming(t: number) {
 
 export function CoelomFold({ t }: SceneProps) {
   const { f, lam } = coelomTiming(t);
-  const g = foldXGeo(f, lam);
+  const g = foldXGeo(f, lam, MES_LEN, MES_WAIST);
   const { X, k } = bigScreen(g);
   const A = foldXAnchors(g);
   const R = (p: Pt) => X(p);
@@ -82,7 +86,7 @@ export function CoelomFold({ t }: SceneProps) {
 
   // Folding arrows at the two edges: where the wall edge is heading.
   const folding = vis(t, 0.52, 0.69);
-  const ahead = foldXGeo(Math.min(0.9, f + 0.14), lam).E0;
+  const ahead = foldXGeo(Math.min(0.9, f + 0.14), lam, MES_LEN, MES_WAIST).E0;
   const edgeArrow = (side: 1 | -1) => {
     const p = side > 0 ? g.E0 : mirrorL(g.E0);
     const q = side > 0 ? ahead : mirrorL(ahead);
@@ -161,7 +165,7 @@ export function CoelomFold({ t }: SceneProps) {
       <Label id="aorta-dortsalak" x={810} y={190} ax={R(A.aorta)[0]} ay={R(A.aorta)[1]} small />
       <Label id="alboko-mesodermoa" x={810} y={272} ax={R(A.parietal)[0]} ay={R(A.parietal)[1]} small />
       <Label id="enbrioi-barruko-zeloma" x={810} y={310} ax={R(A.coelom)[0]} ay={R(A.coelom)[1]} />
-      <Label id="mesenterio-dortsala" x={810} y={354} ax={R(A.mesentery)[0] - 3} ay={R(A.mesentery)[1] - 9} show={seg(g.mes, 8, 20)} small />
+      <Label id="mesenterio-dortsala" sub="atzeko mesenterioa" x={810} y={354} ax={R(A.mesentery)[0] - 6} ay={R(A.mesentery)[1] - 9} show={seg(g.mes, 8, 20)} small />
       <Label id="endodermoa" x={810} y={392} ax={R(A.gut)[0]} ay={R(A.gut)[1]} show={1 - seg(g.ff, 0.665, 0.69)} />
       <Label id="erdiko-hestea" x={810} y={392} ax={R(A.gut)[0]} ay={R(A.gut)[1]} show={seg(g.ff, 0.665, 0.69)} />
       <Label id="hodi-onfalomesenterikoa" x={810} y={430} ax={R(A.duct)[0]} ay={Math.min(R(A.duct)[1], 600)} show={seg(g.ff, 0.5, 0.6) * (1 - 0.75 * lam)} />

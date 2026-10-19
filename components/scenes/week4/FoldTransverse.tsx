@@ -155,7 +155,8 @@ export interface Spine {
 
 const offPt = (sp: Spine, i: number, d: number): Pt => add(sp.pts[i], sp.n[i], d);
 
-export function foldXGeo(f: number, lam: number) {
+/** `mesLen`, `mesWaist`: the dorsal mesentery's full length and half-width at its waist (topic 7, whose subject it is, draws it longer and wider). */
+export function foldXGeo(f: number, lam: number, mesLen = 30, mesWaist = 3.2) {
   const ff = clamp(f + 0.1 * lam);
   // ---------------- top spine (right half; body part)
   const lw = lerp(W0 - U_RIB, LW1, ff ** 1.4);
@@ -169,7 +170,7 @@ export function foldXGeo(f: number, lam: number) {
   const mapT = (u: number, d: number): Pt => add(at(top, u).p, nT(u), d);
 
   // ---------------- bottom spine (gut part)
-  const mes = 30 * sm((ff - 0.62) / 0.33); // dorsal mesentery length
+  const mes = mesLen * sm((ff - 0.62) / 0.33); // dorsal mesentery length
   const S0: Pt = mapT(0, DA + mes);
   const LB0 = W0 - 7;
   const LB1 = 2 * S0W + Math.PI * RG;
@@ -317,7 +318,7 @@ export function foldXGeo(f: number, lam: number) {
     5,
   );
 
-  return { bridge, sepK, ff, lam, LT, lw, top, mapT, nT, bot, S0, Pr, mes, topSp, botSp, iRoot, uRoot, closing, tubeC, noto, aorta, somite, somiteRot, hw: dHw, Ld, sacC: Bc, rxs, rys, duct, sac, E0, mouthY };
+  return { bridge, sepK, ff, lam, LT, lw, top, mapT, nT, bot, S0, Pr, mes, mesWaist, topSp, botSp, iRoot, uRoot, closing, tubeC, noto, aorta, somite, somiteRot, hw: dHw, Ld, sacC: Bc, rxs, rys, duct, sac, E0, mouthY };
 }
 export type FoldX = ReturnType<typeof foldXGeo>;
 
@@ -540,7 +541,7 @@ export function FoldXDrawing({ g, X, k, ghost }: { g: FoldX; X: (p: Pt) => Pt; k
             // Double sheet of splanchnic mesoderm: waisted in the middle, flaring into the body wall and onto the gut.
             const top = g.mapT(S0W + 1, 112);
             const bot = offPt(botSp, g.iRoot, TEN + TP);
-            const ctl: Pt = [3.2, (top[1] + bot[1]) / 2];
+            const ctl: Pt = [g.mesWaist, (top[1] + bot[1]) / 2];
             const side = Array.from({ length: 11 }, (_, i) => {
               const u = i / 10;
               return [(1 - u) * (1 - u) * top[0] + 2 * (1 - u) * u * ctl[0] + u * u * bot[0], (1 - u) * (1 - u) * top[1] + 2 * (1 - u) * u * ctl[1] + u * u * bot[1]] as Pt;
@@ -550,7 +551,9 @@ export function FoldXDrawing({ g, X, k, ghost }: { g: FoldX; X: (p: Pt) => Pt; k
               <>
                 <path d={poly(outline)} fill={C.mesoLateral} opacity={0.82} />
                 <path d={poly(outline)} fill="url(#p-meso-intra)" opacity={0.25} />
-                <path d={`M${f1(X([0, top[1] + 3])[0])},${f1(X([0, top[1] + 3])[1])}L${f1(X([0, bot[1] - 3])[0])},${f1(X([0, bot[1] - 3])[1])}`} stroke="rgba(90,20,24,0.5)" strokeWidth={0.8} />
+                {/* Two layers back to back: each sheet's edge, and the seam between them. */}
+                <path d={poly(outline)} fill="none" stroke="rgba(90,20,24,0.6)" strokeWidth={1} />
+                <path d={`M${f1(X([0, top[1] + 3])[0])},${f1(X([0, top[1] + 3])[1])}L${f1(X([0, bot[1] - 3])[0])},${f1(X([0, bot[1] - 3])[1])}`} stroke="rgba(70,12,18,0.75)" strokeWidth={g.mesWaist > 4 ? 1.8 : 0.8} />
               </>
             );
           })()}

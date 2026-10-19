@@ -71,7 +71,7 @@ export const SIM_STOPS: Stop[] = [
   {
     id: 'apunteak',
     title: 'Apunteak',
-    text: 'Zure apunteak, simulazioarekin batera argituta (N tekla). Esaldi bat klikatuta, hara joaten da simulazioa.',
+    text: 'Zure apunteak, simulazioarekin batera argituta (N tekla). Esaldi edo irudi bat klikatuta, hara joaten da simulazioa.',
     open: 'apunteak',
     live: true,
     targets: [{ ids: ['apunteak', 'eskuineko-zutabea'], min: 2 }, { ids: ['apunteak'] }],

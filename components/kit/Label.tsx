@@ -11,6 +11,8 @@ const LINE_H = 15 / 13.5;
 /** HTML chrome over the frame: the zoom and view buttons (top right) and the side orientation pills. */
 const TOOLBAR = { x: 932, y: 222 };
 const PILLS = { y0: 302, y1: 338, left: 114, right: 891 };
+/** A label's second line (`sub`), relative to the name's size. */
+const SUB_K = 0.8;
 
 /**
  * Grow a label by up to `k` without leaving the 1000×640 frame or running under the chrome.
@@ -85,6 +87,8 @@ interface LabelProps {
   show?: number;
   /** Override the registry name (e.g. to add a day). Prefer the registry name. */
   text?: string;
+  /** A second, smaller line under the name: the notes' other name for it (e.g. "atzeko mesenterioa"). */
+  sub?: string;
   small?: boolean;
   /**
    * A name for a layered whole (a structure with `spans` in the registry, e.g. the bilaminar disc): the
@@ -146,22 +150,25 @@ export interface LabelGeom {
 }
 
 export function labelGeom(
-  { x, y, ax, ay, align, small }: Pick<LabelProps, 'x' | 'y' | 'ax' | 'ay' | 'align' | 'small'>,
+  { x, y, ax, ay, align, small, sub }: Pick<LabelProps, 'x' | 'y' | 'ax' | 'ay' | 'align' | 'small' | 'sub'>,
   chars: number,
   size: number,
   scale: LabelScale,
   measure?: (fs: number) => number,
 ): LabelGeom {
   const anchor = align ?? (ax !== undefined && ax > x ? 'end' : 'start');
-  const k = fitScale(scale, x, y, anchor, chars, size);
+  // The second line is SUB_K the name's size: as wide as its characters at that size.
+  const wide = Math.max(chars, (sub?.length ?? 0) * SUB_K);
+  const k = fitScale(scale, x, y, anchor, wide, size);
   const fs = size * k;
-  const plate = plateBox(x, y, anchor, measure ? measure(fs) : chars * CHAR_W * fs, fs);
+  const plate = plateBox(x, y, anchor, Math.max(measure ? measure(fs) : chars * CHAR_W * fs, (sub?.length ?? 0) * SUB_K * CHAR_W * fs), fs);
+  if (sub) plate.h += fs * SUB_K * LINE_H;
   // The rules' estimate: 7.1 units a character at 13.5px (6.4 at the small 12px), 15 units a line.
   const drawn = small ? 12 : 13.5;
-  const w = (chars * (small ? 6.4 : 7.1) * fs) / drawn;
+  const w = (wide * (small ? 6.4 : 7.1) * fs) / drawn;
   const h = (15 * fs) / drawn;
   const x0 = anchor === 'end' ? x - w : anchor === 'middle' ? x - w / 2 : x;
-  const box: LabelGeom['box'] = [x0, x0 + w, y - h / 2, y + h / 2];
+  const box: LabelGeom['box'] = [x0, x0 + w, y - h / 2, y + h / 2 + (sub ? h * SUB_K : 0)];
   if (ax === undefined || ay === undefined) return { anchor, k, fs, plate, box, leader: [] };
   // Leader starts at the plate edge and bends horizontally first, like textbook call-outs.
   // It leaves from the plate edge nearest the anchor, so its bend never lands inside a column of names.
@@ -182,7 +189,7 @@ function bracket([[x1, y1], [x2, y2]]: [[number, number], [number, number]], fro
 }
 
 /** Draws one label where its props say (the label layer calls it with the laid-out position). */
-export function LabelDraw({ id, x, y, ax, ay, align, show = 1, text, small, span, moved }: LabelProps) {
+export function LabelDraw({ id, x, y, ax, ay, align, show = 1, text, sub, small, span, moved }: LabelProps) {
   const ctx = useScene();
   const scale = useLabelScale();
   const measured = useMeasured();
@@ -196,7 +203,7 @@ export function LabelDraw({ id, x, y, ax, ay, align, show = 1, text, small, span
   const name = text ?? ctx.nameOf(id);
   const size = labelSize(state, small);
   const weight = state === 'spot' || state === 'focus' ? 700 : 550;
-  const { anchor, k, fs, plate, leader: pts } = labelGeom({ x, y, ax, ay, align, small }, name.length, size, scale, (f) => textWidth(name, f, weight, space, measured));
+  const { anchor, k, fs, plate, leader: pts } = labelGeom({ x, y, ax, ay, align, small, sub }, name.length, size, scale, (f) => textWidth(name, f, weight, space, measured));
   const hasLeader = pts.length > 0;
   const leader = hasLeader ? `M${pts[0][0]},${pts[0][1]} L${pts[1][0]},${pts[1][1]} L${ax},${ay}` : '';
   const group = {
@@ -237,6 +244,11 @@ export function LabelDraw({ id, x, y, ax, ay, align, show = 1, text, small, span
           <text x={x} y={y} dy="0.35em" textAnchor={anchor} className="label-text" style={k > 1 ? { fontSize: `${fs.toFixed(2)}px` } : undefined}>
             {name}
           </text>
+          {sub && (
+            <text x={x} y={y + fs * 1.12} dy="0.35em" textAnchor={anchor} className="label-text label-sub" style={{ fontSize: `${(fs * SUB_K).toFixed(2)}px` }}>
+              {sub}
+            </text>
+          )}
         </g>
       </OnTop>
     </>

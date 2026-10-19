@@ -1,6 +1,6 @@
 'use client';
 
-import { Label, Mark, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
+import { Label, Note, Part, lerp, seg, smoothPath, type Pt, type SceneProps } from '@/components/kit';
 import { Defs7, P, f1, offset, poly, resample, spline, vis } from './common';
 
 /**
@@ -212,10 +212,17 @@ export function DiaphragmBelow({ t }: SceneProps) {
       <Part id="aorta">
         <circle cx={AORTA[0]} cy={AORTA[1]} r={15} fill={P.aorta} stroke="#7a0f1e" strokeWidth={1.4} />
       </Part>
-      <Mark id="aortaren-hiatoa" x={AORTA[0]} y={AORTA[1]} rx={26} show={vis(t, 0.48, 0.62)} />
-      <Mark id="hestegorriaren-hiatoa" x={ESO[0]} y={ESO[1]} rx={22} show={vis(t, 0.48, 0.62)} />
-      <Mark id="beheko-kabaren-zuloa" x={IVC[0]} y={IVC[1]} rx={22} show={vis(t, 0.48, 0.62)} />
-      {/* Over the hiatus' glow: the ligament arching over the aorta stays pickable while the hiatus is lit. */}
+      {/* Each opening's own edge, over the vessel through it: lit, the hole glows by its rim. */}
+      <Part id="aortaren-hiatoa">
+        <ellipse cx={AORTA[0]} cy={AORTA[1]} rx={23} ry={19} fill="none" stroke="#e8d2c0" strokeWidth={2.4} opacity={0.75} />
+      </Part>
+      <Part id="hestegorriaren-hiatoa">
+        <ellipse cx={ESO[0]} cy={ESO[1]} rx={17} ry={13} fill="none" stroke="#e8d2c0" strokeWidth={2.4} opacity={0.75} />
+      </Part>
+      <Part id="beheko-kabaren-zuloa">
+        <circle cx={IVC[0]} cy={IVC[1]} r={16} fill="none" stroke="#e8d2c0" strokeWidth={2.4} opacity={0.75} />
+      </Part>
+      {/* Over the hiatus' rim: the ligament arching over the aorta stays pickable while the hiatus is lit. */}
       <Part id="erdiko-lotailu-arkutua">
         <path d={`M466,452Q500,404 534,452`} fill="none" stroke="#efe6d6" strokeWidth={5} strokeLinecap="round" />
       </Part>
@@ -442,8 +449,6 @@ export function DiaphragmProfile({ t, reduced }: SceneProps) {
           {anim(stroke(domePart(...DOME_U.lumbar)), stroke(domePart(...DOME_U.lumbar, DOME_IN)))}
         </path>
       </Part>
-      <Mark id="bularrezur-atala" x={334} y={330} rx={22} show={vis(t, 0.62, 0.78)} />
-      <Mark id="gerriko-atala" x={646} y={470} rx={22} show={vis(t, 0.62, 0.78)} />
       <path d={poly(TORSO)} fill="url(#w7-light)" pointerEvents="none" />
 
       <Note x={250} y={16} size={13}>

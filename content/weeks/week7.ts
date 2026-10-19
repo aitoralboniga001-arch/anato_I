@@ -17,6 +17,8 @@ import { structures7 } from './week7-structures';
 
 const FILE = '7.GAIA_Gorputzaren barrunbeak (ZUZENDUTA).pdf';
 const src = (section: string) => ({ file: FILE, section });
+/** septum-transversum: its steps (stage time) onto the septum scenes' own clock (0.18 apart, the canals from 0.72). */
+const SEPT_STEPS: [number, number][] = [[0, 0], [0.14, 0.18], [0.3, 0.36], [0.58, 0.54], [0.78, 0.72], [1, 1]];
 
 export const week7: WeekDef = {
   week: 7,
@@ -175,7 +177,8 @@ export const week7: WeekDef = {
       dayRange: [22, 28],
       title: 'Septum transversumaren eraketa',
       subtitle: 'Zeloma bitan: hasierako perikardio barrunbea eta peritoneo barrunbea',
-      duration: 30,
+      // Step 3 (the two cavities the rest of the topic builds on) has room to light them one at a time.
+      duration: 38,
       source: src('2. Septum Transversumaren eraketa'),
       views: [
         {
@@ -185,7 +188,7 @@ export const week7: WeekDef = {
           description: 'Apunteetako irudia: enbrioia albotik moztuta. Septum transversuma bihotzaren eta hestearen artean, C3–C5 mailan; goian hasierako perikardio barrunbea, behean peritoneo barrunbea.',
           orientation: lateralOrientation,
           // Steps: the plate, then the division (above / below), then across: how it is held and the canals behind.
-          scene: remap(SeptumLateral, [[0, 0], [0.36, 0.36], [0.54, 0.72], [1, 1]]),
+          scene: remap(SeptumLateral, SEPT_STEPS),
         },
         {
           id: 'zeharkakoa',
@@ -193,7 +196,7 @@ export const week7: WeekDef = {
           plane: 'zeharkakoa',
           description: 'Diafragmaren etapako zeharkako mozketa bera (dortsala goian), 4. astean: septuma aurrean eta alboetan gorputz paretan finkatuta, atzean hestegorri inguruko mesenkiman; hestegorriaren bi aldeetan bi erreten zabalik.',
           orientation: { top: 'Dortsala', bottom: 'Bentrala' },
-          scene: remap(SeptumSection, [[0, 0], [0.54, 0.36], [0.72, 0.72], [1, 1]]),
+          scene: remap(SeptumSection, [[0, 0], [0.58, 0.36], [0.78, 0.72], [1, 1]]),
           locator: { level: 0.5, note: 'Septumaren maila' },
         },
         {
@@ -204,7 +207,7 @@ export const week7: WeekDef = {
           frame: 'sagitala',
           description: 'Enborraren zeloma osoa aurretik, bloke garden gisa, eta ondoan plano zuriaren mailako zeharkako mozketa. Septumaren gainean hasierako perikardio barrunbea, azpian peritoneo barrunbea, eta atzean bi erreten. Planoa arrastatu daiteke.',
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
-          scene: CoelomMapSeptum,
+          scene: remap(CoelomMapSeptum, SEPT_STEPS),
         },
       ],
       beats: [
@@ -217,7 +220,7 @@ export const week7: WeekDef = {
           focus: ['enbrioi-barruko-zeloma', 'bihotza', 'aurreko-hestea'],
         },
         {
-          at: 0.18,
+          at: 0.14,
           idea: 'Lepo mailan (C3–C5) trenkada horizontal bat agertzen da: septum transversuma.',
           key: 'Septuma LEPOAN sortzen da; gero jaitsiko da.',
           ask: {
@@ -236,7 +239,7 @@ export const week7: WeekDef = {
           exam: 'Septum transversuma: 4. astea, C3–C5 maila (lepoan, oso altu).',
         },
         {
-          at: 0.36,
+          at: 0.3,
           recall: ['bihotza'],
           idea: 'Septumak zeloma bitan banatzen du: goian hasierako perikardio barrunbea, behean peritoneo barrunbea.',
           key: 'Goian bihotza dagoen barrunbea; behean hestea dagoena.',
@@ -255,9 +258,10 @@ export const week7: WeekDef = {
           view: 'sagitala',
           text: 'Septumak zeloma bitan banatzen du: goiko atala hasierako perikardio barrunbea da (torax barrunbe osoa okupatzen du); azpikoa peritoneo barrunbea.',
           focus: ['hasierako-perikardio-barrunbea', 'peritoneo-barrunbea'],
+          exam: 'Septum transversuma: gainean hasierako perikardio barrunbea (torax osoa), azpian peritoneo barrunbea.',
         },
         {
-          at: 0.54,
+          at: 0.58,
           idea: 'Trenkada aurrean eta alboetan paretan finkatzen da; atzean, hestegorri inguruko mesenkiman.',
           key: 'Aurrean eta alboetan itxita dago; atzean ez erabat.',
           notes: ['w7/2/p4/s1'],
@@ -267,7 +271,7 @@ export const week7: WeekDef = {
           focus: ['septum-transversum', 'hestegorri-inguruko-mesenkima'],
         },
         {
-          at: 0.72,
+          at: 0.78,
           idea: 'Banaketa ez da osoa: atzean, bi erretenek bi barrunbeak komunikatzen dituzte.',
           key: 'Erretenak = atze-alboko bi kanal; 5. astean itxiko dira.',
           ask: {
@@ -329,6 +333,17 @@ export const week7: WeekDef = {
           locator: { level: 0.66, note: 'Abdomena' },
         },
         {
+          id: 'irudia',
+          label: 'Apunteetako irudia (A–C)',
+          plane: 'zeharkakoa',
+          age: '3.–4. asteak',
+          description: 'Apunteetako irudia (A → C), 1. etapako mozketa bera: disko laua, zeharkako tolespena eta gorputz itxia; hestea errai orriak inguratuta, atzeko paretatik zintzilik (atzeko mesenterioa).',
+          orientation: { top: 'Dortsala', bottom: 'Bentrala' },
+          // The whole fold over step 1, so the step ends on figure C.
+          scene: retime(CoelomFold, 0.12),
+          locator: { level: 0.62, note: 'Erdiko hestearen maila' },
+        },
+        {
           id: 'motak',
           label: 'Hiru motak',
           plane: 'eskema',
@@ -343,7 +358,9 @@ export const week7: WeekDef = {
         {
           at: 0,
           idea: 'Hestea errai orriak inguratzen du eta atzeko paretarekin lotuta dago.',
-          notes: ['w7/2.1/p3/s1-s2'],
+          // The notes' figure (A → C) where they print it: the fold the student knows from stage 1, ending on the gut hanging from the back wall.
+          view: 'irudia',
+          notes: ['w7/2.1/p3/s1-s2', 'w7/2.1/p4/s1'],
           text: 'Hestea alde zefalikotik alde kaudalera hedatzen da, eta alboko mesodermoaren errai orriak inguratzen du. Gorputzaren atzeko aldearekin lotuta dago, mesenkimaz osatutako lotura nahiko zabal baten bitartez.',
           focus: ['erdiko-hestea', 'errai-orria'],
         },
@@ -361,10 +378,12 @@ export const week7: WeekDef = {
               'Ez: septuma barrunbea zeharka zatitzen duen trenkada da.',
             ],
           },
-          notes: ['w7/2.1/p3/s3-s4', 'w7/2.1/p4/s1'],
+          notes: ['w7/2.1/p3/s3-s4'],
+          // Into the abdominal section: the wide link thins into the two-layer mesentery.
+          view: 'zeharkakoa',
           text: 'Peritoneo barrunbean egoera ezberdina da: paretako eta errai orrien artean bi orriz osatutako atzeko lotura bat agertzen da, mesenterio dortsala.',
           focus: ['mesenterio-dortsala'],
-          exam: 'Mesenterio dortsala: paretako eta errai orrien arteko lotura, bi orrikoa.',
+          exam: 'Mesenterio dortsala (atzeko mesenterioa): paretako eta errai orrien arteko lotura, bi orrikoa.',
         },
         {
           at: 0.2904,
@@ -437,7 +456,7 @@ export const week7: WeekDef = {
           age: '3. hilabetetik aurrera',
           idea: 'Peritoneo barrunbeak ez du abdomen osoa betetzen.',
           key: 'Toraxean hasierako barrunbeak dena betetzen zuen; abdomenean ez.',
-          notes: ['w7/2.1/p12/s1', 'w7/2.1/p8/s1', 'w7/2.1/p12/s2'],
+          notes: ['w7/2.1/p12/s1', 'w7/2.1/p8/s1', 'w7/2.1/p12/s2', 'w7/2.1/p13/s1'],
           text: 'Beraz, peritoneo barrunbeak ez du abdomeneko barrunbe osoa okupatzen: organo batzuk peritoneo kanpokoak dira eta beste batzuk peritoneo atzekoak (adibidez, duodenoa).',
           focus: ['peritoneo-barrunbea', 'peritoneo-kanpoko-egiturak', 'peritoneo-atzeko-egiturak'],
         },

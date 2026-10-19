@@ -272,3 +272,40 @@ Each batch ends with:
 - tests;
 - real-WebGL shots at 1536 px and at 768–1024 px;
 - a commit.
+
+## 4. Batch 2 results (topic 7: H + I + J), 2026-10-19
+
+**Done:**
+- **Canals (J, owner's example).**
+  - Only the two canal shapes carry `erreten-perikardioperitonealak`. The open cavity behind the septum no longer does, and the two `Mark` pools are gone.
+  - The oesophageal mesenchyme now reaches the back wall (`MES`, shared with the 3D dome), so there are two separate passages, one either side of it.
+  - Each canal has a crisp rim along the wall, the septum and the mesenchyme.
+- **Other pools on shaped structures (J).**
+  - The three diaphragm openings glow by their own rim.
+  - The sternal and lumbar parts glow by their segments.
+  - The retroperitoneal organs glow through the colons, which already belong to that group.
+  - `tests/clear-structures.test.ts` now fails on any `Mark` whose id the same scene also draws as a `Part` (topics 7–9). Topics 1–6 still have 6 such cases; they are left for their own sweep.
+- **Two cavities (H).**
+  - `septum-transversum` grows from 30 s to 38 s.
+  - Step 3 (the two cavities) now lasts about 10.6 s instead of about 2.7 s. The side view used to spend the first half of the step on the fixings; now it lights the upper cavity (pink, named), then the lower one (green, named).
+  - The step has a FUNTSEZKOA line.
+  - The side view and the map play in the stage's order: plate, cavities, fixings, canals (`SEPT_STEPS`).
+- **Coelom → septum section (H).**
+  - The section opens on stage 1's last picture: one round coelom in its purple, the gut and its mesenchyme.
+  - The septum grows in from the front wall, then its fixings glow.
+  - The open space beside the oesophagus stays coelom-purple until step 5, when it becomes the named canals.
+  - The note names both cavities: "hasierako perikardio barrunbea (goian) ↔ peritoneo barrunbea (behean)".
+  - In `diafragma-eraketa` the note now says "pleura barrunbea ↔ peritoneo barrunbea".
+- **Mesentery (J + I).**
+  - In `zeloma` 5 the dorsal mesentery is longer and wider: a two-layer sheet with its seam, continuous with the splanchnic layer round the gut. It is drawn by topic 4's drawing with new optional `mesLen` and `mesWaist`; topic 4 is unchanged.
+  - Labels can now carry a second line (`sub`). "Mesenterio dortsala" shows "atzeko mesenterioa" under it in `zeloma` and in 2.1, and the FUNTSEZKOA line names both.
+- **Notes figures (I).**
+  - 2.1 opens on a new view, "Apunteetako irudia (A–C)": stage 1's fold plays during step 1 and ends on figure C. Step 2 goes into the abdominal section, where the wide link thins into the mesentery.
+  - The caption "Atzeko mesenterioa ikusi daiteke" now links to that step 1.
+  - The caption "Peritoneo barrunbea" (the last 2.1 figure) now links to the step that compares the cavity with the whole abdomen.
+  - `tests/notes.test.ts` pins three things: every topic 7 caption is linked, 2.1 opens on the figure, and topics 8–9 keep their links (with 2 topic 8 captions still pending for batch 5).
+  - The guide and the help card now say that a figure can be clicked too.
+
+**Not done (kept for later):**
+- A `look` bridge or a 3D turn from "slice" to "looking down": the growing septum and the notes' "goitik ikusita" do that job now. Revisit if the owner still finds the jump hard.
+- The notes' clause "hasieran ez du guztiz inguratzen hestea".

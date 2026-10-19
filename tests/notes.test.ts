@@ -139,3 +139,31 @@ describe('exam dates', () => {
     }
   });
 });
+
+// The owner studies from the notes and then looks for the same picture in the simulator: every figure the
+// notes print needs a step whose picture looks like it, linked from its caption ("Simulazioan ikusi").
+describe('figure parity: notes captions link to a matching step', () => {
+  const captions = (week: number) => notesOf(week).filter((b) => b.kind === 'caption');
+  const linked = (b: ReturnType<typeof captions>[number]) => b.sentences.some((s) => sentenceAnchors.has(s.id));
+
+  it('links every topic 7 figure caption', () => {
+    const open = captions(7).filter((b) => !linked(b)).map((b) => `${b.id}: ${blockText(b)}`);
+    expect(open).toEqual([]);
+  });
+
+  it('opens 2.1 on the notes figure A → C (the fold of stage 1), not on the finished abdomen', () => {
+    const refs = sentenceAnchors.get('w7/2.1/p4/s1') ?? [];
+    expect(refs[0]).toEqual({ week: 7, stageId: 'peritoneo-barrunbea', beat: 0 });
+    const stage = weeks.find((w) => w.week === 7)!.stages.find((s) => s.id === 'peritoneo-barrunbea')!;
+    expect(stage.beats[0].view).toBe('irudia');
+    expect(stage.beats[1].view).toBe('zeharkakoa');
+  });
+
+  it('keeps the linked captions of topics 8 and 9 linked', () => {
+    // Not yet linked in topic 8 (the audit's batch for topic 8 adds them): the skull from above, the chondrocranium from above.
+    const pending = new Set(['w8/3.1.1/p12', 'w8/3.1.2/p5']);
+    for (const week of [8, 9]) for (const b of captions(week)) if (!pending.has(b.id) && !blockText(b).trim().match(/^[\s○•*-]*$/)) {
+      expect(linked(b), `${b.id}: ${blockText(b).slice(0, 60)}`).toBe(true);
+    }
+  });
+});
