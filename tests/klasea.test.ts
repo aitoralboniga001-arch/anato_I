@@ -99,6 +99,7 @@ const X_WORDS: Record<string, 'ks' | 'basque'> = {
   kuxinaren: 'basque',
   kuxinetatik: 'basque',
   kuxinarekin: 'basque',
+  kuxinek: 'basque',
   ixten: 'basque',
   oxigenatzera: 'ks',
   urdinxka: 'basque',
