@@ -193,7 +193,7 @@ Each item says what the student gains, so it passes the brief's test: **only if 
   2. **One id, one thing on screen.** A container must not carry the id of what is inside it.
   3. **When a structure is the step's subject, it is big enough to see.** About 40 px or more at 1536 px wide and about 28 px or more at 1024 px. If it is small in the body, zoom in with a bridge (and keep context, see "never get lost").
   4. **Its defining feature is visible.** If the text says "two-layer", "a canal", "an opening" or "fused", the picture shows two layers, a passage, a hole or the fusion.
-- **Found so far** (automatic check of every step plus the shots; full table to follow):
+- **Found** (automatic check of all 222 steps, then every flag checked by eye):
   - **Topic 7, structures lit only by `Mark` blobs although they have shapes:**
     - `erreten-perikardioperitonealak` (`septum-transversum` 5; `Diaphragm.tsx:678–679`): redraw as two separate dorsolateral passages beside the oesophageal mesenchyme. Give them depth shading (a passage going down to the peritoneal cavity) and the coelom colour (see H). Remove the id from `CAV_X`.
     - `aortaren-hiatoa`, `hestegorriaren-hiatoa`, `beheko-kabaren-zuloa` (`diafragma-heldua` 4; `DiaphragmAdult.tsx:215–217`): the three openings are glowing dots on vessels about 15 px wide. Draw each as an opening in the muscle or tendon with the vessel passing through, and zoom in on the step.
@@ -208,7 +208,23 @@ Each item says what the student gains, so it passes the brief's test: **only if 
   - **Topic 8 `kondrokraneoa`:**
     - Step 1 lights "Kondrokraneoa" on an empty dark oval: there is nothing to see yet.
     - Step 4 (pituitary) is very zoomed. The "adenohipofisia / neurohipofisia" text is small, and "Hipofisi kartilagoak" are dots.
-  - **Topic 9 `ildaskatuak` 3 and 5:** the somites and occipital somites measure under 28 px on the paraxial view. Check them by eye.
+  - **Topic 8, also flagged:**
+    - `buru-ganga` 7: the posterior fontanelle is a small triangle. It is visible; the zoom could favour it. Low.
+    - `buru-ganga` 2 (3D): the ossification centres are small on the skull model. Low.
+  - **Topic 9, real:**
+    - `somitomeroak-burua` 7: the step lights "1. faringe arkua" and "3. faringe arkua" on an *adult* head. There the arches are only faint tints over the muscles, and the colour key in the corner is dim. The student cannot see the arches the text names. Fix: light the arch-derived muscle groups clearly in each arch's colour, or show the 5-week embryo's arches beside the adult head, as `okzipitalak` does.
+    - `nerbio-espinala` 7: the spinal cord section fills about a quarter of the frame. The ependymal canal is a dot and the lateral horn is tiny. Fix: frame the section about twice as big.
+    - `okzipitalak` 4–5: "Nerbio kranialak" lights small numbered badges, and the nerves themselves are not drawn as nerves. Medium. Draw short nerve paths from each badge to its muscles, or accept the badges and make them larger.
+    - `bihotz-muskulua` 3–7: the sinoatrial and AV nodes are 15–18 px ovals. They are lit and readable, but small. Low: enlarge them slightly.
+  - **Topic 9, fine on inspection:**
+    - `somitomeroak-burua` 4 (trochlea);
+    - `muskulu-lisoa` 4 (membranes, small but lit and named);
+    - `ildaskatuak` 3 and 5 (paraxial somites);
+    - `somitaren-paretak` 4 and 6;
+    - `ehun-konektiboa` 1 (fades in).
+  - **Not real flags:**
+    - The `domeinuak` table rows: they are wide rows, measured as short.
+    - The 3D name chips.
 - **Method for the rest:**
   - `focuscheck.mjs` (the scratchpad tool; to become a repeatable script under `scripts/`) loads every step in real Chrome and measures each lit structure's size and opacity. It also flags lighting by `Mark` alone.
   - Then every flagged step is checked by eye.
