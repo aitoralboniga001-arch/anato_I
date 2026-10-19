@@ -109,5 +109,7 @@ The other model's Batches 6–9 were reviewed before committing:
   - Still steps: the silent test rasterises the SVG flat fallback, which hides changes behind glass walls, so 3D flags were judged on real WebGL frames. Septum primum step 1 and birth steps 1, 3 and 6 now move slowly towards what they teach (`drift` in `Septa3D.tsx`); the rest change visibly in WebGL.
   - Tablets: names never sit level with the side pills (each column keeps the pill band clear, scaled by the label scale; a name moves above or below it, its neighbours make room). Before, a name stepped inwards and met the other column's name. On screens up to 820 px the pills are centred on the frame, not the padding, and the padding holds the camera keys, so they no longer cover the step's caption. Checked at 768 × 1024, 1024 × 768 and 1440 × 900.
   - Perf: all 11 views 60 fps on a production build (`docs/perf/README.md`, Topic 11).
-  - Left: 2D alternatives decision for stages 5–9; memory lessons.
+  - Stages 5–9 stay 3D-only (owner's decision, 2026-10-19).
+  - Walkthrough: every step of all 11 stages shot in WebGL at 75 % of the step, and every camera sampled at 401 points (yaw, elevation, distance, pan per glide). Big turns get longer glides (`cameraAt` takes an optional per-key glide length): septum primum to the right atrium, the section and left views of the foramen ovale, the two septum views of the ventricles, the AV canal side view and the first roots view. Every glide now peaks at about 55°/s or less, and every same-specimen crossing turns 89° or less (birth → atrial walls was a cut, now a 28° drift). Two framings fixed: septum primum's last step keeps ostium secundum in the picture, and the birth close-up keeps the foramen ovale in it.
+  - B7 done.
 

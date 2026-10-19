@@ -329,7 +329,8 @@ export function SemilunarValves3D({ t }: SceneProps) {
   const roots = at(0.07);
   const camera = cameraAt(t, [
     [0, orbit(28, 12, 9.6, at(0.35))],
-    [0.01, down(roots, 3.4)],
+    // 66° down onto the roots: a longer glide (a short stage).
+    [0.01, down(roots, 3.4), 0.05],
     // Lower, from the front: into the pockets as they are hollowed.
     [P11[1], orbit(-12, 58, 3.3, roots)],
     [P11[2], down(roots, 3.2)],

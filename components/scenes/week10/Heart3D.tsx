@@ -26,13 +26,16 @@ export function orbit(yaw: number, elev: number, dist = 9.4, target: V3 = [0, 0.
 
 const glide = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * x * (x * (x * 6 - 15) + 10));
 
-/** Camera keyframes over stage time: [t, camera]; between two keys the camera glides round the target. */
-export function cameraAt(t: number, keys: readonly (readonly [number, Camera3])[], glideLen = 0.035): Camera3 {
+/**
+ * Camera keyframes over stage time: [t, camera] or [t, camera, glide]; between two keys the camera glides
+ * round the target. A key's own glide length is for a large turn (over ~75°), so it is never a whip-pan.
+ */
+export function cameraAt(t: number, keys: readonly (readonly [number, Camera3] | readonly [number, Camera3, number])[], glideLen = 0.035): Camera3 {
   let cam = keys[0][1];
   for (let i = 1; i < keys.length; i++) {
     const [tk, ck] = keys[i];
     if (t <= tk) break;
-    const k = glide((t - tk) / glideLen);
+    const k = glide((t - tk) / (keys[i][2] ?? glideLen));
     cam = k >= 1 ? ck : blendCamera(cam, ck, k);
   }
   return cam;

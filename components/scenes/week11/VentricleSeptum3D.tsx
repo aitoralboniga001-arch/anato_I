@@ -73,7 +73,8 @@ export function Ventricles3D({ t }: SceneProps) {
     [0.03, CAM.front],
     [P8[1], CAM.above],
     [P8[2], CAM.front],
-    [P8[3], CAM.septum],
+    // 88° round to the right: a longer glide.
+    [P8[3], CAM.septum, 0.05],
     [P8[4], orbit(-70, 16, 6.8, [0, 0.05, -0.2])],
     // From the right and higher, closer to the gap at the back: the membranous part closing it.
     [P8[4] + 0.08, orbit(-62, 32, 5.2, [0, -0.22, -0.36])],
@@ -163,7 +164,7 @@ export function Conus3D({ t }: SceneProps) {
     [P9[2] + 0.06, orbit(16, 66, 4.2, [0.05, 1.05, 0.08])],
     [P9[3], CAM.conus],
     [P9[3] + 0.1, CAM.down],
-    [P9[4], CAM.septum],
+    [P9[4], CAM.septum, 0.05],
   ]);
   const names: CalloutSpec[] = [
     { id: 'muskulu-trenkadak', p: 'muskulu-trenkadak', show: vis(t, 0.03, P9[1]), small: true },

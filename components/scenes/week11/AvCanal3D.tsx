@@ -103,7 +103,8 @@ export function Canal3D({ t }: SceneProps) {
     [P6[3], CAM.side],
     [P6[4], CAM.rim],
     [P6[5] + 0.04, orbit(10, 8, 5.2, [0, -0.32, -0.75])],
-    [P6[6], CAM.side],
+    // 83° back to the side view: a longer glide.
+    [P6[6], CAM.side, 0.045],
     [P6[7], CAM.loop],
     [P6[8], CAM.foramen],
   ]);

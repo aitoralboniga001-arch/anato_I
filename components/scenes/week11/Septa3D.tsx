@@ -70,11 +70,12 @@ export function Primum3D({ t }: SceneProps) {
     [0, drift(t, 0.01, P1[1] - 0.015, orbit(18, 28, 11.6, [0, 0.05, -0.05]), CAM.front)],
     [P1[1], CAM.rightFront],
     [P1[3], CAM.canal],
-    [P1[4], CAM.right],
+    // 77° round to the right atrium: a longer glide.
+    [P1[4], CAM.right, 0.05],
     // Closer to the top of the septum, where the small holes open and merge.
     [P1[5], orbit(-90, 8, 4.6, [0, 0.3, -0.24])],
-    // Down to the ostium primum, as the cushions' extensions close it.
-    [P1[6], orbit(-90, 2, 4.8, [0, -0.62, -0.08])],
+    // Down to the ostium primum, as the cushions' extensions close it; ostium secundum stays in the picture above.
+    [P1[6], orbit(-90, 2, 6, [0, -0.4, -0.08])],
   ]);
   const names: CalloutSpec[] = [
     { id: 'hasierako-eskuineko-aurikula', p: 'hasierako-eskuineko-aurikula', show: vis(t, 0, P1[1]) + vis(t, P1[3], P1[4]) },
@@ -131,11 +132,12 @@ export function Secundum3D({ t }: SceneProps) {
     // The spurium and the left venous valve: the right atrium's back wall, beside the septum.
     [P2[3], orbit(-112, 8, 6.2, [-0.2, 0.05, -0.35])],
     // The two septa side by side: the notes' frontal section, seen in depth.
-    [P2[4], CAM.section],
+    [P2[4], CAM.section, 0.06],
     // The oblique path: a little more from the right, so the way between the septa opens up.
     [P2[5], orbit(-34, 16, 5.2, [-0.06, -0.05, -0.15])],
     // The valve: from the left atrium (the primum's other face), its upper part gone.
-    [P2[6], CAM.left],
+    // 120° round to the left atrium (the note says so): the longest glide.
+    [P2[6], CAM.left, 0.07],
   ]);
   const names: CalloutSpec[] = [
     // The two atria are named with the way between them (the oblique path).
@@ -231,8 +233,9 @@ export function Walls3D({ t }: SceneProps) {
   };
   const flow: AtriaFlow = { phase: t, low: 0, high: 1, down: 1, born: 0, slit: 0 };
   const camera = cameraAt(t, [
-    // From the front and the right, a little above: the sinus behind the right atrium (its wall clear).
-    [0, orbit(-50, 16, 7.6, [-0.5, 0, -0.45])],
+    // From the front and the right, a little above: the sinus behind the right atrium (its wall clear),
+    // reached by carrying on the turn from the front (the stage before).
+    [0, drift(t, 0.01, P5[1] - 0.015, orbit(-28, 14, 8.6, [-0.4, 0, -0.4]), orbit(-50, 16, 7.6, [-0.5, 0, -0.45]))],
     // The right atrium's back wall: the smooth part and the veins' openings.
     [P5[1], orbit(-24, 8, 6.2, [-0.75, -0.05, -0.45])],
     // Its lateral wall, from the left across the room (through the front opening): the trabeculated part.
@@ -347,7 +350,7 @@ export function Birth3D({ t }: SceneProps) {
     [P3[3], orbit(30, 10, 4.4, [-0.08, -0.2, -0.14])],
     // The seam along the valve's upper edge, where they fuse (and where a slit may stay open).
     // In the 20 % step, closer still to the slit left open along that seam.
-    [P3[4], drift(t, P3[5] + 0.01, P3[6] - 0.015, orbit(34, 12, 3, [-0.08, 0.12, -0.17]), orbit(24, 16, 2.2, [-0.08, 0.15, -0.17]))],
+    [P3[4], drift(t, P3[5] + 0.01, P3[6] - 0.015, orbit(34, 12, 3.6, [-0.08, -0.05, -0.17]), orbit(24, 16, 3, [-0.08, -0.03, -0.17]))],
     [P3[6], CAM.front],
   ]);
   const names: CalloutSpec[] = [
