@@ -140,6 +140,15 @@ Each item says what the student gains, so it passes the brief's test: **only if 
   1. **Start the septum section from stage 1's last picture.** Same colours: coelom purple, the two layers, the gut in the middle. Then grow the septum from the front wall as an orange shelf. What is left open beside the oesophagus stays purple, and only then gets its name, "erretenak". This needs a `SeptumSection` that starts at an earlier state of `DiaphragmSection`, or a short opening built on `CoelomFold`'s closed-body frame.
   2. **Say what the camera is doing.** Before the cut, the sagittal view shows the C3–C5 plane as a sheet seen edge-on. A `look` bridge then tilts down through it, so the student sees that they are looking at the shelf from above (cranial view) and that the two dark holes go down to the peritoneal cavity. Text above lines, no drawn pointers: the shelf and the holes glow.
   3. **Best, if the 3D route is taken:** reuse the topic 7 diaphragm 3D model (`DiaphragmDome3D`) at its early state: a trunk slab with the septum as a horizontal shelf. The student turns it from the side (shelf edge-on) to the top (shelf and two canals). This is what "prefer 3D" means for the hardest topic. The cost is higher; do it only if fixes 1–2 are not enough.
+- **Second owner report, same stage:** "hasierako perikardio barrunbea eta peritoneo barrunbea ez dakit agertzen badira, baina ez ditut ikasi 7. gaian" (I am not sure the two cavities even appear; I did not learn them in topic 7). They do appear, but the way they are taught makes them easy to miss:
+  - **One short step.** The only step that names them is `septum-transversum` step 3 (`content/weeks/week7.ts`, `at: 0.36`). It runs from 0.36 to 0.54 of a 30 s stage, so about **5 s**. These are the two names that the rest of topic 7 builds on (pleura, pericardium, peritoneum).
+  - **No key line.** Step 2 has a FUNTSEZKOA line (C3–C5), but step 3 has none, so the side card never states the fact to re-read.
+  - **Gone in the next picture.** Only the side view names and colours them (pink above, green below). The transverse section that follows never names them, and its note says only "goiko ↔ beheko barrunbea". As a result, the two cavities are seen once and then lost.
+- **Fix (add to the batch):**
+  - Give the two cavities a step of their own of about 10–12 s, by lengthening the stage or the step. Light them one at a time: the septum, then the upper cavity glows pink and its name pops, then the lower cavity glows green and its name pops.
+  - Add the key line: "Septum transversuma: gainean hasierako perikardio barrunbea (torax osoa), azpian peritoneo barrunbea."
+  - Carry both names and colours into the transverse section. Above the shelf is the initial pericardial cavity; the canals lead down to the peritoneal cavity. The note should name them instead of "goiko / beheko".
+  - Check that the visibility test covers the names in the section (mentioned = visible).
 - **Siblings to check in the same batch:** the same "slice ↔ looking down" change happens later, in `pleura-perikardioa` and `diafragma-eraketa` (the same `DiaphragmSection`). The canal colour must match there too.
 - **Cost:** fixes 1–2 are one scene file plus one view entry (`bridges`), with labels and visibility tests and real-WebGL shots of the whole stage-1 → stage-2 path at 1536 px and 1024 px.
 
@@ -171,7 +180,7 @@ Re-shot at 5–6 s, every one of these frames is clean. The DOM check found only
 ## 3. Suggested batches
 
 1. **A + B:** named sides on the four 3D views, fading "seen from" notes, and a slower limb turn. One short batch covering all four scenes, with tests and tablet shots.
-2. **H (topic 7, coelom → septum):** keep the coelom's colour, grow the septum, and add a `look` bridge into the section. Check the sibling sections in `pleura-perikardioa` and `diafragma-eraketa`. This comes before the topic 7 class so the class can narrate the new transition.
+2. **H (topic 7, coelom → septum):** give the two cavities their own longer step with a key line, keep their names and colours in the section, keep the coelom's colour, grow the septum, and add a `look` bridge into the section. Check the sibling sections in `pleura-perikardioa` and `diafragma-eraketa`. This comes before the topic 7 class so the class can narrate the new transition.
 3. **C + D for topic 7:** the class with plain wording, plus key lines where they are missing.
 4. **E for topic 8:** the 11 in-stage bridges, starting with `errai-kraneoa`, plus the **F** recall links for topic 8.
 5. **C + D for topic 9**, plus the **F** timeline milestones.
