@@ -1,11 +1,12 @@
+import { firstSeenOf } from '@/content/chronology';
 import { firstSentence } from '@/content/generate';
 import { ancestry, childrenOf } from '@/content/lineage';
 import { structures, weeks } from '@/content/registry';
 import type { StructureDef } from '@/lib/sim/types';
 import { anchorOf, fairHit, headingOf, itemHead, joinBest, quoteOf, refOf, strongHit, type Intent, type NotesHit } from './notes';
-import { CONFIDENT, SAMPLE_TOPICS, toTarget, type Hit } from './search';
+import { confident, SAMPLE_TOPICS, toTarget, type Hit } from './search';
 import { fold, keyWord, match, queryTokens, tokens, type Lang } from './text';
-import type { KimuFrom, KimuReply, KimuSource, KimuTarget } from './types';
+import type { KimuFrom, KimuHere, KimuReply, KimuSource, KimuTarget } from './types';
 
 /**
  * Kimu's answer built from the notes alone: what most students get (no key, limit reached, no
@@ -15,7 +16,9 @@ import type { KimuFrom, KimuReply, KimuSource, KimuTarget } from './types';
 const COPY: Record<Lang, {
   lead: string;
   weak: (ref: string) => string;
-  none: string;
+  none: (week?: number) => string;
+  /** The atlas says it, the notes do not (and the structure may not be drawn on its own). */
+  atlasOnly: (near?: string) => string;
   hello: string;
   ask: (name: string, many?: boolean) => string;
   from: (name: string, many?: boolean) => string;
@@ -25,7 +28,8 @@ const COPY: Record<Lang, {
   eu: {
     lead: '',
     weak: (ref) => `Apunteek ez dute hori zuzenean esaten. Hurbilen dagoena: ${ref}.`,
-    none: 'Apunteek ez dute horri buruz ezer esaten. Galdetu egitura edo prozesu bati buruz, adibidez:',
+    none: (w) => `Ez dut hori apunteetan aurkitu${w ? ` (${w}. gaian ere ez)` : ''}. Saiatu egituraren izen osoarekin edo beste hitz batekin; behean, hemengo gaiari buruzko galdera batzuk.`,
+    atlasOnly: (near) => `Ez dut apunteetan aurkitu; atlasaren definizioa${near ? ` (simulagailuan ez du urrats propiorik: ${near} ikusten da)` : ''}:`,
     hello: 'Kaixo, Kimu naiz. Galdetu apunteei buruz: zer den egitura bat, noiz sortzen den, nondik datorren edo zertan bihurtzen den. Apunteetatik erantzungo dizut, eta simulagailuan non ikusten den erakutsiko dizut.',
     ask: (n, many) => `Noiz sortzen ${many ? 'dira' : 'da'} ${n}?`,
     from: (n, many) => `Nondik ${many ? 'datoz' : 'dator'} ${n}?`,
@@ -35,7 +39,8 @@ const COPY: Record<Lang, {
   es: {
     lead: 'En los apuntes (en euskera):',
     weak: (ref) => `Los apuntes no lo dicen directamente. Lo más cercano: ${ref}.`,
-    none: 'Los apuntes no dicen nada sobre eso. Pregúntame por una estructura o un proceso, por ejemplo:',
+    none: (w) => `No lo encuentro en los apuntes${w ? ` (tampoco en el tema ${w})` : ''}. Prueba con el nombre completo de la estructura u otra palabra; abajo, algunas preguntas sobre este tema.`,
+    atlasOnly: (near) => `No lo encuentro en los apuntes; la definición del atlas${near ? ` (en el simulador no tiene paso propio: se ve ${near})` : ''}:`,
     hello: 'Hola, soy Kimu. Pregúntame por los apuntes: qué es una estructura, cuándo se forma, de dónde viene o en qué se convierte. Te contesto con los apuntes y te enseño dónde se ve en el simulador.',
     ask: (n, many) => `¿Cuándo se ${many ? 'forman' : 'forma'} ${n}?`,
     from: (n, many) => `¿De dónde ${many ? 'vienen' : 'viene'} ${n}?`,
@@ -45,7 +50,8 @@ const COPY: Record<Lang, {
   en: {
     lead: 'From the notes (in Basque):',
     weak: (ref) => `The notes do not say that directly. The closest section: ${ref}.`,
-    none: 'The notes say nothing about that. Ask me about a structure or a process, for example:',
+    none: (w) => `I cannot find that in the notes${w ? ` (not in topic ${w} either)` : ''}. Try the structure's full name or another word; below, a few questions about this topic.`,
+    atlasOnly: (near) => `I cannot find it in the notes; the atlas definition${near ? ` (the simulator has no step of its own for it: ${near} is shown)` : ''}:`,
     hello: "Hi, I'm Kimu. Ask me about the notes: what a structure is, when it forms, where it comes from or what it becomes. I answer from the notes and show you where the simulator explains it.",
     ask: (n, many) => `When ${many ? 'do' : 'does'} ${n} form?`,
     from: (n, many) => `Where ${many ? 'do' : 'does'} ${n} come from?`,
@@ -64,9 +70,19 @@ const withArticle = (n: string) => {
 const displayName = (s: StructureDef, lang: Lang) => (lang === 'es' && s.es ? withArticle(s.es.toLowerCase()) : inline(s.name));
 const plural = (s: StructureDef) => /(ak|ek)$/.test(s.name.split(' ').pop() ?? '');
 
+/** Structures of the step and stage the student is on (the picked one first), to ask about them. */
+function hereTopics(here: KimuHere): string[] {
+  const stage = weeks.find((w) => w.week === here.week)?.stages.find((x) => x.id === here.stage);
+  if (!stage) return [];
+  const beat = stage.beats[here.beat];
+  const ids = [here.structure ?? '', ...(beat?.focus ?? []), ...stage.beats.flatMap((b) => b.focus ?? []), ...stage.structures];
+  return ids.filter((id, i) => !!id && ids.indexOf(id) === i && !!structures.get(id) && !!firstSeenOf(id)).slice(0, 3);
+}
+
 /** Tappable examples using real structures (Spanish names for Spanish, Basque otherwise). */
-export function sampleQuestions(lang: Lang, n = 3): string[] {
-  return SAMPLE_TOPICS.slice(0, n).map((id) => {
+export function sampleQuestions(lang: Lang, n = 3, here?: KimuHere | null): string[] {
+  const ids = here ? hereTopics(here) : [];
+  return [...ids, ...SAMPLE_TOPICS].filter((id, i, all) => all.indexOf(id) === i).slice(0, n).map((id) => {
     const s = structures.get(id);
     return COPY[lang].ask(s ? displayName(s, lang) : id, !!s && plural(s));
   });
@@ -207,6 +223,9 @@ export interface Evidence {
    * the student's position, and places[1] its usual place (when that is another stage).
    */
   going?: boolean;
+  /** Where the student is, and the topic the question names (when it does): to word fallbacks and pick chips. */
+  here?: KimuHere | null;
+  asked?: number | null;
 }
 
 /** Where a place is from the student, said in one sentence (stage titles are the notes' own Basque). */
@@ -255,7 +274,7 @@ export const SAYS_WHERE = /(hurrengo|aurrerago|lehenago|pantailan|etapa honetan|
 
 /** The simulator destinations for an answer: the place of the thing asked about, then the notes' step. */
 export function targetsOf(ev: Evidence): KimuTarget[] {
-  const place = ev.places[0] && ev.places[0].score >= CONFIDENT ? toTarget(ev.places[0], 'c1') : undefined;
+  const place = confident(ev.places[0]) ? toTarget(ev.places[0], 'c1') : undefined;
   const n = strongHit(ev.notes[0]) ? notesTarget(ev.notes[0]) : undefined;
   // "Take me to X": the nearest place first, then X's usual place when that is another stage.
   const usual = ev.going && place && ev.places[1]?.doc.structure === place.structure ? toTarget(ev.places[1], 'c2') : undefined;
@@ -276,13 +295,13 @@ export function offlineReply(ev: Evidence): KimuReply {
   const place = ev.places[0];
   const lead = c.lead ? `${c.lead} ` : '';
 
-  if (!best && !place && isGreeting(ev.question)) return { reply: c.hello, targets: [], sources: [], followups: sampleQuestions(ev.lang), mood: 'happy', source: 'offline' };
+  if (!best && !place && isGreeting(ev.question)) return { reply: c.hello, targets: [], sources: [], followups: sampleQuestions(ev.lang, 3, ev.here), mood: 'happy', source: 'offline' };
 
   const strong = strongHit(best);
   const onTopic = strong && (!s || mentions(best, s));
   // A date from the atlas timeline only when the question is about the structure itself ("Noiz sortzen da X?"),
   // not about something that happens to it ("Noiz habiratzen da blastozistoa?").
-  const when = s && place?.doc.structure === s.id && aboutItself(ev.question, s) ? place.doc.where.replace(/^\d+\. gaia · /, '') : '';
+  const when = s && place?.doc.structure === s.id && !place.doc.atlasOnly && aboutItself(ev.question, s) ? place.doc.where.replace(/^\d+\. gaia · /, '') : '';
   const card = s && ((intent === 'nondik' && s.origin) || (intent === 'patua' && s.fate) || (intent === 'zer' && s.definition) || (intent === 'noiz' && when));
   const atlasWhen = { eu: 'Atlaseko kronologian', es: 'En la cronología del atlas', en: 'In the atlas timeline' }[ev.lang];
 
@@ -295,7 +314,8 @@ export function offlineReply(ev: Evidence): KimuReply {
   const list = !!best && isList(best);
   const listAbout = list && !!s && fold(listLead(best)).includes(stemOf(s.name));
   const said = !!best && !!s && !list && best.best.some((x) => defines(x.text, s));
-  const cardFirst = !!card && ((intent === 'nondik' || intent === 'patua') ? !listAbout : intent === 'zer' ? !said : false);
+  // "When?" answered by a passage that gives no time at all: the atlas timeline answers it better.
+  const cardFirst = !!card && ((intent === 'nondik' || intent === 'patua') ? !listAbout : intent === 'zer' ? !said : intent === 'noiz' ? !!best && !best.best.some((x) => /\d/.test(x.text)) : false);
   if (onTopic && !cardFirst) {
     // The notes' own words are the answer.
     const body = notesBody(best, intent, s);
@@ -308,23 +328,25 @@ export function offlineReply(ev: Evidence): KimuReply {
     const text = intent === 'nondik' ? s.origin! : intent === 'patua' ? s.fate! : intent === 'noiz' ? `${when} (${atlasWhen.toLowerCase()}).` : firstSentence(s.definition);
     reply = `**${s.name}**: ${text.replace(/^\s+/, '')}`;
     sources = ev.notes.filter((h) => fairHit(h) && mentions(h, s) && !isList(h)).slice(0, 1).map((h) => sourceOf(h, true));
-  } else if (fairHit(best)) {
+    // Nothing in the notes mentions it: the card is the atlas's own wording, and says so.
+    if (!sources.length) reply = `${c.atlasOnly(place?.doc.atlasOnly?.near)} ${reply}`;
+  } else if (fairHit(best) && best.score >= 4.5 && (!ev.asked || best.passage.week === ev.asked)) {
     reply = c.weak(refOf(best.passage));
     unsure = true;
     sources = [sourceOf(best, true)];
-  } else if (place && place.score >= CONFIDENT) {
+  } else if (confident(place)) {
     const st = place.doc.structure ? structures.get(place.doc.structure) : undefined;
-    reply = st ? `**${st.name}**: ${firstSentence(st.definition)}` : place.doc.blurb;
+    reply = st ? `${c.atlasOnly(place.doc.atlasOnly?.near)} **${st.name}**: ${firstSentence(st.definition)}` : place.doc.blurb;
     sources = [];
   } else {
-    return { reply: c.none, targets: [], sources: [], followups: sampleQuestions(ev.lang), mood: 'curious', source: 'offline' };
+    return { reply: c.none(ev.asked ?? ev.here?.week), targets: [], sources: [], followups: sampleQuestions(ev.lang, 3, ev.here), mood: 'curious', source: 'offline' };
   }
   return {
     reply: reply.replace(/\s+/g, ' ').trim(),
     targets: unsure ? [] : targetsOf(ev),
     sources,
     lineage: lineageOf(s, intent),
-    followups: unsure && !s ? sampleQuestions(ev.lang) : followupsFor(ev.lang, s, intent),
+    followups: unsure && !s ? sampleQuestions(ev.lang, 3, ev.here) : followupsFor(ev.lang, s, intent).concat(s ? [] : sampleQuestions(ev.lang, 3, ev.here)).slice(0, 3),
     mood: 'happy',
     source: 'offline',
   };

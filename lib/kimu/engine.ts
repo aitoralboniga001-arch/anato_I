@@ -4,8 +4,8 @@ import type { Answers } from '@/components/shell/answers';
 import { evidenceOf, intentOf, numbersIn, passagesOfSentences, searchNotes, strongHit, warmNotes, type NotesContext, type NotesHit } from './notes';
 import { boldName, followupsFor, fromSentence, lineageOf, notesTarget, offlineReply, SAYS_WHERE, sourceOf, targetsOf, type Evidence } from './offline';
 import { pickPractice, wantsPractice } from './practice';
-import { CONFIDENT, describeHere, factsFrom, GO, isFormationQuestion, nearestFrom, search, toTarget, wantsPlace, withFrom, type Hit } from './search';
-import { detectLang, keyWords, match, queryTokens, type Lang } from './text';
+import { CONFIDENT, confident, describeHere, factsFrom, GO, isFormationQuestion, nearestFrom, search, toTarget, wantsPlace, withFrom, type Hit } from './search';
+import { detectLang, keyWords, match, queryTokens, topicIn, withoutTopic, type Lang } from './text';
 import type { KimuAsk, KimuHere, KimuModelReply, KimuReply, KimuTurn } from './types';
 
 /** "Explain this", "zer da hau?": the question is about what is on screen, not about a named thing. */
@@ -146,10 +146,14 @@ export async function askKimu(question: string, history: KimuTurn[], here: KimuH
   const aboutStep = !going && !!here && DEICTIC.test(question) && (!here.structure || STEP.test(question)) && !(search(question, 1)[0]?.score >= CONFIDENT * 1.5);
   const step = aboutStep ? stepReply(here!, lang) : null;
 
-  const rq = retrievalQuestion(question, history, here);
-  let places = step ? [] : search(rq, 3);
+  // "mediastinoa, 7. gaian": the topic is where to look; the rest is what to look for.
+  const asked = topicIn(question);
+  const week = asked ?? here?.week;
+  const full = retrievalQuestion(question, history, here);
+  const rq = withoutTopic(full);
+  let places = step ? [] : search(full, 3, week);
   // The structure the question names: the best place that is one (not always the first place found).
-  const named = places.find((h) => h.doc.kind === 'structure' && h.score >= CONFIDENT && !!h.doc.structure && namedIn(rq, h.doc.structure));
+  const named = places.find((h) => h.doc.kind === 'structure' && confident(h) && !!h.doc.structure && namedIn(rq, h.doc.structure));
   // "Take me to X": the nearest place that shows X at or after the student's position comes first, and
   // X's usual place second when it is in another stage (the same stage: the usual place says it best).
   const near = going && named ? nearestFrom(here!, named) : null;
@@ -158,13 +162,14 @@ export async function askKimu(question: string, history: KimuTurn[], here: KimuH
   const top = places[0];
   const s = named ? structures.get(named.doc.structure!) : undefined;
   const ctx = notesContext(here);
+  if (asked) { ctx.week = asked; ctx.only = asked; }
   if (named) ctx.focus = { week: named.doc.week, sentences: reviewedSentences(named.doc.structure!), home: stageSentences(named.doc.week, named.doc.stage) };
   const notes = step ? step.notes : searchNotes(rq, ctx, 3);
-  const ev: Evidence = { question, lang, intent, structure: s, notes, places, going: going && !!named };
+  const ev: Evidence = { question: rq, lang, intent, structure: s, notes, places, going: going && !!named, here, asked };
   const offline = located(step ? step.reply : offlineReply(ev), here, ev.going ? lang : null);
 
   // Nothing the notes really answer: the model would have nothing to stand on, so it is not asked.
-  if (!step && !strongHit(notes[0]) && !(places[0]?.score >= CONFIDENT)) return offline;
+  if (!step && !strongHit(notes[0]) && !(places[0] && confident(places[0]))) return offline;
 
   const hereInfo = here ? describeHere(here) : null;
   const ask: KimuAsk = { question, history, notes: notes.map((h) => evidenceOf(h)), places: places.slice(0, 2).map((h) => factsFrom(h, here)), here: hereInfo, lang };

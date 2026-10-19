@@ -172,6 +172,8 @@ function scoreTokens(q: Expanded, tok: Set<string>, head: Set<string>): { score:
 /** Where the student is, to prefer passages of the topic and the step on screen. */
 export interface NotesContext {
   week?: number;
+  /** The student named this topic ("7. gaian"): only its passages are searched. */
+  only?: number;
   /** Sentence ids of the step on screen (strongest) and of its stage. */
   step?: ReadonlySet<string>;
   stage?: ReadonlySet<string>;
@@ -201,6 +203,7 @@ export function searchNotes(question: string, ctx: NotesContext = {}, limit = 3)
   const cue = CUE[intent];
   const out: NotesHit[] = [];
   for (const p of index().passages) {
+    if (ctx.only && p.week !== ctx.only) continue;
     const { score: raw, covered } = scoreTokens(q, p.tok, p.headTok);
     if (raw <= 0) continue;
     let score = raw * (0.15 + 0.85 * (covered / q.length));

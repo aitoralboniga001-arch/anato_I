@@ -10,7 +10,7 @@ import { firstSentence } from '@/content/generate';
 import { structures, weeks } from '@/content/registry';
 import { formationOf } from '@/content/formation';
 import type { KimuFrom, KimuHere, KimuTarget } from './types';
-import { match, queryTokens, tokens } from './text';
+import { match, queryTokens, tokens, topicIn, withoutTopic } from './text';
 
 interface Doc {
   kind: KimuTarget['kind'];
@@ -37,11 +37,17 @@ interface Doc {
   view?: string;
   formation?: string;
   action?: KimuTarget['action'];
+  /** An atlas entry the simulator does not draw on its own: where it is placed is a neighbour's step. */
+  atlasOnly?: { near: string };
+  /** The structure to select on arrival when it is not the entry itself (an atlas-only entry's neighbour). */
+  go?: string;
 }
 
 export interface Hit {
   doc: Doc;
   score: number;
+  /** Share of the question's words the place matches (0..1). */
+  cover: number;
 }
 
 const clip = (s: string, n: number) => (s.length <= n ? s : `${s.slice(0, n - 1).trimEnd()}…`);
@@ -155,6 +161,50 @@ function build(): { docs: Doc[]; idf: Map<string, number> } {
     });
   }
 
+  // Atlas entries no step shows (a "Mediastinoa" card): searchable too, placed at the step of the
+  // neighbour they are related to, and marked so the answer says they are not drawn on their own.
+  for (const w of weeks) {
+    for (const st of w.structures) {
+      if (firstSeenOf(st.id)) continue;
+      const seen = new Set<string>([st.id]);
+      let near: { id: string; f: NonNullable<ReturnType<typeof firstSeenOf>> } | null = null;
+      const queue = [...(st.related ?? [])];
+      while (queue.length && !near) {
+        const id = queue.shift()!;
+        if (seen.has(id)) continue;
+        seen.add(id);
+        const f = firstSeenOf(id);
+        if (f) near = { id, f };
+        else queue.push(...(structures.get(id)?.related ?? []));
+      }
+      if (!near) continue;
+      const spot = bestSpot(near.id, near.f);
+      const stage = weeks.find((x) => x.week === spot.week)?.stages.find((x) => x.id === spot.stage);
+      if (!stage) continue;
+      const nearName = structures.get(near.id)?.name ?? near.id;
+      const names = [st.name, st.es ?? '', ...(st.aka ?? [])].filter(Boolean);
+      docs.push({
+        kind: 'structure',
+        week: spot.week,
+        stage: spot.stage,
+        at: spot.at,
+        structure: st.id,
+        go: near.id,
+        atlasOnly: { near: nearName },
+        label: st.name,
+        where: stageWhere(spot.week, stage.day),
+        names,
+        about: [],
+        body: tokens(`${st.definition} ${st.location ?? ''} ${st.origin ?? ''} ${st.fate ?? ''}`),
+        phrases: names.map((n) => tokens(n).join(' ')).filter(Boolean),
+        nameTok: [],
+        aboutTok: [],
+        blurb: clip(oneLine(firstSentence(st.definition)), 220),
+        facts: clip(oneLine(`${st.name}${st.es ? ` (${st.es})` : ''}: ${st.definition} ATLAS ONLY: the simulator has no step of its own for it; ${nearName} is shown in ${stage.title} (${stageWhere(spot.week, stage.day)}).`), 520),
+      });
+    }
+  }
+
   const df = new Map<string, number>();
   for (const d of docs) {
     d.nameTok = d.names.flatMap(tokens);
@@ -173,8 +223,12 @@ const FORMATION = /(noiz|nola|sort|erak|forma|cuando|cuándo|como|cómo|when|how
 export const isFormationQuestion = (question: string) => FORMATION.test(question);
 
 /** Ranks where the simulator explains what the student asked about, best first. */
-export function search(question: string, limit = 4): Hit[] {
+export function search(raw: string, limit = 4, week?: number): Hit[] {
   const { docs, idf } = index();
+  // A topic named in the question ("7. gaian") is a filter on where to look, not words to match.
+  const asked = topicIn(raw);
+  const question = withoutTopic(raw);
+  const prefer = asked ?? week;
   const q = queryTokens(question);
   if (!q.length) return [];
   const qFlat = q.map((alts) => alts[0]).join(' ');
@@ -198,11 +252,13 @@ export function search(question: string, limit = 4): Hit[] {
       if (best > 0) covered += 1;
       score += best;
     }
-    if (score <= 0) continue;
+    if (score <= 0 || (asked && doc.week !== asked)) continue;
+    const cover = covered / q.length;
     score *= 0.4 + 0.6 * (covered / q.length);
     for (const p of doc.phrases) if (p && qFlat.includes(p)) score += 6;
     if (doc.kind === 'structure') score *= wantsFormation ? 1.3 : 1.15;
     else if (doc.kind === 'stage') score *= 0.95;
+    if (prefer && doc.week === prefer) score *= asked ? 2 : 1.25;
     const f = doc.kind === 'structure' ? formationOf(doc.structure) : undefined;
     const destination = wantsFormation && f ? {
       ...doc, at: f.start, formation: f.structure, action: 'formation' as const,
@@ -211,7 +267,7 @@ export function search(question: string, limit = 4): Hit[] {
       ...doc, action: 'explanation' as const,
       facts: `${doc.facts} SIMULATOR: explanation only; no reviewed formation animation for this destination. Do not promise to show it forming.`,
     };
-    scored.push({ doc: destination, score });
+    scored.push({ doc: destination, score, cover });
   }
   scored.sort((a, b) => b.score - a.score);
 
@@ -233,6 +289,8 @@ export function search(question: string, limit = 4): Hit[] {
 
 /** A hit worth showing without a model's help. */
 export const CONFIDENT = 14;
+/** …and one that matches most of what was asked ("mesenterio ventrala" must not settle for "ventrala"). */
+export const confident = (h: Hit | undefined): h is Hit => !!h && h.score >= CONFIDENT && h.cover >= 0.6;
 
 export const toTarget = (h: Hit, id: string): KimuTarget => ({
   id,
@@ -240,7 +298,7 @@ export const toTarget = (h: Hit, id: string): KimuTarget => ({
   week: h.doc.week,
   stage: h.doc.stage,
   at: h.doc.at,
-  structure: h.doc.structure,
+  structure: h.doc.go ?? h.doc.structure,
   formation: h.doc.formation,
   view: h.doc.view,
   action: h.doc.action,
@@ -309,6 +367,7 @@ export function nearestFrom(here: KimuHere, hit: Hit): Hit | null {
     const from = fromHere(here, week.week, stage.id, beat.at);
     return {
       score: hit.score,
+      cover: hit.cover,
       doc: {
         ...hit.doc,
         kind: 'structure',

@@ -236,3 +236,22 @@ export function stem(w: string): string {
   for (const e of ENDINGS) if (w.length - e.length >= 4 && w.endsWith(e)) return w.slice(0, -e.length);
   return w;
 }
+
+/**
+ * "7. gaian", "7. gaia", "gaia 7", "topic 7", "tema 7": the topic a question names (not "4. astea", which
+ * is a week of development). The phrase is not about content, so it is removed before searching.
+ */
+const TOPIC = /(?:\b(\d{1,2})\s*\.?\s*(?:gai\w*|tema\w*|topic)\b|\b(?:gai\w*|tema|topic)\s*\.?\s*(\d{1,2})\b)/gi;
+
+/** The topic number (1–11) a question names, or null. */
+export function topicIn(question: string): number | null {
+  for (const m of question.matchAll(TOPIC)) {
+    const n = Number(m[1] ?? m[2]);
+    if (n >= 1 && n <= 11) return n;
+  }
+  return null;
+}
+
+/** The question without its topic phrase, tidied (commas and spaces left behind). */
+export const withoutTopic = (question: string): string =>
+  topicIn(question) === null ? question : question.replace(TOPIC, ' ').replace(/\s*,\s*(?=,|$)/g, ' ').replace(/\s+/g, ' ').replace(/^[\s,;]+|[\s,;]+$/g, '');

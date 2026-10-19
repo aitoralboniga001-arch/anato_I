@@ -170,7 +170,8 @@ describe('Kimu grounding: answers come from the original notes', () => {
       const r = await askKimu(q, [], null);
       expect(r.targets).toEqual([]);
       // The same plain answer as any question the notes do not cover: what they lack, and where to look.
-      expect(r.reply).toMatch(/^Apunteek ez dute|^Los apuntes no|^The notes (do not|say nothing)/);
+      expect(r.reply).toMatch(/^Ez dut hori apunteetan|^No lo encuentro|^I cannot find/);
+      expect(r.reply).not.toMatch(/:\s*$/);
       expect(r.sources.length).toBeLessThanOrEqual(1);
       expect(f).not.toHaveBeenCalled();
     }
@@ -539,4 +540,73 @@ describe('Kimu route', () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('{}', { status: 429 })));
     expect((await post({ ...ask, question: 'Beste galdera bat' })).json).toEqual({ ok: false, reason: 'error' });
   });
+});
+
+describe('Kimu: topic named or being studied, atlas-only entries, honest fallbacks', () => {
+  const ask = async (q: string, here: Parameters<typeof askKimu>[2] = null) => {
+    vi.stubGlobal('fetch', nokey());
+    return askKimu(q, [], here);
+  };
+  const in7 = { week: 7, stage: 'zeloma', beat: 0 };
+
+  it('answers "mediastinoa" from the atlas, says the notes do not define it, and ignores "7. gaian"', async () => {
+    for (const q of ['mediastinoa', 'mediastinoa, 7. gaian', 'zer da mediastinoa', 'que es el mediastino']) {
+      const r = await ask(q, in7);
+      expect(r.reply, q).toMatch(/Mediastinoa/);
+      expect(r.reply, q).toMatch(/Bi pleura barrunbeen arteko/);
+      expect(r.reply, q).toMatch(/^(Ez dut apunteetan|No lo encuentro|I cannot find)/);
+      expect(r.sources, q).toEqual([]);
+      expect(r.targets[0]?.week, q).toBe(7);
+    }
+  });
+
+  it('never quotes a far-away sentence as "nearest" when the named topic has nothing', async () => {
+    const r = await ask('mediastinoa, 7. gaian', in7);
+    expect(r.reply).not.toMatch(/11\. gaia|trenkadak/);
+    const other = await ask('mediastinoa 8. gaian', in7);
+    expect(other.reply).toMatch(/^Ez dut hori apunteetan aurkitu \(8\. gaian ere ez\)/);
+  });
+
+  it('prefers the topic the student is in, and the one the question names', async () => {
+    const r = await ask('zer da zeloma', in7);
+    expect(r.sources[0]?.week).toBe(7);
+    const named = await ask('zeloma, 7. gaian', null);
+    expect(named.sources[0]?.week).toBe(7);
+  });
+
+  it('does not settle for one word of a two-word question (mesenterio ventrala, ligamentu falziformea)', async () => {
+    for (const q of ['mesenterio ventrala', 'ligamentu falziformea']) {
+      const r = await ask(q, in7);
+      expect(r.reply, q).not.toMatch(/\*\*(Bentrala|Erdiko lotailu)/);
+      expect(r.targets, q).toEqual([]);
+    }
+  });
+
+  it('answers "noiz" with a time, not a list that happens to mention the structure', async () => {
+    const r = await ask('diafragma noiz', in7);
+    expect(r.reply).toMatch(/^\*\*Diafragma\*\*/);
+  });
+
+  it('suggests questions about the stage on screen, and no reply ends on a dangling colon', async () => {
+    const r = await ask('asdfgh', in7);
+    expect(r.reply).not.toMatch(/:\s*$/);
+    expect(r.followups.length).toBe(3);
+    expect(r.followups.join(' ')).not.toMatch(/notokorda|lerro primitiboa/);
+  });
+
+  it.each(['zer da mesenterio dortsala', 'erreten perikardioperitonealak', 'atzeko mesenterioa', 'pleura barrunbea', 'septum transversuma'])('%s (topic 7)', async (q) => {
+    const r = await ask(q, in7);
+    expect(r.sources[0]?.week).toBe(7);
+  });
+
+  it('every atlas structure of topics 7–9 answers to its own name, from where the student is', async () => {
+    const bad: string[] = [];
+    for (const week of [7, 8, 9]) {
+      for (const st of getWeek(week)!.structures) {
+        const r = await ask(`zer da ${st.name.toLowerCase()}`, { week, stage: getWeek(week)!.stages[0].id, beat: 0 });
+        if (/^Ez dut hori apunteetan aurkitu/.test(r.reply) || /:\s*$/.test(r.reply)) bad.push(`${week}/${st.id}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  }, 120000);
 });
