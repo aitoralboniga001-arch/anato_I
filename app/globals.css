@@ -8594,7 +8594,13 @@ button.tp-switch:hover {
   .viewport {
     aspect-ratio: auto;
     min-height: 0;
-    padding-bottom: 56px;
+    /* Room under the frame for the camera keys (bottom right), so they never cover the step's caption. */
+    padding-bottom: var(--under-frame);
+    --under-frame: 104px;
+  }
+  /* The side pills mark the frame's middle (the names keep that band clear), not the padding's. */
+  .viewport > div.orient {
+    bottom: var(--under-frame);
   }
   .viewport-svg {
     height: auto;

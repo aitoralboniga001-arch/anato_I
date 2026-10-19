@@ -26,6 +26,9 @@ interface Opts {
   xr?: number;
   /** The name's width in frame units (the leader leaves from the plate's edge). */
   width?: (c: Callout) => number;
+  /** A band (top, bottom) each column keeps clear for a side orientation pill: no name is centred inside it. */
+  bandL?: [number, number];
+  bandR?: [number, number];
 }
 
 const HEIGHT = 40;
@@ -77,6 +80,24 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
       y[y.length - 1] = bottom;
       for (let i = y.length - 2; i >= 0; i--) y[i] = Math.min(y[i], y[i + 1] - gap(i + 1));
     }
+    // A name level with the side pill moves just above or below it (whichever is nearer), and the
+    // names around it make room: stepping it in past the pill instead met the other column's name.
+    const band = left ? o.bandL : o.bandR;
+    if (band)
+      for (let i = 0; i < y.length; i++) {
+        if (w[i] < 0.02 || y[i] <= band[0] || y[i] >= band[1]) continue;
+        const move = (to: number) => {
+          const next = [...y];
+          next[i] = to;
+          for (let j = i + 1; j < next.length; j++) next[j] = Math.max(next[j], next[j - 1] + gap(j));
+          for (let j = i - 1; j >= 0; j--) next[j] = Math.min(next[j], next[j + 1] - gap(j + 1));
+          return next;
+        };
+        // Up only when the names above still fit under the column's top.
+        const up = move(band[0]);
+        const moved = y[i] < (band[0] + band[1]) / 2 && up[0] >= top ? up : move(band[1]);
+        moved.forEach((v, j) => (y[j] = v));
+      }
     // Sorting by height is not enough when points lie at different depths into the picture: two names
     // whose leaders still cross trade places (their slots stay where they are).
     const x = left ? (o.xl ?? 24) : (o.xr ?? 976);
@@ -114,15 +135,16 @@ export function Callouts({ items, dim = 1, ...o }: Opts & { items: Callout[]; di
   const live = items.filter((c) => c.show * dim > 0.02);
   // Plate width as the label sizes it (≈7.1 units a character, 6.4 for small names, plus padding).
   const width = (c: Callout) => (c.text ?? nameOf(c.id)).length * (c.small ? 6.4 : 7.1) + 16;
-  const pos = layoutCallouts(live, { width, ...o });
+  // The side pills sit level with the frame's middle, a fixed size on screen: the smaller the frame is
+  // drawn (the larger k), the more frame units they cover. Half the pill plus half a name, with air.
+  const r = 30 * pills.k;
+  const band: [number, number] = [320 - r, 320 + r];
+  const pos = layoutCallouts(live, { width, bandL: pills.left ? band : undefined, bandR: pills.right ? band : undefined, ...o });
   return (
     <>
       {live.map((c) => {
         const p = pos.get(c)!;
-        // A name level with a side orientation pill steps in past it instead of running under it.
-        const level = p.y > 288 && p.y < 352;
-        const x = level && p.align === 'start' && pills.left && p.x < 122 ? 122 : level && p.align === 'end' && pills.right && p.x > 878 ? 878 : p.x;
-        return <Label key={c.key ?? c.id} id={c.id} x={x} y={p.y} align={p.align} ax={c.at.x} ay={c.at.y} show={c.show * dim} small={c.small} text={c.text} />;
+        return <Label key={c.key ?? c.id} id={c.id} x={p.x} y={p.y} align={p.align} ax={c.at.x} ay={c.at.y} show={c.show * dim} small={c.small} text={c.text} />;
       })}
     </>
   );

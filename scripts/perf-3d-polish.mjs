@@ -1,4 +1,4 @@
-// Sequential, bounded survey of all 13 3D views. Production server required.
+// Sequential, bounded survey of the 3D views of topics 7–11 (FILTER=11/ for topic 11's). Production server required.
 // node scripts/perf-3d-polish.mjs http://localhost:3111 docs/perf/polish-batch6
 // FILTER=atal-bentrikularra (or any route substring) limits a diagnostic rerun.
 // No GPU blocklist bypass. Only 3 x 8 held draws, with cooling gaps between views.
@@ -21,6 +21,7 @@ const views = [
   [8, 'gorputz-adarrak', 'biraketa'],
   [9, 'domeinuak', 'domeinuak-3d'],
   ...['bihotz-hodia', 'zirkulazio-goiztiarra', 'bihotz-atalak', 'bihotz-lakioa', 'atal-bulbarra', 'atal-bentrikularra', 'atal-aurikularra', 'zain-sinua', 'eskuineko-aurikula'].map(s => [10, s, '3d']),
+  ...['trenkadatze-mekanismoak', 'septum-primum', 'zulo-obala', 'jaiotza', 'aurikulen-paretak', 'erreten-ab', 'balbula-ab', 'bentrikulu-arteko-trenkada', 'arteria-konoa', 'enbor-arteriosoa', 'balbula-semilunarrak'].map(s => [11, s, '3d']),
 ].filter(v => !process.env.FILTER || process.env.FILTER.split(',').some(f => v.join('/').includes(f)));
 const profile = join(tmpdir(), `polish-3d-${process.pid}`);
 mkdirSync(profile, { recursive: true });

@@ -179,3 +179,21 @@ Topic 10-only changes reuse tube plans/layouts, bounded complete heart/atrium sn
 ## Batch 9: Topic 10 30/40 fps experiment (2026-10-17)
 
 [Method, results and limits](../review/topic10-30-vs-40-fps.md). `topic10-fps/results.json` contains the 52-sample comparison plus class/control/recovery checks; `topic10-fps-atrium/results.json` retains four corrected early-valve samples. `topic10-fps/summary.json` separates continuous motion from static/reading phases. True 40 fps draws about 39–40 times/s, with 12–24% higher main-thread work in four moving cases and about 45% higher work in a separate short class glide. GPU submission counts rise; exact GPU utilization was not measured. Default stays 30. All 1,176 tests, build/TypeScript and focused lint pass; class pause, hidden/resume and actual context-loss/reload fallback pass at 40. No subagents, commit, push or deployment.
+
+## Topic 11: all 11 3D views (2026-10-19)
+
+`FILTER=11/ WIDTH=1440 HEIGHT=900 node scripts/perf-3d-polish.mjs http://localhost:3111 docs/perf/topic11` on a production build (Radeon 780M, stage time 0.55). Every view plays at 60 fps (p95 frame 16.8–17.1 ms) with no errors. Main-thread work while playing is 150–430 ms/s, inside topic 10's range after its batches. The GPU bench (median of 3 × 8 draws, where measured) is 2.4–6.5 ms per picture. The septa and walls views draw 74k triangles; the ventricles and outflow 34–64k.
+
+| Stage | Main thread ms/s (playing) | p95 frame ms | GPU ms | Triangles |
+|---|---|---|---|---|
+| trenkadatze-mekanismoak | 260.4 | 17 | 3.463 | 67824 |
+| septum-primum | 150.7 | 17.1 | – | 73608 |
+| zulo-obala | 405.2 | 17.1 | – | 73608 |
+| jaiotza | 422.8 | 17.1 | – | 73608 |
+| aurikulen-paretak | 345.9 | 17 | – | 73608 |
+| erreten-ab | 401 | 17.1 | 3.3 | 34096 |
+| balbula-ab | 432.3 | 17 | 6.488 | 43688 |
+| bentrikulu-arteko-trenkada | 374.3 | 16.8 | 2.6 | 50520 |
+| arteria-konoa | 356.2 | 16.8 | 2.9 | 50864 |
+| enbor-arteriosoa | 326.7 | 17 | 2.425 | 54896 |
+| balbula-semilunarrak | 399.9 | 16.9 | 3.55 | 63224 |

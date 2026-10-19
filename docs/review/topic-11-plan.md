@@ -104,3 +104,10 @@ The other model's Batches 6–9 were reviewed before committing:
   - Klasea: `content/klasea/w11.ts`, 13 chunks, ~19 min, 26 checks (9 contrast, 3 predict, 1 order, 1 fill table of the chambers' smooth/trabeculated parts, the rest from the pool). All 90 core sentences said (`docs/klasea/w11-audit.md`).
   - `tests/klasea.test.ts` now runs every guard for each topic with a class (per-topic importance, pinned core, contrast start, SHOWN/SAME); `scripts/klasea/core-map.ts` prints the core per step to write a class from.
   - Stage 8 step 4 and stage 10 step 1 now light what their text names (arteria konoa; the septum fuses earlier and keeps its name through the levels).
+- **B7 (in progress):** polish.
+  - Topic 11 no longer `inPreparation`; its subtitle covers the whole topic.
+  - Still steps: the silent test rasterises the SVG flat fallback, which hides changes behind glass walls, so 3D flags were judged on real WebGL frames. Septum primum step 1 and birth steps 1, 3 and 6 now move slowly towards what they teach (`drift` in `Septa3D.tsx`); the rest change visibly in WebGL.
+  - Tablets: names never sit level with the side pills (each column keeps the pill band clear, scaled by the label scale; a name moves above or below it, its neighbours make room). Before, a name stepped inwards and met the other column's name. On screens up to 820 px the pills are centred on the frame, not the padding, and the padding holds the camera keys, so they no longer cover the step's caption. Checked at 768 × 1024, 1024 × 768 and 1440 × 900.
+  - Perf: all 11 views 60 fps on a production build (`docs/perf/README.md`, Topic 11).
+  - Left: 2D alternatives decision for stages 5–9; memory lessons.
+
