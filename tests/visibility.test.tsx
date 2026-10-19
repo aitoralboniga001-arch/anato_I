@@ -58,6 +58,8 @@ const stem = (n: string) => n.toLowerCase().replace(/[()]/g, '').replace(/a$/, '
 
 /** Names a step's text says without showing them, on purpose: `week/stage/step/id` → why. */
 const MENTION_ONLY: Record<string, string> = {
+  '11/enbor-arteriosoa/1/trenkada-aortikopulmonarra': 'sarrera: trenkada hurrengo urratsean hazten da',
+  '11/enbor-arteriosoa/1/birika-arteria': 'sarrera: enborra banatzean sortuko da (3. urratsetik)',
   '10/bihotz-hodia/7/errai-orria': 'jatorria aipatzen da: errai orria zeharkako mozketan (4. urratsa); 3D ereduan hodiak, aortak eta notokorda',
   '10/bihotz-hodia/7/endokardioa': 'endokardio hodiak 3D ereduan "bihotz hodiak" izenez marraztuta eta izendatuta',
   '10/eskualde-kardiogenikoa/2/errai-orria': 'diskoa goitik: errai orria zeharkako mozketan ikusten da',

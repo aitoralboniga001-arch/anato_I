@@ -7,6 +7,7 @@ import { T } from '@/components/scenes/week10/common';
 import { blobParts, mixHex, routeLength, tubeParts, vesselRouteOf } from '@/components/scenes/week10/model3d';
 import { K } from './common';
 import { CONUS_R, CONUS_Z, outflowParts, outflowRoutes, type Conus } from './outflow3d';
+import { truncusParts, truncusRoutes, type Truncus, type TruncusState } from './truncus3d';
 
 /**
  * M2 of topic 11 (notes 3): the AV canal and its valves. The two primitive ventricles are one chamber cut
@@ -133,6 +134,8 @@ export interface CanalState {
   conusCut: number;
   /** Blood up the conus: one way up its middle (0), one up each infundibulum (1). */
   split: number;
+  /** Stages 10–11: the spiral truncus on the conus (truncus3d.ts) instead of the simple tube. */
+  truncus?: TruncusState;
 }
 export const CN0: CanalState = {
   flatten: 0,
@@ -302,6 +305,7 @@ export function canalModel(s: CanalState, flow: CanalFlow): CanalModel {
   const xo = xOpen(s);
   const fused = s.fuse > 0.5;
   let conus: Conus;
+  let truncus: Truncus | undefined;
   {
     const half = (right: boolean) => cachedMesh('canal opening', [q(xo), right ? 1 : 0], () =>
       grid(8, 18, (r, t) => {
@@ -333,7 +337,8 @@ export function canalModel(s: CanalState, flow: CanalFlow): CanalModel {
     pts['erreten-duct'] = [lerp(xo, ATRIUM[0], 0.5), 0.12, -1.55];
     // The outflow from the ventricles' roof: the conus (M4, outflow3d.ts), then the truncus.
     const cx = conusX(s);
-    conus = outflowParts({ x: cx, roof: roofAt(cx, CONUS_Z), ridges: s.conusRidges, fuse: s.conusFuse, glass: s.conusGlass, cut: s.conusCut }, items, pts);
+    conus = outflowParts({ x: cx, roof: roofAt(cx, CONUS_Z), ridges: s.conusRidges, fuse: s.conusFuse, glass: s.conusGlass, cut: s.conusCut, bare: !!s.truncus }, items, pts);
+    if (s.truncus) truncus = truncusParts(conus.top, s.truncus, items, pts);
     // A frontal plane through the opening (seen from the side, the canal faces forward, not up).
     if (s.frontal > 0.01) {
       const z = back(xo, YO, 1)[2];
@@ -378,7 +383,7 @@ export function canalModel(s: CanalState, flow: CanalFlow): CanalModel {
   // —— stage 7: the valves ——
   if (s.swell > 0.01) valves(s, items, pts);
 
-  items.push(...streams(s, flow, conus));
+  items.push(...streams(s, flow, conus, truncus));
   // Stages 8–9: the heart a little turned (notes 5.2 p9): the right ventricle a little in front of the left.
   if (s.turn > 0.001) {
     const a = ((18 * clamp01(s.turn)) * Math.PI) / 180;
@@ -556,7 +561,7 @@ const RED = cellSet(14, (i) => i % 3 !== 0, 0.6);
 const BLUE = cellSet(14, (i) => i % 3 === 0, 0.6);
 const CELL = () => cachedBlob({ center: [0, 0, 0], radii: [0.05, 0.036, 0.05], rings: 6, sides: 8 });
 const SPEED = 30;
-function streams(s: CanalState, f: CanalFlow, conus: Conus): Item3[] {
+function streams(s: CanalState, f: CanalFlow, conus: Conus, truncus?: Truncus): Item3[] {
   if (f.show <= 0.01) return [];
   const out: Item3[] = [];
   const cell = CELL();
@@ -574,7 +579,11 @@ function streams(s: CanalState, f: CanalFlow, conus: Conus): Item3[] {
   const cx = conusX(s);
   const roof = roofAt(cx, CONUS_Z);
   /** Up into the conus from under its mouth (k: −1 its right half, 1 its left half, 0 the middle). */
-  const upFrom = (k: number): V3[] => [r2([cx + k * 0.16, roof - 0.32, CONUS_Z]), ...(s.split > 0.5 && k ? (k < 0 ? R.right : R.left) : R.mid).map(r2)];
+  // On up the spiral truncus when it is there: the right infundibulum's way into the pulmonary channel, the left's into the aortic one.
+  const TR = truncus && s.truncus ? truncusRoutes(truncus, s.truncus.fuse > 0.5 && s.truncus.ridges > 0.01 ? 1 : 0, s.truncus.split) : undefined;
+  const divided = !!TR && s.truncus!.fuse > 0.5 && s.truncus!.ridges > 0.01;
+  const onUp = (k: number, r: V3[]): V3[] => (TR ? [...r.slice(0, -1), ...(divided && k ? (k < 0 ? TR.pulm : TR.aorta) : TR.mid)] : r);
+  const upFrom = (k: number): V3[] => [r2([cx + k * 0.16, roof - 0.32, CONUS_Z]), ...onUp(k, s.split > 0.5 && k ? (k < 0 ? R.right : R.left) : R.mid).map(r2)];
   if (s.septum < 0.01) {
     const over = Math.round((ridgeTop(s, -0.25) + 0.22) * 20) / 20;
     // Into the left ventricle, over the ridge (the primary interventricular foramen) into the right one, out.

@@ -38,6 +38,8 @@ export interface OutflowState {
   /** The conus wall seen through, and the truncus left out (the conus cut across at its top). */
   glass: number;
   cut: number;
+  /** The truncus drawn by truncus3d.ts instead (no simple tube, no lip). */
+  bare?: boolean;
 }
 
 /** The plate's turn across the lumen at height u (degrees from the sagittal plane, towards the left in front). */
@@ -104,7 +106,9 @@ export function outflowParts(o: OutflowState, items: Item3[], pts: Record<string
     items.push({ key: 'conus-in', id: 'arteria-konoa', groups: ['atal-bulbarra', 'infundibuluak'], mesh: inner, color: mixHex(T.conus, '#1d2a08', 0.3), deep: '#3a500e', tissue: 'muscle', outline: false, ...glassOp });
   }
   pts['arteria-konoa'] = ring(F.at(0.55), CONUS_R + WALL, Math.PI * 0.62);
-  if (o.cut > 0.5) {
+  if (o.bare) {
+    // The spiral truncus (truncus3d.ts) carries on from the top.
+  } else if (o.cut > 0.5) {
     const lip = cachedMesh('conus lip', dep, () => grid(36, 2, (u, v) => ring(F.top, lerp(CONUS_R, CONUS_R + WALL, v), u * Math.PI * 2), [F.top[0], F.top[1] + 9, F.top[2]]));
     items.push({ key: 'conus-lip', id: 'arteria-konoa', mesh: lip, color: mixHex(T.conus, '#ffffff', 0.25), deep: '#4d6a12', tissue: 'muscle', outline: false });
   } else {
