@@ -62,6 +62,7 @@ export const week9: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: 'Gihar guztiak mesodermotik sortzen dira; hiru mota: ildaskatuak, leunak (lisoak) eta bihotzekoa (miokardioa).',
           notes: ['w9/1/p3/s1', 'w9/1/p4/s1'],
           recall: ['mesodermo-paraxiala', 'errai-orria'],
           idea: 'Gihar guztiak (ia) mesodermotik datoz: somitetatik edo alboko mesodermoaren orrietatik.',
@@ -81,7 +82,8 @@ export const week9: WeekDef = {
         },
         {
           at: 0.64,
-          notes: ['w9/1/p7/s2'],
+          exam: 'Leunak: erraiak eta odol-hodiak, errai orritik. Miokardioa: bihotz hodiaren inguruko errai orritik; ildaskatua, baina zelulak ez dira fusionatzen.',
+          notes: ['w9/1/p6/s1', 'w9/1/p7/s1', 'w9/1/p7/s2'],
           idea: 'Miokardioa ildaskatua da, baina berezia: zelulak ez dira fusionatzen.',
           caution: 'Ildaskatua ≠ borondatezkoa beti: miokardioak ildaskak ditu, baina ez dator mesodermo paraxialetik eta ez da borondatezkoa.',
           text: 'Miokardioa muskulu ildaskatua da, baina berezitasun batzuk ditu: zelulak ez dira fusionatzen eta disko interkalarren bidez lotzen dira. Muskulu ildaskatuan, aldiz, zuntz luze nukleo ugarikoak daude, eta leunean zelula ardatz-itxurakoak, ildaskarik gabe.',
@@ -171,6 +173,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.08,
+          exam: 'Alde zefalikoan segmentazioa ez da osoa: somitomeroak, paretarik gabe.',
           notes: ['w9/2/p3/s2'],
           idea: 'Buruan segmentazioa ez da osoa: 7 somitomero, paretarik gabe.',
           text: 'Alde zefalikoan mesodermo paraxiala segmentatu egiten da, baina segmentazioa ez da osoa: zazpi somitomero agertzen dira. Ez dute paretarik bereizten, somitek bezala; mesenkima solteko pilak dira.',
@@ -179,6 +182,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.17,
+          exam: 'Okzipitaletik behera segmentazio osoa: somitak. Muskulu ildaskatuak somitomeroetatik zein somitetatik.',
           notes: ['w9/2/p3/s3', 'w9/2/p3/s4'],
           idea: 'Okzipitaletik behera zatitze osoa: somitak (okzipitalak, lepokoak, bizkarrekoak…).',
           text: 'Alde okzipitaletik beherako mesodermoan, berriz, zatitze prozesu osoa gertatzen da eta somitak agertzen dira: lehenengoak somita okzipitalak dira, gero lepokoak, bizkarrekoak, gerrikoak, sakroak eta kokzigeoak. Orokorrean, muskulu ildaskatuak somitomeroetatik zein somitetatik sortzen dira.',
@@ -186,6 +190,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.26,
+          exam: 'Buruko muskulu ildaskatuak: batez ere somitomeroetatik (baita somita okzipitaletatik ere); begiaren kanpoko muskuluak eta faringe arkuetakoak.',
           notes: ['w9/2/p4/s1', 'w9/2/p4/s2', 'w9/2/p4/s3'],
           idea: 'Buruko muskuluak: somitomeroetatik (eta somita okzipitaletatik) → begiaren ingurura eta faringe arkuetara.',
           text: 'Alde zefalikoko muskulu ildaskatuak batez ere somitomeroetako mesodermotik sortzen dira, eta somita okzipitaletatik ere bai. Batzuk begiaren inguruan kokatzen dira: begiaren kanpoko muskuluak. Beste batzuk faringe arkuetako mesodermotik sortzen dira: somitomeroen mesodermoa arku horietan kokatzen da eta bakoitzean muskulu jakin batzuk sortzen dira.',
@@ -193,6 +198,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.36,
+          exam: 'Gainerako gorputzeko muskulu ildaskatuak: somitetatik.',
           notes: ['w9/2/p5/s1'],
           idea: 'Gainerako gorputza: somitetatik (miotomak).',
           text: 'Gainerako gorputzaren eskualdeetako muskulu ildaskatuak somita desberdinetatik sortzen dira: miotomak hedatu egiten dira bizkarrera, gorputz paretetara eta gorputz-adarretara.',
@@ -280,6 +286,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.1,
+          exam: '7 somitomero (bikoitzak); begiaren muskuluak 1., 2., 3. eta 5. somitomeroetatik.',
           notes: ['w9/2.1.1/p3/s1'],
           idea: '7 somitomero (bikoitzak). Begiaren muskuluak: 1, 2, 3 eta 5.',
           key: 'Begira doazenak: 1-2-3-5. Arkuetara doazenak: 4-6-7 (bakoitia ez den 4a lehenengo arkura).',
@@ -330,6 +337,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.56,
+          exam: 'Arkuetan: 4. somitomeroa 1. arkuan, 6.a 2. arkuan (hioidea), 7.a 3. arkuan.',
           notes: ['w9/2.1.1/p5/s1'],
           idea: 'Beste somitomeroak faringe arkuetan kokatzen dira: 4 → 1. arkua, 6 → 2. arkua, 7 → 3. arkua.',
           text: 'Beste somitomero batzuetako mesodermoa lepo mailako faringe arkuetan (egitura bilateralak) kokatzen da: 4. somitomeroa 1. arkuan, 6.a 2. arkuan (hioide arkua) eta 7.a 3. arkuan. Arku bakoitzean muskulu jakin batzuk sortuko dira.',
@@ -338,6 +346,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.66,
+          exam: '4. somitomeroa (1. arkua): muskulu murtsikatzaileak (barailaren jasotzaileak); V. nerbioa (trigeminoa).',
           notes: ['w9/2.1.1/p5/s2', 'w9/2.1.1/p5/s3'],
           idea: '4. somitomeroa → 1. arkua → muskulu murtsikatzaileak (barailaren jasotzaileak) → V. nerbio trigeminoa.',
           text: '4. somitomeroko mesodermoa 1. faringe arkuan kokatzen da, eta hortik muskulu murtsikatzaileak (barailaren muskulu jasotzaileak) sortzen dira: loki muskulua, maseter muskulua eta muskulu pterigoideoak (alboko eta erdialdekoa). Guztiak bosgarren nerbio kranealak inerbatzen ditu: nerbio trigeminoak.',
@@ -347,6 +356,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.76,
+          exam: '6. somitomeroa (2. arkua): muskulu mimikoak eta barailaren jeistaileak; VII. nerbioa (aurpegi nerbioa).',
           notes: ['w9/2.1.1/p5/s4', 'w9/2.1.1/p5/s5', 'w9/2.1/p4/s4', 'w9/2.1/p4/s5'],
           idea: '6. somitomeroa → 2. arkua → muskulu mimikoak eta barailaren jeistaileak → VII. aurpegi nerbioa.',
           text: '6. somitomeroko mesodermoa 2. faringe arkuan kokatzen da, eta hortik buruko eta aurpegiko muskulu mimikoak (keinuak egiteko) eta barailaren muskulu jeistaileak (depresoreak) sortzen dira. 2. arkuaren nerbio kraneala aurpegi nerbioa da, zazpigarrena.',
@@ -354,6 +364,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.86,
+          exam: '7. somitomeroa (3. arkua): muskulu estilofaringeoa; IX. nerbioa (glosofaringeoa).',
           notes: ['w9/2.1.1/p5/s6', 'w9/2.1.1/p5/s7'],
           idea: '7. somitomeroa → 3. arkua → muskulu estilofaringeoa → IX. nerbio glosofaringeoa.',
           key: 'Arku bakoitzak bere nerbioa: 1 → V, 2 → VII, 3 → IX (eta 4/6 → X, hurrengo etapan).',
@@ -465,6 +476,7 @@ export const week9: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: 'Somita okzipitalak: 5 bikote, lehenengoa goiz desagertzen da (4 geratzen dira); mihiaren muskuluetan parte hartzen dute.',
           notes: ['w9/2.1.2/p3/s1', 'w9/2.1/p3/s3'],
           recall: ['somita-okzipitalak', 'somitomeroak'],
           idea: 'Somita okzipitalak: hasieran 5 bikote; lehenengoa oso goiz desagertzen da → 4 bikote.',
@@ -475,6 +487,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.1,
+          exam: '1. eta 2. somita okzipitalak → 4. eta 6. arkuak → laringearen muskulu ildaskatuak; X. nerbioa (bagoa).',
           notes: ['w9/2.1.2/p4/s1', 'w9/2.1.2/p4/s2', 'w9/2.1.2/p4/s3'],
           idea: '1. eta 2. somita okzipitalak → 4. eta 6. arkuak → laringearen muskulu ildaskatuak · X. bagoa.',
           key: 'Somitomeroak arkuak 1–3 betetzen dituzte; somita okzipitalak 4/6 eta mihia: kolore urdin-moreak, zerrendaren amaiera.',
@@ -483,6 +496,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.2,
+          exam: '2.–5. somita okzipitalak → mihiaren muskulu guztiak (ildaskatuak); XII. nerbioa (hipoglosoa), motorea soilik.',
           notes: ['w9/2.1.2/p5/s1', 'w9/2.1.2/p5/s2'],
           idea: '2.–5. somita okzipitalak → mihiaren muskulu guztiak (ildaskatuak) · XII. hipoglosoa, motorea soilik.',
           text: 'Azken somita okzipitaletako (2.–5.) mesodermotik mihiaren muskulu guztiak sortzen dira, denak ildaskatuak: zelulak faringearen atzetik behera eta aurrera migratzen dute mihiraino. 12. bikote kranialak, nerbio hipoglosoak, inerbatzen ditu, eta zuntz motoreak bakarrik ditu.',
@@ -496,6 +510,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.3,
+          exam: 'Buruko muskulu ildaskatu guztiak nerbio kranialek inerbatzen dituzte.',
           notes: ['w9/2.1.2/p6/s1'],
           idea: 'Alde zefalikoko muskulu ildaskatu guztiak nerbio kranialek inerbatzen dituzte.',
           key: 'Etiketa bakoitza bere jatorriaren kolorean: begiaren inguruan III-IV-VI, arkuetan V-VII-IX-X, mihian XII.',
@@ -536,6 +551,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.68,
+          exam: '12 nerbio kraneal; ez guztiek zuntz motorerik. Arku bakoitzarekin nerbio kraneal bat.',
           notes: ['w9/2.1.3/p6/s1', 'w9/2.1.3/p6/s2', 'w9/2.1.3/p6/s3'],
           idea: '12 bikote kraneal; guztiek ez dute zuntz motorerik. Arku bakoitzak bere nerbio kraneala.',
           key: 'Arkuak eta nerbioak: 1 → V, 2 → VII, 3 → IX, 4/6 → X.',
@@ -670,6 +686,7 @@ export const week9: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: 'Muskuluak garatzeko ehun konektibozko patroiak behar dira; mioblastoak bertara iristen dira.',
           notes: ['w9/2.1.4/p24/s1', 'w9/2.1.4/p24/s2', 'w9/2.1.4/p24/s3'],
           recall: ['mioblastoak', 'gandor-neurala', 'paretako-orria'],
           idea: 'Eskualde guztietako muskuluek ehun konektibozko patroiak behar dituzte; bertara iristen diren mioblastoak poliki garatzen dira eta muskuluak sortzen dituzte.',
@@ -680,6 +697,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.12,
+          exam: 'Buruko patroiak: gandor neuraleko zelulak.',
           notes: ['w9/2.1.4/p25/s1'],
           idea: 'Buruan: patroiak gandor neuraleko zelulek osatzen dituzte.',
           text: 'Buruan sortzen diren ehun konektibozko patroiak gandor neuraletako zelulek osatzen dituzte (4. gaiko gandor neurala, kolore berean): faringe arkuak eta aurpegia betetzen dituzte, eta somitomeroetako mioblastoak bertara sartzen dira.',
@@ -687,6 +705,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.24,
+          exam: 'Lepoko patroiak: somitaren mesodermoa.',
           notes: ['w9/2.1.4/p25/s2'],
           idea: 'Lepoan: patroiak somiten mesodermo zelulek osatzen dituzte.',
           text: 'Lepoan (eskualde okzipital eta zerbikalean), patroi horiek somitaren mesodermo zelulek osatzen dituzte: mioblastoak eta haien patroia jatorri berekoak dira.',
@@ -694,6 +713,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.36,
+          exam: 'Paretetako eta gorputz-adarretako patroiak: alboko mesodermoaren paretako orria.',
           notes: ['w9/2.1.4/p26/s1'],
           idea: 'Gorputz paretetan eta gorputz-adarretan: patroiak alboko mesodermoaren paretako orriko zelulek osatzen dituzte.',
           text: 'Gorputzaren paretetan eta goiko eta beheko gorputz-adarretan dauden muskuluak garatzeko patroiak alboko mesodermoaren paretako orriko zelula mesodermikoek osatzen dituzte (8. gaiko gorputz-adarren mesenkima bera). Miotometako zelulak bertara sartzen dira.',
@@ -724,6 +744,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.6,
+          exam: 'Mioblastoak fusionatu → nukleo ugariko zuntzak, ildaskatuak (ildaskatu = mugimendu).',
           notes: ['w9/2.1.4/p27/s1', 'w9/2.1.4/p27/s2', 'w9/2.1.4/p28/s1'],
           recall: ['zuntz-muskularrak'],
           idea: 'Aintzindariak migratu, mioblasto bihurtu eta fusionatzen dira: nukleo ugariko zuntzak; miofibrillen ildoengatik ildaskatuak.',
@@ -806,6 +827,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.1,
+          exam: 'Somitaren hiru paretak: atzekoa (dortsala), erdialdekoa (mediala) eta aurrekoa.',
           notes: ['w9/2.2/p5/s1'],
           idea: 'Somitaren hiru pareta: atzekoa (dortsala), erdialdekoa (mediala) eta aurrekoa.',
           text: 'Somitetan pareta desberdinak bereizten dira: pareta dortsala edo atzeko pareta, erdialdeko pareta edo pareta mediala, eta aurreko pareta.',
@@ -815,6 +837,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.2,
+          exam: 'Erdialdeko eta aurreko paretak → esklerotoma: hodi neurala eta notokorda inguratu → ornoak.',
           notes: ['w9/2.2/p6/s1', 'w9/2.2/p6/s2', 'w9/2.2/p6/s3', 'w9/2.2/p6/s4'],
           idea: 'Erdialdeko eta aurreko paretak → esklerotoma → erdikaldera, hodi neurala eta notokorda inguratu → ornoak.',
           text: 'Erdialdeko eta aurreko paretetako zelulek ezaugarriak aldatu eta beste zelula mota bat bihurtzen dira: esklerotoma zelulak, hezurrak sortzeko balio dutenak. Erdikaldera migratzen dute, erdian dauden hodi neurala eta notokorda inguratzeko; hortik bizkarrezurraren ornoak sortuko dira.',
@@ -822,6 +845,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.32,
+          exam: 'Esklerotoma zelula batzuk albora, paretako orrira: saihets kartilagoak.',
           notes: ['w9/2.2/p6/s5', 'w9/2.2/p6/s6', 'w9/2.2/p7/s1', 'w9/2.2/p7/s2'],
           idea: 'Esklerotoma zelula batzuk albora: somitaren alboko muga gurutzatu → paretako orria → saihets kartilagoak. Saihetsa: hezurra + kartilagoa, esternoiarekin.',
           key: 'Muga berdea gurutzatzen dutenak domeinu abaxialera doaz: esklerotomatik saihetsaren aurreko zatia, miotomatik paretetako muskuluak.',
@@ -838,6 +862,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.52,
+          exam: 'Atzeko pareta: erdikoak dermatoma; ertzetakoak muskulu zelulen aintzindariak.',
           notes: ['w9/2.2/p9/s1', 'w9/2.2/p9/s2', 'w9/2.2/p9/s3'],
           idea: 'Atzeko paretaren erdiko zelulak → dermatoma; ertzetakoak → zelula muskularren aintzindariak.',
           text: 'Atzeko paretako zelulak: erdikoek, desberdintze-prozesu baten bidez, dermatoma osatzen dute. Atzeko paretaren ertzetan dauden zelulak, berriz, zelula muskularren aintzindariak dira, eta bi prozesu egiten dituzte.',
@@ -845,6 +870,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.64,
+          exam: 'Miotoma (dermatomaren alde bentralean) → bizkarreko muskuluak, eskapula ingurukoak, saihets artekoak.',
           notes: ['w9/2.2/p10/s1', 'w9/2.2/p10/s2'],
           idea: '1) Bi ertzetako zelulak bentralera → miotoma (dermatomaren alde bentralean) → bizkarreko, eskapula inguruko eta saihets arteko muskuluak.',
           text: 'Alde batetik, atze-erdialdeko eta aurre-alboko muskulu zelulek alde bentralera migratzen dute eta dermatomaren alde bentralean zelula multzo bat osatzen dute: miotoma. Miotomako zeluletatik bizkarreko muskulu ildaskatuak, eskapula inguruko muskuluak eta saihets arteko muskuluak eratuko dira.',
@@ -852,6 +878,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.76,
+          exam: 'Aurre-alboko zelulak alboko mugaz haratago, paretako orrira → gorputz paretako eta gorputz-adarretako muskuluak.',
           notes: ['w9/2.2/p11/s1'],
           idea: '2) Aurre-alboko zelula batzuk albora: muga gurutzatu → paretako orria → gorputz paretako eta gorputz-adarretako muskuluak.',
           text: 'Bestetik, somitaren aurre-alboko zelula batzuek albora migratzen dute, somitaren alboko muga gurutzatu eta alboko mesodermoaren paretako orrira heltzen dira, gorputz paretako muskulu ildaskatuak eta gorputz-adarretako muskulu ildaskatuak sortzeko.',
@@ -944,6 +971,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.1,
+          exam: 'Somitaren alboko mugak bi domeinu bereizten ditu: primaxiala eta abaxiala.',
           notes: ['w9/2.2.1/p4/s1'],
           idea: 'Somitaren alboko muga (marra berdea): mesodermoa 2 domeinutan banatzen du.',
           caution: '3D ereduko gortina berdea muga kontzeptuala da, ez benetako mintza. Zelulek zeharkatzen dute.',
@@ -952,6 +980,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.2,
+          exam: 'Domeinu primaxiala: hodi neuralaren ondoan (somitak) → bizkarreko muskuluak.',
           notes: ['w9/2.2.1/p5/s1', 'w9/2.2.1/p5/s2', 'w9/2.2.1/p5/s3', 'w9/2.2.1/p5/s4'],
           idea: 'Domeinu primaxiala: hodi neuralaren aldamenean («erdialdean»); bertan somitak; bizkarreko muskuluak.',
           text: 'Domeinu primaxiala: hodi neuralaren aldamenean dagoen mesodermo-zelula multzoak osatutako domeinua, «erdialdean» dagoena. Bertan daude somitak. Domeinu honetatik bizkarreko muskuluak sortzen dira.',
@@ -959,6 +988,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.32,
+          exam: 'Domeinu abaxiala: paretako orria + iritsitako somita-zelulak → gorputz-adarretako muskulu guztiak.',
           notes: ['w9/2.2.1/p6/s1', 'w9/2.2.1/p6/s2'],
           idea: 'Domeinu abaxiala: paretako orriko zelula mesodermikoak + bertara iritsitako somita-zelulak.',
           key: 'Muga berdea = domeinuen arteko muga: barnean primaxiala (urdina), kanpoan abaxiala (laranja).',
@@ -973,6 +1003,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.44,
+          exam: 'Bizkarreko muskulu zutitzaileak: primaxialak (miotomatik). Lepoan, toraxean eta goiko gorputz-adarrean: batzuk primaxialak, besteak abaxialak.',
           notes: ['w9/2.2.1/p7/s1', 'w9/2.2.1/p8/s1', 'w9/2.2.1/p8/s2', 'w9/2.2.1/p8/s3'],
           idea: 'Bi domeinuetatik muskulu ildaskatu desberdinak. Bizkarraren sakoneko muskulu zutitzaileak: primaxialak, miotomatik. Lepoan, toraxean/abdomenean eta goiko gorputz-adarrean: batzuk primaxialak, beste batzuk abaxialak.',
           text: 'Bi domeinu hauetatik eskualde desberdinetan muskulu ildaskatu ezberdinak garatuko dira. Bizkarreko muskuluen jatorria: bizkarraren sakontasunean bizkarraren muskulu zutitzaileak daude, domeinu primaxialetik sortuak, miotomatik. Lepoan, toraxean/abdomenean eta goiko gorputz-adarrean dauden muskulu batzuk domeinu primaxialetik sortzen dira, eta besteak abaxialetik.',
@@ -1125,6 +1156,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.08,
+          exam: 'Orno zuloek hodi errakideoa osatzen dute; bertan ornomuina.',
           notes: ['w9/2.2.2/p3/s3'],
           idea: 'Orno guztien zuloak elkarren segidan: hodi errakideoa; bertan ornomuina.',
           text: 'Bizkarrezurraren orno guztiek hodi bat osatzen dute, hodi errakideoa izenekoa, eta bertan ornomuina kokatzen da.',
@@ -1133,6 +1165,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.14,
+          exam: 'Ornomuin segmentu bakoitzari nerbio espinal pare bat (ezkerrekoa eta eskuinekoa).',
           notes: ['w9/2.2.2/p4/s1'],
           idea: 'Ornomuinaren segmentuak (lepokoa, bizkarrekoak, gerrikoak, sakroak, kokzigeoak): segmentu bakoitzean nerbio espinal pare bat (ezkerra eta eskuina).',
           text: 'Ornomuinean segmentu desberdinak bereizten dira (lepokoak, bizkarrekoak, gerrikoak, sakroak eta kokzigeoak), eta segmentu horietako bakoitzarekin nerbio espinal/errakideo pare bat erlazionatzen da (ezkerrekoa eta eskuinekoa).',
@@ -1163,6 +1196,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.44,
+          exam: 'Gai grisa (H): aurreko adarrak motoreak, atzekoak sentsorialak, albokoak begetatiboak; erdian enimo hodia.',
           notes: ['w9/2.2.2/p8/s1'],
           idea: 'Alboko adarrak (ez beti): neurona begetatiboak. Erdian enimo hodia (sistema bentrikularraren atala).',
           text: 'Alboko adarrak (ez beti): neurona begetatiboak. Erdian ornomuineko sistema bentrikularraren atala dago: enimo hodia.',
@@ -1178,6 +1212,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.62,
+          exam: 'Axoi motoreak → aurreko sustraia → nerbio espinala → muskulu ildaskatuak.',
           notes: ['w9/2.2.2/p9/s1', 'w9/2.2.2/p9/s2', 'w9/2.2.2/p9/s3', 'w9/2.2.2/p9/s4', 'w9/2.2.2/p9/s5'],
           idea: 'Neurona motoreen axoiak (zuntz motoreak) aurre-alboko aldetik irten → aurreko sustraia → nerbio espinalaren enborra → periferiara: muskulu ildaskatuak uzkurtzeko.',
           text: 'Aurreko adarretako neurona motoreen sometatik irteten diren axoiak axoi motoreak dira (nerbio zuntz motoreak). Ornomuinetik aurre-alboko aldetik irteten dira, eta guztiek batera nerbioaren aurreko sustraia osatzen dute. Aurreko sustraitik pasatuz, nerbio espinalaren enborrean kokatzen dira. Ondorioz, zuntz motoreetatik informazioa (nerbio-kinada) ornomuinetik alde periferikora abiatzen da. Nerbio-kinada hauek motoreak dira eta muskulu ildaskatuak inerbatzeko (uzkurtzeko) beharrezkoak dira.',
@@ -1185,6 +1220,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.76,
+          exam: 'Nerbio espinala = aurreko + atzeko sustraiak: zuntz motoreak eta sentsorialak.',
           notes: ['w9/2.2.2/p10/s1'],
           idea: 'Aurreko eta atzeko sustraiak batu: nerbio espinala (kordoi bakarra). Zuntz motoreez gain, sentsorialak (eta begetatiboak) ere bai.',
           text: 'Nerbio espinala aurreko eta atzeko sustraiak batzean sortzen da, kordoi bakarra osatuz. Nerbio espinaletan, zuntz motoreez gain, zuntz sentsorialak ere badaude (begetatiboak ere bai, baina oraingoz ez ditugu aipatuko).',
@@ -1192,6 +1228,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.86,
+          exam: 'Atzeko sustraian gongoil errakideoa: luzapen zentripetoa (ornomuinera) eta zentrifugoa (periferiara).',
           notes: ['w9/2.2.2/p11/s1', 'w9/2.2.2/p11/s2', 'w9/2.2.2/p11/s3', 'w9/2.2.2/p11/s4', 'w9/2.2.2/p11/s5'],
           idea: 'Atzeko sustraian beti gongoil errakideoa: luzapen zentrifugoa periferiara, zentripetoa ornomuinera. Larruazaleko kinada → gongoila → atzeko adarra → gai zuriko traktua → goiko zentroak.',
           text: 'Nerbio espinalen atzeko sustraian beti gongoil bat dago: gongoil errakideoa (espinala). Gongoil honetako neuronek 2 luzapen mota dituzte: luzapen zentripetoa (ornomuinera, informazioa atzeko adarretako neuronetara eramateko) eta luzapen zentrifugoa (alde periferikora). Bi luzapen horien bidez, alde periferikoan sortzen diren nerbio-kinadak (adibidez, larruazalean tenperaturaren sentsazioa) ornomuinera garraiatzen dira. Atzeko adarretako neurona sentsorialetan informazioa transmititzen da, eta haietatik irteten diren axoiak gai zuriko traktuetan kokatzen dira informazioa goiko zentroetara eramateko.',
@@ -1294,6 +1331,7 @@ export const week9: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: 'Nerbio espinala → aurreko eta atzeko adar primarioak; bietan zuntz motoreak eta sentsorialak.',
           notes: ['w9/2.2.2/p12/s1', 'w9/2.2.2/p12/s2', 'w9/2.2.2/p12/s3'],
           recall: ['nerbio-espinalak'],
           idea: 'Nerbio espinalaren enborretik bi adar primario: aurrekoa eta atzekoa; bietan zuntz sentsorialak eta motoreak. Aurrekoak aurreko muskuluak, atzekoak atzekoak.',
@@ -1313,6 +1351,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.26,
+          exam: 'Inerbazioak ez du zerikusirik jatorriarekin: adar bakoitzak domeinu bietako muskuluak inerbatzen ditu.',
           notes: ['w9/2.2.2/p13/s2', 'w9/2.2.2/p13/s3', 'w9/2.2.2/p13/s4'],
           idea: 'KONTUZ: inerbazioak ez du zerikusirik jatorriarekin. Muskuluaren jatorria (domeinua) gauza bat da; zein adarrek inerbatzen duen, beste bat.',
           caution: 'Aurreko adarrak bi domeinuetako muskuluak inerbatzen ditu (saihets artekoak primaxialak, abdomenekoak abaxialak); atzeko adarrak, primaxialak soilik (bizkarreko muskulu sakonak).',
@@ -1335,6 +1374,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.5,
+          exam: 'Epaxialak (bizkarreko muskulu sakonak): atzeko adarra. Hipaxialak (gainerakoak): aurreko adarra.',
           notes: ['w9/2.2.2/p20/s1', 'w9/2.2.2/p21/s1', 'w9/2.2.2/p21/s2', 'w9/2.2.2/p22/s1', 'w9/2.2.2/p22/s2'],
           idea: 'Inerbazioaren arabera: bizkarrezurreko muskulu sakonak = epaxialak (atzeko adarrak); gainerako guztiak = hipaxialak (aurreko adarrak).',
           key: 'Epaxiala = atzeko adar primarioa · hipaxiala = aurreko adar primarioa.',
@@ -1360,6 +1400,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.7,
+          exam: 'Saihets arteko muskuluak: metamerikoak (segmentu bakoitzean nerbio bat).',
           notes: ['w9/2.2.2/p26/s1', 'w9/2.2.2/p26/s2'],
           idea: 'Gorputz paretako eta gorputz-adarretako muskuluen kokapena desberdina; toraxeko saihets arteko muskuluen inerbazioa metamerikoa (segmentarioa).',
           text: 'Gorputz paretako muskuluen kokapena eta hedapena eta goiko gorputz-adarretako muskuluen kokapena desberdinak dira. Toraxeko saihets arteko muskuluen erlazioa metamerikoa (edo segmentarioa) da: segmentu bakoitzean saihets arteko nerbio bat.',
@@ -1367,6 +1408,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.8,
+          exam: 'Gorputz-adarretan: maila desberdinetako zuntzek nerbio sareak osatzen dituzte.',
           notes: ['w9/2.2.2/p26/s3'],
           idea: 'Gorputz-adarretan: maila desberdinetako zuntz motoreek nerbio sareak osatzen dituzte, eta haietatik nerbio jakin batzuk irteten dira.',
           text: 'Goiko eta beheko gorputz-adarretako muskuluen kasuan, aldiz, maila desberdinetako nerbio espinaletako zuntz motoreek nerbio sare desberdinak osatzen dituzte, eta bertatik nerbio jakin batzuk irteten dira.',
@@ -1374,6 +1416,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.88,
+          exam: 'Nerbio espinalek gorputzeko muskulu guztiak inerbatzen dituzte, burukoak izan ezik.',
           notes: ['w9/2.2.2/p27/s1', 'w9/2.2.2/p28/s1'],
           idea: 'Behekoan: femorala, ziatikoa, bultzatzailea. Goikoan: erradiala, ertaina, kubitala. Nerbio espinalek gorputzeko muskulu guztiak inerbatzen dituzte, burukoak izan ezik.',
           key: 'Buruko muskuluak: nerbio kranialak (4. urratsa). Gainerako guztiak: nerbio espinalak.',
@@ -1467,6 +1510,7 @@ export const week9: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: 'Muskulu leuna: erraiak eta odol-hodiak; hestearen inguruko errai orritik.',
           notes: ['w9/3/p3/s1', 'w9/3/p3/s2', 'w9/3/p3/s3', 'w9/3/p3/s4', 'w9/3/p3/s5'],
           recall: ['errai-orria', 'muskulu-leuna'],
           idea: 'Muskulu leuna: errai guztietan eta odol-hodien paretan (arteriak eta zainak ere erraiak dira). Orokorrean hestearen inguruko errai orritik.',
@@ -1484,6 +1528,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.28,
+          exam: 'Muskulu leunaren inerbazioa: begetatiboa (sinpatikoa eta parasinpatikoa), ez kraniala ez espinala.',
           notes: ['w9/3/p5/s1', 'w9/3/p5/s2'],
           idea: 'Inerbazioa guztiz desberdina: ez nerbio kranialak ez espinalak; inerbazio begetatiboa edo autonomoa (sinpatikoa eta parasinpatikoa).',
           key: 'Ildaskatua: nerbio kranialak edo espinalak · leuna: nerbio sistema begetatiboa.',
@@ -1493,6 +1538,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.42,
+          exam: 'Hestea: mintz bukofaringeotik kloaka mintzera; aurreko, bitarteko eta atzeko hestea.',
           notes: ['w9/3/p6/s1', 'w9/3/p6/s2'],
           recall: ['aurreko-hestea', 'erdiko-hestea', 'atzeko-hestea'],
           idea: 'Diskoaren tolespenek endodermoa eta bitelo zakuaren zatirik handiena barneratzen dute: hestea, mintz bukofaringeotik kloaka mintzeraino; aurreko, bitarteko eta atzeko hestea.',
@@ -1509,6 +1555,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.72,
+          exam: 'Aortaren eta haren adarren muskulu leuna: paretako orritik eta gandor neuraletik (ez errai orritik).',
           notes: ['w9/3/p8/s1', 'w9/3/p8/s2', 'w9/3/p8/s3', 'w9/3/p8/s4', 'w9/3/p9/s1'],
           idea: 'Bigarren salbuespena: arterien eta zainen paretako muskulu leuna. Aorta (ezkerreko bentrikulutik) eta haren adarrak: paretako orritik eta gandor neuraletik, gaur egun uste denez; ez errai orritik.',
           caution: 'Aorta eta haren adarrak: ez errai orritik, baizik eta paretako orritik eta gandor neuraletik ("uste da gaur egun"). Enbrioi honetan oraindik bi aorta dortsal daude.',
@@ -1597,6 +1644,7 @@ export const week9: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: 'Miokardioa: bi bihotz hodien inguruko errai orritik.',
           notes: ['w9/4/p3/s1', 'w9/4/p3/s2', 'w9/4/p3/s4', 'w9/4/p3/s5'],
           recall: ['errai-orria', 'endokardioa'],
           idea: 'Bihotzaren paretako muskulua bi bihotz hodien inguruko alboko mesodermoaren errai orritik sortzen da: bihotzaren erdiko geruza, miokardioa. Lehenik endokardio (bihotz) hodia; haren inguruan errai orria.',
@@ -1606,6 +1654,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.14,
+          exam: 'Bihotzeko mioblastoak ez dira fusionatzen: disko interkalarrez lotzen dira.',
           notes: ['w9/4/p3/s3', 'w9/4/p3/s6', 'w9/4/p3/s7', 'w9/4/p3/s8'],
           idea: 'Mioblastoak ez dira fusionatzen: lotura berezien bidez atxikitzen dira, disko interkalarrak. Zitoplasman miofibrillak. Ildaskatuaren antzekoa, baina itxura desberdina.',
           key: 'Ildaskatua: mioblastoak fusionatzen dira · bihotzekoa: ez; disko interkalarrek lotzen dituzte.',
@@ -1629,6 +1678,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.46,
+          exam: 'Nodulu sinusala (markapasoa) eskuineko aurikulan; nodulu aurikobentrikularra haren beheko aldean.',
           notes: ['w9/4/p6/s1'],
           idea: 'Eskuineko aurikulan nodulu sinusala (markapasoa); aurikularen behealdean nodulu aurikobentrikularra; haien artean traktuak (aurikularteko balak).',
           text: 'Bihotzaren eskuineko aurikulan nodulu sinusala dago (markapasoa); aurikularen beheko aldean nodulu aurikobentrikularra; eta bi noduluen artean traktu desberdinak, aurikularteko balak.',
@@ -1637,6 +1687,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.6,
+          exam: 'His faszikulua (bi adar) → Purkinje sarea endokardio azpian.',
           notes: ['w9/4/p6/s2'],
           idea: 'Nodulu aurikobentrikularretik His faszikulua (faszikulu aurikobentrikularra), bi adarrekin; adarrak endokardio azpian adarkatzen dira: Purkinje sarea.',
           text: 'Nodulu aurikobentrikularretik His faszikulua ateratzen da, bi adarrekin (eskuinekoa eta ezkerrekoa). Adar horiek endokardio azpian adarkatzen dira eta zuntzez osatutako Purkinje sarea eratzen dute, bentrikuluen paretan.',
@@ -1645,6 +1696,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.74,
+          exam: 'Noduluak ez dira nerbio sistema: zuntz muskular espezializatuak (barneko inerbazioa).',
           notes: ['w9/4/p5/s1', 'w9/4/p5/s2', 'w9/4/p5/s3'],
           idea: 'Noduluak ez dira nerbio sistemaren parte: zuntz muskular oso espezializatuak. Kinadak sortu eta garraiatzen dituzte: bihotzaren barneko inerbazioa.',
           caution: 'Eroapen sistema ez da nerbio-ehuna: zuntz muskular espezializatuak dira (horregatik ez dira horiak, nerbioak bezala).',
@@ -1659,6 +1711,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.84,
+          exam: 'Kanpoko inerbazioa: nerbio sistema begetatiboa.',
           notes: ['w9/4/p5/s4', 'w9/4/p5/s5', 'w9/4/p5/s6', 'w9/4/p5/s7', 'w9/4/p7/s1'],
           idea: 'Kanpoko inerbazioa: nerbio sistema begetatiboa (sinpatikoa eta parasinpatikoa) eroapen sistemaren egituretara iristen da, haren funtzioak erregulatzeko, errai guztietan bezala. Muskulu leunarena ere begetatiboa.',
           key: 'Barnekoa: eroapen sistema (muskulua) · kanpokoa: begetatiboa (erregulatu).',

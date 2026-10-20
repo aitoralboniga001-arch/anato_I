@@ -84,7 +84,7 @@ export function spellNumbers(text: string): string {
 }
 
 /** Words whose x is /ks/ (Greco-Latin), never respelled; matched by their start. */
-const KS_STEMS = ['torax', 'plexu', 'extra', 'oxigen', 'axial', 'maxil', 'aprox', 'sexu', 'toxi', 'oxi', 'parax'];
+const KS_STEMS = ['torax', 'plexu', 'extra', 'oxigen', 'axial', 'maxil', 'aprox', 'sexu', 'toxi', 'oxi', 'parax', 'primax', 'abax', 'epax', 'hipax', 'axoi'];
 /** Latin terms the notes use as they are. */
 const LATIN = new Set(['septum', 'primum', 'secundum', 'sekundum', 'spurium', 'transversum', 'sinus', 'venarum', 'venosus', 'cordis', 'arteriosus', 'truncus']);
 

@@ -4,6 +4,7 @@ import { expandNotes, sentence, sentenceText } from '@/content/notes-text';
 import { POOL } from '@/content/pool';
 import { getWeek, nameOf, partsOf, structures } from '@/content/registry';
 import { IMPORTANCE_W7 } from '@/content/klasea/importance/w7';
+import { IMPORTANCE_W9 } from '@/content/klasea/importance/w9';
 import { IMPORTANCE_W10 } from '@/content/klasea/importance/w10';
 import { IMPORTANCE_W11 } from '@/content/klasea/importance/w11';
 import { LESSONS } from '@/content/klasea';
@@ -111,6 +112,16 @@ const X_WORDS: Record<string, 'ks' | 'basque'> = {
   paraxiala: 'ks',
   paraxialetik: 'ks',
   gaixotasunetan: 'basque',
+  toraxean: 'ks',
+  primaxiala: 'ks',
+  primaxialak: 'ks',
+  primaxialetik: 'ks',
+  abaxiala: 'ks',
+  abaxialak: 'ks',
+  abaxialetik: 'ks',
+  epaxialak: 'ks',
+  hipaxialak: 'ks',
+  axoiak: 'ks',
 };
 
 // ———————————————————————————— each topic's class ————————————————————————————
@@ -139,6 +150,14 @@ const TOPICS: Topic[] = [
     importance: IMPORTANCE_W7,
     pinned: ['1/p4/s2', '1/p4/s6', '2/p3/s1', '2/p5/s1', '2/p5/s3', '2.1/p3/s4', '2.1/p11/s2', '2.2/p3/s1', '2.2/p8/s1', '2.2/p14/s1', '3/p5/s3', '3/p6/s2', '3/p7/s4', '3.1/p8/s1'],
     contrastFrom: 'orriak',
+    shown: {},
+    same: {},
+  },
+  {
+    week: 9,
+    importance: IMPORTANCE_W9,
+    pinned: ['1/p3/s1', '2/p3/s1', '2.1.1/p4/s3', '2.1.2/p6/s1', '2.2/p10/s2', '2.2.1/p5/s3', '2.2.1/p6/s1', '2.2.2/p21/s1', '2.2.2/p22/s1', '2.2.2/p28/s1', '3/p3/s5', '4/p3/s1'],
+    contrastFrom: 'ildaskatuak',
     shown: {},
     same: {},
   },

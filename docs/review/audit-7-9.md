@@ -375,3 +375,20 @@ Each batch ends with:
   - vertebra: the sclerotome, the notochord; column: the somites, the sclerotome, the notochord; ribs: the sclerotome.
 - **The two pending captions.** The notes figures of the skull from above (`w8/3.1.1/p12`) and the chondrocranium from above (`w8/3.1.2/p5`) are now linked to their steps. `tests/notes.test.ts` no longer keeps a pending list: every caption of topics 8 and 9 must stay linked.
 - **Checked:** headless Chrome at 1280 px, frame by frame through every new move, including the two-leg move through the dome. In headless, the first entry into a 3D model waits up to ~3 s for WebGL to start, as every move into 3D does. The full test suite passes.
+
+## 8. Batch 6 results (C + D for topic 9, the F timeline milestones), 2026-10-20
+
+- **Key lines (D).** 53 steps gained a key line (`exam`): topic 9 now has 58 on its 93 steps. Every stage has them, and each one says only what its step's cited sentences say. The core of the notes was regenerated from them (`content/klasea/importance/w9.ts`): 82 of 229 sentences, 36 %.
+- **The class (C).** `content/klasea/w9.ts`: Kimu teaches topic 9 in 16 parts, about 19 min.
+  - It runs from the three kinds of muscle, through the head (somitomeres, occipital somites, cranial nerves), the connective-tissue patterns, the somite walls and the two domains, the spinal cord and nerve, and epaxial vs hypaxial, to smooth muscle and the heart.
+  - 115 lines say all 82 core sentences, each held to the sentences it cites.
+  - 14 contrast questions set look-alikes against each other (for example somitomeres vs somites, nerve IV vs VI, X vs XII, primaxial vs abaxial, epaxial vs hypaxial, the inner vs outer innervation of the heart). There are also 8 pool questions and an opening prediction.
+  - It ends with a fill-in table of where each head muscle comes from and its cranial nerve.
+  - `tests/klasea.test.ts` now runs every class rule on topic 9 too.
+- **Voice.** The Spanish voice now keeps the /ks/ in primaxial, abaxial, epaxial, hipaxial and axoi (it read them with a Basque /ʃ/).
+- **Timeline (F).** Topic 9's notes give one date: by the end of the third month, striations appear in the fused muscle fibres (`w9/2/p9/s2`). That is now a milestone in the muscles lane. It opens on the fusion step of the connective-tissue stage, and the date is shown as the notes write it ("3. hilabetearen bukaerarako").
+  - The notes do not date the other events the audit listed (myoblasts arriving, the limb muscles), so none were invented.
+- **For the owner, two things in the notes:**
+  - `w9/2.1.3/p5/s3` says the lower limb has its flexors in front and the upper limb its extensors in front. Topic 8's notes and the step's own key line say the opposite: upper limb flexors in front, lower limb extensors in front. The class line is worded so it does not take a side: after the rotation, flexors and extensors sit on opposite sides in the upper and lower limbs. Worth checking against the lecture.
+  - The notes paragraph `w9/2/p6–p9` (myotome → myoblasts → fusion → striations by the third month) is shown by no step since the `fusioa` view was removed in c684b80. Its scene (`components/scenes/week9/Fusion.tsx`) is still in the code, unused. Bringing it back would give the milestone its own step.
+- **Checked:** headless Chrome at 1280 px (nine parts) and at 1024 px (the closing table). The full test suite passes (1323 tests).
