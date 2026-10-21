@@ -57,6 +57,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: 'Hezurren hiru jatorri: mesodermo paraxiala (somitomeroak eta somitak), alboko mesodermoaren paretako orria eta gandor neurala (ektodermikoa).',
           recall: ['mesodermo-paraxiala', 'paretako-orria', 'gandor-neurala'],
           idea: 'Hezur guztiak mesenkimatik sortzen dira, eta mesenkima hiru lekutatik dator.',
           key: 'Hezur bakoitzaren jatorria jakitea ordena ezartzea da: gorputza → mesodermoa; aurpegia → gandor neurala.',
@@ -77,6 +78,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.12,
+          exam: 'Mesodermo paraxiala segmentatu: alde zefalikoan somitomeroak; okzipitaletik behera somitak.',
           idea: 'Mesodermo paraxiala segmentatzen da: aurrean somitomeroak, atzera somitak.',
           key: 'Somitak dira ornoen, saihetsen eta burezurraren atzealdearen iturria.',
           notes: ['w8/1/p4/s1-s3'],
@@ -86,6 +88,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.26,
+          exam: 'Somitan: esklerotoma (aurreko eta erdialdeko paretak) eta dermomiotoma (atzeko pareta).',
           recall: ['somitak'],
           idea: 'Somita bakoitzak bi zati ditu: esklerotoma (hezurra) eta dermomiotoma.',
           key: 'Esklerotoma = hezurra; dermomiotoma = muskuluak eta dermisa.',
@@ -116,6 +119,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.54,
+          exam: 'Esklerotomaren mesenkima erdialdera: hodi neurala eta notokorda inguratu → ornoak eta saihetsak.',
           recall: ['hodi-neurala', 'notokorda'],
           idea: 'Mesenkimaren bide bat: hodi neurala eta notokorda inguratzea, ornoak eratzeko.',
           notes: ['w8/1/p5/s3', 'w8/1/p6/s1'],
@@ -134,6 +138,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.78,
+          exam: 'Paretako orriko mesenkima → gorputz-adarretako hezurrak, esternoia eta gerrialdeko hezurrak.',
           recall: ['paretako-orria'],
           idea: 'Paretako orritik: gorputz-adarretako hezurrak, esternoia eta gerrikoak.',
           notes: ['w8/1/p9/s1', 'w8/1/p10/s1', 'w8/1/p11/s1', 'w8/1/p12/s1'],
@@ -143,6 +148,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.9,
+          exam: 'Gandor neurala (alde zefalikoa) → aurpegiko eta neurokraneoko hezurrak.',
           recall: ['gandor-neurala'],
           idea: 'Gandor neuraletik: aurpegiko hezurrak eta burezurraren aurrealdea.',
           key: 'Jatorriz ektodermikoak dira, baina mesenkima bihurtzen dira.',
@@ -212,6 +218,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: 'Bi hezurtzapen mota: mintzezkoa eta endokondrala; abiapuntua mesenkima.',
           recall: ['hezurtzapen-zentroak'],
           idea: 'Bi hezurtzapen mota daude, biak mesenkimatik hasten dira.',
           notes: ['w8/2/p2/s1'],
@@ -221,6 +228,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.16,
+          exam: 'Mintzezkoa: mesenkimazko mintz ereduetan zuzenean hezurtzapen zentroak; eredua zuzenean hezurtzen da.',
           idea: 'Mintzezkoan mesenkimaren barruan agertzen dira hezurtzapen zentroak.',
           ask: {
             q: 'Zein hezurtzapen motak ez du kartilago ereduik?',
@@ -247,6 +255,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.48,
+          exam: 'Endokondrala: mesenkima → kartilago hialinozko eredua (kondroblastoak) → 2. fasean hezurra (hezurtzapen zentroak).',
           idea: 'Endokondralean lehenengo kondroblastoek kartilago hialinozko eredua egiten dute.',
           notes: ['w8/2/p4/s1-s2'],
           text: 'Hezurtzapen endokondrala: mesenkimatik desberdindutako kondroblastoek kartilago hialinozko hezur ereduak sortzen dituzte; hasieran kartilaginotsuak dira.',
@@ -330,6 +339,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: 'Burezurra: neurokraneoa (entzefaloa babestu; buru-ganga + kondrokraneoa) eta errai kraneoa (aurpegia).',
           recall: ['gandor-neurala', 'somitomeroak'],
           idea: 'Burezurra bi zati: neurokraneoa (burmuina babesten du) eta errai kraneoa (aurpegia).',
           notes: ['w8/3/p2/s1', 'w8/3/p3/s1-s4', 'w8/3/p4/s1', 'w8/3.1/p3/s1-s2'],
@@ -339,6 +349,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.14,
+          exam: 'Buru-ganga: entzefaloaren goiko eta alboko mesenkimatik; mintzezko hezurtzapena, hezur lauak.',
           idea: 'Buru-ganga mintzezko hezurtzapenaz sortzen da: hezur lau eta zapalak.',
           notes: ['w8/3.1.1/p2/s1-s2'],
           text: 'Buru-ganga entzefaloaren goikaldeko eta alboko mesenkimatik sortzen da. Mintzezko hezurtzapena du: hezurtzapen zentro bakoitzetik hezur espikulak hazten dira eta zuzenean hezurtzen da; hezur lauak eta zapalak dira.',
@@ -347,6 +358,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.28,
+          exam: 'Buru-ganga: 2 frontal, 2 parietal eta okzipitalaren ezkata (albotik, tenporalaren ezkata).',
           idea: 'Goitik: 2 frontal, 2 parietal eta okzipitalaren ezkata.',
           ask: {
             q: 'Goitik ikusita, zein hezurrek osatzen dute buru-ganga?',
@@ -361,10 +373,12 @@ export const week8: WeekDef = {
           notes: ['w8/3.1.1/p3/s1', 'w8/3.1.1/p4/s1', 'w8/3.1.1/p5/s1'],
           text: 'Goitik ikusita, buru-gangako hezurrak: 2 hezur frontal (kopeta hezurra), 2 hezur parietal (pareta hezurra) eta hezur okzipitalaren ezkata (garondoa).',
           focus: ['hezur-frontala', 'hezur-parietala', 'okzipitalaren-ezkata'],
+          tour: ['hezur-frontala', 'hezur-parietala', 'okzipitalaren-ezkata'],
           view: 'goitik',
         },
         {
           at: 0.42,
+          exam: 'Joskurak: bi hezur lauren arteko ehun konektibozko ildo estuak.',
           idea: 'Joskura: bi hezur lauren arteko ildo estua.',
           key: 'Joskura = ildo estua, 2 hezur; fontanela = eremu zabalagoa, 2 hezur baino gehiago.',
           ask: {
@@ -380,10 +394,12 @@ export const week8: WeekDef = {
           notes: ['w8/3.1.1/p8/s1', 'w8/3.1.1/p9/s1'],
           text: 'Hezur horien artean ehun konektibozko eskualdeak daude. Joskurak: bi hezur lau eta zapalen arteko ildo estuak (metopikoa, koronala, sagitala eta lanbdoidea).',
           focus: ['joskura-metopikoa', 'joskura-koronala', 'joskura-sagitala', 'joskura-lanbdoidea'],
+          tour: ['joskura-metopikoa', 'joskura-koronala', 'joskura-sagitala', 'joskura-lanbdoidea'],
           view: 'goitik',
         },
         {
           at: 0.56,
+          exam: 'Fontanelak: ildo zabalak, bi hezur baino gehiago elkartzen diren lekuetan. Aurrekoa (bregma) 18. hilabetean ixten da; atzekoa (lambda) 1.–2. hilabetean.',
           idea: 'Fontanela: bi hezur baino gehiago elkartzen diren eremua. Aurrekoa 18. hilabetean ixten da.',
           ask: {
             q: 'Zein fontanela ixten da lehenago?',
@@ -402,6 +418,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.68,
+          exam: 'Albotik: aurre-alboko (esfenoidala) eta atze-alboko (mastoidea) fontanelak, bilateralak.',
           idea: 'Albotik beste bi fontanela: esfenoidala (aurrean) eta mastoidea (atzean).',
           notes: ['w8/3.1.1/p6/s1', 'w8/3.1.1/p17/s1', 'w8/3.1.1/p18/s1', 'w8/3.1.1/p19/s1-s2', 'w8/3.1.1/p20/s1'],
           text: 'Albotik: loki hezurraren (tenporalaren) ezkata ere buru-gangakoa da. Bi fontanela bilateral: aurre-albokoa edo esfenoidala eta atze-albokoa edo tenporala (mastoidea).',
@@ -477,6 +494,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: 'Kondrokraneoa: neurokraneoaren oinaldea; hezurtzapen endokondrala (mesenkima → kartilagoa → hezurra).',
           recall: ['notokorda', 'somitak'],
           idea: 'Kondrokraneoa burezurraren zorua da: kartilagotik hezurrera (endokondrala).',
           ask: {
@@ -502,6 +520,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.2,
+          exam: 'Kartilago parakordalak (3 somita okzipital + 1. lepoko somita) → okzipitalaren oinaldea (endokondrala); ezkata mintzezkoa.',
           idea: 'Atzean kartilago parakordalek okzipitalaren oinaldea eratzen dute.',
           notes: ['w8/3.1.2/p8/s1-s5'],
           text: 'Kartilago parakordalak (eskuineko bat eta ezkerreko bat) 3 somita okzipitalen eta lehen lepoko somitaren esklerotometatik sortzen dira. Haietatik eta esklerotoma okzipitaletatik okzipitalaren oinaldea (lamina basilarra) eratzen da: endokondrala, buru-gangako ezkataren (mintzezkoa) jarraipena.',
@@ -509,6 +528,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.33,
+          exam: 'Hipofisi kartilagoak → esfenoidesaren gorputza (hipofisi hoditxoa).',
           idea: 'Hipofisi kartilagoetatik esfenoidesaren gorputza sortzen da.',
           ask: {
             q: 'Zergatik du hipofisi kartilagoek izen hori?',
@@ -526,6 +546,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.46,
+          exam: 'Trenkada kranialak → etmoides hezurra.',
           idea: 'Aurrean trenkada kranialetatik etmoidesa sortzen da.',
           notes: ['w8/3.1.2/p10/s1-s2'],
           text: 'Trenkadatxo edo trenkada kranialak hipofisi kartilagoen aurrean daude, erdiko plakaren aurrealdean. Hauetatik etmoides hezurra sortzen da.',
@@ -533,6 +554,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.56,
+          exam: 'Kapsula periotikoa → tenporalaren harkaitza (barneko belarria) eta atal mastoideoa.',
           idea: 'Alboetan kapsula periotikoak tenporalaren harkaitza eta mastoidea eratzen ditu.',
           notes: ['w8/3.1.2/p11/s1', 'w8/3.1.2/p12/s1'],
           text: 'Erdiko plakaren alboetan bi alboko kartilago plaka daude (atzetik aurrera). Atzealdean kapsula periotikoa: tenporalaren harkaitz zatia eta atal mastoideoa sortzen dira; harkaitz zatian barneko belarria egongo da.',
@@ -540,6 +562,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.66,
+          exam: 'Hego tenporala → esfenoidesaren hego handia; begizulo hegoa → hego txikia.',
           idea: 'Hego tenporalak esfenoidesaren hego handia sortzen du; begizulo hegoak hego txikia.',
           notes: ['w8/3.1.2/p13/s1-s2'],
           text: 'Aurrerago hego tenporala: esfenoidesaren hego handia eratzen da. Haren aurrean begizulo hegoa: esfenoidesaren hego txikiak sortzen dira.',
@@ -554,6 +577,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.87,
+          exam: 'Oinaldeko zuloetatik 12 bikote nerbio kraneal eta odol hodiak pasatzen dira.',
           idea: 'Plakak fusionatzean zuloak geratzen dira, nerbio kranialak eta odol hodiak igarotzeko.',
           notes: ['w8/3.1.2/p15/s1-s7'],
           text: 'Plaketatik sortutako hezur-atalak fusionatzean, oinaldean zuloak geratzen dira: haietatik 12 bikote nerbio kranial irteten (motoreak) edo sartzen (sentsorialak) dira, baita odol hodiak ere. Usaimen (I) eta ikusmen (II) nerbioak sentsorialak soilik dira; beste batzuk mistoak.',
@@ -624,6 +648,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: 'Errai kraneoa: aurpegiko hezurrak, arku faringeoetara iritsitako gandor neuraletik (ez mesodermotik).',
           recall: ['faringe-arkuak', 'gandor-neurala'],
           idea: 'Aurpegiko hezurrak arku faringeoetatik sortzen dira, gandor neuraleko zelulekin.',
           notes: ['w8/3.2/p2/s1-s5'],
@@ -633,6 +658,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.09,
+          exam: 'Lehen 2 arkuetatik. 1. arkua: prozesu maxilarra (dortsala) eta barail prozesua (bentrala).',
           idea: 'Lehen arkuak bi zati ditu: prozesu maxilarra (goian) eta barail prozesua (behean).',
           notes: ['w8/3.2/p3/s1', 'w8/3.2/p4/s1', 'w8/3.2/p5/s1', 'w8/3.2/p7/s1'],
           text: 'Errai kraneoko hezurrak lehen 2 arkuetatik sortzen dira. 1. arkuak 2 atal ditu: atal dortsala, prozesu maxilarra (begizuloaren behetik, aho primitiboaren goitik hedatzen da), eta atal bentrala, barail prozesua (aho primitiboaren behetik).',
@@ -668,6 +694,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.36,
+          exam: 'Reichert kartilagoa: barail prozesutik eta 2. arkuaren mesenkimatik.',
           idea: 'Bigarren arkuan (hioidea) Reichert kartilagoa sortzen da.',
           notes: ['w8/3.2/p9/s1'],
           text: 'Barail prozesutik eta bigarren arkuaren (hioide arkua) mesenkimatik, hau ere gandor neuraletakoa, Reichert kartilagoa sortzen da.',
@@ -676,14 +703,17 @@ export const week8: WeekDef = {
         },
         {
           at: 0.46,
+          exam: 'Barra pterigopalatinoaren inguruko mesenkima → goiko maxilarra, hezur malarrak eta tenporalaren ezkata (estiloide apofisia).',
           idea: 'Barra pterigopalatinotik ingudea; inguruko mesenkimatik goiko maxilarra eta hezur malarra.',
           notes: ['w8/3.2/p6/s1-s3'],
           text: 'Barra pterigopalatino karratutik bitarteko belarriko hezurtxo bat garatzen da: ingudea. Kartilago horren inguruko mesenkimatik goiko maxilarra, hezur malarrak (zigomatikoak) eta tenporalaren ezkata sortzen dira; azkenengotik estiloide apofisia irteten da.',
           focus: ['ingudea', 'goiko-maxilarra', 'hezur-malarra', 'tenporalaren-ezkata', 'apofisi-estiloidea'],
+          tour: ['goiko-maxilarra', 'hezur-malarra', 'tenporalaren-ezkata', 'apofisi-estiloidea', 'ingudea'],
           view: 'burezurra',
         },
         {
           at: 0.56,
+          exam: 'Meckel kartilagoaren inguruko mesenkima → beheko maxilarra (baraila).',
           idea: 'Meckel kartilagotik mailua; inguruko mesenkimatik beheko maxilarra.',
           ask: {
             q: 'Zer hezur sortzen da Meckel kartilagoaren inguruko mesenkimatik?',
@@ -710,6 +740,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.74,
+          exam: 'Belarriko hezurtxoak: mailua (Meckel), ingudea (barra pterigopalatino karratua), ointokia (Reichert).',
           idea: 'Hiru hezurtxoak, hiru kartilago: mailua–Meckel, ingudea–pterigopalatino, ointokia–Reichert.',
           key: 'Bitarteko belarriko hezurtxoak aurpegiko arkuetatik datoz.',
           ask: {
@@ -729,6 +760,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.82,
+          exam: 'Jaiotzean aurpegia txikia: sinu paranasalak eta apofisi albeolarrak ez daude garatuta.',
           idea: 'Jaiotzean aurpegia txikia da: sinuak eta apofisi albeolarrak gero garatzen dira.',
           notes: ['w8/3.2/p10/s1-s2', 'w8/3.2/p11/s1', 'w8/3.2/p12/s1-s2', 'w8/3.2/p13/s1-s2'],
           text: 'Jaiotzean aurpegia oso txikia da neurokraneoarekin alderatuta: sudur alboko sinuak (sinu paranasalak) eta maxilarretako apofisi albeolarrak (hortzak txertatzen diren lekua) ez daude garatuta. Gero garatzen direnean, aurpegiko hezurrak handitzen dira.',
@@ -737,6 +769,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.92,
+          exam: 'Errai kraneo osoa eta neurokraneoaren aurrealdea gandor neuraletik; atzealdea mesodermo paraxialetik.',
           idea: 'Errai kraneoa eta neurokraneo aurrealdea gandor neuraletik; atzealdea mesodermo paraxialetik.',
           key: 'Frontala = gandor neurala; parietala eta okzipitalaren ezkata = mesodermo paraxiala.',
           ask: {
@@ -835,6 +868,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: '4. astean gorputz-adarren hasikinak (goikoak lehenago): paretako orriko mesenkima, ektodermoz estalia.',
           recall: ['goiko-gorputz-adarraren-hasikina', 'beheko-gorputz-adarraren-hasikina'],
           idea: 'Laugarren astean gorputz-adarren hasikinak agertzen dira; goikoak lehenago.',
           ask: {
@@ -854,6 +888,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.12,
+          exam: 'Erpinean ektodermoa loditu: erpineko ektodermo ertza.',
           idea: 'Erpinean ektodermoa loditzen da: erpineko ektodermo ertza.',
           notes: ['w8/4/p4/s1'],
           text: 'Hasikinen erpinean ektodermoa loditu egiten da: erpineko ektodermo ertza.',
@@ -862,6 +897,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.22,
+          exam: '6. astea: esku eta oin plakak; lehen hertsadura (bi zati). Gero bigarrena: 3 atal.',
           idea: 'Esku eta oin plakak agertzen dira, eta lehen hertsadura.',
           notes: ['w8/4/p6/s1-s3', 'w8/4/p3/s4'],
           text: '6. astea, hasieran: urrutiko atalak lauagoak egiten dira eta esku eta oin plakak agertzen dira. Lehen hertsadura agertzen da: bi zati bereizten dira.',
@@ -878,6 +914,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.42,
+          exam: 'Plaketan 4 ildo erradiatu (apoptosia); tartean hatzetako izpiak → hatzak eta behatzak.',
           idea: 'Apoptosiak ildo erradiatuak egiten ditu: haien artean hatzen izpiak geratzen dira.',
           ask: {
             q: 'Zerk sortzen ditu hatzen arteko ildoak?',
@@ -896,6 +933,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.54,
+          exam: '6. asterako lehen kartilagoak (paretako orriko mesenkima): gorputz-adarretako hezurrak endokondralak.',
           recall: ['paretako-orria'],
           idea: 'Paretako orriko mesenkimatik kartilagoak sortzen dira: hezurrak endokondralak izango dira.',
           ask: {
@@ -915,6 +953,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.66,
+          exam: '8. asterako hezurtzapen zentroak kartilagoen erdiko ataletan.',
           idea: '8. asterako kartilagoen erdian hezurtzapen zentroak agertzen dira.',
           notes: ['w8/4/p12/s1-s2'],
           text: '8. asterako, enbrioi garaia bukatzean, gorputz-adarretako kartilagoen erdiko ataletan hezurtzapen zentroak agertzen dira.',
@@ -923,6 +962,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.76,
+          exam: '8. astea: goikoak 90° albora (kanpora) → tolestatzaileak aurrean, hedatzaileak atzean eta alboetan.',
           idea: 'Goiko gorputz-adarrak 90° biratzen dute kanpora: flexoreak aurrean.',
           completeAt: 0.87, // Full rotation and the posterior-elbow landmark, before the legs turn.
           notes: ['w8/4/p13/s1', 'w8/4/p14/s1-s2', 'w8/4/p15/s1'],
@@ -932,6 +972,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.88,
+          exam: 'Behekoak 90° erdialdera (barrura) → hedatzaileak aurrean, tolestatzaileak atzean.',
           idea: 'Behekoek 90° biratzen dute barrura: hedatzaileak aurrean, tolestatzaileak atzean.',
           key: 'Biraketak kontrakoak dira: goikoak kanpora, behekoak barrura.',
           ask: {
@@ -1008,6 +1049,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: '12. asterako hezur luze guztien erdiko atalean hezurtzapen zentro primarioak.',
           recall: ['hezurtzapen-zentroak'],
           idea: 'Hezur luzeetan zentro primarioa kartilagoaren erdian agertzen da.',
           notes: ['w8/4/p18/s1'],
@@ -1016,6 +1058,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.14,
+          exam: 'Hezur luzea: diafisia (gorputza, erdian) eta epifisiak (muturrak).',
           idea: 'Hezur luzeak bi zati: diafisia (erdia) eta epifisiak (muturrak).',
           notes: ['w8/4/p18/s2', 'w8/4/p19/s1', 'w8/4/p20/s1'],
           text: 'Goi eta beheko gorputz-adarretako hezur luzeetan bi atal bereizten dira: diafisia edo hezurraren gorputza (erdiko eremua) eta epifisiak (muturrak).',
@@ -1023,6 +1066,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.26,
+          exam: 'Diafisia zentrotik ertzetara hezurtzen da; epifisiak kartilaginotsuak jaiotza arte.',
           idea: 'Jaiotzean diafisia hezurtuta dago; epifisiak kartilaginotsuak.',
           ask: {
             q: 'Jaiotzean, zer dago hezurtuta hezur luzeetan?',
@@ -1040,6 +1084,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.42,
+          exam: 'Jaio ondoren epifisietan hezurtzapen zentro sekundarioak.',
           idea: 'Jaio ondoren epifisietan zentro sekundarioak agertzen dira.',
           notes: ['w8/4/p26/s1'],
           text: 'Jaio ondoren, epifisietan hezurtzapen zentro sekundarioak agertzen dira, eta pixkanaka epifisiak hezurtzen dira.',
@@ -1047,6 +1092,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.56,
+          exam: 'Hazkuntza plaka (metafisia): diafisia eta epifisia lotzen ditu, ez da hezurtzen → luzetarako hazkuntza. Hazkuntza maximoan desagertu.',
           idea: 'Diafisiaren eta epifisiaren artean hazkuntza plaka dago: ez da hezurtzen.',
           key: 'Hezurra luzatzen da hazkuntza plakan.',
           ask: {
@@ -1072,6 +1118,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.84,
+          exam: 'Normalean bi hazkuntza plaka (izter hezurra); bakarra falangeetan.',
           idea: 'Plaka kopurua hezurraren araberakoa da: femurra bi mutur, falangeak bat.',
           notes: ['w8/4/p28/s1-s2', 'w8/4/p29/s1-s2', 'w8/4/p30/s1'],
           text: 'Hezurtzapen kopurua hezurraren araberakoa da. Normalean bi epifisi edo hazkuntza plaka: hezurra bi muturretatik hazten da (femurra). Plaka bakarra: mutur bakarretik hazten da (falangeak).',
@@ -1119,6 +1166,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: 'Orno gorputza: aurreko atala (bentrala).',
           recall: ['esklerotoma', 'notokorda'],
           idea: 'Orno gorputza notokordaren inguruan eratzen da, aurrean.',
           notes: ['w8/5.1/p2/s1'],
@@ -1128,6 +1176,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.14,
+          exam: 'Orno arkua (arku neurala): gorputzaren atze-alboko zatian.',
           idea: 'Arku neuralak (pedikuluak + laminak) hodia atzetik ixten du.',
           ask: {
             q: 'Zerk ixten du orno zuloa atzetik?',
@@ -1146,6 +1195,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.26,
+          exam: 'Arkutik apofisiak: zeharrak alboetara.',
           idea: 'Alboetara apofisi zeharrak.',
           notes: ['w8/5.1/p3/s2', 'w8/5.1/p4/s1'],
           text: 'Arkutik hainbat apofisi irteten dira. Alboetara: apofisi zeharrak edo zeharkako apofisiak.',
@@ -1154,6 +1204,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.36,
+          exam: 'Arantza apofisia atzera (bizkarrean ikusten dena).',
           idea: 'Atzera arantza apofisia: bizkarrean sentitzen duguna.',
           notes: ['w8/5.1/p5/s1'],
           text: 'Atzealdera: arantza apofisia, bizkarrean ikusten ditugunak.',
@@ -1170,14 +1221,17 @@ export const week8: WeekDef = {
         },
         {
           at: 0.56,
+          exam: 'Gorputzaren eta arkuaren artean orno zuloa.',
           idea: 'Gorputzaren eta arkuaren artean orno zuloa geratzen da: ornomuina dago bertan.',
           notes: ['w8/5.3/p1/s1', 'w8/5.3/p2/s1'],
           text: 'Gorputzaren eta arku neuralaren artean zulo bat gelditzen da: orno zuloa edo zulo bertebrala. Bertan ornomuina kokatzen da.',
           focus: ['orno-zuloa'],
+          tour: ['orno-gorputza', 'orno-arkua', 'apofisi-zeharrak', 'arantza-apofisia', 'apofisi-artikularrak', 'orno-zuloa'],
           view: 'goitik',
         },
         {
           at: 0.66,
+          exam: 'Orno zulo guztiek hodi errakideoa: bertan ornomuina.',
           idea: 'Orno zuloek hodi errakideoa osatzen dute, ornomuinarentzat.',
           notes: ['w8/5.1/p7/s1', 'w8/5.3/p3/s1-s2'],
           text: 'Ornoak bata bestearen gainean tutu bat sortzen dute: orno guztien zuloek hodi errakideoa eratzen dute, eta ornomuina hemen kokatzen da. Ornomuinean goitik behera segmentu desberdinak daude: lepokoak, bizkarrekoak eta gerrikoak.',
@@ -1186,6 +1240,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.78,
+          exam: 'Segmentu bakoitzean nerbio espinal bikote bat: ornoarteko zuloetatik (diskoaren mailan) irteten dira.',
           idea: 'Nerbio espinalak ornoarteko zuloetatik irteten dira, diskoaren mailan.',
           ask: {
             q: 'Nondik irteten dira nerbio espinalak?',
@@ -1288,11 +1343,12 @@ export const week8: WeekDef = {
         },
         {
           at: 0.08,
+          exam: '4. astean esklerotoma erdialdera: hodi neurala eta notokorda inguratu → mesenkima zutabea.',
           recall: ['esklerotoma'],
           idea: 'Esklerotoma zelulak hodi neurala eta notokorda inguratzen dute: mesenkima zutabea.',
           notes: ['w8/5.2/p3/s1-s2', 'w8/5.2/p4/s1', 'w8/5.2.1/p2/s1'],
           text: 'Hodi neural eta notokordaren albo banatako somitetan esklerotoma zelulak bereizten dira. Zelula hauek erdialdera migratzen dute (4. astean) hodi neurala eta notokorda inguratzeko, maila guztietan: mesenkima zutabea edo esklerotoma zutabea sortzen da.',
-          focus: ['esklerotoma', 'mesenkima-zutabea'],
+          focus: ['esklerotoma', 'mesenkima-zutabea', 'hodi-neurala', 'notokorda'],
           view: 'zeharkakoa',
         },
         {
@@ -1313,6 +1369,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.35,
+          exam: 'Birsegmentazioa: esklerotoma segmentu bakoitza goiko eta beheko erdietan banatzen da.',
           idea: 'Birsegmentazioa: segmentu bakoitza goiko eta beheko erdietan banatzen da.',
           key: 'Birsegmentazioaren ondorioz ornoak intersegmentarioak dira.',
           ask: {
@@ -1332,6 +1389,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.44,
+          exam: 'Beheko erdia + azpiko segmentuaren goiko erdia → orno gorputza: ornoa bi segmentutatik (jatorri intersegmentarioa).',
           idea: 'Segmentu baten beheko erdia azpikoaren goiko erdiarekin fusionatzen da: orno gorputza.',
           ask: {
             q: 'Zein da orno bakoitzaren jatorria?',
@@ -1350,6 +1408,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.53,
+          exam: 'Erdien arteko zelulak → ornoarteko diskoa.',
           idea: 'Segmentu baten erdien artean geratzen direnetatik ornoarteko diskoa sortzen da.',
           notes: ['w8/5.2.1/p8/s1'],
           text: 'Esklerotoma segmentu baten goiko eta beheko erdien artean gelditzen diren zeluletatik ornoarteko diskoa eratzen da.',
@@ -1358,6 +1417,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.61,
+          exam: 'Notokorda orno gorputzetan desagertu; diskoan gune pulposoa. Inguruko mesenkima → eraztun fibrosoa.',
           recall: ['notokorda'],
           idea: 'Notokordak diskoan gune pulposoa sortzen du; inguruko mesenkimak eraztun fibrosoa.',
           ask: {
@@ -1377,6 +1437,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.7,
+          exam: 'Birsegmentazioaren ondorioz miotomak eta nerbio espinalak orno batetik bestera hedatzen dira (bizkarrezurra mugitzeko).',
           idea: 'Birsegmentazioaren ondorioz miotomak ornoak zeharkatzen dituzte, mugimendua ahalbidetzeko.',
           notes: ['w8/5.2.1/p12/s1', 'w8/5.2.1/p13/s1', 'w8/5.2.1/p14/s1', 'w8/5.2.1/p15/s1', 'w8/5.2.1/p19/s1', 'w8/5.2.1/p20/s1'],
           text: 'Birsegmentazioaren ondorioz miotomek kokapena aldatzen dute: orno gorputz batetik bestera hedatzen dira, muskuluek bizkarrezurra mugitu behar dutelako. Gauza bera gertatzen da ornomuinetik irteten diren nerbio espinalekin.',
@@ -1393,6 +1454,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.84,
+          exam: 'Zifosia (primarioa): jaio aurretik, atzerantz ganbila; bizkarrekoa eta sakroarena.',
           idea: 'Zifosia: jaio aurretik, bizkarrezurra atzerantz ganbila (bizkarreko eta sakroko makurdurak).',
           ask: {
             q: 'Zein makurdura da primarioa?',
@@ -1411,6 +1473,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.91,
+          exam: 'Lordosia (sekundarioa): jaio ondoren; lepokoa (burua altxatzean), gerrikoa (ibiltzean).',
           idea: 'Lordosia jaio ondoren: burua altxatzean lepokoa, ibiltzean gerrikoa.',
           notes: ['w8/5.2.1/p26/s1-s2', 'w8/5.2.1/p27/s1'],
           text: 'Lordosia (makurdura sekundarioa) jaio ondoren garatzen da: burua altxatzean lepokoa, eta ibiltzean gerrikoa. Makurdura horiei esker bizkarrezurrak tentsio edo indar gehiago jaso dezake.',
@@ -1476,6 +1539,7 @@ export const week8: WeekDef = {
       beats: [
         {
           at: 0,
+          exam: 'Saihetsa: atzean saihets hezurra, aurrean saihets kartilagoa.',
           recall: ['esklerotoma'],
           idea: 'Saihetsak bi atal: hezurra (atzean) eta kartilagoa (aurrean).',
           notes: ['w8/5.4/p2/s1', 'w8/5.4/p3/s1', 'w8/5.4/p4/s1'],
@@ -1485,6 +1549,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.14,
+          exam: 'Saihets hezurrak esklerotomatik: zelulek somitaren alboko muga gurutzatu eta paretako orrira iristen dira.',
           idea: 'Saihets hezurra esklerotomatik dator: zelulak somitaren alboko muga zeharkatzen dute.',
           ask: {
             q: 'Zein ehunetatik sortzen dira saihets hezurrak?',
@@ -1511,6 +1576,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.42,
+          exam: 'Saihets kartilagoa: alboko mesodermoaren paretako orrian sortzen da.',
           idea: 'Saihets kartilagoa ere esklerotomatik: muga gurutzatu eta paretako orrian dauden zelula horietatik.',
           key: 'Saihetsa osorik (hezurra + kartilagoa) esklerotomatik; paretako orritik esternoia.',
           ask: {
@@ -1530,6 +1596,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.56,
+          exam: 'Esternoia: paretako orritik; kartilagoak goitik behera agertu eta fusionatu.',
           idea: 'Esternoia: paretako kartilago barrak goitik behera sortu eta fusionatzen dira.',
           notes: ['w8/5.4/p10/s2-s3'],
           text: 'Toraxaren aurreko esternoia (bularrezurra), aldiz, alboko mesodermoaren paretako orritik sortzen da: paretatik kartilago desberdinak agertzen dira goitik behera (esternoi barrak), eta beraien artean fusionatzen dira.',
@@ -1538,6 +1605,7 @@ export const week8: WeekDef = {
         },
         {
           at: 0.76,
+          exam: 'Esternoiaren 3 atal: kirtena, gorputza eta xifoide apofisia.',
           idea: 'Esternoiak hiru atal: kirtena, gorputza eta xifoide apofisia.',
           ask: {
             q: 'Zenbat atal ditu esternoiak?',

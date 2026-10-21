@@ -392,3 +392,16 @@ Each batch ends with:
   - `w9/2.1.3/p5/s3` says the lower limb has its flexors in front and the upper limb its extensors in front. Topic 8's notes and the step's own key line say the opposite: upper limb flexors in front, lower limb extensors in front. The class line is worded so it does not take a side: after the rotation, flexors and extensors sit on opposite sides in the upper and lower limbs. Worth checking against the lecture.
   - The notes paragraph `w9/2/p6–p9` (myotome → myoblasts → fusion → striations by the third month) is shown by no step since the `fusioa` view was removed in c684b80. Its scene (`components/scenes/week9/Fusion.tsx`) is still in the code, unused. Bringing it back would give the milestone its own step.
 - **Checked:** headless Chrome at 1280 px (nine parts) and at 1024 px (the closing table). The full test suite passes (1323 tests).
+
+## 9. Batch 7 results (C + D for topic 8, the F tours), 2026-10-21
+
+- **Key lines (D).** Topic 8 now has a key line (`exam`) on 64 of its 85 steps, every stage included, each saying only what its step's cited sentences say. The core was regenerated from them (`content/klasea/importance/w8.ts`): 111 of 205 sentences, 54 %.
+  - The rib cartilage line follows the notes' prose (`w8/5.4/p10/s1`: from the parietal layer directly), not the step text, which says sclerotome.
+- **The class (C).** `content/klasea/w8.ts`: Kimu teaches topic 8 in 13 parts, just under 20 min.
+  - It runs from the three origins of bone and the two kinds of ossification, through the skull (vault, sutures and fontanelles, chondrocranium, the face and the ear ossicles), the limbs and long bones, to the vertebra, resegmentation, the curvatures, the ribs and the sternum.
+  - 126 lines say all 111 core sentences. There are 11 contrast questions (for example bregma vs lambda, the occipital squama vs base, Meckel vs Reichert, malleus vs incus, upper vs lower limb rotation, primary vs secondary centres, vertebral foramen vs intervertebral foramina, vertebral body vs disc, rib bone vs rib cartilage), 8 pool questions and an opening prediction.
+  - It ends with a fill-in table of the three face cartilages, the ossicle each gives and the bones of the mesenchyme around it.
+- **Lit with the text.** The column step that says the sclerotome surrounds the neural tube and notochord now lights both.
+- **Tours (F).** Explicit tours on the skull vault bones (front to back), the four sutures, the face bones of the skull view, and a walk through every vertebra part once the vertebra is complete. The limb bones step already offers a tour on its own (13 new names), so none was added.
+- **Voice.** The Spanish voice keeps the /ks/ in maxilar-, maximo- and xifoide.
+- **Checked:** the full test suite passes. The headless shots of this class were not taken (stopped at the owner's request); the class runs on the existing stages and views, which earlier batches checked.
