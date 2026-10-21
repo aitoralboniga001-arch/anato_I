@@ -60,11 +60,11 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
     const w = col.map((c) => smooth(c.show / 0.6));
     // Names print k times their drawn size, so they need k times the spacing. A column too crowded
     // for that eases back towards drawn-size spacing rather than climbing above its top.
-    const place = (k: number) => {
+    const place = (k: number, airMax = 1.4) => {
       const h = col.map((c) => (c.small ? HEIGHT_SMALL : HEIGHT) * k);
       // A crowded column breathes a little (up to 1.4 lines a name, as the room allows): a tight stack reads as a list.
       const n = w.reduce((a, b) => a + b, 0);
-      const air = n > 1.5 ? Math.max(1, Math.min(1.4, (bottom - top) / ((n - 1) * HEIGHT * k))) : 1;
+      const air = n > 1.5 ? Math.max(1, Math.min(airMax, (bottom - top) / ((n - 1) * HEIGHT * k))) : 1;
       const gap = (i: number) => ((h[i] + h[i - 1]) / 2) * air * Math.min(w[i], w[i - 1]);
       const y = col.map((c) => Math.max(top, Math.min(bottom, c.at.y)));
       // Down the column, each name at least a line under the one above; then, if that ran past the
@@ -98,16 +98,26 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
             for (let j = i - 1; j >= 0; j--) next[j] = Math.min(next[j], next[j + 1] - gap(j + 1));
             return next;
           };
-          // Up only when the names above still fit under the column's top.
+          // The nearer side, as long as the names it pushes still fit in the column: up only while those above
+          // stay under its top, down only while those below stay above its bottom (the camera keys).
           const up = move(band[0]);
-          const moved = y[i] < (band[0] + band[1]) / 2 && up[0] >= top ? up : move(band[1]);
+          const down = move(band[1]);
+          const upFits = up[0] >= top - 0.5;
+          const downFits = down[down.length - 1] <= bottom + 0.5;
+          const nearUp = y[i] < (band[0] + band[1]) / 2;
+          const moved = upFits && (nearUp || !downFits) ? up : downFits ? down : top - up[0] < down[down.length - 1] - bottom ? up : down;
           moved.forEach((v, j) => (y[j] = v));
         }
       return y;
     };
-    let y = place(o.k ?? 1);
-    for (let k = (o.k ?? 1) - 0.1; k > 1 && y.length && y[0] < top - 0.5; k -= 0.1) y = place(k);
-    if (y.length && y[0] < top - 0.5 && (o.k ?? 1) > 1) y = place(1);
+    const K = o.k ?? 1;
+    // Out of the column: above its top, or below its bottom (the camera keys), e.g. after stepping past the pill.
+    const spills = (v: number[]) => v.length > 0 && (v[0] < top - 0.5 || v[v.length - 1] > bottom + 0.5);
+    let y = place(K);
+    // Too full: first without the breathing room, then towards drawn-size spacing.
+    if (spills(y)) y = place(K, 1);
+    for (let k = K - 0.1; k > 1 && spills(y); k -= 0.1) y = place(k, 1);
+    if (spills(y) && K > 1) y = place(1, 1);
     // Sorting by height is not enough when points lie at different depths into the picture: two names
     // whose leaders still cross trade places (their slots stay where they are).
     const x = left ? (o.xl ?? 24) : (o.xr ?? 976);
@@ -139,7 +149,7 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
 }
 
 /** The names of a 3D view, laid out by `layoutCallouts`. `dim` fades them all (e.g. while the camera turns). */
-export function Callouts({ items, dim = 1, ...o }: Opts & { items: Callout[]; dim?: number }) {
+export function Callouts({ items, dim = 1, axes = true, ...o }: Opts & { items: Callout[]; dim?: number; axes?: boolean }) {
   const { nameOf } = useScene();
   const pills = useLabelScale();
   const live = items.filter((c) => c.show * dim > 0.02);
@@ -153,7 +163,12 @@ export function Callouts({ items, dim = 1, ...o }: Opts & { items: Callout[]; di
   const right = o.right ?? [240, 590];
   const keysEnd = pills.keysTop != null ? pills.keysTop - 20 * pills.k : undefined;
   const rightCol: [number, number] = keysEnd != null && keysEnd < right[1] ? [Math.min(right[0], keysEnd - 40), keysEnd] : right;
-  const pos = layoutCallouts(live, { width, k: pills.k, bandL: pills.left ? band : undefined, bandR: pills.right ? band : undefined, ...o, right: rightCol });
+  // The orientation key of a 3D view (Stage3D Axes: top left, at y 52, 54 tall, grown up to 1.5×) sits over
+  // the left column's top: on small frames (tablets) its first name would land on the plate.
+  const left = o.left ?? [140, 590];
+  const keyEnd = axes ? 52 + 54 * Math.min(1.5, pills.k) + 16 * pills.k : 0;
+  const leftCol: [number, number] = [Math.max(left[0], keyEnd), left[1]];
+  const pos = layoutCallouts(live, { width, k: pills.k, bandL: pills.left ? band : undefined, bandR: pills.right ? band : undefined, ...o, left: leftCol, right: rightCol });
   return (
     <>
       {live.map((c) => {

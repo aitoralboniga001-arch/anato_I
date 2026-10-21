@@ -485,7 +485,7 @@ export function CirculationSide({ t }: SceneProps) {
         ))}
       </g>
 
-      <Callouts items={callouts} left={[110, 590]} right={[240, 590]} />
+      <Callouts items={callouts} left={[110, 590]} right={[240, 590]} axes={false} />
 
       {table > 0.01 && (
         // A camera move out of this view first fades the table: it never flies past its cells.

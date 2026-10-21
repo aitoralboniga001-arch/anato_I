@@ -47,6 +47,7 @@ export const LESSON_W11: Lesson = {
     'Aurikulak: bi trenkada, bi zulo, eta jaiotzean itxiera',
     'Erretena, balbulak eta bentrikuluen trenkada',
     'Konoa eta enbor arteriosoa: trenkada kiribila eta arteria handiak',
+    'Jatorriak: bihotz hodiaren atal bakoitza bihotz osoan',
   ],
   chunks: [
     {
@@ -57,13 +58,13 @@ export const LESSON_W11: Lesson = {
         L(0, 'Kaixo! Gaur bihotzaren barrunbeak nola banatzen diren ikasiko dugu: trenkadak.', n('1/p3/s1'), [], { plain: 'Gaurko gaia: bihotzaren barruko hutsuneak hormekin nola banatzen diren. Horma horiei trenkada deitzen diegu.' }),
         L(0, 'Hasieran zuzena zen bihotz hodia tolestu egiten da, eta lakio bat sortzen da.', n('1/p3/s1'), [], { tone: 'recall', plain: 'Bihotza hasieran hodi zuzen bat da. Hodi hori bere buruaren gainean tolesten da, eta forma horri lakioa deitzen diogu.' }),
         // For a student starting from zero: the loop's parts, then what the septa are for.
-        L(0, 'Lakio horretan atal hauek bereizten dira: atal bulbarra, atal bentrikularra, atal aurikularra eta zain sinua.', n('1/p3/s2'), [
+        L(0, 'Lakioaren atalak: atal bulbarra, atal bentrikularra, atal aurikularra eta zain sinua.', n('1/p3/s2'), [
           'atal-bulbarra',
           'atal-bentrikularra',
           'atal-aurikularra',
           'zain-sinua',
         ], { plain: 'Hodi tolestuak zati batzuk ditu, bakoitza bere izenarekin: atal bulbarra, atal bentrikularra, atal aurikularra eta zain sinua.' }),
-        L(0, 'Barrunbe horietan trenkadak sortzen dira, eta horrela eratzen dira behin betiko aurikulak eta bentrikuluak.', n('1/p3/s4'), [], { tone: 'why', plain: 'Trenkada horma bat da: barrunbe bat bitan banatzen du. Horrela sortzen dira behin betiko aurikulak eta bentrikuluak.' }),
+        L(0, 'Barrunbeetan trenkadak sortzen dira: hala eratzen dira aurikulak eta bentrikuluak.', n('1/p3/s4'), [], { tone: 'why', plain: 'Trenkada horma bat da: barrunbe bat bitan banatzen du. Horrela sortzen dira behin betiko aurikulak eta bentrikuluak.' }),
         L(0.11, 'Trenkadatzea 27. eta 37. egunen artean gertatzen da: 4. eta 5. asteetan, gutxi gorabehera.', n('1/p4/s1'), [], { tone: 'emphasis', writes: 'b-noiz', plain: 'Hau guztia oso azkar gertatzen da: 27. egunetik 37. egunera, hau da, 4. eta 5. asteetan.' }),
       ],
       board: [
@@ -639,7 +640,7 @@ export const LESSON_W11: Lesson = {
         L(0.52, 'Atze ezkerrekoa ezkerreko bentrikuluaren infundibulua da: hortik aorta.', n('5.1/p5/s6'), ['ezkerreko-infundibulua'], { plain: 'Atze ezkerreko hutsunea ezkerreko infundibulua da: hortik aterako da aorta.' }),
         L(
           0.52,
-          'Biak ez daude plano berean: eskuinekoa askoz aurrerago eta eskuinerago dago. Beraz, birika arteria eta aorta ere ez.',
+          'Biak ez daude plano berean: eskuinekoa aurrerago eta eskuinerago dago. Beraz, bi arteriak ere ez.',
           n('5.1/p5/s7', '5.1/p5/s8'),
           ['eskuineko-infundibulua', 'ezkerreko-infundibulua'],
           { tone: 'emphasis', writes: 'b-infundibuluak', plain: 'Bi hutsune horiek ez daude maila berean: eskuinekoa askoz aurrerago eta eskuinerago dago. Horregatik, bi arteriak ere ez.' }),
@@ -842,10 +843,58 @@ export const LESSON_W11: Lesson = {
     },
 
     {
+      id: 'jatorriak',
+      title: 'Jatorriak',
+      stage: 'jatorriak',
+      lines: [
+        L(0, 'Bukatzeko, galdera bat: atal bakoitza nondik dator? Bihotz osoa hodi zuzenera itzultzen da, atal bakoitza bere kolorez.', n('1/p3/s1', '1/p3/s2'), [], {
+          tone: 'summary',
+          plain: 'Amaitzeko: zati bakoitza nondik dator? Bihotz osoa berriro hodi zuzena bihurtzen da, eta zati bakoitza bere kolorearekin ikusiko dugu.',
+        }),
+        L(0.15, 'Hodia tolesten da: bulboa aurrera, behera eta eskuinera; atal aurikularra eta zain sinua gora, atzera eta ezkerrera.', n('3/p11/s1', '3/p11/s3'), ['atal-bulbarra', 'atal-aurikularra', 'zain-sinua'], {
+          plain: 'Hodia tolestu egiten da: bulboa aurrera, behera eta eskuinera mugitzen da; atal aurikularra eta zain sinua, gora, atzera eta ezkerrera.',
+        }),
+        L(0.3, 'Kolore bakoitzak bere lekua gordetzen du. Eskuineko bentrikuluaren zati trabekulatua hurbileko ataletik dator, eta ezkerrekoarena atal bentrikularretik.', n('3/p8/s1'), ['hasierako-eskuineko-bentrikulua', 'hasierako-ezkerreko-bentrikulua', 'bulboaren-hurbileko-atala', 'atal-bentrikularra'], {
+          tone: 'recall',
+          writes: 'b-jatorriak',
+          plain: 'Eskuineko bentrikuluaren zati muskuluz betea hurbileko zatitik dator; ezkerrekoarena, atal bentrikularretik.',
+        }),
+        L(0.46, 'Arteria konotik, berriz, bi bentrikuluen atal lisoak sortzen dira: infundibuluak, arteriak irteteko bideak.', n('5.1/p5/s1', '5.2/p10/s2'), ['arteria-konoa', 'eskuineko-infundibulua', 'ezkerreko-infundibulua'], {
+          plain: 'Konotik bi bentrikuluen zati leunak sortzen dira, arteriak irteten diren tokiak: infundibuluak.',
+        }),
+        L(0.6, 'Eta enbor arteriosotik, trenkada kiribilaz banatuta, aorta eta birika enborra irteten dira: bi arteria handiak.', n('5.2/p10/s3'), ['enbor-arteriosoa', 'aorta', 'birika-arteria'], {
+          plain: 'Enbor arteriosoa horma bihurritu batek bitan banatzen du: aorta eta birika enborra.',
+        }),
+      ],
+      board: [
+        {
+          id: 'b-jatorriak',
+          kind: 'line',
+          text: 'Trabekulatuak: eskuinekoa hurbileko ataletik, ezkerrekoa atal bentrikularretik; lisoak konotik',
+          notes: n('3/p8/s1', '5.1/p5/s1'),
+          key: true,
+        },
+      ],
+      checks: [
+        {
+          kind: 'contrast',
+          id: 'klasea:11/jatorriak-bentrikuluak',
+          concept: 'hasierako-eskuineko-bentrikulua',
+          after: 2,
+          q: 'Bentrikuluen zati trabekulatuak: nondik dator bakoitza?',
+          options: ['Eskuinekoa hurbileko ataletik; ezkerrekoa atal bentrikularretik', 'Eskuinekoa atal bentrikularretik; ezkerrekoa hurbileko ataletik', 'Biak atal bentrikularretik', 'Biak arteria konotik'],
+          answer: 0,
+          why: ['Bai: hurbileko atala hasierako eskuineko bentrikulua da; atal bentrikularra, ezkerrekoa.', 'Ez: alderantziz da.', 'Ez: eskuinekoa bulboaren hurbileko ataletik dator.', 'Ez: konotik zati lisoak (infundibuluak) datoz.'],
+          notes: n('3/p8/s1'),
+        },
+      ],
+    },
+
+    {
       id: 'amaiera',
       title: 'Osatu taula',
-      stage: 'balbula-semilunarrak',
-      lines: [L(0.9, 'Azken zatia: taula osatu oroimenetik, eta gero zenbait galdera, gai osoko zatiak nahastuta.', n('5.2/p10/s1'), [], { tone: 'summary', plain: 'Orain zure txanda: bete taula buruz, eta gero galdera batzuk, gai osoari buruz.' })],
+      stage: 'jatorriak',
+      lines: [L(0.9, 'Azken zatia: osatu taula oroimenetik, eta gero galdera bat.', n('5.2/p10/s1'), [], { tone: 'summary', plain: 'Orain zure txanda: bete taula buruz, eta gero galdera bat.' })],
       checks: [
         {
           kind: 'fill',
@@ -854,7 +903,6 @@ export const LESSON_W11: Lesson = {
           blanks: ['tz-esk-aurikula', 'tz-ezk-aurikula', 'tz-bentrikuluak'],
         },
         { kind: 'pool', id: 'w11-q-kuxin-ab' },
-        { kind: 'pool', id: 'w11-q-aorta-infundibulua' },
       ],
     },
   ],

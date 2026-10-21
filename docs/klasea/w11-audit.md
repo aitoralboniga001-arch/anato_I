@@ -4,18 +4,31 @@ _Sortua: `npx tsx scripts/klasea/audit.ts 11`. F = funtsezkoa, g = garrantzitsua
 
 ## 0. Gaur
 
-Etapa: `trenkadatze-mekanismoak` · 3 lerro · ~15 s hitz eginda
+Etapa: `trenkadatze-mekanismoak` · 5 lerro · ~26 s hitz eginda
 
 1. «Kaixo! Gaur bihotzaren barrunbeak nola banatzen diren ikasiko dugu: trenkadak.»
   _t=0_
+  - Ez dut ulertu: «Gaurko gaia: bihotzaren barruko hutsuneak hormekin nola banatzen diren. Horma horiei trenkada deitzen diegu.»
   - **F** `w11/1/p3/s1` Hasieran zuzena zen bihotz hodia tolesten hasten da bihotz lakioa eratuz.
 
 2. «Hasieran zuzena zen bihotz hodia tolestu egiten da, eta lakio bat sortzen da.»
   _t=0 · recall_
+  - Ez dut ulertu: «Bihotza hasieran hodi zuzen bat da. Hodi hori bere buruaren gainean tolesten da, eta forma horri lakioa deitzen diogu.»
   - **F** `w11/1/p3/s1` Hasieran zuzena zen bihotz hodia tolesten hasten da bihotz lakioa eratuz.
 
-3. «Trenkadatzea 27. eta 37. egunen artean gertatzen da: 4. eta 5. asteetan, gutxi gorabehera.»
+3. «Lakioaren atalak: atal bulbarra, atal bentrikularra, atal aurikularra eta zain sinua.»
+  _t=0 · argi: atal-bulbarra, atal-bentrikularra, atal-aurikularra, zain-sinua_
+  - Ez dut ulertu: «Hodi tolestuak zati batzuk ditu, bakoitza bere izenarekin: atal bulbarra, atal bentrikularra, atal aurikularra eta zain sinua.»
+  - g `w11/1/p3/s2` Bihotz lakio horretan atal desberdinak bereiz daitezke: atal bulbarra, jarraia dena atal bentrikularrarekin, aldi berean atal bentrikularra jarraia da goi-atzekaldean kokatzen den atal aurikularrarekin eta azken hau atzetik komunikatzen da zain-sinuarekin.
+
+4. «Barrunbeetan trenkadak sortzen dira: hala eratzen dira aurikulak eta bentrikuluak.»
+  _t=0 · why_
+  - Ez dut ulertu: «Trenkada horma bat da: barrunbe bat bitan banatzen du. Horrela sortzen dira behin betiko aurikulak eta bentrikuluak.»
+  - g `w11/1/p3/s4` Barrunbe horietan trenkadak garatuko dira, behin betiko barrunbeak eratuz, hau da, behin betiko aurikula eta bentrikulen eraketa emango da; bentrikulu horietako atal lisoetatik birika enborra/arteria eta aorta sortuko direlarik.
+
+5. «Trenkadatzea 27. eta 37. egunen artean gertatzen da: 4. eta 5. asteetan, gutxi gorabehera.»
   _t=0.11 · emphasis · arbelean: b-noiz_
+  - Ez dut ulertu: «Hau guztia oso azkar gertatzen da: 27. egunetik 37. egunera, hau da, 4. eta 5. asteetan.»
   - **F** `w11/1/p4/s1` Bihotzaren trenkadatze prozesua garapenaren 27- 37. egunen artean ematen da; hau da, 4.-5.asteetan, gutxi gorabehera.
 
 - Arbela `b-noiz`: Trenkadatzea: 27–37. egunak (4.–5. asteak)
@@ -28,23 +41,28 @@ Etapa: `trenkadatze-mekanismoak` · 6 lerro · ~39 s hitz eginda
 
 1. «Lehen mekanismoa: barrunbearen paretan goraguneak agertzen dira, endokardio kuxinak.»
   _t=0.22 · argi: endokardio-kuxinak_
+  - Ez dut ulertu: «Lehen modua: barrunbearen hormatik koskor bigun batzuk ateratzen dira. Koskor horiei endokardio kuxinak deitzen zaie.»
   - **F** `w11/1/p5/s1` -1. Barrunbe pareta batean goraguneak agertzen dira eta hauek endokardio kuxinak (edo almoadilatxoak) dira.
 
 2. «Kuxinaren erdigunean zelula kanpoko matrizea dago, eta endokardioak estaltzen du.»
   _t=0.22 · emphasis · argi: kuxinaren-matrizea, endokardioa · arbelean: b-kuxina_
+  - Ez dut ulertu: «Kuxin bakoitzaren barruan betegarri bat dago, zelula kanpoko matrizea, eta endokardioak azal batek bezala estaltzen du.»
   - **F** `w11/1/p5/s2` Goragune hauen erdigunean zelula kanpoko matrizea dago eta hau estaliz endokardioa.
 
 3. «Aurkako paretan gauza bera gertatzen bada, bi kuxinak hazi eta hurbildu egiten dira, fusionatu arte: trenkada bat.»
   _t=0.35 · emphasis · argi: endokardio-kuxinak · arbelean: b-mek1_
+  - Ez dut ulertu: «Parez pare dauden bi hormetan kuxin bana sortzen bada, biak hazten dira, elkar ukitzen dute eta bat egiten dute: horma osoa.»
   - **F** `w11/1/p5/s3` Barrunbeen paretetako zelula endokardikoak ugaldu eta, endokardio masa sortzen da; barrunbearen aurkako/kontrako paretan prozesu bera gertatzen bada, bi endokardio kuxin horiek hazi eta elkarrengana hurbiltzen dira fusionatu arte, trenkada bat sortuz.
 
 4. «Beste batzuetan kuxin bakarra sortzen da, eta kontrako paretara iritsi arte luzatzen da.»
   _t=0.5 · argi: endokardio-kuxinak_
+  - Ez dut ulertu: «Beste batzuetan kuxin bakarra dago: hazten eta hazten doa, beste hormara iritsi arte.»
   - g `w11/1/p5/s4` Beste batzuetan, bi endokardio kuxin agertu beharrean, barrunbeetako pareta bakarrean sortzen da (endokardio almohadillatxoak).
   - **F** `w11/1/p5/s5` Honako hau luzatu egingo da kontrako paretara iritsi arte eta trenkada osatuko du.
 
 5. «Bigarren mekanismoa bentrikuluetan ikusten da: hasieran bi hasierako bentrikulu daude, eskuinean eta ezkerrean.»
   _t=0.63 · argi: hasierako-eskuineko-bentrikulua, hasierako-ezkerreko-bentrikulua_
+  - Ez dut ulertu: «Bigarren modua bentrikuluetan ikusiko dugu. Hasieran bi bentrikulu txiki daude, bata eskuinean eta bestea ezkerrean.»
   - **F** `w11/1/p6/s1` -2. Beste mekanismoan, bentrikuletan adibidez, hasieran bi hasierako bentrikulu ditugu (eskuin eta ezkerrean).
 
 6. «Barneko bi pareta muskularrak hazi eta fusionatzen dira: trenkada muskularra. Baina ez da osoa.»
@@ -69,30 +87,38 @@ Etapa: `septum-primum` · 7 lerro · ~41 s hitz eginda
 
 1. «Hasi gaitezen aurikulekin. Aurikulan bi alboko zabalkuntza daude, baina trenkada bat sortu behar da.»
   _t=0 · argi: hasierako-eskuineko-aurikula, hasierako-ezkerreko-aurikula_
+  - Ez dut ulertu: «Aurikula hasieran barrunbe bakarra da, bi aldeetara puztua. Bi aurikula izateko, horma bat behar da haien artean.»
   - **F** `w11/2.1/p3/s1` Aurikula komunari dagokionez (hasiera batean goi-atzealdean kokatzen den barrunbea) nahiz eta hasieratik bi alboko zabalkuntza aurkitu, hasierako ezkerreko eta eskuineko aurikulak sortzeko trenkada sortu behar da.
 
 2. «4. astearen amaieran, sabaian, lehen trenkada sortzen da: septum primuma, endokardio goragune bat.»
   _t=0.14 · emphasis · argi: septum-primum · arbelean: b-primum_
+  - Ez dut ulertu: «4. astearen bukaeran, aurikularen sabaitik lehen horma hasten da hazten: septum primuma.»
   - **F** `w11/2.1/p3/s4` 4. astearen amaieran, aurikula komunaren sabaian hasierako trenkada (endokardio goragune bat) bat eratzen da: Septum primum.
 
 3. «Erretenaren inguruan bi kuxin agertzen dira: bat goikoa, eta bestea behekoa.»
   _t=0.46 · argi: kuxin-aurikulubentrikularrak_
+  - Ez dut ulertu: «Erretenaren inguruan, hau da, aurikulatik bentrikulura doan pasabidean, bi kuxin sortzen dira: goikoa eta behekoa.»
   - g `w11/2.1/p4/s1` Horrez gain, erreten aurikulubentrikularraren inguruan, bi endokardio goragune agertzen dira: Endokardio almoadilatxoak edo endokardio kuxinak, bat goikoa eta bestea behekoa.
+  - g `w11/2.1/p3/s5` Honako gandor hau behera luzatu egingo da erreten aurikulubentrikularreruntz (aurikula komuna eta hasierako ezker bentrikulua edo atal bentrikularra komunikatzen ditu erreten honek) heldu arte.
 
 4. «Septum primumaren beheko aldean zulo bat geratzen da: ostium primuma. Hortik odola eskuinetik ezkerrera igarotzen da.»
   _t=0.58 · emphasis · argi: septum-primum, ostium-primuma · arbelean: b-ostium1_
+  - Ez dut ulertu: «Septum primuma ez da behera osorik iristen: azpian zulo bat uzten du, ostium primuma. Odola zulo horretatik pasatzen da.»
   - **F** `w11/2.1/p4/s2` Septum primum-aren beheko zonaldean, hots, trenkadaren eta endokardio almoadilatxo horien artean, zulo bat eratzen da: Ostium primum-a, hots, Septum primum-a ez da trenkada oso bat, bertatik eskuineko aurikulan dagoen odola ezkerreko aurikulara igaro daiteke.
 
 5. «Itxi aurretik, septum primumaren goiko aldean beste zulo bat irekitzen da: ostium secunduma.»
   _t=0.7 · emphasis · argi: septum-primum, ostium-secunduma_
+  - Ez dut ulertu: «Zulo hori itxi baino lehen, septum primumaren goialdean bigarren zulo bat zabaltzen da: ostium secunduma.»
   - g `w11/2.1/p4/s4` Hala ere, itxiera gertatu aurretik, Septum primum-aren goiko aldean, beste zulo bat agertzen da, Ostium secundum izenekoa.
 
 6. «Horrela, odolak eskuineko aurikulatik ezkerrekora igarotzen jarraitzen du.»
   _t=0.7 · why_
+  - Ez dut ulertu: «Horrela, bide bat itxi baino lehen beste bat irekitzen da, eta odola eskuineko aurikulatik ezkerrekora pasatzen da.»
   - g `w11/2.1/p4/s5` Zulo honen bitartez, eskuineko aurikulan dagoen odola ezkerreko aurikulara pasa daiteke.
 
 7. «Ostium primuma, berriz, erretenaren kuxinetatik irteten diren luzapenek ixten dute.»
   _t=0.84 · argi: ostium-primuma, kuxin-aurikulubentrikularrak · arbelean: b-ostium2_
+  - Ez dut ulertu: «Lehen zuloa, ostium primuma, kuxinek ixten dute: luzapen batzuk ateratzen zaizkie, eta zuloa estaltzen dute.»
   - **F** `w11/2.1/p4/s3` Garapenean, almoadilatxo hauetatik (erretenekoak) irteten diren luzapen batzuek itxiko dute zulo hori.
 
 - Arbela `b-primum`: Septum primuma: 4. aste amaieran, aurikula komunaren sabaian
@@ -111,26 +137,32 @@ Etapa: `zulo-obala` · 6 lerro · ~43 s hitz eginda
 
 1. «Bitartean, atzean zegoen sinua eskuineko aurikularen atzeko paretara inkorporatzen da.»
   _t=0_
+  - Ez dut ulertu: «Bitartean, atzean zegoen sinua eskuineko aurikulak bereganatzen du: haren atzeko hormaren parte bihurtzen da.»
   - **F** `w11/2.2/p3/s1` Hasiera batean aurikula komunaren atzekaldean kokatzen den zain sinua, eskubiko aurikularen atzeko paretara inkorporatzen joango da.
 
 2. «Orduan, septum primumaren eskuinean, sabaitik hasita, bigarren trenkada sortzen da: septum secunduma.»
   _t=0.12 · emphasis · argi: septum-primum, septum-secundum · arbelean: b-secundum_
+  - Ez dut ulertu: «Orduan bigarren horma bat hasten da sabaitik hazten, septum primumaren eskuinean, haren ondoan: septum secunduma.»
   - **F** `w11/2.2/p3/s2` Hori gertatzen denean, septum primum-aren eskuineko aldean eta aurikularen sabaiatik hasita, bigarren trenkada bat eratzen da: Septum Secundum.
 
 3. «Hau ere behera hedatzen da, baina ez da osoa: beheko aldean zulo bat du, zulo obala.»
   _t=0.27 · emphasis · argi: septum-secundum, zulo-obala_
+  - Ez dut ulertu: «Bigarren horma hau ere behera hazten da, baina ez da bukaeraraino iristen: behean zulo bat uzten du, zulo obala.»
   - **F** `w11/2.2/p3/s4` Hau ere beherantz hedatzen da, erreten aurikulubentrikularrerantz, baina honek ere ez ditu guztiz banatzen bi aurikulak, haren beheko aldean zulo bat ere baitu: zulo obala.
 
 4. «Beraz, bi trenkada daude: septum primuma, goian ostium secundumarekin, eta haren eskuinean septum secunduma, behean zulo obalarekin.»
   _t=0.55 · summary · argi: septum-primum, ostium-secunduma, septum-secundum, zulo-obala · arbelean: b-bi-trenkada_
+  - Ez dut ulertu: «Laburbilduz: bi horma daude, bakoitza zulo batekin. Septum primumak goian du zuloa, ostium secunduma; septum secundumak behean, zulo obala.»
   - **F** `w11/2.2/p4/s1` Beraz, bi aurikuluen artean bi trenkada daude: septum primum-a (goiko partean ostium secundum zuloarekin) eta bere eskuinaldean kokatzen den septum secundum-a (beheko aldean zulo obalarekin).
 
 5. «Jaio arte, odolak bide laprana egiten du: lehenik zulo obaletik, eta gero ostium secundumatik.»
   _t=0.67 · emphasis · argi: zulo-obala, ostium-secunduma · arbelean: b-laprana_
+  - Ez dut ulertu: «Jaio arte, odolak zeharka egiten du bidea: lehenik behean dagoen zulo obaletik pasatzen da, eta gero goian dagoen ostium secundumatik.»
   - **F** `w11/2.2/p5/s1` Hortaz, jaio arte, eskubiko aurikula honetan dagoen odolak, ezkerreko aurikulara igarotzeko (zuloetatik) ibilbide lapran (“oblicuo”) bat jarraitzen du; izan ere, hasieran, odola septum secumdun-aren beheko aldean dagoen zulo obaletik pasatu behar da eta gero, septum primum-aren goiko aldean dagoen ostium secundum zulo horretatik igaro behar da.
 
 6. «Liburu batzuen arabera, septum primumaren goiko ataltxoa desagertzen da, eta beheko atala zulo obalaren balbula bihurtzen da.»
   _t=0.82 · argi: septum-primum, zulo-obalaren-balbula_
+  - Ez dut ulertu: «Liburu batzuek diotenez, septum primumaren goiko zatia desagertu egiten da, eta beheko zatia zulo obalaren balbula bihurtzen da.»
   - **F** `w11/2.2/p6/s1` Bestalde, hainbat liburuetan deskribatzen den bezala (ez guztietan), septum primum-aren goiko ataltxoa desagertu egiten da eta, geratzen den beheko ataltxoa, hau da, zulo obalaren parean kokatzen den septum primum-aren beheko atala, zulo obalak duen balbula bilakatuko da (balbula efektua egiten du), baina, nahiz eta balbula bat izan odola septumetatik igarotzen jarraitzen du komunikatuta daudelako.
 
 - Arbela `b-secundum`: Septum secunduma: septum primumaren eskuinean, sabaitik
@@ -147,26 +179,32 @@ Etapa: `jaiotza` · 6 lerro · ~41 s hitz eginda
 
 1. «Jaiotzean birika zirkulazioa eratzen da: odola biriketara doa oxigenatzera, eta ezkerreko aurikulara itzultzen da.»
   _t=0 · argi: ezkerreko-aurikula-jaiotakoan_
+  - Ez dut ulertu: «Jaiotzean birikak lanean hasten dira: odola biriketara doa oxigenoa hartzera, eta ezkerreko aurikulara itzultzen da.»
   - **F** `w11/2.2/p7/s1` Hala ere, jaiotzaren momentuan, birika zirkulazioa eratzen da eta ondorioz, odola biriketara abiatzen da oxigenatzeko asmoarekin, ezkerreko aurikulara zehazki.
 
 2. «Horregatik, ezkerreko aurikulara gero eta odol gehiago iristen da, eta bertako presioa handitzen da.»
   _t=0.27 · why · argi: ezkerreko-aurikula-jaiotakoan_
+  - Ez dut ulertu: «Biriketatik odol asko itzultzen denez, ezkerreko aurikula betetzen da, eta bertako presioa igotzen da.»
   - **F** `w11/2.2/p7/s3` Prozesu hau dela eta, odol kopurua gero eta hadiagoa izango da eta ezkerreko aurikulako presioa handituz joango da.
 
 3. «Presio horrek zulo obalaren balbula septum secundumaren aurka bultzatzen du.»
   _t=0.41 · emphasis · argi: zulo-obalaren-balbula, septum-secundum_
+  - Ez dut ulertu: «Presio horrek zulo obalaren balbula septum secundumaren kontra estutzen du, eta zuloa estalita geratzen da.»
   - **F** `w11/2.2/p7/s4` Horregatik, septum primuma sekundarioaren aurka presionatzen da.
 
 4. «Bi trenkadak fusionatzen hasten dira, eta komunikazioa ixten da: jaio ondoren eta lehen urtean zehar.»
   _t=0.55 · emphasis · argi: zulo-obalaren-balbula, septum-secundum · arbelean: b-ixtea_
+  - Ez dut ulertu: «Denborarekin bi hormak itsatsi egiten dira eta bat egiten dute. Hori jaio ondoren hasten da, eta lehen urtean zehar jarraitzen du.»
   - **F** `w11/2.2/p7/s5` Ondorioz, zulo obalaren balbula zulo obalaren aurka bultzatuko du (septum primum septum sekundum-aren aurka) eta fusionatzen hasiko dira bi aurikulen arteko komunikazioa itxiz, prozesu luze baten bitartez, jaiosteko eta lehenengo urtean zehar jarraitzen duena.
 
 5. «Kontuz: kasuen ehuneko hogeian fusioa ez da osoa, eta arraildura txiki bat geratzen da eskuinetik ezkerrera.»
   _t=0.71 · caution · argi: zulo-obala_
+  - Ez dut ulertu: «Kontuz: bost haurretatik batean hormak ez dira guztiz itsasten, eta zirrikitu txiki bat irekita geratzen da eskuinetik ezkerrera.»
   - **F** `w11/2.2/p7/s6` 2 trenkada hauen fusioa askotan ez da osoa izaten (%20 kasuetan) jaio ostean eta ondorioz, eskuineko aurikulatik ezkerreko aurikulara pasua (arraildura txiki bat) mantentzen da.
 
 6. «Orduan, ezkerreko aurikulan odol oxigenatua eta zain odola nahasten dira: jaioberria urdinxka da, zianosia.»
   _t=0.85 · why · argi: ezkerreko-aurikula-jaiotakoan · arbelean: b-zianosia_
+  - Ez dut ulertu: «Orduan oxigeno askoko odola eta oxigeno gutxiko odola nahasten dira, eta jaioberriak kolore urdinxka hartzen du: zianosia.»
   - **F** `w11/2.2/p7/s7` Horregatik ezkerreko aurikulan nahasten da biriketatik datorren odol oxigenatua, eskuineko aurikulan dagoen zain odolarekin.
   - **F** `w11/2.2/p7/s8` Odol-nahasten honen ondorioz, jaioberrietako kolorea urdinxka izaten da (zianosia, jaioberria zianotikoa).
 
@@ -185,38 +223,46 @@ Etapa: `aurikulen-paretak` · 8 lerro · ~50 s hitz eginda
 
 1. «Orain paretak. Aurikula komuna atzean dagoen zain sinuarekin komunikatuta dago, zulo baten bidez.»
   _t=0 · argi: zain-sinua_
+  - Ez dut ulertu: «Orain aurikulen hormak. Hasieran aurikula atzeko zain sinuarekin lotuta dago, zulo baten bidez.»
   - **F** `w11/2.2/p8/s1` Aurikula komuna, bihotz lakioaren atal aurikularra, nondik sortzen diren eskuineko eta ezkerreko hasierako aurikulak, atzean dagoen zain sinuarekin mantentzen dira komunikatuak, zulo sinuaurikularraren bitartez komunikatuta jarraitzen du.
 
 2. «Zain sinua eskuineko aurikularen atzeko paretara inkorporatzen da: atzeko pareta lisoa sortzen da.»
   _t=0.12 · emphasis · argi: zain-sinua, atal-lisoa_
+  - Ez dut ulertu: «Zain sinua eskuineko aurikulak bereganatzen du: haren atzeko horma bihurtzen da, eta horma hori leuna da, lisoa.»
   - g `w11/2.2/p8/s2` Baina zain sinu hori poliki-poliki inkorporatzen hasten da hasierako eskuineko aurikularen atzeko paretara, eskuineko aurikularen tamaina handituz.
   - **F** `w11/2.2/p9/s1` -​ Atzeko pareta lisoa (jatorria zain sinuan) bertan eskuineko aurikulara iristen diren zainak irekitzen dira (goiko bena kaba (goitik), beheko bena kaba (abdomenean hasi, diafragma zeharkatuz) eta sinu koronarioa (zain sinuaren ezkerraldeko luzapen batetik sortua) (behetik).
 
 3. «Bertan irekitzen dira goiko eta beheko kaba zainak, eta sinu koronarioa.»
   _t=0.12 · argi: goiko-kaba-zaina, beheko-kaba-zaina, sinu-koronarioa · arbelean: tz-esk-aurikula_
+  - Ez dut ulertu: «Horma leun horretara iristen dira zain handiak: goiko eta beheko kaba zainak, eta sinu koronarioa.»
   - **F** `w11/2.2/p9/s1` -​ Atzeko pareta lisoa (jatorria zain sinuan) bertan eskuineko aurikulara iristen diren zainak irekitzen dira (goiko bena kaba (goitik), beheko bena kaba (abdomenean hasi, diafragma zeharkatuz) eta sinu koronarioa (zain sinuaren ezkerraldeko luzapen batetik sortua) (behetik).
 
 4. «Gainerako pareta atal aurikularretik dator: atal trabekulatua, belarritxoa, barrutik muskulu pektinioekin.»
   _t=0.25 · emphasis · argi: atal-trabekulatua, belarritxoa, muskulu-pektinioak_
+  - Ez dut ulertu: «Gainerako horma desberdina da: barrutik zimurra, muskulu pektinio txikiekin. Atal trabekulatua da, eta belarritxoa osatzen du.»
   - **F** `w11/2.2/p10/s1` -​ Bihotz lakioaren atal aurikularretik gainerako eskuin aurikularen pareta muskularra (aurreko pareta) garatuko da: eskuin aurikulako atal trabekulatua.
   - g `w11/2.2/p10/s2` Honek, eskuineko aurikularen belarritxoa osatzen dute.
   - g `w11/2.2/p10/s3` Oso pareta fina da eta barrutik muskulu txikitxo ezberdinak ditu (muskulu pektineoak/peptinatuak).
 
 5. «Bi atalen artean gandor terminala dago, eta haren goiko aldean nodulu sinusala.»
   _t=0.37 · argi: gandor-terminala, nodulu-sinusala · arbelean: b-gandor_
+  - Ez dut ulertu: «Bi horma moten muga gandor terminala da. Haren goiko aldean nodulu sinusala dago: bihotza uzkurtzeko seinaleak sortzen ditu.»
   - **F** `w11/2.2/p11/s1` Bi atalen artean gandor muskular bat dago, gandor terminala, goiko aldean egongo da kokatuta bihotz sistemako nodulu sinusala (bihotzak uzkurtzeko behar dituen nerbio kinadak sortzeko).
 
 6. «Ezkerreko aurikulan, atzeko paretatik ebaginazio bat irteten da: hasierako birika zaina.»
   _t=0.5 · argi: birika-zain-primitiboa_
+  - Ez dut ulertu: «Ezkerreko aurikulan, atzeko hormatik hodi bat ateratzen da: hasierako birika zaina.»
   - g `w11/2.2/p13/s1` Ezkerreko aurikulan ere atzeko pareta lisoa, eta atal trabekulatua(gainerako/aurreko pareta) daude.
   - **F** `w11/2.2/p13/s2` Baita ere tamainaz handitzen da, garapenean haren atzeko paretatik ebaginazio bat irteten delako: hasierako birika zaina / birika zain primitiboa.
 
 7. «Lau adar ematen ditu, eta birika hastapenetako zainekin kontaktatzen du.»
   _t=0.62 · argi: birika-zain-primitiboa, birika-hastapenak_
+  - Ez dut ulertu: «Hodi hori lau adarretan banatzen da, eta adar bakoitza birika hastapenetako zainekin lotzen da.»
   - g `w11/2.2/p13/s3` Adarkatu egiten da (4 adar sortu) eta kontaktatuko da birika hastapenetan dauden birika zainekin (2 ezkerrera ta 2 eskuinera).
 
 8. «Azkenean, lau birika zain inkorporatzen dira, bi birika bakoitzetik: ezkerreko aurikularen atal lisoa osatzen dute.»
   _t=0.76 · emphasis · argi: birika-zainak, ezkerreko-aurikularen-atal-lisoa · arbelean: tz-ezk-aurikula_
+  - Ez dut ulertu: «Azkenean lau birika zain sartzen dira ezkerreko aurikulan, bi birika bakoitzetik, eta haren horma leuna osatzen dute.»
   - **F** `w11/2.2/p13/s4` Oso prozesu arraro baten bidez gero azkenean biriketatik irteten den odol oxigenatua ezkerreko aurikulara iritsiko da, atzeko paretara (atal lisoa) 4 birika zain (birika bakoitzetik 2 birika zain irten) iritsiko dira, ezkerreko aurikularen atal lisoa osatuz.
 
 - Taula `tz-esk-aurikula`: Eskuineko aurikula → Zain sinutik → Atal aurikularretik
@@ -238,46 +284,56 @@ Etapa: `erreten-ab` · 13 lerro · ~93 s hitz eginda
 
 1. «Orain bentrikuluak. Erreten aurikulubentrikularra hodi bat da, plano frontalean, ez horizontalean.»
   _t=0 · argi: erreten-aurikulubentrikularra_
+  - Ez dut ulertu: «Orain bentrikuluak. Erretena aurikula eta bentrikulua lotzen dituen hodia da. Zutik dago, bekokiaren paraleloan, ez lurraren paraleloan.»
   - **F** `w11/3/p3/s1` Bihotz lakioaren atalak (jarraiak erreten aurikulobentrikularraren bitartez (atal bentrikularra eta aurikularra komunikatu), hodi/kondukto bat den egitura) (gogoratu plano frontalean kokatzen dela erretena, ez horizontalean):
 
 2. «Hasieran atal bentrikularra, hau da, hasierako ezkerreko bentrikulua, goi atzeko aurikula komunarekin komunikatzen du.»
   _t=0 · argi: hasierako-ezkerreko-bentrikulua, aurikula-komuna_
+  - Ez dut ulertu: «Hasieran pasabide horrek hasierako ezkerreko bentrikulua bakarrik lotzen du aurikula komunarekin.»
   - **F** `w11/3/p5/s1` -​ Atal bentrikularra komunikatuta mantentzen da aurikula komunarekin erreten aurikulobentrikularraren bitartez.
   - **F** `w11/3/p5/s2` Hasiera batean, erreten aurikulobentrikularrak bihotz lakioaren atal bentrikularra, nundik sortzen da ezkerreko bentrikuluaren atal trabekulatua, goi atzean geratzen den atal aurikularrarekin komunikatzen du.
 
 3. «Hiru prozesu daude. Lehena: bi atalen arteko ertza, hasieran zorrotza, gero eta zapalagoa egiten da.»
   _t=0.1 · argi: ertz-bulbobentrikularra_
+  - Ez dut ulertu: «Hiru gauza gertatzen dira. Lehenengoa: bi atalen arteko ertza, hasieran zorrotza, apurka leundu eta zapaldu egiten da.»
   - **F** `w11/3/p6/s1` Erretenaren trenkadatzeak hiru prozesu ditu: (1) bihotz lakioaren atal bulbarraren eta atal bentrikularraren artean dagoen ertza edo gandor bat (hasieran nahiko zorrotza da) gero eta txikiagoa (zapalagoa) egiten da.
 
 4. «Bigarrena: erretena eskuinerantz mugitzen da, eta bi hasierako bentrikuluak goian dagoen aurikularekin komunikatzen ditu.»
   _t=0.2 · emphasis · argi: erreten-aurikulubentrikularra, hasierako-eskuineko-bentrikulua, hasierako-ezkerreko-bentrikulua · arbelean: b-eskuinera_
+  - Ez dut ulertu: «Bigarrena: erretena eskuinerantz lerratzen da. Horrela, bi bentrikuluek dute aurikularako bidea, ez ezkerrekoak bakarrik.»
   - **F** `w11/3/p7/s1` (2) Erreten aurikulobentrikularra eskuinerantz mugitzen da poliki-poliki, mugimendu hori egin ondoren, erreten aurikulobentrikularrak ondoren ez du bakarrik atal bentrikularra atal aurikularrarekin komunikatuko, baizik eta, komunikatuko ditu 2 hasierako bentrikuluak (ezkerrekoa eta eskuinekoa ere) goian dagoen atal aurikularrarekin
 
 5. «Kontuz: erretena plano frontalean dago, ez horizontalean.»
   _t=0.31 · caution · argi: erreten-aurikulubentrikularra_
+  - Ez dut ulertu: «Gogoratu: erretena zutik dago, bekokiaren paraleloan; ez lurraren paraleloan.»
   - **F** `w11/3/p8/s2` Erretena, plano frontalean dago EZ horizontalean
 
 6. «Hirugarrena: erretenaren ertzetan lau kuxin sortzen dira: goikoa edo dortsala, behekoa eta bi alboetakoak.»
   _t=0.41 · argi: goiko-kuxina, beheko-kuxina, alboko-kuxinak_
+  - Ez dut ulertu: «Hirugarrena: erretenaren ertzetan lau kuxin hazten dira: bat goian, bat behean, eta bat alde bakoitzean.»
   - **F** `w11/3/p9/s1` (3) Erreten honen ertzeetan 4 goragune desberdinak sortzen dira, endokardio kuxinak edo almoadilatxoak (masak).
   - **F** `w11/3/p9/s2` Zehazki, goiko/dortsaleko zati bat, beheko beste bat eta alboetan 2 zati ditu (ezkerrekoa eta eskuinekoa).
 
 7. «Goikoa eta behekoa hurbildu eta fusionatzen dira, eta erretena bi zulotan banatzen da: eskuineko eta ezkerreko zulo aurikulubentrikularrak.»
   _t=0.52 · emphasis · argi: goiko-kuxina, beheko-kuxina, eskuineko-zulo-ab, ezkerreko-zulo-ab · arbelean: b-zuloak_
+  - Ez dut ulertu: «Goiko eta beheko kuxinak elkartu egiten dira, eta erretena bi zulotan geratzen da: eskuineko eta ezkerreko zulo aurikulubentrikularrak.»
   - **F** `w11/3/p9/s2` Zehazki, goiko/dortsaleko zati bat, beheko beste bat eta alboetan 2 zati ditu (ezkerrekoa eta eskuinekoa).
   - **F** `w11/3/p9/s3` Garapenean, goikoak eta behekoak, haien artean hurbilduko dira, trenkada sortuz, eta erreten hori, 2 zulo ezberdinetan bihurtuko dute.
   - **F** `w11/3/p10/s1` Hau agertu eta gero erretenean 2 zulo desberdin agertzen dira: ezkerreko eta eskuineko zulo aurikulobentrikularrak.
 
 8. «Zuloak plano frontalean daudelako, kuxin horiei goikoa eta behekoa deitzen zaie.»
   _t=0.63 · why · argi: zulo-aurikulubentrikularrak, goiko-kuxina, beheko-kuxina_
+  - Ez dut ulertu: «Zuloak zutik daudenez, kuxin bat goian geratzen da eta bestea behean. Horregatik goikoa eta behekoa deitzen zaie.»
   - **F** `w11/3/p10/s3` Gainera aurikulen eta bentrikuluen kokapena dela eta (plano lapranean daudelarik, ia-ia plano frontalean) 2 zulo hauek plano frontalean kokatuta daude (ez plano horizontalean), horregatik kuxinak goikoa eta behekoa dira.
 
 9. «Atal bulbarrean azpiatalak bereizten dira: enbor arteriosoa, arteria konoa eta hurbileko atala, eskuineko bentrikuluaren jatorria.»
   _t=0.74 · recall · argi: atal-bulbarra, enbor-arteriosoa, arteria-konoa, bulboaren-hurbileko-atala_
+  - Ez dut ulertu: «Atal bulbarra hiru zatitan bereizten da: enbor arteriosoa, arteria konoa eta hurbileko atala. Azken horretatik dator eskuineko bentrikulua.»
   - **F** `w11/3/p4/s1` -​ Atal aurikularra/bulbarra; hemendik bereizten dira azpiatal desberdinak: enbor arteriosoa, arteria konoa, hurbileko atala (hemendik sortzen da eskuineko bentrikularen atal trabekulatsua)....
 
 10. «Albotik ikusita: atal bulbarra aurrean dago, aurrera, behera eta eskuinera abiatuta; atal bentrikularra haren ezkerrean.»
   _t=0.74 · emphasis · argi: atal-bulbarra, atal-bentrikularra_
+  - Ez dut ulertu: «Albotik begiratuta, atal bulbarra aurrealdean dago, eta aurrera, behera eta eskuinera doa. Atal bentrikularra haren ezkerrean dago.»
   - **F** `w11/3/p11/s1` Bulboa, aurrera behera eta eskuinera abiatzen da.
   - g `w11/3/p12/s1` ALBOTIK IKUSITA:
   - **F** `w11/3/p13/s1` -​ Atal bulbarra: aurrera, behera eta eskuinera; aurrekaldean kokatzen da
@@ -285,15 +341,18 @@ Etapa: `erreten-ab` · 13 lerro · ~93 s hitz eginda
 
 11. «Atal aurikularra eta zain sinua, berriz, atal bulbarraren atzean daude, eta jarraiak dira.»
   _t=0.74 · argi: atal-aurikularra, zain-sinua, atal-bulbarra_
+  - Ez dut ulertu: «Atal aurikularra eta zain sinua atal bulbarraren atzean daude, bata bestearen jarraian.»
   - **F** `w11/3/p15/s1` -​ Atal aurikularra: gora, aurrera eta atzera abiatu, atal bulbarraren atzekaldean kokatu (zain sinuarekin batera) Ondorioz, atal aurikularra eta horren atzean gelditzen den zain sinua jarraiak dira.
 
 12. «Kontuz: apunteek haien norabidea bi eratara idazten dute: gora, atzera eta ezkerrera, edo gora, aurrera eta atzera.»
   _t=0.74 · caution_
+  - Ez dut ulertu: «Apunteetan bi bertsio daude norabide horretarako. Biak ezagutu, eta eszenan ikusten duzuna gogoratu.»
   - **F** `w11/3/p11/s3` Atal aurikularra eta bere jarraipena, zain sinua, gora atzera eta ezkerrera abiatzen dira; ondorioz, mugimendu hauen ondoren, bihotz hodia bihotz lakioan bihurtzen da.
   - **F** `w11/3/p15/s1` -​ Atal aurikularra: gora, aurrera eta atzera abiatu, atal bulbarraren atzekaldean kokatu (zain sinuarekin batera) Ondorioz, atal aurikularra eta horren atzean gelditzen den zain sinua jarraiak dira.
 
 13. «Bi hasierako bentrikuluen arteko komunikazioari bentrikulu arteko zulo primarioa deitzen zaio.»
   _t=0.88 · argi: bentrikulu-arteko-zulo-primarioa · arbelean: b-zulo-primarioa_
+  - Ez dut ulertu: «Bi bentrikulu txikien artean zulo bat dago, bata bestearekin lotzen dituena: bentrikulu arteko zulo primarioa.»
   - **F** `w11/3/p16/s1` -​ Bi hasierako bentrikulen arteko komunikazioa, bentrikulen arteko zulo primarioa deitzen da.
 
 - Arbela `b-eskuinera`: Erretena eskuinerantz: bi bentrikuluak aurikularekin komunikatuta
@@ -314,28 +373,34 @@ Etapa: `balbula-ab` · 6 lerro · ~44 s hitz eginda
 
 1. «Zulo horien inguruan mesenkima goraguneak sortzen dira, kuxinetatik: hortik balbula aurikulubentrikularrak.»
   _t=0 · argi: balbula-aurikulubentrikularrak_
+  - Ez dut ulertu: «Bi zulo horien ertzetan ehun koskorrak hazten dira, kuxinetatik. Koskor horietatik sortzen dira balbula aurikulubentrikularrak.»
   - **F** `w11/3/p17/s1` Gainera, aipatutako zuloen inguruan mesenkima goraguneak sortzen dira (endokardio almoadilatxoetatik sortuak).
   - g `w11/3/p17/s3` Bi zulo hauetan mesenkima goragune horietatik, balbula aurikulobentrikularrak sortzen dira:
 
 2. «Eskuineko zuloan balbula trikuspidea dago, hiru balbarekin; ezkerrekoan, bikuspidea edo mitrala, bi balbarekin.»
   _t=0.15 · emphasis · argi: balbula-trikuspidea, balbula-mitrala · arbelean: b-ab-balbulak_
+  - Ez dut ulertu: «Eskuineko zuloan hiru balbako balbula dago, balbula trikuspidea. Ezkerrekoan bi balbakoa, bikuspidea edo mitrala.»
   - **F** `w11/3/p18/s1` -​ Eskuineko zulo aurikulabentrikularrean kokatutako balbulari, balbula trikuspide deritze, hiru balba (mintz antzeko egiturak) edo erpin nagusi dituelako.
   - **F** `w11/3/p19/s1` -​ Ezkerreko zulo aurikulabentrikularrean kokatzen den balbula, balbula bikuspidea edo mitrala deritze, honek bi balba dituelako.
 
 3. «Kontuan hartu: zuloetatik pasatzen den odolak goraguneen azalera bentrikularra zulatzen du, eta balbak mehetzen dira.»
   _t=0.31 · caution · argi: balbula-trikuspidea, balbula-mitrala_
+  - Ez dut ulertu: «Odolak zuloetatik pasatzean koskorrak bentrikuluko aldetik husten ditu, eta balbak gero eta meheagoak egiten dira.»
   - **F** `w11/3/p20/s1` *kontuan hartu, zulo aurikulobentrikular horietatik, pasatzen den odolak, mesenkima goraguneetako azalera bentrikularra zulatzen hasten da, eta gero eta meheagoak egiten dira.
 
 4. «Balbak muskulu papilarrei lotuta geratzen dira, soka tendinosoen bidez: hasieran muskularrak, gero fibrotsuak.»
   _t=0.47 · emphasis · argi: muskulu-papilarrak, soka-tendinosoak · arbelean: b-sokak_
+  - Ez dut ulertu: «Balbak ez daude libre: soka tendinosoek muskulu papilarrei lotzen dizkiete. Soka horiek hasieran muskuluak dira, gero zuntz gogorrak.»
   - **F** `w11/3/p21/s1` Balbuletako balba horiek muskulu papilar izeneko bentrikuletako paretetako muskuluekin lotuta mantentzen dira soka tendinosoei esker (hauek hasieran muskularrak dira; hala ere garapenean fibrotsuak bilakatuko dira, egitura tendinosoak).
 
 5. «Muskulu papilarrak uzkurtzean, sokek balbak mugitzen dituzte: zuloa ireki edo itxi egiten da, odola pasa dadin.»
   _t=0.65 · why · argi: muskulu-papilarrak, soka-tendinosoak_
+  - Ez dut ulertu: «Muskulu papilarrak uzkurtzean sokei tira egiten diete, eta balbak mugitzen dira: zuloa zabaldu edo itxi egiten da.»
   - **F** `w11/3/p21/s3` Muskulu papilar horiek uzkurtzen direnean, soka tendinotsuetatik tiratzen dute paretako balbak mugitzeko, zulo aurikulobentrikularra zabalduz edo itxiz, odola pasa dadin.
 
 6. «Hiru soka mota daude: lehen, bigarren eta hirugarren mailakoak, balbetan non insertatzen diren arabera.»
   _t=0.81 · argi: soka-tendinosoak_
+  - Ez dut ulertu: «Sokak hiru motatakoak dira, balban non lotzen diren kontuan hartuta: lehen, bigarren eta hirugarren mailakoak.»
   - **F** `w11/3/p22/s1` Hiru motako sokak daude: lehen mailakoak, bigarren mailakoak eta hirugarren mailakoak.
   - **F** `w11/3/p22/s2` Hauen arteko desberdintasuna balbulatan nun insertatzen edo finkatzen diren araberakoa da.
 
@@ -353,32 +418,39 @@ Etapa: `bentrikulu-arteko-trenkada` · 7 lerro · ~46 s hitz eginda
 
 1. «Gogoratu: hasierako eskuineko bentrikulua bulbotik dator, eta ezkerrekoa atal bentrikularretik.»
   _t=0 · recall · argi: hasierako-eskuineko-bentrikulua, hasierako-ezkerreko-bentrikulua_
+  - Ez dut ulertu: «Gogoratu nondik datozen: eskuineko bentrikulua bulbotik, eta ezkerrekoa atal bentrikularretik.»
   - **F** `w11/4/p3/s1` *Gogoratu, bihotz lakioaren arteria enborraren hurbileko ataletik hasierako eskuineko bentrikulua (atal trabekulatua) agertzen dela, eta bihotz lakioaren atal bentrikularretik, hasierako ezkerreko bentrikulua garatzen dela.
 
 2. «Aurikulak bentrikuluen atzean daude; eta eskuineko bentrikulua ezkerrekoa baino pixka bat aurrerago.»
   _t=0.17 · emphasis · argi: hasierako-eskuineko-bentrikulua · arbelean: b-aurrerago_
+  - Ez dut ulertu: «Aurikulak bentrikuluen atzean daude. Eta bi bentrikuluetatik, eskuinekoa pixka bat aurrerago dago.»
   - g `w11/4/p4/s1` *Bentrikuluak eta aurikulak ez daude plano berean kokatuta (zuloak lapranak dira), aurikulak bentrikuluen atzeko partean kokatuta daude.
   - **F** `w11/4/p4/s2` Aldi berean, bi bentrikuluak ez daude plano berean kokatuta ezta ere, kasu honetan, eskuineko bentrikulua ezkerrekoa baino pixka bat aurrerago kokatzen da.*
 
 3. «4. astearen bukaeran, bentrikuluen paretetan muskulu trenkadak agertzen dira, eta muskulu papilarrak.»
   _t=0.34 · argi: muskulu-trenkadak, muskulu-papilarrak_
+  - Ez dut ulertu: «4. astearen bukaeran, bentrikuluen hormetan muskulu sareak agertzen dira, muskulu trenkadak, eta muskulu papilarrak ere bai.»
   - **F** `w11/4/p5/s2` 4. astearen bukaeran, bi bentrikuluetako pareta, batez ere, miokardio horretatik, garapenean, muskulu trenkada/trabekula pila agertzen dira, baita bentrikuluetako paretetan muskulu papilarrak ere, soka tendinosoak insertatzeko.
 
 4. «Bentrikuluak handitzen dira, eta haien barneko paretak hurbildu egiten dira: hortik trenkada muskularra.»
   _t=0.5 · why · argi: trenkada-muskularra_
+  - Ez dut ulertu: «Bentrikuluak puztu egiten dira, eta haien arteko hormak elkarrengana hurbiltzen dira: horrela sortzen da trenkada muskularra.»
   - **F** `w11/4/p6/s1` Beraz, miokardioaren garapenarekin, bi bentrikuluak geroz eta handiagoak egiten dira eta, ondorioz, bi bentrikuluen barruko paretak haien artean hurbildu egiten dira.
   - **F** `w11/4/p6/s2` Hori dela eta, bentrikulu arteko trenkadaren zati muskularra sortzen da, bentrikulu arteko trenkada muskularra.
 
 5. «Trenkada hau ez da osoa: haren goiko aldetik, odola eskuineko bentrikulutik ezkerrekora pasa daiteke.»
   _t=0.5 · emphasis · argi: trenkada-muskularra, bentrikulu-arteko-zulo-primarioa · arbelean: b-ez-osoa_
+  - Ez dut ulertu: «Horma muskular hau ez da goraino iristen: goian zulo bat geratzen da, eta odola eskuinetik ezkerrera pasa daiteke.»
   - **F** `w11/4/p6/s3` Trenkada muskular hau ez da osoa, ez ditu guztiz banatzen bentrikuluak, eta, hala, trenkada muskularraren goiko aldetik, eskuineko bentrikuluan dagoen odola ezkerrekora pasa daiteke.
 
 6. «Arteria konoa trenkadatzean, bigarren trenkada bat agertzen da, ez muskularra: mintzezko trenkada.»
   _t=0.72 · emphasis · argi: arteria-konoa, mintzezko-trenkada_
+  - Ez dut ulertu: «Arteria konoa banatzen denean, beste horma mehe bat agertzen da, ez muskularra: mintzezko trenkada.»
   - **F** `w11/4/p6/s4` Arteria konoaren trenkadatze prozesuarekin batera, hemen bertan bentrikulu arteko bigarren trenkada bat agertzen da, muskularra ez den trenkada bat: bentrikulu arteko mintzezko trenkada (arteria konoaren trenkadaren beheko aldea).
 
 7. «Beraz, trenkada horrek bi atal ditu: muskularra eta mintzezkoa; eta bentrikuluak guztiz banatuta geratzen dira.»
   _t=0.72 · summary · argi: trenkada-muskularra, mintzezko-trenkada · arbelean: b-bi-atal_
+  - Ez dut ulertu: «Beraz, bentrikuluen arteko horma bi zatiz egina dago, muskularra eta mintzezkoa. Biak elkartzean, bentrikuluak guztiz banatuta geratzen dira.»
   - **F** `w11/4/p7/s1` Beraz, bi bentrikuluen artean sortzen den trenkadak, bi atal ditu: muskularra eta mintzezkoa.
   - g `w11/4/p6/s5` Mintzezko trenkada, trenkada muskularrean finkatu ondoren, guztiz banatuta geratzen dira eskuineko eta ezkerreko bentrikuluak.
 
@@ -394,45 +466,54 @@ Etapa: `bentrikulu-arteko-trenkada` · 7 lerro · ~46 s hitz eginda
 
 ## 9. Arteria konoa
 
-Etapa: `arteria-konoa` · 9 lerro · ~63 s hitz eginda
+Etapa: `arteria-konoa` · 9 lerro · ~61 s hitz eginda
 
 1. «Orain irteerak. Atal bulbarrean kiribil formako trenkadak sortzen dira.»
   _t=0 · emphasis · argi: atal-bulbarra_
+  - Ez dut ulertu: «Orain bihotzetik irteten diren hodiak. Atal bulbarrean horma bihurrituak sortzen dira, kiribil formakoak.»
   - **F** `w11/5/p3/s1` kiribil formako trenkadak
 
 2. «Bentrikuluetan bi atal bereizten dira: atal trabekulatua, muskuluekin, eta atal lisoa, arteriak irteteko.»
   _t=0_
+  - Ez dut ulertu: «Bentrikulu bakoitzak bi zati ditu: bata zimurra, muskuluz betea, eta bestea leuna, arteriak hortik irteten direlako.»
   - g `w11/5.1/p3/s1` Bentrikuletan, guztiz desberdinak diren 2 atal desberdintzen dira: atal trabekulatua (muskuluekin) eta atal liso/infundibulua (arteria desberdinak atera)
 
 3. «Arteria konoaren alboko paretetan bi endokardio kuxin agertzen dira: atze eskuinean eta aurre ezkerrean.»
   _t=0.16 · emphasis · argi: arteria-konoa, konoaren-gandorrak · arbelean: b-kono-gandorrak_
+  - Ez dut ulertu: «Arteria konoaren hormetan bi kuxin hazten dira, bata atze eskuinean eta bestea aurre ezkerrean.»
   - **F** `w11/5.1/p5/s2` Arteria kono honen mailan, alboko paretetan, bi endokardio kuxin (endokardio masa almoadillatxoak) agertzen dira: atze-eskuineko aldean eta aurre-ezkerreko aldean.
 
 4. «Bi gandorrak hazi eta fusionatzen dira: arteria konoa trenkadatu egiten da, eta trenkada laprana da.»
   _t=0.34 · argi: arteria-konoa, konoaren-trenkada_
+  - Ez dut ulertu: «Bi kuxinak elkartu egiten dira, eta konoa bitan banatzen da. Horma hori zeharka dago, ez zuzen.»
   - **F** `w11/5.1/p5/s3` Bi gandor (endokardio almoadillatxo) horiek hazten dira eta haien artean hurbiltzen dira fusionatu arte, honen ondorioz arteria konoa trenkadatu egiten da.
   - **F** `w11/5.1/p5/s4` Trenkada hau laprana da, izan ere, gandor bat agertu da aurre-eskuinaldean eta bestea atze-ezkerrean.
 
 5. «Kontuz: apunteen hurrengo esaldiak gandorren aldeak alderantziz idazten ditu; gogoratu atze eskuinean eta aurre ezkerrean.»
   _t=0.34 · caution_
+  - Ez dut ulertu: «Apunteetan esaldi batek aldeak alderantziz jartzen ditu. Zuk gogoratu: bata atze eskuinean, bestea aurre ezkerrean.»
   - **F** `w11/5.1/p5/s2` Arteria kono honen mailan, alboko paretetan, bi endokardio kuxin (endokardio masa almoadillatxoak) agertzen dira: atze-eskuineko aldean eta aurre-ezkerreko aldean.
   - **F** `w11/5.1/p5/s4` Trenkada hau laprana da, izan ere, gandor bat agertu da aurre-eskuinaldean eta bestea atze-ezkerrean.
 
 6. «Trenkadaren aurre eskuinaldean eskuineko bentrikuluaren infundibulua geratzen da: hortik birika arteria irtengo da.»
   _t=0.52 · emphasis · argi: eskuineko-infundibulua_
+  - Ez dut ulertu: «Hormaren aurre eskuineko aldean geratzen den hutsunea eskuineko infundibulua da: hortik aterako da birika arteria.»
   - **F** `w11/5.1/p5/s5` Trenkada honen aurre-eskuinaldean geratzen den espazioa eskuineko bentrikuluaren infundibulua (atal lisoa) izango da, bertatik irtengo da birika arteria.
 
 7. «Atze ezkerrekoa ezkerreko bentrikuluaren infundibulua da: hortik aorta.»
   _t=0.52 · argi: ezkerreko-infundibulua_
+  - Ez dut ulertu: «Atze ezkerreko hutsunea ezkerreko infundibulua da: hortik aterako da aorta.»
   - g `w11/5.1/p5/s6` Arteria konoaren trenkadaren atze-ezkerreko aldeko espazioa, berriz, ezkerreko bentrikuluaren infundibulua (edo atal lisoa) izango da, bertatik irtengo da aorta arteria.
 
-8. «Biak ez daude plano berean: eskuinekoa askoz aurrerago eta eskuinerago dago. Beraz, birika arteria eta aorta ere ez.»
+8. «Biak ez daude plano berean: eskuinekoa aurrerago eta eskuinerago dago. Beraz, bi arteriak ere ez.»
   _t=0.52 · emphasis · argi: eskuineko-infundibulua, ezkerreko-infundibulua · arbelean: b-infundibuluak_
+  - Ez dut ulertu: «Bi hutsune horiek ez daude maila berean: eskuinekoa askoz aurrerago eta eskuinerago dago. Horregatik, bi arteriak ere ez.»
   - **F** `w11/5.1/p5/s7` Beraz, ikus dezakegu infundibuluak ez daudela plano berean, eskuinekoarena askoz aurrerago eta eskuinerago gelditzen delarik.
   - **F** `w11/5.1/p5/s8` Beraz, bi infundibulu horietatik irteten diren birika arteria eta aorta ez dira plano berean kokatuta egongo.
 
 9. «Konoaren trenkada behetik hazten da, eta trenkada muskularrarekin eta beheko kuxinarekin fusionatzen da: hori da mintzezko zatia.»
   _t=0.74 · argi: konoaren-trenkada, trenkada-muskularra, beheko-kuxina, mintzezko-trenkada_
+  - Ez dut ulertu: «Konoaren horma beherantz hazten da, eta trenkada muskularrarekin eta beheko kuxinarekin elkartzen da. Hor sortzen da mintzezko zatia.»
   - g `w11/5.1/p6/s1` Arteria konoaren trenkada beheko aldetik hazten da eta azkenean fusionatu egiten da, bentrikulu arteko trenkada muskularraren goiko aldearekin, eta baita erreten aurikobentrikularreko beheko/aurreko endokardio almoadillatxoarekin.
   - **F** `w11/5.1/p6/s2` Arteria konoaren beheko ataltxo hau izango da bi bentrikuloen artean kokatzen den bentrikuloen arteko trenkadaren mintzezko zatia (Bi atal ditu, muskularra eta bere gainean mintzezkoa).
 
@@ -451,6 +532,7 @@ Etapa: `enbor-arteriosoa` · 13 lerro · ~82 s hitz eginda
 
 1. «Orain enbor arteriosoa. Hemen ere trenkada bat sortzen da, eta enborra bitan banatzen du.»
   _t=0 · argi: enbor-arteriosoa_
+  - Ez dut ulertu: «Orain enbor arteriosoa, bihotzetik irteten den hodi nagusia. Bere barruan ere horma bat hazten da, eta bi hodi bihurtzen da.»
   - **F** `w11/5.2/p3/s1` Enbor arteriosoan eratzen den trenkada trenkada aortiko-pulmonarra da.
   - g `w11/5.2/p3/s2` Trenkada sortu ostean, bitan banatuta gelditzen da: arteria aorta (ezkerreko bentrikuluaren infundibulularekin komunikatuta mantendu) eta birika arteria (eskuineko bentrikuluaren infundibuluarekin komunikatuta).
 
@@ -462,48 +544,59 @@ Etapa: `enbor-arteriosoa` · 13 lerro · ~82 s hitz eginda
 
 3. «Kiribila denez, trenkadaren kokapena desberdina da enborraren maila bakoitzean.»
   _t=0.22 · why · argi: trenkada-aortikopulmonarra_
+  - Ez dut ulertu: «Horma bihurrituta dagoenez, enborra maila desberdinetan mozten badugu, horma beste toki batean ikusiko dugu bakoitzean.»
   - **F** `w11/5.2/p3/s8` Hau da, enbor arteriosoaren maila desberdinetan trenkada aortiko pulmonarraren kokapena ezberdina izango dela (kiribil formarengatik):
 
 4. «Hurbileko mailan, behean, trenkada zeharkakoa da: aurrean birika arteria dago, eta atzean aorta.»
   _t=0.22 · emphasis · argi: birika-arteria, aorta_
+  - Ez dut ulertu: «Behean, bihotzetik hurbil, horma zeharka dago: birika arteria aurrean geratzen da, eta aorta atzean.»
   - **F** `w11/5.2/p4/s1` -​ Enbor arteriosoan hurbileko atalean (Beheko aldean) hedatutako trenkada zeharkakoa izango da, trenkadaren aurrealdean kokatzen den erretena arteria pulmonarra izango da, eta atzealdekoa aorta izango da (aorta ezkerreko bentrikularen infundibulutik irteten da).
   - g `w11/5.2/p4/s2` Hau da, birika enborra aorta baino aurrerago kokatzen da.
 
 5. «Gorago, tarteko mailan, trenkada aurretik atzera doa: aorta eskuinean dago, eta birika arteria ezkerrean.»
   _t=0.35 · emphasis · argi: aorta, birika-arteria_
+  - Ez dut ulertu: «Tartean, horma aurretik atzera doa: aorta eskuinean eta birika arteria ezkerrean, elkarren ondoan.»
   - **F** `w11/5.2/p5/s1` -​ Enbor arteriosoan gorago, tarteko aldean, kiribil formako trenkada hor aurretik atzera abiatutakoa da eta beraz trenkadaren erretenak bata bestearen parean kokatuko dira, aorta eskuinaldean eta birika arteria ezkerraldean.
 
 6. «Urrutiko mailan, goian, berriro zeharkakoa da: orain aorta aurrean dago, eta birika arteria atzean.»
   _t=0.47 · emphasis · argi: aorta, birika-arteria_
+  - Ez dut ulertu: «Goian, bihotzetik urrun, horma berriro zeharka dago, baina orain alderantziz: aorta aurrean eta birika arteria atzean.»
   - **F** `w11/5.2/p6/s1` -​ Enbor arteriosoaren urrutiko atalean (goikaldean), berriro, trenkada aortiko pulmonar hori zeharkakoa da eta, kasu honetan, aorta aurreko aldean eta birika arteria (birika enborra) atzean kokatuko dira.
 
 7. «Hala, trenkadak bi erretenetan banatzen du enborra, eta bi hodien kokapena aldatzen da mailaz maila.»
   _t=0.47_
+  - Ez dut ulertu: «Horrela, enborra bi hodi bihurtzen da, eta maila bakoitzean bi hodien tokia aldatu egiten da.»
   - **F** `w11/5.2/p7/s2` Trenkada horrek bi erretenetan banatzen du enbor arteriosoa: birika enborra eta aorta, bi egitura horien kokapena desberdina delarik trenkadaren kokapenaren ondorioz.
 
 8. «Behean, trenkada kiribil hau konoaren trenkadarekin fusionatzen da: jarraiak dira.»
   _t=0.59 · emphasis · argi: trenkada-aortikopulmonarra, konoaren-trenkada · arbelean: b-jarraiak_
+  - Ez dut ulertu: «Beheko muturrean, horma bihurritu hau konoaren hormarekin lotzen da: bat bera dira, jarraian.»
   - **F** `w11/5.2/p8/s1` Enbor arteriosoan dagoen kiribil formako trenkada hori beheko aldetik fusionatzen da arteria konoaren trenkadarekin jarraiak dira, eta berdina gertatzen zaio arteria konoaren trenkadari.
 
 9. «Fusioaren ondorioz, bentrikuluen arteko mintzezko zatia sortzen da.»
   _t=0.59 · argi: mintzezko-trenkada_
+  - Ez dut ulertu: «Lotura horretatik sortzen da bentrikuluen arteko hormaren mintzezko zatia.»
   - **F** `w11/5.2/p8/s3` Fusioaren ondorioz, trenkada muskularrarekin fusionatuta dagoen bentrikulu arteko mintzezko zatia sortzen da.
 
 10. «Beraz, birika arteria aurretik irteten da, eskuineko bentrikulutik; aorta, berriz, atzetik, ezkerrekotik.»
   _t=0.59 · argi: birika-arteria_
+  - Ez dut ulertu: «Ondorioz, birika arteria eskuineko bentrikulutik ateratzen da, aurretik; eta aorta ezkerreko bentrikulutik, atzetik.»
   - g `w11/5.2/p8/s4` Eskuineko bentrikuluaren infundibulutik irteten den egitura birika arteria da, eta ezkerreko bentrikulutik ateratzen dena aorta da.
   - **F** `w11/5.2/p8/s5` Beraz aurretik irteten da birika arteria eta trenkada honen atzetik (ezkerreko bentrikuluaren infundibulutik) aorta.
 
 11. «Bihotza apur bat biratuta dago: eskuineko bentrikulua ezkerrekoa baino aurrerago.»
   _t=0.72_
+  - Ez dut ulertu: «Bihotza pixka bat biratuta dago, eta horregatik eskuineko bentrikulua ezkerrekoa baino aurrerago geratzen da.»
   - **F** `w11/5.2/p9/s1` Bihotza apur bat biratuta dago eta, beraz, eskuineko bentrikulua ezkerrekoa baino pixka bat aurrerago kokatzen da.
 
 12. «Laburbilduz: behean birika arteria aortaren aurrean, tartean parean, eta goian aorta aurrean.»
   _t=0.72 · summary · argi: birika-arteria, aorta · arbelean: b-mailak_
+  - Ez dut ulertu: «Gogoratzeko: behean birika arteria aurrean; tartean biak elkarren ondoan; goian aorta aurrean.»
   - **F** `w11/5.2/p9/s3` Hala, beheko aldean, enbor arteriosoaren hurbileko aldean birika arteria aortaren aurrealdean kokatuta dago, baina gero tarteko aldean aorta eta birika arteria parean daude, eta goialdean aorta aurretik kokatzen da (birika arteria eta aorta enbor arteriosotik sortzen dira, kiribil formako trenkada agertu ondoren).
 
 13. «Eta paretak: bentrikuluen atal trabekulatuak hasierako bentrikuluetatik datoz, eta atal lisoak konotik.»
   _t=0.86 · summary · arbelean: tz-bentrikuluak_
+  - Ez dut ulertu: «Eta bentrikuluen hormak: zati zimurrak hasierako bentrikuluetatik datoz, eta zati leunak konotik.»
   - g `w11/5.2/p10/s2` Atal trabekulatuak garatu egiten dira hasierako eskuineko eta ezkerreko bentrikulotik, eta bi bentrikulo horietako atal lisoak arteria kono espaziotik garatzen dira.
 
 - Arbela `b-kiribila`: Enborraren bi gandor: trenkada aortiko-pulmonar kiribila
@@ -526,26 +619,32 @@ Etapa: `balbula-semilunarrak` · 6 lerro · ~39 s hitz eginda
 
 1. «Bi arteria horien hasieran balbula semilunarrak agertzen dira, kuxinetatik: aorta balbula eta birika balbula.»
   _t=0 · argi: balbula-semilunarrak, aorta-balbula, birika-balbula_
+  - Ez dut ulertu: «Bi arteria horiek hasten diren tokian balbula berriak sortzen dira, kuxinetatik: aorta balbula eta birika balbula.»
   - **F** `w11/5.2/p12/s1` Birika arteriaren eta aortaren hasierako zatietan balbula semilunarrak (balbula semilunarrak endokardio almoadillatxoetatik sortzen dira) agertzen dira, aorta balbula (aortan) eta balbula pulmonarra edo birika balbula (birika arterian) dira.
 
 2. «Hiru gandor agertzen dira, eta haien goikaldean goraguneak, tuberkuluak. Gero goiko aldetik zulatzen dira.»
   _t=0.1 · argi: balbula-semilunarrak_
+  - Ez dut ulertu: «Lehenik hiru gandor agertzen dira, koskor txikiekin, tuberkuluak. Gero koskor horiek goitik zulatzen dira.»
   - g `w11/5.2/p12/s6` Balbulen eraketa: bi arteria horietako hasierako zatietan hiru gandor agertu, eta beren goikoaldean goragune (tuberkulo) batzuk agertzen dira eta gora gune horiek goiko aldetik zulatzen dira (2 zulo horietatik, goranzko aortak ematen dituen lehenengo adarrak sortu, arteria koronarioak, bihotza irrigatuko dutenak), bi egitura hauen hasierako ataletan balbula semilunarrak sortu, eta balbula bakoitzak haurrak diren 3 balbak edukiko ditu: bi albokoak eta atzekoa (aortan) edo aurrekoa (arteria pulmonarrean).
 
 3. «Horregatik balbak bereziak dira: enara kabiko forma dute, eta ahurrak dira, goitik zulatuta.»
   _t=0.25 · emphasis · argi: aorta-balbula, birika-balbula · arbelean: b-enara_
+  - Ez dut ulertu: «Horregatik balba hauek poltsa txiki baten itxura dute, enara kabia bezala, eta goitik irekita daude.»
   - **F** `w11/5.2/p12/s3` Balba horiek bereziak dira enara kabiko forma dutelako eta ahurrak (concavoak) direlako, hau da, zulatuta daude goikaldetik.
 
 4. «Trikuspideak dira: aortan bi alboko balba eta atzeko bat; birika balbulan bi alboko eta aurreko bat.»
   _t=0.5 · emphasis · argi: aorta-balbula, birika-balbula · arbelean: b-trikuspideak_
+  - Ez dut ulertu: «Balbula bakoitzak hiru balba ditu. Aortan bi alboetan eta bat atzean; birika balbulan bi alboetan eta bat aurrean.»
   - **F** `w11/5.2/p12/s2` Balbula semilunarrak trikuspideak dira, hau da, horietako bakoitzak hiru balba dituzte: aortikan bi alboko eta aorta atzeko bat, eta pulmonarrean bi alboko eta aurreko bat.
 
 5. «Aorta balbularen eskuineko eta ezkerreko balben sinuetatik arteria koronarioak irteten dira: aortaren lehen adarrak.»
   _t=0.73 · emphasis · argi: aorta-balbula, arteria-koronarioak · arbelean: b-koronarioak_
+  - Ez dut ulertu: «Aorta balbulako bi balbek, eskuinekoak eta ezkerrekoak, poltsatxo bana dute; hortik ateratzen dira arteria koronarioak, aortaren lehen adarrak.»
   - **F** `w11/5.2/p12/s4` Aorta balbularen eskuineko eta ezkerreko balbaren sinuetatik (balbula semilunarrak) irteten dira arteria koronarioak (eskuinekoa eta ezkerrekoa), hauek aortak ematen dituen lehenengo adarrak izanik.
 
 6. «Arteria koronarioek bihotzaren miokardioa irrigatzen dute.»
   _t=0.73 · argi: arteria-koronarioak_
+  - Ez dut ulertu: «Arteria koronarioek bihotzaren muskuluari, miokardioari, odola ematen diote.»
   - g `w11/5.2/p12/s5` Arteria koronarioek (goranzko aortan, aorta balbularen mailan, balbula honetako alboko balbetako paretatik irteten (eta sortzen) dira) bihotzaren miokardioa irrigatzen dute.
 
 - Arbela `b-enara`: Balba semilunarrak: enara kabiko forma, ahurrak (goitik zulatuta)
@@ -557,20 +656,57 @@ Etapa: `balbula-semilunarrak` · 6 lerro · ~39 s hitz eginda
 - Galdera (contrast): Aorta balbula eta birika balbula: zein da bakoitzaren alboko ez den balba?
 - Galdera (pool): w11-q-koronarioak
 
-## 12. Osatu taula
+## 12. Jatorriak
 
-Etapa: `balbula-semilunarrak` · 1 lerro · ~6 s hitz eginda
+Etapa: `jatorriak` · 5 lerro · ~40 s hitz eginda
 
-1. «Azken zatia: taula osatu oroimenetik, eta gero zenbait galdera, gai osoko zatiak nahastuta.»
+1. «Bukatzeko, galdera bat: atal bakoitza nondik dator? Bihotz osoa hodi zuzenera itzultzen da, atal bakoitza bere kolorez.»
+  _t=0 · summary_
+  - Ez dut ulertu: «Amaitzeko: zati bakoitza nondik dator? Bihotz osoa berriro hodi zuzena bihurtzen da, eta zati bakoitza bere kolorearekin ikusiko dugu.»
+  - **F** `w11/1/p3/s1` Hasieran zuzena zen bihotz hodia tolesten hasten da bihotz lakioa eratuz.
+  - g `w11/1/p3/s2` Bihotz lakio horretan atal desberdinak bereiz daitezke: atal bulbarra, jarraia dena atal bentrikularrarekin, aldi berean atal bentrikularra jarraia da goi-atzekaldean kokatzen den atal aurikularrarekin eta azken hau atzetik komunikatzen da zain-sinuarekin.
+
+2. «Hodia tolesten da: bulboa aurrera, behera eta eskuinera; atal aurikularra eta zain sinua gora, atzera eta ezkerrera.»
+  _t=0.15 · argi: atal-bulbarra, atal-aurikularra, zain-sinua_
+  - Ez dut ulertu: «Hodia tolestu egiten da: bulboa aurrera, behera eta eskuinera mugitzen da; atal aurikularra eta zain sinua, gora, atzera eta ezkerrera.»
+  - **F** `w11/3/p11/s1` Bulboa, aurrera behera eta eskuinera abiatzen da.
+  - **F** `w11/3/p11/s3` Atal aurikularra eta bere jarraipena, zain sinua, gora atzera eta ezkerrera abiatzen dira; ondorioz, mugimendu hauen ondoren, bihotz hodia bihotz lakioan bihurtzen da.
+
+3. «Kolore bakoitzak bere lekua gordetzen du. Eskuineko bentrikuluaren zati trabekulatua hurbileko ataletik dator, eta ezkerrekoarena atal bentrikularretik.»
+  _t=0.3 · recall · argi: hasierako-eskuineko-bentrikulua, hasierako-ezkerreko-bentrikulua, bulboaren-hurbileko-atala, atal-bentrikularra · arbelean: b-jatorriak_
+  - Ez dut ulertu: «Eskuineko bentrikuluaren zati muskuluz betea hurbileko zatitik dator; ezkerrekoarena, atal bentrikularretik.»
+  - **F** `w11/3/p8/s1` *gogoratu: hasierako eskuineko bentrikulua (atal trabekulatua) arteria enborraren hurbileko ataletik sortzen dela, eta hasierako ezkerreko bentrikulua, bihotz lakioaren atal bentrikularretik.
+
+4. «Arteria konotik, berriz, bi bentrikuluen atal lisoak sortzen dira: infundibuluak, arteriak irteteko bideak.»
+  _t=0.46 · argi: arteria-konoa, eskuineko-infundibulua, ezkerreko-infundibulua_
+  - Ez dut ulertu: «Konotik bi bentrikuluen zati leunak sortzen dira, arteriak irteten diren tokiak: infundibuluak.»
+  - **F** `w11/5.1/p5/s1` Arteria kono horretatik bi bentrikuluetako atal lisoa edo infundibuluak sortzen dira.
+  - g `w11/5.2/p10/s2` Atal trabekulatuak garatu egiten dira hasierako eskuineko eta ezkerreko bentrikulotik, eta bi bentrikulo horietako atal lisoak arteria kono espaziotik garatzen dira.
+
+5. «Eta enbor arteriosotik, trenkada kiribilaz banatuta, aorta eta birika enborra irteten dira: bi arteria handiak.»
+  _t=0.6 · argi: enbor-arteriosoa, aorta, birika-arteria_
+  - Ez dut ulertu: «Enbor arteriosoa horma bihurritu batek bitan banatzen du: aorta eta birika enborra.»
+  - **F** `w11/5.2/p10/s3` Gero infundibulo horietatik, atal diferenteetatik irteten diren aorta eta birika enborra bihotz lakioaren urrutiko ataletik (urrutiko atala arteria enborra da), bertan agertzen da kiribil formako trenkada aortiko-pulmonarra.
+
+- Arbela `b-jatorriak`: Trabekulatuak: eskuinekoa hurbileko ataletik, ezkerrekoa atal bentrikularretik; lisoak konotik
+  - **F** `w11/3/p8/s1` *gogoratu: hasierako eskuineko bentrikulua (atal trabekulatua) arteria enborraren hurbileko ataletik sortzen dela, eta hasierako ezkerreko bentrikulua, bihotz lakioaren atal bentrikularretik.
+  - **F** `w11/5.1/p5/s1` Arteria kono horretatik bi bentrikuluetako atal lisoa edo infundibuluak sortzen dira.
+- Galdera (contrast): Bentrikuluen zati trabekulatuak: nondik dator bakoitza?
+
+## 13. Osatu taula
+
+Etapa: `jatorriak` · 1 lerro · ~4 s hitz eginda
+
+1. «Azken zatia: osatu taula oroimenetik, eta gero galdera bat.»
   _t=0.9 · summary_
+  - Ez dut ulertu: «Orain zure txanda: bete taula buruz, eta gero galdera bat.»
   - g `w11/5.2/p10/s1` Gaia laburbilduz, aurikuletan bi atal desberdin ditugu, atal liso eta atal trabekulatua, gauza bera gertatzen da bentrikuloetan.
 
 - Galdera (fill): klasea:11/taula
 - Galdera (pool): w11-q-kuxin-ab
-- Galdera (pool): w11-q-aorta-infundibulua
 
 ## Estaldura
 
-- Funtsezko esaldiak: 90 / 161; klaseak esaten ditu: 90.
-- Klaseak aipatzen dituen esaldi guztiak: 113.
-- Hitz egiteko denbora: ~10 min (galderak aparte).
+- Funtsezko esaldiak: 93 / 161; klaseak esaten ditu: 93.
+- Klaseak aipatzen dituen esaldi guztiak: 119.
+- Hitz egiteko denbora: ~11 min (galderak aparte).

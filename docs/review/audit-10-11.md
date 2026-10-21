@@ -113,3 +113,32 @@
   - full suite;
   - WebGL shots with the guide open at 1536 × 960, 1024 × 768 and 768 × 1024;
   - every step of 10–11 shot at 1536 × 960, 143 shots, no errors.
+
+## 5. Batch 2 results (2026-10-21)
+
+- **The origins showcase.** Topic 11 has a closing stage, *Bihotz hodiatik bihotzera: jatorriak* (`components/scenes/week11/Origins3D.tsx`), in one 3D view and seven steps:
+  1. The finished heart of the stage before rewinds into the straight tube of topic 10. The tube is drawn where the heart is and at its size, each segment in its colour, and the names are introduced one by one.
+  2. The tube loops: the bulbus goes forward, down and to the right; the atrial part and the sinus go up, back and to the left.
+  3. The loop dissolves, in place, into the septated heart, each part in its segment's colour. The loop is fitted onto the heart (a 28° turn, ×2, least squares over five segment ↔ part pairs), so each segment lies on what it becomes. The trabeculated ventricles come first: the right one from the proximal bulbus (green), the left one from the ventricular part (blue-green).
+  4. The conus (lime) gives the two infundibula.
+  5. The truncus (ivory) gives the aorta and the pulmonary trunk.
+  6. The camera turns to the back. The right atrium's smooth wall comes from the sinus (violet, the cavae open into it); the left's comes from the pulmonary veins (red, four veins). The trabeculated rest comes from the atrial part (orange).
+  7. Summary table, segment → derivative, in the same colours. Its cells are names, so each opens its card.
+- **Learning layer:** a FUNTSEZKOA key line on six of the seven steps, recall links, one check question, a guide ("Irudia ulertu"), and a class chunk (*Jatorriak*, with its own contrast check). The class's closing table now runs on this stage, and the class stays under 20 minutes.
+- **Notes:** each step cites the sentences it shows (sections 1, 2.2, 3, 5.1 and 5.2 p10). The stage is listed under 5.2, with a reviewed exception for the earlier sections.
+
+### Found while checking, fixed for every topic
+
+- **Names sharing one slot printed over each other** while one faded out and the other faded in (the owner's report: "Miokardioa" over "Orri epimiokardikoa", topic 10).
+  - Fix: names in the same slot now hand it over. The stronger one fades out first, and the next appears only once it is gone (`handOver` in `components/kit/columns.tsx`, tested in `tests/hand-over.test.ts`).
+  - The topic 10 split itself now ends before its step settles, so the step's picture names both layers.
+- **View-to-view zooms aimed at the wrong place** (the owner's report: the camera dived in where the arteries could not be seen).
+  - Every zoom now first lights the structure it goes to, for 0.65 s, before the camera moves.
+  - Topic 10's transverse section → frontal 3D zoom now dives onto the two dorsal aortas, not onto the heart tube.
+  - Topic 10's disc → section zoom now closes in on the band the cut runs through, not on the whole disc.
+- **A 3D name could slip under the camera keys.** When a name stepped past the side pill, the names below it were pushed down with no check against the column's bottom.
+  - Fix: the layout now picks the side that fits.
+  - A column that is still too full drops its extra spacing before it overflows.
+- **On tablets, the first name in a 3D view's left column could land on the orientation key** (top left). The left column now starts below it (`axes` on `Callouts`).
+- **On tablets, a bottom caption could run under the camera keys** (topic 10's frontal 3D: "Bi endokardio hodiak goitik behera…"). A note level with the keys now moves left to clear them, or, if it is too wide for that, just above them (`Note` in `components/kit/Label.tsx`; the viewport now also reports where the keys start horizontally).
+- **The origins summary table** was first placed high on the right, where on tablets it met the drag hint and the right side pill. It now sits in the left middle band, between the left side pill and the camera keys, with the heart beside it on the right. Checked at 1024 × 768, 768 × 1024 and 1536 × 960.

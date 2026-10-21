@@ -276,11 +276,23 @@ export function Note({ x, y, children, align = 'middle', show = 1, tone = 'dim',
   const base = size ?? 12.5;
   // Sentences grow less than names (at most 30%): they are long and sit beside names.
   const k = fitScale({ ...scale, k: Math.min(scale.k, 1.3) }, x, y, align, children.length, base);
+  // A note level with the camera keys (bottom right on tablets) moves left to clear them, or, too wide
+  // for the room left of them, just above them.
+  let [nx, ny] = [x, y];
+  const { keysTop, keysLeft } = scale;
+  if (keysTop != null && keysLeft != null && y + (base * k * LINE_H) / 2 > keysTop) {
+    const w = children.length * CHAR_W * base * k;
+    const right = align === 'end' ? x : align === 'start' ? x + w : x + w / 2;
+    const over = right - (keysLeft - 10);
+    const leftEdge = right - w - over;
+    if (over > 0 && leftEdge >= 12) nx = x - over;
+    else if (over > 0) ny = keysTop - (base * k * LINE_H) / 2 - 6;
+  }
   return (
     <OnTop>
       <text
-        x={x}
-        y={y}
+        x={nx}
+        y={ny}
         dy="0.35em"
         textAnchor={align}
         className={`note note-${tone}`}

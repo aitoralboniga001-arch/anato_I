@@ -158,7 +158,8 @@ export function FusionArt({ t }: { t: number }) {
   // Folding: a little during the cephalocaudal fold, then the transverse fold proper.
   const k = 0.12 * seg(t, D2.fold[0], D2.fold[1]) + 0.88 * seg(t, D2.fuse[0], D2.fuse[1] + 0.02);
   const wrap = seg(t, D2.wrap[0], D2.wrap[1]);
-  const split = seg(t, D2.wrap[1] - 0.02, D2.wrap[1] + 0.03);
+  // Done before the step settles (its end moment is the next step minus 0.035): one name at a time in the slot.
+  const split = seg(t, D2.wrap[1] - 0.035, D2.wrap[1] - 0.005);
   const jelly = seg(t, D2.jelly[0], D2.jelly[1]);
   const mig = seg(t, D2.migrate[0], D2.migrate[1]);
   const meso = seg(t, D2.meso[0], D2.meso[1]);

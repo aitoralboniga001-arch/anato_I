@@ -273,6 +273,13 @@ export const guides11: Record<string, ViewGuide> = {
     question: 'Zein balba ditu aorta balbulak, eta zein birika balbulak?',
     answer: 'Aortan, bi alboko eta atzeko bat; birika balbulan, bi alboko eta aurreko bat.',
   },
+  'jatorriak/3d': {
+    orientation: `${FRONT} Aurikulen urratsean atzetik ikusten da: orduan eskuina zure eskuinean dago.`,
+    observe: 'Hodia, lakioa eta bihotza leku berean daude: begiratu kolore bakoitza non geratzen den bihotz osoan.',
+    meaning: 'Kolorea jatorria da, ez funtzioa: berdea hurbileko atala, urdin-berdea atal bentrikularra, lima konoa, marfila enborra, laranja atal aurikularra, morea zain sinua.',
+    question: 'Zein ataletik datoz eskuineko bentrikuluaren bi atalak, trabekulatua eta lisoa?',
+    answer: 'Trabekulatua bulboaren hurbileko ataletik; lisoa (infundibulua) arteria konotik.',
+  },
 };
 
 /** Gives each view of a week its guide from `guides` (keyed stage/view). */

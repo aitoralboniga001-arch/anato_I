@@ -204,6 +204,32 @@ const RESEAT_MS = 150;
 /** Time for the reseating throttle (none where there is no clock: every render searches, as before). */
 const clock = () => (typeof performance === 'undefined' ? -Infinity : performance.now());
 
+/**
+ * Names that take turns in one slot (a layer's name giving way to its daughter's, a name renamed) are
+ * crossfaded by their scenes; printed together for that moment, they read as one name over another.
+ * So in a shared slot only the strongest prints, and it fades out as the next catches up: the slot
+ * empties at the crossover and fills again with the newcomer. Names that are both fully shown in one
+ * slot are a real layout clash and are left as they are (tests/labels.test finds them).
+ */
+export function handOver(entries: [string, Pos, number][]): Map<string, number> {
+  const out = new Map<string, number>();
+  const slots = new Map<string, [string, number][]>();
+  for (const [k, p, show] of entries) {
+    if (show <= 0.02) continue;
+    const id = `${p.x},${p.y},${p.align}`;
+    slots.set(id, [...(slots.get(id) ?? []), [k, show]]);
+  }
+  for (const turn of slots.values()) {
+    if (turn.length < 2) continue;
+    turn.sort((a, b) => b[1] - a[1]);
+    const [[first, s1], [, s2]] = turn;
+    if (s2 >= 0.98) continue;
+    out.set(first, s1 * Math.min(1, (s1 - s2) / 0.4));
+    for (const [k] of turn.slice(1)) out.set(k, 0);
+  }
+  return out;
+}
+
 /** Draws every collected name, laid out by `arrangeLabels`. */
 function LabelLayer({ col, fixed }: { col: LabelCollector; fixed?: boolean }) {
   const ctx = useScene();
@@ -268,11 +294,12 @@ function LabelLayer({ col, fixed }: { col: LabelCollector; fixed?: boolean }) {
     const id = window.setTimeout(redraw, RESEAT_MS + 10);
     return () => window.clearTimeout(id);
   });
+  const shown = handOver(list.map(([k, e]) => [k, moved.get(k) ?? { x: e.x, y: e.y, align: alignOf(e) }, e.show ?? 1]));
   return (
     <>
       {list.map(([k, e]) => {
         const m = moved.get(k);
-        return <LabelDraw key={k} {...e} x={m?.x ?? e.x} y={m?.y ?? e.y} align={m?.align ?? e.align} moved={!!m && (m.x !== e.x || m.y !== e.y)} />;
+        return <LabelDraw key={k} {...e} show={shown.get(k) ?? e.show} x={m?.x ?? e.x} y={m?.y ?? e.y} align={m?.align ?? e.align} moved={!!m && (m.x !== e.x || m.y !== e.y)} />;
       })}
     </>
   );

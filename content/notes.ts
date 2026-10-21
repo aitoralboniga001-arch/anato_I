@@ -140,7 +140,7 @@ export const NOTES: Record<number, NotesSection[]> = {
     { n: '4', title: 'Bentrikuluaren trenkadak', depth: 0, stages: ['bentrikulu-arteko-trenkada'] },
     { n: '5', title: 'Atal bulbarraren trenkadatze prozesua', depth: 0, stages: [] },
     { n: '5.1', title: 'Arteria Konoaren trenkadak', depth: 1, stages: ['arteria-konoa'] },
-    { n: '5.2', title: 'Enbor arteriosoaren trenkadak', depth: 1, stages: ['enbor-arteriosoa', 'balbula-semilunarrak'] },
+    { n: '5.2', title: 'Enbor arteriosoaren trenkadak', depth: 1, stages: ['enbor-arteriosoa', 'balbula-semilunarrak', 'jatorriak'] },
   ],
 };
 

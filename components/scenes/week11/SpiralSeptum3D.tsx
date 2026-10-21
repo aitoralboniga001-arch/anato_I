@@ -25,7 +25,7 @@ const CONT = 'erretena-11';
 const RIGHT: [number, number] = [262, 505];
 
 /** Stages 8–9 finished, as these stages keep them: the valves, the turned heart, both septa, the conus divided. */
-const DONE: Partial<CanalState> = {
+export const DONE: Partial<CanalState> = {
   flatten: 1, shift: 1, cushions: 1, fuse: 1, swell: 1, leaflets: 1, hollow: 1, papillary: 1, chordae: 1, fibrous: 1,
   trab: 1, turn: 1, septum: 1, align: 1, conusRidges: 1, conusFuse: 1, membranous: 1, split: 1,
 };

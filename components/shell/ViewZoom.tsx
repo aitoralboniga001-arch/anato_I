@@ -47,6 +47,8 @@ export interface ZoomPlan {
 const TURN_MS = 1100;
 /** Out to a 3D picture the next move turns on from: over once the pictures have crossed. */
 const HOLD_MS = 900;
+/** Going in, the structure first lights up in the whole view, so the student sees what the camera goes to. */
+const AIM_MS = 650;
 
 /**
  * The zoom between two views, or null: one must be the other's close-up (`zoom`, same stage) or name the
@@ -157,7 +159,8 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   // Into a cut seen from another side: the 3D picture turns first, then the camera goes in.
   const pre = plan.look && plan.inward ? TURN_MS : 0;
-  const total = plan.hold ? HOLD_MS : ZOOM_MS + pre;
+  const aim = plan.inward && !plan.look ? AIM_MS : 0;
+  const total = plan.hold ? HOLD_MS : ZOOM_MS + pre + aim;
   const look = useMemo(() => {
     let k = plan.look && !plan.inward ? 1 : 0;
     const subs = new Set<() => void>();
@@ -182,7 +185,7 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
     const g = root.current;
     const r = reg.current;
     if (!g || !r) return;
-    const ms = msAll - pre;
+    const ms = msAll - pre - aim;
     if (plan.look) look.set(plan.inward ? glide(msAll / TURN_MS) : plan.hold ? 1 : 1 - glide((ms - 350) / 1200));
     const q = (k: string) => g.querySelector<SVGElement>(`[data-z="${k}"]`);
     const set = (k: string, attrs: Record<string, string | number>) => {
@@ -210,6 +213,12 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
       set('new', { opacity: ramp(ms, 0, 450) });
     }
     set('caption', { opacity: ramp(msAll, 0, 350) * (1 - ramp(msAll, total - 500, total - 100)) });
+    // The structure the camera goes to (or comes back out of) glows in the whole view: lit before the move
+    // and while the camera closes in; coming out, it lights as the whole view comes back round it.
+    const lit = plan.inward ? ms < 1250 : ms > 700;
+    wholeRef.current
+      ?.querySelectorAll<SVGElement>(`[data-part="${CSS.escape(plan.part)}"] > .part, [data-groups~="${CSS.escape(plan.part)}"] > .part`)
+      .forEach((el) => el.classList.toggle('zoom-target', lit));
     // Overlays of the whole view (a summary table) step aside while the camera travels.
     const fade = plan.inward ? 1 - ramp(ms, 0, 300) : ramp(ms, 1550, 1900);
     wholeRef.current?.querySelectorAll<SVGElement>('.zoom-fade').forEach((el) => el.setAttribute('opacity', fade.toFixed(3)));
@@ -245,7 +254,7 @@ export function ViewZoom({ plan, old, children, onDone, progress }: { plan: Zoom
     };
     // A 3D view still starting up: the camera waits where it is (the close-up not yet shown, or the
     // whole view not yet left) rather than show a "preparing" picture mid-move, for 3 s at most.
-    const holdAt = plan.inward ? 1000 + pre : 0;
+    const holdAt = plan.inward ? 1000 + pre + aim : 0;
     const MAX_HOLD = 3000;
     const tick = (now: number) => {
       if (!start) start = last = now;

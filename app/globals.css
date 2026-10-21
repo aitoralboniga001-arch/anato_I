@@ -1733,6 +1733,12 @@ kbd {
   filter: brightness(1.08);
 }
 
+/* The structure a view-to-view zoom dives into (components/shell/ViewZoom): lit at full strength, whatever its step state. */
+.zoom-layer .part.zoom-target {
+  opacity: 1;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 12px rgba(255, 184, 107, 0.6)) brightness(1.2) saturate(1.25);
+}
+
 /* A background tissue pointed at on purpose (its name, the side list, the pointer) still answers clearly. */
 .part-quiet.part-active {
   filter: brightness(1.28) drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));

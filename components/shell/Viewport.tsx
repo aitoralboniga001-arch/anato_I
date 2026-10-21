@@ -377,18 +377,20 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   // Where the named camera keys (bottom right, over the frame above 820 px) begin, in frame units: the
   // right column of names ends above them instead of running under the panel.
   const lookRef = useRef<HTMLDivElement>(null);
-  const [keysTop, setKeysTop] = useState<number | undefined>(undefined);
+  const [keys, setKeys] = useState<{ top: number; left: number } | undefined>(undefined);
   useEffect(() => {
     const el = lookRef.current;
     const svg = wrap.current?.querySelector<SVGSVGElement>('svg.viewport-svg');
-    if (!el || !svg) return setKeysTop(undefined);
+    if (!el || !svg) return setKeys(undefined);
     const measure = () => {
       const r = svg.getBoundingClientRect();
       const s = Math.min(r.width / W, r.height / H);
       if (!s) return;
-      const top = (el.getBoundingClientRect().top - (r.top + (r.height - H * s) / 2)) / s;
+      const b = el.getBoundingClientRect();
+      const top = (b.top - (r.top + (r.height - H * s) / 2)) / s;
+      const left = Math.round((b.left - (r.left + (r.width - W * s) / 2)) / s);
       // Under the frame (narrow screens) the keys cover no name.
-      setKeysTop(top < H - 4 ? Math.round(top) : undefined);
+      setKeys((k) => (top >= H - 4 ? undefined : k?.top === Math.round(top) && k.left === left ? k : { top: Math.round(top), left }));
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -396,7 +398,7 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
     ro.observe(svg);
     return () => ro.disconnect();
   }, [size, look, interactive3d]);
-  const labelScale = useMemo(() => ({ k: labelK, left: pillL, right: pillR, keysTop }), [labelK, pillL, pillR, keysTop]);
+  const labelScale = useMemo(() => ({ k: labelK, left: pillL, right: pillR, keysTop: keys?.top, keysLeft: keys?.left }), [labelK, pillL, pillR, keys]);
 
   const changed = useEffectEvent((on: boolean) => onFullscreenChange?.(on));
 

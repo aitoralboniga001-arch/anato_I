@@ -48,7 +48,9 @@ const week: WeekDef = {
           orientation: { top: 'Dortsala', bottom: 'Bentrala' },
           scene: CardiogenicSection,
           locator: { level: 0.3, note: 'Endokardio hodien maila' },
-          bridges: [{ from: 'diskoa', part: 'odol-irlatxoak', section: true }],
+          // The islands light up round the whole horseshoe; the camera then closes in on the band the cut runs
+          // through (both lateral limbs at mid-height), not on the whole disc.
+          bridges: [{ from: 'diskoa', part: 'odol-irlatxoak', at: [505, 262, 430], section: true }],
         },
       ],
       beats: [
@@ -218,7 +220,9 @@ const week: WeekDef = {
           orientation: { top: 'Kraneala', bottom: 'Kaudala' },
           scene: ZipperFront,
           travel: false,
-          bridges: [{ from: 'zeharkakoa', part: 'bihotz-hodia' }, { from: 'sagitala', part: 'perikardio-barrunbea' }],
+          // From the transverse section the camera dives onto the two dorsal aortas (the arteries this step adds): they light
+          // up first, then the frontal 3D grows out of them.
+          bridges: [{ from: 'zeharkakoa', part: 'aorta-dortsalak' }, { from: 'sagitala', part: 'perikardio-barrunbea' }],
         },
       ],
       beats: [

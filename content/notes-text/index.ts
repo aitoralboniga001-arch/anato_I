@@ -67,6 +67,7 @@ for (const week of weeks) for (const stage of week.stages) stage.beats.forEach((
 
 /** Audited exceptions where a scene teaches detail absent from this ORIGINAL PDF. */
 export const NOTES_EXCEPTIONS: Record<string, { sections?: string[]; reason: string }> = {
+  '11/jatorriak': { sections: ['1', '2.2', '3', '5.1'], reason: 'Bi gaien laburpena: atal bakoitzaren jatorria aurreko ataletan azaltzen da (1, 2.2, 3, 5.1), eta 5.2ko laburpenarekin biltzen da.' },
   '11/arteria-konoa/0': { sections: ['5'], reason: '5. atalaren sarrera (kiribil formako trenkadak) atal bulbarraren trenkadatzea irekitzen du; 5.1 arteria konoarekin hasten da.' },
   '1/ibilbidea': { sections: ['4.2', '4.3', '4.4', '4.5'], reason: 'Ibilbideak ernalkuntza, segmentazioa, blastozistoa eta habiratzea ere erakusten ditu.' },
   '10/atal-bulbarra/5': { reason: 'Etaparen laburpena: aurreko urratsetako eratorriak mapa lau batean biltzen ditu; ez dago apunteetako esaldi berririk.' },
