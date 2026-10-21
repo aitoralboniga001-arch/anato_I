@@ -210,6 +210,9 @@ export function LabelDraw({ id, x, y, ax, ay, align, show = 1, text, sub, small,
     'data-label': id,
     className: `label label-${state}${small ? ' label-small' : ''}${space ? ' label-space' : ''}`,
     opacity: show,
+    // The dim / shade / context states set their opacity in CSS, which overrides the attribute: they
+    // multiply in the fade through --show, so a name still fading in never prints at near full strength.
+    style: { '--show': show } as CSSProperties,
     'data-moved': moved ? '' : undefined,
     onClick: (e: ReactMouseEvent) => {
       e.stopPropagation();

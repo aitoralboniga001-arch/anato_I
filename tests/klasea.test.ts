@@ -129,6 +129,8 @@ const X_WORDS: Record<string, 'ks' | 'basque'> = {
   maxilarrak: 'ks',
   maximoa: 'ks',
   xifoide: 'ks',
+  oxigenoz: 'ks',
+  oxigenatzeko: 'ks',
 };
 
 // ———————————————————————————— each topic's class ————————————————————————————

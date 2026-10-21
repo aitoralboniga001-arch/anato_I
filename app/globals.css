@@ -1842,16 +1842,16 @@ kbd {
 
 /* Dimmed names stay readable: the plate keeps contrast, and the focus still leads in colour. */
 .label-dim {
-  opacity: 0.5;
+  opacity: calc(0.5 * var(--show, 1));
 }
 
 .label-shade {
-  opacity: 0.45;
+  opacity: calc(0.45 * var(--show, 1));
 }
 
 /* While a step talks about something, the other names step back (still readable on their plates). */
 .label-ctx {
-  opacity: 0.78;
+  opacity: calc(0.78 * var(--show, 1));
 }
 
 .label-ctx .label-plate {

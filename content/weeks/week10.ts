@@ -1,4 +1,5 @@
 import type { WeekDef } from '@/lib/sim/types';
+import { guides10, withGuides } from '@/content/heart-guides';
 import { CardiogenicDisc } from '@/components/scenes/week10/Disc';
 import { CardiogenicSection } from '@/components/scenes/week10/DiscSection';
 import { FusionSection } from '@/components/scenes/week10/Fusion';
@@ -11,7 +12,7 @@ import { stageAtrium, stageBulbus, stageRightAtrium, stageSinus, stageVentricle 
 const FILE = '10. GAIA_ ZIRKULAZIO APARATUA (ZUZENDUTA).pdf';
 const src = (section: string) => ({ file: FILE, section });
 
-export const week10: WeekDef = {
+const week: WeekDef = {
   week: 10,
   slug: '10',
   title: 'Zirkulazio aparatua',
@@ -56,6 +57,8 @@ export const week10: WeekDef = {
           notes: ['w10/1/p3/s1'],
           idea: '3. astetik aurrera enbrioia ezin da difusioz elikatu: bere zirkulazio-sistema garatzen du.',
           key: 'Diskoa handitzean difusioa ez da nahikoa: odol hodiak eta bihotza behar ditu.',
+          recall: ['lerro-primitiboa', 'errai-orria'],
+          exam: '3. astetik aurrera enbrioia ezin da difusioz elikatu: bere zirkulazio-sistema (sistema kardiobaskularra) garatzen du.',
           text: 'Garapenaren 3. astean enbrioia ezin da orain arte bezala elikatu, difusioaren bidez. 3. astetik aurrera bere berezko zirkulazio-sistema (sistema kardiobaskularra) garatuko da.',
           focus: ['ektodermoa', 'plaka-neurala'],
           tour: ['plaka-neurala', 'mintz-bukofaringeoa', 'notokorda', 'lerro-primitiboa'],
@@ -66,6 +69,7 @@ export const week10: WeekDef = {
           notes: ['w10/1/p4/s1'],
           recall: ['lerro-primitiboa', 'epiblastoa', 'errai-orria'],
           idea: 'Lerro primitiboaren alde zefalikoko zelula epiblastikoak plaka neuralaren alde zefalikora eta alboetara migratzen dute.',
+          exam: 'Lerro primitiboaren alde zefalikoko zelula epiblastikoak plaka neuralaren alde zefalikora eta alboetara migratzen dute, alboko mesodermoko errai orriraino.',
           text: 'Lerro primitiboaren alde zefalikoan kokatzen diren zelula epiblastiko batzuk lerro primitibotik migratzen dute. Alde zefalikora abiatzen dira, plaka neuralaren alde zefalikoan eta alde lateraletan, eta alboko mesodermoko errai orriraino iristen dira.',
           focus: ['epiblastoa', 'lerro-primitiboa'],
           view: 'diskoa',
@@ -95,6 +99,7 @@ export const week10: WeekDef = {
           notes: ['w10/1/p4/s4'],
           idea: 'Odol irlatxoetatik odoleko zelulak eta odol hodiak garatzen dira.',
           key: 'Irlatxo bakoitzak bi gauza ematen ditu: barruan odoleko zelulak, kanpoan hodiaren pareta.',
+          exam: 'Odol irlatxoetatik odoleko zelulak eta odol hodiak garatzen dira.',
           text: 'Zeharkako mozketan ikusten da: odol irlatxoak errai orrian daude, zelomaren azpian. Odol irlatxo horietatik garatzen dira odoleko zelulak (barruan) eta baita odol hodiak ere (inguruko zelulek hodiaren pareta osatzen dute).',
           focus: ['odol-irlatxoak', 'errai-orria'],
           tour: ['ektodermoa', 'plaka-neurala', 'paretako-orria', 'enbrioi-barruko-zeloma', 'errai-orria', 'endodermoa', 'notokorda'],
@@ -104,6 +109,7 @@ export const week10: WeekDef = {
           at: 0.62,
           notes: ['w10/1/p4/s5-s6'],
           idea: 'Hodiek ferra formako sare bat osatzen dute; fusionatzean, ferra formako tutua.',
+          exam: 'Odol hodiek ferra formako sarea osatzen dute; fusionatzean, ferra formako tutua.',
           text: 'Beraz, hemendik ferra formako odol hodiz osatutako sare bat sortzen da. Sare horretako odol hodiak fusionatzean, ferra formako tutu itxurako egitura sortzen da.',
           focus: ['ferra-formako-plexua'],
           view: 'diskoa',
@@ -123,6 +129,7 @@ export const week10: WeekDef = {
           at: 0.86,
           notes: ['w10/1/p8/s1-s3'],
           idea: 'Notokordaren bi aldeetan, errai orritik, bi aorta dortsal: hasieratik endokardio hodiekin kontaktuan.',
+          exam: 'Aorta dortsalak, bat ezkerrekoa eta bat eskumakoa: notokordaren alboetan, errai orriko zelula irlatxoetatik; hasieratik endokardio hodiekin kontaktuan.',
           text: 'Aldi berean, alboko mesodermoko errai orritik sortutako beste zelula batzuek, notokordaren bi alboetan osatzen dituzten zelula irlatxoetatik, bi luzetarako odol hodi (arteria) sortzen dituzte: aorta dortsalak (bat ezkerrekoa, bat eskumakoa). Hasieratik kontaktuan daude alboko endokardio hodiekin.',
           focus: ['aorta-dortsalak', 'notokorda'],
           ask: {
@@ -219,6 +226,8 @@ export const week10: WeekDef = {
           at: 0,
           notes: ['w10/1/p9/s1-s2'],
           idea: 'Diskoa laua da oraindik; 3. aste bukaeran bi tolespen: zefalokaudala eta zeharkakoa.',
+          recall: ['plaka-kardiogenikoa', 'odol-irlatxoak'],
+          exam: '3. aste bukaeran disko lauak bi tolespen egiten ditu: zefalokaudala eta zeharkakoa.',
           text: 'Diskoaren tolespenak ez dira hasi oraindik: laua mantentzen da. 3. aste bukaeran laua den diskoa tolesten hasten da eta bi tolespen egiten ditu: zefalokaudala eta zeharkakoa.',
           focus: ['bihotz-hodiak', 'plaka-neurala'],
           tour: ['plaka-neurala', 'paretako-orria', 'perikardio-barrunbea', 'errai-orria', 'bihotz-hodiak', 'endodermoa'],
@@ -262,6 +271,7 @@ export const week10: WeekDef = {
           at: 0.47,
           notes: ['w10/1/p11/s3-s4', 'w10/1/p12/s1', 'w10/1/p13/s1'],
           idea: 'Errai orria hodiaren inguruan: orri epimiokardikoa → miokardioa eta epikardioa.',
+          exam: 'Hodiaren inguruko errai orritik orri epimiokardikoa sortzen da: hortik miokardioa (geruza muskularra) eta epikardioa (errai perikardioa).',
           text: 'Hodi horren inguruan alboko mesodermoaren errai orria kokatzen da, eta errai orri horretatik orri epimiokardikoa sortzen da. Hemendik bihotzeko bi zelula geruza sortzen dira: miokardio geruza (geruza muskularra) eta epikardio geruza edo errai perikardioa, miokardioaren inguruan.',
           focus: ['orri-epimiokardikoa', 'miokardioa', 'epikardioa', 'errai-orria'],
           recall: ['errai-orria'],
@@ -292,6 +302,7 @@ export const week10: WeekDef = {
           at: 0.73,
           notes: ['w10/1/p18/s1-s2'],
           idea: 'Mesokardio dortsala (behin-behinekoa) desagertu: perikardioaren zeharkako sinua.',
+          exam: 'Mesokardio dortsala behin-behineko lotura da: desagertzean, perikardioaren zeharkako sinua agertzen da.',
           text: 'Hasieran bihotz hodia perikardio barrunbearen atzeko paretarekin lotuta dago mesokardio dortsalaren bitartez. Lotura hau behin-behinekoa da eta desagertu egiten da. Desagertzean, perikardio barrunbean zakuondo edo sinu bat agertzen da: perikardioaren zeharkako sinua.',
           focus: ['mesokardio-dortsala', 'perikardioaren-zeharkako-sinua', 'perikardio-barrunbea'],
           ask: {
@@ -312,6 +323,7 @@ export const week10: WeekDef = {
           notes: ['w10/1/p19/s1-s3', 'w10/1/p20/s1'],
           recall: ['aorta-dortsalak'],
           idea: 'Notokordatik gertu, errai orritik: bi arteria dortsal (aorta dortsalak), atzekaldean; alde zefalikotik bihotz hodiaren atal zefalikoarekin kontaktuan.',
+          exam: 'Arteria dortsalak enbrioiaren atzekaldean daude, eta alde zefalikotik bihotz hodiaren atal zefalikoarekin kontaktatzen dute.',
           text: 'Bihotz hodia sortzen den bitartean, notokordatik gertu eta alboko mesodermoaren errai orritik, beste mota bateko metaketa angiogenoak sortzen dira. Hauetatik bi luzetarako odol hodi sortzen dira: arteria dortsalak, enbrioiaren atzekaldean. Alde zefalikotik bihotz hodiaren atal zefalikoarekin kontaktatzen dute. Mozketa frontalean, aurretik: endokardio hodiak goitik behera fusionatzen, eta atzekaldean aorta dortsalak goitik behera, gorriz.',
           focus: ['aorta-dortsalak', 'bihotz-hodiak'],
           tour: ['bihotz-hodiak', 'bihotz-hodia', 'aorta-dortsalak', 'aurreko-hestea', 'perikardio-barrunbea'],
@@ -513,3 +525,5 @@ export const week10: WeekDef = {
     },
   ],
 };
+
+export const week10 = withGuides(week, guides10);

@@ -1,4 +1,5 @@
 import type { WeekDef } from '@/lib/sim/types';
+import { guides11, withGuides } from '@/content/heart-guides';
 import { P1, P2, PrimumBoth, PrimumFace, PrimumFrontal, SecundumBoth, SecundumFace, SecundumFrontal } from '@/components/scenes/week11/Atria';
 import { BirthBoth, BirthFace, BirthFrontal, P3 } from '@/components/scenes/week11/Birth';
 import { Birth3D, P5, Primum3D, Secundum3D, Walls3D } from '@/components/scenes/week11/Septa3D';
@@ -18,7 +19,7 @@ const D3 = 'Bi aurikulak 3D ereduan, aurretik irekita (enbrioiaren eskuina zure 
 /** The 2D drawings stay as the notes draw them (frontal section, the view from the right atrium): the student meets them in the exam's figures. */
 const FACE = 'Aurikula arteko trenkada, eskuineko aurikularen barrutik ikusita: trenkada irudiaren planoan dago; ezkerrean atzekoa, eskuinean aurrekoa. Zulo bakoitzaren atzean ezkerreko aurikula ilun ikusten da.';
 
-export const week11: WeekDef = {
+const week: WeekDef = {
   week: 11,
   slug: '11',
   title: 'Zirkulazio-sistema (II)',
@@ -1706,3 +1707,5 @@ export const week11: WeekDef = {
     },
   ],
 };
+
+export const week11 = withGuides(week, guides11);

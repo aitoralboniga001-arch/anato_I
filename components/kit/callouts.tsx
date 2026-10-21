@@ -29,6 +29,8 @@ interface Opts {
   /** A band (top, bottom) each column keeps clear for a side orientation pill: no name is centred inside it. */
   bandL?: [number, number];
   bandR?: [number, number];
+  /** How much larger than drawn size the names print (the label scale): a smaller frame needs wider spacing. */
+  k?: number;
 }
 
 const HEIGHT = 40;
@@ -56,54 +58,62 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
     const [top, bottom] = (left ? o.left : o.right) ?? (left ? [140, 590] : [240, 590]);
     const col = items.filter((c) => (c.at.x < mid) === left).sort((a, b) => a.at.y - b.at.y);
     const w = col.map((c) => smooth(c.show / 0.6));
-    const h = col.map((c) => (c.small ? HEIGHT_SMALL : HEIGHT));
-    // A crowded column breathes a little (up to 1.4 lines a name, as the room allows): a tight stack reads as a list.
-    const n = w.reduce((a, b) => a + b, 0);
-    const air = n > 1.5 ? Math.max(1, Math.min(1.4, (bottom - top) / ((n - 1) * HEIGHT))) : 1;
-    const gap = (i: number) => ((h[i] + h[i - 1]) / 2) * air * Math.min(w[i], w[i - 1]);
-    const y = col.map((c) => Math.max(top, Math.min(bottom, c.at.y)));
-    // Down the column, each name at least a line under the one above; then, if that ran past the
-    // bottom, back up from the bottom.
-    const want = [...y];
-    for (let i = 1; i < y.length; i++) y[i] = Math.max(y[i], y[i - 1] + gap(i));
-    // The stack centres on its points instead of hanging below the first one.
-    let shift = 0;
-    let sw = 0;
-    y.forEach((v, i) => ((shift += (v - want[i]) * w[i]), (sw += w[i])));
-    if (sw > 0) {
-      shift /= sw;
-      for (let i = 0; i < y.length; i++) y[i] -= shift;
-      y[0] = Math.max(top, y[0]);
+    // Names print k times their drawn size, so they need k times the spacing. A column too crowded
+    // for that eases back towards drawn-size spacing rather than climbing above its top.
+    const place = (k: number) => {
+      const h = col.map((c) => (c.small ? HEIGHT_SMALL : HEIGHT) * k);
+      // A crowded column breathes a little (up to 1.4 lines a name, as the room allows): a tight stack reads as a list.
+      const n = w.reduce((a, b) => a + b, 0);
+      const air = n > 1.5 ? Math.max(1, Math.min(1.4, (bottom - top) / ((n - 1) * HEIGHT * k))) : 1;
+      const gap = (i: number) => ((h[i] + h[i - 1]) / 2) * air * Math.min(w[i], w[i - 1]);
+      const y = col.map((c) => Math.max(top, Math.min(bottom, c.at.y)));
+      // Down the column, each name at least a line under the one above; then, if that ran past the
+      // bottom, back up from the bottom.
+      const want = [...y];
       for (let i = 1; i < y.length; i++) y[i] = Math.max(y[i], y[i - 1] + gap(i));
-    }
-    if (y.length && y[y.length - 1] > bottom) {
-      y[y.length - 1] = bottom;
-      for (let i = y.length - 2; i >= 0; i--) y[i] = Math.min(y[i], y[i + 1] - gap(i + 1));
-    }
-    // A name level with the side pill moves just above or below it (whichever is nearer), and the
-    // names around it make room: stepping it in past the pill instead met the other column's name.
-    const band = left ? o.bandL : o.bandR;
-    if (band)
-      for (let i = 0; i < y.length; i++) {
-        if (w[i] < 0.02 || y[i] <= band[0] || y[i] >= band[1]) continue;
-        const move = (to: number) => {
-          const next = [...y];
-          next[i] = to;
-          for (let j = i + 1; j < next.length; j++) next[j] = Math.max(next[j], next[j - 1] + gap(j));
-          for (let j = i - 1; j >= 0; j--) next[j] = Math.min(next[j], next[j + 1] - gap(j + 1));
-          return next;
-        };
-        // Up only when the names above still fit under the column's top.
-        const up = move(band[0]);
-        const moved = y[i] < (band[0] + band[1]) / 2 && up[0] >= top ? up : move(band[1]);
-        moved.forEach((v, j) => (y[j] = v));
+      // The stack centres on its points instead of hanging below the first one.
+      let shift = 0;
+      let sw = 0;
+      y.forEach((v, i) => ((shift += (v - want[i]) * w[i]), (sw += w[i])));
+      if (sw > 0) {
+        shift /= sw;
+        for (let i = 0; i < y.length; i++) y[i] -= shift;
+        y[0] = Math.max(top, y[0]);
+        for (let i = 1; i < y.length; i++) y[i] = Math.max(y[i], y[i - 1] + gap(i));
       }
+      if (y.length && y[y.length - 1] > bottom) {
+        y[y.length - 1] = bottom;
+        for (let i = y.length - 2; i >= 0; i--) y[i] = Math.min(y[i], y[i + 1] - gap(i + 1));
+      }
+      // A name level with the side pill moves just above or below it (whichever is nearer), and the
+      // names around it make room: stepping it in past the pill instead met the other column's name.
+      const band = left ? o.bandL : o.bandR;
+      if (band)
+        for (let i = 0; i < y.length; i++) {
+          if (w[i] < 0.02 || y[i] <= band[0] || y[i] >= band[1]) continue;
+          const move = (to: number) => {
+            const next = [...y];
+            next[i] = to;
+            for (let j = i + 1; j < next.length; j++) next[j] = Math.max(next[j], next[j - 1] + gap(j));
+            for (let j = i - 1; j >= 0; j--) next[j] = Math.min(next[j], next[j + 1] - gap(j + 1));
+            return next;
+          };
+          // Up only when the names above still fit under the column's top.
+          const up = move(band[0]);
+          const moved = y[i] < (band[0] + band[1]) / 2 && up[0] >= top ? up : move(band[1]);
+          moved.forEach((v, j) => (y[j] = v));
+        }
+      return y;
+    };
+    let y = place(o.k ?? 1);
+    for (let k = (o.k ?? 1) - 0.1; k > 1 && y.length && y[0] < top - 0.5; k -= 0.1) y = place(k);
+    if (y.length && y[0] < top - 0.5 && (o.k ?? 1) > 1) y = place(1);
     // Sorting by height is not enough when points lie at different depths into the picture: two names
     // whose leaders still cross trade places (their slots stay where they are).
     const x = left ? (o.xl ?? 24) : (o.xr ?? 976);
     // The leader as the label draws it: from the plate's edge, level for a third of the way, then to the point.
     const path = (c: Callout, yy: number): P[] => {
-      const wd = o.width?.(c) ?? 120;
+      const wd = (o.width?.(c) ?? 120) * (o.k ?? 1);
       const lx = left ? x + wd : x - wd;
       const ex = lx + (c.at.x - lx) * 0.35;
       return [[lx, yy], [ex, yy], [c.at.x, c.at.y]];
@@ -143,7 +153,7 @@ export function Callouts({ items, dim = 1, ...o }: Opts & { items: Callout[]; di
   const right = o.right ?? [240, 590];
   const keysEnd = pills.keysTop != null ? pills.keysTop - 20 * pills.k : undefined;
   const rightCol: [number, number] = keysEnd != null && keysEnd < right[1] ? [Math.min(right[0], keysEnd - 40), keysEnd] : right;
-  const pos = layoutCallouts(live, { width, bandL: pills.left ? band : undefined, bandR: pills.right ? band : undefined, ...o, right: rightCol });
+  const pos = layoutCallouts(live, { width, k: pills.k, bandL: pills.left ? band : undefined, bandR: pills.right ? band : undefined, ...o, right: rightCol });
   return (
     <>
       {live.map((c) => {
