@@ -165,7 +165,7 @@ export function embryoModel(pose: EmbryoPose, o: { flow?: { phase: number; show:
       // The pharyngeal arch round its artery (mesoderm), see-through.
       const b = o.bars ?? 0;
       if (b > 0.01 && k !== 4) {
-        items.push({ key: `bar${k}${n}`, id: 'faringe-arkuak', ...tubeOf(line.slice(2, 15), 0.13, 14), color: '#e98b7a', deep: '#8c3f33', tissue: 'mesenchyme', opacity: 0.3 * b, outline: false });
+        items.push({ key: `bar${k}${n}`, id: 'faringe-arkuak', ...tubeOf(line.slice(2, 15), 0.13, 14), color: '#e6d2bf', deep: '#86705c', tissue: 'mesenchyme', opacity: 0.3 * b, outline: false });
         if (k === 2 && s > 0) pts['faringe-arkuak'] = line[9];
       }
     }

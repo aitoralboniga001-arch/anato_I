@@ -1130,7 +1130,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   };
   /** The class moves the scene with the simulator's own glide, place and camera moves. */
   const classDriver: ClassDriver = {
-    go: (sid, t, then, vid) => {
+    go: (sid, t, then, vid, rate = 1) => {
       const i = week.stages.findIndex((s) => s.id === sid);
       if (i < 0) return then();
       const st = week.stages[i];
@@ -1149,7 +1149,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
       if (cur.i !== i || t < cur.t - 0.002 || (reduced && t - cur.t >= 0.002)) place({ i, t });
       else if (t - cur.t >= 0.002) {
         stopGlide();
-        glideRef.current = { w: week.week, i, from: cur.t, to: t, ms: Math.min(4500, glideMs(st, cur.t, t, true)), start: 0 };
+        glideRef.current = { w: week.week, i, from: cur.t, to: t, ms: Math.min(4500, glideMs(st, cur.t, t, true)) / rate, start: 0 };
         setGlideAim({ w: week.week, i, k: beatIndexAt(st, t) });
         setGlideRun((n) => n + 1);
       }
@@ -1524,6 +1524,12 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     // The question window has its own keys (1–4, Enter): only Escape reaches the simulator.
     if (questionsOpen && e.key !== 'Escape') return;
     // In the class: Space pauses Kimu, the arrows go to the next or the last sentence.
+    // + and − change the class's speed.
+    if (classOn && (e.key === '+' || e.key === '=' || e.key === '-') && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      klasea.shiftRate(e.key === '-' ? -1 : 1);
+      return;
+    }
     if (classOn && (e.key === ' ' || e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
       e.preventDefault();
       const asking = klasea.state.phase === 'ask' || klasea.state.phase === 'feedback';

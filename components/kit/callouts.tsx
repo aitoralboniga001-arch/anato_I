@@ -62,6 +62,14 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
   // Each name on its structure's side; but a side too full for its names even at drawn size (small frames:
   // tablets) hands the names nearest the middle to the other side, while that one has room.
   const onLeft = new Map(items.map((c) => [c, c.at.x < mid]));
+  // A pair of one name (left and right carotids, seen from the front) both just past the middle would print
+  // the same words twice in one column: well apart across the picture, each takes its own side.
+  for (const c of items)
+    for (const d of items)
+      if (c !== d && c.id === d.id && c.text === d.text && c.at.x < d.at.x - 60 && onLeft.get(c) === onLeft.get(d) && c.show > 0.5 && d.show > 0.5) {
+        onLeft.set(c, true);
+        onLeft.set(d, false);
+      }
   const need = (left: boolean) => items.filter((c) => onLeft.get(c) === left).reduce((a, c) => a + (c.small ? HEIGHT_SMALL : HEIGHT) * (c.sub ? 1.45 : 1) * smooth(c.show / 0.6), 0);
   // The room a side has: its column, less the band its side pill keeps clear.
   const span = (left: boolean) => {
@@ -78,8 +86,8 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
   }
   for (const left of [true, false]) {
     const [top, bottom] = room(left);
-    const col = items.filter((c) => onLeft.get(c) === left).sort((a, b) => a.at.y - b.at.y);
-    const w = col.map((c) => smooth(c.show / 0.6));
+    let col = items.filter((c) => onLeft.get(c) === left).sort((a, b) => a.at.y - b.at.y);
+    let w = col.map((c) => smooth(c.show / 0.6));
     // Names print k times their drawn size, so they need k times the spacing. A column too crowded
     // for that eases back towards drawn-size spacing rather than climbing above its top.
     const place = (k: number, airMax = 1.4) => {
@@ -87,12 +95,24 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
       // A crowded column breathes a little (up to 1.4 lines a name, as the room allows): a tight stack reads as a list.
       const n = w.reduce((a, b) => a + b, 0);
       const air = n > 1.5 ? Math.max(1, Math.min(airMax, (bottom - top) / ((n - 1) * HEIGHT * k))) : 1;
-      const gap = (i: number) => ((h[i] + h[i - 1]) / 2) * air * Math.min(w[i], w[i - 1]);
+      // Every pair keeps its own distance, not only neighbours: a name fading out between two others shrinks
+      // the gaps on both its sides, and they would otherwise close up on each other.
+      const sep = (i: number, j: number) => ((h[i] + h[j]) / 2) * air * Math.min(w[i], w[j]);
+      const below = (v: number[], i: number) => {
+        let m = -Infinity;
+        for (let j = 0; j < i; j++) m = Math.max(m, v[j] + sep(i, j));
+        return m;
+      };
+      const above = (v: number[], i: number) => {
+        let m = Infinity;
+        for (let j = i + 1; j < v.length; j++) m = Math.min(m, v[j] - sep(i, j));
+        return m;
+      };
       const y = col.map((c) => Math.max(top, Math.min(bottom, c.at.y)));
       // Down the column, each name at least a line under the one above; then, if that ran past the
       // bottom, back up from the bottom.
       const want = [...y];
-      for (let i = 1; i < y.length; i++) y[i] = Math.max(y[i], y[i - 1] + gap(i));
+      for (let i = 1; i < y.length; i++) y[i] = Math.max(y[i], below(y, i));
       // The stack centres on its points instead of hanging below the first one.
       let shift = 0;
       let sw = 0;
@@ -101,11 +121,11 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
         shift /= sw;
         for (let i = 0; i < y.length; i++) y[i] -= shift;
         y[0] = Math.max(top, y[0]);
-        for (let i = 1; i < y.length; i++) y[i] = Math.max(y[i], y[i - 1] + gap(i));
+        for (let i = 1; i < y.length; i++) y[i] = Math.max(y[i], below(y, i));
       }
       if (y.length && y[y.length - 1] > bottom) {
         y[y.length - 1] = bottom;
-        for (let i = y.length - 2; i >= 0; i--) y[i] = Math.min(y[i], y[i + 1] - gap(i + 1));
+        for (let i = y.length - 2; i >= 0; i--) y[i] = Math.min(y[i], above(y, i));
       }
       // A name level with the side pill moves just above or below it (whichever is nearer), and the
       // names around it make room: stepping it in past the pill instead met the other column's name.
@@ -118,8 +138,8 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
           const move = (to: number) => {
             const next = [...y];
             next[i] = to;
-            for (let j = i + 1; j < next.length; j++) next[j] = Math.max(next[j], next[j - 1] + gap(j));
-            for (let j = i - 1; j >= 0; j--) next[j] = Math.min(next[j], next[j + 1] - gap(j + 1));
+            for (let j = i + 1; j < next.length; j++) next[j] = Math.max(next[j], below(next, j));
+            for (let j = i - 1; j >= 0; j--) next[j] = Math.min(next[j], above(next, j));
             return next;
           };
           // The nearer side, as long as the names it pushes still fit in the column: up only while those above
@@ -137,11 +157,15 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
     const K = o.k ?? 1;
     // Out of the column: above its top, or below its bottom (the camera keys), e.g. after stepping past the pill.
     const spills = (v: number[]) => v.length > 0 && (v[0] < top - 0.5 || v[v.length - 1] > bottom + 0.5);
-    let y = place(K);
-    // Too full: first without the breathing room, then towards drawn-size spacing.
-    if (spills(y)) y = place(K, 1);
-    for (let k = K - 0.1; k > 1 && spills(y); k -= 0.1) y = place(k, 1);
-    if (spills(y) && K > 1) y = place(1, 1);
+    const fit = () => {
+      let v = place(K);
+      // Too full: first without the breathing room, then towards drawn-size spacing.
+      if (spills(v)) v = place(K, 1);
+      for (let k = K - 0.1; k > 1 && spills(v); k -= 0.1) v = place(k, 1);
+      if (spills(v) && K > 1) v = place(1, 1);
+      return v;
+    };
+    let y = fit();
     // Sorting by height is not enough when points lie at different depths into the picture: two names
     // whose leaders still cross trade places (their slots stay where they are).
     const x0 = left ? (o.xl ?? 24) : (o.xr ?? 976);
@@ -170,7 +194,14 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
         }
       if (!swapped) break;
     }
-    order.forEach((ci, slot) => out.set(col[ci], { x: xAt(y[slot]), y: y[slot], align: left ? 'start' : 'end' }));
+    // The slots were spaced for the first order: a fading name's slot is narrow, and a full name swapped into
+    // it would sit on its neighbour. Swapped, the column is spaced again in its new order.
+    if (order.some((ci, slot) => ci !== slot)) {
+      col = order.map((ci) => col[ci]);
+      w = order.map((ci) => w[ci]);
+      y = fit();
+      col.forEach((c, slot) => out.set(c, { x: xAt(y[slot]), y: y[slot], align: left ? 'start' : 'end' }));
+    } else order.forEach((ci, slot) => out.set(col[ci], { x: xAt(y[slot]), y: y[slot], align: left ? 'start' : 'end' }));
   }
   return out;
 }

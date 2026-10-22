@@ -19,7 +19,7 @@ const GROUPS = [
   { color: TC.interseg, text: 'segmentu arteko arteriak' },
 ];
 
-function TrunkView({ pose, opts, ...rest }: { pose: TrunkPose; opts: TrunkOpts } & Omit<Parameters<typeof ArtView>[0], 'pose' | 'opts' | 'extra'>) {
+export function TrunkView({ pose, opts, ...rest }: { pose: TrunkPose; opts: TrunkOpts } & Omit<Parameters<typeof ArtView>[0], 'pose' | 'opts' | 'extra'>) {
   return <ArtView pose={ADULT} opts={ARCH_OPTS} extra={trunkModel(pose, opts)} {...rest} />;
 }
 

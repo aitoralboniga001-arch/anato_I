@@ -5,6 +5,7 @@ import { Stage3D, type At3 } from '@/components/kit/three/Stage3D';
 import { blendCamera } from '@/lib/three-d/aim';
 import { add, deg, norm, sub, type Camera3, type V3, type View3 } from '@/lib/three-d/math';
 import type { Scene3 } from '@/lib/three-d/scene';
+import { visibleAnchor } from '@/lib/three-d/occlusion';
 import { seg } from '@/lib/sim/anim';
 import { vis } from './common';
 import { POSE0, centreline, caudal, heartModel, type HeartOpts, type HeartPose } from './model3d';
@@ -215,11 +216,16 @@ export function ModelView({
           // camera: turned more than ~20 degrees away, they fade (the camera keys say the side instead).
           const asked = askedView(camera, view);
           const items: Callout[] = [];
+          const inFrame = (q: V3) => {
+            const s = at(q);
+            return s.x > 30 && s.x < 970 && s.y > 30 && s.y < 610;
+          };
           for (const n of names) {
             if (n.show <= 0.01) continue;
             const p = typeof n.p === 'string' ? model.pts[n.p] : n.p;
             if (!p) continue;
-            const q = at(p);
+            // A dot behind another structure would sit on that one: it moves to the part of its own the eye sees.
+            const q = at(typeof n.p === 'string' ? visibleAnchor(model.items, view.eye, p, n.id, inFrame) : p);
             items.push({ id: n.id, at: { x: q.x, y: q.y }, show: n.show, small: n.small, text: n.text, sub: n.sub, key: n.key });
           }
           return (

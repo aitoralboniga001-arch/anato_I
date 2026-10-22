@@ -12,8 +12,8 @@ import { ClassVoice, savedVoiceName, speakSeconds, voiceSupported, type VoiceCho
  */
 
 export interface ClassDriver {
-  /** Move the scene to this stage and time (gliding when it is ahead); `then` once there and still. */
-  go: (stage: string, t: number, then: () => void, view?: string) => void;
+  /** Move the scene to this stage and time (gliding when it is ahead, `rate` times faster); `then` once there and still. */
+  go: (stage: string, t: number, then: () => void, view?: string, rate?: number) => void;
   /** Play the current step on to its finished frame over `ms` (never past `until`, where the next line
    *  of this stage starts): its change, seen while it is said. */
   play: (ms: number, until?: number) => void;
@@ -31,7 +31,9 @@ export interface ClassLink {
   chunk?: string | null;
 }
 
-const RATES = [0.8, 1, 1.15, 1.3];
+const RATES = [0.8, 1, 1.25, 1.5, 1.75, 2];
+/** A rate saved by an older build (1.15, 1.3) becomes the nearest one offered now. */
+const nearestRate = (r: number) => RATES.reduce((a, b) => (Math.abs(b - r) < Math.abs(a - r) ? b : a));
 const RATE_KEY = 'enbrioatlas:klasea:abiadura';
 const placeKey = (week: number) => `enbrioatlas:klasea:${week}`;
 
@@ -108,7 +110,7 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
     const r = readJson<number>(RATE_KEY);
     const p = readJson<{ chunk: string; line: number }>(placeKey(lesson.week));
     // eslint-disable-next-line react-hooks/set-state-in-effect -- browser storage only exists after mount
-    if (r && RATES.includes(r)) setRateState(r);
+    if (typeof r === 'number' && r > 0) setRateState(nearestRate(r));
     setSaved(p && lesson.chunks.some((c) => c.id === p.chunk) ? p : null);
   }, [lesson]);
 
@@ -147,7 +149,7 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
         writeJson(placeKey(lesson.week), place);
       }
       let live = true;
-      d.go(cmd.stage, cmd.at, () => live && dispatch({ type: 'arrived' }), cmd.view);
+      d.go(cmd.stage, cmd.at, () => live && dispatch({ type: 'arrived' }), cmd.view, rate);
       return () => {
         live = false;
       };
@@ -173,7 +175,7 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
       };
     }
     if (state.phase === 'write') {
-      const id = window.setTimeout(() => dispatch({ type: 'written' }), 800);
+      const id = window.setTimeout(() => dispatch({ type: 'written' }), 800 / rate);
       return () => window.clearTimeout(id);
     }
     if (state.phase === 'hold') {
@@ -290,6 +292,13 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
       setFellBack(false);
     },
     setRate: (r: number) => {
+      setRateState(r);
+      writeJson(RATE_KEY, r);
+    },
+    /** One speed up or down (the dock's button and the + / − keys); `wrap` goes from the fastest back to the slowest. */
+    shiftRate: (dir: 1 | -1, wrap = false) => {
+      const i = RATES.indexOf(rate) + dir;
+      const r = RATES[wrap ? (i + RATES.length) % RATES.length : Math.max(0, Math.min(RATES.length - 1, i))];
       setRateState(r);
       writeJson(RATE_KEY, r);
     },

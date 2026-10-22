@@ -417,6 +417,44 @@
   color: var(--bg);
 }
 
+/* The speed, always in sight: one click a step faster (from 2× back to 0,8×), right click slower. */
+.speed {
+  min-width: 46px;
+  height: 30px;
+  margin-left: 4px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font: 600 12px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.speed:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.speedOn {
+  color: #1b0f05;
+  background: var(--focus);
+  border-color: transparent;
+}
+
+.speedOn:hover {
+  color: #1b0f05;
+  background: var(--focus);
+  filter: brightness(1.08);
+}
+
+.left {
+  margin-left: auto;
+  font: 500 11.5px/1.2 var(--font-mono);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
 .grow {
   flex: 1;
 }

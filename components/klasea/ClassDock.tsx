@@ -24,11 +24,28 @@ const TONE: Partial<Record<Tone, string>> = { emphasis: 'Garrantzitsua', caution
 
 const VOICE_KIND: Record<string, string> = { eu: 'euskarazko ahotsa', es: 'gaztelaniazkoa, euskaraz irakurtzen' };
 
-/** About how long the class takes: its speech, its pauses, and some 20 s per check. */
-export const classMinutes = (lesson: Lesson) => {
-  const secs = lesson.chunks.reduce((s, c) => s + c.lines.reduce((a, l) => a + speakSeconds(l.say) + 0.6 + (l.hold ?? 0), 0) + (c.checks?.length ?? 0) * 20, 0);
+/** About how long the class takes at `rate`: its speech and pauses (which follow the speed), and some 20 s per check. */
+export const classMinutes = (lesson: Lesson, rate = 1) => {
+  const secs = lesson.chunks.reduce((s, c) => s + c.lines.reduce((a, l) => a + speakSeconds(l.say) + 0.6 + (l.hold ?? 0), 0) / rate + (c.checks?.length ?? 0) * 20, 0);
   return Math.round(secs / 60);
 };
+
+/** From each step to the end: the seconds of lines at 1× and the checks still to come. */
+const remainingOf = (lesson: Lesson) => {
+  const steps = stepsOf(lesson);
+  const line = new Float64Array(steps.length + 1);
+  const checks = new Int32Array(steps.length + 1);
+  for (let i = steps.length - 1; i >= 0; i--) {
+    const st = steps[i];
+    const l = st.kind === 'line' ? lesson.chunks[st.chunk].lines[st.line] : null;
+    line[i] = line[i + 1] + (l ? speakSeconds(l.say) + 0.6 + (l.hold ?? 0) : 0);
+    checks[i] = checks[i + 1] + (st.kind === 'check' ? 1 : 0);
+  }
+  return { line, checks };
+};
+
+/** Speeds as Basque writes them: 1,25×. */
+export const rateText = (r: number) => `${String(r).replace('.', ',')}×`;
 
 export function ClassDock({ k, mode, onMode, holdReason, onAskKimu }: {
   k: Klasea;
@@ -43,10 +60,13 @@ export function ClassDock({ k, mode, onMode, holdReason, onAskKimu }: {
 
   // Topic 10's scene clock re-renders this dock. Its immutable lesson estimate and check count
   // do not change with the heart pose: do not rescan/syllabify every sentence on every frame.
-  const { minutes, checkCount } = useMemo(() => ({
-    minutes: classMinutes(lesson),
+  const { checkCount, remaining } = useMemo(() => ({
     checkCount: stepsOf(lesson).filter((s) => s.kind === 'check').length,
+    remaining: remainingOf(lesson),
   }), [lesson]);
+  const minutes = useMemo(() => classMinutes(lesson, k.rate), [lesson, k.rate]);
+  const at = Math.min(state.step, remaining.checks.length - 1);
+  const minutesLeft = Math.max(1, Math.round((remaining.line[at] / k.rate + remaining.checks[at] * 20) / 60));
 
   const sheetEl = sheet && (
     <Sheet
@@ -146,6 +166,9 @@ export function ClassDock({ k, mode, onMode, holdReason, onAskKimu }: {
             {tone && !asking && <span className={`${styles.tone} ${styles[`tone_${cmd.tone}`] ?? ''}`}>{tone}</span>}
             {state.plain && cmd.line && !asking && <span className={styles.tone}>Errazago</span>}
             {paused && <span className={styles.pausedTag}>{holdReason ?? 'Pausatuta · Zuriunea'}</span>}
+            <span className={styles.left} data-tip={`Klasearen amaierara, ${rateText(k.rate)} abiaduran`} data-tip-pos="top-end">
+              ≈ {minutesLeft} min
+            </span>
           </div>
           {asking && cmd.check ? (
             <ClassCheck
@@ -176,6 +199,19 @@ export function ClassDock({ k, mode, onMode, holdReason, onAskKimu }: {
           <button className={styles.icon} onClick={k.next} disabled={asking && state.phase === 'ask'} aria-label="Hurrengoa" data-tip="Hurrengoa · →" data-tip-pos="top">
             <IconNext size={16} />
           </button>
+          <button
+            className={`${styles.speed}${k.rate !== 1 ? ` ${styles.speedOn}` : ''}`}
+            onClick={() => k.shiftRate(1, true)}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              k.shiftRate(-1, true);
+            }}
+            aria-label={`Abiadura: ${rateText(k.rate)}`}
+            data-tip="Abiadura · + / −"
+            data-tip-pos="top"
+          >
+            {rateText(k.rate)}
+          </button>
         </div>
         <button
           className={`btn small${state.plain ? ' primary' : ''}`}
@@ -199,7 +235,7 @@ export function ClassDock({ k, mode, onMode, holdReason, onAskKimu }: {
             <button className={`tp-set-btn${open ? ' is-on' : ''}`} onClick={toggle} aria-expanded={open} aria-haspopup="dialog" data-tip="Modua, abiadura eta ahotsa · G" data-tip-pos="top-end">
               <ModeIcon mode={mode} />
               <span>Klasea</span>
-              {k.rate !== 1 && <em>{k.rate}×</em>}
+              {k.rate !== 1 && <em>{rateText(k.rate)}</em>}
               <IconChevron size={12} className="tp-set-caret" />
             </button>
           )}
@@ -224,7 +260,7 @@ export function ClassDock({ k, mode, onMode, holdReason, onAskKimu }: {
                 <span className="tp-speeds" role="radiogroup" aria-label="Abiadura">
                   {k.rates.map((v) => (
                     <button key={v} role="radio" aria-checked={k.rate === v} className={k.rate === v ? 'is-on' : ''} onClick={() => k.setRate(v)}>
-                      {v}×
+                      {rateText(v)}
                     </button>
                   ))}
                 </span>

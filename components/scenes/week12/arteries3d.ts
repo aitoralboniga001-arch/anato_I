@@ -47,8 +47,9 @@ export const AC = {
   pulmIv: mixHex(T.truncus, T.deo2, 0.16),
   pharynx: '#f2c14e',
   pharynxDeep: '#a7801f',
-  arch: '#e98b7a',
-  archDeep: '#8c3f33',
+  // Pale tissue, not red: the arteries inside the bars must read as the red things.
+  arch: '#e6d2bf',
+  archDeep: '#86705c',
   lung: '#f7b6c2',
   lungDeep: '#a85a6a',
   blood: T.o2,
@@ -571,7 +572,8 @@ export function arteryModel(pose: ArtPose, o: ArtOpts = {}): ArtModel {
   const fused = lineOf(fusedStretch(pose.fuse), d);
   lines.fused = fused;
   if (pose.fuse > 0.01) push('fused', 'aorta-dortsalak', fused, AC.da, 0.15, 1, { groups: ['beheranzko-aorta', 'aorta'] });
-  pts['aorta-dortsal-bakarra'] = fused[Math.round(N * 0.3)];
+  // Below the heart: higher up, from the front, the ventricle covers it.
+  pts['aorta-dortsal-bakarra'] = fused[Math.round(N * 0.62)];
 
   // Adult names on the pieces (where each is drawn in the adult pose).
   const L = lines;

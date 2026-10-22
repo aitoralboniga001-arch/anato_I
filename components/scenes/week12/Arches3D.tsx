@@ -29,11 +29,11 @@ export function ArchSystem3D({ t }: SceneProps) {
   const fuse = seg(t, S2[3] + 0.03, S2[3] + 0.14);
   const pose: ArtPose = { ...AP0, grow: g6(a1, grow(0), grow(1), grow(2), grow(3) * 0.8, grow(4)), fuse, is7: 0, pulm: 0 };
   const camera = cameraAt(t, [
-    [0, orbit(22, 10, 14, [0, 0.55, 0.2], [30, 0])],
+    [0, orbit(8, 10, 14, [0, 0.55, 0.2], [30, 0])],
     [S2[1], orbit(48, 8, 11, [0, 2.4, 0.1], [30, 0])],
-    [S2[2], orbit(32, 12, 11.5, [0, 2.2, 0.1], [30, 0])],
-    [S2[3], orbit(12, 6, 16, [0, -1.6, -0.4], [30, 0]), 0.05],
-    [S2[4], orbit(30, 10, 12.5, [0, 1.6, 0.1], [30, 0]), 0.05],
+    [S2[2], orbit(10, 12, 11.5, [0, 2.2, 0.1], [30, 0])],
+    [S2[3], orbit(4, 6, 16, [0, -1.6, -0.4], [30, 0]), 0.05],
+    [S2[4], orbit(10, 10, 12.5, [0, 1.6, 0.1], [30, 0]), 0.05],
   ]);
   const archesOn = vis(t, S2[2] + 0.02);
   const names: CalloutSpec[] = [
@@ -432,7 +432,7 @@ export function OtherChanges3D({ t }: SceneProps) {
     ...both('hodi-karotideoa', 'hodi-karotideoa', vis(t, S8[1], S8[1] + 0.1)),
     { id: 'aorta-dortsalak', p: 'aorta-dortsalak-lowR', show: vis(t, S8[2], S8[2] + 0.1), text: 'Eskuineko aorta dortsalaren ataltxoa' },
     { id: 'aorta-dortsalak', p: 'aorta-dortsalakL', show: vis(t, S8[2] + 0.08, S8[3]), text: 'Ezkerreko aorta dortsala', key: 'daL8' },
-    { id: 'beheranzko-aorta', p: 'aorta-dortsalak-lowL', show: vis(t, S8[2] + 0.08), text: 'Beheranzko aorta' },
+    { id: 'beheranzko-aorta', p: 'beheranzko-aorta', show: vis(t, S8[2] + 0.08), text: 'Beheranzko aorta' },
     ...both('karotida-komuna', 'karotida-komuna', vis(t, S8[3] + 0.12, S8[4])),
     { id: 'enbor-brakiozefalikoa', p: 'enbor-brakiozefalikoa', show: vis(t, S8[3] + 0.12, S8[4]) },
     { id: 'ezkerreko-subklabioa', p: 'ezkerreko-subklabioa', show: vis(t, S8[4], S8[5]) },
@@ -493,7 +493,8 @@ export function Nerves3D({ t }: SceneProps) {
   const pose: ArtPose = { ...LATE, grow: g6(1, 1, 1, 1, 0.8, 1), gone5, r6dist, rHook, ligament, descend, ductCar: descend, rLow: descend };
   const camera = cameraAt(t, [
     [0, orbit(30, 8, 15, [0, 1.6, 0.0], [30, 0])],
-    [S9[1], orbit(36, 10, 10.5, [0, 1.6, 0.1], [30, 0])],
+    // Turned only a little: from farther round, the aortic sac's horns hide the larynx.
+    [S9[1], orbit(20, 10, 10.5, [0, 1.6, 0.1], [30, 0])],
     [S9[2], orbit(4, 14, 10.5, [0, 1.3, 0.2], [30, 0])],
     [S9[3], orbit(70, 10, 8.5, [0.5, 1.1, 0.0], [30, 0])],
     [S9[4], orbit(-70, 10, 8.5, [-0.5, 1.4, 0.0], [30, 0]), 0.07],
@@ -508,7 +509,7 @@ export function Nerves3D({ t }: SceneProps) {
     { id: 'goiko-nerbio-laringeoa', p: 'goiko-nerbio-laringeoaL', show: vis(t, S9[1] + 0.06, S9[3]) },
     { id: 'nerbio-laringeo-atzerakaria', p: 'ezkerreko-nerbio-atzerakaria', show: vis(t, S9[1] + 0.08, S9[3]) },
     { id: 'laringea', p: 'laringea', show: vis(t, S9[1] + 0.08, S9[3]), small: true },
-    { id: 'eskuineko-nerbio-atzerakaria', p: 'eskuineko-nerbio-atzerakaria', show: vis(t, S9[2], S9[3]) + vis(t, S9[4]) },
+    { id: 'eskuineko-nerbio-atzerakaria', p: 'eskuineko-nerbio-atzerakaria', show: vis(t, S9[2], S9[3]) + vis(t, S9[4], S9[5]) + vis(t, S9[6]) },
     { id: 'ezkerreko-nerbio-atzerakaria', p: 'ezkerreko-nerbio-atzerakaria', show: vis(t, S9[2], S9[4]) + vis(t, S9[5]) },
     { id: 'hodi-arteriosoa', p: 'hodi-arteriosoa', show: vis(t, S9[3], S9[4]) + vis(t, S9[5], S9[6]) },
     { id: 'eskuineko-subklabioa', p: 'laugarren-aorta-arkuaR', show: vis(t, S9[4], S9[5]) },

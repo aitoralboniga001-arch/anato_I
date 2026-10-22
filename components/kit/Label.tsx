@@ -297,7 +297,8 @@ export function placeNote(text: string, x: number, y: number, align: 'start' | '
     if (from < 992) out.push([from, 992]);
     return out;
   };
-  const fits = gaps(y - lh / 2, y + lh / 2).filter(([a, b]) => b - a >= w);
+  // The width is an estimate (bold captions run wider): a gap is taken, or a line wrapped, with a tenth to spare.
+  const fits = gaps(y - lh / 2, y + lh / 2).filter(([a, b]) => b - a >= w * 1.1);
   if (fits.length) {
     const near = (g: [number, number]) => Math.min(Math.max(x, g[0] + w / 2), g[1] - w / 2);
     const g = fits.sort((p, q) => Math.abs(near(p) - x) - Math.abs(near(q) - x))[0];
@@ -311,7 +312,7 @@ export function placeNote(text: string, x: number, y: number, align: 'start' | '
     const y0 = up ? y - (lines.length - 1) * lh - lh / 2 : y - lh / 2;
     const g = gaps(y0, y0 + lines.length * lh).sort((p, q) => q[1] - q[0] - (p[1] - p[0]))[0] ?? [8, 992];
     gap = g;
-    const max = Math.max(8, Math.floor((g[1] - g[0]) / (CHAR_W * fs)));
+    const max = Math.max(8, Math.floor((g[1] - g[0]) / (CHAR_W * fs * 1.1)));
     lines = [];
     let line = '';
     for (const word of text.split(' ')) {

@@ -82,6 +82,7 @@ const KEYS: [string, string][] = [
   ['Shift + ← →', 'Aurreko / hurrengo etapa'],
   ['1–9', 'Ikuspegia aldatu (mozketak)'],
   ['G', 'Modua aldatu: gidatua → arrunta → azkarra'],
+  ['+  −', 'Klasea: azkarrago / motelago (0,8×–2×)'],
   ['L', 'Izenak: urratsez urrats / guztiak / gabe'],
   ['F', 'Foku modua: eszena handia, azalpena beti beheko txartelean'],
   ['[  ]', 'Etapen zerrenda / azalpen-panela tolestu'],

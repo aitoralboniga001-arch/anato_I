@@ -22,7 +22,8 @@ const CONT_E = 'enbrioia-12';
 
 export const S1 = [0, 0.16, 0.32, 0.5, 0.68, 0.84] as const;
 
-function IntroView({ t }: SceneProps) {
+/** Exported for the anchor audit (tests/anchors3d.test.ts), which calls it without the geometry gate. */
+export function IntroView({ t }: SceneProps) {
   const bars = seg(t, S1[4] + 0.02, S1[4] + 0.08);
   const pose: EmbryoPose = { ...EP0, arches: [0.15, 0.4, 1, 1, 0, 0.7] };
   const flow = vis(t, S1[3] + 0.01, S1[4] + 0.02) + 0.35 * vis(t, 0, S1[1]);
@@ -40,8 +41,8 @@ function IntroView({ t }: SceneProps) {
     { id: 'aorta-dortsalak', p: 'aorta-dortsalakL', show: vis(t, 0, S1[1]) + vis(t, S1[3], S1[4]) },
     { id: 'zilbor-arteriak', p: 'zilbor-arteriak', show: vis(t, 0, S1[1]) + vis(t, S1[3], S1[4]) },
     { id: 'bitelo-arteriak', p: 'bitelo-arteriak', show: vis(t, 0, S1[1]), small: true },
-    { id: 'atal-bulbarra', p: 'atal-bulbarra', show: vis(t, S1[1], S1[2]), text: 'Arteria bulboa' },
-    { id: 'enbor-arteriosoa', p: 'enbor-arteriosoa', show: vis(t, S1[1], S1[2]), text: 'Arteria enborra' },
+    { id: 'atal-bulbarra', p: 'atal-bulbarra', show: vis(t, S1[1], S1[2]), text: 'Alde bulbarra' },
+    { id: 'enbor-arteriosoa', p: 'enbor-arteriosoa', show: vis(t, S1[1], S1[2]), text: 'Arteria enborra', sub: '(arteria bulboa)' },
     { id: 'zain-sinua', p: 'zain-sinua', show: vis(t, S1[2], S1[3]) },
     { id: 'bitelo-zainak', p: 'bitelo-zainak', show: vis(t, S1[2], S1[4]) },
     { id: 'zilbor-zainak', p: 'zilbor-zainak', show: vis(t, S1[2], S1[4]) },
@@ -93,7 +94,7 @@ Intro3D.geo = ['embryo5'];
 
 // ———————————————————————————— stage 11: the ventral branches in the embryo (notes 2.5–2.5.1) ————————————————————————————
 
-function VentralView({ t }: SceneProps) {
+export function VentralView({ t }: SceneProps) {
   const reduce = seg(t, S11[2] + 0.03, S11[2] + 0.11);
   const pose: EmbryoPose = { ...EP0, arches: [0, 0, 1, 1, 0, 1], reduce, veins: 0.35, cardinal: 0.25 };
   const camera = cameraAt(t, [
