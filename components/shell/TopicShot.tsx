@@ -23,6 +23,7 @@ const SHOTS: Record<number, { stage: string; view: string; rest: number }> = {
   9: { stage: 'ildaskatuak', view: 'miotoma', rest: 0.73 },
   10: { stage: 'bihotz-hodia', view: 'zeharkakoa', rest: 0.9 },
   11: { stage: 'zulo-obala', view: 'frontala', rest: 0.9 },
+  12: { stage: 'aorta-heldua', view: '3d', rest: 0.9 },
 };
 
 const PLAY_S = 4.5;

@@ -166,6 +166,47 @@ relation('arteria-konoa', 'ezkerreko-infundibulua', 'origin', `${topic11}#ezkerr
 relation('enborraren-gandorrak', 'trenkada-aortikopulmonarra', 'transformation', `${topic11}#enborraren-gandorrak.fate`, 'Trenkada kiribila.');
 relation('enbor-arteriosoa', 'birika-arteria', 'origin', `${topic11}#birika-arteria.origin`);
 
+// 12. gaia: arteria sistema.
+const topic12 = 'content/weeks/week12-structures.ts';
+relation('lehen-aorta-arkua', 'arteria-maxilarra', 'origin', `${topic12}#arteria-maxilarra.origin`, 'Arkuaren hondarra.');
+relation('bigarren-aorta-arkua', 'hioide-arteria', 'origin', `${topic12}#hioide-arteria.origin`, 'Arkuaren hondarra.');
+relation('bigarren-aorta-arkua', 'ointokiko-arteria', 'origin', `${topic12}#ointokiko-arteria.origin`, 'Arkuaren hondarra.');
+relation('hirugarren-aorta-arkua', 'karotida-komuna', 'origin', `${topic12}#karotida-komuna.origin`);
+relation('hirugarren-aorta-arkua', 'barneko-karotida', 'origin', `${topic12}#barneko-karotida.origin`, 'Hurbileko zatia.');
+relation('aorta-dortsalak', 'barneko-karotida', 'origin', `${topic12}#barneko-karotida.origin`, 'Urrutiko atala, alde kranealetik.');
+relation('karotida-komuna', 'kanpoko-karotida', 'origin', `${topic12}#kanpoko-karotida.origin`, 'Kimu bezala.');
+relation('aorta-zakua', 'enbor-brakiozefalikoa', 'origin', `${topic12}#enbor-brakiozefalikoa.origin`, 'Eskuineko luzapena (estuagoa).');
+relation('aorta-zakua', 'aortaren-makoa', 'origin', `${topic12}#aortaren-makoa.origin`, 'Hasierako zatia: ezkerreko luzapena (lodiagoa).');
+relation('laugarren-aorta-arkua', 'makoaren-urrutiko-atala', 'origin', `${topic12}#makoaren-urrutiko-atala.origin`, 'Ezkerreko laugarren arkua.');
+relation('laugarren-aorta-arkua', 'eskuineko-subklabioa', 'origin', `${topic12}#eskuineko-subklabioa.origin`, 'Hasierako atala, eskuineko laugarren arkutik.');
+relation('aorta-dortsalak', 'eskuineko-subklabioa', 'origin', `${topic12}#eskuineko-subklabioa.origin`, 'Bitarteko atala, eskuineko aorta dortsaletik.');
+relation('zazpigarren-segmentu-arteko-arteria', 'eskuineko-subklabioa', 'origin', `${topic12}#eskuineko-subklabioa.origin`, 'Urrutiko atala.');
+relation('zazpigarren-segmentu-arteko-arteria', 'ezkerreko-subklabioa', 'origin', `${topic12}#ezkerreko-subklabioa.origin`, 'Gero gorago kokatzen da.');
+relation('enbor-arteriosoa', 'goranzko-aorta', 'origin', `${topic12}#goranzko-aorta.origin`, 'Trenkadatu ondoren.');
+relation('aorta-dortsalak', 'beheranzko-aorta', 'origin', `${topic12}#beheranzko-aorta.origin`, 'Ezkerreko aorta dortsala.');
+relation('seigarren-aorta-arkua', 'ezkerreko-birika-arteria', 'origin', `${topic12}#ezkerreko-birika-arteria.origin`, 'Hurbileko atala.');
+relation('seigarren-aorta-arkua', 'eskuineko-birika-arteria', 'origin', `${topic12}#eskuineko-birika-arteria.origin`, 'Hurbileko atala.');
+relation('hasierako-birika-arteriak', 'ezkerreko-birika-arteria', 'origin', `${topic12}#ezkerreko-birika-arteria.origin`);
+relation('hasierako-birika-arteriak', 'eskuineko-birika-arteria', 'origin', `${topic12}#eskuineko-birika-arteria.origin`);
+relation('seigarren-aorta-arkua', 'hodi-arteriosoa', 'origin', `${topic12}#hodi-arteriosoa.origin`, 'Ezkerreko arkuaren urrutiko atala.');
+relation('hodi-arteriosoa', 'lotailu-arteriosoa', 'transformation', `${topic12}#lotailu-arteriosoa.origin`, 'Jaio ondoren.');
+relation('bitelo-arteriak', 'enbor-zeliakoa', 'origin', `${topic12}#enbor-zeliakoa.origin`);
+relation('bitelo-arteriak', 'goiko-arteria-mesenterikoa', 'origin', `${topic12}#goiko-arteria-mesenterikoa.origin`);
+relation('bitelo-arteriak', 'beheko-arteria-mesenterikoa', 'origin', `${topic12}#beheko-arteria-mesenterikoa.origin`);
+relation('luzetarako-anastomosiak', 'orno-arteria', 'origin', `${topic12}#orno-arteria.origin`, 'Lepoko segmentu arteko arteriak, aortatik askatuta.');
+relation('segmentu-arteko-arteriak', 'arteria-iliako-primitiboak', 'origin', `${topic12}#arteria-iliako-primitiboak.origin`, 'Gerriko V. segmentu arteko arteria.');
+relation('kanpoko-arteria-iliakoa', 'arteria-femorala', 'development', `${topic12}#arteria-femorala.origin`, 'Iztai lotailuaren azpitik.');
+relation('zilbor-arteriak', 'erdialdeko-zilbor-lotailua', 'transformation', `${topic12}#erdialdeko-zilbor-lotailua.origin`, 'Urrutiko atala, jaio ondoren.');
+relation('zilbor-arteriak', 'goiko-gernu-maskuri-arteria', 'development', `${topic12}#goiko-gernu-maskuri-arteria.origin`, 'Hurbileko atala.');
+relation('ardatz-arteria', 'arteria-brakiala', 'origin', `${topic12}#arteria-brakiala.origin`);
+relation('ardatz-arteria', 'hezur-arteko-arteria', 'origin', `${topic12}#hezur-arteko-arteria.origin`);
+relation('ardatz-arteria', 'eskuaurreko-arku-sakona', 'origin', `${topic12}#eskuaurreko-arku-sakona.origin`);
+relation('ardatz-arteria', 'arteria-kubitala', 'origin', `${topic12}#arteria-kubitala.origin`);
+relation('ardatz-arteria', 'arteria-erradiala', 'origin', `${topic12}#arteria-erradiala.origin`);
+relation('ardatz-arteria', 'arteria-ziatikoa', 'origin', `${topic12}#arteria-ziatikoa.origin`);
+relation('ardatz-arteria', 'arteria-popliteoa', 'origin', `${topic12}#arteria-popliteoa.origin`);
+relation('ardatz-arteria', 'arteria-peroneoa', 'origin', `${topic12}#arteria-peroneoa.origin`);
+
 /** Reuse the existing learning trees without upgrading their edges to cell ancestry. */
 const legacy: AtlasRelation[] = [];
 function walk(node: LNode) {

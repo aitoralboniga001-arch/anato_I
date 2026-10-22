@@ -50,6 +50,9 @@ const GONE: Record<string, string> = {
   '10/bihotz-hodia/6/mesokardio-dortsala': 'urrats honetan desagertzen da: zeharkako sinua geratzen da',
   '10/zain-sinua/3/eskuineko-zilbor-zaina': 'urrats honetan desagertzen da (4. asterako): izena hasieran, gero ixten',
   '10/zain-sinua/3/ezkerreko-zain-bitelinoa': 'urrats honetan desagertzen da (4. asterako): izena hasieran, gero ixten',
+  '12/eguna-27/5/bostgarren-aorta-arkua': 'agertu eta desagertu egiten da urrats honetan (bira-irudian agertuta)',
+  '12/laugarren-arkua/6/bostgarren-aorta-arkua': 'agertu eta guztiz desagertzen da urrats honetan: ez du ezer sortzen',
+  '12/beste-aldaketak/2/hodi-karotideoa': 'urrats honetan desagertzen da (bira-irudian izendatuta)',
   '10/eskuineko-aurikula/4/eskuineko-zain-balbula': 'goiko aldea desagertzen da urrats honetan; behekoa kaben eta sinu koronarioaren balbulak (izendatuta)',
 };
 
@@ -65,6 +68,7 @@ const MENTION_ONLY: Record<string, string> = {
   '10/eskualde-kardiogenikoa/2/errai-orria': 'diskoa goitik: errai orria zeharkako mozketan ikusten da',
   '10/eskualde-kardiogenikoa/3/errai-orria': 'diskoa goitik: errai orria zeharkako mozketan ikusten da',
   '10/eskualde-kardiogenikoa/3/ferra-formako-plexua': '"ferra formako egitura": irlatxoak; plexua 5. urratsean',
+  '12/gorputz-adarrak/1/arteria-femorala': 'sarrera: hankako ardatz arteria 6.–7. urratsetan; femorala han ikusten da',
   '1/blastozistoa/2/blastozistoa': 'eraketa hasten da: oraindik morula da',
   '1/ernalkuntza/1/obulua': '"ez da obulua": ezeztapena',
   '1/ernalkuntza/6/obozito-sekundarioa': 'urrats honetan obulu bihurtzen da',

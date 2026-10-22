@@ -8,6 +8,7 @@ import { IMPORTANCE_W8 } from '@/content/klasea/importance/w8';
 import { IMPORTANCE_W9 } from '@/content/klasea/importance/w9';
 import { IMPORTANCE_W10 } from '@/content/klasea/importance/w10';
 import { IMPORTANCE_W11 } from '@/content/klasea/importance/w11';
+import { IMPORTANCE_W12 } from '@/content/klasea/importance/w12';
 import { LESSONS } from '@/content/klasea';
 import { computeImportance, type Importance } from '@/lib/klasea/importance';
 import { stepsOf } from '@/lib/klasea/engine';
@@ -131,6 +132,8 @@ const X_WORDS: Record<string, 'ks' | 'basque'> = {
   xifoide: 'ks',
   oxigenoz: 'ks',
   oxigenatzeko: 'ks',
+  konexioan: 'ks',
+  konexioa: 'ks',
 };
 
 // ———————————————————————————— each topic's class ————————————————————————————
@@ -196,6 +199,14 @@ const TOPICS: Topic[] = [
     shown: {},
     // 3/p5/s1–s2: the ventricular part is the early left ventricle; topic 11's cuts draw it under that name.
     same: { 'atal-bentrikularra': ['hasierako-ezkerreko-bentrikulua'] },
+  },
+  {
+    week: 12,
+    importance: IMPORTANCE_W12,
+    pinned: ['1/p4/s3', '2/p3/s3', '2/p4/s1', '2.3.1/p8/s1', '2.3.2/p9/s1', '2.3.4/p6/s1', '2.3.4/p11/s7', '2.4/p4/s4', '2.4/p13/s1', '2.5/p3/s3', '2.5.1/p5/s1', '2.6/p3/s5', '2.7.1/p4/s4'],
+    contrastFrom: 'sistema',
+    shown: {},
+    same: {},
   },
 ];
 

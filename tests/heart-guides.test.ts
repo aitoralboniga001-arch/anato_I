@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { getWeek } from '@/content/registry';
-import { guides10, guides11 } from '@/content/heart-guides';
+import { guides10, guides11, guides12 } from '@/content/heart-guides';
 
-/** Topics 10–11: every picture has its "Irudia ulertu" reading aid, and no aid points at a view that is gone. */
+/** Topics 10–12: every picture has its "Irudia ulertu" reading aid, and no aid points at a view that is gone. */
 describe.each([
   [10, guides10],
   [11, guides11],
+  [12, guides12],
 ] as const)('topic %i reading aids', (week, guides) => {
   const views = getWeek(week)!.stages.flatMap((s) => s.views.map((v) => ({ key: `${s.id}/${v.id}`, guide: v.guide })));
 

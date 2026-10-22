@@ -934,5 +934,61 @@
         "text": "12"
       }
     ]
+  },
+  "12": {
+    "file": "12. GAIA_ARTERIA SISTEMA (zirkulazio-sistema III) (zuzendu gabe) (1).pdf",
+    "pages": 11,
+    "characters": 20131,
+    "sha256": "0416f743dcf34dfca8320ad95f01e45be8b43c17b20df62f5409608f14800d35",
+    "removed": [
+      {
+        "page": 1,
+        "text": "31. TALDEA 2025/10/20"
+      },
+      {
+        "page": 1,
+        "text": "1"
+      },
+      {
+        "page": 2,
+        "text": "2"
+      },
+      {
+        "page": 3,
+        "text": "3"
+      },
+      {
+        "page": 4,
+        "text": "4"
+      },
+      {
+        "page": 5,
+        "text": "5"
+      },
+      {
+        "page": 6,
+        "text": "6"
+      },
+      {
+        "page": 7,
+        "text": "7"
+      },
+      {
+        "page": 8,
+        "text": "8"
+      },
+      {
+        "page": 9,
+        "text": "9"
+      },
+      {
+        "page": 10,
+        "text": "10"
+      },
+      {
+        "page": 11,
+        "text": "11"
+      }
+    ]
   }
 }

@@ -11,6 +11,7 @@ import { w8 } from './w8';
 import { w9 } from './w9';
 import { w10 } from './w10';
 import { w11 } from './w11';
+import { w12 } from './w12';
 
 export interface NotesPart { text: string; b?: boolean; i?: boolean }
 export interface NotesSentence { id: string; parts: NotesPart[] }
@@ -21,7 +22,7 @@ export interface NotesBlock {
   sentences: NotesSentence[];
 }
 export interface NotesAnchor { week: number; stageId: string; beat: number }
-const documents: Record<number, NotesBlock[]> = { 1: w1, 2: w2, 3: w3, 4: w4, 5: w5, 6: w6, 7: w7, 8: w8, 9: w9, 10: w10, 11: w11 };
+const documents: Record<number, NotesBlock[]> = { 1: w1, 2: w2, 3: w3, 4: w4, 5: w5, 6: w6, 7: w7, 8: w8, 9: w9, 10: w10, 11: w11, 12: w12 };
 export const notesOf = (week: number): NotesBlock[] => documents[week] ?? [];
 export const sentenceText = (s: NotesSentence) => s.parts.map(p => p.text).join('');
 export const blockText = (b: NotesBlock) => b.sentences.map(sentenceText).join('');
@@ -67,6 +68,7 @@ for (const week of weeks) for (const stage of week.stages) stage.beats.forEach((
 
 /** Audited exceptions where a scene teaches detail absent from this ORIGINAL PDF. */
 export const NOTES_EXCEPTIONS: Record<string, { sections?: string[]; reason: string }> = {
+  '12/aorta-heldua': { sections: ['2.3.4', '2.3.2'], reason: 'Aorta helduaren adarrak 2.3.4ko azken paragrafoan ere deskribatzen dira (makoaren hiru adarrak, brakiozefaliko bakarra), eta 2.3.2ko irudiak (arkuetatik eratutako arteriak) jatorriaren kolorea laburtzen du, 2.4ko laburpenarekin batera.' },
   '11/jatorriak': { sections: ['1', '2.2', '3', '5.1'], reason: 'Bi gaien laburpena: atal bakoitzaren jatorria aurreko ataletan azaltzen da (1, 2.2, 3, 5.1), eta 5.2ko laburpenarekin biltzen da.' },
   '11/arteria-konoa/0': { sections: ['5'], reason: '5. atalaren sarrera (kiribil formako trenkadak) atal bulbarraren trenkadatzea irekitzen du; 5.1 arteria konoarekin hasten da.' },
   '1/ibilbidea': { sections: ['4.2', '4.3', '4.4', '4.5'], reason: 'Ibilbideak ernalkuntza, segmentazioa, blastozistoa eta habiratzea ere erakusten ditu.' },

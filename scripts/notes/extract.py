@@ -29,7 +29,12 @@ FILES = [
     '9.GAIA _MUSKULU EDO GIHAR SISTEMA .docx.pdf',
     '10. GAIA_ ZIRKULAZIO APARATUA (ZUZENDUTA).pdf',
     '11. GAIA. ZIRKULAZIO-SISTEMA (II) (zuzenduta).pdf',
+    '12. GAIA_ARTERIA SISTEMA (zirkulazio-sistema III) (zuzendu gabe) (1).pdf',
 ]
+
+
+# Week 12's figure captions are set in body type beside the text: they are recognised by their words.
+CAPTIONS_12 = ('Embrioiaren zirkulazio sistema', 'Arku sistema hasierako garapenean', 'Garapenaren 27.eguna', 'Garapenaren 29. eguna', 'Arkuetatik eratutako arteria', 'ezberdinak', 'Nerbioak aorta arkua', 'arteria subklabioa inguratzen', 'Aortaren atalak eta bertatik', 'ateratako arteriak', 'Aorta dortsalaren fusioa', 'Aurreko errai adarrak', 'Alboko errai adarrak', 'Atze alboko arteriak (segmentuarteko', 'Goiko gorputz adarren arterien garapena')
 
 
 def norm(text):
@@ -43,7 +48,7 @@ def block_text(block):
 def furniture(line, page):
     text = norm(''.join(s['text'] for s in line['spans']))
     y = line['bbox'][1]
-    return (y < 65 and bool(re.search(r'GIZA ANATOMIA|ANATOMIA I|MEDIKUNTZA 1|RAFAEL SARRIA|31 TALDEA', text, re.I))) or (y > page.rect.height - 65 and bool(re.fullmatch(r'\d+', text)))
+    return (y < 65 and bool(re.search(r'GIZA ANATOMIA|ANATOMIA I|MEDIKUNTZA 1|RAFAEL SARRIA|31 TALDEA', text, re.I)) or (y < 90 and bool(re.fullmatch(r'31\. TALDEA \d{4}/\d\d/\d\d', text)))) or (y > page.rect.height - 65 and bool(re.fullmatch(r'\d+', text)))
 
 
 def compact(parts):
@@ -58,7 +63,7 @@ def compact(parts):
     return out
 
 
-def split_sentences(parts):
+def split_sentences(parts, week=0):
     text = ''.join(p['text'] for p in parts)
     ends = []
     # Decimal/section ordinals, initials and abbreviations are not sentence ends.
@@ -66,7 +71,7 @@ def split_sentences(parts):
         prefix = text[:m.start()]
         token = re.search(r'[\w,]+$', prefix)
         word = token.group() if token else ''
-        if word.isdigit() or re.fullmatch(r'\d+,\d+', word) or len(word) == 1 or word.lower() in {'adib', 'etab', 'etc', 'dr', 'irud', 'vs'}:
+        if word.isdigit() or re.fullmatch(r'\d+,\d+', word) or len(word) == 1 or word.lower() in {'adib', 'etab', 'etc', 'dr', 'irud', 'vs'} or (week == 12 and (word == 'ezk' or re.fullmatch(r'[IVX]+', word))):
             continue
         ends.append(m.end())
     if not ends or ends[-1] != len(text):
@@ -88,9 +93,12 @@ def split_sentences(parts):
 def extract(path, week):
     doc = fitz.open(path)
     lines, removed = [], []
-    # Preserve PDF reading order, also used by get_text('text'); don't sort columns.
+    # Preserve PDF reading order, also used by get_text('text'); don't sort columns. Week 12 sets its
+    # two-column summary tables as text boxes stored after the prose that follows them: its blocks are
+    # read top to bottom (both extractions sorted the same way), so each table stays in its own section.
+    order = week == 12
     for pn, page in enumerate(doc):
-        for b in page.get_text('dict')['blocks']:
+        for b in page.get_text('dict', sort=order)['blocks']:
             if b['type'] != 0:
                 continue
             for line in b['lines']:
@@ -123,7 +131,8 @@ def extract(path, week):
     raw_lines = []
     for pn, page in enumerate(doc):
         excluded = collections.Counter(r['text'] for r in removed if r['page'] == pn + 1)
-        for text in page.get_text('text').splitlines():
+        plain = ''.join(b[4] for b in page.get_text('blocks', sort=True) if b[6] == 0) if order else page.get_text('text')
+        for text in plain.splitlines():
             text = norm(text)
             if excluded[text]:
                 excluded[text] -= 1
@@ -168,8 +177,10 @@ def extract(path, week):
                 kind = 'h2'
         elif re.match(r'^(?:[●•➔\-]|\d+\.\u200b)', text):
             kind = 'li'
-        # Week 11 wraps body text beside its figures (indented lines) and has no printed captions.
-        elif (line['italic'] and line['size'] <= 11.2 and len(text) < 110 and line['box'][0] > 100) or re.match(r'^\d+\.?\s*irudia', text, re.I) or (week != 11 and line['box'][0] > 150 and len(text) < 100 and not line['bold']):
+        # Weeks 11 and 12 wrap body text beside their figures (indented lines); week 12's tables have a right column.
+        elif (line['italic'] and line['size'] <= 11.2 and len(text) < 110 and line['box'][0] > 100) or re.match(r'^\d+\.?\s*irudia', text, re.I) or (week not in {11, 12} and line['box'][0] > 150 and len(text) < 100 and not line['bold']):
+            kind = 'caption'
+        elif week == 12 and text.startswith(CAPTIONS_12) and len(text) < 64:
             kind = 'caption'
         elif week == 10 and line['italic'] and line['size'] <= 10.5:
             # Week 10 sets two figure captions side by side on one 10 pt italic row (wider than a caption).
@@ -181,7 +192,8 @@ def extract(path, week):
         continuation = blocks and block_section == blocks[-1]['section'] and (
             (kind == 'p' and blocks[-1]['kind'] in {'p', 'li'} and ((line['page'] == previous['page'] and gap < max(9, line['size'] * .55)) or (line['page'] != previous['page'] and not re.search(r'[.!?:]$', previous['text']))))
             or (same_row and kind in {'p', 'li', 'caption', 'toc'} and blocks[-1]['kind'] in {'p', 'li', 'caption', 'toc'})
-            or (kind in {'p', 'caption'} and blocks[-1]['kind'] == 'caption' and line['page'] == previous['page'] and gap < 9 and not (week == 10 and kind == 'p' and not line['italic']))
+            # Week 12 sets its captions beside the body text: a body line after a caption starts a new block.
+            or (kind in {'p', 'caption'} and blocks[-1]['kind'] == 'caption' and line['page'] == previous['page'] and gap < 9 and not (week == 10 and kind == 'p' and not line['italic']) and not (week == 12 and kind == 'p'))
             or (kind == 'title' and blocks[-1]['kind'] == 'title')
             or (kind == 'p' and blocks[-1]['kind'] in {'h1', 'h2'} and line['size'] >= 13.5 and line['bold'] > .7)
         )
@@ -196,7 +208,7 @@ def extract(path, week):
         # Week prefix avoids collisions between sections shared by different topics.
         bid = f"w{week}/{b['section']}/p{counts[b['section']]}"
         b['id'] = bid
-        b['sentences'] = [{'id': f'{bid}/s{i}', 'parts': p} for i, p in enumerate(split_sentences(compact(b.pop('parts'))), 1)]
+        b['sentences'] = [{'id': f'{bid}/s{i}', 'parts': p} for i, p in enumerate(split_sentences(compact(b.pop('parts')), week), 1)]
     generated = norm(' '.join(block_text(b) for b in blocks))
     if generated != reference:
         print('\n'.join(difflib.unified_diff(reference.split(), generated.split(), fromfile='PDF', tofile='extracted', n=3)))

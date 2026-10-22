@@ -1,8 +1,8 @@
 import type { ViewGuide, WeekDef } from '@/lib/sim/types';
 
 /**
- * "Irudia ulertu" reading aids for every view of topics 10 and 11 (the circulatory system), keyed
- * `stage/view`. Each is worded from the notes (w10, w11) and the view's own description: where you
+ * "Irudia ulertu" reading aids for every view of topics 10–12 (the circulatory system), keyed
+ * `stage/view`. Each is worded from the notes (w10–w12) and the view's own description: where you
  * stand and which side is which, one thing to watch, how to read the colours, and one question.
  * In a front view the embryo's right is on the viewer's left; the notes' venous sinus figure is seen
  * from behind, so there it is not swapped (w10/3.4/p4/s2).
@@ -279,6 +279,119 @@ export const guides11: Record<string, ViewGuide> = {
     meaning: 'Kolorea jatorria da, ez funtzioa: berdea hurbileko atala, urdin-berdea atal bentrikularra, lima konoa, marfila enborra, laranja atal aurikularra, morea zain sinua.',
     question: 'Zein ataletik datoz eskuineko bentrikuluaren bi atalak, trabekulatua eta lisoa?',
     answer: 'Trabekulatua bulboaren hurbileko ataletik; lisoa (infundibulua) arteria konotik.',
+  },
+};
+
+/** Topic 12 (the arteries): the arch models are seen from the front, the embryo from its left. */
+const ARCH_FRONT = 'Aurretik ikusita, enbrioiaren ezkerra zure eskuinean dago. Arrastatu biratzeko.';
+const SIDE = 'Enbrioia ezkerretik, gorputza gardena: burua goian, bizkarra zure ezkerrean. Arrastatu biratzeko.';
+const BODY_FRONT = 'Aurretik ikusita, gorputzaren ezkerra zure eskuinean dago. Arrastatu biratzeko.';
+
+export const guides12: Record<string, ViewGuide> = {
+  'sarrera/3d': {
+    orientation: `5. asteko enbrioia. ${SIDE}`,
+    observe: 'Jarraitu odolari: bihotz lakiotik arteria enborrera, aorta arkuetatik aorta dortsaletara, eta handik zilborreko eta bitelo arterietara.',
+    meaning: 'Koloreak odolaren oxigenoa erakusten du, ez hodi mota. Zain guztien odola bihotz lakioan nahasten da.',
+    question: 'Zein zainek dakarte odol oxigenatua bihotzera?',
+    answer: 'Zilborreko zainek, karenatik. Bitelo eta kardinal zainek oxigeno gutxiko odola dakarte.',
+  },
+  'arku-sistema/3d': {
+    orientation: `Aorta zakua, aorta arkuak eta bi aorta dortsalak, kraneala goian. ${ARCH_FRONT}`,
+    observe: 'Jarraitu arkuei: aorta zakutik bi alboetara ateratzen dira, eta atzean aorta dortsaletara iristen dira, bikotez bikote.',
+    meaning: 'Kolore bakoitza jatorri bat da: zakua, arku bakoitza eta aorta dortsalak. Kolore berak hurrengo urratsetan eta heldutan jarraitzen du.',
+    question: 'Non fusionatzen dira bi aorta dortsalak?',
+    answer: 'T4 mailatik behera: aorta dortsal bakarra sortzen da. Gainetik bananduta jarraitzen dute.',
+  },
+  'eguna-27/3d': {
+    orientation: `Aorta arkuak 27. egunean, 4 mm-ko enbrioian. ${ARCH_FRONT}`,
+    observe: 'Konparatu arkuak: lehena eta bigarrena txikitzen ari dira, hirugarrena handia da, laugarrena hasten da, bostgarrena ia ez dago.',
+    meaning: 'Lehen bi arkuetatik zati txiki bat geratzen da: arteria maxilarrak, hioide arteria eta ointokiko arteria.',
+    question: 'Zein arkutik ateratzen dira hasierako birika arteriak?',
+    answer: 'Seigarren arkutik: adartxo horiek birika enborrarekin lotuko dira.',
+  },
+  'eguna-29/3d': {
+    orientation: `Aorta arkuak 29. egunean, 10 mm-ko enbrioian. ${ARCH_FRONT}`,
+    observe: 'Begiratu enbor arteriosoari: trenkadak bitan banatzen du, goranzko aorta eta birika enborra. Gero, aorta zakuaren bi luzapenei.',
+    meaning: 'Luzapenak ez dira simetrikoak: ezkerrekoa lodiagoa da, eskuinekoa estuagoa. Kolore bakoitza helduan ere bere lekuan geratzen da.',
+    question: 'Zer sortzen du aorta zakuaren eskuineko luzapenak?',
+    answer: 'Arteria brakiozefalikoa: hortik eskuineko karotida komuna eta eskuineko subklabioa.',
+  },
+  'hirugarren-arkua/3d': {
+    orientation: `Lehen hiru arkuak eta karotidak. ${ARCH_FRONT}`,
+    observe: 'Jarraitu hirugarren arkuari: karotida komuna eta barneko karotidaren hasiera bihurtzen da. Goian, aorta dortsalak barneko karotida osatzen du.',
+    meaning: 'Hirugarren arkuak berdin garatzen dira bi aldeetan. Kanpoko karotida kimu berri bat da, karotida komunetik.',
+    question: 'Nondik dator barneko karotidaren urrutiko zatia?',
+    answer: 'Aorta dortsalaren alde kranealetik.',
+  },
+  'laugarren-arkua/3d': {
+    orientation: `Laugarren arkuak eta subklabioak. ${ARCH_FRONT}`,
+    observe: 'Konparatu bi aldeak: ezkerreko arkua aortaren makoan geratzen da; eskuinekoa eskuineko subklabioaren hasiera da.',
+    meaning: 'Eskuineko subklabioak hiru jatorri ditu, hiru kolore: laugarren arkua, eskuineko aorta dortsala eta zazpigarren segmentu arteko arteria.',
+    question: 'Nondik dator ezkerreko arteria subklabioa?',
+    answer: 'Ezkerreko zazpigarren segmentu arteko arteriatik; gero gorago kokatzen da, karotidatik gertu.',
+  },
+  'seigarren-arkua/3d': {
+    orientation: `Seigarren arkuak eta birika enborra. ${ARCH_FRONT}`,
+    observe: 'Konparatu bi aldeak: ezkerrean arkua osorik geratzen da; eskuinean urrutiko zatia desagertzen da.',
+    meaning: 'Hurbileko zatiak birika arteriak dira. Ezkerreko urrutiko zatia hodi arteriosoa da: ezkerreko birika arteria eta aorta lotzen ditu.',
+    question: 'Zer gertatzen da eskuineko seigarren arkuaren urrutiko zatiarekin?',
+    answer: 'Desagertu egiten da. Hurbileko zatitik eskuineko birika arteria sortzen da.',
+  },
+  'beste-aldaketak/3d': {
+    orientation: `Arku sistema osoa eta bihotza. ${ARCH_FRONT}`,
+    observe: 'Lau aldaketa: hodi karotideoak desagertzen dira, eskuineko aorta dortsalaren zati bat ere bai, bihotza jaisten da eta ezkerreko subklabioa igotzen da.',
+    meaning: 'Bihotza toraxera jaistean, haren adarrak luzatu egiten dira. Horregatik dira hain luzeak karotida komunak eta arteria brakiozefalikoa.',
+    question: 'Zein aorta dortsaletik sortzen da beheranzko aorta?',
+    answer: 'Ezkerreko aorta dortsaletik: eskuinekoaren zati bat desagertu egiten da.',
+  },
+  'nerbio-atzerakariak/3d': {
+    orientation: `Arkuak, bi nerbio bagoak eta laringea. ${ARCH_FRONT}`,
+    observe: 'Jarraitu nerbio laringeo atzerakari bakoitzari: arteria baten azpitik buelta eman, eta laringera igotzen da.',
+    meaning: 'Nerbioa arteria baten azpitik igarotzen da; arteria hori desagertzean, hurrengoaren azpian geratzen da. Horregatik dira desberdinak bi aldeak.',
+    question: 'Zer inguratzen du ezkerreko nerbio laringeo atzerakariak helduan?',
+    answer: 'Lotailu arteriosoa: hodi arteriosoa, jaio ondoren itxita.',
+  },
+  'aorta-heldua/3d': {
+    orientation: `Aorta heldua: goranzko aorta, makoa eta beheranzko aorta. ${BODY_FRONT}`,
+    observe: 'Begiratu makoaren hiru adarrei: eskuinean arteria brakiozefaliko bakarra; ezkerrean karotida komuna eta subklabioa, bakoitza bere aldetik.',
+    meaning: 'Koloreek jatorria gordetzen dute: zakua, laugarren arkua, seigarren arkua, aorta dortsala. Hala ikusten da zati bakoitza nondik datorren.',
+    question: 'Zenbat adar ateratzen dira aortaren makotik?',
+    answer: 'Hiru: arteria brakiozefalikoa, ezkerreko karotida komuna eta ezkerreko subklabioa.',
+  },
+  'adar-bentralak/enbrioia': {
+    orientation: `5. asteko enbrioia. ${SIDE}`,
+    observe: 'Begiratu aortaren aurreko paretari: zilborreko arteriak karenara doaz, eta bitelo arteriak bitelo zakura.',
+    meaning: 'Bitelo zakua endekatzean, bitelo arteriak ere bai. Hiru geratzen dira abdomenean: enbor zeliakoa eta bi arteria mesenterikoak.',
+    question: 'Zer dira hasieran aurreko errai adarrak?',
+    answer: 'Bitelo arteriak, bitelo plexuetatik sortuak.',
+  },
+  'adar-bentralak/3d': {
+    orientation: `Beheranzko aorta, makoaren azpitik. ${BODY_FRONT}`,
+    observe: 'Hiru adar taldeak, bakoitza bere kolorean: aurreko errai adarrak laranja, alboko errai adarrak urdina, atze alboko adarrak berdea.',
+    meaning: 'Aurreko adarrak hestera doaz: hestegorrira eta aurreko, bitarteko eta atzeko hestera. Zati bakoitzak bere arteria du.',
+    question: 'Zein arteriak irrigatzen du bitarteko hestea?',
+    answer: 'Goiko arteria mesenterikoak.',
+  },
+  'alboko-adarrak/3d': {
+    orientation: `Beheranzko aorta eta bizkarrezurra. ${BODY_FRONT}`,
+    observe: 'Begiratu albora doazen adarrei: giltzurrun gaineko guruinetara, giltzurrunetara eta gonadetara. Gero, atzera doazen segmentu arteko arteriei.',
+    meaning: 'Segmentu arteko arteriek izen desberdina dute mailaka: lepoan orno arteriak, toraxean saihets artekoak, gerrian lunbarrak, sakroan alboko sakroak.',
+    question: 'Nola sortzen dira orno arteriak?',
+    answer: 'Lepoko segmentu arteko arteriak luzetarako anastomosiz lotzen dira, eta aortarekiko lotura galtzen dute.',
+  },
+  'zilbor-iliakoak/3d': {
+    orientation: `Aortaren behealdea eta pelbisa. ${BODY_FRONT}`,
+    observe: 'Jarraitu zilborreko arteriei: aortatik askatu, eta barneko arteria iliakoari lotzen zaizkio.',
+    meaning: 'Arteria iliako primitiboak gerriko bostgarren segmentu arteko arteriatik datoz. Kanpokoa hankara doa; barnekoa pelbisera.',
+    question: 'Zer bihurtzen da zilborreko arteriaren urrutiko zatia jaio ondoren?',
+    answer: 'Erdialdeko zilbor lotailua. Hurbileko zatia goiko gernu maskuriaren arteria da.',
+  },
+  'gorputz-adarrak/3d': {
+    orientation: 'Besoa eta hanka, haien ardatz arteriarekin. Arrastatu biratzeko.',
+    observe: 'Besoan, arteria guztiak ardatz arteriatik datoz. Hankan, ardatz arteria barneko iliakoari lotzen zaio, eta femoralak hartzen du lekua.',
+    meaning: 'Subklabioa besoko arteriekin lotzen da bakarrik: ez da haien jatorria.',
+    question: 'Hankako ardatz arteriatik zein arteria sortzen dira?',
+    answer: 'Arteria ziatikoa, popliteoa eta peroneoaren zati bat. Gehienak femoraletik datoz.',
   },
 };
 

@@ -142,6 +142,17 @@ export const NOTES: Record<number, NotesSection[]> = {
     { n: '5.1', title: 'Arteria Konoaren trenkadak', depth: 1, stages: ['arteria-konoa'] },
     { n: '5.2', title: 'Enbor arteriosoaren trenkadak', depth: 1, stages: ['enbor-arteriosoa', 'balbula-semilunarrak', 'jatorriak'] },
   ],
+  12: [
+    { n: '1', title: 'Sarrera', depth: 0, stages: ['sarrera'] },
+    { n: '2', title: 'Arku-sistemaren eraketa eta garapena', depth: 0, stages: ['arku-sistema'] },
+    { n: '2.1', title: 'Garapenaren 27. eguna, 4mm-ko enbrioia', depth: 1, stages: ['eguna-27'] },
+    { n: '2.2', title: 'Garapenaren 29. eguna, 10mm-ko enbrioia', depth: 1, stages: ['eguna-29'] },
+    { n: '2.3', title: 'Arkuen garapena', depth: 1, stages: ['hirugarren-arkua', 'laugarren-arkua', 'seigarren-arkua'] },
+    { n: '2.4', title: 'Beste aldaketak arteria arku-sisteman', depth: 1, stages: ['beste-aldaketak', 'nerbio-atzerakariak', 'aorta-heldua'] },
+    { n: '2.5', title: 'Beheranzko aortaren garapena', depth: 1, stages: ['adar-bentralak', 'alboko-adarrak'] },
+    { n: '2.6', title: 'Aortatik ateratzen diren adarrak', depth: 1, stages: ['zilbor-iliakoak'] },
+    { n: '2.7', title: 'Goiko eta beheko gorputz adarren arteriak', depth: 1, stages: ['gorputz-adarrak'] },
+  ],
 };
 
 /** The notes section a stage belongs to, and its parent heading when it is a sub-heading. */

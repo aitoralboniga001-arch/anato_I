@@ -189,7 +189,7 @@ function boxOf(svg: SVGSVGElement, root: SVGGraphicsElement, ids: readonly strin
 const REVEAL_HOLD_MS = 2600;
 
 const sameMarks = (a: Mark[], b: Mark[]) =>
-  a.length === b.length && a.every((m, i) => m.id === b[i].id && Math.abs(m.x - b[i].x) + Math.abs(m.y - b[i].y) + Math.abs(m.w - b[i].w) + Math.abs(m.h - b[i].h) < 3);
+  a.length === b.length && a.every((m, i) => m.id === b[i].id && m.named === b[i].named && Math.abs(m.x - b[i].x) + Math.abs(m.y - b[i].y) + Math.abs(m.w - b[i].w) + Math.abs(m.h - b[i].h) < 3);
 
 /** SVG stage with wheel/drag zoom-pan, orientation edges and a feathered specimen backdrop. */
 export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewport(
@@ -299,6 +299,13 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
       cancelAnimationFrame(raf);
     };
   });
+  // A new step fades in (scene-enter, 0.7 s) and so do its names: one more render once they have
+  // re-measures, or a paused step would keep pills beside the names that already say them.
+  const [, setSettled] = useState(0);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSettled((n) => n + 1), 800);
+    return () => clearTimeout(timer);
+  }, [markKey, z.k]);
 
   useEffect(() => {
     cancelAnimationFrame(zRaf.current);
