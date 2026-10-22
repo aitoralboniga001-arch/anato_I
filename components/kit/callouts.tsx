@@ -11,6 +11,8 @@ export interface Callout {
   show: number;
   small?: boolean;
   text?: string;
+  /** A second, smaller line under the name (e.g. where it comes from). */
+  sub?: string;
   /** For two names of the same structure (e.g. upper and lower limb). */
   key?: string;
 }
@@ -31,6 +33,8 @@ interface Opts {
   bandR?: [number, number];
   /** How much larger than drawn size the names print (the label scale): a smaller frame needs wider spacing. */
   k?: number;
+  /** A narrow tool column at the frame's right edge (scene and zoom buttons): names level with it end left of it. */
+  toolsR?: { bottom: number; x: number };
 }
 
 const HEIGHT = 40;
@@ -54,14 +58,32 @@ const crossLeaders = (p: P[], q: P[]) => p.slice(1).some((b, i) => q.slice(1).so
 export function layoutCallouts(items: Callout[], o: Opts = {}) {
   const mid = o.mid ?? 500;
   const out = new Map<Callout, { x: number; y: number; align: 'start' | 'end' }>();
+  const room = (left: boolean) => (left ? o.left : o.right) ?? (left ? [140, 590] : [240, 590]);
+  // Each name on its structure's side; but a side too full for its names even at drawn size (small frames:
+  // tablets) hands the names nearest the middle to the other side, while that one has room.
+  const onLeft = new Map(items.map((c) => [c, c.at.x < mid]));
+  const need = (left: boolean) => items.filter((c) => onLeft.get(c) === left).reduce((a, c) => a + (c.small ? HEIGHT_SMALL : HEIGHT) * (c.sub ? 1.45 : 1) * smooth(c.show / 0.6), 0);
+  // The room a side has: its column, less the band its side pill keeps clear.
+  const span = (left: boolean) => {
+    const b = left ? o.bandL : o.bandR;
+    return room(left)[1] - room(left)[0] + HEIGHT - (b ? b[1] - b[0] : 0);
+  };
+  for (const left of [false, true]) {
+    while (need(left) > span(left)) {
+      const c = items.filter((d) => onLeft.get(d) === left && d.show > 0.02).sort((a, b) => Math.abs(a.at.x - mid) - Math.abs(b.at.x - mid))[0];
+      const h = c ? (c.small ? HEIGHT_SMALL : HEIGHT) * (c.sub ? 1.45 : 1) : 0;
+      if (!c || need(!left) + h > span(!left)) break;
+      onLeft.set(c, !left);
+    }
+  }
   for (const left of [true, false]) {
-    const [top, bottom] = (left ? o.left : o.right) ?? (left ? [140, 590] : [240, 590]);
-    const col = items.filter((c) => (c.at.x < mid) === left).sort((a, b) => a.at.y - b.at.y);
+    const [top, bottom] = room(left);
+    const col = items.filter((c) => onLeft.get(c) === left).sort((a, b) => a.at.y - b.at.y);
     const w = col.map((c) => smooth(c.show / 0.6));
     // Names print k times their drawn size, so they need k times the spacing. A column too crowded
     // for that eases back towards drawn-size spacing rather than climbing above its top.
     const place = (k: number, airMax = 1.4) => {
-      const h = col.map((c) => (c.small ? HEIGHT_SMALL : HEIGHT) * k);
+      const h = col.map((c) => (c.small ? HEIGHT_SMALL : HEIGHT) * (c.sub ? 1.45 : 1) * k);
       // A crowded column breathes a little (up to 1.4 lines a name, as the room allows): a tight stack reads as a list.
       const n = w.reduce((a, b) => a + b, 0);
       const air = n > 1.5 ? Math.max(1, Math.min(airMax, (bottom - top) / ((n - 1) * HEIGHT * k))) : 1;
@@ -90,7 +112,9 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
       const band = left ? o.bandL : o.bandR;
       if (band)
         for (let i = 0; i < y.length; i++) {
-          if (w[i] < 0.02 || y[i] <= band[0] || y[i] >= band[1]) continue;
+          // A two-line name reaches further down: it keeps its second line off the pill too.
+          const b0 = band[0] - (col[i].sub ? 14 * k : 0);
+          if (w[i] < 0.02 || y[i] <= b0 || y[i] >= band[1]) continue;
           const move = (to: number) => {
             const next = [...y];
             next[i] = to;
@@ -100,11 +124,11 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
           };
           // The nearer side, as long as the names it pushes still fit in the column: up only while those above
           // stay under its top, down only while those below stay above its bottom (the camera keys).
-          const up = move(band[0]);
+          const up = move(b0);
           const down = move(band[1]);
           const upFits = up[0] >= top - 0.5;
           const downFits = down[down.length - 1] <= bottom + 0.5;
-          const nearUp = y[i] < (band[0] + band[1]) / 2;
+          const nearUp = y[i] < (b0 + band[1]) / 2;
           const moved = upFits && (nearUp || !downFits) ? up : downFits ? down : top - up[0] < down[down.length - 1] - bottom ? up : down;
           moved.forEach((v, j) => (y[j] = v));
         }
@@ -120,9 +144,12 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
     if (spills(y) && K > 1) y = place(1, 1);
     // Sorting by height is not enough when points lie at different depths into the picture: two names
     // whose leaders still cross trade places (their slots stay where they are).
-    const x = left ? (o.xl ?? 24) : (o.xr ?? 976);
+    const x0 = left ? (o.xl ?? 24) : (o.xr ?? 976);
+    // Level with the right edge's tool column, a name ends just left of it.
+    const xAt = (yy: number) => (!left && o.toolsR && yy - 16 * (o.k ?? 1) < o.toolsR.bottom ? Math.min(x0, o.toolsR.x - 8) : x0);
     // The leader as the label draws it: from the plate's edge, level for a third of the way, then to the point.
     const path = (c: Callout, yy: number): P[] => {
+      const x = xAt(yy);
       const wd = (o.width?.(c) ?? 120) * (o.k ?? 1);
       const lx = left ? x + wd : x - wd;
       const ex = lx + (c.at.x - lx) * 0.35;
@@ -143,7 +170,7 @@ export function layoutCallouts(items: Callout[], o: Opts = {}) {
         }
       if (!swapped) break;
     }
-    order.forEach((ci, slot) => out.set(col[ci], { x, y: y[slot], align: left ? 'start' : 'end' }));
+    order.forEach((ci, slot) => out.set(col[ci], { x: xAt(y[slot]), y: y[slot], align: left ? 'start' : 'end' }));
   }
   return out;
 }
@@ -154,26 +181,38 @@ export function Callouts({ items, dim = 1, axes = true, ...o }: Opts & { items: 
   const pills = useLabelScale();
   const live = items.filter((c) => c.show * dim > 0.02);
   // Plate width as the label sizes it (≈7.1 units a character, 6.4 for small names, plus padding).
-  const width = (c: Callout) => (c.text ?? nameOf(c.id)).length * (c.small ? 6.4 : 7.1) + 16;
+  const width = (c: Callout) => Math.max((c.text ?? nameOf(c.id)).length * (c.small ? 6.4 : 7.1), (c.sub?.length ?? 0) * 7.1 * 0.8) + 16;
   // The side pills sit level with the frame's middle, a fixed size on screen: the smaller the frame is
   // drawn (the larger k), the more frame units they cover. Half the pill plus half a name, with air.
   const r = 30 * pills.k;
   const band: [number, number] = [320 - r, 320 + r];
   // The right column ends above the camera keys (a name plate is ~14 label units tall either side of its line).
+  // At the top right, measured: the wide turn button and drag hint push the column's top down; the narrow
+  // tool column at the edge only moves the names level with it inwards (on tablets it reaches far down).
   const right = o.right ?? [240, 590];
   const keysEnd = pills.keysTop != null ? pills.keysTop - 20 * pills.k : undefined;
-  const rightCol: [number, number] = keysEnd != null && keysEnd < right[1] ? [Math.min(right[0], keysEnd - 40), keysEnd] : right;
+  const bottomR = keysEnd != null && keysEnd < right[1] ? keysEnd : right[1];
+  const topRight = (pills.chrome ?? []).filter((b) => b.y1 < 320 && b.x1 > 550);
+  const narrow = topRight.filter((b) => b.x0 > 860);
+  const wide = topRight.filter((b) => b.x0 <= 860);
+  const topR = wide.length ? Math.max(right[0], Math.max(...wide.map((b) => b.y1)) + 18 * pills.k) : right[0];
+  const rightCol: [number, number] = [Math.min(topR, bottomR - 40), bottomR];
+  const toolsR = narrow.length ? { bottom: Math.max(...narrow.map((b) => b.y1)), x: Math.min(...narrow.map((b) => b.x0)) } : undefined;
   // The orientation key of a 3D view (Stage3D Axes: top left, at y 52, 54 tall, grown up to 1.5×) sits over
   // the left column's top: on small frames (tablets) its first name would land on the plate.
+  // Kimu (bottom left, a fixed size on screen) ends the left column above him, as the keys end the right one.
   const left = o.left ?? [140, 590];
   const keyEnd = axes ? 52 + 54 * Math.min(1.5, pills.k) + 16 * pills.k : 0;
-  const leftCol: [number, number] = [Math.max(left[0], keyEnd), left[1]];
-  const pos = layoutCallouts(live, { width, k: pills.k, bandL: pills.left ? band : undefined, bandR: pills.right ? band : undefined, ...o, left: leftCol, right: rightCol });
+  const kimu = (pills.chrome ?? []).find((b) => b.x0 < 60 && b.y0 > 320);
+  // It also stops short of the bottom captions (y ≈ 612), whose band grows with the names on small frames.
+  const bottomL = Math.min(left[1], 612 - 23 * pills.k, kimu ? kimu.y0 - 20 * pills.k : Infinity);
+  const leftCol: [number, number] = [Math.min(Math.max(left[0], keyEnd), bottomL - 40), bottomL];
+  const pos = layoutCallouts(live, { width, k: pills.k, bandL: pills.left ? band : undefined, bandR: pills.right ? band : undefined, toolsR, ...o, left: leftCol, right: rightCol });
   return (
     <>
       {live.map((c) => {
         const p = pos.get(c)!;
-        return <Label key={c.key ?? c.id} id={c.id} x={p.x} y={p.y} align={p.align} ax={c.at.x} ay={c.at.y} show={c.show * dim} small={c.small} text={c.text} />;
+        return <Label key={c.key ?? c.id} id={c.id} x={p.x} y={p.y} align={p.align} ax={c.at.x} ay={c.at.y} show={c.show * dim} small={c.small} text={c.text} sub={c.sub} />;
       })}
     </>
   );

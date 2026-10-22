@@ -166,6 +166,8 @@ export interface CalloutSpec {
   show: number;
   small?: boolean;
   text?: string;
+  /** A second, smaller line under the name. */
+  sub?: string;
   key?: string;
 }
 
@@ -218,7 +220,7 @@ export function ModelView({
             const p = typeof n.p === 'string' ? model.pts[n.p] : n.p;
             if (!p) continue;
             const q = at(p);
-            items.push({ id: n.id, at: { x: q.x, y: q.y }, show: n.show, small: n.small, text: n.text, key: n.key });
+            items.push({ id: n.id, at: { x: q.x, y: q.y }, show: n.show, small: n.small, text: n.text, sub: n.sub, key: n.key });
           }
           return (
             <>

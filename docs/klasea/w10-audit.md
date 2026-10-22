@@ -4,14 +4,21 @@ _Sortua: `npx tsx scripts/klasea/audit.ts 10`. F = funtsezkoa, g = garrantzitsua
 
 ## 0. Gaur
 
-Etapa: `eskualde-kardiogenikoa` · 2 lerro · ~13 s hitz eginda
+Etapa: `eskualde-kardiogenikoa` · 3 lerro · ~20 s hitz eginda
 
 1. «Kaixo! Gaurko klasean bihotza nola sortzen den eta lehen zirkulazioa ikasiko ditugu.»
   _t=0_
   - Ez dut ulertu: «Gaurko gaia: bihotza nola sortzen den, eta odolak egiten duen lehen bidea.»
   - **F** `w10/1/p3/s1` Garapenaren 3. astean enbrioia jada ezin da orain arte bezala elikatu (difusioaren bidez) eta 3. astetik aurrera bere berezko zirkulazio-sistema/sistema kardiobaskularra garatuko da.
 
-2. «3. astean, enbrioia ezin da jada difusioaren bidez elikatu. Horregatik, bere zirkulazio-sistema garatzen du.»
+2. «Bidea: lehenik eskualde kardiogenikoa; gero bihotz lakioa; azkenik, lakioaren atal bakoitzetik sortzen diren egiturak.»
+  _t=0 · summary_
+  - Ez dut ulertu: «Hiru pausotan: bihotza non sortzen den, nola tolesten den lakio bat eginez, eta lakioaren atal bakoitzetik zer sortzen den.»
+  - **F** `w10/1/p3/s1` Garapenaren 3. astean enbrioia jada ezin da orain arte bezala elikatu (difusioaren bidez) eta 3. astetik aurrera bere berezko zirkulazio-sistema/sistema kardiobaskularra garatuko da.
+  - **F** `w10/2/p13/s1` ●​ Alde zefalikoa (arteria bulboa): aurrera, behera eta eskuinera abiatzen da.
+  - **F** `w10/3.1/p4/s2` Beraz, hemendik behin-betiko bihotzaren eskuineko bentrikuluak duen atal trabekulatua sortzen da (hasierako eskuineko bentrikulua).
+
+3. «3. astean, enbrioia ezin da jada difusioaren bidez elikatu. Horregatik, bere zirkulazio-sistema garatzen du.»
   _t=0 · why · arbelean: b-zergatik_
   - Ez dut ulertu: «Enbrioia handitu egin da: difusioa ez da nahikoa, eta odol hodiak eta bihotza behar ditu.»
   - **F** `w10/1/p3/s1` Garapenaren 3. astean enbrioia jada ezin da orain arte bezala elikatu (difusioaren bidez) eta 3. astetik aurrera bere berezko zirkulazio-sistema/sistema kardiobaskularra garatuko da.
@@ -157,7 +164,7 @@ Etapa: `bihotz-hodia` · 8 lerro · ~70 s hitz eginda
 
 ## 3. Lehen zirkulazioa
 
-Etapa: `zirkulazio-goiztiarra` · 11 lerro · ~85 s hitz eginda
+Etapa: `zirkulazio-goiztiarra` · 12 lerro · ~93 s hitz eginda
 
 1. «Orain, bihotzera iristen den eta handik irteten den odola. Hasieran hodia nahiko zuzena da, eta bi mutur ditu.»
   _t=0 · argi: arteria-muturra, zain-muturra_
@@ -189,9 +196,9 @@ Etapa: `zirkulazio-goiztiarra` · 11 lerro · ~85 s hitz eginda
   - **F** `w10/1/p26/s3` Bi odol hodi mota hauek oxigenaturik dagoen odola edo oxigeno gabeko odola eraman dezakete.
   - **F** `w10/1/p23/s2` Hasieran 3 zain mota: zilborrekoak (2 dira, karenatik bueltatzen dira, eta odol oxigenatua garraiatzen dute), bitelinoak (2 dira, bitelo zakutik itzuli eta odol ez-oxigenatua garraiatzen dute), eta kardinal komunak (2 dira, eta alde zefalikotik zein alde kaudaletik itzultzen diren zainak (aurreko eta atzeko kardinalak direnak) elkartzen direnean sortzen dira).
 
-6. «Kardinal komunek enbrioiaren alde zefalikoko eta behe aldeko odola biltzen dute: oxigeno gutxikoa.»
-  _t=0.38 · argi: bena-kardinal-komuna, zain-sinua · arbelean: zt-kardinal_
-  - Ez dut ulertu: «Kardinal komunek enbrioiaren gorputzeko odola biltzen dute, oxigeno gutxirekin.»
+6. «Kardinal komunek enbrioiaren alde zefalikoko eta behe aldeko odola biltzen dute; beraz, bihotzera iristen den odol hori oxigeno gutxikoa da.»
+  _t=0.38 · why · argi: bena-kardinal-komuna, zain-sinua · arbelean: zt-kardinal_
+  - Ez dut ulertu: «Kardinal komunek enbrioiaren gorputzeko odola biltzen dute; horregatik dakarte oxigeno gutxiko odola.»
   - **F** `w10/1/p29/s1` ●Zain kardinal komunak: bihotz hodiaren beheko atalera iristen da.
   - **F** `w10/1/p29/s3` Enbrioiaren alde zefalikoko oxigeno gutxiko odola eta enbrioiaren behe aldeko oxigeno gutxiko odola hartzen ditu, beraz, bihotzeraino iristen den odola, oxigeno gutxikoa da.
 
@@ -214,7 +221,7 @@ Etapa: `zirkulazio-goiztiarra` · 11 lerro · ~85 s hitz eginda
   - **F** `w10/1/p34/s1` ● Aorta dortsalak: odol oxigenatua (gero eta oxigeno gutxiagorekin), gorputzaren beste atal guztietara eramaten du.
 
 10. «Azkenik, bitelo arteriek eta zilborreko arteriek oxigenorik gabeko odola karenara eramaten dute, oxigenoa eta makromolekulak har ditzan.»
-  _t=0.8 · emphasis · argi: bitelo-arteriak, zilbor-arteriak, karena_
+  _t=0.8 · why · argi: bitelo-arteriak, zilbor-arteriak, karena_
   - Ez dut ulertu: «Bitelo eta zilborreko arteriek oxigenorik gabeko odola karenara itzultzen dute, berriz oxigenatzeko.»
   - **F** `w10/1/p35/s1` ● Bitelo arteriak eta zilborreko arteriak: jadanik oxigenorik ez daukan odola gorputzetik karenara eramaten du, bertan oxigenoa eta makromolekulak har ditzan.
 
@@ -223,6 +230,11 @@ Etapa: `zirkulazio-goiztiarra` · 11 lerro · ~85 s hitz eginda
   - Ez dut ulertu: «Zain guztien odola bihotzaren sarreran elkartu eta nahasten da, atal aurikularrean.»
   - **F** `w10/1/p36/s1` Bi motatako odolak (zain kardinal komuneko odol oxigenatu gabea eta bitelo benatik datorren odol oxigenatu gabea) bihotzean (atrio primitiboan) nahasten dira.
   - **F** `w10/1/p36/s2` Zain eta arteria mota hauek bikoitiak dira (ezker-eskuin kokatzen dira).
+
+12. «Zertarako hainbeste hodi? Honela, odola gorputzaren atal guztietara heltzen da.»
+  _t=0.94 · why_
+  - Ez dut ulertu: «Arteria eta zain horiei esker, odola gorputzaren atal guztietara iristen da.»
+  - g `w10/1/p36/s3` Honela, gorputzaren atal guztietara heltzen da odola.
 
 - Arbela `b-arteria-zaina`: Arteria: bihotzetik irten. Zaina: bihotzera. Biek eraman dezakete odol oxigenatua edo oxigeno gabea
   - **F** `w10/1/p26/s1` Kontuan hartu: Arteriak bihotzetik irtetzen diren odol hodiak dira.
@@ -660,5 +672,5 @@ Etapa: `eskuineko-aurikula` · 1 lerro · ~6 s hitz eginda
 ## Estaldura
 
 - Funtsezko esaldiak: 112 / 189; klaseak esaten ditu: 112.
-- Klaseak aipatzen dituen esaldi guztiak: 135.
-- Hitz egiteko denbora: ~10 min (galderak aparte).
+- Klaseak aipatzen dituen esaldi guztiak: 136.
+- Hitz egiteko denbora: ~11 min (galderak aparte).

@@ -60,6 +60,16 @@ export interface LabelScale {
   keysTop?: number;
   /** Their left edge (frame units). */
   keysLeft?: number;
+  /** Everything fixed over the picture (camera keys, scene tools, turn hint, Kimu, 3D orientation key), frame units. */
+  chrome?: Box[];
+}
+
+/** A rectangle in frame units. */
+export interface Box {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
 }
 
 export const LabelScaleContext = createContext<LabelScale>({ k: 1, left: false, right: false });

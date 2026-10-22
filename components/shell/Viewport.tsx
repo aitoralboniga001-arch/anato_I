@@ -2,7 +2,7 @@
 
 import { forwardRef, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from 'react';
 import { Defs } from '@/components/kit/Defs';
-import { LabelScaleContext, TextLayerContext, UnderlayContext, type LookSide, type Underlay } from '@/components/kit/context';
+import { LabelScaleContext, TextLayerContext, UnderlayContext, type Box, type LookSide, type Underlay } from '@/components/kit/context';
 import type { Orientation } from '@/lib/sim/types';
 import { IconFit, IconZoomIn, IconZoomOut } from './icons';
 
@@ -374,31 +374,57 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   const edges = orientation && liveOrient?.key === resetKey ? liveOrient.o : orientation;
   const pillL = !!edges?.left;
   const pillR = !!edges?.right;
-  // Where the named camera keys (bottom right, over the frame above 820 px) begin, in frame units: the
-  // right column of names ends above them instead of running under the panel.
+  // What sits over the picture, in frame units: the named camera keys (bottom right, over the frame above
+  // 820 px), the scene tools, the 3D turn button and drag hint (top right), Kimu (bottom left) and a 3D
+  // view's orientation key (top left). They are fixed on screen, so on small frames (tablets) they cover
+  // more of the picture: names and notes keep clear of them (Callouts, Note).
   const lookRef = useRef<HTMLDivElement>(null);
-  const [keys, setKeys] = useState<{ top: number; left: number } | undefined>(undefined);
+  const [chrome, setChrome] = useState<{ keys?: Box; boxes: Box[] }>({ boxes: [] });
   useEffect(() => {
-    const el = lookRef.current;
-    const svg = wrap.current?.querySelector<SVGSVGElement>('svg.viewport-svg');
-    if (!el || !svg) return setKeys(undefined);
+    const host = wrap.current;
+    const svg = host?.querySelector<SVGSVGElement>('svg.viewport-svg');
+    if (!host || !svg) return;
     const measure = () => {
       const r = svg.getBoundingClientRect();
       const s = Math.min(r.width / W, r.height / H);
       if (!s) return;
-      const b = el.getBoundingClientRect();
-      const top = (b.top - (r.top + (r.height - H * s) / 2)) / s;
-      const left = Math.round((b.left - (r.left + (r.width - W * s) / 2)) / s);
-      // Under the frame (narrow screens) the keys cover no name.
-      setKeys((k) => (top >= H - 4 ? undefined : k?.top === Math.round(top) && k.left === left ? k : { top: Math.round(top), left }));
+      const ox = r.left + (r.width - W * s) / 2;
+      const oy = r.top + (r.height - H * s) / 2;
+      const box = (e: Element | null | undefined): Box | undefined => {
+        if (!e) return undefined;
+        const b = e.getBoundingClientRect();
+        if (b.width < 2 || b.height < 2) return undefined;
+        const x0 = Math.round((b.left - ox) / s), y0 = Math.round((b.top - oy) / s);
+        const x1 = Math.round((b.right - ox) / s), y1 = Math.round((b.bottom - oy) / s);
+        // Off the frame (e.g. the keys under it on narrow screens): covers nothing.
+        return x1 <= 0 || x0 >= W || y1 <= 0 || y0 >= H - 4 ? undefined : { x0, y0, x1, y1 };
+      };
+      const keys = box(lookRef.current);
+      // (Not the drag hint: it fades out by itself within seconds, and only shows until the first drag.)
+      const top = ['.view-tools', '.zoom-controls', '.bira-btn'].flatMap((q) => [...host.querySelectorAll(`:scope > ${q}`)].map(box)).filter((b): b is Box => !!b && b.x1 > W * 0.55);
+      const others = [box(document.querySelector('.kimu-launch')), box(host.querySelector('.axes3d-plate'))].filter((b): b is Box => !!b);
+      const boxes = [...(keys ? [keys] : []), ...top, ...others];
+      setChrome((c) => (JSON.stringify(c) === JSON.stringify({ keys, boxes }) ? c : { keys, boxes }));
     };
     measure();
+    // The turn button comes and goes, and a 3D view draws its orientation key once its model is built:
+    // measured again when the view's children change, at most every quarter second.
+    let timer = 0;
+    const soon = () => {
+      if (!timer) timer = window.setTimeout(() => ((timer = 0), measure()), 250);
+    };
     const ro = new ResizeObserver(measure);
-    ro.observe(el);
     ro.observe(svg);
-    return () => ro.disconnect();
+    if (lookRef.current) ro.observe(lookRef.current);
+    const mo = new MutationObserver(soon);
+    mo.observe(host, { childList: true });
+    mo.observe(svg, { childList: true, subtree: true });
+    return () => (window.clearTimeout(timer), ro.disconnect(), mo.disconnect());
   }, [size, look, interactive3d]);
-  const labelScale = useMemo(() => ({ k: labelK, left: pillL, right: pillR, keysTop: keys?.top, keysLeft: keys?.left }), [labelK, pillL, pillR, keys]);
+  const labelScale = useMemo(
+    () => ({ k: labelK, left: pillL, right: pillR, keysTop: chrome.keys?.y0, keysLeft: chrome.keys?.x0, chrome: chrome.boxes }),
+    [labelK, pillL, pillR, chrome],
+  );
 
   const changed = useEffectEvent((on: boolean) => onFullscreenChange?.(on));
 

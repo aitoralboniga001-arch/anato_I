@@ -44,6 +44,8 @@ export const LESSON_W10: Lesson = {
       stage: 'eskualde-kardiogenikoa',
       lines: [
         L(0, 'Kaixo! Gaurko klasean bihotza nola sortzen den eta lehen zirkulazioa ikasiko ditugu.', n('1/p3/s1'), [], { plain: 'Gaurko gaia: bihotza nola sortzen den, eta odolak egiten duen lehen bidea.' }),
+        // The road map, from the notes' own contents: where the heart forms, the loop, and what each part gives.
+        L(0, 'Bidea: lehenik eskualde kardiogenikoa; gero bihotz lakioa; azkenik, lakioaren atal bakoitzetik sortzen diren egiturak.', n('1/p3/s1', '2/p13/s1', '3.1/p4/s2'), [], { tone: 'summary', plain: 'Hiru pausotan: bihotza non sortzen den, nola tolesten den lakio bat eginez, eta lakioaren atal bakoitzetik zer sortzen den.' }),
         L(0, '3. astean, enbrioia ezin da jada difusioaren bidez elikatu. Horregatik, bere zirkulazio-sistema garatzen du.', n('1/p3/s1'), [], {
           tone: 'why',
           writes: 'b-zergatik',
@@ -130,12 +132,13 @@ export const LESSON_W10: Lesson = {
           tone: 'caution',
           plain: 'Arteria edo zaina izatea norabideak erabakitzen du, ez oxigenoak: bihotzetik irten ala bihotzera etorri.',
         }),
-        L(0.38, 'Kardinal komunek enbrioiaren alde zefalikoko eta behe aldeko odola biltzen dute: oxigeno gutxikoa.', n('1/p29/s1', '1/p29/s3'), ['bena-kardinal-komuna', 'zain-sinua'], { writes: 'zt-kardinal', plain: 'Kardinal komunek enbrioiaren gorputzeko odola biltzen dute, oxigeno gutxirekin.' }),
+        L(0.38, 'Kardinal komunek enbrioiaren alde zefalikoko eta behe aldeko odola biltzen dute; beraz, bihotzera iristen den odol hori oxigeno gutxikoa da.', n('1/p29/s1', '1/p29/s3'), ['bena-kardinal-komuna', 'zain-sinua'], { tone: 'why', writes: 'zt-kardinal', plain: 'Kardinal komunek enbrioiaren gorputzeko odola biltzen dute; horregatik dakarte oxigeno gutxiko odola.' }),
         L(0.48, 'Zain bitelinoek ere oxigeno gutxiko odola dakarte, bitelo zakutik hodiaren beheko ataleraino.', n('1/p23/s2', '1/p30/s1', '1/p30/s2'), ['bitelo-zainak', 'bitelo-zaku-sekundarioa'], { writes: 'zt-bitelo', plain: 'Zain bitelinoek bitelo zakuko odola dakarte, hau ere oxigeno gutxirekin.' }),
         L(0.57, 'Zilborreko zainak, berriz, karenatik datoz; horregatik, odol oxigenatua dute.', n('1/p31/s1'), ['zilbor-zainak', 'karena'], { tone: 'why', writes: 'zt-zilbor', plain: 'Zilborreko zainek, berriz, karenako odola dakarte: oxigenoz betea.' }),
         L(0.74, 'Arku aortikoek odol oxigenatua burura eta aorta dortsaletara daramate; aorta dortsalek, gorputzeko beste atal guztietara.', n('1/p33/s1', '1/p34/s1'), ['aorta-arkuak', 'aorta-dortsalak'], { plain: 'Aorta arkuek odola burura eramaten dute, eta aorta dortsalek gorputz osora.' }),
-        L(0.8, 'Azkenik, bitelo arteriek eta zilborreko arteriek oxigenorik gabeko odola karenara eramaten dute, oxigenoa eta makromolekulak har ditzan.', n('1/p35/s1'), ['bitelo-arteriak', 'zilbor-arteriak', 'karena'], { tone: 'emphasis', plain: 'Bitelo eta zilborreko arteriek oxigenorik gabeko odola karenara itzultzen dute, berriz oxigenatzeko.' }),
+        L(0.8, 'Azkenik, bitelo arteriek eta zilborreko arteriek oxigenorik gabeko odola karenara eramaten dute, oxigenoa eta makromolekulak har ditzan.', n('1/p35/s1'), ['bitelo-arteriak', 'zilbor-arteriak', 'karena'], { tone: 'why', plain: 'Bitelo eta zilborreko arteriek oxigenorik gabeko odola karenara itzultzen dute, berriz oxigenatzeko.' }),
         L(0.87, 'Zain eta arteria hauek bikoitiak dira, eta zainen odola bihotzean nahasten da, atrio primitiboan.', n('1/p36/s1', '1/p36/s2'), ['atal-aurikularra'], { tone: 'emphasis', plain: 'Zain guztien odola bihotzaren sarreran elkartu eta nahasten da, atal aurikularrean.' }),
+        L(0.94, 'Zertarako hainbeste hodi? Honela, odola gorputzaren atal guztietara heltzen da.', n('1/p36/s3'), [], { tone: 'why', plain: 'Arteria eta zain horiei esker, odola gorputzaren atal guztietara iristen da.' }),
       ],
       board: [
         { id: 'b-arteria-zaina', kind: 'line', text: 'Arteria: bihotzetik irten. Zaina: bihotzera. Biek eraman dezakete odol oxigenatua edo oxigeno gabea', notes: n('1/p26/s1', '1/p26/s2', '1/p26/s3'), key: true },

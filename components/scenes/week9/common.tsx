@@ -186,7 +186,7 @@ export function SummaryTable({ t, x, y, widths, rowH, head, rows, headColor = '#
     <g>
       <rect x={x} y={y} width={total} height={rowH} rx={8} fill={headColor} stroke="rgba(255,255,255,0.18)" />
       {head.map((h, i) => (
-        <Note key={i} x={xs[i] + widths[i] / 2} y={y + rowH / 2} size={12.5} tone="accent">
+        <Note key={i} x={xs[i] + widths[i] / 2} y={y + rowH / 2} size={12.5} tone="accent" fixed>
           {h}
         </Note>
       ))}

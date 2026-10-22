@@ -142,3 +142,24 @@
 - **On tablets, the first name in a 3D view's left column could land on the orientation key** (top left). The left column now starts below it (`axes` on `Callouts`).
 - **On tablets, a bottom caption could run under the camera keys** (topic 10's frontal 3D: "Bi endokardio hodiak goitik behera…"). A note level with the keys now moves left to clear them, or, if it is too wide for that, just above them (`Note` in `components/kit/Label.tsx`; the viewport now also reports where the keys start horizontally).
 - **The origins summary table** was first placed high on the right, where on tablets it met the drag hint and the right side pill. It now sits in the left middle band, between the left side pill and the camera keys, with the heart beside it on the right. Checked at 1024 × 768, 768 × 1024 and 1536 × 960.
+
+## 6. Batch 3 results (2026-10-22)
+
+- **Topic 11 tours.** Four stage openers now introduce their parts one by one: the AV canal (5 parts), the AV valves (3), the ventricular septum (3) and the conus (3). Topic 11 now has 6 tours.
+  - Each tour lights only parts that are drawn and named at the opening.
+  - Parts first named by a later step stay out of the tour (the bulboventricular ridge, the common atrium, the conus in the septum stage): a tour does not jump ahead of its steps.
+- **Topic 10 class.**
+  - The opening now gives a one-line road map, from the notes' own sections: the cardiogenic region, the loop, then what each part of the loop gives.
+  - Two more why-lines in the circulation chunk, both from the notes' own causal sentences ("beraz…" p29, "Honela…" p36), and the placental arteries line is now marked as a why.
+- **Tablet sweep.** Every 3D step of topics 10 and 11 was shot at 1024 × 768 and 768 × 1024 (252 shots), with an automatic check of name plates and notes against each other and against everything fixed over the picture.
+  - First pass: about 240 overlaps. Last pass: none, apart from the drag hint, which fades out by itself within seconds and only until the first drag.
+  - **The viewport now measures what sits over the picture**: camera keys, scene tools, the 3D turn button, Kimu, and the 3D orientation key, in frame units.
+  - **3D names:**
+    - names level with the zoom-button column end just left of it;
+    - the right column starts under the turn button;
+    - the left column ends above Kimu and the bottom captions;
+    - a side too full for its names, even at drawn size, hands the names nearest the middle to the other side;
+    - two-line names keep their second line off the side pills.
+  - **Notes:** a note that would touch one of these slides along its line into the nearest gap wide enough, or wraps onto lines that fit (`placeNote`, tested in `tests/place-note.test.ts`). Table headers stay put.
+  - **Origins (topic 11):** the "part ← origin" names are now two lines (the part, then "← origin" smaller underneath), so they no longer cross on tablets.
+- **The "NON NAGO?" card** no longer covers the scene: the live map now sits in the stage bar.

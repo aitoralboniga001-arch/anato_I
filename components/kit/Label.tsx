@@ -2,7 +2,7 @@
 
 import { useContext, useId, useLayoutEffect, useSyncExternalStore, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import { OnTop } from './OnTop';
-import { LabelCollectorContext, PaneContext, partState, useLabelScale, useScene, type LabelScale } from './context';
+import { LabelCollectorContext, PaneContext, partState, useLabelScale, useScene, type Box, type LabelScale } from './context';
 
 /** Semibold text width per character at 1px font size (13.5px ≈ 7.1 frame units per character). */
 const CHAR_W = 7.1 / 13.5;
@@ -266,40 +266,92 @@ interface NoteProps {
   show?: number;
   tone?: 'dim' | 'accent' | 'warn';
   size?: number;
+  /** Stays where drawn (e.g. a table's header, which belongs to its column). */
+  fixed?: boolean;
+}
+
+/**
+ * Where a note goes so that nothing fixed over the picture (camera keys, scene tools, turn hint, Kimu,
+ * the 3D orientation key) covers it: as drawn when clear; else slid along its line into the nearest gap
+ * wide enough; else wrapped onto lines as wide as the widest gap, growing away from the frame's edge
+ * (bottom notes upwards, top notes downwards). Frame units; `fs` is the printed font size.
+ */
+export function placeNote(text: string, x: number, y: number, align: 'start' | 'middle' | 'end', fs: number, chrome: Box[] = []) {
+  const lh = fs * LINE_H;
+  const width = (s: string) => s.length * CHAR_W * fs;
+  const w = width(text);
+  const left = align === 'end' ? x - w : align === 'start' ? x : x - w / 2;
+  const PAD = 8;
+  const inBand = (y0: number, y1: number) => chrome.filter((b) => b.y1 > y0 - 2 && b.y0 < y1 + 2);
+  const asDrawn = { x, anchor: align, lines: [text], y, lh };
+  if (!inBand(y - lh / 2, y + lh / 2).some((b) => b.x1 + PAD > left && b.x0 - PAD < left + w)) return asDrawn;
+  // The gaps along a band of the frame between the things over it.
+  const gaps = (y0: number, y1: number) => {
+    const spans = inBand(y0, y1).map((b) => [b.x0 - PAD, b.x1 + PAD]).sort((a, b) => a[0] - b[0]);
+    const out: [number, number][] = [];
+    let from = 8;
+    for (const [a, b] of spans) {
+      if (a > from) out.push([from, a]);
+      from = Math.max(from, b);
+    }
+    if (from < 992) out.push([from, 992]);
+    return out;
+  };
+  const fits = gaps(y - lh / 2, y + lh / 2).filter(([a, b]) => b - a >= w);
+  if (fits.length) {
+    const near = (g: [number, number]) => Math.min(Math.max(x, g[0] + w / 2), g[1] - w / 2);
+    const g = fits.sort((p, q) => Math.abs(near(p) - x) - Math.abs(near(q) - x))[0];
+    return { ...asDrawn, x: near(g), anchor: 'middle' as const };
+  }
+  // Wrapped: lines as wide as the widest gap, checked again over the whole block's height.
+  const up = y > 320;
+  let lines = [text];
+  let gap: [number, number] = [8, 992];
+  for (let pass = 0; pass < 3; pass++) {
+    const y0 = up ? y - (lines.length - 1) * lh - lh / 2 : y - lh / 2;
+    const g = gaps(y0, y0 + lines.length * lh).sort((p, q) => q[1] - q[0] - (p[1] - p[0]))[0] ?? [8, 992];
+    gap = g;
+    const max = Math.max(8, Math.floor((g[1] - g[0]) / (CHAR_W * fs)));
+    lines = [];
+    let line = '';
+    for (const word of text.split(' ')) {
+      if (line && (line + ' ' + word).length > max) (lines.push(line), (line = word));
+      else line = line ? line + ' ' + word : word;
+    }
+    if (line) lines.push(line);
+  }
+  // A bottom note keeps its first line where it was and grows down while the frame has room, then up.
+  const first = up ? Math.min(y, 638 - lh / 2 - (lines.length - 1) * lh) : y;
+  return { x: (gap[0] + gap[1]) / 2, anchor: 'middle' as const, lines, y: first, lh };
 }
 
 /** Free annotation that is not a structure (e.g. "Alde kraneala", "Ernalkuntza: anpulua"). */
-export function Note({ x, y, children, align = 'middle', show = 1, tone = 'dim', size }: NoteProps) {
+export function Note({ x, y, children, align = 'middle', show = 1, tone = 'dim', size, fixed }: NoteProps) {
   const ctx = useScene();
   const scale = useLabelScale();
   if (show <= 0.02 || (!ctx.showLabels && tone !== 'warn')) return null;
   const base = size ?? 12.5;
   // Sentences grow less than names (at most 30%): they are long and sit beside names.
   const k = fitScale({ ...scale, k: Math.min(scale.k, 1.3) }, x, y, align, children.length, base);
-  // A note level with the camera keys (bottom right on tablets) moves left to clear them, or, too wide
-  // for the room left of them, just above them.
-  let [nx, ny] = [x, y];
-  const { keysTop, keysLeft } = scale;
-  if (keysTop != null && keysLeft != null && y + (base * k * LINE_H) / 2 > keysTop) {
-    const w = children.length * CHAR_W * base * k;
-    const right = align === 'end' ? x : align === 'start' ? x + w : x + w / 2;
-    const over = right - (keysLeft - 10);
-    const leftEdge = right - w - over;
-    if (over > 0 && leftEdge >= 12) nx = x - over;
-    else if (over > 0) ny = keysTop - (base * k * LINE_H) / 2 - 6;
-  }
+  const p = placeNote(children, x, y, align, base * k, fixed ? [] : scale.chrome);
   return (
     <OnTop>
       <text
-        x={nx}
-        y={ny}
+        x={p.x}
+        y={p.y}
         dy="0.35em"
-        textAnchor={align}
+        textAnchor={p.anchor}
         className={`note note-${tone}`}
         opacity={show}
         style={grown(base, k) ?? (size ? { fontSize: size } : undefined)}
       >
-        {children}
+        {p.lines.length === 1
+          ? children
+          : p.lines.map((l, i) => (
+              <tspan key={i} x={p.x} y={p.y + i * p.lh} dy="0.35em">
+                {l}
+              </tspan>
+            ))}
       </text>
     </OnTop>
   );
