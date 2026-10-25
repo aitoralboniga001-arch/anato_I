@@ -688,9 +688,16 @@ function buildAtria(s: AtriaState): AtriaModel {
         const z = lerp(-0.62, 0.3, i / 40);
         const y = stubTop(s, z) - 0.02;
         if (!inside(plane(xp), y, z)) continue;
-        if (s.patent && z > -0.32 && z < -0.02) slit.push([xp - 0.03, y, z]);
+        // Follow the pressed valve's actual surface; xp alone is its undeformed reference plane.
+        // The slit is seen on the left-atrial face, just clear of the membrane's surface.
+        if (s.patent && z > -0.32 && z < -0.02) slit.push([xf(y, z) + 0.025, y, z]);
       }
-      if (slit.length > 1) items.push({ key: 'slit', groups: ['zulo-obala'], ...ridge(slit, 0.022, 8), color: '#12070c', deep: '#000000', tissue: 'vessel', outline: false });
+      if (slit.length > 1) {
+        items.push({ key: 'slit', groups: ['zulo-obala'], ...ridge(slit, 0.022, 8), color: '#12070c', deep: '#000000', tissue: 'vessel', outline: false });
+        // After birth the named communication is this residual slit, not the centre of the fetal
+        // foramen (now covered by the valve). Use the opening we actually draw.
+        pts['zulo-obala'] = slit[Math.floor(slit.length / 2)];
+      }
     }
   }
 

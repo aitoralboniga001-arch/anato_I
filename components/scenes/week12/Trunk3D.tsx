@@ -194,7 +194,7 @@ export function Iliac3D({ t }: SceneProps) {
   const pose: TrunkPose = { ...TP0, celiac: 1, sma: 1, ima: 1, renal: 1, umb, common, ext, int, umbShift, birth, femoral, leg: 1, lumb: 1, sacr: 1 };
   const camera = cameraAt(t, [
     [0, orbit(56, 10, 10, [0, -9.2, 0.3], [30, 0])],
-    [S13[1], orbit(24, 12, 8.5, [0.3, -9.4, -0.5], [30, 0])],
+    [S13[1], orbit(9, 12, 8.5, [0.3, -9.4, -0.5], [30, 0])],
     [S13[2], orbit(40, 8, 10, [0.9, -10.3, 0.1], [30, 0])],
     [S13[3], orbit(64, 12, 8.5, [0.5, -9.9, -0.2], [30, 0])],
     [S13[4], orbit(22, 10, 9, [0.2, -9.4, 0.7], [30, 0])],

@@ -41,8 +41,9 @@ const CAM = {
   left: orbit(90, 6, 6.9, [0, -0.15, -0.18]),
   /** Down into the AV canal from the front and above. */
   canal: orbit(-14, 46, 6.2, [0, YF + 0.15, 0]),
-  /** Close to the two septa from the front: the notes' frontal section, in depth. */
-  section: orbit(-16, 12, 5, [-0.08, -0.15, -0.12]),
+  /** Close to the two septa from the front: the notes' frontal section, in depth. Nearly face on: from
+   *  further right, the secundum's upper edge hides the ostium secundum behind it. */
+  section: orbit(-7, 12, 5, [-0.08, -0.15, -0.12]),
   /** The left atrium's back wall from the front and the left: the pulmonary veins. */
   leftBack: orbit(48, 14, 8.2, [0.35, 0, -0.25]),
 } satisfies Record<string, Camera3>;
@@ -133,8 +134,9 @@ export function Secundum3D({ t }: SceneProps) {
     [P2[3], orbit(-112, 8, 6.2, [-0.2, 0.05, -0.35])],
     // The two septa side by side: the notes' frontal section, seen in depth.
     [P2[4], CAM.section, 0.06],
-    // The oblique path: a little more from the right, so the way between the septa opens up.
-    [P2[5], orbit(-34, 16, 5.2, [-0.06, -0.05, -0.15])],
+    // Back off a little for the oblique path: both openings in sight, below the atrial rim. From
+    // further right the secundum hides the ostium secundum, where the way comes out.
+    [P2[5], orbit(-7, 16, 6.4, [-0.06, -0.05, -0.15])],
     // The valve: from the left atrium (the primum's other face), its upper part gone.
     // 120° round to the left atrium (the note says so): the longest glide.
     [P2[6], CAM.left, 0.07],
@@ -341,15 +343,15 @@ export function Birth3D({ t }: SceneProps) {
     slit: k.patent ? seg(t, P3[5] + 0.04, P3[5] + 0.08) : 0,
   };
   const camera = cameraAt(t, [
-    // From the front towards the left atrium, where the blood from the lungs now comes back.
-    [0, drift(t, 0.01, P3[1] - 0.015, CAM.front, orbit(18, 12, 8.6, [0.25, -0.1, -0.12]))],
+    // Both atria, from the front and right: the foramen's right-atrial opening is in sight.
+    [0, drift(t, 0.01, P3[1] - 0.015, orbit(-30, 12, 9.4, [0, -0.15, -0.18]), orbit(-40, 16, 8.6, [-0.08, -0.15, -0.14]))],
     // The pulmonary veins fill the left atrium; as its pressure rises, in towards the septa.
     [P3[1], drift(t, P3[2] + 0.01, P3[3] - 0.01, CAM.leftBack, orbit(40, 12, 6.2, [0.1, -0.15, -0.16]))],
     // Its pressure on the valve: close to the two septa from the front and the left, the valve's left face
     // against septum secundum.
     [P3[3], orbit(30, 10, 4.4, [-0.08, -0.2, -0.14])],
-    // The seam along the valve's upper edge, where they fuse (and where a slit may stay open).
-    // In the 20 % step, closer still to the slit left open along that seam.
+    // The left face while they fuse, then closer to the residual slit along the valve's upper edge.
+    // This is the slit itself, rather than the fetal foramen's entrance on the opposite face.
     [P3[4], drift(t, P3[5] + 0.01, P3[6] - 0.015, orbit(34, 12, 3.6, [-0.08, -0.05, -0.17]), orbit(24, 16, 3, [-0.08, -0.03, -0.17]))],
     [P3[6], CAM.front],
   ]);
@@ -359,7 +361,9 @@ export function Birth3D({ t }: SceneProps) {
     { id: 'ezkerreko-aurikula-jaiotakoan', p: 'ezkerreko-aurikula-jaiotakoan', show: vis(t, 0, P3[3]) + vis(t, P3[6]) },
     { id: 'birika-zainak', p: 'birika-zainak', show: vis(t, 0, P3[3]) + vis(t, P3[6]) },
     { id: 'septum-secundum', p: 'septum-secundum', show: vis(t, 0, P3[1]) + vis(t, P3[3]) },
-    { id: 'zulo-obala', p: 'zulo-obala', show: vis(t, 0, P3[1]) + vis(t, P3[3]) },
+    // During pressure closure/fusion the opening is sealed by the valve: name the two tissues then.
+    // Name the opening again when the text introduces the patent slit along the valve's upper edge.
+    { id: 'zulo-obala', p: 'zulo-obala', show: vis(t, 0, P3[1]) + vis(t, P3[5]) },
     { id: 'zulo-obalaren-balbula', p: 'zulo-obalaren-balbula', show: vis(t, 0, P3[1]) + vis(t, P3[3]) },
     { id: 'beheko-kaba-zaina', p: 'beheko-kaba-zaina', show: vis(t, P3[6]), small: true },
   ];
@@ -375,13 +379,16 @@ export function Birth3D({ t }: SceneProps) {
           {/* The left atrium's pressure, pushing the valve towards the right atrium. */}
           <Trail pts={[[0.95, -0.25, -0.2], [0.55, -0.3, -0.18], [0.12, -0.38, -0.14]]} at={at} show={vis(t, P3[2] + 0.01, P3[4])} progress={seg(t, P3[2] + 0.01, P3[2] + 0.06)} color="#ffd27a" />
           <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, 0, P3[1]) * asked}>
-            Jaiotza · bi aurikulak aurretik (eskuina zure ezkerrean): lau birika zainak ezkerrekoaren atzeko paretan
+            Jaiotza · bi aurikulak aurretik eta eskuinetik: zulo obalaren sarrera eskuineko aurikulan
           </Note>
           <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, P3[1], P3[3]) * asked}>
             Aurretik eta ezkerretik: ezkerreko aurikularen atzeko pareta, lau birika zainak
           </Note>
-          <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, P3[3], P3[6]) * asked}>
+          <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, P3[3], P3[5]) * asked}>
             Aurretik eta ezkerretik, bi trenkadetara hurbilduta: balbula (krema) septum secundumaren (arrosa) aurka
+          </Note>
+          <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, P3[5], P3[6]) * asked}>
+            Aurretik eta ezkerretik: balbularen goiko ertzean geratzen den arraildura txikia
           </Note>
           <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, P3[6]) * asked}>
             Aurretik: odol urdinak (gutxi oxigenatua) ezkerreko aurikulan nahasten dira

@@ -134,7 +134,7 @@ export function visibleAnchor(items: Item3[], eye: V3, p: V3, id: string, inFram
   if (!memo) memos.set(items, (memo = new Map()));
   const key = `${id}|${p[0]},${p[1]},${p[2]}`;
   const was = memo.get(key);
-  if (was && Math.hypot(eye[0] - was.eye[0], eye[1] - was.eye[1], eye[2] - was.eye[2]) < 0.08) return was.q;
+  if (was && inFrame(was.q) && Math.hypot(eye[0] - was.eye[0], eye[1] - was.eye[1], eye[2] - was.eye[2]) < 0.08) return was.q;
   const q = search(items, eye, p, id, inFrame, tries);
   memo.set(key, { eye: [eye[0], eye[1], eye[2]], q });
   return q;
@@ -143,7 +143,8 @@ export function visibleAnchor(items: Item3[], eye: V3, p: V3, id: string, inFram
 const memos = new WeakMap<Item3[], Map<string, { eye: V3; q: V3 }>>();
 
 function search(items: Item3[], eye: V3, p: V3, id: string, inFrame: (q: V3) => boolean, tries: number): V3 {
-  if (!coverOf(items, eye, p, id)) return p;
+  // Seen and inside the picture: it stays. Cut off by the frame's edge, it looks for a part in the picture too.
+  if (!coverOf(items, eye, p, id) && inFrame(p)) return p;
   const cand: { q: V3; d: number }[] = [];
   for (const it of items) {
     // Its own drawn pieces, glassy ones included (a cartilage is seen through, yet it is where the name points).
@@ -166,8 +167,12 @@ function search(items: Item3[], eye: V3, p: V3, id: string, inFrame: (q: V3) => 
   const ROOM = 0.012 * fl;
   const around = (q: V3): V3[] => [q, ...[right, up].flatMap((a) => [1, -1].map((k): V3 => [q[0] + a[0] * k * ROOM, q[1] + a[1] * k * ROOM, q[2] + a[2] * k * ROOM]))];
   const ok = (q: V3) => inFrame(q) && around(q).every((r) => !coverOf(items, eye, r, id, 0.12));
-  for (let i = 0; i < Math.min(tries, cand.length); i++) if (ok(cand[i].q)) return cand[i].q;
-  // Farther along: sample the rest sparsely before giving up.
-  for (let i = tries; i < cand.length; i += Math.max(1, Math.floor(cand.length / 64))) if (ok(cand[i].q)) return cand[i].q;
+  const tight = (q: V3) => inFrame(q) && !coverOf(items, eye, q, id, 0.12);
+  // Nearest first; farther along, the rest sampled sparsely. A thin thing lying on another (a slit along a
+  // seam) never has room round it: then any point of it in sight beats a dot on what covers it.
+  for (const pass of [ok, tight]) {
+    for (let i = 0; i < Math.min(tries, cand.length); i++) if (pass(cand[i].q)) return cand[i].q;
+    for (let i = tries; i < cand.length; i += Math.max(1, Math.floor(cand.length / 64))) if (pass(cand[i].q)) return cand[i].q;
+  }
   return p;
 }

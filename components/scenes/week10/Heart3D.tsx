@@ -226,7 +226,7 @@ export function ModelView({
             if (!p) continue;
             // A dot behind another structure would sit on that one: it moves to the part of its own the eye sees.
             const q = at(typeof n.p === 'string' ? visibleAnchor(model.items, view.eye, p, n.id, inFrame) : p);
-            items.push({ id: n.id, at: { x: q.x, y: q.y }, show: n.show, small: n.small, text: n.text, sub: n.sub, key: n.key });
+            items.push({ id: n.id, at: q, show: n.show, small: n.small, text: n.text, sub: n.sub, key: n.key });
           }
           return (
             <>
