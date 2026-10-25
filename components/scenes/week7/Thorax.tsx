@@ -174,15 +174,46 @@ function HeartShape({ s = 1, beating }: { s?: number; beating: boolean }) {
   );
 }
 
-/** The membrane as a three-layered band: two serous layers round a mesenchymal core. */
-function Membrane({ pts, core, show }: { pts: Pt[]; core: string; show: number }) {
-  if (show <= 0.01) return null;
-  const d = `M${pts.map((q) => `${f1(q[0])},${f1(q[1])}`).join('L')}`;
+/**
+ * The membrane as the fold it is (the notes' "tolestura pleuroperikardikoa"): an outline round its centre
+ * line that starts inside the body wall, flares where it leaves the wall and ends in a rounded tip. Filled
+ * with the wall's own tissue, and with the cavity lining run round it, it reads as the wall folding in.
+ */
+function foldPts(mem: Pt[]): Pt[] {
+  const base = mem[0];
+  const nx = mem[1][0] - base[0];
+  const ny = mem[1][1] - base[1];
+  const L = Math.hypot(nx, ny) || 1;
+  const c = resample([[base[0] - (nx / L) * 18, base[1] - (ny / L) * 18], ...mem], 40);
+  const hw = (q: Pt) => 7 + 10 * Math.exp(-((q[0] - base[0]) ** 2 + (q[1] - base[1]) ** 2) / (2 * 13 * 13));
+  const norm = (i: number): Pt => {
+    const a = c[Math.max(0, i - 1)];
+    const b = c[Math.min(c.length - 1, i + 1)];
+    const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+    return [-(b[1] - a[1]) / l, (b[0] - a[0]) / l];
+  };
+  const left = c.map((q, i) => [q[0] + norm(i)[0] * hw(q), q[1] + norm(i)[1] * hw(q)] as Pt);
+  const right = c.map((q, i) => [q[0] - norm(i)[0] * hw(q), q[1] - norm(i)[1] * hw(q)] as Pt);
+  const T = c[c.length - 1];
+  const n = norm(c.length - 1);
+  const d: Pt = [n[1], -n[0]];
+  const r = hw(T);
+  const cap = Array.from({ length: 9 }, (_, k) => {
+    const f = (k / 8) * Math.PI;
+    return [T[0] + (n[0] * Math.cos(f) + d[0] * Math.sin(f)) * r, T[1] + (n[1] * Math.cos(f) + d[1] * Math.sin(f)) * r] as Pt;
+  });
+  return [...left, ...cap.slice(1, -1), ...right.reverse()];
+}
+
+/** The fold's core: the body wall's tissue (later the fibrous pericardium, `core` laid over it). */
+function Fold({ pts, core }: { pts: Pt[]; core?: string }) {
+  const d = smoothPath(pts, true, 0.3);
   return (
-    <g opacity={show}>
-      <path d={d} fill="none" stroke={P.ppMem} strokeWidth={14} strokeLinecap="round" strokeLinejoin="round" />
-      <path d={d} fill="none" stroke={core} strokeWidth={6} strokeLinecap="round" strokeLinejoin="round" />
-    </g>
+    <>
+      <path d={d} fill={P.wall} />
+      <path d={d} fill="url(#w7-mesench)" />
+      {core && <path d={d} fill={core} opacity={0.6} />}
+    </>
   );
 }
 
@@ -190,13 +221,14 @@ const along = (pts: Pt[], u: number): Pt => resample(pts, 101)[Math.round(u * 10
 
 /**
  * The textbook comparison, small in the corner: a fist pushed into a soft balloon. The balloon's wall
- * folds round the fist (inner layer = visceral pleura) and goes on as the outer wall (parietal pleura);
- * between them only the balloon's thin inside (the pleural cavity).
+ * folds round the fist (inner layer = visceral) and goes on as the outer wall (parietal); between them
+ * only the balloon's thin inside (the cavity). Told twice: for the pleura (the lung is the fist) and for
+ * the serous pericardium (the heart is the fist, the outer layer lining the fibrous pericardium).
  */
-function Balloon({ t }: { t: number }) {
-  const show = vis(t, 0.745, 0.84);
+function Balloon({ t, a, b, heart }: { t: number; a: number; b: number; heart?: boolean }) {
+  const show = vis(t, a, b);
   if (show <= 0.01) return null;
-  const p = sm(seg(t, 0.75, 0.79));
+  const p = sm(seg(t, a + 0.005, a + 0.045));
   const cx = 70;
   const cy = 552;
   const R = 40;
@@ -205,7 +237,7 @@ function Balloon({ t }: { t: number }) {
   const fy = cy + R - depth + fr * 0.2;
   const gap = 6;
   const wr = fr + gap;
-  // Where the inner layer meets the outer wall (the wrist; for the lung, its root).
+  // Where the inner layer meets the outer wall (the wrist; for the lung, its root; for the heart, the great vessels).
   const a0 = Math.asin(Math.min(0.99, wr / R));
   const bx = (sgn: number) => cx + sgn * R * Math.sin(a0);
   const by = cy + R * Math.cos(a0);
@@ -213,27 +245,26 @@ function Balloon({ t }: { t: number }) {
   const iy = Math.min(fy, by);
   const inner = ` L${f1(cx + wr)},${f1(by)} L${f1(cx + wr)},${f1(iy)} A${wr},${wr} 0 0 0 ${f1(cx - wr)},${f1(iy)} L${f1(cx - wr)},${f1(by)} Z`;
   const fist = `M${f1(cx - fr)},${f1(fy)} A${fr},${fr} 0 1 1 ${f1(cx + fr)},${f1(fy)} L${f1(cx + fr - 2)},${cy + R + 22} L${f1(cx - fr + 2)},${cy + R + 22} Z`;
+  const sac = heart ? '#ffb3c4' : '#9fd0ff';
+  const rows = heart
+    ? ['ukabila → bihotza', 'barneko orria → errai serosoa', 'kanpoko orria → paretako serosoa', 'kanpoan, fibrosoa itsatsita']
+    : ['ukabila → birika', 'barneko orria → errai pleura', 'kanpoko orria → paretako pleura', 'tartea → pleura barrunbea'];
   return (
     <g opacity={show} pointerEvents="none">
-      <path d={outer + inner} fill="rgba(110,180,255,0.3)" stroke="#9fd0ff" strokeWidth={2.6} strokeLinejoin="round" />
-      <path d={fist} fill={P.lung} stroke={P.lungDeep} strokeWidth={1.4} />
-      <path d={`M${f1(cx - fr + 5)},${f1(fy - 4)}h${2 * fr - 10}M${f1(cx - fr + 4)},${f1(fy + 3)}h${2 * fr - 8}`} stroke={P.lungDeep} strokeWidth={1.2} opacity={0.8} />
+      {/* The fibrous pericardium the outer serous layer lines. */}
+      {heart && <path d={`M${f1(cx - (R + 5) * Math.sin(a0))},${f1(cy + (R + 5) * Math.cos(a0))} A${R + 5},${R + 5} 0 1 1 ${f1(cx + (R + 5) * Math.sin(a0))},${f1(cy + (R + 5) * Math.cos(a0))}`} fill="none" stroke="#d9c7a4" strokeWidth={6} />}
+      <path d={outer + inner} fill={heart ? 'rgba(255,140,170,0.28)' : 'rgba(110,180,255,0.3)'} stroke={sac} strokeWidth={2.6} strokeLinejoin="round" />
+      <path d={fist} fill={heart ? P.heart : P.lung} stroke={heart ? P.heartDeep : P.lungDeep} strokeWidth={1.4} />
+      {!heart && <path d={`M${f1(cx - fr + 5)},${f1(fy - 4)}h${2 * fr - 10}M${f1(cx - fr + 4)},${f1(fy + 3)}h${2 * fr - 8}`} stroke={P.lungDeep} strokeWidth={1.2} opacity={0.8} />}
       <text x={124} y={528} fontSize={15.5} fontWeight={700} fill="#ffb067">
-        Ukabila puxikan sakatuta
+        {heart ? 'Bihotza puxikan sakatuta' : 'Ukabila puxikan sakatuta'}
       </text>
-      <g fontSize={14} fill="rgba(232,238,252,0.94)" opacity={sm(seg(t, 0.77, 0.79))}>
-        <text x={124} y={547}>
-          ukabila → birika
-        </text>
-        <text x={124} y={564}>
-          barneko orria → errai pleura
-        </text>
-        <text x={124} y={581}>
-          kanpoko orria → paretako pleura
-        </text>
-        <text x={124} y={598}>
-          tartea → pleura barrunbea
-        </text>
+      <g fontSize={14} fill="rgba(232,238,252,0.94)" opacity={sm(seg(t, a + 0.025, a + 0.045))}>
+        {rows.map((r, i) => (
+          <text key={i} x={124} y={547 + 17 * i}>
+            {r}
+          </text>
+        ))}
       </g>
     </g>
   );
@@ -241,6 +272,111 @@ function Balloon({ t }: { t: number }) {
 
 /** The side of the mediastinal mesenchyme that faces the cavity (lateral and ventral), lined by the splanchnic layer. */
 const MEDIA_FACE = [...MEDIA.slice(16), MEDIA[0]];
+
+function inside(pts: readonly Pt[], [x, y]: Pt) {
+  let c = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const [xi, yi] = pts[i];
+    const [xj, yj] = pts[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) c = !c;
+  }
+  return c;
+}
+
+/** A bud on its stalk, as one outline: stalk from x0 to the ball (centre c, radius R), half-height h. */
+function budPath(x0: number, c: Pt, R: number, h: number) {
+  const k = Math.sqrt(Math.max(0, R * R - h * h));
+  const [cx, cy] = c;
+  return `M${f1(x0)},${f1(cy - h)}L${f1(cx + k)},${f1(cy - h)}A${f1(R)},${f1(R)} 0 1 0 ${f1(cx + k)},${f1(cy + h)}L${f1(x0)},${f1(cy + h)}Z`;
+}
+
+/**
+ * Close-up beside the section while the buds grow out: the edge of the mediastinal mesenchyme with its
+ * splanchnic layer, and one bud pushing out of it. The layer bends round the bud as one unbroken line,
+ * so the push is seen at a size where the line cannot be missed. Same timing as the section's buds.
+ */
+function PushInset({ t }: { t: number }) {
+  const show = vis(t, 0.24, 0.36);
+  if (show <= 0.01) return null;
+  const p = sm(seg(t, 0.245, 0.34));
+  const X0 = 150;
+  const c: Pt = [lerp(176, 84, p), 348 + 8 * p];
+  const r = lerp(8, 30, p);
+  const hs = lerp(5, 12, p);
+  const coat = 9;
+  const coatD = budPath(204, c, r + coat, hs + coat);
+  const gold = '#ffd29a';
+  // Which way it grows: an arrow in the bud's lumen, once the bud is big enough to hold it.
+  const ar = seg(r, 16, 22);
+  return (
+    <g opacity={show} pointerEvents="none">
+      <defs>
+        <clipPath id="w7-push-clip">
+          <rect x={12} y={264} width={182} height={176} rx={6} />
+        </clipPath>
+        <mask id="w7-push-outM" maskUnits="userSpaceOnUse" x={0} y={240} width={220} height={240}>
+          <rect x={0} y={240} width={220} height={240} fill="#fff" />
+          <rect x={X0} y={240} width={70} height={240} fill="#000" />
+        </mask>
+        <mask id="w7-push-outB" maskUnits="userSpaceOnUse" x={0} y={240} width={220} height={240}>
+          <rect x={0} y={240} width={220} height={240} fill="#fff" />
+          <path d={coatD} fill="#000" />
+        </mask>
+      </defs>
+      <rect x={6} y={230} width={194} height={300} rx={10} fill="#141418" stroke="rgba(255,255,255,0.18)" strokeWidth={1.2} />
+      <text x={18} y={254} fontSize={15.5} fontWeight={700} fill="#ffb067">
+        Hurbiletik
+      </text>
+      <g clipPath="url(#w7-push-clip)">
+        {/* The cavity, then the mediastinal mesenchyme on the right. */}
+        <rect x={12} y={264} width={182} height={176} fill={P.space} />
+        <rect x={12} y={264} width={X0 - 12} height={176} fill={P.peri} opacity={0.6} />
+        <rect x={X0} y={264} width={50} height={176} fill={P.eso} opacity={0.55} />
+        <rect x={X0} y={264} width={50} height={176} fill="url(#w7-mesench)" />
+        {/* The bud's mesenchymal coat, carried out with it. */}
+        <path d={coatD} fill={P.eso} opacity={0.55} />
+        <path d={coatD} fill="url(#w7-mesench)" />
+        {/* The bud (endoderm round a lumen). */}
+        <path d={budPath(204, c, r, hs)} fill={P.lung} stroke={P.lungDeep} strokeWidth={1.3} />
+        <path d={budPath(204, c, r * 0.45, hs * 0.45)} fill="#7a2a40" opacity={0.55} />
+        {ar > 0.01 && (
+          <path
+            d={`M${f1(c[0] + r * 0.35)},${f1(c[1])}H${f1(c[0] - r * 0.45)}M${f1(c[0] - r * 0.45 + 7)},${f1(c[1] - 6)}L${f1(c[0] - r * 0.45)},${f1(c[1])}L${f1(c[0] - r * 0.45 + 7)},${f1(c[1] + 6)}`}
+            fill="none"
+            stroke="#fff"
+            strokeWidth={2.4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={0.85 * ar}
+          />
+        )}
+        {/* The splanchnic layer: one unbroken line from the mediastinum round the bud and back. */}
+        <path d={`M${X0},258L${X0},446`} fill="none" stroke={gold} strokeWidth={4} mask="url(#w7-push-outB)" />
+        <path d={coatD} fill="none" stroke={gold} strokeWidth={4} mask="url(#w7-push-outM)" />
+      </g>
+      <text x={X0 - 7} y={282} fontSize={13.5} fontWeight={700} fill={gold} textAnchor="end">
+        errai orria
+      </text>
+      <text x={80} y={430} fontSize={13} fontWeight={700} fill={P.lung} textAnchor="middle">
+        birika hastapena
+      </text>
+      <g fontSize={13} fill="rgba(232,238,252,0.94)">
+        <text x={18} y={466}>
+          Hastapenak errai orria
+        </text>
+        <text x={18} y={484}>
+          aurretik bultzatzen du:
+        </text>
+        <text x={18} y={502}>
+          orria ez da apurtzen,
+        </text>
+        <text x={18} y={520}>
+          hastapena estaltzen du.
+        </text>
+      </g>
+    </g>
+  );
+}
 
 /**
  * One pleura, traced as the single sheet it is (a fist pushed into a balloon): round the lung (visceral
@@ -287,6 +423,16 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
   const trace = seg(t, 0.745, 0.82);
   const sheetShow = vis(t, 0.74, 0.84);
   const sheetPts = sheetShow > 0.01 ? sheet(G) : [];
+  const lungD = both((s) => smoothPath(G.lung.map((q) => sideP(q, s)), true, 0.3));
+  // The splanchnic layer's name sits on its line: on the bud once it is out, on the mediastinal lining before.
+  const coatQ = sideP(along(G.lung, 0.3), 1);
+  const coatAt: Pt = inside(MEDIA, coatQ) ? [448, 280] : coatQ;
+  const fold = foldPts(G.mem);
+  const folds = [fold, fold.map(mirror)];
+  // While the folds grow and fuse the lining is drawn strong, as the notes' figure draws it; then it steps back.
+  const lining = vis(t, 0.36, 0.62, 0.04);
+  const liningC = lining > 0.5 ? '#ff8fa6' : 'rgba(255,200,190,0.55)';
+  const liningW = lerp(1.6, 2.8, lining);
 
   return (
     <g>
@@ -297,6 +443,32 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
           <stop offset="0.6" stopColor="#c62d42" />
           <stop offset="1" stopColor="#7d1527" />
         </radialGradient>
+        {/* Outside the mediastinum / outside the lungs: together they keep only the outline of their union. */}
+        <mask id="w7-th-outM" maskUnits="userSpaceOnUse" x={0} y={0} width={1000} height={640}>
+          <rect width={1000} height={640} fill="#fff" />
+          <path d={poly(MEDIA)} fill="#000" />
+        </mask>
+        {/* Outside the folds / inside the cavity: the wall's lining and the folds' faces as one line. */}
+        <mask id="w7-th-outF" maskUnits="userSpaceOnUse" x={0} y={0} width={1000} height={640}>
+          <rect width={1000} height={640} fill="#fff" />
+          {folds.map((pts, i) => (
+            <path key={i} d={smoothPath(pts, true, 0.3)} fill="#000" />
+          ))}
+        </mask>
+        {folds.map((_, i) => (
+          // Inside the cavity, outside the other fold and the mediastinum: once fused, no line runs through the join.
+          <mask key={i} id={`w7-th-inW${i}`} maskUnits="userSpaceOnUse" x={0} y={0} width={1000} height={640}>
+            <path d={poly(WALL)} fill="#fff" />
+            <path d={smoothPath(folds[1 - i], true, 0.3)} fill="#000" />
+            <path d={poly(MEDIA)} fill="#000" />
+          </mask>
+        ))}
+        <mask id="w7-th-outL" maskUnits="userSpaceOnUse" x={0} y={0} width={1000} height={640}>
+          <rect width={1000} height={640} fill="#fff" />
+          {lungD.map((d, i) => (
+            <path key={i} d={d} fill="#000" />
+          ))}
+        </mask>
       </defs>
       <rect x={0} y={0} width={1000} height={640} fill="#0f0f11" />
       <Part id="gorputz-pareta" quiet>
@@ -369,10 +541,11 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
         ))}
       </Part>
       <Part id="errai-orria" show={1 - pleuraNamed}>
-        {/* The splanchnic layer lines the mediastinum; the buds push it ahead of them as their coat. */}
-        <path d={poly(MEDIA_FACE, false)} fill="none" stroke="#ffd29a" strokeWidth={3} opacity={0.85} />
-        {both((s) => (
-          <path key={s} d={smoothPath(G.lung.map((q) => sideP(q, s)), true, 0.3)} fill="none" stroke="#ffd29a" strokeWidth={3.4} />
+        {/* The splanchnic layer lines the mediastinum; the buds push it ahead of them as their coat. One
+            unbroken line: the mediastinal lining where no bud is, the bud's outline where it has come out. */}
+        <path d={poly(MEDIA_FACE, false)} fill="none" stroke="#ffd29a" strokeWidth={3.4} mask="url(#w7-th-outL)" />
+        {lungD.map((d, i) => (
+          <path key={i} d={d} fill="none" stroke="#ffd29a" strokeWidth={3.4} mask="url(#w7-th-outM)" />
         ))}
       </Part>
       <Part id="errai-pleura" show={pleuraNamed}>
@@ -383,15 +556,23 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
 
       {/* Pleuropericardial membranes, carrying the phrenic nerve and the common cardinal vein. */}
       <Part id="mintz-pleuroperikardikoak" show={memShow * (1 - periNamed)}>
-        {both((s) => (
-          <Membrane key={s} pts={G.mem.map((q) => sideP(q, s))} core={P.mesench} show={1} />
+        {folds.map((pts, i) => (
+          <Fold key={i} pts={pts} />
         ))}
       </Part>
       <Part id="perikardio-fibrosoa" show={periNamed}>
-        {both((s) => (
-          <Membrane key={s} pts={G.mem.map((q) => sideP(q, s))} core={memCore} show={1} />
+        {folds.map((pts, i) => (
+          <Fold key={i} pts={pts} core={memCore} />
         ))}
       </Part>
+      {/* The cavity lining runs out along one face of each fold, round its tip and back along the other:
+          the membrane is the wall folding in, with its two serous faces round a core of wall tissue. */}
+      <g pointerEvents="none" opacity={memShow}>
+        <path d={poly(WALL)} fill="none" stroke={liningC} strokeWidth={liningW} mask="url(#w7-th-outF)" />
+        {folds.map((pts, i) => (
+          <path key={i} d={smoothPath(pts, true, 0.3)} fill="none" stroke={liningC} strokeWidth={liningW} mask={`url(#w7-th-inW${i})`} />
+        ))}
+      </g>
       <Part id="perikardio-serosoa" show={periNamed}>
         <path d={smoothPath(inset(resample(G.peri, 120), 9), true, 0.3)} fill="none" stroke="#ffb3c4" strokeWidth={2.6} />
         <path d={heartD(heartS * 1.02)} fill="none" stroke="#ffb3c4" strokeWidth={2.6} />
@@ -446,7 +627,9 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
       <Note x={500} y={612} tone="accent" show={vis(t, 0.72, 0.84)}>
         Pleura barrunbe bakoitza: paretako pleura + errai pleura
       </Note>
-      <Balloon t={t} />
+      <Balloon t={t} a={0.745} b={0.84} />
+      <Balloon t={t} a={0.84} b={0.93} heart />
+      <PushInset t={t} />
       <Note x={500} y={612} tone="accent" show={vis(t, 0.84, 0.93)}>
         Mintzaren mesenkima → perikardio fibrosoa · somatopleura → perikardio serosoa
       </Note>
@@ -455,7 +638,7 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
       </Note>
 
       {/* Left gutter: the lung side and the membrane. */}
-      <Label id="errai-orria" x={190} y={150} ax={sideP(along(G.lung, 0.3), 1)[0]} ay={sideP(along(G.lung, 0.3), 1)[1]} show={1 - pleuraNamed} small />
+      <Label id="errai-orria" x={190} y={150} ax={coatAt[0]} ay={coatAt[1]} show={1 - pleuraNamed} small />
       <Label id="errai-pleura" x={190} y={150} ax={sideP(along(G.lung, 0.3), 1)[0]} ay={sideP(along(G.lung, 0.3), 1)[1]} show={pleuraNamed} small />
       <Label id="birika-hastapenak" x={190} y={200} ax={lungMid[0]} ay={lungMid[1]} show={1 - G.d} />
       <Label id="birikak" x={190} y={200} ax={lungMid[0]} ay={lungMid[1]} show={G.d} />
