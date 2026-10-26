@@ -990,5 +990,145 @@
         "text": "11"
       }
     ]
+  },
+  "13": {
+    "file": "13. GAIA_ZAIN SISTEMA (zirkulazio-sistema IV) (Zuzenduta).pdf",
+    "pages": 11,
+    "characters": 24707,
+    "sha256": "a3f3a479f5675524b500248d06e0e140a28e3babe2d9053823a4dd58d7e3c771",
+    "removed": [
+      {
+        "page": 1,
+        "text": "GIZA ANATOMIA I 7. ASTEA"
+      },
+      {
+        "page": 1,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 1,
+        "text": "1"
+      },
+      {
+        "page": 2,
+        "text": "GIZA ANATOMIA I 7. ASTEA"
+      },
+      {
+        "page": 2,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 2,
+        "text": "2"
+      },
+      {
+        "page": 3,
+        "text": "GIZA ANATOMIA I 7. ASTEA"
+      },
+      {
+        "page": 3,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 3,
+        "text": "3"
+      },
+      {
+        "page": 4,
+        "text": "GIZA ANATOMIA I 7. ASTEA"
+      },
+      {
+        "page": 4,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 4,
+        "text": "4"
+      },
+      {
+        "page": 5,
+        "text": "GIZA ANATOMIA I 7. ASTEA"
+      },
+      {
+        "page": 5,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 5,
+        "text": "5"
+      },
+      {
+        "page": 6,
+        "text": "GIZA ANATOMIA I 7. ASTEA"
+      },
+      {
+        "page": 6,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 6,
+        "text": "6"
+      },
+      {
+        "page": 7,
+        "text": "GIZA ANATOMIA I 7. ASTEA"
+      },
+      {
+        "page": 7,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 7,
+        "text": "7"
+      },
+      {
+        "page": 8,
+        "text": "GIZA ANATOMIA I 7. ASTEA"
+      },
+      {
+        "page": 8,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 8,
+        "text": "8"
+      },
+      {
+        "page": 9,
+        "text": "GIZA ANATOMIA I 7. ASTEA"
+      },
+      {
+        "page": 9,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 9,
+        "text": "9"
+      },
+      {
+        "page": 10,
+        "text": "GIZA ANATOMIA I 7. ASTEA"
+      },
+      {
+        "page": 10,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 10,
+        "text": "10"
+      },
+      {
+        "page": 11,
+        "text": "GIZA ANATOMIA I 7. ASTEA"
+      },
+      {
+        "page": 11,
+        "text": "RAFAEL SARRIA"
+      },
+      {
+        "page": 11,
+        "text": "11"
+      }
+    ]
   }
 }

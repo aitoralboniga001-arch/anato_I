@@ -395,6 +395,123 @@ export const guides12: Record<string, ViewGuide> = {
   },
 };
 
+const VEIN_FRONT = 'Aurretik ikusita, enbrioiaren ezkerra zure eskuinean dago. Arrastatu biratzeko.';
+
+export const guides13: Record<string, ViewGuide> = {
+  'sarrera/3d': {
+    orientation: `5. asteko enbrioia. ${SIDE}`,
+    observe: 'Jarraitu zain sinura iristen diren hiru bikoteei: bitelinoak bitelo zakutik, zilborrekoak karenatik eta kardinal komunak enbrioiaren gorputzetik.',
+    meaning: 'Hiru jatorri, hiru kolore: kolore horiek gai osoan zehar jarraitzen dute, heldutan ere. Odol zelulak: gorriak oxigenatuak, urdinak oxigeno gutxikoak.',
+    question: 'Zein zainek dakarte odol oxigenatua 5. astean?',
+    answer: 'Zilborreko zainek, karenatik. Bitelinoek eta kardinalek oxigeno gutxiko odola dakarte.',
+  },
+  'zain-nagusiak/3d': {
+    orientation: `Zain sinua bere bi luzapenekin eta haietara heltzen diren hiru zain bikoteak. ${VEIN_FRONT}`,
+    observe: 'Konparatu bi aldeak: hasieran simetrikoak dira, baina odola eskuinera desbideratzen denean ezkerreko zainak txikitzen dira.',
+    meaning: 'Kolore bakoitza jatorri bat da (bitelinoak turkesa, zilborrekoak arrosa, kardinalak urdina): heldu zain bakoitzak bere jatorriaren kolorea gordetzen du.',
+    question: 'Zergatik txikitzen dira ezkerreko zainak?',
+    answer: 'Odola eskuineko luzapenera desbideratzen delako: eskuineko zainak handitzen dira eta ezkerrekoak txikitu edo desagertu.',
+  },
+  'bitelinoak/3d': {
+    orientation: `Zain bitelinoak, duodenoa eta gibelaren hastapena. ${VEIN_FRONT}`,
+    observe: 'Ikusi bitelinoak duodenoaren inguruan plexu bat eratzen, eta gibel hastapena haien gainean hazten, sinusoideak sortuz.',
+    meaning: 'Turkesa = bitelinoak. Gibela hodi horien gainean hazten da: haien zatiak sinusoide bihurtzen dira.',
+    question: 'Zer sortzen da zain bitelinoek duodenoaren inguruan?',
+    answer: 'Zain plexu periduodenala: hortik porta zaina eratuko da.',
+  },
+  'porta/3d': {
+    orientation: `Gibela gardena, porta zaina eta hodi hepatokardiakoak. ${VEIN_FRONT}`,
+    observe: 'Jarraitu plexu periduodenalari: anastomosi batzuk geratzen dira eta porta zaina osatzen dute; gibelaren gainean, hodi hepatokardiakoak bihotzera.',
+    meaning: 'Porta zainak bitelinoen jatorria du (turkesa). Eskuineko hodi hepatokardiakoa beheko kabaren gibel segmentua izango da.',
+    question: 'Nondik dator beheko kabaren gibel segmentua?',
+    answer: 'Eskuineko hodi hepatokardiakotik, hau da, eskuineko zain bitelinoaren zati hurbiletik.',
+  },
+  'zilbor-zainak/3d': {
+    orientation: `Zilborreko zainak, gibela eta hodi benosoa. ${VEIN_FRONT}`,
+    observe: 'Konparatu bi zilbor zainak: eskuinekoa desagertzen da; ezkerrekoa geratzen da, eta gibelean hodi benosoak beheko kabarekin lotzen du.',
+    meaning: 'Arrosa = zilborrekoak. Ezkerreko zilbor zainak karenako odol oxigenatu guztia darama.',
+    question: 'Zer lotzen du hodi benosoak?',
+    answer: 'Ezkerreko zilbor zaina eta eskuineko hodi hepatokardiakoa (beheko kaba), gibeleko sinusoideak saihestuz.',
+  },
+  'kardinalak/3d': {
+    orientation: `Kardinal zainak eta hiru sistema berriak, bizkarraldetik ikusita. ${VEIN_FRONT}`,
+    observe: 'Ikusi hiru sistema berriak agertzen: kardinal azpikoak (laranja), sakrokardinalak (magenta) eta kardinal gainekoak (horia). Atzeko kardinalak desagertzen dira.',
+    meaning: 'Kolore bakoitza sistema bat da. Hurrengo urratsetan zain heldu bakoitzak bere sistemaren kolorea izango du.',
+    question: 'Zein zain sistema berri agertzen dira 5. eta 7. asteen artean?',
+    answer: 'Kardinal azpikoak, sakrokardinalak eta kardinal gainekoak, bikoitzak.',
+  },
+  'azigos/3d': {
+    orientation: `Kardinal gaineko zainak eta azigos sistema, atzetik. ${VEIN_FRONT}`,
+    observe: 'Jarraitu kardinal gainekoei: eskuinekoa azigos zaina bihurtzen da, ezkerrekoa hemiazigosa, eta anastomosi batek bata bestearekin lotzen du.',
+    meaning: 'Horia = kardinal gainekoak. Eskuineko saihets arteko zainak azigosera heltzen dira; ezkerrekoak hemiazigosetik eta hemiazigos laguntzailetik.',
+    question: 'Nondik dator azigos zaina?',
+    answer: 'Eskuineko kardinal gaineko zainetik eta eskuineko atzeko kardinalaren hurbileko ataletik.',
+  },
+  'kaba-zainak/3d': {
+    orientation: `Goiko eta beheko kaba zainak, osorik. ${VEIN_FRONT}`,
+    observe: 'Ikusi bi kabak eskuineko aurikulara heltzen: goikoa goitik, behekoa behetik. Biak eskuinean daude.',
+    meaning: 'Kabek zati asko dituzte, eta zati bakoitzak bere jatorriaren kolorea gordetzen du.',
+    question: 'Zergatik daude bi kaba zainak eskuinean?',
+    answer: 'Odola eskuineko luzapenera desbideratu zelako: eskuineko zainak geratzen dira eta ezkerrekoak txikitzen dira.',
+  },
+  'beheko-kaba/3d': {
+    orientation: `Beheko kaba zaina eta haren atalak. ${VEIN_FRONT}`,
+    observe: 'Jarraitu beheko kabari behetik gora: atal sakrokardinala (magenta), giltzurrun atala (laranja) eta gibel atala (turkesa).',
+    meaning: 'Hiru kolore, hiru jatorri: beheko kaba hiru zain sistemaren zatiz osatuta dago.',
+    question: 'Nondik dator beheko kabaren giltzurrun segmentua?',
+    answer: 'Eskuineko kardinal azpiko zainetik.',
+  },
+  'sinu-koronarioa/3d': {
+    orientation: `Bihotza atzetik: zain sinuaren ezkerreko luzapena. ${VEIN_FRONT}`,
+    observe: 'Ikusi ezkerreko luzapena txikitzen: odola galtzen du, eta bihotzaren atzean geratzen da.',
+    meaning: 'Ezkerreko luzapenetik bi egitura geratzen dira: sinu koronarioa eta ezkerreko aurikularen zain laprana.',
+    question: 'Zer bihurtzen da zain sinuaren ezkerreko luzapena?',
+    answer: 'Sinu koronarioa, bihotzaren atzeko paretan; eta hara iristen den ezkerreko aurikularen zain laprana.',
+  },
+  'goiko-kaba/3d': {
+    orientation: `Goiko kaba zaina, zain brakiozefalikoak eta jugularrak. ${VEIN_FRONT}`,
+    observe: 'Ikusi aurreko kardinalen arteko anastomosia: ezkerreko zain brakiozefalikoa bihurtzen da eta ezkerreko odola eskuinera darama.',
+    meaning: 'Urdina = aurreko kardinalak, urdin argia = kardinal komuna. Biek osatzen dute goiko kaba.',
+    question: 'Zerk osatzen du goiko kaba zaina?',
+    answer: 'Eskuineko aurreko kardinalaren zati hurbilak eta eskuineko kardinal komunak.',
+  },
+  'laburpena/3d': {
+    orientation: `Zain sistema heldua. ${VEIN_FRONT}`,
+    observe: 'Begiratu kolore guztiei batera: zain heldu bakoitzak bere jatorriaren kolorea du. Taulan, zaina eta jatorria.',
+    meaning: 'Laburpena: goiko kabara brakiozefalikoak eta azigosa; beheko kabara beheko gorputzeko odol guztia.',
+    question: 'Zein zain heltzen da goiko kabara atzetik?',
+    answer: 'Azigos zaina: saihets arteko zainen odola dakar.',
+  },
+  'jaio-aurretik/3d': {
+    orientation: `Fetua, zilbor hestea eta karena; bihotza beira moduan. ${BODY_FRONT}`,
+    observe: 'Jarraitu zelula gorriei karenatik: zilbor zaina, hodi benosoa, beheko kaba, zulo obala, ezkerreko bihotza eta aorta. Gero itzulera zilborreko arterietatik.',
+    meaning: 'Zelula gorriak = odol oxigenatua, urdinak = oxigeno gutxikoa. Korronte bakoitzean gorrien proportzioa = saturazioa (%80, %58).',
+    question: 'Zergatik pasatzen da odol gutxi biriketatik fetuan?',
+    answer: 'Biriketan erresistentzia handia dagoelako: odol gehiena hodi arteriosotik aortara pasatzen da.',
+  },
+  'jaiotza/3d': {
+    orientation: `Jaiotzaren momentua: bihotza, biriken zirkulazioa eta zilborreko hodiak. ${BODY_FRONT}`,
+    observe: 'Ikusi lasterbideak banan-banan ixten: zilborreko arteriak, zilbor zaina, hodi benosoa, hodi arteriosoa eta zulo obala.',
+    meaning: 'Gris = lotailu bihurtzen den hodia. Kolore horiek esaten dute zer geratzen den helduan.',
+    question: 'Zer bihurtzen da hodi benosoa?',
+    answer: 'Gibeleko lotailu benosoa (gibelaren azalean). Ezkerreko zilbor zaina, berriz, gibeleko lotailu borobila.',
+  },
+  'jaio-ondoren/3d': {
+    orientation: `Jaio osteko zirkulazioa: bi zirkuitu bereizi. ${BODY_FRONT}`,
+    observe: 'Jarraitu odolari: kabetatik eskuineko bihotzera eta biriketara; birika zainetatik ezkerreko bihotzera eta aortara.',
+    meaning: 'Orain ez dago nahasketarik: eskuinean zelula urdinak, ezkerrean gorriak.',
+    question: 'Zein dira aortaren lehen adarrak?',
+    answer: 'Arteria koronarioak, Valsalvaren sinuetatik irteten direnak.',
+  },
+  'linfa/3d': {
+    orientation: `Linfa sistema, zainen gainean. ${VEIN_FRONT}`,
+    observe: 'Jarraitu linfa tanta berdeei: gorputzetik linfa zakuetara, kiloren zisternara, eta hodi toraxikotik gora ezkerreko lotura yugulosubklabikora.',
+    meaning: 'Berdea = linfa zakuak eta hodiak; urdina = zainak. Linfa azkenean zain odolera itzultzen da.',
+    question: 'Non irekitzen da hodi toraxikoa?',
+    answer: 'Ezkerreko lotura yugulosubklabikoan, ezkerreko zain yugularra eta subklabioa elkartzen diren puntuan.',
+  },
+};
+
 /** Gives each view of a week its guide from `guides` (keyed stage/view). */
 export function withGuides(week: WeekDef, guides: Record<string, ViewGuide>): WeekDef {
   for (const stage of week.stages) for (const view of stage.views) view.guide ??= guides[`${stage.id}/${view.id}`];

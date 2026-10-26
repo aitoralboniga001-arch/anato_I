@@ -41,7 +41,7 @@ export function shapeFor(week: number, day: number, plane: PlaneKind): SpecimenS
   // Circulatory system: the cardiogenic area on the flat disc (as topic 3, days 13–21), the heart tube
   // while the embryo folds (topic 4, days 22–28), then the C-shaped embryo and the fetus (topics 5, 8, 9).
   if (week === 10) return day < 22 ? 'diskoa' : day < 28 ? 'tolesten' : day < 57 ? 'c' : 'fetua';
-  if (week === 11 || week === 12) return day < 57 ? 'c' : 'fetua';
+  if (week === 11 || week === 12 || week === 13) return day < 57 ? 'c' : 'fetua';
   return 'karena';
 }
 

@@ -14,12 +14,13 @@ import { IMPORTANCE_W9 } from '@/content/klasea/importance/w9';
 import { IMPORTANCE_W10 } from '@/content/klasea/importance/w10';
 import { IMPORTANCE_W11 } from '@/content/klasea/importance/w11';
 import { IMPORTANCE_W12 } from '@/content/klasea/importance/w12';
+import { IMPORTANCE_W13 } from '@/content/klasea/importance/w13';
 import { speakSeconds } from '@/lib/klasea/voice';
 
 const week = Number(process.argv[2] ?? 10);
 const lesson = lessonOf(week);
 if (!lesson) throw new Error(`No class for topic ${week}`);
-const importance = { 7: IMPORTANCE_W7, 8: IMPORTANCE_W8, 9: IMPORTANCE_W9, 10: IMPORTANCE_W10, 11: IMPORTANCE_W11, 12: IMPORTANCE_W12 }[week] ?? {};
+const importance = { 7: IMPORTANCE_W7, 8: IMPORTANCE_W8, 9: IMPORTANCE_W9, 10: IMPORTANCE_W10, 11: IMPORTANCE_W11, 12: IMPORTANCE_W12, 13: IMPORTANCE_W13 }[week] ?? {};
 
 const tier = (id: string) => (importance[id]?.tier === 'funtsezkoa' ? '**F**' : importance[id] ? 'g' : '·');
 const cite = (ids: string[]) => ids.map((id) => `  - ${tier(id)} \`${id}\` ${sentence(id) ? sentenceText(sentence(id)!).trim() : '(ez dago)'}`).join('\n');

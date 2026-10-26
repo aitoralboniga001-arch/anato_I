@@ -12,6 +12,7 @@ import { w9 } from './w9';
 import { w10 } from './w10';
 import { w11 } from './w11';
 import { w12 } from './w12';
+import { w13 } from './w13';
 
 export interface NotesPart { text: string; b?: boolean; i?: boolean }
 export interface NotesSentence { id: string; parts: NotesPart[] }
@@ -22,7 +23,7 @@ export interface NotesBlock {
   sentences: NotesSentence[];
 }
 export interface NotesAnchor { week: number; stageId: string; beat: number }
-const documents: Record<number, NotesBlock[]> = { 1: w1, 2: w2, 3: w3, 4: w4, 5: w5, 6: w6, 7: w7, 8: w8, 9: w9, 10: w10, 11: w11, 12: w12 };
+const documents: Record<number, NotesBlock[]> = { 1: w1, 2: w2, 3: w3, 4: w4, 5: w5, 6: w6, 7: w7, 8: w8, 9: w9, 10: w10, 11: w11, 12: w12, 13: w13 };
 export const notesOf = (week: number): NotesBlock[] => documents[week] ?? [];
 export const sentenceText = (s: NotesSentence) => s.parts.map(p => p.text).join('');
 export const blockText = (b: NotesBlock) => b.sentences.map(sentenceText).join('');

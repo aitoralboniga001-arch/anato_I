@@ -153,6 +153,21 @@ export const NOTES: Record<number, NotesSection[]> = {
     { n: '2.6', title: 'Aortatik ateratzen diren adarrak', depth: 1, stages: ['zilbor-iliakoak'] },
     { n: '2.7', title: 'Goiko eta beheko gorputz adarren arteriak', depth: 1, stages: ['gorputz-adarrak'] },
   ],
+  13: [
+    { n: '1', title: 'Sarrera', depth: 0, stages: ['sarrera'] },
+    { n: '2', title: 'Zain nagusien garapena', depth: 0, stages: ['zain-nagusiak'] },
+    { n: '2.1', title: 'Zain bitelinoak / onfalomesenterikoak', depth: 1, stages: ['bitelinoak', 'porta'] },
+    { n: '2.2', title: 'Zilborreko zainak', depth: 1, stages: ['zilbor-zainak'] },
+    { n: '2.3', title: 'Kardinal zainak', depth: 1, stages: ['kardinalak', 'azigos'] },
+    { n: '3', title: 'Kaba zainak (goiko eta behekoak)', depth: 0, stages: ['kaba-zainak'] },
+    { n: '3.1', title: 'Beheko kaba zaina', depth: 1, stages: ['beheko-kaba', 'sinu-koronarioa'] },
+    { n: '3.2', title: 'Goiko kaba zaina', depth: 1, stages: ['goiko-kaba', 'laburpena'] },
+    { n: '4', title: 'Zirkulazio sistemak', depth: 0, stages: [] },
+    { n: '4.1', title: 'Jaio aurreko zirkulazioa', depth: 1, stages: ['jaio-aurretik'] },
+    { n: '4.2', title: 'Jaiotzaren momentuan ematen diren aldaketak', depth: 1, stages: ['jaiotza'] },
+    { n: '4.3', title: 'Jaio osteko zirkulazioa', depth: 1, stages: ['jaio-ondoren'] },
+    { n: '5', title: 'Linfa sistema', depth: 0, stages: ['linfa'] },
+  ],
 };
 
 /** The notes section a stage belongs to, and its parent heading when it is a sub-heading. */

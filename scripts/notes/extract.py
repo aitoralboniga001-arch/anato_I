@@ -30,6 +30,7 @@ FILES = [
     '10. GAIA_ ZIRKULAZIO APARATUA (ZUZENDUTA).pdf',
     '11. GAIA. ZIRKULAZIO-SISTEMA (II) (zuzenduta).pdf',
     '12. GAIA_ARTERIA SISTEMA (zirkulazio-sistema III) (zuzendu gabe) (1).pdf',
+    '13. GAIA_ZAIN SISTEMA (zirkulazio-sistema IV) (Zuzenduta).pdf',
 ]
 
 
@@ -97,11 +98,22 @@ def extract(path, week):
     # two-column summary tables as text boxes stored after the prose that follows them: its blocks are
     # read top to bottom (both extractions sorted the same way), so each table stays in its own section.
     order = week == 12
+    # Week 13 (a Google Docs export) wraps every word in zero-width spaces, and a justified line keeps only
+    # the two of them (no space) between words: two in a row are the word gap, a single one is dropped,
+    # or no number, heading or page footer would be recognised.
+    zw = (lambda s: s.replace('​​', ' ').replace('​', '')) if week == 13 else (lambda s: s)
     for pn, page in enumerate(doc):
         for b in page.get_text('dict', sort=order)['blocks']:
             if b['type'] != 0:
                 continue
             for line in b['lines']:
+                spans = line['spans']
+                for i, span in enumerate(spans):
+                    # The word gap can straddle two spans (a bold word ends one).
+                    if week == 13 and span['text'].endswith('​') and i + 1 < len(spans) and spans[i + 1]['text'].startswith('​') and not span['text'].endswith('​​'):
+                        span['text'] = span['text'][:-1] + ' '
+                        spans[i + 1]['text'] = spans[i + 1]['text'][1:]
+                    span['text'] = zw(span['text'])
                 text = norm(''.join(s['text'] for s in line['spans']))
                 if not text:
                     continue
@@ -132,7 +144,7 @@ def extract(path, week):
     for pn, page in enumerate(doc):
         excluded = collections.Counter(r['text'] for r in removed if r['page'] == pn + 1)
         plain = ''.join(b[4] for b in page.get_text('blocks', sort=True) if b[6] == 0) if order else page.get_text('text')
-        for text in plain.splitlines():
+        for text in zw(plain).splitlines():
             text = norm(text)
             if excluded[text]:
                 excluded[text] -= 1
@@ -177,8 +189,8 @@ def extract(path, week):
                 kind = 'h2'
         elif re.match(r'^(?:[●•➔\-]|\d+\.\u200b)', text):
             kind = 'li'
-        # Weeks 11 and 12 wrap body text beside their figures (indented lines); week 12's tables have a right column.
-        elif (line['italic'] and line['size'] <= 11.2 and len(text) < 110 and line['box'][0] > 100) or re.match(r'^\d+\.?\s*irudia', text, re.I) or (week not in {11, 12} and line['box'][0] > 150 and len(text) < 100 and not line['bold']):
+        # Weeks 11–13 wrap body text beside their figures (indented lines); week 12's tables have a right column.
+        elif (line['italic'] and line['size'] <= 11.2 and len(text) < 110 and line['box'][0] > 100) or re.match(r'^\d+\.?\s*irudia', text, re.I) or (week not in {11, 12, 13} and line['box'][0] > 150 and len(text) < 100 and not line['bold']):
             kind = 'caption'
         elif week == 12 and text.startswith(CAPTIONS_12) and len(text) < 64:
             kind = 'caption'

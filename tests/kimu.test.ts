@@ -549,14 +549,19 @@ describe('Kimu: topic named or being studied, atlas-only entries, honest fallbac
   };
   const in7 = { week: 7, stage: 'zeloma', beat: 0 };
 
-  it('answers "mediastinoa" from the atlas, says the notes do not define it, and ignores "7. gaian"', async () => {
+  it('answers "mediastinoa" from the atlas; named topic 7 has no notes on it, topic 13 mentions it (the thoracic duct)', async () => {
     for (const q of ['mediastinoa', 'mediastinoa, 7. gaian', 'zer da mediastinoa', 'que es el mediastino']) {
       const r = await ask(q, in7);
       expect(r.reply, q).toMatch(/Mediastinoa/);
       expect(r.reply, q).toMatch(/Bi pleura barrunbeen arteko/);
-      expect(r.reply, q).toMatch(/^(Ez dut apunteetan|No lo encuentro|I cannot find)/);
-      expect(r.sources, q).toEqual([]);
       expect(r.targets[0]?.week, q).toBe(7);
+      if (q.includes('7. gaian')) {
+        expect(r.reply, q).toMatch(/^(Ez dut apunteetan|No lo encuentro|I cannot find)/);
+        expect(r.sources, q).toEqual([]);
+      } else {
+        // Topic 13's notes say the thoracic duct climbs «mediastinotik»: the only notes that mention it.
+        expect(r.sources.map((x) => x.week), q).toEqual([13]);
+      }
     }
   });
 

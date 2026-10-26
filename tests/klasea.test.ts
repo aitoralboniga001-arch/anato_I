@@ -9,6 +9,7 @@ import { IMPORTANCE_W9 } from '@/content/klasea/importance/w9';
 import { IMPORTANCE_W10 } from '@/content/klasea/importance/w10';
 import { IMPORTANCE_W11 } from '@/content/klasea/importance/w11';
 import { IMPORTANCE_W12 } from '@/content/klasea/importance/w12';
+import { IMPORTANCE_W13 } from '@/content/klasea/importance/w13';
 import { LESSONS } from '@/content/klasea';
 import { computeImportance, type Importance } from '@/lib/klasea/importance';
 import { stepsOf } from '@/lib/klasea/engine';
@@ -134,6 +135,14 @@ const X_WORDS: Record<string, 'ks' | 'basque'> = {
   oxigenatzeko: 'ks',
   konexioan: 'ks',
   konexioa: 'ks',
+  toraxikoa: 'ks',
+  toraxikoak: 'ks',
+  toraxiko: 'ks',
+  toraxikotik: 'ks',
+  plexutik: 'ks',
+  plexua: 'ks',
+  oxigenatuta: 'ks',
+  baxuagoa: 'basque',
 };
 
 // ———————————————————————————— each topic's class ————————————————————————————
@@ -207,6 +216,16 @@ const TOPICS: Topic[] = [
     contrastFrom: 'sistema',
     shown: {},
     same: {},
+  },
+  {
+    week: 13,
+    importance: IMPORTANCE_W13,
+    pinned: ['1/p3/s1', '1/p5/s2', '2/p3/s2', '2.1.1/p3/s13', '2.2/p5/s2', '2.3/p7/s2', '2.3/p8/s5', '3.1/p9/s7', '3.2/p11/s4', '4.1.1/p3/s7', '4.2/p7/s4', '5/p6/s4'],
+    contrastFrom: 'bitelinoak',
+    // Cardinal3D names the whole vein ('Beheko bena kaba') from the beheko-kaba stage's first step, over its three toured segments.
+    shown: { 'kabak#3/beheko-kaba-zaina': 'Cardinal3D: beheko kaba izendatuta 1. urratsetik', 'kabak#10/beheko-kaba-zaina': 'Cardinal3D: beheko kaba izendatuta 1. urratsetik' },
+    // 4.2/p6–p7: each fetal shunt closes into its ligament; the birth scene draws the vessel under the ligament's name.
+    same: { 'ezkerreko-zilbor-zaina': ['gibeleko-lotailu-borobila'], 'hodi-benosoa': ['gibeleko-lotailu-benosoa'], 'hodi-arteriosoa': ['lotailu-arteriosoa'] },
   },
 ];
 

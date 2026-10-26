@@ -38,7 +38,7 @@ export interface NarrationRequest {
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const isId = (v: unknown): v is string => typeof v === 'string' && /^[a-z0-9][a-z0-9-]{0,99}$/.test(v);
 /** The highest topic number the course has (this module takes no imports: keep in step with the registry). */
-const MAX_WEEK = 12;
+const MAX_WEEK = 13;
 
 const isIndex = (v: unknown): v is number => Number.isInteger(v) && Number(v) >= 0 && Number(v) <= 999;
 
