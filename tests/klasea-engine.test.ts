@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { commandOf, initialState, reduce, stepsOf, type ClassEvent, type ClassState } from '@/lib/klasea/engine';
 import type { Lesson } from '@/lib/klasea/types';
+import { LESSONS } from '@/content/klasea';
 
 const lesson: Lesson = {
   week: 10,
@@ -31,6 +32,49 @@ const lesson: Lesson = {
 const run = (events: ClassEvent[], from: ClassState = initialState()) => events.reduce((s, e) => reduce(lesson, s, e), from);
 
 describe('class engine', () => {
+  it('waits after a finished board point, retaining text and board until the learner continues', () => {
+    let s: ClassState = { ...initialState(), step: 2, phase: 'speak' };
+    s = reduce(lesson, s, { type: 'spoken' }, true);
+    expect(s.phase).toBe('write');
+    s = reduce(lesson, s, { type: 'written' }, true);
+    expect(s).toMatchObject({ step: 2, phase: 'wait' });
+    expect(commandOf(lesson, s)).toMatchObject({ text: 'Bigarrena.', written: ['b1'], focus: ['y'] });
+    expect(reduce(lesson, s, { type: 'spoken' }, true)).toEqual(s);
+    expect(reduce(lesson, s, { type: 'continue' }, true)).toMatchObject({ step: 3, phase: 'move' });
+    expect(reduce(lesson, s, { type: 'back' }, true)).toMatchObject({ step: 2, phase: 'move' });
+    expect(reduce(lesson, s, { type: 'notUnderstood' }, true)).toMatchObject({ step: 2, phase: 'move', plain: true });
+  });
+
+  it('does not add a wait before a check, or let Next skip an unanswered check', () => {
+    const s = reduce(lesson, { ...initialState(), step: 3, phase: 'hold' }, { type: 'held' }, true);
+    expect(s).toMatchObject({ step: 4, phase: 'ask' });
+    expect(reduce(lesson, s, { type: 'next' }, true)).toEqual(s);
+    expect(reduce(lesson, s, { type: 'continue' }, true)).toEqual(s);
+  });
+
+  it.each([10, 11, 12])('completes topic %i in both pacing modes with every check preserved', (week) => {
+    const lesson = LESSONS[week];
+    for (const manual of [false, true]) {
+      let s = initialState();
+      let checks = 0;
+      let waits = 0;
+      for (let guard = 0; s.phase !== 'done' && guard < 3000; guard++) {
+        const ev: ClassEvent = s.phase === 'move' ? { type: 'arrived' }
+          : s.phase === 'speak' ? { type: 'spoken' }
+          : s.phase === 'write' ? { type: 'written' }
+          : s.phase === 'hold' ? { type: 'held' }
+          : s.phase === 'ask' ? { type: 'answered', ok: true, graded: true }
+          : { type: 'continue' };
+        if (s.phase === 'ask') checks++;
+        if (s.phase === 'wait') waits++;
+        s = reduce(lesson, s, ev, manual);
+      }
+      expect(s.phase).toBe('done');
+      expect(checks).toBe(stepsOf(lesson).filter((step) => step.kind === 'check').length);
+      expect(manual ? waits > 0 : waits === 0).toBe(true);
+    }
+  });
+
   it('slots checks after the line they name, else at the chunk end', () => {
     expect(stepsOf(lesson)).toEqual([
       { kind: 'line', chunk: 0, line: 0 },

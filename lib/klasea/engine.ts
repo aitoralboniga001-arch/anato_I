@@ -12,7 +12,7 @@ import type { BoardItem, Check, Chunk, Lesson, Line, Tone } from './types';
 
 export type Step = { kind: 'line'; chunk: number; line: number } | { kind: 'check'; chunk: number; check: number };
 
-export type Phase = 'move' | 'speak' | 'write' | 'hold' | 'ask' | 'feedback' | 'done';
+export type Phase = 'move' | 'speak' | 'write' | 'hold' | 'wait' | 'ask' | 'feedback' | 'done';
 
 export interface ClassState {
   step: number;
@@ -78,14 +78,22 @@ const markWeak = (lesson: Lesson, state: ClassState, chunk: number): string[] =>
   return id && !state.weak.includes(id) ? [...state.weak, id] : state.weak;
 };
 
-export function reduce(lesson: Lesson, state: ClassState, ev: ClassEvent): ClassState {
+export function reduce(lesson: Lesson, state: ClassState, ev: ClassEvent, learnerPaced = false): ClassState {
   const steps = stepsOf(lesson);
   const step = steps[state.step];
   const line = step?.kind === 'line' ? lesson.chunks[step.chunk].lines[step.line] : null;
+  const finishLine = (): ClassState => {
+    const next = steps[state.step + 1];
+    // Checks already wait for the learner. Group connective lines; stop at a completed teaching point.
+    const boundary = line && (line.writes || line.hold || line.tone === 'caution' || line.tone === 'summary' || next?.chunk !== step?.chunk);
+    return learnerPaced && boundary && next?.kind === 'line'
+      ? { ...state, phase: 'wait' }
+      : goTo(lesson, state, state.step + 1);
+  };
   const after = (from: 'speak' | 'write'): ClassState => {
     if (from === 'speak' && line?.writes) return { ...state, phase: 'write' };
     if (line?.hold) return { ...state, phase: 'hold' };
-    return goTo(lesson, state, state.step + 1);
+    return finishLine();
   };
   switch (ev.type) {
     case 'start':
@@ -99,14 +107,14 @@ export function reduce(lesson: Lesson, state: ClassState, ev: ClassEvent): Class
     case 'written':
       return state.phase === 'write' ? after('write') : state;
     case 'held':
-      return state.phase === 'hold' ? goTo(lesson, state, state.step + 1) : state;
+      return state.phase === 'hold' ? finishLine() : state;
     case 'answered':
       if (state.phase !== 'ask' || !step) return state;
       return { ...state, phase: 'feedback', weak: ev.graded && !ev.ok ? markWeak(lesson, state, step.chunk) : state.weak };
     case 'continue':
-      return state.phase === 'feedback' ? goTo(lesson, state, state.step + 1) : state;
+      return state.phase === 'feedback' || state.phase === 'wait' ? goTo(lesson, state, state.step + 1) : state;
     case 'next':
-      return state.phase === 'done' ? state : goTo(lesson, state, state.step + 1);
+      return state.phase === 'done' || state.phase === 'ask' ? state : goTo(lesson, state, state.step + 1);
     case 'back': {
       // To the start of the line before this one (from a line's start), else of this one.
       let i = state.step;
@@ -182,7 +190,7 @@ export function commandOf(lesson: Lesson, state: ClassState, lastOk?: boolean): 
     if (s.kind !== 'line') return;
     const w = lesson.chunks[s.chunk].lines[s.line].writes;
     if (!w) return;
-    if (done || i < state.step || (i === state.step && (state.phase === 'write' || state.phase === 'hold'))) written.push(w);
+    if (done || i < state.step || (i === state.step && (state.phase === 'write' || state.phase === 'hold' || state.phase === 'wait'))) written.push(w);
   });
 
   // While the scene moves to a line, the last line's structures stay lit (no flicker between lines).

@@ -368,9 +368,9 @@ export function Player(p: PlayerProps) {
   const terms = p.noTerms ? NO_TERMS : allTerms;
   const showText = !p.voice || fullText;
   // The 3D view's reading guide belongs to one step of one view: playing on or moving to another step closes it.
-  const guideKey = p.modelGuide && !p.voice && !p.ask && !p.tourCard && !p.intro ? `${p.modelGuide.key}|${p.stage.id}|${p.activeBeat}` : null;
+  const guideKey = p.modelGuide && !p.ask && !p.tourCard && !p.intro ? `${p.modelGuide.key}|${p.stage.id}|${p.activeBeat}` : null;
   const [guideFor, setGuideFor] = useState<string | null>(null);
-  if (p.playing && guideFor !== null) setGuideFor(null);
+  if (guideFor !== null && (p.playing || guideFor !== guideKey)) setGuideFor(null);
   const guideOpen = guideKey !== null && guideFor === guideKey;
   const guideBtn = useRef<HTMLButtonElement>(null);
   const closeGuide = () => { setGuideFor(null); guideBtn.current?.focus({ preventScroll: true }); };

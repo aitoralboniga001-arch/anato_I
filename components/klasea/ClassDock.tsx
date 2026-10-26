@@ -6,6 +6,7 @@ import { Popover } from '@/components/shell/Popover';
 import { IconChevron, IconNext, IconPause, IconPlay, IconPrev } from '@/components/shell/icons';
 import type { PlayMode } from '@/components/shell/prefs';
 import { stepsOf } from '@/lib/klasea/engine';
+import { canResumeClass } from '@/lib/klasea/resume';
 import type { Lesson, Tone } from '@/lib/klasea/types';
 import { speakSeconds, voiceSupported } from '@/lib/klasea/voice';
 import { ClassCheck } from './ClassCheck';
@@ -83,25 +84,29 @@ export function ClassDock({ k, mode, onMode, holdReason, onAskKimu }: {
   if (k.status === 'card') {
     const saved = k.saved ? lesson.chunks.findIndex((c) => c.id === k.saved!.chunk) : -1;
     const linked = k.linkSaved >= 0 ? k.linkSaved : k.linkChunk;
+    const resume = canResumeClass(lesson, k.saved, linked);
     return (
       <section className={`dock ${styles.dock} ${styles.card}`} aria-label="Klasea">
         <div className={styles.cardBody}>
           <span className={styles.kicker}>Klasea · Kimu irakasle</span>
           <h2>{lesson.title}</h2>
           <p>Kimuk funtsezkoa azalduko dizu ahoz, eszenari begira, eta arbelean idatziko du. Bidean {checkCount} galdera labur. Ohar guztiak Simulazioan daude.</p>
+          <p className={styles.note}>{k.learnerPaced
+            ? 'Zure erritmoan: ideia nagusien ondoren, begiratu eszenari eta sakatu Jarraitu. Etengabeko klasea ezarpenetan aukera dezakezu.'
+            : 'Etengabeko klasea: azalpenek automatikoki jarraitzen dute. Zure erritmoan ikasteko aukera ezarpenetan dago.'} Denbora estimatuak ez ditu zure pausak barne hartzen.</p>
           <div className={styles.cardActions}>
-            {linked !== null && linked > 0 && (
+            {!resume && linked !== null && linked > 0 && (
               <button className="btn primary" onClick={() => k.start(linked)} autoFocus>
                 Klasea hemendik · {linked + 1}. {lesson.chunks[linked].title}
               </button>
             )}
-            {saved > 0 && linked === null && (
+            {resume && (
               <button className="btn primary" onClick={k.resumeSaved} autoFocus>
                 Jarraitu · {saved + 1}. {lesson.chunks[saved].title}
               </button>
             )}
-            <button className={`btn${(saved > 0 && linked === null) || (linked !== null && linked > 0) ? '' : ' primary'}`} onClick={() => k.start()}>
-              Hasi klasea · {minutes} min
+            <button className={`btn${resume || (linked !== null && linked > 0) ? '' : ' primary'}`} onClick={() => k.start()}>
+              {resume ? 'Hasieratik hasi' : 'Hasi klasea'} · {minutes} min
             </button>
             <button className="btn ghost" onClick={() => onMode('arrunta')} title="Simulazioa ohar guztiekin, klaserik gabe">
               Simulazioa bakarrik
@@ -151,6 +156,7 @@ export function ClassDock({ k, mode, onMode, holdReason, onAskKimu }: {
   const asking = state.phase === 'ask' || state.phase === 'feedback';
   const tone = cmd.line ? TONE[cmd.tone] : null;
   const paused = k.paused && !asking;
+  const waiting = state.phase === 'wait';
 
   return (
     <section className={`dock ${styles.dock}${asking ? ` ${styles.asking}` : ''}`} aria-label="Klasea" data-tone={cmd.line ? cmd.tone : undefined}>
@@ -166,7 +172,8 @@ export function ClassDock({ k, mode, onMode, holdReason, onAskKimu }: {
             {tone && !asking && <span className={`${styles.tone} ${styles[`tone_${cmd.tone}`] ?? ''}`}>{tone}</span>}
             {state.plain && cmd.line && !asking && <span className={styles.tone}>Errazago</span>}
             {paused && <span className={styles.pausedTag}>{holdReason ?? 'Pausatuta · Zuriunea'}</span>}
-            <span className={styles.left} data-tip={`Klasearen amaierara, ${rateText(k.rate)} abiaduran`} data-tip-pos="top-end">
+            {waiting && !paused && <span className={styles.pausedTag}>Zure txanda · Begiratu eszenari</span>}
+            <span className={styles.left} data-tip={`Klasearen amaierara, ${rateText(k.rate)} abiaduran; zure pausak kontatu gabe`} data-tip-pos="top-end">
               ≈ {minutesLeft} min
             </span>
           </div>
@@ -193,8 +200,8 @@ export function ClassDock({ k, mode, onMode, holdReason, onAskKimu }: {
           <button className={styles.icon} onClick={k.back} aria-label="Aurreko esaldia" data-tip="Aurreko esaldia · ←" data-tip-pos="top">
             <IconPrev size={16} />
           </button>
-          <button className={`${styles.icon} ${styles.play}`} onClick={k.togglePause} disabled={asking} aria-label={k.userPaused ? 'Jarraitu' : 'Pausatu'} data-tip={`${k.userPaused ? 'Jarraitu' : 'Pausatu'} · Zuriunea`} data-tip-pos="top">
-            {k.userPaused ? <IconPlay size={14} /> : <IconPause size={14} />}
+          <button className={`${styles.icon} ${styles.play}`} onClick={k.togglePause} disabled={asking} aria-label={k.userPaused || waiting ? 'Jarraitu' : 'Pausatu'} data-tip={`${k.userPaused || waiting ? 'Jarraitu' : 'Pausatu'} · Zuriunea`} data-tip-pos="top">
+            {k.userPaused || waiting ? <IconPlay size={14} /> : <IconPause size={14} />}
           </button>
           <button className={styles.icon} onClick={k.next} disabled={asking && state.phase === 'ask'} aria-label="Hurrengoa" data-tip="Hurrengoa · →" data-tip-pos="top">
             <IconNext size={16} />
@@ -213,6 +220,7 @@ export function ClassDock({ k, mode, onMode, holdReason, onAskKimu }: {
             {rateText(k.rate)}
           </button>
         </div>
+        {waiting && <button className="btn small primary" onClick={k.cont} disabled={k.paused}>Jarraitu <IconNext size={14} /></button>}
         <button
           className={`btn small${state.plain ? ' primary' : ''}`}
           onClick={() => {
@@ -253,6 +261,16 @@ export function ClassDock({ k, mode, onMode, holdReason, onAskKimu }: {
                     </span>
                   </button>
                 ))}
+              </div>
+              <hr />
+              <p className="menu-h">Klasearen erritmoa</p>
+              <div role="radiogroup" aria-label="Klasearen erritmoa" className="tp-modes">
+                <button role="radio" aria-checked={k.learnerPaced} className={k.learnerPaced ? 'is-on' : ''} onClick={() => k.setLearnerPaced(true)}>
+                  <span><b>Zure erritmoan</b><small>Ideia nagusien ondoren, Jarraitu sakatu</small></span>
+                </button>
+                <button role="radio" aria-checked={!k.learnerPaced} className={!k.learnerPaced ? 'is-on' : ''} onClick={() => k.setLearnerPaced(false)}>
+                  <span><b>Etengabeko klasea</b><small>Azalpenak automatikoki; galderetan pausatu</small></span>
+                </button>
               </div>
               <hr />
               <div className="tp-row">

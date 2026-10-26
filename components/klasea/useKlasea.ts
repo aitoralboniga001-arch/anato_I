@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { commandOf, initialState, reduce, stepsOf, type ClassEvent, type ClassState } from '@/lib/klasea/engine';
 import type { Lesson } from '@/lib/klasea/types';
+import { savedClassPlace, type SavedClassPlace } from '@/lib/klasea/resume';
 import { ClassVoice, savedVoiceName, speakSeconds, voiceSupported, type VoiceChoice } from '@/lib/klasea/voice';
 
 /**
@@ -35,6 +36,7 @@ const RATES = [0.8, 1, 1.25, 1.5, 1.75, 2];
 /** A rate saved by an older build (1.15, 1.3) becomes the nearest one offered now. */
 const nearestRate = (r: number) => RATES.reduce((a, b) => (Math.abs(b - r) < Math.abs(a - r) ? b : a));
 const RATE_KEY = 'enbrioatlas:klasea:abiadura';
+const PACING_KEY = 'enbrioatlas:klasea:learner-paced';
 const placeKey = (week: number) => `enbrioatlas:klasea:${week}`;
 
 const readJson = <T,>(key: string): T | null => {
@@ -88,7 +90,8 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
   const [choice, setChoice] = useState<VoiceChoice | null>(null);
   const [fellBack, setFellBack] = useState(false);
   const [rate, setRateState] = useState(1);
-  const [saved, setSaved] = useState<{ chunk: string; line: number } | null>(null);
+  const [learnerPaced, setLearnerPaced] = useState(true);
+  const [saved, setSaved] = useState<SavedClassPlace | null>(null);
 
   const [voice] = useState(() => new ClassVoice((c) => {
     setChoice(c);
@@ -108,10 +111,12 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
   // Saved place and rate, read once on the client.
   useEffect(() => {
     const r = readJson<number>(RATE_KEY);
-    const p = readJson<{ chunk: string; line: number }>(placeKey(lesson.week));
+    const p = readJson<unknown>(placeKey(lesson.week));
     // eslint-disable-next-line react-hooks/set-state-in-effect -- browser storage only exists after mount
     if (typeof r === 'number' && r > 0) setRateState(nearestRate(r));
-    setSaved(p && lesson.chunks.some((c) => c.id === p.chunk) ? p : null);
+    setSaved(savedClassPlace(lesson, p));
+    const pacing = readJson<unknown>(PACING_KEY);
+    if (typeof pacing === 'boolean') setLearnerPaced(pacing);
   }, [lesson]);
 
   useEffect(() => {
@@ -132,7 +137,7 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
   }, [running, voice]);
   useEffect(() => () => voice.cancel(), [voice]);
 
-  const dispatch = (ev: ClassEvent) => setState((s) => reduce(lesson, s, ev));
+  const dispatch = (ev: ClassEvent) => setState((s) => reduce(lesson, s, ev, learnerPaced));
 
   // The class clock: each phase does its one thing, then reports back.
   const phaseKey = `${state.step}/${state.phase}/${state.plain ? 'p' : ''}`;
@@ -141,12 +146,15 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
     const d = driverRef.current;
     if (state.phase === 'done') {
       writeJson(placeKey(lesson.week), null);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- keep the in-page bookmark in sync with this storage write
+      setSaved(null);
       return;
     }
     if (state.phase === 'move') {
       if (step?.kind === 'line') {
         const place = { chunk: lesson.chunks[step.chunk].id, line: step.line };
         writeJson(placeKey(lesson.week), place);
+        setSaved(place);
       }
       let live = true;
       d.go(cmd.stage, cmd.at, () => live && dispatch({ type: 'arrived' }), cmd.view, rate);
@@ -183,7 +191,7 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
       return () => window.clearTimeout(id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- one run per phase; cmd and step follow the phase key
-  }, [running, paused, phaseKey]);
+  }, [running, paused, phaseKey, learnerPaced]);
 
   // Paused: the scene stops where it is; the line starts again from its beginning on resume.
   useEffect(() => {
@@ -223,6 +231,8 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
       });
     const at = steps.findIndex((s) => s.kind === 'line' && s.chunk === ci && s.line === saved.line);
     setState({ ...initialState(), step: Math.max(0, at), phase: 'move' });
+    setLastOk(undefined);
+    setPlainOn(null);
     setUserPaused(false);
     setStatus('running');
   };
@@ -244,6 +254,12 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
     choice,
     fellBack,
     rate,
+    learnerPaced,
+    setLearnerPaced: (value: boolean) => {
+      setLearnerPaced(value);
+      writeJson(PACING_KEY, value);
+      if (!value && state.phase === 'wait') dispatch({ type: 'continue' });
+    },
     rates: RATES,
     saved,
     /** Where a link opened the topic: the chunk to offer ("Klasea hemendik"). */
@@ -251,7 +267,10 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
     linkSaved: link?.chunk ? lesson.chunks.findIndex((c) => c.id === link.chunk) : -1,
     start,
     resumeSaved,
-    togglePause: () => setUserPaused((p) => !p),
+    togglePause: () => {
+      if (state.phase === 'wait' && !userPaused) dispatch({ type: 'continue' });
+      else setUserPaused((p) => !p);
+    },
     pause: () => setUserPaused(true),
     next: () => {
       voice.cancel();
@@ -283,6 +302,8 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
     },
     cont: () => dispatch({ type: 'continue' }),
     restart: () => {
+      writeJson(placeKey(lesson.week), null);
+      setSaved(null);
       setStatus('card');
       setState(initialState());
     },

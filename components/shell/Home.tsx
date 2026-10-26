@@ -11,7 +11,7 @@ import { StudyMap, countWord, shelfCols } from './StudyMap';
 import { INTRO_KEY, Intro } from './intro/Intro';
 import { LandFoot, LandNav, firstReady, inPrep, isWip } from './LandNav';
 import { IconPlay } from './icons';
-import { useLastPlace, useVisited } from './progress';
+import { resumeHref, useLastPlace, usePlace, useVisited } from './progress';
 import { TopicShot } from './TopicShot';
 import { GuideButton, TourHost } from './tour/TourHost';
 import { CountUp, useReveal } from './landing-fx';
@@ -35,12 +35,12 @@ const spot = (e: PointerEvent<HTMLElement>) => {
 /** One topic on the home shelf: a frame of its own scene, span, title, progress and the next step. */
 function TopicCard({ w, i }: { w: (typeof weeks)[number]; i: number }) {
   const visited = useVisited(w.week);
+  const saved = usePlace(w.week);
   const [hot, setHot] = useState(false);
   const days = spanOf(w).long;
   const wip = isWip(w);
   const done = w.stages.filter((s) => visited.includes(s.id)).length;
-  const next = w.stages.find((s) => !visited.includes(s.id)) ?? w.stages[0];
-  const href = done > 0 && done < w.stages.length ? `/astea/${w.week}?etapa=${next.id}` : `/astea/${w.week}`;
+  const href = resumeHref(w.week, w.stages, saved, visited);
   const inner = (
     <>
       <span className="lp-card-fig">
@@ -69,7 +69,7 @@ function TopicCard({ w, i }: { w: (typeof weeks)[number]; i: number }) {
               </small>
             </span>
             <span className="lp-card-go">
-              {done === 0 ? 'Hasi' : done < w.stages.length ? 'Jarraitu' : 'Berrikusi'} <span aria-hidden>→</span>
+              {done === 0 && !saved ? 'Hasi' : 'Jarraitu'} <span aria-hidden>→</span>
             </span>
           </>
         )}
@@ -110,7 +110,7 @@ function ContinueCta() {
       </Link>
     );
   return (
-    <Link className="btn btn-light lg cta-continue" data-tour="hasi" href={`/astea/${w.week}?etapa=${st.id}`}>
+    <Link className="btn btn-light lg cta-continue" data-tour="hasi" href={resumeHref(w.week, w.stages, last)}>
       <IconPlay size={14} />
       <span className="cta-continue-t">
         Jarraitu

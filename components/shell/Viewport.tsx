@@ -267,12 +267,21 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
   const [liveLook, setLiveLook] = useState<{ key: string; names: Record<LookSide, string>; facing?: LookSide } | null>(null);
   const setLook = useCallback((l: { names: Record<LookSide, string>; facing?: LookSide } | null) => setLiveLook(l ? { key: resetKey, ...l } : null), [resetKey]);
   const look = liveLook?.key === resetKey ? liveLook : null;
+  const [lookOpenKey, setLookOpenKey] = useState<string | null>(null);
+  // Forget an open panel when leaving its stage, including when returning to that stage later.
+  if (lookOpenKey !== null && lookOpenKey !== resetKey) setLookOpenKey(null);
+  const lookOpen = lookOpenKey === resetKey;
+  const lookToggle = useRef<HTMLButtonElement>(null);
   const underlay = useMemo<Underlay | null>(() => (underHost ? { host: underHost, scene: sceneEl, zoomed, orbitRequest, setOrient, setLook } : null), [underHost, sceneEl, zoomed, orbitRequest, setOrient, setLook]);
   const turnModel = (direction: NonNullable<Underlay['orbitRequest']>['direction'], side?: LookSide) => {
     cancelReveal();
     if (direction === 'reset') glideZoom(HOME);
     setOrbitCommand((old) => ({ key: resetKey, request: { direction, look: side, serial: (old?.request.serial ?? 0) + 1 } }));
     onTurn?.();
+    if (lookOpen && window.matchMedia('(max-width: 600px)').matches) {
+      setLookOpenKey(null);
+      lookToggle.current?.focus();
+    }
   };
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenError, setFullscreenError] = useState('');
@@ -674,8 +683,17 @@ export const Viewport = forwardRef<SVGSVGElement, ViewportProps>(function Viewpo
       {interactive3d && look && (
         // Named sides: "see it from the front, from behind, from its left…" — the words a student
         // studies with, and the lit key always says where the picture is seen from now.
-        <div ref={lookRef} className="look-controls" role="group" aria-label="Ikusi alde batetik" onPointerDown={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
+        <div ref={lookRef} className={`look-controls${lookOpen ? ' is-open' : ''}`} role="group" aria-label="Ikusi alde batetik" onPointerDown={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()} onKeyDown={(e) => {
+          if (e.key === 'Escape' && lookOpen) {
+            e.stopPropagation();
+            setLookOpenKey(null);
+            lookToggle.current?.focus();
+          }
+        }}>
           <span className="look-title">{look.facing ? `${fromWord(look.names[look.facing])} ikusita` : 'Ikusi'}</span>
+          <button ref={lookToggle} type="button" className="look-toggle" aria-expanded={lookOpen} onClick={() => setLookOpenKey(lookOpen ? null : resetKey)}>
+            {look.facing ? `${fromWord(look.names[look.facing])} ikusita` : 'Ikuspegia'} <span aria-hidden>{lookOpen ? '▾' : '▴'}</span>
+          </button>
           <div className="look-keys">
             {LOOK_ORDER(look.names).map((side) => (
               <button

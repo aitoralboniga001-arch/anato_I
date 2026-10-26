@@ -90,11 +90,25 @@ const WRITTEN: MapCard[] = [
     href: '/astea/9',
   },
   {
-    days: '3.–4. asteak',
+    days: '3.–10. asteak',
     title: 'Zirkulazio aparatua',
-    chain: ['Odol irlatxoak (errai orrian)', 'Ferra formako tutua: plaka kardiogenikoa + endokardio hodiak', 'Zeharkako tolespena: hodi bakarra', 'Endokardioa · miokardioa · epikardioa'],
-    idea: 'Lerro primitibotik migratutako zelulek errai orrian ferra formako odol irlatxoak sortzen dituzte; hodi bihurtu eta ferra formako tutua osatzen dute. Zeharkako tolespenak bi endokardio hodiak fusionatzen ditu; errai orritik miokardioa eta epikardioa, eta haien artean bihotz gelatina.',
+    chain: ['Eskualde kardiogenikoa', 'Tolespenak → bihotz hodi bakarra', 'Lehen zirkulazioa: zainak → bihotza → arteriak', 'Hodia tolestu → bihotz lakioa', 'Atalen eratorriak: bentrikuluak · aurikulak · arteria handiak'],
+    idea: 'Eskualde kardiogenikotik bihotz hodia eta lehen zirkulazioa; hodia lakio bihurtzen da. Atal bulbarra, bentrikularra, aurikularra eta zain sinua bereizi, bakoitzaren eratorriak kokatzeko.',
     href: '/astea/10',
+  },
+  {
+    days: '4.–5. asteak eta jaiotza',
+    title: 'Zirkulazio-sistema (II)',
+    chain: ['Kuxinak + pareta muskularrak → trenkadak', 'Aurikulak: bi septum, zulo obala', 'Erreten aurikulubentrikularra → bi zulo + balbulak', 'Bentrikuluak · konoa · enborra: bereizi eta lotu', 'Jaiotza: zulo obalaren itxiera'],
+    idea: 'Bihotz lakioaren barrunbeak trenkadek banatzen dituzte; konoa eta enbor arteriosoa bereiztean, aorta ezkerreko bentrikuluarekin eta birika enborra eskuinekoarekin lotzen dira. Zulo obalak jaio arte komunikazioa mantentzen du; jaiotzean presio-aldaketak itxiera eragiten du.',
+    href: '/astea/11',
+  },
+  {
+    days: '4.–8. asteak eta jaiotza',
+    title: 'Zirkulazio-sistema (III)',
+    chain: ['Aorta zakua → arkuak → aorta dortsalak', 'Arkuen eratorriak: eskuina ≠ ezkerra', 'Nerbio atzerakariak: arterien inguruan', 'Beheranzko aorta → gorputzeko adarrak', 'Gorputz adarrak: ardatz arteriak'],
+    idea: 'Arkuak sortu eta birmoldatu egiten dira: 3.etik karotidak; 4. eta 6. arkuen garapena desberdina da bi aldeetan. Horrek nerbio atzerakarien ibilbidea azaltzen du. Ondoren, beheranzko aortaren adarrak eta gorputz adarretako ardatz arteriak bereizi.',
+    href: '/astea/12',
   },
 ];
 

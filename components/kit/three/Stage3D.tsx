@@ -9,6 +9,7 @@ import { KEY_LIGHT, projectItem, type Item3, type Projected, type Scene3 } from 
 import { Part } from '../Part';
 import { BridgeLookContext, UnderlayContext, partState, useLabelScale, useScene, type LookSide } from '../context';
 import type { GLApi, GLState } from './gl';
+import { registerPublication } from './publication';
 
 export type At3 = (p: V3, m?: M4) => { x: number; y: number; z: number };
 
@@ -47,7 +48,7 @@ type Edges = { top?: string; bottom?: string; left?: string; right?: string };
  * one direction clearly points that way (within ~55 degrees); a name, once shown, stays until another
  * clearly beats it, so the pills do not flicker while the picture turns between two directions.
  */
-function edgesFor(m: M4, n: EdgeNames, sideDir: V3, was: Edges): Edges {
+export function edgesFor(m: M4, n: EdgeNames, sideDir: V3, was: Edges): Edges {
   const dirs: [V3, string, string][] = [
     [[0, 1, 0], n.up, n.down],
     [[0, 0, 1], n.front, n.back],
@@ -306,20 +307,11 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
     if (!host0) return;
     const entry = pub.current;
     const list = pubs.get(host0) ?? [];
-    // The fading copy of the last view never speaks over the view taking over.
-    if (root.current?.closest('.scene-ghost')) list.unshift(entry);
-    else list.push(entry);
     pubs.set(host0, list);
-    return () => {
-      const i = list.indexOf(entry);
-      if (i < 0) return;
-      const top = i === list.length - 1;
-      list.splice(i, 1);
-      if (!top) return;
-      const next = list[list.length - 1];
+    return registerPublication(list, entry, !!root.current?.closest('.scene-ghost'), (next) => {
       setOrient?.(next?.orient ?? null);
       setLook?.(next?.look ?? null);
-    };
+    });
   }, [host0, setOrient, setLook]);
   const speaks = () => {
     const list = host0 ? pubs.get(host0) : undefined;

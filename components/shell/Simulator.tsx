@@ -43,7 +43,7 @@ import { registerKimuHost, setKimuHere, toggleKimu, useKimuOpen } from '@/compon
 import { NarrationTransport, type AudioSnapshot } from './narrate';
 import { getNarrationSegments, narratedFrame, needsStageRestart, type NarrationKind } from '@/lib/sim/narration';
 import { getPref, setPlayMode, setPref, usePref, type PlayMode } from './prefs';
-import { markVisited, useVisited } from './progress';
+import { markVisited, useStudyPosition, useVisited } from './progress';
 import { recordAnswer } from './answers';
 import { imageId } from '@/content/pool';
 import { sectionLabel, sectionOf } from '@/content/notes';
@@ -1183,7 +1183,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     if (classOn) quietForClass();
   }, [classOn]);
   // The link keeps the class's place (`klasea=<chunk>`), so a reload or a shared link returns to it.
-  const classChunk = classOn ? klasea.cmd.chunk.id : null;
+  const classChunk = classOn ? klasea.cmd.chunk.id : classActive && klasea.status === 'card' ? classLink?.chunk ?? null : null;
+  useStudyPosition(linkedWeek === week.week ? {
+    week: week.week, stage: stage.id, view: view.id, t: pos.t,
+    ...(classChunk ? { chunk: classChunk } : {}),
+  } : null, playing || (classOn && !klasea.paused));
   useEffect(() => {
     if (linkedWeek !== week.week) return;
     const url = new URL(window.location.href);

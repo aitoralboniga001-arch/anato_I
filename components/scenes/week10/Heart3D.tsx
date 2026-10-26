@@ -212,8 +212,8 @@ export function ModelView({
       <rect x={0} y={0} width={1000} height={640} fill="none" />
       <Stage3D scene={scene} axes={AXES} continuity={continuity}>
         {(at, view) => {
-          // Words that say where the picture is seen from ("from the front…") hold only for the step's own
-          // camera: turned more than ~20 degrees away, they fade (the camera keys say the side instead).
+          // Directional captions describe the step's reference camera. After a turn, label that
+          // reference explicitly; the frame edges and camera keys describe the current view.
           const asked = askedView(camera, view);
           const items: Callout[] = [];
           const inFrame = (q: V3) => {
@@ -233,8 +233,8 @@ export function ModelView({
               {over?.(at, asked)}
               <Callouts items={items} left={[120, 580]} right={right ?? [240, 580]} />
               {caption && (
-                <Note x={24} y={24} size={12.5} align="start" show={0.35 + 0.65 * asked}>
-                  {caption}
+                <Note x={24} y={24} size={12.5} align="start">
+                  {asked < 0.5 ? `Hasierako ikuspegia: ${caption}` : caption}
                 </Note>
               )}
             </>

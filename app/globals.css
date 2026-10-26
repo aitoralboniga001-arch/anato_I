@@ -13474,6 +13474,24 @@ kbd {
 .look-controls button:focus-visible { outline: 2px solid #ffb86b; outline-offset: 1px; }
 .look-controls button[aria-pressed='true'] { border-color: rgba(255, 184, 107, 0.7); background: rgba(255, 184, 107, 0.16); color: #ffd9ae; }
 .look-controls .look-reset { grid-area: reset; align-self: stretch; padding: 0; font-size: 15px; color: var(--text-3); }
+.look-controls .look-toggle { display: none; }
+@media (max-width: 600px) {
+  .look-controls { padding: 4px; gap: 4px; grid-template-columns: auto 36px; }
+  .look-controls button { min-height: 36px; }
+  .look-controls .look-title { display: none; }
+  .look-controls .look-toggle {
+    grid-area: title;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 40px;
+    padding: 0 10px;
+  }
+  .look-controls:not(.is-open) { grid-template-columns: auto; grid-template-rows: auto; grid-template-areas: 'title'; }
+  .look-controls:not(.is-open) .look-keys,
+  .look-controls:not(.is-open) .look-reset { display: none; }
+}
 @media (pointer: coarse) {
   .look-controls button { min-height: 36px; padding: 0 10px; font-size: 13px; }
 }
