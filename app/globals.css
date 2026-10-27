@@ -3666,6 +3666,27 @@ a.ln-chip:hover {
   margin-bottom: 28px;
 }
 
+.mg {
+  scroll-margin-top: 60px;
+}
+
+/* The topics 1–6 tab: the germ-layer sections, without their page-level padding. */
+.ln-page .mg-early > section {
+  padding: 0;
+}
+
+.ln-page .mg-early > section + section {
+  margin-top: 64px;
+}
+
+.mg-early .section-head {
+  margin-bottom: 24px;
+}
+
+.mg-tab b {
+  padding: 0 5px;
+}
+
 .mg-bar {
   position: sticky;
   top: 60px;

@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { Fragment, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { appearances, getWeek, structures } from '@/content/registry';
 import { EARLY, LAYERS, type LNode } from '@/content/lineage';
 import { MIGRATIONS, SOURCES, flowIds, sourceIds, type Flow, type MNode } from '@/content/migrations';
 import { categoryColor } from '@/lib/sim/palette';
 
+/** A topic tab (week 0 = the topics 1–6 germ-layer trees) or one origin followed across topics. */
 type Mode = { week: number; source?: undefined } | { source: string; week?: undefined };
 
 /** Self-test: the boxes a structure becomes stay hidden until tapped. */
@@ -226,6 +227,7 @@ const legend = (
 
 const parseHash = (): Mode | null => {
   const h = decodeURIComponent(window.location.hash.slice(1));
+  if (h === 'orriak') return { week: 0 };
   const w = /^gaia-(\d+)$/.exec(h);
   if (w && MIGRATIONS.some((t) => t.week === +w[1])) return { week: +w[1] };
   const s = /^iturria-(.+)$/.exec(h);
@@ -236,9 +238,10 @@ const parseHash = (): Mode | null => {
 /**
  * "Migrazioak eta bilakaerak": for topics 7 onwards, every structure's path from where it comes from to
  * what it becomes, as left-to-right schemes, one topic at a time or following one origin across topics.
- * A self-test switch hides every derivative until it is tapped.
+ * A self-test switch hides every derivative until it is tapped. The first tab holds the topics 1–6
+ * germ-layer trees (`layers`), so nothing from them shows under a later topic.
  */
-export function MigrationMap() {
+export function MigrationMap({ layers }: { layers: ReactNode }) {
   const [mode, setMode] = useState<Mode>({ week: MIGRATIONS[0].week });
   const [quizOn, setQuizOn] = useState(false);
   const [shown, setShown] = useState<ReadonlySet<string>>(new Set());
@@ -247,7 +250,9 @@ export function MigrationMap() {
   useEffect(() => {
     const read = () => {
       const m = parseHash();
-      if (m) setMode(m);
+      if (!m) return;
+      setMode(m);
+      top.current?.scrollIntoView({ block: 'start' });
     };
     read();
     window.addEventListener('hashchange', read);
@@ -257,7 +262,7 @@ export function MigrationMap() {
   const pick = (m: Mode) => {
     setMode(m);
     setShown(new Set());
-    history.replaceState(null, '', `#${m.source ? `iturria-${m.source}` : `gaia-${m.week}`}`);
+    history.replaceState(null, '', `#${m.source ? `iturria-${m.source}` : m.week ? `gaia-${m.week}` : 'orriak'}`);
     const el = top.current;
     if (el && el.getBoundingClientRect().top < 0) el.scrollIntoView({ block: 'start' });
   };
@@ -275,6 +280,7 @@ export function MigrationMap() {
   const topic = mode.week ? MIGRATIONS.find((t) => t.week === mode.week)! : null;
   const src = mode.source ? bySource.find((s) => s.id === mode.source)! : null;
   const early = src ? findLineage(src.id) : null;
+  const layersTab = mode.week === 0;
   const flows = topic ? topic.flows : (src?.groups.flatMap((g) => g.flows) ?? []);
   const total = answersIn(flows);
   const quiz: Quiz = { on: quizOn, shown, reveal: (k) => setShown((s) => new Set(s).add(k)) };
@@ -288,6 +294,10 @@ export function MigrationMap() {
     <div className="mg" ref={top}>
       <div className="mg-bar">
         <div className="mg-tabs" role="tablist" aria-label="Gaiak">
+          <button role="tab" aria-selected={layersTab} className={`mg-tab${layersTab ? ' is-on' : ''}`} onClick={() => pick({ week: 0 })}>
+            <b>1–6</b>
+            Ernetze orriak
+          </button>
           {MIGRATIONS.map((t) => (
             <button key={t.week} role="tab" aria-selected={mode.week === t.week} className={`mg-tab${mode.week === t.week ? ' is-on' : ''}`} onClick={() => pick({ week: t.week })}>
               <b>{t.week}</b>
@@ -295,10 +305,12 @@ export function MigrationMap() {
             </button>
           ))}
         </div>
-        <button className={`mg-quiz${quizOn ? ' is-on' : ''}`} aria-pressed={quizOn} onClick={toggleQuiz} title="Eratorriak ezkutatu eta zeure burua probatu">
-          <i aria-hidden />
-          <span>Proba modua</span>
-        </button>
+        {!layersTab && (
+          <button className={`mg-quiz${quizOn ? ' is-on' : ''}`} aria-pressed={quizOn} onClick={toggleQuiz} title="Eratorriak ezkutatu eta zeure burua probatu">
+            <i aria-hidden />
+            <span>Proba modua</span>
+          </button>
+        )}
       </div>
 
       <div className="mg-sources">
@@ -316,10 +328,11 @@ export function MigrationMap() {
         })}
       </div>
 
-      {legend}
+      {!layersTab && legend}
 
       <div className={`mg-list${quizOn ? ' is-quiz' : ''}`} key={mode.source ?? mode.week}>
-        {quizOn && (
+        {layersTab && <div className="mg-early">{layers}</div>}
+        {quizOn && !layersTab && (
           <p className="mg-quiz-hint" aria-live="polite">
             <b>Proba modua.</b> Iturriak ikusgai daude; sakatu lauki ezkutu bakoitza zer bihurtzen den ikusteko. {Math.min(shown.size, total)} / {total} agerian.
             {shown.size > 0 && (

@@ -56,36 +56,11 @@ function Tree({ nodes }: { nodes: N[] }) {
   );
 }
 
-export function Lineage() {
+/** Topics 1–6: blastocyst to the bilaminar disc, then the three germ layers and their derivatives. */
+function EarlyLayers() {
   return (
-    <div className="landing ln-page">
-      <LandNav current="leinuak" />
-      <section className="ln-hero">
-        <p className="eyebrow">Leinuak</p>
-        <h1>Ernetze orrien leinuak</h1>
-        <p className="hero-lead">
-          Blastozistotik hiru ernetze orrietara, eta 7. gaitik aurrera egitura bakoitza nondik datorren, nora migratzen den eta zertan bihurtzen den. Egitura bakoitzean klikatuz, simulagailuan agertzen den etapa irekitzen da.
-        </p>
-        <nav className="ln-jump" aria-label="Orrialdeko atalak">
-          <a href="#migrazioak">
-            7.–13. gaiak · Migrazioak eta bilakaerak <span aria-hidden>↓</span>
-          </a>
-          <a href="#orriak">
-            1.–6. gaiak · Ernetze orriak <span aria-hidden>↓</span>
-          </a>
-        </nav>
-      </section>
-
-      <section className="land-section ln-migrations" id="migrazioak">
-        <div className="section-head">
-          <p className="eyebrow">7.–13. gaiak</p>
-          <h2>Migrazioak eta bilakaerak</h2>
-          <p>Gai bakoitzeko egiturak, ezkerretik eskuinera: nondik datozen, nora migratzen diren eta zertan bihurtzen diren. Iturri bat aukeratuz, haren bidea gai guztietan zehar jarraitzen da.</p>
-        </div>
-        <MigrationMap />
-      </section>
-
-      <section className="ln-early" id="orriak">
+    <>
+      <section className="ln-early">
         <div className="section-head">
           <p className="eyebrow">1.–2. asteak</p>
           <h2>Blastozistotik bi orriko diskora</h2>
@@ -116,6 +91,38 @@ export function Lineage() {
             </article>
           ))}
         </div>
+      </section>
+    </>
+  );
+}
+
+export function Lineage() {
+  return (
+    <div className="landing ln-page">
+      <LandNav current="leinuak" />
+      <section className="ln-hero">
+        <p className="eyebrow">Leinuak</p>
+        <h1>Ernetze orrien leinuak</h1>
+        <p className="hero-lead">
+          Blastozistotik hiru ernetze orrietara, eta 7. gaitik aurrera egitura bakoitza nondik datorren, nora migratzen den eta zertan bihurtzen den. Egitura bakoitzean klikatuz, simulagailuan agertzen den etapa irekitzen da.
+        </p>
+        <nav className="ln-jump" aria-label="Orrialdeko atalak">
+          <a href="#gaia-7">
+            7.–13. gaiak · Migrazioak eta bilakaerak <span aria-hidden>↓</span>
+          </a>
+          <a href="#orriak">
+            1.–6. gaiak · Ernetze orriak <span aria-hidden>↓</span>
+          </a>
+        </nav>
+      </section>
+
+      <section className="land-section ln-migrations" id="migrazioak">
+        <div className="section-head">
+          <p className="eyebrow">Gaiz gai</p>
+          <h2>Migrazioak eta bilakaerak</h2>
+          <p>Aukeratu gai bat: 1.–6. gaietan ernetze orrien leinua; 7. gaitik aurrera, egitura bakoitza nondik datorren, nora migratzen den eta zertan bihurtzen den. Iturri bat aukeratuz, haren bidea gai guztietan zehar jarraitzen da.</p>
+        </div>
+        <MigrationMap layers={<EarlyLayers />} />
       </section>
       <LandFoot />
     </div>
