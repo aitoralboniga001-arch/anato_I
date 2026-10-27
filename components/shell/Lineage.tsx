@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { appearances, structures } from '@/content/registry';
 import { categoryColor } from '@/lib/sim/palette';
 import { LandFoot, LandNav } from './LandNav';
+import { MigrationMap } from './MigrationMap';
 import { EARLY as ROOT, LAYERS, type LNode } from '@/content/lineage';
 
 /** The page starts the early tree at the blastocyst (cleavage is shown in the simulator). */
@@ -63,11 +64,28 @@ export function Lineage() {
         <p className="eyebrow">Leinuak</p>
         <h1>Ernetze orrien leinuak</h1>
         <p className="hero-lead">
-          Blastozistotik hiru ernetze orrietara, eta horietako bakoitzetik 4. asteko eratorrietara. Egitura bakoitzean klikatuz, simulagailuan lehen aldiz agertzen den etapa irekitzen da.
+          Blastozistotik hiru ernetze orrietara, eta 7. gaitik aurrera egitura bakoitza nondik datorren, nora migratzen den eta zertan bihurtzen den. Egitura bakoitzean klikatuz, simulagailuan agertzen den etapa irekitzen da.
         </p>
+        <nav className="ln-jump" aria-label="Orrialdeko atalak">
+          <a href="#migrazioak">
+            7.–13. gaiak · Migrazioak eta bilakaerak <span aria-hidden>↓</span>
+          </a>
+          <a href="#orriak">
+            1.–6. gaiak · Ernetze orriak <span aria-hidden>↓</span>
+          </a>
+        </nav>
       </section>
 
-      <section className="ln-early">
+      <section className="land-section ln-migrations" id="migrazioak">
+        <div className="section-head">
+          <p className="eyebrow">7.–13. gaiak</p>
+          <h2>Migrazioak eta bilakaerak</h2>
+          <p>Gai bakoitzeko egiturak, ezkerretik eskuinera: nondik datozen, nora migratzen diren eta zertan bihurtzen diren. Iturri bat aukeratuz, haren bidea gai guztietan zehar jarraitzen da.</p>
+        </div>
+        <MigrationMap />
+      </section>
+
+      <section className="ln-early" id="orriak">
         <div className="section-head">
           <p className="eyebrow">1.–2. asteak</p>
           <h2>Blastozistotik bi orriko diskora</h2>
