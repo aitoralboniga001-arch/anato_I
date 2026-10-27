@@ -254,7 +254,7 @@ export const guides11: Record<string, ViewGuide> = {
   },
   'arteria-konoa/3d': {
     orientation: `Arteria konoa bentrikuluen sabaian, goian zeharka moztuta. ${TOP}`,
-    observe: 'Barruan bi gandor hazten dira, aurre-eskuinean eta atze-ezkerrean. Fusionatzean, trenkada laprana sortzen dute.',
+    observe: 'Barruan bi gandor hazten dira, atze-eskuinean eta aurre-ezkerrean. Fusionatzean, trenkada laprana sortzen dute.',
     meaning: 'Odol zelulek erakusten dute nora doan espazio bakoitza: aurre-eskuinekoa eskuineko bentrikuluaren infundibulua da, atze-ezkerrekoa ezkerrekoarena.',
     question: 'Zein arteria irtengo da infundibulu bakoitzetik?',
     answer: 'Eskuineko bentrikuluaren infundibulutik birika arteria; ezkerrekoaren infundibulutik aorta.',

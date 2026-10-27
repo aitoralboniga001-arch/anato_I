@@ -245,7 +245,7 @@ export const Birth3D = veinStage({
       dim: ['goiko-gernu-maskuri-arteria', 'barneko-arteria-iliakoa', 'gernu-maskuria', 'erdialdeko-zilbor-lotailua'],
       names: [{ id: 'goiko-gernu-maskuri-arteria', p: 'goiko-gernu-maskuri-arteriaR', sub: '(hurbileko atala)' }, { id: 'barneko-arteria-iliakoa', p: 'barneko-arteria-iliakoaR', small: true }, { id: 'gernu-maskuria', small: true }],
       note: 'Hurbileko atala irekita geratzen da: goiko gernu maskuriaren arteriak, barneko arteria iliakoen zatiak',
-      flows: [{ path: ['desc', 'ciaR', 'iiaR', 'uaR'], sat: 1, n: 6, speed: 0.6 }],
+      flows: [{ path: ['desc', 'ciaR', 'iiaR', 'uaPR', 'svaR'], sat: 1, n: 6, speed: 0.6 }],
     },
     {
       to: { teres: 1 },

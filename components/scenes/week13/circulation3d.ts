@@ -353,7 +353,11 @@ export function circModel(s: CircState, o: CircOpts = {}): CircModel {
     pts[`goiko-gernu-maskuri-arteria${n}`] = mid(prox, 0.75);
     if (sd > 0) pts['zilbor-arteriak'] = pts['zilbor-arteriakL'];
     // A short branch of the proximal stretch to the bladder.
-    vessel(`sva${n}`, lig ? 'goiko-gernu-maskuri-arteria' : 'zilbor-arteriak', L([prox[prox.length - 1], X(sd, [0.55, -6.05, 0.55]), X(sd, [0.38, -5.95, 0.7])], 6), mixHex(uaCol, aoCol, k), 0.035, { groups: ['zilbor-arteriak', 'goiko-gernu-maskuri-arteria'], key: `c-sva${n}` });
+    const sva = L([prox[prox.length - 1], X(sd, [0.55, -6.05, 0.55]), X(sd, [0.38, -5.95, 0.7])], 6);
+    vessel(`sva${n}`, lig ? 'goiko-gernu-maskuri-arteria' : 'zilbor-arteriak', sva, mixHex(uaCol, aoCol, k), 0.035, { groups: ['zilbor-arteriak', 'goiko-gernu-maskuri-arteria'], key: `c-sva${n}` });
+    // Once the distal stretch is a ligament, blood takes the proximal stretch into the vesical branch only.
+    lines[`uaP${n}`] = prox;
+    lines[`sva${n}`] = sva;
   }
   items.push({ key: 'c-bladder', id: 'gernu-maskuria', ...blobParts({ center: [0, -6.05, 0.72], radii: [0.42, 0.5, 0.36], rings: 14, sides: 20 }), color: CC.bladder, deep: '#7a5a1a', tissue: 'epithelium', opacity: 0.55 * dk('gernu-maskuria'), outline: false });
   pts['gernu-maskuria'] = [0.25, -6.25, 0.95];

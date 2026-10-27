@@ -1,4 +1,4 @@
-"""Extract the ten ORIGINAL PDFs. No spelling, punctuation or content corrections.
+"""Extract the ORIGINAL PDFs. No spelling, punctuation or content corrections.
 
 Requires PyMuPDF. --check is read-only and compares both the PDF text and the
 committed TypeScript, including emphasis and ids. Only audited furniture goes.
@@ -31,6 +31,7 @@ FILES = [
     '11. GAIA. ZIRKULAZIO-SISTEMA (II) (zuzenduta).pdf',
     '12. GAIA_ARTERIA SISTEMA (zirkulazio-sistema III) (zuzendu gabe) (1).pdf',
     '13. GAIA_ZAIN SISTEMA (zirkulazio-sistema IV) (Zuzenduta).pdf',
+    '14.GAIA_DIGESTIO APARATUA 1.ATALA (Zuzenduta).pdf',
 ]
 
 
@@ -137,7 +138,7 @@ def extract(path, week):
                     if hi > lo:
                         trimmed.append({**p, 'text': p['text'][lo:hi]})
                     offset += len(p['text'])
-                lines.append({'parts': compact(trimmed), 'text': text, 'page': pn, 'box': line['bbox'], 'size': max(s['size'] for s in line['spans'] if s['text'].strip()), 'bold': sum(len(s['text'].strip()) for s in line['spans'] if s['flags'] & 16) / max(1, len(text)), 'italic': any(s['flags'] & 2 for s in line['spans'])})
+                lines.append({'parts': compact(trimmed), 'text': text, 'page': pn, 'box': line['bbox'], 'size': max(s['size'] for s in line['spans'] if s['text'].strip()), 'bold': sum(len(s['text'].strip()) for s in line['spans'] if s['flags'] & 16) / max(1, len(text)), 'italic': any(s['flags'] & 2 for s in line['spans']), 'all_italic': all(s['flags'] & 2 for s in line['spans'] if s['text'].strip())})
     # Independent plain-text API: remove whole audited lines, never substrings
     # (a footer "1" must not eat a digit in the topic title or a body sentence).
     raw_lines = []
@@ -189,8 +190,11 @@ def extract(path, week):
                 kind = 'h2'
         elif re.match(r'^(?:[●•➔\-]|\d+\.\u200b)', text):
             kind = 'li'
-        # Weeks 11–13 wrap body text beside their figures (indented lines); week 12's tables have a right column.
-        elif (line['italic'] and line['size'] <= 11.2 and len(text) < 110 and line['box'][0] > 100) or re.match(r'^\d+\.?\s*irudia', text, re.I) or (week not in {11, 12, 13} and line['box'][0] > 150 and len(text) < 100 and not line['bold']):
+        # Weeks 11–14 wrap body text beside their figures (indented lines); week 12's tables have a right column.
+        elif (line['italic'] and line['size'] <= 11.2 and len(text) < 110 and line['box'][0] > 100) or re.match(r'^\d+\.?\s*irudia', text, re.I) or (week not in {11, 12, 13, 14} and line['box'][0] > 150 and len(text) < 100 and not line['bold']):
+            kind = 'caption'
+        elif week == 14 and line['all_italic'] and line['size'] <= 11.2 and len(text) < 110:
+            # Week 14's first caption sits left of its figure, at body indent.
             kind = 'caption'
         elif week == 12 and text.startswith(CAPTIONS_12) and len(text) < 64:
             kind = 'caption'
@@ -202,7 +206,7 @@ def extract(path, week):
         same_row = previous and line['page'] == previous['page'] and abs(line['box'][1] - previous['box'][1]) < 3
         block_section = number.group(1) if toc and number else (blocks[-1]['section'] if toc and same_row and blocks else section)
         continuation = blocks and block_section == blocks[-1]['section'] and (
-            (kind == 'p' and blocks[-1]['kind'] in {'p', 'li'} and ((line['page'] == previous['page'] and gap < max(9, line['size'] * .55)) or (line['page'] != previous['page'] and not re.search(r'[.!?:]$', previous['text']))))
+            (kind == 'p' and blocks[-1]['kind'] in {'p', 'li'} and ((line['page'] == previous['page'] and gap < max(9, line['size'] * .55)) or (line['page'] != previous['page'] and not re.search(r'[.!?:]$', previous['text']) and not (week == 14 and blocks[-1]['kind'] == 'li'))))
             or (same_row and kind in {'p', 'li', 'caption', 'toc'} and blocks[-1]['kind'] in {'p', 'li', 'caption', 'toc'})
             # Week 12 sets its captions beside the body text: a body line after a caption starts a new block.
             or (kind in {'p', 'caption'} and blocks[-1]['kind'] == 'caption' and line['page'] == previous['page'] and gap < 9 and not (week == 10 and kind == 'p' and not line['italic']) and not (week == 12 and kind == 'p'))

@@ -302,7 +302,7 @@ export function embryoModel(pose: EmbryoPose, o: { flow?: { phase: number; show:
     for (const n of ['R', 'L']) {
       const a = lines[`arch3${n}`];
       if (a) route(`a${n}`, [...a, ...(lines[`da${n}`] ?? []).slice(-10)], T.o2, T.o2Deep);
-      route(`umbA${n}`, lines[`umbA${n}`], T.o2, T.o2Deep);
+      route(`umbA${n}`, lines[`umbA${n}`], T.deo2, T.deo2Deep);
       route(`umbV${n}`, lines[`umbV${n}`], T.o2, T.o2Deep);
       route(`vitV${n}`, lines[`vitV${n}`], T.deo2, T.deo2Deep);
       route(`cardP${n}`, lines[`cardP${n}`] ? [...lines[`cardP${n}`], ...(lines[`cardC${n}`] ?? [])] : undefined, T.deo2, T.deo2Deep);

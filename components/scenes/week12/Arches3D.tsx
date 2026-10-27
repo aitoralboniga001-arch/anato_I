@@ -93,7 +93,7 @@ export function Day27_3D({ t }: SceneProps) {
   const gone5 = seg(t, S3[4] + 0.07, S3[4] + 0.12);
   const g6_ = 0.3 + 0.7 * seg(t, S3[5] + 0.01, S3[5] + 0.06);
   const pulm = seg(t, S3[5] + 0.06, S3[5] + 0.13);
-  const pose: ArtPose = { ...AP0, grow: g6(1, 1, 0.75 + 0.25 * seg(t, S3[3], S3[3] + 0.05), g4, g5 * 0.8, g6_), gone1, gone2, gone5, pulm, is7: 0 };
+  const pose: ArtPose = { ...AP0, grow: g6(1, 1, 0.75 + 0.25 * seg(t, S3[3], S3[3] + 0.05), g4, g5 * 0.8, g6_), gone1, gone2, cranGone: gone2, gone5, pulm, is7: 0 };
   const camera = cameraAt(t, [
     [0, orbit(70, 8, 11.5, [0, 2.2, 0.1], [30, 0])],
     [S3[1], orbit(62, 12, 8.5, [0, 3.3, 0.2], [30, 0])],
@@ -156,7 +156,7 @@ export function Day27_3D({ t }: SceneProps) {
 // ———————————————————————————— stage 4: day 29 (notes 2.2) ————————————————————————————
 
 export const S4 = [0, 0.15, 0.32, 0.5, 0.66, 0.83] as const;
-const DAY29: ArtPose = { ...AP0, grow: g6(1, 1, 1, 1, 0, 1), gone1: 1, gone2: 1, gone5: 0, is7: 0, pulm: 1 };
+const DAY29: ArtPose = { ...AP0, grow: g6(1, 1, 1, 1, 0, 1), gone1: 1, gone2: 1, cranGone: 1, gone5: 0, is7: 0, pulm: 1 };
 
 export function Day29_3D({ t }: SceneProps) {
   const size34 = seg(t, S4[1] + 0.02, S4[1] + 0.08);
@@ -231,7 +231,7 @@ export function ThirdArch3D({ t }: SceneProps) {
   const gone1 = seg(t, 0.04, 0.11);
   const gone2 = seg(t, S5[1] + 0.03, S5[1] + 0.1);
   const eca = seg(t, S5[5] + 0.02, S5[5] + 0.1);
-  const pose: ArtPose = { ...AP0, grow: g6(1, 1, 1, 1, 0, 1), gone1, gone2, gone5: 1, eca, split: 1, is7: 0, pulm: 1 };
+  const pose: ArtPose = { ...AP0, grow: g6(1, 1, 1, 1, 0, 1), gone1, gone2, cranGone: gone2, gone5: 1, eca, split: 1, is7: 0, pulm: 1 };
   const camera = cameraAt(t, [
     [0, orbit(60, 12, 8.5, [0, 3.4, 0.2], [30, 0])],
     [S5[1], orbit(62, 10, 8.5, [0, 3.0, 0.2], [30, 0])],
@@ -290,7 +290,7 @@ export function ThirdArch3D({ t }: SceneProps) {
 // ———————————————————————————— stage 6: 4th and 5th arches (notes 2.3.2–2.3.3) ————————————————————————————
 
 export const S6 = [0, 0.14, 0.3, 0.48, 0.64, 0.82] as const;
-const LATE: ArtPose = { ...AP0, grow: g6(1, 1, 1, 1, 1, 1), gone1: 1, gone2: 1, gone5: 1, eca: 1, split: 1, pulm: 1 };
+const LATE: ArtPose = { ...AP0, grow: g6(1, 1, 1, 1, 1, 1), gone1: 1, gone2: 1, cranGone: 1, gone5: 1, eca: 1, split: 1, pulm: 1 };
 
 export function FourthArch3D({ t }: SceneProps) {
   const g5 = seg(t, S6[5] - 0.02, S6[5] + 0.02);

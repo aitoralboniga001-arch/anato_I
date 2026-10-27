@@ -374,7 +374,6 @@ export function LoopScene({ t }: SceneProps) {
     { id: 'erreten-aurikulubentrikularra', p: 'erreten-aurikulubentrikularra', show: vis(t, S5[6], 2), small: true },
     { id: 'bihotz-lakioa', p: [0.9, -0.9, 0.4], show: vis(t, S5[4] + 0.06, 2), small: true },
   ];
-  void r;
   return (
     <HeartView
       pose={pose}
@@ -389,6 +388,8 @@ export function LoopScene({ t }: SceneProps) {
         const cd = caudal(pose, line);
         const bulbNow = line[Math.round(0.44 * 60)];
         const atrNow = add(cd.atrium[1], [0, 0.05, 0]);
+        // The ventricular part (between the proximal bulbus and the atrium) during the replay (p17).
+        const ventNow = line[Math.round(0.68 * 60)];
         const G = '#7ee0a0';
         const O = '#ffb070';
         const cran = [
@@ -412,6 +413,13 @@ export function LoopScene({ t }: SceneProps) {
             </Note>
             <Note x={500} y={612} tone="accent" show={vis(t, S5[2], S5[3])}>
               Alde kaudala (zain sinua eta aurikula): atzera, gora eta ezkerrera
+            </Note>
+            <DirArrows at={at} p={ventNow} dirs={[{ v: DIRS.ezkerrera, text: 'ezkerrera', color: '#67e8f9' }]} show={r(0.03, 0.09)} />
+            <Note x={500} y={612} tone="accent" show={r(0, 0.09)}>
+              Atal bulbobentrikularra: aurrera, behera eta eskuinera · atal bentrikularra: ezkerrera
+            </Note>
+            <Note x={500} y={612} tone="accent" show={r(0.09, S5[4] - S5[3])}>
+              Atal aurikularrak: ezkerrera, atzera eta gora, atal bulbarraren goi-atzekaldera
             </Note>
             <Note x={500} y={612} tone="accent" show={vis(t, S5[4], S5[5])}>
               Bikoitzak diren egiturak fusionatzen dira: bihotz hodia → bihotz lakioa
