@@ -260,8 +260,9 @@ function askedView(camera: Camera3, view: View3) {
 export const S4 = [0, 0.13, 0.27, 0.4, 0.53, 0.66, 0.8] as const;
 
 export function SegmentsScene({ t }: SceneProps) {
-  const fuse = 0.62 + 0.38 * seg(t, S4[1], S4[1] + 0.07);
-  const segs = seg(t, S4[1] + 0.03, S4[1] + 0.1);
+  // The two endocardial tubes zip together from the cranial end down first, then the constrictions appear.
+  const fuse = 0.62 + 0.38 * seg(t, S4[1] + 0.005, S4[1] + 0.065);
+  const segs = seg(t, S4[1] + 0.06, S4[1] + 0.1);
   const cBulb = seg(t, S4[2], S4[2] + 0.04);
   const cVent = seg(t, S4[3], S4[3] + 0.03);
   const cAtr = seg(t, S4[3] + 0.04, S4[3] + 0.07);
@@ -284,7 +285,8 @@ export function SegmentsScene({ t }: SceneProps) {
   ]);
   const L = 1;
   const names: CalloutSpec[] = [
-    { id: 'bihotz-hodia', p: 'atal-bentrikularra', show: vis(t, 0, S4[2]) * L, key: 'bihotz-hodia:4' },
+    { id: 'bihotz-hodia', p: 'bihotz-hodia', show: vis(t, 0, S4[2]) * L, key: 'bihotz-hodia:4' },
+    { id: 'bihotz-hodiak', p: 'bihotz-hodiak', show: vis(t, 0, S4[1] + 0.062) * L, small: true },
     { id: 'arteria-muturra', p: 'aorta-zakua', show: vis(t, 0, S4[2]) * L },
     { id: 'aorta-arkuak', p: 'aorta-arkuak1', show: L },
     { id: 'aorta-dortsalak', p: 'aorta-dortsalak1', show: L, small: true },
@@ -316,7 +318,10 @@ export function SegmentsScene({ t }: SceneProps) {
         return (
           <>
             <Trail pts={route} at={at} show={vis(t, S4[6] + 0.01, 2) * 0.9} progress={seg(t, S4[6] + 0.01, S4[6] + 0.08)} color="#ffd27a" />
-            <Note x={500} y={612} tone="accent" show={vis(t, S4[1], S4[2])}>
+            <Note x={500} y={612} tone="accent" show={vis(t, S4[1], S4[1] + 0.07)}>
+              Bi endokardio hodiak goitik behera fusionatzen dira: bihotz hodi bakarra
+            </Note>
+            <Note x={500} y={612} tone="accent" show={vis(t, S4[1] + 0.07, S4[2])}>
               Estuguneak eta zabalkuntzak goitik behera: atal desberdinak
             </Note>
             <Note x={500} y={612} tone="accent" show={vis(t, S4[5], S4[6])}>

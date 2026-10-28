@@ -250,6 +250,21 @@ export function caudal(pose: HeartPose, line = centreline(pose)): Caudal {
   return { atrium: [r.a, l.a], sinusIn: [r.s, l.s], horn: [r.h, l.h], end };
 }
 
+/**
+ * The zipper of the two endocardial tubes (front = u it has reached): below the front each tube moves
+ * out to its own side (x) and a little back. Eased out, so the two part at once and never lie in one place.
+ */
+function zipper(front: number) {
+  const below = (u: number) => clamp01((u - front) / 0.25);
+  const part = (u: number) => 1 - (1 - below(u)) ** 2;
+  return {
+    below,
+    at: (p: V3, u: number, sx: number): V3 => [p[0] + sx * 0.36 * part(u), p[1], p[2] - 0.05 * below(u)],
+    /** Each tube's radius, as a share of the fused tube's. */
+    radius: (u: number) => lerp(0.7, 0.82, part(u)),
+  };
+}
+
 /** Polyline through key points (smooth). */
 const path = (pts: V3[], n = 18) => curve3(pts, n);
 
@@ -415,6 +430,7 @@ function buildHeartModel(pose: HeartPose, o: HeartOpts): HeartModel {
   ];
   // Unfused part of the tube: from the fusion front down, the tube is two tubes (left and right).
   const front = lerp(-0.05, 1.05, fuse); // u reached by the zipper
+  const zip = zipper(front);
   for (const [si, s] of segsList.entries()) {
     const { pts: P, u: us } = slice(line, s.u0, s.u1);
     if (P.length < 2) continue;
@@ -436,17 +452,33 @@ function buildHeartModel(pose: HeartPose, o: HeartOpts): HeartModel {
       const outline = pose.loop <= 0.5 || !['proximal', 'ventricle', 'av-canal', 'atrium'].includes(s.key);
       items.push({ key: s.key === 'av-canal' ? s.key : `myo-${s.key}`, id: s.id, groups: [...(s.groups ?? []), ...WHOLE], ...tubeParts(P, { radius: (k) => r(k) * lerp(0.62, 1, myo), ref: [0, 0, 1], sides: 22, capStart: s.key === 'sac' }), color, deep, tissue: 'muscle', opacity: wallOp, outline });
     } else {
-      // Paired tubes, drawn apart by how far below the zipper they are.
-      for (const sx of [-1, 1]) {
-        const Q = P.map((p, k): V3 => {
-          const below = clamp01((us[k] - front) / 0.25);
-          return [p[0] + sx * 0.36 * ss(0, 1, below), p[1], p[2] - 0.05 * below];
-        });
-        items.push({ key: `myo-${s.key}-${sx}`, id: s.id, groups: [...(s.groups ?? []), ...WHOLE, 'bihotz-hodiak'], ...tubeParts(Q, { radius: (k) => r(k) * lerp(0.62, 1, myo) * 0.82, ref: [0, 0, 1], sides: 18 }), color, deep, tissue: 'muscle', opacity: wallOp });
+      // The segment is cut at the front: above it one tube, below it the two tubes parting. Each piece
+      // lies in one place only; a whole segment drawn as two tubes put both on the same line above the
+      // front (dark flicker) and splayed them out under the atria (an X with the atrial branches).
+      const rU = (u: number) => radiusAt(u, pose) * tuck(u) * lerp(0.62, 1, myo);
+      if (us[0] < front) {
+        // The single tube runs a little past the front and rounds off inside the two tubes' crotch.
+        const one = slice(line, s.u0, Math.min(s.u1, front + 0.02));
+        const U1 = one.u;
+        const ru = (k: number) => lerp(U1[0], U1[U1.length - 1], k);
+        if (one.pts.length >= 2) items.push({ key: `myo-${s.key}`, id: s.id, groups: [...(s.groups ?? []), ...WHOLE], ...tubeParts(one.pts, { radius: (k) => rU(ru(k)) * (1 - 0.16 * ss(front - 0.015, front + 0.02, ru(k))), ref: [0, 0, 1], sides: 22, capStart: s.key === 'sac', capEnd: true }), color, deep, tissue: 'muscle', opacity: wallOp });
+      }
+      const two = slice(line, Math.max(s.u0, front - 0.01), s.u1);
+      const U2 = two.u;
+      const ru = (k: number) => lerp(U2[0], U2[U2.length - 1], k);
+      if (two.pts.length >= 2) {
+        for (const sx of [-1, 1]) {
+          const Q = two.pts.map((p, k): V3 => zip.at(p, U2[k], sx));
+          items.push({ key: `myo-${s.key}-${sx}`, id: s.id, groups: [...(s.groups ?? []), ...WHOLE, 'bihotz-hodiak'], ...tubeParts(Q, { radius: (k) => rU(ru(k)) * zip.radius(ru(k)), ref: [0, 0, 1], sides: 18, capStart: U2[0] > s.u0 }), color, deep, tissue: 'muscle', opacity: wallOp });
+        }
       }
     }
     pts[s.id] ??= at((s.u0 + s.u1) / 2);
   }
+  // The tube as a whole is named on its fused part; the two tubes on the left one, below the front.
+  pts['bihotz-hodia'] = at(Math.min(0.45, front - 0.08));
+  const uPair = Math.min(1, front + 0.16);
+  pts['bihotz-hodiak'] = zip.at(at(uPair), uPair, 1);
   pts['aorta-zakua'] = at(0.03);
   pts['atal-bulbarra'] = at((U.sac + U.proximal) / 2 + 0.06);
   pts['enbor-arteriosoa'] = at((U.sac + U.truncus) / 2);
@@ -517,10 +549,13 @@ function buildHeartModel(pose: HeartPose, o: HeartOpts): HeartModel {
   const atriumDeep = segDeep(T.atriumDeep, 'atrium');
   const rA = radiusAt(0.95, pose);
   const branches: { mesh: Mesh; hit: Mesh }[] = [];
+  // While the tubes are still paired at the atrial end, each branch carries on from its own tube.
+  const endScale = lerp(1, zip.radius(1), clamp01(zip.below(1) / 0.1));
   for (let i = 0; i < 2; i++) {
     const a = cd.atrium[i];
-    const mid = mix3(cd.end, a, 0.5);
-    branches.push(tubeParts(path([cd.end, add(mid, [0, -0.02 * (1 - pose.loop), 0]), a], 12), { radius: (k) => rA * lerp(1, 0.86 + 0.3 * f, k), ref: [0, 0, 1], sides: 18, capEnd: true }));
+    const from = zip.at(cd.end, 1, i ? 1 : -1);
+    const mid = mix3(from, a, 0.5);
+    branches.push(tubeParts(path([from, add(mid, [0, -0.02 * (1 - pose.loop), 0]), a], 12), { radius: (k) => rA * lerp(endScale, 0.86 + 0.3 * f, k), ref: [0, 0, 1], sides: 18, capEnd: true }));
   }
   if (f > 0.02 || pose.expand > 0.01) {
     // The common atrium: a wide chamber between the two branches, bulging on both sides of the truncus later.
@@ -528,7 +563,8 @@ function buildHeartModel(pose: HeartPose, o: HeartOpts): HeartModel {
     const e = clamp01(pose.expand);
     branches.push(blobParts({ center: add(c, [0, 0.02 * e, 0.04 * e]), radii: [lerp(0.3, 0.46, f) + 0.12 * e, lerp(0.26, 0.34, f) + 0.06 * e, lerp(0.24, 0.3, f) + 0.04 * e], rings: 14, sides: 20 }));
   }
-  items.push({ key: 'atria', id: 'atal-aurikularra', groups: ['zain-muturra', 'aurikula-komuna', ...WHOLE], ...mergeParts(branches), color: atriumColour, deep: atriumDeep, tissue: 'muscle', opacity: wallOp });
+  // While the zipper has not reached them, the paired atria are the two tubes' caudal ends.
+  items.push({ key: 'atria', id: 'atal-aurikularra', groups: ['zain-muturra', 'aurikula-komuna', ...WHOLE, ...(fuse < 1 ? ['bihotz-hodiak'] : [])], ...mergeParts(branches), color: atriumColour, deep: atriumDeep, tissue: 'muscle', opacity: wallOp });
   // Inside the tissue: one branch while they are paired, the common chamber once fused.
   pts['atal-aurikularra'] = f > 0.5 ? mix3(cd.atrium[0], cd.atrium[1], 0.5) : mix3(cd.end, cd.atrium[1], 0.6);
 
