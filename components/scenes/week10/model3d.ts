@@ -561,7 +561,9 @@ function buildHeartModel(pose: HeartPose, o: HeartOpts): HeartModel {
     // The common atrium: a wide chamber between the two branches, bulging on both sides of the truncus later.
     const c = mix3(cd.atrium[0], cd.atrium[1], 0.5);
     const e = clamp01(pose.expand);
-    branches.push(blobParts({ center: add(c, [0, 0.02 * e, 0.04 * e]), radii: [lerp(0.3, 0.46, f) + 0.12 * e, lerp(0.26, 0.34, f) + 0.06 * e, lerp(0.24, 0.3, f) + 0.04 * e], rings: 14, sides: 20 }));
+    // It swells out of the branches' junction as they fuse, never popping in at full size.
+    const g = e > 0.01 ? 1 : ss(0, 0.5, f);
+    branches.push(blobParts({ center: add(c, [0, 0.02 * e, 0.04 * e]), radii: [(lerp(0.3, 0.46, f) + 0.12 * e) * g, (lerp(0.26, 0.34, f) + 0.06 * e) * g, (lerp(0.24, 0.3, f) + 0.04 * e) * g], rings: 14, sides: 20 }));
   }
   // While the zipper has not reached them, the paired atria are the two tubes' caudal ends.
   items.push({ key: 'atria', id: 'atal-aurikularra', groups: ['zain-muturra', 'aurikula-komuna', ...WHOLE, ...(fuse < 1 ? ['bihotz-hodiak'] : [])], ...mergeParts(branches), color: atriumColour, deep: atriumDeep, tissue: 'muscle', opacity: wallOp });
@@ -615,7 +617,7 @@ function buildHeartModel(pose: HeartPose, o: HeartOpts): HeartModel {
     // Behind the atrium (dorsal, -z), sagging a little: it must show from the back, not hide inside the horns.
     const back = (p: V3, k: number): V3 => [p[0], p[1] - 0.06 * k, p[2] - 0.12 * k];
     const P = path([back(cd.sinusIn[0], 0.5), back(mix3(cd.sinusIn[0], cd.sinusIn[1], 0.5), 1), back(cd.sinusIn[1], 0.5)], 10);
-    items.push({ key: 'sinus-mid', id: 'zain-sinuaren-zeharkako-atala', groups: ['zain-sinua', 'zain-muturra', ...WHOLE], ...tubeParts(P, { radius: () => lerp(0.14, 0.22, f), ref: [0, 0, 1], sides: 16, capStart: true, capEnd: true }), color: sinusCol, deep: sinusDeep, tissue: 'muscle', opacity: wallOp });
+    items.push({ key: 'sinus-mid', id: 'zain-sinuaren-zeharkako-atala', groups: ['zain-sinua', 'zain-muturra', ...WHOLE], ...tubeParts(P, { radius: () => lerp(0.14, 0.22, f) * ss(0, 0.5, f), ref: [0, 0, 1], sides: 16, capStart: true, capEnd: true }), color: sinusCol, deep: sinusDeep, tissue: 'muscle', opacity: wallOp });
   }
   pts['zain-sinua'] = f > 0.5 ? mix3(cd.sinusIn[0], cd.sinusIn[1], 0.5) : mix3(cd.sinusIn[1], cd.horn[1], 0.5);
   pts['sinu-koronarioa'] = mix3(cd.sinusIn[1], cd.horn[1], 0.6);

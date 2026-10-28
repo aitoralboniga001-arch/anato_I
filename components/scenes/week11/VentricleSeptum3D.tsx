@@ -59,8 +59,9 @@ export function septumStage(t: number) {
     glassR: vis(t, P8[3] + 0.02, 2, 0.03),
     align: seg(t, P8[4] + 0.005, P8[4] + 0.05),
     conusGlass: seg(t, P8[4] + 0.03, P8[4] + 0.06),
-    conusRidges: t >= P8[4] + 0.06 ? 1 : 0,
-    conusFuse: t >= P8[4] + 0.06 ? 1 : 0,
+    // The conus ridges grow and meet before they fuse into its septum (no septum popping in whole).
+    conusRidges: seg(t, P8[4] + 0.035, P8[4] + 0.07),
+    conusFuse: t >= P8[4] + 0.075 ? 1 : 0,
     membranous: seg(t, P8[4] + 0.08, P8[4] + 0.17),
   };
 }
@@ -88,7 +89,7 @@ export function Ventricles3D({ t }: SceneProps) {
     { id: 'trenkada-muskularra', p: 'trenkada-muskularra', show: vis(t, P8[3] + 0.05, P8[4]) + vis(t, P8[4] + 0.08) * 0.999 },
     { id: 'bentrikulu-arteko-zulo-primarioa', p: 'bentrikulu-arteko-zulo-primarioa', show: vis(t, P8[3] + 0.06, P8[4] + 0.1) },
     { id: 'arteria-konoa', p: 'arteria-konoa', show: vis(t, P8[4] + 0.02), small: true },
-    { id: 'konoaren-trenkada', p: 'konoaren-trenkada', show: vis(t, P8[4] + 0.06, P8[4] + 0.1), small: true },
+    { id: 'konoaren-trenkada', p: 'konoaren-trenkada', show: vis(t, P8[4] + 0.07, P8[4] + 0.1), small: true },
     { id: 'mintzezko-trenkada', p: 'mintzezko-trenkada', show: vis(t, P8[4] + 0.1) },
   ];
   return (

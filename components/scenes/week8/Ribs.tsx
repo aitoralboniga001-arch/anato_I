@@ -303,7 +303,8 @@ export function SternumFront({ t }: SceneProps) {
   const parts = seg(t, RS_T.sternum + 0.01, RS_T.sternum + 0.07);
   const barEnd = lerp(BAR_TOP, BAR_BOT, grow);
   const fuseAt = (y: number) => seg(fz, ((y - BAR_TOP) / (BAR_BOT - BAR_TOP)) * 0.6, ((y - BAR_TOP) / (BAR_BOT - BAR_TOP)) * 0.6 + 0.4);
-  const off = (y: number) => lerp(78, BAR_W / 2 - 1, fuseAt(y));
+  // Fused, the two bars overlap a little across the midline (one cartilage, no seam).
+  const off = (y: number) => lerp(78, BAR_W / 2 - 4, fuseAt(y));
   const ys = Array.from({ length: 33 }, (_, i) => lerp(BAR_TOP, barEnd, i / 32));
   const bar = (s: 1 | -1) => {
     const inner = ys.map((y): Pt => [500 + s * (off(y) - BAR_W / 2), y]);
@@ -353,13 +354,20 @@ export function SternumFront({ t }: SceneProps) {
         }),
       )}
       {/* Sternal bars: two cartilages in the wall, appearing top → bottom, then fusing in the midline. */}
+      {/* Fused, they overlap in the midline: both outlines first, then both fills, so where they have
+          joined no seam is left (the shading as one layer, not twice over the overlap). */}
       <Part id="esternoi-barrak" show={grow > 0.01 ? 1 - parts : 0}>
         {[1, -1].map((s) => (
-          <g key={s}>
-            <path d={bar(s as 1 | -1)} fill={CART} stroke={CART_DEEP} strokeWidth={1.6} />
-            <path d={bar(s as 1 | -1)} fill="url(#w8-cart)" opacity={0.5} />
-          </g>
+          <path key={`o${s}`} d={bar(s as 1 | -1)} fill={CART} stroke={CART_DEEP} strokeWidth={1.6} />
         ))}
+        {[1, -1].map((s) => (
+          <path key={`f${s}`} d={bar(s as 1 | -1)} fill={CART} />
+        ))}
+        <g opacity={0.5}>
+          {[1, -1].map((s) => (
+            <path key={`g${s}`} d={bar(s as 1 | -1)} fill="url(#w8-cart)" />
+          ))}
+        </g>
       </Part>
       <Part id="kirtena" show={parts}>
         <path d={smoothPath(MAN, true, 0.2)} fill={CART} stroke={CART_DEEP} strokeWidth={2} />
