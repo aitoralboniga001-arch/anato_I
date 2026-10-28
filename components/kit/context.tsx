@@ -21,6 +21,13 @@ export interface SceneContextValue {
   named?: ((id: string) => boolean) | null;
   /** When quiz mode is on, labels are hidden and clicks answer the prompt. */
   quiz: boolean;
+  /**
+   * Numbered plate (image cards): each name is drawn as its number in a black box, a name without a
+   * number is not drawn, and scene notes stay out (they would give the names away).
+   */
+  numberOf?: ((id: string) => number | undefined) | null;
+  /** On a numbered plate: the number being asked about now (drawn in the accent colour). */
+  asked?: string | null;
   quizFlash: QuizFlash;
   nameOf: (id: string) => string;
   /** Spaces (cavities) are labelled differently from tissues. */

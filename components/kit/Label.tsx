@@ -195,6 +195,7 @@ export function LabelDraw({ id, x, y, ax, ay, align, show = 1, text, sub, small,
   const measured = useMeasured();
   // A name left inside a dual view's pane would shrink with it: the dual lifts and sets the pane's names.
   const inPane = useContext(PaneContext);
+  if (ctx.numberOf) return show > 0.5 && !inPane ? <NumberDraw {...{ id, x, y, ax, ay, align, small, span, text }} /> : null;
   if (!ctx.showLabels || ctx.quiz || show <= 0.02 || inPane) return null;
   const state = partState(ctx, id);
   // Not named yet (progressive names): the slot is kept, so names already shown never move when it comes.
@@ -252,6 +253,60 @@ export function LabelDraw({ id, x, y, ax, ay, align, show = 1, text, sub, small,
               {sub}
             </text>
           )}
+        </g>
+      </OnTop>
+    </>
+  );
+}
+
+/**
+ * A name on a numbered plate: its number in a black box where the name would start, with the same
+ * leader. Names without a number are left out. `data-name` keeps the name for the plate's legend.
+ */
+function NumberDraw({ id, x, y, ax, ay, align, small, span, text }: LabelProps) {
+  const ctx = useScene();
+  const scale = useLabelScale();
+  const n = ctx.numberOf?.(id);
+  const name = text ?? ctx.nameOf(id);
+  const shown = n === undefined ? '' : String(n);
+  const pointed = (ctx.hovered ?? ctx.selected) === id;
+  const asked = ctx.asked === id;
+  const { anchor, fs, plate, leader: pts } = labelGeom({ x, y, ax, ay, align, small }, Math.max(2, shown.length), 13.5, scale);
+  const leader = pts.length ? `M${pts[0][0]},${pts[0][1]} L${pts[1][0]},${pts[1][1]} L${ax},${ay}` : '';
+  const group = {
+    'data-label': id,
+    'data-name': name,
+    'data-num': shown || undefined,
+    // A name with a leader points into the figure; one without sits on its spot (or in a table's cell).
+    'data-lead': leader ? '' : undefined,
+    className: `label label-num${pointed ? ' is-pointed' : ''}${asked ? ' is-asked' : ''}${n === undefined ? ' is-unnumbered' : ''}`,
+    onClick: (e: ReactMouseEvent) => {
+      e.stopPropagation();
+      ctx.onSelect(id);
+    },
+    onPointerEnter: () => ctx.onHover(id),
+    onPointerLeave: () => ctx.onHover(null),
+  };
+  // Measured before numbers are given out: the plate reads names and places, draws nothing yet.
+  if (n === undefined) return <g {...group} data-x={x} data-y={y} data-ax={ax} data-ay={ay} />;
+  const side = plate.h;
+  // The box closes the plate on the leader's side, so the line meets it.
+  const bx = anchor === 'end' ? plate.x + plate.w - side : anchor === 'start' ? plate.x : x - side / 2;
+  return (
+    <>
+      {leader && (
+        <g {...group}>
+          <path className="label-casing" d={leader} />
+          <path className="label-leader" d={leader} />
+          {span ? <path className="label-leader" d={bracket(span, pts[1])} /> : <circle className="label-dot" cx={ax} cy={ay} r={3.1} />}
+        </g>
+      )}
+      <OnTop>
+        <g {...group}>
+          <rect className="num-box" x={bx} y={y - side / 2} width={side} height={side} rx={2} />
+          <text x={bx + side / 2} y={y} dy="0.35em" textAnchor="middle" className="num-text" style={{ fontSize: `${(fs * (shown.length > 1 ? 0.92 : 1)).toFixed(2)}px` }}>
+            {shown}
+          </text>
         </g>
       </OnTop>
     </>
@@ -330,7 +385,7 @@ export function placeNote(text: string, x: number, y: number, align: 'start' | '
 export function Note({ x, y, children, align = 'middle', show = 1, tone = 'dim', size, fixed }: NoteProps) {
   const ctx = useScene();
   const scale = useLabelScale();
-  if (show <= 0.02 || (!ctx.showLabels && tone !== 'warn')) return null;
+  if (show <= 0.02 || ctx.numberOf || (!ctx.showLabels && tone !== 'warn')) return null;
   const base = size ?? 12.5;
   // Sentences grow less than names (at most 30%): they are long and sit beside names.
   const k = fitScale({ ...scale, k: Math.min(scale.k, 1.3) }, x, y, align, children.length, base);

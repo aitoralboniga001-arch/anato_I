@@ -24,7 +24,7 @@ const CONTROLS: { area: string; items: { icon: ReactNode; name: string; text: st
       { icon: <IconQuiz size={16} />, name: 'Galderak', text: 'Aukera anitzeko galderak, akats bakoitzaren azalpenarekin; huts egindakoak errepasatzeko ere bai.' },
       { icon: <IconRail open side="right" />, name: 'Laburpena', text: 'Eskuineko zutabea: etaparen gakoak, data garrantzitsuak eta egiturak. Berriro sakatuta, ezkutatzen da.', key: ']' },
       { icon: <IconNotes size={16} />, name: 'Apunteak', text: 'Eskuineko zutabea: jatorrizko apunteak, simulazioarekin batera argituta. Esaldi edo irudi bat klikatuta, hara joaten da simulazioa.', key: 'N' },
-      { icon: <IconMore size={16} />, name: 'Tresnak', text: 'Glosarioa, kronologia, leinuak, etiketarik gabeko irudiak eta foku modua.' },
+      { icon: <IconMore size={16} />, name: 'Tresnak', text: 'Glosarioa, kronologia, leinuak, irudi-fitxak (irudiak zenbakiekin), etiketarik gabeko irudiak eta foku modua.' },
       { icon: <IconHelp size={16} />, name: 'Laguntza', text: 'Gida laburra eta orri hau.', key: '?' },
     ],
   },

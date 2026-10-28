@@ -3290,6 +3290,11 @@ a.toc-row:hover .toc-go span {
   color: var(--text-3);
 }
 
+/* A page's own note (image lab, image cards) goes under the source line, not into the narrow third column. */
+.land-foot > p + p {
+  grid-column: 2;
+}
+
 /* ——— Opening sequence ——— */
 
 .intro {
@@ -15684,4 +15689,347 @@ kbd {
   .workspace.klasea:not(.panel-open) .info {
     visibility: hidden;
   }
+}
+
+/* ——— Image cards (Irudi-fitxak): numbered plates ——— */
+/* A number on the figure: white on a black box, like a printed plate. */
+.num-box {
+  fill: #0b0c0f;
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-width: 1.1;
+}
+
+.num-text {
+  fill: #fff;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13.5px;
+  pointer-events: none;
+}
+
+.label-num.is-pointed .num-box {
+  fill: var(--focus);
+  stroke: #0b0c0f;
+}
+
+.label-num.is-pointed .num-text {
+  fill: #0b0c0f;
+}
+
+.label-num.is-pointed .label-leader {
+  stroke: var(--focus);
+  stroke-width: 1.8;
+}
+
+.label-num.is-asked .num-box {
+  fill: var(--signal);
+  stroke: #fff;
+  stroke-width: 1.6;
+}
+
+.label-num.is-asked .label-leader {
+  stroke: var(--signal);
+  stroke-width: 2;
+}
+
+.plate-fig.is-pointing .label-num {
+  cursor: pointer;
+}
+
+.plate-fig .lab-svg {
+  background: var(--bg-1);
+}
+
+.plate-strip {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  margin: 0 0 14px;
+  padding: 0 0 6px;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.plate-strip button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 300px;
+  height: 34px;
+  padding: 0 12px 0 6px;
+  border-radius: 9px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.plate-strip button:hover {
+  color: var(--text);
+  border-color: var(--line-3);
+}
+
+.plate-strip button.is-on {
+  border-color: var(--signal);
+  background: var(--signal-soft);
+  color: var(--text);
+}
+
+.plate-strip-n {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--surface-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.plate-strip-t {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.plate-star {
+  color: var(--focus);
+  margin-right: 4px;
+  font-size: 11px;
+}
+
+.plate-strip .plate-star {
+  margin: 0;
+}
+
+.plate-best {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--surface-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+
+.plate-best.is-full {
+  color: var(--ok);
+}
+
+.plate-key {
+  color: var(--focus);
+}
+
+.plate-title {
+  font-size: 17px;
+}
+
+.plate-modes {
+  justify-self: start;
+}
+
+.plate-hint {
+  margin: 0;
+  font-size: 13px;
+}
+
+.plate-legend {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: min(44vh, 420px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.plate-legend button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 5px 6px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.plate-legend li.is-on button {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.plate-legend li.is-on .num-chip {
+  background: var(--focus);
+  color: #0b0c0f;
+}
+
+.plate-legend li.is-covered .plate-legend-name {
+  color: var(--text-4);
+  font-style: italic;
+  font-size: 12.5px;
+}
+
+.num-chip {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: #0b0c0f;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12.5px;
+}
+
+.num-chip.is-asked {
+  background: var(--signal);
+  border-color: #fff;
+  vertical-align: middle;
+}
+
+.plate-progress {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.plate-ask {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.plate-score {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 650;
+}
+
+.plate-score small {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-3);
+}
+
+.plate-missed {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+
+.plate-done {
+  display: grid;
+  gap: 10px;
+}
+
+.plate-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.plate-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+@media (max-width: 1280px) {
+  .plates .lab-main {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}
+
+@media (max-width: 960px) {
+  .plates .lab-main {
+    grid-template-columns: 1fr;
+  }
+  .plate-legend {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    max-height: none;
+  }
+}
+
+/* The lab hides every text in its figures; a plate shows its numbers (and its names when asked to). */
+.lab-fig.plate-fig .lab-svg .num-text,
+.lab-fig.plate-fig.is-named .lab-svg text {
+  display: inline;
+}
+
+/* Plates: a short head, so the figure and its legend fit the first screen on a laptop or tablet. */
+.lab-hero.plate-hero {
+  padding-top: 22px;
+}
+
+.plate-hero h1 {
+  margin: 4px 0 6px;
+  font-size: clamp(24px, 2.4vw, 34px);
+}
+
+.plate-hero .hero-lead {
+  max-width: 96ch;
+  font-size: 14px;
+}
+
+.lab.plates {
+  padding-top: 12px;
+}
+
+.plates .lab-controls {
+  margin-bottom: 8px;
+}
+
+.plates .plate-strip {
+  margin-bottom: 10px;
+}
+
+@media (min-width: 961px) {
+  .plates .lab-main {
+    align-items: stretch;
+  }
+  .plate-side {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: min(64vh, 620px);
+    min-height: 0;
+    overflow: hidden;
+  }
+  .plate-side .plate-legend {
+    flex: 1 1 auto;
+    min-height: 80px;
+    max-height: none;
+  }
+  .plate-side .plate-foot {
+    margin-top: auto;
+  }
+}
+
+.plate-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-3);
+  pointer-events: none;
 }

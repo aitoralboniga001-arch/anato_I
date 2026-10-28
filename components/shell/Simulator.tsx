@@ -1820,6 +1820,9 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                 <Link role="menuitem" href="/leinuak" onClick={close}>
                   <IconTree size={16} /> Leinuak <small>ernetze orrien zuhaitza</small>
                 </Link>
+                <Link role="menuitem" href="/fitxak" onClick={close}>
+                  <IconImage size={16} /> Irudi-fitxak <small>irudiak zenbakiekin</small>
+                </Link>
                 <Link role="menuitem" href="/irudiak" onClick={close}>
                   <IconImage size={16} /> Irudiak <small>etiketarik gabe</small>
                 </Link>
