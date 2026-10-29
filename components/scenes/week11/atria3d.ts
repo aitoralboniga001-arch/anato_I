@@ -688,8 +688,8 @@ function buildAtria(s: AtriaState): AtriaModel {
     const mesh = cachedMesh('atria primum', deps, () => build(120, 34));
     const hit = cachedMesh('atria primum hit', deps, () => build(40, 10));
     const id = s.stub > 0.5 ? 'zulo-obalaren-balbula' : 'septum-primum';
-    const tone = s.fuse > 0 ? mixHex(K.primum, K.secundum, 0.35 * s.fuse) : K.primum;
-    items.push({ key: 'primum', id, groups: ['aurikula-arteko-trenkada', 'septum-primum'], mesh, hit, color: tone, deep: K.primumDeep, tissue: 'membrane', thin: 1, outline: false, opacity: 1 - 0.5 * s.glassValve });
+    // Fused at birth, the valve stays cream only over the foramen (the fossa's floor): the fused band is drawn on it.
+    items.push({ key: 'primum', id, groups: ['aurikula-arteko-trenkada', 'septum-primum'], mesh, hit, color: K.primum, deep: K.primumDeep, tissue: 'membrane', thin: 1, outline: false, opacity: 1 - 0.5 * s.glassValve });
     // Its free edge (the ostium primum's roof), the rims of the holes and of the vanished top: a thin cord.
     // Each opening glows by its own rim: the free edge over the ostium primum, the rims of the ostium secundum.
     const cord = (key: string, hole: string, lines: V3[][], color: string) => {
@@ -711,9 +711,10 @@ function buildAtria(s: AtriaState): AtriaModel {
       if (line.length > 1) edges.push(line);
     }
     if (edges.length) {
-      const parts = edges.map((e) => ridge(e, 0.017 + 0.016 * s.fuse, 6));
-      // What is left of the ostium secundum: the way over the valve's free upper edge.
-      items.push({ key: 'primum-edge', id: 'ostium-secunduma', groups: ['septum-primum', 'zulo-obalaren-balbula'], mesh: cachedMerge(parts.map((p) => p.mesh)), hit: cachedMerge(parts.map((p) => p.hit)), color: mixHex(cordTone, K.secundum, 0.7 * s.fuse), deep: K.primumDeep, tissue: 'membrane', outline: false });
+      const parts = edges.map((e) => ridge(e, 0.017, 6));
+      // What is left of the ostium secundum: the way over the valve's free upper edge. Fused, the seam
+      // takes septum secundum's colour and is gone (patent: half way, the slit runs along it).
+      items.push({ key: 'primum-edge', id: 'ostium-secunduma', groups: ['septum-primum', 'zulo-obalaren-balbula'], mesh: cachedMerge(parts.map((p) => p.mesh)), hit: cachedMerge(parts.map((p) => p.hit)), color: mixHex(cordTone, K.secundum, s.fuse), deep: K.primumDeep, tissue: 'membrane', outline: false });
     }
     // A frontal section: the membrane's cut edge is the notes' line, broken by the ostium secundum.
     if (s.cut < ZC) {
@@ -738,6 +739,8 @@ function buildAtria(s: AtriaState): AtriaModel {
       const y = OPC.y + r * Math.sin(a);
       const z = OPC.z + r * Math.cos(a);
       pts['septum-primum'] = [xf(y, z), y, z];
+      // The first of the interatrial septum: named high at the front, clear of the ostium secundum's holes.
+      pts['aurikula-arteko-trenkada:primum'] = [xf(0.75, 0.25), 0.75, 0.25];
       // Once septum secundum hides its upper part from the right atrium, name it where it shows: low in
       // the foramen ovale (under the free edge, above the cushions' extensions), behind any frontal cut.
       if (s.secundum > 0.45) {
@@ -753,7 +756,11 @@ function buildAtria(s: AtriaState): AtriaModel {
       const z = Math.min(OSC.z, P.zcut - 0.1);
       pts['ostium-secunduma'] = [xf(OSC.y, z), OSC.y, z];
     }
-    pts['zulo-obalaren-balbula'] = [xf(FOC.y + 0.05, FOC.z), FOC.y + 0.05, FOC.z];
+    {
+      // Behind a frontal section through the foramen (birth: pressing and fusing).
+      const z = Math.min(FOC.z, P.zcut - 0.06);
+      pts['zulo-obalaren-balbula'] = [xf(FOC.y + 0.05, z), FOC.y + 0.05, z];
+    }
     // The cushions' extensions closing the ostium primum: mint, along the edge's lowest part.
     if (s.closeOP > 0.01) {
       const r0 = opMem;
@@ -797,6 +804,9 @@ function buildAtria(s: AtriaState): AtriaModel {
       const holeTop = fo.y + fo.ry * Math.sqrt(Math.max(0, 1 - ((z - fo.z) / fo.rz) ** 2));
       pts['septum-secundum'] = [XS - HS, (Math.min(holeTop, top) + top) / 2, z];
     }
+    // In a frontal section, the two septa together named on septum secundum's cut face, high above the foramen.
+    // At birth higher, above the valve's upper edge (the fused bar below it).
+    if (s.cut < ZC) pts['aurikula-arteko-trenkada:mozketa'] = [XS, s.fuse > 0 ? 0.62 : 0.2, P.zcut];
     // The foramen named in its upper part, under the arch (the primum is named lower down, through it).
     // In a frontal section, in the gap just under the free edge, in the septum's own plane.
     if (s.secundum > 0.6) pts['zulo-obala'] = s.cut < ZC ? [XS, fo.y + 0.4 * fo.ry, P.zcut - 0.03] : [XS - HS, fo.y + 0.6 * fo.ry, fo.z - 0.02];
@@ -816,6 +826,36 @@ function buildAtria(s: AtriaState): AtriaModel {
         // foramen (now covered by the valve). Use the opening we actually draw.
         pts['zulo-obala'] = slit[Math.floor(slit.length / 2)];
       }
+    }
+    // Birth: the valve, pressed on septum secundum's left face, fuses with it from its margins in to the
+    // foramen's rim. The fused band (rose, on the valve's left face) leaves cream only over the foramen:
+    // the fossa ovalis floor. In a frontal section a rose bridge joins the two layers into one wall.
+    if (s.fuse > 0.01 && s.stub > 0.5 && s.primum > 0.005) {
+      const f = clamp01(s.fuse);
+      const toTop = (a: number) => toStub(s, fo.y, fo.z, a, 3);
+      const from = (a: number) => {
+        const out = Math.min(toTop(a), reach(plane(xp, s.cut), fo.y, fo.z, a));
+        return lerp(out, Math.min(hole(a), out), f);
+      };
+      const tone = mixHex(K.primum, K.secundum, 0.45 + 0.5 * f);
+      const band = cachedMesh('atria fused band', [xp, f, s.cut, s.patent ? 1 : 0], () =>
+        twoSided(sheet(xp, fo.y, fo.z, from, 0, Math.PI * 2, 110, 12, [3, 0, 0], (y, z) => xf(y, z) + 0.006, toTop, s.cut)),
+      );
+      items.push({ key: 'fused', id: 'zulo-obalaren-balbula', groups: ['septum-primum', 'aurikula-arteko-trenkada'], mesh: band, color: tone, deep: K.secundumDeep, tissue: 'muscle', outline: false });
+      if (s.cut < ZC) {
+        const zc = plane(xp, s.cut).zcut - 0.004;
+        const line: V3[] = [];
+        // One bar from septum secundum's right face to the valve's left: two layers become a single wall.
+        const x0 = XS - HS - 0.004;
+        const x1 = xp + 0.026;
+        for (let i = 0; i <= 60; i++) line.push([(x0 + x1) / 2, lerp(YF + 0.005, stubTop(s, zc), i / 60), zc]);
+        const fused = ([, y, z]: V3) => Math.hypot(y - fo.y, z - fo.z) >= from(Math.atan2(y - fo.y, z - fo.z)) - 0.002;
+        const bridge = runsOf(line, fused).map((e) => ridge(e, (x1 - x0) / 2, 10));
+        if (bridge.length) items.push({ key: 'fused-cut', id: 'zulo-obalaren-balbula', groups: ['septum-primum', 'aurikula-arteko-trenkada'], mesh: cachedMerge(bridge.map((q) => q.mesh)), hit: cachedMerge(bridge.map((q) => q.hit)), color: tone, deep: K.secundumDeep, tissue: 'muscle', outline: false });
+      }
+      // From the left atrium the fused wall is named on the fused band (above the foramen's arch, below
+      // the valve's upper edge).
+      pts['aurikula-arteko-trenkada:ezker'] = [xf(0.12, -0.3) + 0.012, 0.12, -0.3];
     }
   }
 

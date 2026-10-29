@@ -87,6 +87,8 @@ export function Primum3D({ t }: SceneProps) {
     { id: 'beheko-kaba-zaina', p: 'beheko-kaba-zaina', show: vis(t, 0, P1[1]), small: true },
     { id: 'erreten-aurikulubentrikularra', p: 'erreten-aurikulubentrikularra', show: vis(t, 0, P1[1]) + vis(t, P1[2] + 0.04, P1[4]) },
     { id: 'septum-primum', p: 'septum-primum', show: vis(t, P1[1] + 0.03) },
+    // The sagittal septum the narration names (aurikulu arteko trenkada): its first part, septum primum.
+    { id: 'aurikula-arteko-trenkada', p: 'aurikula-arteko-trenkada:primum', show: vis(t, P1[1] + 0.03, P1[3]), small: true },
     // Looking into the canal, the pair is named by its two members (the front one carries the pair's name).
     { id: 'goiko-kuxina', p: 'goiko-kuxina', show: vis(t, P1[3] + 0.03, P1[4]), small: true },
     { id: 'kuxin-aurikulubentrikularrak', p: 'kuxin-aurikulubentrikularrak', show: vis(t, 0, P1[1]) + vis(t, P1[2], P1[3]) + vis(t, P1[6]) },
@@ -175,6 +177,8 @@ export function Secundum3D({ t }: SceneProps) {
     { id: 'ezkerreko-zain-balbula', p: 'ezkerreko-zain-balbula', show: vis(t, P2[3] + 0.02, P2[4]) },
     { id: 'beheko-kaba-zaina', p: 'beheko-kaba-zaina', show: vis(t, P2[5], P2[6]), small: true },
     { id: 'zulo-obalaren-balbula', p: 'zulo-obalaren-balbula', show: vis(t, P2[6] + 0.06) },
+    // "Hauek aurikula arteko trenkada osatzen dute": the two septa side by side in the section, both glowing.
+    { id: 'aurikula-arteko-trenkada', p: 'aurikula-arteko-trenkada:mozketa', show: vis(t, P2[4] + 0.06, P2[6]) },
   ];
   return (
     <ModelView
@@ -343,6 +347,11 @@ export function Walls3D({ t }: SceneProps) {
 
 // ———————————————————————————— 11:jaiotza ————————————————————————————
 
+function cutAt(t: number) {
+  const c = seg(t, P3[3], P3[3] + 0.05) * (1 - seg(t, P3[5], P3[5] + 0.04));
+  return c > 0.002 ? lerp(0.5, -0.1, c) : 9;
+}
+
 export function Birth3D({ t }: SceneProps) {
   const k = birthStage(t);
   const s: AtriaState = {
@@ -361,6 +370,9 @@ export function Birth3D({ t }: SceneProps) {
     patent: k.patent,
     pulmonary: 1,
     adult: true,
+    // Pressing and fusing: a frontal section through the foramen (the notes' figure), so the two layers
+    // show side by side, close, and become one wall; it slides back for the residual slit.
+    cut: cutAt(t),
   };
   const born = k.born ? 1 : 0;
   const flow: AtriaFlow = {
@@ -376,12 +388,15 @@ export function Birth3D({ t }: SceneProps) {
     [0, drift(t, 0.01, P3[1] - 0.015, orbit(-30, 12, 9.4, [0, -0.15, -0.18]), orbit(-40, 16, 8.6, [-0.08, -0.15, -0.14]))],
     // The pulmonary veins fill the left atrium; as its pressure rises, in towards the septa.
     [P3[1], drift(t, P3[2] + 0.01, P3[3] - 0.01, CAM.leftBack, orbit(40, 12, 6.2, [0.1, -0.15, -0.16]))],
-    // Its pressure on the valve: close to the two septa from the front and the left, the valve's left face
-    // against septum secundum.
-    [P3[3], orbit(30, 10, 5.4, [-0.08, -0.2, -0.14])],
-    // The left face while they fuse, then closer to the residual slit along the valve's upper edge.
-    // This is the slit itself, rather than the fetal foramen's entrance on the opposite face.
-    [P3[4], drift(t, P3[5] + 0.01, P3[6] - 0.015, orbit(34, 14, 4.8, [-0.08, -0.05, -0.17]), orbit(26, 30, 4.2, [-0.08, 0.05, -0.17]))],
+    // Its pressure on the valve, and the fusion: the frontal section through the foramen, face on (the notes'
+    // figure): the valve closes on septum secundum, then the gap between them fills from the top down.
+    // Face on, as the notes' frontal sections (the right atrium on your left).
+    [P3[3], orbit(0, 4, 5.6, [-0.05, -0.12, -0.12]), 0.06],
+    // Closer while they fuse: the two layers and the bridge between them, the septum's top still in sight.
+    [P3[4], orbit(0, 4, 4.2, [-0.1, -0.02, -0.12]), 0.05],
+    // The left face: the fused band round the foramen, then closer to the residual slit along the valve's
+    // upper edge. This is the slit itself, rather than the fetal foramen's entrance on the opposite face.
+    [P3[5], drift(t, P3[5] + 0.05, P3[6] - 0.015, orbit(34, 14, 4.8, [-0.08, -0.05, -0.17]), orbit(26, 30, 4.2, [-0.08, 0.05, -0.17])), 0.05],
     [P3[6], CAM.front],
   ]);
   const names: CalloutSpec[] = [
@@ -394,6 +409,8 @@ export function Birth3D({ t }: SceneProps) {
     // Name the opening again when the text introduces the patent slit along the valve's upper edge.
     { id: 'zulo-obala', p: 'zulo-obala', show: vis(t, 0, P3[1]) + vis(t, P3[5]) },
     { id: 'zulo-obalaren-balbula', p: 'zulo-obalaren-balbula', show: vis(t, 0, P3[1]) + vis(t, P3[3]) },
+    // Fused, the two are one wall: the interatrial septum (both glow under its name).
+    { id: 'aurikula-arteko-trenkada', p: t < P3[5] ? 'aurikula-arteko-trenkada:mozketa' : t < P3[6] ? 'aurikula-arteko-trenkada:ezker' : 'aurikula-arteko-trenkada', show: vis(t, P3[4] + 0.06) },
     { id: 'beheko-kaba-zaina', p: 'beheko-kaba-zaina', show: vis(t, P3[6]), small: true },
   ];
   return (
@@ -414,7 +431,7 @@ export function Birth3D({ t }: SceneProps) {
             Aurretik eta ezkerretik: ezkerreko aurikularen atzeko pareta, lau birika zainak
           </Note>
           <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, P3[3], P3[5]) * asked}>
-            Aurretik eta ezkerretik, bi trenkadetara hurbilduta: balbula (krema) septum secundumaren (arrosa) aurka
+            Aurretik, mozketa frontala: balbula (krema) septum secundumaren (arrosa) aurka, gero bat eginda
           </Note>
           <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, P3[5], P3[6]) * asked}>
             Aurretik eta ezkerretik: balbularen goiko ertzean geratzen den arraildura txikia
