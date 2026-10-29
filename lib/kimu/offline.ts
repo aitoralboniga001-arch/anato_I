@@ -377,8 +377,8 @@ export function offlineReply(ev: Evidence): KimuReply {
     const text = intent === 'nondik' || (intent === 'nola' && s.origin) ? s.origin! : intent === 'patua' ? s.fate! : intent === 'noiz' ? `${when} (${atlasWhen.toLowerCase()}).` : firstSentence(s.definition);
     reply = `**${s.name}**: ${text.replace(/^\s+/, '')}`;
     sources = ev.notes.filter((h) => fairHit(h) && mentions(h, s) && !isList(h)).slice(0, 1).map((h) => sourceOf(h, true));
-    // Nothing in the notes mentions it: the card is the atlas's own wording, and says so.
-    if (!sources.length) reply = `${c.atlasOnly(place?.doc.atlasOnly?.near)} ${reply}`;
+    // Nothing in the notes mentions it (not even a list item): the card is the atlas's own wording, and says so.
+    if (!ev.notes.some((h) => fairHit(h) && mentions(h, s))) reply = `${c.atlasOnly(place?.doc.atlasOnly?.near)} ${reply}`;
   } else if (fairHit(best) && best.score >= 4.5 && (!ev.asked || best.passage.week === ev.asked)) {
     reply = c.weak(refOf(best.passage));
     unsure = true;

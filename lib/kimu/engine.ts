@@ -1,8 +1,8 @@
 import { expandNotes } from '@/content/notes-text';
 import { structures, weeks } from '@/content/registry';
 import type { Answers } from '@/components/shell/answers';
-import { evidenceOf, intentOf, numbersIn, passagesOfSentences, searchNotes, sectionAsked, strongHit, warmNotes, type NotesContext, type NotesHit } from './notes';
-import { boldName, followupsFor, fromSentence, lineageOf, notesTarget, offlineReply, SAYS_WHERE, sourceOf, targetsOf, type Evidence } from './offline';
+import { evidenceOf, fairHit, intentOf, numbersIn, passagesOfSentences, searchNotes, sectionAsked, strongHit, warmNotes, type NotesContext, type NotesHit } from './notes';
+import { boldName, followupsFor, fromSentence, lineageOf, mentions, notesTarget, offlineReply, SAYS_WHERE, sourceOf, targetsOf, type Evidence } from './offline';
 import { pickPractice, wantsPractice } from './practice';
 import { CONFIDENT, confident, describeHere, factsFrom, GO, isFormationQuestion, nearestFrom, search, toTarget, vocabulary, wantsPlace, withFrom, type Hit } from './search';
 import { detectLang, keyWords, match, queryTokens, spell, tokens, topicIn, withoutTopic, type Lang } from './text';
@@ -180,7 +180,10 @@ export async function askKimu(question: string, history: KimuTurn[], here: KimuH
   // searches them with its Basque name too.
   const q = queryTokens(rq).flat();
   const inBasque = !!s && tokens(s.name).every((w) => q.some((x) => match(x, w, false) >= 0.85));
-  const notes = step ? step.notes : section ? section.parts : s && !inBasque ? searchNotes(s.name, ctx, 3, rq) : searchNotes(rq, ctx, 3);
+  const found = step ? step.notes : section ? section.parts : s && !inBasque ? searchNotes(s.name, ctx, 6, rq) : searchNotes(rq, ctx, s ? 6 : 3);
+  // A structure asked about: the passages that say its name come first (one that shares more words may be
+  // about its neighbour).
+  const notes = s && !step && !section ? [...found.filter((h) => fairHit(h) && mentions(h, s)), ...found.filter((h) => !(fairHit(h) && mentions(h, s)))].slice(0, 3) : found;
   const ev: Evidence = { question: rq, lang, intent, structure: s, notes, places, going: going && !!named, here, asked, section };
   const offline = located(step ? step.reply : offlineReply(ev), here, ev.going ? lang : null);
 
