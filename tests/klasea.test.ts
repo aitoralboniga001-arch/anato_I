@@ -12,6 +12,7 @@ import { IMPORTANCE_W12 } from '@/content/klasea/importance/w12';
 import { IMPORTANCE_W13 } from '@/content/klasea/importance/w13';
 import { LESSONS } from '@/content/klasea';
 import { computeImportance, type Importance } from '@/lib/klasea/importance';
+import { cuesOf } from '@/lib/klasea/cues';
 import { stepsOf } from '@/lib/klasea/engine';
 import { respellWord, spokenText } from '@/lib/klasea/speak-eu';
 import { speakSeconds } from '@/lib/klasea/voice';
@@ -197,7 +198,8 @@ const TOPICS: Topic[] = [
     contrastFrom: 'bulbarra',
     shown: { 'zirkulazioa#2/aorta-dortsalak': 'Circulation3D: aorta dortsalak izendatuta hasieratik (aorta-dortsalak1 callout)' },
     // 3.2/p5/s1: "atal bentrikularreko paretan, hasierako ezkerreko bentrikulua ere deitua"; the frontal cut draws it under that name.
-    same: { 'atal-bentrikularra': ['hasierako-ezkerreko-bentrikulua'] },
+    // "Endokardio hodiak" (plural, the pair before they fuse) reads as the single tube's other name (endokardio hodia).
+    same: { 'atal-bentrikularra': ['hasierako-ezkerreko-bentrikulua'], endokardioa: ['bihotz-hodiak'] },
     table: { file: 'components/scenes/week10/RightAtrium.tsx', fn: 'AtriumTable' },
   },
   {
@@ -404,6 +406,58 @@ for (const topic of TOPICS)
         for (const { chunk, check, after } of checks)
           if (check.kind === 'zer-da-hau' && after && !isShown(after.stage, after.beat, check.structure)) bad.push(`${chunk}/zer-da-hau: ${check.structure}`);
         expect(bad).toEqual([]);
+      });
+    });
+
+    describe('class: in step with the voice', () => {
+      const namesOf = (id: string) => {
+        const s = structures.get(id);
+        return s ? [s.name, ...(s.aka ?? [])] : [];
+      };
+
+      it('the scene never plays back: within a stage, each line is said at or after the one before', () => {
+        const bad = placed.filter((p, i) => i > 0 && placed[i - 1].chunk === p.chunk && placed[i - 1].stage === p.stage && p.at < placed[i - 1].at - 1e-9).map((p) => `${where(p)}: ${p.at}`);
+        expect(bad).toEqual([]);
+      });
+
+      it('every name a line says lights, shows and is pointed at as that word is said', () => {
+        const bad: string[] = [];
+        for (const p of placed)
+          for (const text of [p.line.say, p.line.plain ?? '']) {
+            if (!text) continue;
+            const cues = cuesOf(text, p.line.focus ?? [], namesOf, p.line.cues);
+            const said = text.toLowerCase();
+            for (const n of namesSaid(text, p.stage.structures)) {
+              // Each lit id this name stands for is cued where the line first names it: here or before.
+              const at = said.indexOf(n.span);
+              for (const id of n.ids) {
+                const c = cues.find((q) => q.id === id || (SAME[q.id] ?? []).includes(id));
+                if (c && (c.i < 0 || c.i > at)) bad.push(`${where(p)}: "${n.span}" at ${at}, ${id} cued at ${c.i}`);
+              }
+            }
+          }
+        expect(bad).toEqual([]);
+      });
+
+      it('a line given words to cue on says those words', () => {
+        const bad: string[] = [];
+        for (const p of placed)
+          for (const [id, words] of Object.entries(p.line.cues ?? {})) {
+            if (!(p.line.focus ?? []).includes(id)) bad.push(`${where(p)}: ${id} is not lit`);
+            if (!p.line.say.toLowerCase().includes(words.toLowerCase()) && !(p.line.plain ?? '').toLowerCase().includes(words.toLowerCase())) bad.push(`${where(p)}: "${words}" is not said`);
+          }
+        expect(bad).toEqual([]);
+      });
+
+      it('most lit structures are named by their line, not just lit from its start', () => {
+        let lit = 0;
+        let unsaid = 0;
+        for (const p of placed) {
+          const cues = cuesOf(p.line.say, p.line.focus ?? [], namesOf, p.line.cues);
+          lit += cues.length;
+          unsaid += cues.filter((c) => c.i < 0).length;
+        }
+        expect(unsaid / Math.max(1, lit)).toBeLessThan(0.15);
       });
     });
 

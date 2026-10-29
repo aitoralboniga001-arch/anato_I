@@ -112,3 +112,68 @@ describe('audio ownership', () => {
     await settle(); expect(FakeAudio.all).toHaveLength(0); expect(transport.key).toBe('');
   });
 });
+
+describe('segments without a recorded clip', () => {
+  const stage = weeks[0].stages[0].id;
+  class Utterance { onstart?: () => void; onend?: () => void; onerror?: () => void; onboundary?: () => void; voice: unknown; lang = ''; rate = 1; volume = 1; constructor(public text: string) {} }
+  function setup(voices: object[] = [{ name: 'Mónica', lang: 'es-ES', localService: true }], status = 404, code = 'AUDIO_NOT_FOUND') {
+    vi.useFakeTimers();
+    const said: Utterance[] = [];
+    const synth = { getVoices: () => voices, speak: vi.fn((u: Utterance) => { said.push(u); }), cancel: vi.fn(), addEventListener: vi.fn() };
+    vi.stubGlobal('window', { speechSynthesis: synth, localStorage: { getItem: () => null, setItem: () => {} } });
+    vi.stubGlobal('SpeechSynthesisUtterance', Utterance);
+    vi.stubGlobal('Audio', FakeAudio);
+    const fetchMock = vi.fn(async () => ({ ok: false, status, json: async () => ({ code }) }));
+    vi.stubGlobal('fetch', fetchMock);
+    const states: string[] = [];
+    const transport = new NarrationTransport((s) => { if (states.at(-1) !== s.status) states.push(s.status); });
+    const sayNext = async () => { await settle(); vi.advanceTimersByTime(60); return said.at(-1)!; };
+    return { transport, said, synth, fetchMock, states, sayNext };
+  }
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('speaks the step with the browser voice, keeping pause, speed, progress and step pacing', async () => {
+    const { transport, said, synth, fetchMock, states, sayNext } = setup();
+    transport.start('step', { week: 1, stage, kind: 'beat', beat: 0 }, [{ text: 'Bihotz hodia.', focus: ['a'] }, { text: 'Zain sinua.', focus: ['b'] }], 1.25);
+    const first = await sayNext();
+    expect(first.text).toBe('bihots hodia.'); // respelled for a Spanish voice, as the class does
+    expect(first.rate).toBe(1.25);
+    expect(transport.snapshot().status).toBe('loading');
+    first.onstart!(); expect(transport.snapshot().status).toBe('playing');
+    vi.advanceTimersByTime(400); const reached = transport.snapshot().fraction; expect(reached).toBeGreaterThan(0);
+    transport.pause(); expect(transport.snapshot().status).toBe('paused'); expect(synth.cancel).toHaveBeenCalled();
+    transport.setSpeed(.75); transport.resume();
+    const again = await sayNext(); expect(again).not.toBe(first); expect(again.rate).toBe(.75);
+    again.onstart!(); vi.advanceTimersByTime(80); expect(transport.snapshot().fraction).toBeGreaterThanOrEqual(reached);
+    again.onend!(); const second = await sayNext();
+    expect(transport.snapshot()).toMatchObject({ segment: 1, text: 'Zain sinua.', focus: ['b'] });
+    second.onstart!(); second.onend!(); await settle();
+    expect(transport.snapshot().status).toBe('observing');
+    transport.tick(1.5); expect(transport.snapshot().status).toBe('done');
+    expect(states).not.toContain('error'); expect(said).toHaveLength(3); expect(FakeAudio.all).toHaveLength(0);
+    // Each missing clip is asked for once (the second via preload), never retried.
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    transport.dispose();
+  });
+  it('says plainly that the step has no recorded voice when the browser has none', async () => {
+    const { transport } = setup([]);
+    transport.start('step', { week: 1, stage, kind: 'intro' }, [{ text: 'A.', focus: [] }], 1);
+    await settle(); vi.advanceTimersByTime(1500); await settle(); // voices that never load: loadVoices gives up
+    expect(transport.snapshot().status).toBe('error');
+    expect(transport.snapshot().error).toMatch(/ahots grabaturik/);
+    expect(transport.snapshot().error).not.toMatch(/Saiatu berriro/);
+  });
+  it('keeps real server failures as errors', async () => {
+    const { transport, said } = setup(undefined, 500, 'SERVER_ERROR');
+    transport.start('step', { week: 1, stage, kind: 'intro' }, [{ text: 'A.', focus: [] }], 1);
+    await settle(); vi.advanceTimersByTime(60);
+    expect(transport.snapshot()).toMatchObject({ status: 'error', error: 'Ezin izan da audioa erreproduzitu. Saiatu berriro.' });
+    expect(said).toHaveLength(0);
+  });
+  it('never cancels speech it did not start (the class shares speechSynthesis)', () => {
+    const { transport, synth } = setup();
+    transport.start('step', { week: 1, stage, kind: 'intro' }, [{ text: 'A.', focus: [] }], 1);
+    transport.cancel(); transport.dispose();
+    expect(synth.cancel).not.toHaveBeenCalled();
+  });
+});

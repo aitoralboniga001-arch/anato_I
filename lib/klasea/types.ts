@@ -19,8 +19,13 @@ export interface Line {
   view?: string;
   /** Stage time (0..1) the scene glides to before the line is said. */
   at?: number;
-  /** Structures lit while it is said; their names appear as Kimu says them. */
+  /** Structures lit while it is said; each lights, shows its name and is pointed at as the voice names it. */
   focus?: string[];
+  /**
+   * Where the line names a lit structure, when its names alone do not find it (a pronoun, an elided
+   * name): id → the words as `say` (or `plain`) has them. Unnamed ones are lit from the line's start.
+   */
+  cues?: Record<string, string>;
   tone?: Tone;
   /** Board item (line or table cell id) written in once the line has been said. */
   writes?: string;

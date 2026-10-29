@@ -21,9 +21,9 @@ const mouthOf = (word: string) => {
 /** The free arm's angle per pose (Kimu's own frame: 0 = ahead, 90 = down, −90 = up). */
 const FREE: Record<Pose, number> = { listen: 112, talk: 60, emphasis: -125, caution: -95, think: 28, praise: -140, gentle: 100, look: 105 };
 
-/** Pointer: arm 16 units, a telescopic stick up to 150 more (so Kimu can stand clear of the drawing). */
+/** Pointer: arm 16 units, a telescopic stick up to 240 more (so Kimu can stand clear of the drawing and still reach into it). */
 export const ARM = 16;
-export const STICK = 150;
+export const STICK = 240;
 
 export function KimuTeacher({ pose, facing, arm, speaking, word, walking, look, reduced }: {
   pose: Pose;
@@ -45,7 +45,8 @@ export function KimuTeacher({ pose, facing, arm, speaking, word, walking, look, 
 
   // Pointer arm: aimed, or held down along the side (stick short) when nothing is named.
   const stickAngle = arm ? arm.angle : look === 'board' ? -35 : 98;
-  const stickLen = arm ? 18 + (STICK - 18) * arm.reach : look === 'board' ? 26 : 22;
+  // `reach` is the tip's distance from the shoulder, as a fraction of the arm and the stick drawn out.
+  const stickLen = arm ? Math.max(18, (ARM + STICK) * arm.reach - ARM) : look === 'board' ? 26 : 22;
   const a = (stickAngle * Math.PI) / 180;
   const eye = look === 'student' ? { x: 0, y: 0.8 } : look === 'ahead' ? { x: 1.8, y: 0.2 } : { x: Math.cos(a) * 1.8, y: Math.sin(a) * 1.5 };
 
@@ -153,8 +154,13 @@ export function KimuTeacher({ pose, facing, arm, speaking, word, walking, look, 
 
         {/* the pointer arm, in front: the stick slides out to just short of what is named */}
         <g className={styles.armStick} style={{ transform: `rotate(${stickAngle}deg)`, transformOrigin: '92px 80px' }}>
-          <line className={styles.stick} x1={92 + ARM} y1="80" x2={92 + ARM + STICK} y2="80" stroke="#8a5a34" strokeWidth="2.4" strokeLinecap="round" style={{ transform: `scaleX(${stickLen / STICK})`, transformOrigin: `${92 + ARM}px 80px` }} />
-          <circle className={styles.stick} cx={92 + ARM} cy="80" r="2.2" fill="#f3e2c4" style={{ transform: `translateX(${stickLen}px)` }} />
+          {/* a light stick on a dark casing (like the names' leaders), so it reads on pale and dark tissue alike;
+              scaled as a group, so the casing keeps to the stick */}
+          <g className={styles.stick} style={{ transform: `scaleX(${stickLen / STICK})`, transformOrigin: `${92 + ARM}px 80px` }}>
+            <line x1={92 + ARM} y1="80" x2={92 + ARM + STICK} y2="80" stroke="#1d0f08" strokeOpacity="0.75" strokeWidth="5.2" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            <line x1={92 + ARM} y1="80" x2={92 + ARM + STICK} y2="80" stroke="#f4dcae" strokeWidth="2.6" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+          </g>
+          <circle className={styles.stick} cx={92 + ARM} cy="80" r="3.4" fill="#ffd27a" stroke="#1d0f08" strokeOpacity="0.75" strokeWidth="1.4" style={{ transform: `translateX(${stickLen}px)` }} />
           <path d={`M92 80h${ARM}`} stroke="#e7766a" strokeWidth="7" strokeLinecap="round" />
           <circle cx={92 + ARM + 1} cy="80" r="5" fill="#ee8576" stroke="#b9473f" strokeOpacity="0.4" />
         </g>

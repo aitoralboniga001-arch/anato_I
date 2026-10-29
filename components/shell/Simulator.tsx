@@ -1592,14 +1592,18 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
   // The class lights what Kimu names (or what a check has placed); names appear as they are said, and
   // "Zer da hau?" hides the name it asks for.
   const classFocus = classOn ? (klasea.checkFocus.length ? klasea.checkFocus : klasea.cmd.focus) : [];
+  /** What Kimu points at and the scene puts forward: the structure just named (or the chip just placed). */
+  const classPoint = classOn ? (klasea.checkFocus.length ? klasea.checkFocus[klasea.checkFocus.length - 1] : klasea.cmd.point) : null;
   const spotting = classOn && klasea.cmd.check?.kind === 'zer-da-hau' && klasea.state.phase === 'ask' ? klasea.cmd.check.structure : null;
   const classNamed = (() => {
     if (!classOn) return null;
     const said = new Set<string>(klasea.checkFocus);
     stepsOf(lesson).forEach((s, i) => {
-      if (s.kind !== 'line' || i > klasea.state.step || (i === klasea.state.step && klasea.state.phase === 'move')) return;
+      if (s.kind !== 'line' || i >= klasea.state.step) return;
       for (const id of lesson.chunks[s.chunk].lines[s.line].focus ?? []) said.add(id);
     });
+    // The line being said: a name shows as the voice says it.
+    for (const id of klasea.cmd.heardIds) said.add(id);
     const all = klasea.cmd.allNames;
     if (all && !spotting) return null;
     return (id: string) => id !== spotting && !partsOf(spotting ?? '').includes(id) && (all || said.has(id) || knownBefore(id, week.week, stage));
@@ -1617,7 +1621,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     hovered: find ? hovered : hovered,
     focus: classOn ? classFocus : find || intro !== null ? [] : formation ? (formation.highlight ?? [formation.structure]) : voice && audioState.focus.length ? audioState.focus : (beat?.focus ?? []),
     dimContext: classOn ? classLit && !view.ownFocus : !formation && focusLit && !view.ownFocus && !find && intro === null,
-    spotlight: classOn ? null : !find && intro === null && tour ? tour.items[tour.idx] : null,
+    spotlight: classOn ? (classLit ? classPoint : null) : !find && intro === null && tour ? tour.items[tour.idx] : null,
+    spotKeep: classOn,
     showLabels: showLabels && intro === null,
     named: classOn ? (labelMode === 'urratsez' || spotting ? classNamed : null) : labelMode === 'urratsez' && !formation && !find ? namedAt(week.week, stage, glideBeat ?? activeBeat) : null,
     quiz: !!find,
@@ -2224,7 +2229,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                 stepKey={`${klasea.state.step}/${klasea.state.phase}/${klasea.state.plain ? 'p' : ''}`}
                 pose={klasea.cmd.pose}
                 gaze={klasea.cmd.gaze}
-                focus={classFocus}
+                point={classPoint}
+                plan={klasea.cmd.line?.focus ?? classFocus}
                 speaking={klasea.speaking}
                 word={klasea.word}
                 paused={klasea.paused}

@@ -199,12 +199,22 @@ export function LabelDraw({ id, x, y, ax, ay, align, show = 1, text, sub, small,
   if (!ctx.showLabels || ctx.quiz || show <= 0.02 || inPane) return null;
   const state = partState(ctx, id);
   // Not named yet (progressive names): the slot is kept, so names already shown never move when it comes.
-  if (ctx.named && state !== 'focus' && state !== 'spot' && state !== 'active' && !ctx.named(id)) return null;
+  const unnamed = !!ctx.named && state !== 'focus' && state !== 'spot' && state !== 'active' && !ctx.named(id);
+  if (unnamed && !ctx.spotKeep) return null;
   const space = !!ctx.isSpace?.(id);
   const name = text ?? ctx.nameOf(id);
-  const size = labelSize(state, small);
-  const weight = state === 'spot' || state === 'focus' ? 700 : 550;
+  const size = unnamed ? labelSize('focus', small) : labelSize(state, small);
+  const weight = unnamed || state === 'spot' || state === 'focus' ? 700 : 550;
   const { anchor, k, fs, plate, leader: pts } = labelGeom({ x, y, ax, ay, align, small, sub }, name.length, size, scale, (f) => textWidth(name, f, weight, space, measured));
+  // In the class, a name still to be said leaves only where it will be (unseen): Kimu plans its place so
+  // that the name will not come up under it, and knows where to point before the name shows.
+  if (unnamed)
+    return (
+      <g data-slot={id} visibility="hidden" aria-hidden pointerEvents="none">
+        <rect className="label-slot" x={plate.x} y={plate.y} width={plate.w} height={plate.h} />
+        <circle className="label-slot-dot" cx={ax} cy={ay} r={3} />
+      </g>
+    );
   const hasLeader = pts.length > 0;
   const leader = hasLeader ? `M${pts[0][0]},${pts[0][1]} L${pts[1][0]},${pts[1][1]} L${ax},${ay}` : '';
   const group = {

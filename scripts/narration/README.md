@@ -10,6 +10,14 @@ catalog has 2,191 references, 1,311 distinct clips and 92,968 Unicode characters
 Export, inspect the dry-run, then generate only with the user's offline Cloud
 key. No Python package installation is necessary for Google generation.
 
+Segments whose text changed since the recording have no clip; the app says them
+with the browser voice (as the class does) until they are re-recorded. List them,
+per week, into ignored `.narration-tools/missing.json` (no provider call):
+
+```powershell
+npx vitest run --config scripts/narration/vitest.config.ts missing-clips
+```
+
 ```powershell
 npx vitest run --config scripts/narration/vitest.config.ts
 python -m unittest discover -s scripts/narration -p 'test_*.py'

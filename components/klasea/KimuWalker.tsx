@@ -3,16 +3,17 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import type { Gaze, Phase, Pose } from '@/lib/klasea/engine';
-import { armTo, blocked, centreOf, reaches, standAt,type Facing, type Pt, type Rect } from '@/lib/klasea/stand';
+import { armTo, blocked, centreOf, legible, reaches, standAt, type Facing, type Pt, type Rect } from '@/lib/klasea/stand';
 import { ARM, KimuTeacher, STICK } from './KimuTeacher';
 import styles from './klasea.module.css';
 
 /**
  * Kimu walking about the scene like a teacher at the board: when a line names structures it walks to a
- * free spot beside them (never over them, their names or the scene's buttons), turns to them and points
- * with its stick; between lines it stays put, and for a question it turns to the student. It lives in
- * the viewport's own layer, takes no clicks, and moves only at phase boundaries (its arm follows a
- * structure that moves while it is said).
+ * free spot from where its stick reads on every one of them (never over them, their names or the scene's
+ * buttons), and points at each one as the voice names it; between lines it stays put, and for a question
+ * it turns to the student. It lives in the viewport's own layer and takes no clicks. It moves at phase
+ * boundaries, and again mid-line only if the structure just named would not read from where it stands
+ * (out of reach, or at an angle its arm cannot make).
  */
 
 const GHOST = '.scene-ghost, .view-zoom, .travel';
@@ -63,7 +64,10 @@ function readScene(host: HTMLElement, focus: string[]): Scene {
   const keepClear: Rect[] = [];
   for (const id of focus) {
     const sel = CSS.escape(id);
-    const dots = [...host.querySelectorAll(`[data-label="${sel}"] .label-dot`)].filter(live).map(rectOf).filter((r): r is Rect => !!r);
+    // A name still fading in counts (it is the one being said).
+    let dots = [...host.querySelectorAll(`[data-label="${sel}"] .label-dot`)].filter(present).map(rectOf).filter((r): r is Rect => !!r);
+    // Not named yet: where its name's dot will be.
+    if (!dots.length) dots = [...host.querySelectorAll(`[data-slot="${sel}"] .label-slot-dot`)].filter(present).map(rectOf).filter((r): r is Rect => !!r);
     const parts = [...host.querySelectorAll(`[data-part="${sel}"]`)].filter(live).map(rectOf).filter((r): r is Rect => !!r);
     if (dots.length) targets.push(...dots.map((r) => ({ x: r.x + r.w / 2, y: r.y + r.h / 2 })));
     else if (parts.length) {
@@ -75,7 +79,7 @@ function readScene(host: HTMLElement, focus: string[]): Scene {
   const avoid: Scene['avoid'] = [];
   // What it names gets its name shown as it is said: keep clear of where that name will be, too.
   for (const id of focus)
-    for (const el of host.querySelectorAll(`[data-label="${CSS.escape(id)}"] .label-plate`)) {
+    for (const el of host.querySelectorAll(`[data-label="${CSS.escape(id)}"] .label-plate, [data-slot="${CSS.escape(id)}"] .label-slot`)) {
       const r = el.closest(GHOST) ? null : rectOf(el);
       if (r) avoid.push({ r: { x: r.x - 4, y: r.y - 4, w: r.w + 8, h: r.h + 8 }, weight: 9 });
     }
@@ -99,13 +103,13 @@ function readScene(host: HTMLElement, focus: string[]): Scene {
       const y0 = Math.min(...dots.map((r) => r.y)) - view.h * 0.08;
       const x1 = Math.max(...dots.map((r) => r.x + r.w)) + view.w * 0.08;
       const y1 = Math.max(...dots.map((r) => r.y + r.h)) + view.h * 0.08;
-      avoid.push({ r: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, weight: 3 });
+      avoid.push({ r: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, weight: 4.5 });
     }
   }
   return { view, targets, keepClear, avoid };
 }
 
-export function KimuWalker({ svgRef, status, phase, stepKey, pose, gaze, focus, speaking, word, paused, reduced }: {
+export function KimuWalker({ svgRef, status, phase, stepKey, pose, gaze, point, plan, speaking, word, paused, reduced }: {
   svgRef: RefObject<SVGSVGElement | null>;
   status: 'card' | 'running' | 'done';
   phase: Phase;
@@ -113,7 +117,10 @@ export function KimuWalker({ svgRef, status, phase, stepKey, pose, gaze, focus, 
   stepKey: string;
   pose: Pose;
   gaze: Gaze;
-  focus: string[];
+  /** What it points at now: the structure the voice has just named (null: not yet). */
+  point: string | null;
+  /** Everything the line names: where it stands is chosen so that each will read. */
+  plan: string[];
   speaking: boolean;
   word: string;
   paused: boolean;
@@ -126,8 +133,6 @@ export function KimuWalker({ svgRef, status, phase, stepKey, pose, gaze, focus, 
   const [arm, setArm] = useState<{ angle: number; reach: number } | null>(null);
   const spotRef = useRef(spot);
   const walkRef = useRef(walk);
-  /** When it started pointing at this set (turning round must not restart the round). */
-  const round = useRef({ key: '', start: 0 });
   useEffect(() => {
     spotRef.current = spot;
     walkRef.current = walk;
@@ -146,8 +151,8 @@ export function KimuWalker({ svgRef, status, phase, stepKey, pose, gaze, focus, 
     return () => cancelAnimationFrame(raf);
   }, [svgRef]);
 
-  const focusKey = focus.join(' ');
-  const pointing = status === 'running' && !paused && focus.length > 0 && (phase === 'speak' || phase === 'hold' || phase === 'move' || phase === 'ask');
+  const planKey = plan.join(' ');
+  const pointing = status === 'running' && !paused && plan.length > 0 && (phase === 'speak' || phase === 'hold' || phase === 'move' || phase === 'ask');
 
   // Where to stand: decided at phase boundaries (and when the scene's box changes size).
   useEffect(() => {
@@ -178,7 +183,7 @@ export function KimuWalker({ svgRef, status, phase, stepKey, pose, gaze, focus, 
         if (tries++ < 30) retry = window.setTimeout(decide, 200);
         return;
       }
-      const scene = readScene(host, pointing ? focus : []);
+      const scene = readScene(host, pointing ? plan : []);
       // What it names may still be appearing (its name shows once said): look again before deciding.
       if (pointing && !scene.targets.length) {
         if (tries++ < 8) retry = window.setTimeout(decide, 300);
@@ -208,7 +213,7 @@ export function KimuWalker({ svgRef, status, phase, stepKey, pose, gaze, focus, 
     const watch = window.setInterval(() => {
       const from = spotRef.current;
       if (status !== 'running' || paused || !from || walkRef.current || settling()) return;
-      const scene = readScene(host, focus);
+      const scene = readScene(host, plan);
       const k = sized(scene.view);
       const reach = (k.w / 120) * (ARM + STICK);
       // Walking to point is only for what is being said (between lines it still holds the last line's
@@ -235,7 +240,7 @@ export function KimuWalker({ svgRef, status, phase, stepKey, pose, gaze, focus, 
       ro.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- decided once per step and phase
-  }, [host, stepKey, status, pointing, focusKey, paused]);
+  }, [host, stepKey, status, pointing, planKey, paused]);
 
   // A walk ends when its time is up (even if the class moved on meanwhile).
   useEffect(() => {
@@ -244,29 +249,46 @@ export function KimuWalker({ svgRef, status, phase, stepKey, pose, gaze, focus, 
     return () => window.clearTimeout(id);
   }, [walk, spot]);
 
-  // The arm follows what it names (it can move while it is said), one structure after another when it
-  // names several, turning round when one is behind it; at rest otherwise.
+  // The arm points at the structure just named (and follows it if it moves), turning round when it is
+  // behind Kimu; if it would not read from here, Kimu steps to where it does (once per structure). At rest
+  // until the line names something.
+  const replanned = useRef('');
   useEffect(() => {
-    if (!host || !spot || walk || !pointing) return;
-    if (round.current.key !== focusKey) round.current = { key: focusKey, start: performance.now() };
-    const start = round.current.start;
+    if (!host || !spot || walk || !pointing || !point) return;
+    let misses = 0;
     const aimNow = () => {
-      const pts = readScene(host, focus).targets.filter((p, i, all) => all.findIndex((q) => Math.hypot(q.x - p.x, q.y - p.y) < 30) === i).sort((a, b) => a.x - b.x);
-      if (!pts.length) return setArm(null);
-      const aim = pts[Math.floor((performance.now() - start) / 1800) % pts.length];
+      const reach = (kimu.w / 120) * (ARM + STICK);
+      const sh = { x: spot.x + kimu.w / 2, y: spot.y + kimu.h / 2 };
+      // A paired structure has a dot on each side: the nearer one.
+      const pts = readScene(host, [point]).targets.sort((a, b) => Math.hypot(a.x - sh.x, a.y - sh.y) - Math.hypot(b.x - sh.x, b.y - sh.y));
+      const aim = pts[0];
+      // Its name may be on the way in: the arm holds where it is meanwhile (at rest if it never comes).
+      if (!aim) return ++misses > 5 && setArm(null);
+      misses = 0;
+      const key = `${stepKey}|${point}`;
+      if (!legible(spot, kimu, aim, reach) && replanned.current !== key && !reduced) {
+        replanned.current = key;
+        const scene = readScene(host, [point]);
+        const next = standAt({ view: scene.view, kimu, targets: [aim], keepClear: scene.keepClear, avoid: scene.avoid, from: spot, reach });
+        if (Math.hypot(next.x - spot.x, next.y - spot.y) >= 6 && legible(next, kimu, aim, reach)) {
+          setWalk(Math.round(Math.max(380, Math.min(1100, Math.hypot(next.x - spot.x, next.y - spot.y) * 2))));
+          setSpot({ x: next.x, y: next.y, facing: next.facing });
+          return;
+        }
+      }
       const facing: Facing = aim.x >= spot.x + kimu.w / 2 ? 'right' : 'left';
       if (facing !== spot.facing && Math.abs(aim.x - (spot.x + kimu.w / 2)) > 12) {
         // Turn round where it stands now (a walk decided meanwhile wins).
         setSpot((s) => (s && s.x === spot.x && s.y === spot.y ? { ...s, facing } : s));
         return;
       }
-      setArm(armTo(spot, kimu, aim, (kimu.w / 120) * (ARM + STICK)));
+      setArm(armTo(spot, kimu, aim, reach));
     };
     aimNow();
     const id = window.setInterval(aimNow, 250);
     return () => window.clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- focus follows its key
-  }, [host, spot, walk, pointing, focusKey, kimu]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stepKey only names the replan
+  }, [host, spot, walk, pointing, point, kimu]);
 
   if (!host || !spot) return null;
   const shownPose: Pose = walk ? 'look' : paused && status === 'running' ? 'listen' : status === 'card' ? 'talk' : status === 'done' ? 'praise' : pose;
@@ -279,7 +301,7 @@ export function KimuWalker({ svgRef, status, phase, stepKey, pose, gaze, focus, 
       <KimuTeacher
         pose={shownPose}
         facing={spot.facing}
-        arm={!walk && pointing ? arm : null}
+        arm={!walk && pointing && point ? arm : null}
         speaking={speaking && !paused}
         word={word}
         walking={walk > 0}

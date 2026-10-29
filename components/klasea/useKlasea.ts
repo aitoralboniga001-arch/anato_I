@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { commandOf, initialState, reduce, stepsOf, type ClassEvent, type ClassState } from '@/lib/klasea/engine';
+import { getWeek, structures } from '@/content/registry';
+import { reached, type NamesOf } from '@/lib/klasea/cues';
+import { commandOf, initialState, playMs, reduce, stepsOf, type ClassEvent, type ClassState, type ClassWorld } from '@/lib/klasea/engine';
 import type { Lesson } from '@/lib/klasea/types';
 import { savedClassPlace, type SavedClassPlace } from '@/lib/klasea/resume';
-import { ClassVoice, savedVoiceName, speakSeconds, voiceSupported, type VoiceChoice } from '@/lib/klasea/voice';
+import { ClassVoice, savedVoiceName, voiceSupported, type VoiceChoice } from '@/lib/klasea/voice';
 
 /**
  * The class's host logic: the engine's state, the voice, and the scene moves, kept out of the simulator.
@@ -38,6 +40,15 @@ const nearestRate = (r: number) => RATES.reduce((a, b) => (Math.abs(b - r) < Mat
 const RATE_KEY = 'enbrioatlas:klasea:abiadura';
 const PACING_KEY = 'enbrioatlas:klasea:learner-paced';
 const placeKey = (week: number) => `enbrioatlas:klasea:${week}`;
+
+/** A structure's names as a line may say them (its name and other names). */
+export const namesOf: NamesOf = (id) => {
+  const s = structures.get(id);
+  return s ? [s.name, ...(s.aka ?? [])] : [];
+};
+
+/** The topic as the class needs it: the names it cues, the steps it plays on under its lines. */
+export const worldOf = (week: number): ClassWorld => ({ namesOf, beatsOf: (id) => getWeek(week)?.stages.find((s) => s.id === id)?.beats });
 
 const readJson = <T,>(key: string): T | null => {
   try {
@@ -104,7 +115,8 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
 
   const paused = userPaused || hidden || hold;
   const running = enabled && status === 'running';
-  const cmd = commandOf(lesson, state, lastOk);
+  const [world] = useState(() => worldOf(lesson.week));
+  const cmd = commandOf(lesson, state, lastOk, world);
   const steps = stepsOf(lesson);
   const step = steps[Math.min(state.step, steps.length - 1)];
 
@@ -164,13 +176,20 @@ export function useKlasea({ lesson, enabled, driver, hold, link }: { lesson: Les
     }
     if (state.phase === 'speak') {
       const text = cmd.text;
-      // The next line said on this stage: the scene stops where it starts.
-      const nx = steps.findIndex((s, i) => i > state.step && s.kind === 'line');
-      const after = nx >= 0 ? commandOf(lesson, { ...state, step: nx, phase: 'speak', plain: false }) : null;
-      d.play(Math.max(1200, Math.min(9000, (speakSeconds(text, rate) + 0.4) * 1000)), after && after.stage === cmd.stage ? after.at : undefined);
+      // The scene plays on under the line, to where the next line said on this stage starts.
+      // Each structure lights, shows its name and is pointed at as the voice reaches it.
+      const cues = cmd.cues;
+      let heard = 0;
+      d.play(playMs(text, rate), cmd.playTo);
       voice.speak(text, {
         onStart: () => setSpeaking(true),
         onWord: setWord,
+        onProgress: (p) => {
+          const n = reached(cues, p);
+          if (n <= heard) return;
+          heard = n;
+          dispatch({ type: 'heard', n });
+        },
         onEnd: () => {
           setSpeaking(false);
           setWord('');

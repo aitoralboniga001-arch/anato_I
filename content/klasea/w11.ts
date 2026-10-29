@@ -631,8 +631,8 @@ export const LESSON_W11: Lesson = {
           writes: 'b-kono-gandorrak',
           plain: 'Arteria konoaren hormetan bi kuxin hazten dira, bata atze eskuinean eta bestea aurre ezkerrean.',
         }),
-        L(0.34, 'Bi gandorrak hazi eta fusionatzen dira: arteria konoa trenkadatu egiten da, eta trenkada laprana da.', n('5.1/p5/s3', '5.1/p5/s4'), ['arteria-konoa', 'konoaren-trenkada'], { plain: 'Bi kuxinak elkartu egiten dira, eta konoa bitan banatzen da. Horma hori zeharka dago, ez zuzen.' }),
-        L(0.34, 'Kontuz: apunteen hurrengo esaldiak gandorren aldeak alderantziz idazten ditu; gogoratu atze eskuinean eta aurre ezkerrean.', n('5.1/p5/s2', '5.1/p5/s4'), [], { tone: 'caution', plain: 'Apunteetan esaldi batek aldeak alderantziz jartzen ditu. Zuk gogoratu: bata atze eskuinean, bestea aurre ezkerrean.' }),
+        L(0.46, 'Bi gandorrak hazi eta fusionatzen dira: arteria konoa trenkadatu egiten da, eta trenkada laprana da.', n('5.1/p5/s3', '5.1/p5/s4'), ['arteria-konoa', 'konoaren-trenkada'], { plain: 'Bi kuxinak elkartu egiten dira, eta konoa bitan banatzen da. Horma hori zeharka dago, ez zuzen.' }),
+        L(0.46, 'Kontuz: apunteen hurrengo esaldiak gandorren aldeak alderantziz idazten ditu; gogoratu atze eskuinean eta aurre ezkerrean.', n('5.1/p5/s2', '5.1/p5/s4'), [], { tone: 'caution', plain: 'Apunteetan esaldi batek aldeak alderantziz jartzen ditu. Zuk gogoratu: bata atze eskuinean, bestea aurre ezkerrean.' }),
         L(0.52, 'Trenkadaren aurre eskuinaldean eskuineko bentrikuluaren infundibulua geratzen da: hortik birika arteria irtengo da.', n('5.1/p5/s5'), ['eskuineko-infundibulua'], {
           tone: 'emphasis',
           plain: 'Hormaren aurre eskuineko aldean geratzen den hutsunea eskuineko infundibulua da: hortik aterako da birika arteria.',
@@ -781,7 +781,7 @@ export const LESSON_W11: Lesson = {
       title: 'Balbula semilunarrak',
       stage: 'balbula-semilunarrak',
       lines: [
-        L(0, 'Bi arteria horien hasieran balbula semilunarrak agertzen dira, kuxinetatik: aorta balbula eta birika balbula.', n('5.2/p12/s1'), [
+        L(0.06, 'Bi arteria horien hasieran balbula semilunarrak agertzen dira, kuxinetatik: aorta balbula eta birika balbula.', n('5.2/p12/s1'), [
           'balbula-semilunarrak',
           'aorta-balbula',
           'birika-balbula',

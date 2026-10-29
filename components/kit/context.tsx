@@ -13,6 +13,11 @@ export interface SceneContextValue {
   dimContext?: boolean;
   /** Guided tour: the one structure lit right now; everything else is shaded. */
   spotlight?: string | null;
+  /**
+   * The class: the spotlight is the structure the voice has just named. What the line lit before stays
+   * lit (not shaded), and a 3D camera turns only when the structure is hidden or out of the frame.
+   */
+  spotKeep?: boolean;
   showLabels: boolean;
   /**
    * Progressive names: which structures the study has named so far (null or absent: all). An unnamed
@@ -92,7 +97,8 @@ export function partState(ctx: SceneContextValue, id: string, groups: readonly s
   const pointed = ctx.hovered ?? ctx.selected;
   if (ctx.quizFlash?.id === id) return 'active';
   if (pointed) return is(pointed) ? 'active' : 'dim';
-  if (ctx.spotlight) return is(ctx.spotlight) ? 'spot' : 'shade';
+  if (ctx.spotlight && is(ctx.spotlight)) return 'spot';
+  if (ctx.spotlight && !ctx.spotKeep) return 'shade';
   if (ctx.focus.length) return ctx.focus.some(is) ? 'focus' : ctx.dimContext ? 'ctx' : 'idle';
   return 'idle';
 }

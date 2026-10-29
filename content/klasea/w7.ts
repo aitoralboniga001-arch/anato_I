@@ -332,14 +332,14 @@ export const LESSON_W7: Lesson = {
       title: 'Mesenterio dortsala',
       stage: 'peritoneo-barrunbea',
       lines: [
-        L(0, 'Goazen apunteetako irudira. Hestea alde zefalikotik kaudalera hedatzen da.', n('2.1/p3/s1'), ['erdiko-hestea'], {
+        L(0.07, 'Goazen apunteetako irudira. Hestea alde zefalikotik kaudalera hedatzen da.', n('2.1/p3/s1'), ['erdiko-hestea'], {
           plain: 'Begiratu apunteetako irudia. Hestea hodi luze bat da, buruaren aldetik isatsaren aldera doana.',
         }),
-        L(0, 'Alboko mesodermoaren errai orriak hestea inguratzen du.', n('2.1/p3/s1'), ['errai-orria'], {
+        L(0.07, 'Alboko mesodermoaren errai orriak hestea inguratzen du.', n('2.1/p3/s1'), ['errai-orria'], {
           tone: 'emphasis',
           plain: 'Zelomaren barneko orriak, errai orriak, hestea biltzen du, azal batek bezala.',
         }),
-        L(0, 'Hestea gorputzaren atzeko aldeari lotuta mantentzen da, mesenkimazko lotura zabal baten bitartez.', n('2.1/p3/s2'), [], {
+        L(0.07, 'Hestea gorputzaren atzeko aldeari lotuta mantentzen da, mesenkimazko lotura zabal baten bitartez.', n('2.1/p3/s2'), [], {
           plain: 'Hestea ez dago libre: lotura zabal batek atzeko paretari eusten dio.',
         }),
         L(0.15, 'Zelomaren beheko aldean, gorputzaren paretaren eta errai orriaren artean, bi orriko atzeko lotura bat agertzen da.', n('2.1/p3/s4'), [
@@ -745,20 +745,20 @@ export const LESSON_W7: Lesson = {
           writes: 'b-pleuroperitonealak',
           plain: 'Horrela bi erretenak ixten dira, eta bi barrunbeak guztiz bereizita geratzen dira.',
         }),
-        L(0.7568, 'Beraz, diafragmak lau osagai ditu. Lehena, septum transversuma: bertako miozitoak mintz pleuroperitonealetara migratzen dute.', n('3.1/p3/s1'), [
+        L(0.79, 'Beraz, diafragmak lau osagai ditu. Lehena, septum transversuma: bertako miozitoak mintz pleuroperitonealetara migratzen dute.', n('3.1/p3/s1'), [
           'septum-transversum',
           'miozitoak',
           'mintz-pleuroperitonealak',
         ], { plain: 'Diafragma lau zatiz egina dago. Lehena septuma da: bere muskulu zelulak mintzetara mugitzen dira.' }),
-        L(0.7568, 'Bigarrena, mintz pleuroperitonealak: pleuren eta peritoneoaren arteko komunikazioa ixten dute.', n('3.1/p4/s1'), ['mintz-pleuroperitonealak'], {
+        L(0.79, 'Bigarrena, mintz pleuroperitonealak: pleuren eta peritoneoaren arteko komunikazioa ixten dute.', n('3.1/p4/s1'), ['mintz-pleuroperitonealak'], {
           writes: 'tz-mintzak',
           plain: 'Bigarrena, mintz pleuroperitonealak: bi erretenak ixten dituzte.',
         }),
-        L(0.7568, 'Hirugarrena, hestegorri inguruko mesenkimatik sortutako zuntz muskularrak: hortik gerriko atala garatuko da.', n('3.1/p5/s1', '3.1/p5/s2'), ['hestegorri-inguruko-mesenkima'], {
+        L(0.79, 'Hirugarrena, hestegorri inguruko mesenkimatik sortutako zuntz muskularrak: hortik gerriko atala garatuko da.', n('3.1/p5/s1', '3.1/p5/s2'), ['hestegorri-inguruko-mesenkima'], {
           writes: 'tz-mesenkima',
           plain: 'Hirugarrena, hestegorri inguruko mesenkima: gerriko atala emango du.',
         }),
-        L(0.7568, 'Laugarrena, alde periferikoko atal muskularra, gorputzeko mesodermo paraxialetik sortua.', n('3.1/p6/s1'), ['gorputz-paretako-mesodermoa'], {
+        L(0.79, 'Laugarrena, alde periferikoko atal muskularra, gorputzeko mesodermo paraxialetik sortua.', n('3.1/p6/s1'), ['gorputz-paretako-mesodermoa'], {
           writes: 'tz-paraxiala',
           plain: 'Laugarrena, ertzeko muskulua: gorputzeko mesodermo paraxialetik dator.',
         }),
@@ -892,20 +892,20 @@ export const LESSON_W7: Lesson = {
           tone: 'summary',
           plain: 'Gogoratu: septumak zeloma bitan zatitzen du, goiko zatia eta beheko zatia.',
         }),
-        L(0.84, 'Goikoan bi pleura barrunbe eta perikardio barrunbe bat sortzen dira; behekoa peritoneo barrunbea da.', n('4/p5/s1', '4/p3/s1'), [
+        L(0.92, 'Goikoan bi pleura barrunbe eta perikardio barrunbe bat sortzen dira; behekoa peritoneo barrunbea da.', n('4/p5/s1', '4/p3/s1'), [
           'pleura-barrunbea',
           'perikardio-barrunbea',
           'peritoneo-barrunbea',
         ], { tone: 'summary', plain: 'Goikotik hiru barrunbe: bi pleura barrunbe eta perikardio barrunbea. Behekoa peritoneo barrunbea da.' }),
-        L(0.84, 'Hestetik sortutako atalak hasieran peritoneo barrukoak dira, baina batzuk peritoneo kanpokoak bihurtzen dira, atzekaldean.', n('4/p4/s1'), [], {
+        L(0.92, 'Hestetik sortutako atalak hasieran peritoneo barrukoak dira, baina batzuk peritoneo kanpokoak bihurtzen dira, atzekaldean.', n('4/p4/s1'), [], {
           tone: 'summary',
           plain: 'Hesteko organoak hasieran barruan daude; batzuk gero atzera mugitzen dira eta atzeko hormari itsasten zaizkio.',
         }),
-        L(0.84, 'Eta pleura barrunbeak espazio birtualak dira: egoera patologikoetan bakarrik bihurtzen dira errealak.', n('4/p5/s2'), ['pleura-barrunbea'], {
+        L(0.92, 'Eta pleura barrunbeak espazio birtualak dira: egoera patologikoetan bakarrik bihurtzen dira errealak.', n('4/p5/s2'), ['pleura-barrunbea'], {
           tone: 'summary',
           plain: 'Pleura barrunbeek ez dute benetako hutsunerik; gaixotasunetan bakarrik irekitzen dira.',
         }),
-        L(0.84, 'Orain zure txanda: osatu diafragmaren taula oroimenetik, eta gero galdera batzuk.', n('3.1/p8/s1'), ['diafragma'], {
+        L(0.92, 'Orain zure txanda: osatu diafragmaren taula oroimenetik, eta gero galdera batzuk.', n('3.1/p8/s1'), ['diafragma'], {
           tone: 'summary',
           plain: 'Orain zu: bete taula buruz, eta gero erantzun galdera batzuei, gai osoari buruz.',
         }),

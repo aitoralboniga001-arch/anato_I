@@ -464,6 +464,7 @@ export const LESSON_W12: Lesson = {
       lines: [
         L(0.09, 'Arkuez gain, arteria sisteman beste aldaketa batzuk ere gertatzen dira. Lau ikusiko ditugu.', n('2.4/p3/s1'), [], { plain: 'Arkuez gain, beste lau aldaketa garrantzitsu daude. Banan-banan ikusiko ditugu.' }),
         L(0.18, 'Lehena: hirugarren eta laugarren arkuen arteko tarteak desagertzen dira: hodi karotideoak.', n('2.4/p4/s1'), ['hodi-karotideoa'], {
+          cues: { 'hodi-karotideoa': 'hirugarren eta laugarren arkuen' },
           plain: 'Hirugarren eta laugarren arkuen artean dagoen hodi zatia galdu egiten da. Zati horiei hodi karotideoak deitzen zaie.',
         }),
         L(0.4, 'Bigarrena: eskuineko aorta dortsalaren zati bat ere desagertzen da, zazpigarren segmentu arteko arteriaren azpian.', n('2.4/p4/s2', '2.4/p4/s3'), ['aorta-dortsalak'], {

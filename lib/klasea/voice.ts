@@ -1,3 +1,4 @@
+import { progressAt } from './cues';
 import { spokenText, syllables, type VoiceKind } from './speak-eu';
 
 /**
@@ -8,7 +9,8 @@ import { spokenText, syllables, type VoiceKind } from './speak-eu';
  *
  * Handled pitfalls: one utterance per sentence (long ones get cut), a short gap between cancel() and
  * speak() (back to back, the new one can be dropped), voices that load late (voiceschanged), speech that
- * must first be started inside a click (iPad), and a lost `end` event (a watchdog from `start`).
+ * must first be started inside a click (iPad), a lost `end` event (a watchdog from `start`), and voices
+ * that send no word boundaries (online ones often do not: a clock at reading pace stands in for them).
  */
 
 export interface VoiceChoice {
@@ -17,8 +19,13 @@ export interface VoiceChoice {
 }
 
 export interface SpeakHandlers {
-  /** Word boundary: the character offset in the spoken text and that word. */
+  /** Word boundary: the word being said. */
   onWord?: (word: string) => void;
+  /**
+   * How far through the sentence the voice is (0..1 of its syllables): from its word boundaries, or, for a
+   * voice that sends none (and without a voice), from the reading-pace clock.
+   */
+  onProgress?: (fraction: number) => void;
   onStart?: () => void;
   onEnd: () => void;
 }
@@ -122,9 +129,26 @@ export class ClassVoice {
     }
   }
 
+  private ticks: ReturnType<typeof setInterval>[] = [];
+
   private clear() {
     this.timers.forEach(clearTimeout);
     this.timers = [];
+    this.ticks.forEach(clearInterval);
+    this.ticks = [];
+  }
+
+  /** The reading-pace clock: progress from the time since `start`, until a word boundary takes over. */
+  private clock(text: string, h: SpeakHandlers, live: () => boolean) {
+    if (!h.onProgress) return;
+    const start = Date.now();
+    const total = speakSeconds(text, this.rate) * 1000;
+    h.onProgress(0);
+    const id = setInterval(() => {
+      if (!live()) return clearInterval(id);
+      h.onProgress?.(Math.min(1, (Date.now() - start) / total));
+    }, 80);
+    this.ticks.push(id);
   }
 
   cancel() {
@@ -147,6 +171,7 @@ export class ClassVoice {
     };
     if (!s || !this.choice) {
       // No voice: the subtitle is read instead, at reading pace.
+      this.clock(text, h, () => !ended && token === this.token);
       this.timers.push(setTimeout(end, (speakSeconds(text, this.rate) * 1.15 + 0.8) * 1000));
       return;
     }
@@ -157,14 +182,19 @@ export class ClassVoice {
     u.lang = choice.voice.lang;
     u.rate = this.rate;
     let started = false;
+    let bounded = false;
     u.onstart = () => {
       started = true;
       h.onStart?.();
       this.clear();
       this.timers.push(setTimeout(end, (speakSeconds(text, this.rate) * 1.5 + 2) * 1000));
+      this.clock(text, h, () => !bounded && !ended && token === this.token);
     };
     u.onboundary = (e) => {
       if (e.name && e.name !== 'word') return;
+      // The voice says where it is: that wins over the clock from now on.
+      bounded = true;
+      h.onProgress?.(progressAt(said, e.charIndex));
       const m = /\p{L}+/u.exec(said.slice(e.charIndex));
       if (m) h.onWord?.(m[0]);
     };

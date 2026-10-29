@@ -18,8 +18,11 @@ import { K } from './common';
  * The room is a two-lobed ellipsoid, pinched at the septum (x = 0): the right atrium on x < 0, the left on
  * x > 0. It is opened by a frontal cut (z ≤ ZC) and its floor has the AV canal (θ > TH_FLOOR).
  * The septa lie in sagittal planes: septum primum at x = XP (a thin membrane), septum secundum at
- * x = XS, on the primum's right (a thick muscular crescent). A septum point is named in its plane by
- * (y, z); its holes are ellipses round a centre.
+ * x = XS, on the primum's right (a thick muscular crescent: it never reaches the cushions, so its free
+ * edge arches over the foramen ovale, which stays open down to the canal between the crescent's front and
+ * back limbs). A septum point is named in its plane by (y, z); the primum's holes are ellipses round a
+ * centre. In the frontal-section steps the septa are cut further back (`cut`), through both holes, so seen
+ * from the front they are the notes' two lines and the oblique way between them shows.
  * Stage 5 (notes 2.2 p8–p15) adds the walls' two origins: in the right atrium the sinus venosus taken into
  * the back wall (smooth, violet, with the cavae and the coronary sinus) and the trabeculated rest (the
  * atrial part's orange, pectinate muscles, the auricle), the crista terminalis between them and the sinus
@@ -74,10 +77,11 @@ interface Plane {
   rz: number;
   zcut: number;
 }
-function plane(x: number): Plane {
+/** A septum's plane at x; `cut` trims it further back than the room's front opening (a frontal section). */
+function plane(x: number, cut = Infinity): Plane {
   const s = Math.sqrt(Math.max(0, 1 - (x / RX) ** 2));
   const w = waist(x);
-  return { x, ryT: RYT * (1 - 0.14 * w) * s, ryB: RYB * s, rz: RZ * (1 - 0.1 * w) * s, zcut: ZC * (1 - 0.1 * w) };
+  return { x, ryT: RYT * (1 - 0.14 * w) * s, ryB: RYB * s, rz: RZ * (1 - 0.1 * w) * s, zcut: Math.min(ZC * (1 - 0.1 * w), cut) };
 }
 const inside = (P: Plane, y: number, z: number) => (y >= 0 ? (y / P.ryT) ** 2 : (y / P.ryB) ** 2) + (z / P.rz) ** 2 <= 1 && z <= P.zcut + 1e-9 && y >= YF - 1e-9;
 
@@ -104,8 +108,8 @@ function reach(P: Plane, cy: number, cz: number, a: number): number {
 const rEll = (ry: number, rz: number, a: number) => 1 / Math.sqrt((Math.sin(a) / Math.max(1e-4, ry)) ** 2 + (Math.cos(a) / Math.max(1e-4, rz)) ** 2);
 
 /** A sheet near plane x (`xf` bends it) round a hole (centre cy, cz; edge radius `hole(a)`) out to the room's wall. */
-function sheet(x: number, cy: number, cz: number, hole: (a: number) => number, a0: number, a1: number, nA: number, nR: number, facing: V3, xf: (y: number, z: number) => number = () => x, outer?: (a: number) => number): Mesh {
-  const P = plane(x);
+function sheet(x: number, cy: number, cz: number, hole: (a: number) => number, a0: number, a1: number, nA: number, nR: number, facing: V3, xf: (y: number, z: number) => number = () => x, outer?: (a: number) => number, cut?: number): Mesh {
+  const P = plane(x, cut);
   const reachAt = new Map<number, number>();
   const R = (i: number, a: number) => {
     let r = reachAt.get(i);
@@ -234,6 +238,10 @@ export interface AtriaState {
   /** A wall goes clear so the septum is seen through it. */
   glassRA: number;
   glassLA: number;
+  /** The valve of the foramen ovale goes see-through (from the left atrium, the foramen behind it shows). */
+  glassValve: number;
+  /** A frontal cut through both septa at this z (through the ostium secundum and the foramen ovale); 9 = none. */
+  cut: number;
   /** Stage 5: the sinus venosus as a sac behind the right atrium (1), taken into its back wall (0). */
   sinus: number;
   /** The right atrium's smooth part spreads over the back wall (0 = the strip of stages 2–4). */
@@ -274,6 +282,8 @@ export const AT0: AtriaState = {
   adult: false,
   glassRA: 0,
   glassLA: 0,
+  glassValve: 0,
+  cut: 9,
   sinus: 0,
   smoothWide: 0,
   walls: false,
@@ -351,14 +361,75 @@ function toStub(s: AtriaState, cy: number, cz: number, a: number, max: number) {
   }
   return lo;
 }
-/** Where the primum's upper part is gone (the valve's free upper edge), as a height at z. */
-const stubTop = (s: AtriaState, z: number) => lerp(1.4, 0.27 + 0.04 * Math.sin(z * 7 + 1), s.stub);
+/** Where the primum's upper part is gone (the valve's free upper edge), as a height at z. A patent foramen:
+ *  along a stretch of the edge the two septa never fused, and the edge stops a little short (the slit). */
+const stubTop = (s: AtriaState, z: number) => lerp(1.4, 0.27 + 0.04 * Math.sin(z * 7 + 1), s.stub) - (s.patent ? NOTCH * slitAlong(z) : 0);
+const NOTCH = 0.07;
+const SLIT_Z: [number, number] = [-0.36, 0.02];
+/** 0 … 1 … 0 along the unfused stretch of the valve's upper edge. */
+function slitAlong(z: number) {
+  const u = (z - SLIT_Z[0]) / (SLIT_Z[1] - SLIT_Z[0]);
+  return u <= 0 || u >= 1 ? 0 : Math.sin(u * Math.PI) ** 0.7;
+}
 
 /** Septum secundum: the hole left under it (the foramen ovale), shrinking as it grows down from the roof. */
 const FOC = { y: -0.45, z: -0.1 };
 function foHole(s: AtriaState) {
   const g = clamp01(s.secundum);
   return { y: lerp(YF - 0.3, FOC.y, g ** 0.7), z: lerp(0.0, FOC.z, g), ry: lerp(2.5, 0.34, g ** 0.7), rz: lerp(2.3, 0.27, g ** 0.7) };
+}
+type Fo = ReturnType<typeof foHole>;
+/**
+ * The foramen ovale is not a hole ringed by septum secundum: the crescent never reaches the cushions
+ * (septum intermedium). Over the foramen's middle its free edge is an arch (the ellipse's upper half);
+ * below, the opening runs down to the canal between the crescent's two limbs, widening a little (the
+ * limbs taper towards the floor, as in the face view).
+ */
+const FO_FLARE = 0.6;
+const foDepth = (fo: Fo) => Math.max(0.05, fo.y - YF);
+/** Half-width of the opening below the arch (where the limbs' edges run down). */
+const foHalf = (fo: Fo, y: number) => fo.rz * (1 + (FO_FLARE * Math.max(0, fo.y - y)) / foDepth(fo));
+/** Inside the opening left by septum secundum. */
+const inFo = (fo: Fo, y: number, z: number) => (y >= fo.y ? ((y - fo.y) / fo.ry) ** 2 + ((z - fo.z) / fo.rz) ** 2 < 1 : Math.abs(z - fo.z) < foHalf(fo, y));
+/** From the foramen's centre along angle a, how far to septum secundum's free edge. */
+function foEdge(fo: Fo, a: number) {
+  const sa = Math.sin(a);
+  if (sa >= 0) return rEll(fo.ry, fo.rz, a);
+  const den = Math.abs(Math.cos(a)) + (FO_FLARE * fo.rz * sa) / foDepth(fo);
+  return den <= 1e-3 ? 9 : Math.min(9, fo.rz / den);
+}
+/** The free edge as a line: the front limb up from the floor, the arch over the foramen, the back limb down. */
+function foRim(fo: Fo): V3[] {
+  const out: V3[] = [];
+  const n = 16;
+  for (let i = 0; i <= n; i++) {
+    const y = lerp(YF, fo.y, i / n);
+    out.push([XS, y, fo.z + foHalf(fo, y)]);
+  }
+  for (let i = 1; i < 48; i++) {
+    const a = (i / 48) * Math.PI;
+    const r = rEll(fo.ry, fo.rz, a);
+    out.push([XS, fo.y + r * Math.sin(a), fo.z + r * Math.cos(a)]);
+  }
+  for (let i = 0; i <= n; i++) {
+    const y = lerp(fo.y, YF, i / n);
+    out.push([XS, y, fo.z - foHalf(fo, y)]);
+  }
+  return out;
+}
+/** A line's runs where `keep` holds. */
+function runsOf(line: V3[], keep: (p: V3) => boolean): V3[][] {
+  const runs: V3[][] = [];
+  let cur: V3[] = [];
+  for (const p of line) {
+    if (keep(p)) cur.push(p);
+    else if (cur.length) {
+      runs.push(cur);
+      cur = [];
+    }
+  }
+  if (cur.length) runs.push(cur);
+  return runs.filter((r) => r.length >= 3);
 }
 
 /** The primum's plane: at birth it is pressed onto septum secundum's left face. */
@@ -585,19 +656,19 @@ function buildAtria(s: AtriaState): AtriaModel {
     const opMem = opRadius({ ...s, closeOP: 0 });
     const holes = osHoles(s.os2);
     const stubbed = s.stub > 0.005;
-    const P = plane(xp);
+    const P = plane(xp, s.cut);
     const keep = (y: number, z: number) => !holes.some((h) => inEll(y, z, h)) && (!stubbed || y < stubTop(s, z));
     const build = (nA: number, nR: number) => {
-      const m = sheet(xp, OPC.y, OPC.z, (a) => rEll(opMem.ry, opMem.rz, a), 0, Math.PI, nA, nR, [-3, 0, 0], xf, stubbed ? (a) => toStub(s, OPC.y, OPC.z, a, 3) : undefined);
+      const m = sheet(xp, OPC.y, OPC.z, (a) => rEll(opMem.ry, opMem.rz, a), 0, Math.PI, nA, nR, [-3, 0, 0], xf, stubbed ? (a) => toStub(s, OPC.y, OPC.z, a, 3) : undefined, s.cut);
       // Holes wholly in the vanished part are gone with it.
       return twoSided(cutHoles(m, stubbed ? holes.filter((h) => h.y - h.ry < stubTop(s, h.z)) : holes, xf));
     };
-    const deps = [xp, opMem.ry, s.os2, s.stub];
+    const deps = [xp, opMem.ry, s.os2, s.stub, s.cut, s.patent ? 1 : 0];
     const mesh = cachedMesh('atria primum', deps, () => build(120, 34));
     const hit = cachedMesh('atria primum hit', deps, () => build(40, 10));
     const id = s.stub > 0.5 ? 'zulo-obalaren-balbula' : 'septum-primum';
     const tone = s.fuse > 0 ? mixHex(K.primum, K.secundum, 0.35 * s.fuse) : K.primum;
-    items.push({ key: 'primum', id, groups: ['aurikula-arteko-trenkada', 'septum-primum'], mesh, hit, color: tone, deep: K.primumDeep, tissue: 'membrane', thin: 1, outline: false });
+    items.push({ key: 'primum', id, groups: ['aurikula-arteko-trenkada', 'septum-primum'], mesh, hit, color: tone, deep: K.primumDeep, tissue: 'membrane', thin: 1, outline: false, opacity: 1 - 0.5 * s.glassValve });
     // Its free edge (the ostium primum's roof), the rims of the holes and of the vanished top: a thin cord.
     // Each opening glows by its own rim: the free edge over the ostium primum, the rims of the ostium secundum.
     const cord = (key: string, hole: string, lines: V3[][], color: string) => {
@@ -623,6 +694,20 @@ function buildAtria(s: AtriaState): AtriaModel {
       // What is left of the ostium secundum: the way over the valve's free upper edge.
       items.push({ key: 'primum-edge', id: 'ostium-secunduma', groups: ['septum-primum', 'zulo-obalaren-balbula'], mesh: cachedMerge(parts.map((p) => p.mesh)), hit: cachedMerge(parts.map((p) => p.hit)), color: mixHex(cordTone, K.secundum, 0.7 * s.fuse), deep: K.primumDeep, tissue: 'membrane', outline: false });
     }
+    // A frontal section: the membrane's cut edge is the notes' line, broken by the ostium secundum.
+    if (s.cut < ZC) {
+      const zc = P.zcut - 0.004;
+      const line: V3[] = [];
+      for (let i = 0; i <= 60; i++) {
+        const y = lerp(YF + 0.005, P.ryT, i / 60);
+        line.push([xf(y, zc), y, zc]);
+      }
+      const cutRuns = runsOf(line, ([, y, z]) => inside(P, y, z) && keep(y, z) && rEll(op.ry, op.rz, Math.atan2(y - OPC.y, z - OPC.z)) < Math.hypot(y - OPC.y, z - OPC.z));
+      if (cutRuns.length) {
+        const parts = cutRuns.map((e) => ridge(e, 0.022, 6));
+        items.push({ key: 'primum-cut', id: 'septum-primum', groups: ['aurikula-arteko-trenkada'], mesh: cachedMerge(parts.map((q) => q.mesh)), hit: cachedMerge(parts.map((q) => q.hit)), color: mixHex(K.primum, K.primumDeep, 0.2), deep: K.primumDeep, tissue: 'membrane', outline: false });
+      }
+    }
     // Where each is named: the membrane well inside, the holes at their middle.
     {
       // Well inside the membrane: halfway from its free edge to the wall, up and back from the canal.
@@ -632,36 +717,47 @@ function buildAtria(s: AtriaState): AtriaModel {
       const y = OPC.y + r * Math.sin(a);
       const z = OPC.z + r * Math.cos(a);
       pts['septum-primum'] = [xf(y, z), y, z];
+      // Once septum secundum hides its upper part from the right atrium, name it where it shows: low in
+      // the foramen ovale (under the free edge, above the cushions' extensions), behind any frontal cut.
+      if (s.secundum > 0.45) {
+        const fo = foHole(s);
+        const yl = fo.y - 0.06;
+        const zl = Math.min(fo.z - 0.1, P.zcut - 0.1);
+        pts['septum-primum'] = [xf(yl, zl), yl, zl];
+      }
     }
     // The ostium primum's middle: over the cushions, under the free edge.
     if (op.ry < 3 && s.closeOP < 0.9) pts['ostium-primuma'] = [xf(YF, OPC.z), YF + Math.max(0.12, (CUSH_TOP(s) + Math.min(op.ry, 1)) / 2), OPC.z];
-    if (holes.length) pts['ostium-secunduma'] = [xf(OSC.y, OSC.z), OSC.y, OSC.z];
+    if (holes.length) {
+      const z = Math.min(OSC.z, P.zcut - 0.1);
+      pts['ostium-secunduma'] = [xf(OSC.y, z), OSC.y, z];
+    }
     pts['zulo-obalaren-balbula'] = [xf(FOC.y + 0.05, FOC.z), FOC.y + 0.05, FOC.z];
     // The cushions' extensions closing the ostium primum: mint, along the edge's lowest part.
     if (s.closeOP > 0.01) {
       const r0 = opMem;
       // Only the band between the edge then and now (the rest is the membrane above).
-      const band = cachedMesh('atria op band', [xp, op.ry, r0.ry], () => twoSided(sheet(xp, OPC.y, OPC.z, (a) => rEll(op.ry, op.rz, a), 0, Math.PI, 48, 5, [-3, 0, 0], xf, (a) => rEll(r0.ry, r0.rz, a))));
+      const band = cachedMesh('atria op band', [xp, op.ry, r0.ry, s.cut], () => twoSided(sheet(xp, OPC.y, OPC.z, (a) => rEll(op.ry, op.rz, a), 0, Math.PI, 48, 5, [-3, 0, 0], xf, (a) => rEll(r0.ry, r0.rz, a), s.cut)));
       items.push({ key: 'op-cap', id: 'kuxin-aurikulubentrikularrak', groups: ['endokardio-kuxinak'], mesh: band, color: K.cushion, deep: K.cushionDeep, tissue: 'mesenchyme', opacity: clamp01(s.closeOP * 3), outline: false });
     }
   }
 
-  // —— septum secundum: a thick rose crescent on the primum's right, the foramen ovale under it ——
+  // —— septum secundum: a thick rose crescent on the primum's right; its free edge arches over the foramen ovale ——
   if (s.secundum > 0.005) {
     const fo = foHole(s);
-    const hole = (a: number) => rEll(fo.ry, fo.rz, a);
-    const deps = [s.secundum];
-    const face = (dx: number, coarse: number) => sheet(XS + dx, fo.y, fo.z, hole, 0, Math.PI * 2, Math.round(110 / coarse), Math.round(20 / coarse), [XS + dx * 60, 0, -0.2]);
+    const hole = (a: number) => foEdge(fo, a);
+    const deps = [s.secundum, s.cut];
+    const face = (dx: number, coarse: number) => sheet(XS + dx, fo.y, fo.z, hole, 0, Math.PI * 2, Math.round(110 / coarse), Math.round(20 / coarse), [XS + dx * 60, 0, -0.2], undefined, undefined, s.cut);
     const mesh = cachedMesh('atria secundum', deps, () => merge([face(-HS, 1), face(HS, 1)]));
     const hit = cachedMesh('atria secundum hit', deps, () => merge([face(-HS, 3), face(HS, 3)]));
     items.push({ key: 'secundum', id: 'septum-secundum', groups: ['aurikula-arteko-trenkada'], mesh, hit, color: K.secundum, deep: K.secundumDeep, tissue: 'muscle' });
-    // Its thick free edge round the foramen, and its cut face at the front.
-    const P = plane(XS);
-    const runs = ellipseRuns(XS, fo.y, fo.z, fo.ry, fo.rz, (y, z) => inside(P, y, z) && y > YF + 0.01, 0, Math.PI * 2, 90);
+    // Its thick free edge round the foramen, and its cut face at the front (the section line, when cut).
+    const P = plane(XS, s.cut);
+    const runs = runsOf(foRim(fo), ([, y, z]) => inside(P, y, z) && y > YF + 0.01);
     const front: V3[] = [];
-    for (let i = 0; i <= 24; i++) {
-      const y = lerp(YF, P.ryT, i / 24);
-      if (inside(P, y, P.zcut) && ((y - fo.y) / fo.ry) ** 2 + ((P.zcut - fo.z) / fo.rz) ** 2 > 1) front.push([XS, y, P.zcut]);
+    for (let i = 0; i <= 30; i++) {
+      const y = lerp(YF, P.ryT, i / 30);
+      if (inside(P, y, P.zcut) && !inFo(fo, y, P.zcut)) front.push([XS, y, P.zcut]);
     }
     // The foramen's rim glows as the foramen ovale; the cut face at the front is the septum's.
     if (s.secundum > 0.6 && runs.length) {
@@ -675,25 +771,26 @@ function buildAtria(s: AtriaState): AtriaModel {
     }
     {
       // On its right face, halfway between the foramen's top and the roof.
-      const z = -0.05;
+      const z = Math.min(-0.05, P.zcut - 0.08);
       const top = Math.sqrt(Math.max(0, 1 - (z / P.rz) ** 2)) * P.ryT;
       const holeTop = fo.y + fo.ry * Math.sqrt(Math.max(0, 1 - ((z - fo.z) / fo.rz) ** 2));
       pts['septum-secundum'] = [XS - HS, (Math.min(holeTop, top) + top) / 2, z];
     }
-    if (s.secundum > 0.6) pts['zulo-obala'] = [XS - HS, fo.y, fo.z];
-    // Birth: the valve against septum secundum; the seam along its upper edge closes (or leaves a slit).
-    if (s.press > 0.6) {
+    // The foramen named in its upper part, under the arch (the primum is named lower down, through it).
+    // In a frontal section, in the gap just under the free edge, in the septum's own plane.
+    if (s.secundum > 0.6) pts['zulo-obala'] = s.cut < ZC ? [XS, fo.y + 0.4 * fo.ry, P.zcut - 0.03] : [XS - HS, fo.y + 0.6 * fo.ry, fo.z - 0.02];
+    // Birth, a patent foramen: where the valve's upper edge stops short of fusing, the slit between it and
+    // septum secundum opens into the left atrium (a dark slot on septum secundum, just over the edge).
+    if (s.press > 0.6 && s.patent) {
       const slit: V3[] = [];
       for (let i = 0; i <= 40; i++) {
-        const z = lerp(-0.62, 0.3, i / 40);
-        const y = stubTop(s, z) - 0.02;
-        if (!inside(plane(xp), y, z)) continue;
-        // Follow the pressed valve's actual surface; xp alone is its undeformed reference plane.
-        // The slit is seen on the left-atrial face, just clear of the membrane's surface.
-        if (s.patent && z > -0.32 && z < -0.02) slit.push([xf(y, z) + 0.025, y, z]);
+        const z = lerp(SLIT_Z[0], SLIT_Z[1], i / 40);
+        const y = stubTop(s, z) + 0.035;
+        if (!inside(plane(xp), y, z) || slitAlong(z) < 0.45) continue;
+        slit.push([XS + HS + 0.012, y, z]);
       }
       if (slit.length > 1) {
-        items.push({ key: 'slit', groups: ['zulo-obala'], ...ridge(slit, 0.022, 8), color: '#12070c', deep: '#000000', tissue: 'vessel', outline: false });
+        items.push({ key: 'slit', id: 'zulo-obala', groups: ['zulo-obala'], ...ridge(slit, 0.02, 8), color: '#12070c', deep: '#000000', tissue: 'vessel', outline: false });
         // After birth the named communication is this residual slit, not the centre of the fetal
         // foramen (now covered by the valve). Use the opening we actually draw.
         pts['zulo-obala'] = slit[Math.floor(slit.length / 2)];
@@ -860,6 +957,8 @@ const SETS = {
 };
 
 const CELL = () => cachedBlob({ center: [0, 0, 0], radii: [0.05, 0.036, 0.05], rings: 6, sides: 8 });
+/** Smaller cells squeezing through the patent slit (between the valve and septum secundum). */
+const CELL_SMALL = () => cachedBlob({ center: [0, 0, 0], radii: [0.03, 0.022, 0.03], rings: 6, sides: 8 });
 /** Speed of the cells: room units per unit of stage time. */
 const SPEED = 30;
 
@@ -880,22 +979,22 @@ function highWay(s: AtriaState): V3[] {
 const LOW_WAY: V3[] = [...IVC_IN, [-0.6, -0.62, -0.12], [-0.18, YF + 0.4, -0.03], [0.2, YF + 0.4, -0.03], [0.75, -0.5, 0.0], ...DOWN_L];
 const RA_DOWN: V3[] = [...SVC_IN, [-0.85, 0.2, -0.1], ...DOWN_R];
 const PV_IN = PVS.map((o, i): V3[] => [o.out, chamber(o.phi, o.th, 0.9), [0.95 - 0.1 * (i % 2), i < 2 ? 0.3 : -0.35, -0.2], ...DOWN_L]);
-const SLIT: V3[] = [...IVC_IN, [-0.75, -0.3, -0.2], [-0.34, -0.3, -0.16], [XS + HS + 0.004, -0.2, -0.17], [XS + HS + 0.004, 0.2, -0.17], [0.2, 0.36, -0.17], [0.85, 0.15, -0.12], ...DOWN_L];
+const SLIT: V3[] = [...IVC_IN, [-0.75, -0.3, -0.2], [-0.34, -0.3, -0.16], [XS + HS + 0.012, -0.2, -0.17], [XS + HS + 0.012, 0.24, -0.17], [0.2, 0.36, -0.17], [0.85, 0.15, -0.12], ...DOWN_L];
 
 function streams(s: AtriaState, f: AtriaFlow): Item3[] {
   const out: Item3[] = [];
   const cell = CELL();
-  const add = (key: string, pts: V3[], grow: number, sets: [Cells, string, string][]) => {
+  const add = (key: string, pts: V3[], grow: number, sets: [Cells, string, string][], mesh = cell) => {
     if (grow <= 0.01) return;
     const route = vesselRouteOf(pts);
     const run = { route, phase: (f.phase * SPEED) / routeLength(route), grow: clamp01(grow) };
-    for (const [set, color, deep] of sets) out.push({ key: `flow-${key}-${color}`, mesh: cell, color, deep, tissue: 'skin', stream: { ...run, ...set } });
+    for (const [set, color, deep] of sets) out.push({ key: `flow-${key}-${color}`, mesh, color, deep, tissue: 'skin', stream: { ...run, ...set } });
   };
   const mixed: [Cells, string, string][] = [[SETS.mixO2, T.o2, T.o2Deep], [SETS.mixDe, T.deo2, T.deo2Deep]];
   add('low', LOW_WAY, f.low, mixed);
   add('high', highWay(s), f.high, mixed);
   add('ra-down', RA_DOWN, f.down, f.born > 0.5 ? [[SETS.blue, T.deo2, T.deo2Deep]] : mixed);
   PV_IN.forEach((p, i) => add(`pv${i}`, p, f.born * s.pulmonary, [[SETS.red, T.o2, T.o2Deep]]));
-  add('slit', SLIT, f.slit, [[SETS.few, T.deo2, T.deo2Deep]]);
+  add('slit', SLIT, f.slit, [[SETS.few, T.deo2, T.deo2Deep]], CELL_SMALL());
   return out;
 }

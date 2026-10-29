@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { mix } from '@/lib/sim/anim';
-import { aimCamera, blendCamera, centreOf } from '@/lib/three-d/aim';
+import { aimCamera, blendCamera, centreOf, showCamera } from '@/lib/three-d/aim';
 import { len, norm, sub, viewOf, project, type Camera3, type M4, type V3, type View3 } from '@/lib/three-d/math';
 import { lookTurn, orbitCamera } from '@/lib/three-d/orbit';
 import { KEY_LIGHT, projectItem, type Item3, type Projected, type Scene3 } from '@/lib/three-d/scene';
@@ -256,7 +256,8 @@ export function Stage3D({ scene, children, orbit = true, axes, continuity }: Sta
   // The structure put forward (the step's tour, the 3D tour): the camera turns to the side it is best
   // seen from, gliding there and back so the viewer always sees where the picture went.
   const spot = ctx.spotlight ?? null;
-  const goalFor = (id: string | null) => (id ? aimCamera(cam, centreOf(scene.items, id, ctx.partsOf)) : cam);
+  // In the class the camera stays while the named structure is in sight, and turns only to show it.
+  const goalFor = (id: string | null) => (!id ? cam : ctx.spotKeep ? showCamera(cam, scene.items, id, ctx.partsOf) : aimCamera(cam, centreOf(scene.items, id, ctx.partsOf)));
   const [aim, setAim] = useState<{ from: string | null; to: string | null; p: number }>({ from: spot, to: spot, p: 1 });
   // A new structure: the glide starts from where the camera is aimed now (adjusted during render, so
   // the first frame never shows the end of the move).

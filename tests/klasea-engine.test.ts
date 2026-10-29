@@ -125,6 +125,39 @@ describe('class engine', () => {
     expect(commandOf(lesson, s)).toMatchObject({ focus: ['y'], said: ['x', 'y'], at: 0.4, pose: 'emphasis', allNames: true });
   });
 
+  it('lights, names and points at each structure as the voice reaches it, holding the last line until then', () => {
+    const names = (id: string) => ({ x: ['Ixa'], p: ['Peloa'], q: ['Kua egitura'] })[id as 'x'] ?? [];
+    const two: Lesson = {
+      ...lesson,
+      chunks: [{ id: 'a', title: 'A', stage: 's1', lines: [
+        { say: 'Lehena.', notes: ['n1'], focus: ['x'] },
+        { say: 'Hasteko peloa, eta gero kua egiturak.', notes: ['n2'], focus: ['q', 'p'] },
+      ] }],
+    };
+    const go = (evs: ClassEvent[], from = initialState()) => evs.reduce((st, e) => reduce(two, st, e), from);
+    let s = go([{ type: 'start' }, { type: 'arrived' }, { type: 'spoken' }, { type: 'arrived' }]);
+    let c = commandOf(two, s, undefined, { namesOf: names });
+    // Named in the order said (p before q), each from its word's place in the line.
+    expect(c.cues.map((q) => q.id)).toEqual(['p', 'q']);
+    expect(c.cues[0].at).toBeGreaterThan(0);
+    expect(c.cues[1].at).toBeGreaterThan(c.cues[0].at);
+    // Nothing reached yet: the last line's structure stays lit, nothing new named or pointed at.
+    expect(c).toMatchObject({ focus: ['x'], point: null, heardIds: [] });
+    s = go([{ type: 'heard', n: 1 }], s);
+    c = commandOf(two, s, undefined, { namesOf: names });
+    expect(c).toMatchObject({ focus: ['p'], point: 'p', heardIds: ['p'], said: ['x', 'p'] });
+    // The count never goes back (a late word boundary), and it is reset by the next step.
+    s = go([{ type: 'heard', n: 2 }, { type: 'heard', n: 1 }], s);
+    expect(commandOf(two, s, undefined, { namesOf: names })).toMatchObject({ focus: ['p', 'q'], point: 'q' });
+    s = go([{ type: 'spoken' }], s);
+    expect(s.heard).toBe(0);
+  });
+
+  it('without names, a line lights everything it names from its start (subtitles only)', () => {
+    const s = run([{ type: 'start' }, { type: 'arrived' }]);
+    expect(commandOf(lesson, s)).toMatchObject({ focus: ['x'], point: 'x' });
+  });
+
   it('"Ez dut ulertu" says the line again in plain words and marks the chunk', () => {
     let s = run([{ type: 'start' }, { type: 'arrived' }, { type: 'spoken' }, { type: 'answered', ok: true, graded: false }, { type: 'continue' }, { type: 'arrived' }]);
     s = run([{ type: 'notUnderstood' }], s);

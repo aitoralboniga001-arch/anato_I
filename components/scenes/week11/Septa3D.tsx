@@ -1,6 +1,6 @@
 'use client';
 
-import { Note, seg, type SceneProps } from '@/components/kit';
+import { Note, lerp, seg, type SceneProps } from '@/components/kit';
 import type { Camera3 } from '@/lib/three-d/math';
 import { ModelView, Trail, cameraAt, orbit, type CalloutSpec } from '@/components/scenes/week10/Heart3D';
 import { blendCamera } from '@/lib/three-d/aim';
@@ -43,7 +43,7 @@ const CAM = {
   canal: orbit(-14, 46, 6.2, [0, YF + 0.15, 0]),
   /** Close to the two septa from the front: the notes' frontal section, in depth. Nearly face on: from
    *  further right, the secundum's upper edge hides the ostium secundum behind it. */
-  section: orbit(-7, 12, 5, [-0.08, -0.15, -0.12]),
+  section: orbit(-16, 6, 5, [-0.08, -0.15, -0.12]),
   /** The left atrium's back wall from the front and the left: the pulmonary veins. */
   leftBack: orbit(48, 14, 8.2, [0.35, 0, -0.25]),
 } satisfies Record<string, Camera3>;
@@ -126,7 +126,23 @@ export function Primum3D({ t }: SceneProps) {
 
 export function Secundum3D({ t }: SceneProps) {
   const k = secundumStage(t);
-  const s: AtriaState = { ...AT0, primum: 0.82, cushions: 1, cushionFuse: 1, os2: 1, closeOP: 1, ...k, glassRA: glass(t, [[0, P2[4]]]), glassLA: glass(t, [[P2[6], 2]]) };
+  // The frontal-section steps cut both septa through their two holes (behind the room's front opening):
+  // the cut slides back as the camera comes round to the front, and returns as it leaves for the left atrium.
+  const c = seg(t, P2[4], P2[4] + 0.05) * (1 - seg(t, P2[6], P2[6] + 0.04));
+  const s: AtriaState = {
+    ...AT0,
+    primum: 0.82,
+    cushions: 1,
+    cushionFuse: 1,
+    os2: 1,
+    closeOP: 1,
+    ...k,
+    glassRA: glass(t, [[0, P2[4]]]),
+    glassLA: glass(t, [[P2[6], 2]]),
+    // From the left atrium the foramen lies behind the valve: the valve goes see-through to show it.
+    glassValve: seg(t, P2[6] + 0.04, P2[6] + 0.08),
+    cut: c > 0.002 ? lerp(0.5, -0.1, c) : 9,
+  };
   const flow: AtriaFlow = { phase: t, low: 0, high: 1, down: 1, born: 0, slit: 0 };
   const camera = cameraAt(t, [
     [0, CAM.right],
@@ -136,7 +152,7 @@ export function Secundum3D({ t }: SceneProps) {
     [P2[4], CAM.section, 0.06],
     // Back off a little for the oblique path: both openings in sight, below the atrial rim. From
     // further right the secundum hides the ostium secundum, where the way comes out.
-    [P2[5], orbit(-7, 16, 6.4, [-0.06, -0.05, -0.15])],
+    [P2[5], orbit(-14, 10, 6.4, [-0.06, -0.05, -0.15])],
     // The valve: from the left atrium (the primum's other face), its upper part gone.
     // 120° round to the left atrium (the note says so): the longest glide.
     [P2[6], CAM.left, 0.07],
@@ -167,10 +183,10 @@ export function Secundum3D({ t }: SceneProps) {
             5. astea · eskuineko aurikulatik, trenkada aurrez aurre: atzea zure ezkerrean
           </Note>
           <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, P2[4], P2[6]) * asked}>
-            Aurretik, bi trenkadetara hurbilduta: septum secunduma eskuinean (zure ezkerrean), primuma ezkerrean
+            Aurretik, ebaki frontala bi zuloen parean: septum secunduma eskuinean (zure ezkerrean), primuma ezkerrean
           </Note>
           <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, P2[6]) * asked}>
-            Ezkerreko aurikulatik (180° biratuta): septum primumaren beste aurpegia, atzea zure eskuinean
+            Ezkerreko aurikulatik (180° biratuta): balbula gardena, zulo obala haren atzean; atzea zure eskuinean
           </Note>
           {Steps({ t, steps: STEPS2, y: 630 })}
         </>
@@ -327,7 +343,8 @@ export function Birth3D({ t }: SceneProps) {
     secundum: 1,
     spurium: 1,
     stub: 1,
-    press: k.press,
+    // A patent foramen: the valve lies a little off septum secundum (2D: 0.8), enough for the slit's cells.
+    press: k.patent ? lerp(0.7, 1, (k.press - 0.8) / 0.2) : k.press,
     fuse: k.fuse,
     patent: k.patent,
     pulmonary: 1,
@@ -352,7 +369,7 @@ export function Birth3D({ t }: SceneProps) {
     [P3[3], orbit(30, 10, 4.4, [-0.08, -0.2, -0.14])],
     // The left face while they fuse, then closer to the residual slit along the valve's upper edge.
     // This is the slit itself, rather than the fetal foramen's entrance on the opposite face.
-    [P3[4], drift(t, P3[5] + 0.01, P3[6] - 0.015, orbit(34, 12, 3.6, [-0.08, -0.05, -0.17]), orbit(24, 16, 3, [-0.08, -0.03, -0.17]))],
+    [P3[4], drift(t, P3[5] + 0.01, P3[6] - 0.015, orbit(34, 14, 3.6, [-0.08, -0.05, -0.17]), orbit(26, 30, 3, [-0.08, 0.05, -0.17]))],
     [P3[6], CAM.front],
   ]);
   const names: CalloutSpec[] = [

@@ -1,4 +1,6 @@
-import { add, cross, dot, len, mix3, mul, norm, perp, rotate, sub, type Camera3, type M4, type V3 } from './math';
+import { add, cross, dot, len, mix3, mul, norm, perp, project, rotate, sub, viewOf, FRAME_H, FRAME_W, type Camera3, type M4, type V3 } from './math';
+import { coverOf } from './occlusion';
+import { orbitCamera } from './orbit';
 import type { Mesh } from './mesh';
 import type { Item3 } from './scene';
 
@@ -97,4 +99,49 @@ export function blendCamera(a: Camera3, b: Camera3, e: number): Camera3 {
   const shift: [number, number] | undefined =
     a.shift || b.shift ? [(a.shift?.[0] ?? 0) + ((b.shift?.[0] ?? 0) - (a.shift?.[0] ?? 0)) * e, (a.shift?.[1] ?? 0) + ((b.shift?.[1] ?? 0) - (a.shift?.[1] ?? 0)) * e] : undefined;
   return { ...b, target, eye: add(target, mul(dir, r)), fov: a.fov + (b.fov - a.fov) * e, shift };
+}
+
+/** Where the structure lands in the frame for this camera, and whether it is inside with a margin. */
+const inFrameFor = (cam: Camera3, at: V3) => {
+  const q = project(viewOf(cam), at);
+  return q.w > 0 && q.x > FRAME_W * 0.1 && q.x < FRAME_W * 0.9 && q.y > FRAME_H * 0.1 && q.y < FRAME_H * 0.9;
+};
+
+/** Turns tried round the target, smallest first: a little each way, then more, then from above or below. */
+const TRIES: { yaw: number; pitch: number }[] = [0.3, 0.6, 0.9, 1.25].flatMap((yaw) => [
+  { yaw, pitch: 0 },
+  { yaw: -yaw, pitch: 0 },
+]).concat([0.35, -0.3].flatMap((pitch) => [0, 0.45, -0.45, 0.9, -0.9].map((yaw) => ({ yaw, pitch }))));
+
+const shown = new Map<string, Camera3>();
+
+/**
+ * The class's camera for the structure the voice has just named: the step's own camera while it shows it
+ * (nothing solid in front of it, inside the frame), so the picture holds still; else the smallest turn
+ * round the target that does (re-centred a little towards it); else the study camera's aim. Remembered
+ * per camera and structure, so a playing scene does not search every frame.
+ */
+export function showCamera(cam: Camera3, items: Item3[], id: string, partsOf?: (id: string) => readonly string[]): Camera3 {
+  const at = centreOf(items, id, partsOf);
+  if (!at) return cam;
+  const r = (v: V3) => v.map((x) => Math.round(x * 20)).join(',');
+  const key = `${id}|${r(cam.eye)}|${r(cam.target)}|${r(at)}`;
+  const hit = shown.get(key);
+  if (hit) return hit;
+  const sees = (c: Camera3) => inFrameFor(c, at) && !coverOf(items, c.eye, at, id);
+  let out: Camera3 | null = sees(cam) ? cam : null;
+  if (!out) {
+    const base = { ...cam, target: mix3(cam.target, at, 0.3) };
+    for (const t of TRIES) {
+      const c = orbitCamera(base, t);
+      if (sees(c)) {
+        out = c;
+        break;
+      }
+    }
+  }
+  out ??= aimCamera(cam, at);
+  if (shown.size > 400) shown.clear();
+  shown.set(key, out);
+  return out;
 }

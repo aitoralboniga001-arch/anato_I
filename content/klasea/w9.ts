@@ -56,13 +56,13 @@ export const LESSON_W9: Lesson = {
         L(0, 'Hiru muskulu mota bereizten dira: ildaskatuak, leunak eta bihotzekoa.', n('1/p4/s1'), [], {
           plain: 'Hiru mota ikasiko ditugu: ildaskatuak, leunak eta bihotzekoa.',
         }),
-        L(0.12, 'Muskulu ildaskatuak, edo borondatezkoak, lokomozio sistemarekin eta mugimenduarekin erlazionatuta daude.', n('1/p5/s1'), ['muskulu-ildaskatuak'], {
+        L(0.22, 'Muskulu ildaskatuak, edo borondatezkoak, lokomozio sistemarekin eta mugimenduarekin erlazionatuta daude.', n('1/p5/s1'), ['muskulu-ildaskatuak'], {
           plain: 'Muskulu ildaskatuak nahi dugunean mugitzen ditugu: ibiltzeko eta mugitzeko dira.',
         }),
-        L(0.64, 'Muskulu leunak erraiekin doaz: hestearen inguruko alboko mesodermoaren errai orritik sortzen dira.', n('1/p6/s1'), ['muskulu-leuna', 'errai-orria'], {
+        L(0.7, 'Muskulu leunak erraiekin doaz: hestearen inguruko alboko mesodermoaren errai orritik sortzen dira.', n('1/p6/s1'), ['muskulu-leuna', 'errai-orria'], {
           plain: 'Muskulu leunak erraietan daude, eta hestearen inguruko errai orritik datoz.',
         }),
-        L(0.64, 'Miokardioa, bihotzeko muskulua, bihotz hodiaren inguruko errai orritik sortzen da.', n('1/p7/s1'), ['miokardioa', 'errai-orria'], {
+        L(0.7, 'Miokardioa, bihotzeko muskulua, bihotz hodiaren inguruko errai orritik sortzen da.', n('1/p7/s1'), ['miokardioa', 'errai-orria'], {
           writes: 'b-hiru-mota',
           plain: 'Bihotzeko muskulua, miokardioa, bihotz hodiaren inguruko errai orritik dator.',
         }),
@@ -104,7 +104,7 @@ export const LESSON_W9: Lesson = {
         L(0.08, 'Alde zefalikoan mesodermo hori segmentatu egiten da, baina ez osorik: somitomeroak agertzen dira, paretarik gabe.', n('2/p3/s2'), ['somitomeroak'], {
           plain: 'Buruan zatiketa ez da osoa: somitomeroak sortzen dira, paretarik gabeko pilak.',
         }),
-        L(0.17, 'Alde okzipitaletik behera, berriz, zatiketa osoa da, eta somitak agertzen dira.', n('2/p3/s3'), ['somitak', 'somita-okzipitalak'], {
+        L(0.2, 'Alde okzipitaletik behera, berriz, zatiketa osoa da, eta somitak agertzen dira.', n('2/p3/s3'), ['somitak', 'somita-okzipitalak'], {
           writes: 'b-zatiketa',
           plain: 'Hortik behera zatiketa osoa da: somitak sortzen dira, eta lehenengoak somita okzipitalak dira.',
         }),
@@ -208,11 +208,11 @@ export const LESSON_W9: Lesson = {
           'lehen-faringe-arkua',
           'hioide-arkua',
           'hirugarren-faringe-arkua',
-        ], { plain: 'Beste somitomero batzuk lepora doaz, eta han faringe arkuak sortzen dituzte, muskuluak egiteko.' }),
+        ], { view: 'burua', plain: 'Beste somitomero batzuk lepora doaz, eta han faringe arkuak sortzen dituzte, muskuluak egiteko.' }),
         L(0.66, '4. somitomeroa 1. faringe arkuan kokatzen da, eta hortik muskulu murtsikatzaileak sortzen dira, barailaren jasotzaileak.', n('2.1.1/p5/s2'), [
           'lehen-faringe-arkua',
           'muskulu-murtsikatzaileak',
-        ], { writes: 'b-arkuak', plain: 'Laugarren somitomeroa 1. faringe arkura doa: hortik murtsikatzeko muskuluak, barailaren jasotzaileak.' }),
+        ], { view: 'heldua', writes: 'b-arkuak', plain: 'Laugarren somitomeroa 1. faringe arkura doa: hortik murtsikatzeko muskuluak, barailaren jasotzaileak.' }),
         L(0.66, 'Nerbio trigeminoak inerbatzen ditu, bosgarren bikote kranialak.', n('2.1.1/p5/s3'), ['nerbio-trigeminoa'], {
           plain: 'Horien nerbioa bosgarrena da: trigeminoa.',
         }),
@@ -323,6 +323,7 @@ export const LESSON_W9: Lesson = {
           plain: 'Lasai: ez dituzu muskulu guztien izenak buruz ikasi behar.',
         }),
         L(0.84, '1. eta 2. somita okzipitalak 4. eta 6. faringe arkuetan garatzen dira.', n('2.1.4/p20/s1'), ['somita-okzipitalak', 'laringearen-muskuluak'], {
+          view: 'burua',
           plain: 'Lehen bi somita okzipitalak laugarren eta seigarren arkuetan garatzen dira.',
         }),
         L(0.92, 'Nerbio batek mota askotako zuntzak izan ditzake; hipoglosoak, aldiz, zuntz motoreak bakarrik ditu.', n('2.1/p5/s1', '2.1/p5/s3'), ['nerbio-hipoglosoa'], {
@@ -426,7 +427,7 @@ export const LESSON_W9: Lesson = {
         L(0.32, 'Horietatik sortzen dira, adibidez, gorputzaren aurrealdeko saihets kartilagoak.', n('2.2/p6/s6'), ['saihets-kartilagoa'], {
           plain: 'Zelula horietatik saihets kartilagoak sortzen dira, gorputzaren aurrealdean.',
         }),
-        L(0.52, 'Atzeko paretan, erdiko zelulek dermatoma osatzen dute; ertzetakoak muskulu zelulen aintzindariak dira.', n('2.2/p9/s1', '2.2/p9/s2'), [
+        L(0.59, 'Atzeko paretan, erdiko zelulek dermatoma osatzen dute; ertzetakoak muskulu zelulen aintzindariak dira.', n('2.2/p9/s1', '2.2/p9/s2'), [
           'somitaren-atzeko-pareta',
           'dermatoma',
           'muskulu-zelula-atze-erdialdekoak',
@@ -440,10 +441,10 @@ export const LESSON_W9: Lesson = {
           writes: 'b-miotoma',
           plain: 'Miotomatik bizkarreko muskuluak, eskapula ingurukoak eta saihets artekoak datoz.',
         }),
-        L(0.76, 'Aurre-alboko zelula batzuek, berriz, alboko muga gurutzatu eta paretako orrira heltzen dira.', n('2.2/p11/s1'), ['aurre-alboko-muskulu-zelulak', 'paretako-orria'], {
+        L(0.8, 'Aurre-alboko zelula batzuek, berriz, alboko muga gurutzatu eta paretako orrira heltzen dira.', n('2.2/p11/s1'), ['aurre-alboko-muskulu-zelulak', 'paretako-orria'], {
           plain: 'Beste zelula batzuk mugaz haratago joaten dira, alboko mesodermoaren paretako orrira.',
         }),
-        L(0.76, 'Hortik gorputz paretako eta gorputz-adarretako muskulu ildaskatuak sortzen dira.', n('2.2/p11/s1'), ['paretako-orria'], {
+        L(0.8, 'Hortik gorputz paretako eta gorputz-adarretako muskulu ildaskatuak sortzen dira.', n('2.2/p11/s1'), ['paretako-orria'], {
           plain: 'Han gorputz paretako eta gorputz-adarretako muskuluak egiten dituzte.',
         }),
       ],
@@ -529,7 +530,7 @@ export const LESSON_W9: Lesson = {
         L(0.08, 'Orno guztiek hodi errakideoa osatzen dute, eta bertan ornomuina kokatzen da.', n('2.2.2/p3/s3'), ['hodi-errakideoa', 'ornomuina'], {
           plain: 'Ornoen zuloek hodi bat egiten dute, hodi errakideoa, eta barruan ornomuina dago.',
         }),
-        L(0.14, 'Ornomuinaren segmentu bakoitzarekin nerbio espinal pare bat erlazionatzen da, ezkerrekoa eta eskuinekoa.', n('2.2.2/p4/s1'), ['ornomuina', 'ornomuin-segmentuak', 'nerbio-espinalak'], {
+        L(0.16, 'Ornomuinaren segmentu bakoitzarekin nerbio espinal pare bat erlazionatzen da, ezkerrekoa eta eskuinekoa.', n('2.2.2/p4/s1'), ['ornomuina', 'ornomuin-segmentuak', 'nerbio-espinalak'], {
           writes: 'b-pareak',
           plain: 'Ornomuinaren zati bakoitzetik bi nerbio espinal irteten dira, ezkerrekoa eta eskuinekoa.',
         }),
@@ -819,7 +820,7 @@ export const LESSON_W9: Lesson = {
         L(0.84, 'Horrez gain, bihotzak kanpoko inerbazioa du: nerbio sistema begetatiboa.', n('4/p5/s4'), ['nerbio-sistema-begetatiboa'], {
           plain: 'Gainera, nerbio sistema begetatiboak ere kontrolatzen du bihotza, kanpotik.',
         }),
-        L(0.92, 'Gogoratu: erraien eta bihotzaren inerbazioa begetatiboa da; muskulu ildaskatuena, kraniala edo espinala.', n('4/p8/s1', '2.1.2/p6/s1', '2.2.2/p28/s1'), [
+        L(0.945, 'Gogoratu: erraien eta bihotzaren inerbazioa begetatiboa da; muskulu ildaskatuena, kraniala edo espinala.', n('4/p8/s1', '2.1.2/p6/s1', '2.2.2/p28/s1'), [
           'muskulu-ildaskatuak',
           'muskulu-leuna',
           'miokardioa',
@@ -856,6 +857,7 @@ export const LESSON_W9: Lesson = {
           plain: 'Gogoratu: ildaskatuak mesodermo paraxialetik; leunak eta bihotzekoa, errai orritik.',
         }),
         L(0.84, 'Buruko muskuluak nerbio kranialek inerbatzen dituzte; gainerakoak, nerbio espinalek.', n('2.1.2/p6/s1', '2.2.2/p28/s1'), ['nerbio-kranialak'], {
+          view: 'garuna',
           tone: 'summary',
           plain: 'Buruko muskuluak nerbio kranialek mugitzen dituzte; beste guztiak, nerbio espinalek.',
         }),
