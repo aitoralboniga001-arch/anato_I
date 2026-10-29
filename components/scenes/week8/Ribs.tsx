@@ -410,6 +410,8 @@ export function SternumFront({ t }: SceneProps) {
       <Label id="esternoi-barrak" x={190} y={300} ax={500 - off(300) - BAR_W / 2 + 2} ay={300} show={grow * (1 - parts)} />
       <Label id="saihets-kartilagoa" x={190} y={420} ax={ribFront(4, -1, 466).cart[9][0]} ay={ribFront(4, -1, 466).cart[9][1]} />
       <Label id="saihets-hezurra" x={190} y={540} ax={ribFront(6, -1, 466).bone[12][0]} ay={ribFront(6, -1, 466).bone[12][1]} />
+      {/* The whole sternum, once its bars have met in the midline (its point inside the fused body). */}
+      <Label id="esternoia" x={810} y={110} ax={500} ay={300} show={seg(fz, 0.85, 1)} />
       <Label id="kirtena" x={810} y={176} ax={552} ay={178} show={parts} />
       <Label id="esternoiaren-gorputza" x={810} y={330} ax={535} ay={330} show={parts} />
       <Label id="apofisi-xifoidea" x={810} y={470} ax={513} ay={450} show={parts} />

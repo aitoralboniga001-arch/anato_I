@@ -236,7 +236,6 @@ export function ModelView({
             // Drawn (as itself, as a group of parts, or as the members of a whole), named where the model says
             // or else at its biggest piece.
             const own = [id, ...(partsOf?.(id) ?? [])].find((o) => ownCentre(model.items, o));
-            if (process.env.SAID_DEBUG) console.log('SAID', id, own, JSON.stringify(partsOf?.(id)), !!model.pts[id]);
             if (!own) continue;
             const q = visibleAnchor(model.items, view.eye, model.pts[id] ?? model.pts[own] ?? ownCentre(model.items, own)!, own, inFrame);
             if (!inFrame(q)) continue;

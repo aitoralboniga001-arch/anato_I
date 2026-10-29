@@ -136,7 +136,9 @@ export function LongBone({ t, reduced }: SceneProps) {
   const F = (p: Pt): Pt => {
     const q = A(p);
     return [CX + fx + (q[0] - CX) * fk, MID + (q[1] - MID) * fk];
-  };
+  };  const shaftMid: Pt = [CX - SW * 0.9, MID + Math.min(40, reach * 0.5)];
+  const shaftAt: Pt = inFrame(F(shaftMid)) > 0.5 ? shaftMid : [CX - SW * 0.6, plateT + 90];
+
   const clipId = `w8-hl-clip${cid}`;
   const age = t < HL_T.parts ? '12. astea' : t < HL_T.secondary ? (reach0 > 0.98 ? 'Jaiotza' : 'Jaio aurretik') : t < HL_T.fusion ? 'Jaio ondoren · haurtzaroa' : 'Helduaroa';
   const PX = 760;
@@ -352,7 +354,8 @@ export function LongBone({ t, reduced }: SceneProps) {
       <Label id="epifisiak" x={190} y={130} {...pt(F([CX - EW * 0.8, top + E * 0.45]))} show={vis(t, HL_T.parts) * (1 - cmp) * inFrame(F([CX - EW * 0.8, top + E * 0.45]))} />
       <Label id="hazkuntza-plaka" x={190} y={230} {...pt(F([CX - SW * 1.1, plateT]))} show={vis(t, HL_T.plate) * inFrame(F([CX - SW * 1.1, plateT]))} />
       {/* Inside the bone already formed (it spreads from the centre toward the ends). */}
-      <Label id="diafisia" x={190} y={390} {...pt(F([CX - SW * 0.9, MID + Math.min(40, reach * 0.5)]))} show={vis(t, HL_T.parts) * (1 - cmp) * inFrame(F([CX - SW * 0.9, MID + 40]))} />
+      {/* Mid-shaft, or (zoomed on the growth plate) the shaft just under it, whichever is in the frame. */}
+      <Label id="diafisia" x={190} y={390} {...pt(F(shaftAt))} show={vis(t, HL_T.parts) * inFrame(F(shaftAt))} />
       <Label id="kartilago-eredua" x={190} y={500} {...pt(F([CX - SW + 6, bot - E * 0.7]))} show={Math.min(1 - seg(t, HL_T.secondary, HL_T.secondary + 0.03), 1 - seg(t, HL_T.fusion + 0.01, HL_T.fusion + 0.07)) * inFrame(F([CX - SW + 6, bot - E * 0.7]))} />
       <Label id="hezurtzapen-zentro-sekundarioak" x={716} y={240} {...pt(F([CX + 14, (top + plateT) / 2]))} show={vis(t, HL_T.secondary, HL_T.fusion) * inFrame(F([CX + 14, (top + plateT) / 2]))} />
       <Label id="hezurtzapen-zentroak" text="Zentro primarioa" x={810} y={360} {...pt(F([CX + 20, MID + 4]))} show={p1 * (1 - seg(t, HL_T.secondary, HL_T.secondary + 0.03)) * inFrame(F([CX + 20, MID + 4]))} />

@@ -525,7 +525,7 @@ export function CalvariaTop({ t, reduced }: SceneProps) {
       <Label id="hezur-espikulak" x={810} y={190} ax={sx(TOP_BONES[3].c[0] + 13)} ay={sy(TOP_BONES[3].c[1] - 1)} show={vis(t, CAL_T.grow, CAL_T.bones + 0.04)} small />
       <Label id="joskura-metopikoa" x={810} y={150} ax={CX} ay={sy(130)} show={sutures} />
       <Label id="aurreko-fontanela" x={810} y={250} ax={sx(AF[0] + 20)} ay={sy(AF[1])} show={vis(t, CAL_T.sutures) * (1 - afClose)} />
-      <Label id="joskurak" x={810} y={420} ax={CX} ay={sy(430)} show={vis(t, CAL_T.sutures, CAL_T.fontanelles) + vis(t, CAL_T.birth, CAL_T.after)} small />
+      <Label id="joskurak" x={810} y={420} ax={CX} ay={sy(430)} show={vis(t, CAL_T.sutures)} small />
       <Label id="fontanelak" x={810} y={290} ax={sx(AF[0] + 20)} ay={sy(AF[1] + 8)} show={vis(t, CAL_T.fontanelles) * (1 - afClose)} small />
       <Label id="joskura-sagitala" x={810} y={380} ax={CX} ay={sy(380)} show={sutures} />
       <Label id="atzeko-fontanela" x={810} y={480} ax={sx(PF[0] + 10)} ay={sy(PF[1] + 2)} show={vis(t, CAL_T.sutures) * (1 - pfClose)} />
@@ -628,6 +628,7 @@ export function CalvariaSide({ t }: SceneProps) {
         Bi fontanela bilateral: aurre-albokoa (esfenoidala) eta atze-albokoa (mastoidea)
       </Note>
 
+      <Label id="buru-ganga" x={810} y={70} ax={560} ay={84} small />
       <Label id="neurokraneoa" x={190} y={130} ax={338} ay={124} show={boxes} />
       <Label id="hezur-parietala" x={190} y={190} ax={430} ay={160} show={grow} />
       <Label id="okzipitalaren-ezkata" x={190} y={250} ax={290} ay={262} show={grow} />

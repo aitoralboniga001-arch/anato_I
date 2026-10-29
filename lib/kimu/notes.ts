@@ -58,7 +58,7 @@ export function intentOf(question: string): Intent {
 }
 
 /** Sentences that carry the kind of fact a question asks for. */
-const CUE: Record<Intent, RegExp | null> = {
+export const CUE: Record<Intent, RegExp | null> = {
   noiz: /(\d+\s*\.?\s*(?:-?\s*\d+\.?\s*)?(?:egun|aste|hilabete))|egunean|astean|astearen|hilabetean/i,
   nondik: /(tik\b|sortzen|sortu|eratorri|jatorri|datoz|dator|bereizten)/i,
   patua: /(bihurtu|bihurtzen|emango|garatuko|sortuko|eratorri|osatuko|osatzen)/i,
@@ -291,7 +291,10 @@ export function sectionAsked(question: string, ctx: NotesContext = {}): SectionH
       if (m > 0) covered += 1;
       score += m;
     }
-    if (covered < q.length || covered < sec.tok.size * 0.7) continue;
+    // Every word asked is in the heading, and most of the heading's own words were asked ("notokorda"
+    // twice is not "Notokordaren eraketa").
+    const said = [...sec.tok].filter((w) => q.some((alts) => alts.some((alt) => match(alt, w, alt.length >= 6) > 0))).length;
+    if (covered < q.length || said < sec.tok.size * 0.7) continue;
     const v = (score / sec.tok.size) * (ctx.week === sec.week ? 1.2 : 1);
     if (!best || v > best.v) best = { s: sec, v };
   }
@@ -299,8 +302,14 @@ export function sectionAsked(question: string, ctx: NotesContext = {}): SectionH
   const { week, section } = best.s;
   const opening = (p: Passage): NotesHit => {
     const pool = p.kind === 'li' && p.leadCount ? p.sentences.slice(0, p.leadCount) : p.sentences;
-    // One sentence, or two when the first is short (a heading-like opening).
-    const two = pool[0].text.length < 90 && pool[1] ? [pool[0], pool[1]] : [pool[0]];
+    // One sentence, or two when the first is short (a heading-like opening); one that ends on a colon
+    // keeps what it introduces (the list items after it, up to four).
+    let n = pool[0].text.length < 90 && pool[1] ? 2 : 1;
+    while (n < pool.length && n < 5 && /:\s*$/.test(pool[n - 1].text)) n = Math.min(pool.length, n + 4);
+    let two = pool.slice(0, n);
+    // The list it introduces is the next passage.
+    const next = passages[passages.indexOf(p) + 1];
+    if (n === pool.length && /:\s*$/.test(two[n - 1].text) && next?.week === p.week && next.section === p.section) two = [...two, ...next.sentences.slice(0, 4)];
     return { passage: p, score: 20, cover: 1, best: two };
   };
   // A section's opening, skipping a paragraph whose first sentence is broken in the notes themselves (an

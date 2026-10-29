@@ -389,6 +389,8 @@ export function FusionArt({ t }: { t: number }) {
       <Label id="miokardioa" x={790} y={456} ax={HC[0] + rx - EPI - (RING - EPI) / 2} ay={HC[1] + 8} show={split} />
       <Label id="bihotz-gelatina" x={790} y={496} ax={jellyA[0]} ay={jellyA[1]} show={jelly * closed} />
       <Label id="endokardioa" x={790} y={540} ax={HC[0] + 14} ay={HC[1] + 28} show={closed} />
+      {/* The whole tube (its layers glow): a bracket under it, edge to edge. */}
+      <Label id="bihotz-hodia" x={210} y={600} span={[[HC[0] - rx, HC[1] + ry + 8], [HC[0] + rx, HC[1] + ry + 8]]} show={closed} />
     </g>
   );
 }

@@ -59,6 +59,8 @@ export function VentricleFrontal({ t }: SceneProps) {
 
       {A('hasierako-eskuineko-bentrikulua', L, 470, 352, 470, 1)}
       {A('hasierako-ezkerreko-bentrikulua', R, 452, 660, 452)}
+      {/* The segment it comes from: the same chamber, under its first name. */}
+      {A('atal-bentrikularra', R, 406, 684, 474, 1, { small: true })}
       {A('muskulu-trenkadak', R, 548, 690, 520, trabL, { small: true })}
       {A('ertz-bulbobentrikularra', L, 372, 446, 400, 1, { small: true })}
       {A('bentrikulu-arteko-zulo-primarioa', L, 560, 516, 520, foramen)}

@@ -5,7 +5,7 @@ import { evidenceOf, fairHit, intentOf, numbersIn, passagesOfSentences, searchNo
 import { boldName, followupsFor, fromSentence, lineageOf, mentions, notesTarget, offlineReply, SAYS_WHERE, sourceOf, targetsOf, type Evidence } from './offline';
 import { pickPractice, wantsPractice } from './practice';
 import { CONFIDENT, confident, describeHere, factsFrom, GO, isFormationQuestion, nearestFrom, search, toTarget, vocabulary, wantsPlace, withFrom, type Hit } from './search';
-import { detectLang, keyWords, match, queryTokens, spell, tokens, topicIn, withoutTopic, type Lang } from './text';
+import { askingWord, detectLang, keyWords, match, queryTokens, spell, tokens, topicIn, withoutTopic, type Lang } from './text';
 import type { KimuAsk, KimuHere, KimuModelReply, KimuReply, KimuTurn } from './types';
 
 /** "Explain this", "zer da hau?": the question is about what is on screen, not about a named thing. */
@@ -157,7 +157,13 @@ export async function askKimu(question: string, history: KimuTurn[], here: KimuH
   // only through an alias ("Birika enborraren sustraiak", aka birika arteria).
   // A structure called by its own full name counts even when the question's other words lower its cover
   // ("Notokorda noiz agertzen da?": "agertzen" is not in the notochord's entry, yet it is what is asked).
-  const own = (h: Hit) => h.doc.kind === 'structure' && h.score >= CONFIDENT && !!h.doc.structure && namedIn(rq, h.doc.structure, false);
+  // Only asking words may be left over: "mesenterio ventrala" does not name "Bentrala".
+  const own = (h: Hit) => {
+    if (h.doc.kind !== 'structure' || h.score < CONFIDENT || !h.doc.structure || !namedIn(rq, h.doc.structure, false)) return false;
+    const st = structures.get(h.doc.structure)!;
+    const name = [st.name, st.es ?? ''].flatMap((n) => tokens(n));
+    return queryTokens(rq).every((alts) => alts.some((a) => askingWord(a) || name.some((w) => match(a, w, true) >= 0.6)));
+  };
   let namedAll = places.filter((h) => h.doc.kind === 'structure' && confident(h) && !!h.doc.structure && namedIn(rq, h.doc.structure));
   if (!namedAll.length) namedAll = places.filter(own);
   const named = namedAll.find((h) => namedIn(rq, h.doc.structure!, false)) ?? namedAll[0];
@@ -177,10 +183,10 @@ export async function askKimu(question: string, history: KimuTurn[], here: KimuH
   // whole section: its opening and its parts, not the one sentence that shares the most words.
   const section = step || going ? null : sectionAsked(rq, ctx);
   // The notes are in Basque: a question that calls the structure otherwise (in Spanish, English or misspelt)
-  // searches them with its Basque name too.
+  // searches them with its Basque name (the one the atlas entry found goes by: "Mediastinoa").
   const q = queryTokens(rq).flat();
   const inBasque = !!s && tokens(s.name).every((w) => q.some((x) => match(x, w, false) >= 0.85));
-  const found = step ? step.notes : section ? section.parts : s && !inBasque ? searchNotes(s.name, ctx, 6, rq) : searchNotes(rq, ctx, s ? 6 : 3);
+  const found = step ? step.notes : section ? section.parts : s && !inBasque ? searchNotes(named!.doc.label, ctx, 6, rq) : searchNotes(rq, ctx, s ? 6 : 3);
   // A structure asked about: the passages that say its name come first (one that shares more words may be
   // about its neighbour).
   const notes = s && !step && !section ? [...found.filter((h) => fairHit(h) && mentions(h, s)), ...found.filter((h) => !(fairHit(h) && mentions(h, s)))].slice(0, 3) : found;

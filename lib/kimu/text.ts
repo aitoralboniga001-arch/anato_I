@@ -184,6 +184,9 @@ export const tokens = (text: string): string[] =>
 const ASKING = new Set('egitura egiturak egiturek estructura estructuras structure structures viene vienen proviene procede deriva convierte origina come comes become becomes nondik datoz dator zertan bihurtzen bihurtu eratzen zergatik jaisten gertatzen azaltzen deitzen esaten aurkitzen kokatzen habiratzen agertzen ixten itxi'.split(' ').map(fold));
 const ASKING_KEEP = new Set(['jaisten', 'habiratzen', 'ixten', 'itxi', 'agertzen', 'kokatzen'].map(fold));
 
+/** A word that asks (when, how, appears, forms…), not one that says what about. */
+export const askingWord = (w: string) => ASKING.has(fold(w)) || ASKING_KEEP.has(fold(w)) || /^(noiz|nola|zer|non|zein|cuando|como|when|how|what)$/.test(fold(w));
+
 /** Query tokens with the sound-alike synonyms added (each synonym counts as an alternative). */
 export function queryTokens(text: string, asking = false): string[][] {
   const out: string[][] = [];

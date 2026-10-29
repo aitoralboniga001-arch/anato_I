@@ -3,8 +3,8 @@ import { firstSentence } from '@/content/generate';
 import { ancestry, childrenOf } from '@/content/lineage';
 import { structures, weeks } from '@/content/registry';
 import type { StructureDef } from '@/lib/sim/types';
-import { anchorOf, fairHit, headingOf, itemHead, joinBest, quoteOf, refOf, strongHit, type Intent, type NotesHit, type SectionHit } from './notes';
-import { confident, SAMPLE_TOPICS, toTarget, type Hit } from './search';
+import { anchorOf, CUE, fairHit, headingOf, itemHead, joinBest, quoteOf, refOf, strongHit, type Intent, type NotesHit, type SectionHit } from './notes';
+import { CONFIDENT, confident, SAMPLE_TOPICS, toTarget, type Hit } from './search';
 import { fold, keyWord, match, queryTokens, tokens, type Lang } from './text';
 import type { KimuFrom, KimuHere, KimuReply, KimuSource, KimuTarget } from './types';
 
@@ -159,9 +159,15 @@ export function boldName(text: string, s: StructureDef | undefined): string {
   let m: RegExpExecArray | null;
   while ((m = re.exec(text))) {
     if (fold(m[0]).startsWith(stem)) {
-      // Take the following word too when the name has two ("septum transversuma", "hodi neurala").
-      const two = s.name.includes(' ') ? /^\s+[\wÀ-ÿñÑ-]+/.exec(text.slice(m.index + m[0].length))?.[0] ?? '' : '';
-      const end = m.index + m[0].length + two.length;
+      // Take the name's following words too ("septum transversuma", "kanpoko arteria iliakoa"): the first
+      // always, the others while they are the name's own.
+      const rest = s.name.replace(/\([^)]*\)/g, ' ').trim().split(/\s+/).slice(1).map((w) => stemWord(w));
+      let end = m.index + m[0].length;
+      for (let i = 0; i < rest.length; i++) {
+        const next = /^\s+([\wÀ-ÿñÑ-]+)/.exec(text.slice(end));
+        if (!next || (i > 0 && !fold(next[1]).startsWith(rest[i]))) break;
+        end += next[0].length;
+      }
       return `${text.slice(0, m.index)}**${text.slice(m.index, end)}**${text.slice(end)}`;
     }
   }
@@ -317,8 +323,12 @@ export const SAYS_WHERE = /(hurrengo|aurrerago|lehenago|pantailan|etapa honetan|
 
 /** The simulator destinations for an answer: the place of the thing asked about, then the notes' step. */
 export function targetsOf(ev: Evidence): KimuTarget[] {
-  const place = confident(ev.places[0]) ? toTarget(ev.places[0], 'c1') : undefined;
-  const n = strongHit(ev.notes[0]) ? notesTarget(ev.notes[0]) : undefined;
+  // The structure asked about, called by its full name, is the place even when other words of the question
+  // lower its cover ("Notokorda noiz agertzen da?").
+  const at = confident(ev.places[0]) ? ev.places[0] : ev.structure ? ev.places.find((h) => h.doc.structure === ev.structure!.id && h.score >= CONFIDENT) : undefined;
+  const place = at ? toTarget(at, 'c1') : undefined;
+  // A structure asked about: only a passage that says its name is a place to go (not one that merely shares a word).
+  const n = strongHit(ev.notes[0]) && (!ev.structure || mentions(ev.notes[0], ev.structure)) ? notesTarget(ev.notes[0]) : undefined;
   // "Take me to X": the nearest place first, then X's usual place when that is another stage.
   const usual = ev.going && place && ev.places[1]?.doc.structure === place.structure ? toTarget(ev.places[1], 'c2') : undefined;
   // The thing asked about first when the question names it; otherwise the step of the passage quoted.
@@ -346,7 +356,8 @@ export function offlineReply(ev: Evidence): KimuReply {
   if (!best && !place && isGreeting(ev.question)) return { reply: c.hello, targets: [], sources: [], followups: sampleQuestions(ev.lang, 3, ev.here), mood: 'happy', source: 'offline' };
 
   const strong = strongHit(best);
-  const onTopic = strong && (!s || mentions(best, s));
+  // About the structure in what the student will read (a list shows only its items' heads).
+  const onTopic = strong && (!s || (mentions(best, s) && says(tokens(notesBody(best, intent, s)), s)));
   // A date from the atlas timeline only when the question is about the structure itself ("Noiz sortzen da X?"),
   // not about something that happens to it ("Noiz habiratzen da blastozistoa?").
   const when = s && place?.doc.structure === s.id && !place.doc.atlasOnly && aboutItself(ev.question, s) ? place.doc.where.replace(/^\d+\. gaia · /, '') : '';
@@ -364,7 +375,7 @@ export function offlineReply(ev: Evidence): KimuReply {
   const listAbout = list && !!s && fold(listLead(best)).includes(stemOf(s.name));
   const said = !!best && !!s && !list && best.best.some((x) => defines(x.text, s));
   // "When?" answered by a passage that gives no time at all: the atlas timeline answers it better.
-  const cardFirst = !!card && ((intent === 'nondik' || intent === 'patua') ? !listAbout : intent === 'zer' ? !said : intent === 'noiz' ? !!best && !best.best.some((x) => /\d/.test(x.text)) : false);
+  const cardFirst = !!card && ((intent === 'nondik' || intent === 'patua') ? !listAbout : intent === 'zer' ? !said : intent === 'noiz' ? !!best && !best.best.some((x) => CUE.noiz!.test(x.text)) : false);
   if (onTopic && !cardFirst) {
     // The notes' own words are the answer.
     const body = notesBody(best, intent, s);
@@ -376,7 +387,12 @@ export function offlineReply(ev: Evidence): KimuReply {
     // The atlas card (worded from the notes), with the closest notes passage quoted under it.
     const text = intent === 'nondik' || (intent === 'nola' && s.origin) ? s.origin! : intent === 'patua' ? s.fate! : intent === 'noiz' ? `${when} (${atlasWhen.toLowerCase()}).` : firstSentence(s.definition);
     reply = `**${s.name}**: ${text.replace(/^\s+/, '')}`;
-    sources = ev.notes.filter((h) => fairHit(h) && mentions(h, s) && !isList(h)).slice(0, 1).map((h) => sourceOf(h, true));
+    // The passage of the topic that explains it comes first (topic 7 for the mediastinum, not topic 13's
+    // thoracic duct that only climbs through it), even when it is a list.
+    const cands = ev.notes.filter((h) => fairHit(h) && mentions(h, s));
+    const home = (h: NotesHit) => h.passage.week === place?.doc.week;
+    const pick = cands.find((h) => home(h) && !isList(h)) ?? cands.find(home) ?? cands.find((h) => !isList(h));
+    sources = pick ? [sourceOf(pick, true)] : [];
     // Nothing in the notes mentions it (not even a list item): the card is the atlas's own wording, and says so.
     if (!ev.notes.some((h) => fairHit(h) && mentions(h, s))) reply = `${c.atlasOnly(place?.doc.atlasOnly?.near)} ${reply}`;
   } else if (fairHit(best) && best.score >= 4.5 && (!ev.asked || best.passage.week === ev.asked)) {

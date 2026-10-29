@@ -424,7 +424,7 @@ export function RightAtrium3D({ t }: SceneProps) {
     // The septum: from the embryo's right, through the clear lateral wall (its back on your left).
     [S[2], orbit(-80, 6, 7.4, [0.25, 0.1, -0.1])],
     // Down to the openings of the IVC and the coronary sinus.
-    [S[3], orbit(-6, -10, 6.2, [0, -0.5, -0.45])],
+    [S[3], orbit(-6, -10, 6.9, [0, -0.45, -0.45])],
     [S[4], whole],
     // The lateral wall from inside: from the front and the embryo's left.
     [S[6], orbit(40, 10, 7.2, [-0.3, 0.15, -0.1])],

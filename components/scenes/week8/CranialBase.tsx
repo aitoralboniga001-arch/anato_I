@@ -544,6 +544,8 @@ export function CranialBase({ t, reduced }: SceneProps) {
 
       {/* Right gutter: the cartilages (right half). */}
       <Label id="trenkada-kranialak" x={748} y={140} ax={L([514, 180])[0]} ay={L([514, 180])[1]} show={cartK(PIECE.trab) * (1 - ossR) * inFrame(L([514, 180]))} />
+      {/* The vault's cut rim, between the outer outline and the floor: named well inside the ring. */}
+      <Label id="buru-ganga" x={790} y={74} ax={L([CX + 229 * 0.7, CY - 255 * 0.714])[0]} ay={L([CX + 229 * 0.7, CY - 255 * 0.714])[1]} show={inFrame(L([CX + 229 * 0.7, CY - 255 * 0.714]))} small />
       <Label id="nerbio-kranialak" x={780} y={120} ax={L([513, 146])[0]} ay={L([513, 146])[1]} show={vis(t, CB_T.holes + 0.02)} />
       <Label id="burezurreko-zuloak" x={690} y={170} ax={L([563, 257])[0]} ay={L([563, 257])[1]} show={holes} />
       <Label id="begizulo-hegoa" x={810} y={200} ax={L([580, 226])[0]} ay={L([580, 226])[1]} show={cartK(PIECE.orb) * (1 - ossR)} />

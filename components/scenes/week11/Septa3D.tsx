@@ -40,7 +40,7 @@ const CAM = {
   /** From the left atrium, the septum face on (its lateral wall clear): the back on your right. */
   left: orbit(90, 6, 6.9, [0, -0.15, -0.18]),
   /** Down into the AV canal from the front and above. */
-  canal: orbit(-14, 46, 6.2, [0, YF + 0.15, 0]),
+  canal: orbit(-14, 46, 7.6, [0, YF + 0.15, 0]),
   /** Close to the two septa from the front: the notes' frontal section, in depth. Nearly face on: from
    *  further right, the secundum's upper edge hides the ostium secundum behind it. */
   section: orbit(-16, 6, 5, [-0.08, -0.15, -0.12]),
@@ -163,7 +163,9 @@ export function Secundum3D({ t }: SceneProps) {
     // The two atria are named all along (small), full size with the way between them (the oblique path).
     // Seen from inside it (its wall clear), its point would land on the septum: named on its front wall then.
     { id: 'hasierako-eskuineko-aurikula', p: t < P2[4] ? chamber(314, 112, 1.0) : 'hasierako-eskuineko-aurikula', show: 1, small: t < P2[5] || t >= P2[6] },
-    { id: 'hasierako-ezkerreko-aurikula', p: 'hasierako-ezkerreko-aurikula', show: 1, small: t < P2[5] || t >= P2[6] },
+    // From the right the left atrium shows through the ostia until the septum secundum and the spurium's
+    // view hide it whole (steps 2–3): not named there, where no point of it is in sight.
+    { id: 'hasierako-ezkerreko-aurikula', p: 'hasierako-ezkerreko-aurikula', show: t < P2[2] || t >= P2[4] ? 1 : 0, small: t < P2[5] || t >= P2[6] },
     { id: 'zain-sinua', p: 'zain-sinua', show: vis(t, 0, P2[1]) },
     { id: 'septum-primum', p: 'septum-primum', show: vis(t, 0, P2[6] + 0.04) },
     { id: 'ostium-secunduma', p: 'ostium-secunduma', show: vis(t, 0, P2[1]) + vis(t, P2[4], P2[6] + 0.06) },
@@ -376,10 +378,10 @@ export function Birth3D({ t }: SceneProps) {
     [P3[1], drift(t, P3[2] + 0.01, P3[3] - 0.01, CAM.leftBack, orbit(40, 12, 6.2, [0.1, -0.15, -0.16]))],
     // Its pressure on the valve: close to the two septa from the front and the left, the valve's left face
     // against septum secundum.
-    [P3[3], orbit(30, 10, 4.4, [-0.08, -0.2, -0.14])],
+    [P3[3], orbit(30, 10, 5.4, [-0.08, -0.2, -0.14])],
     // The left face while they fuse, then closer to the residual slit along the valve's upper edge.
     // This is the slit itself, rather than the fetal foramen's entrance on the opposite face.
-    [P3[4], drift(t, P3[5] + 0.01, P3[6] - 0.015, orbit(34, 14, 3.6, [-0.08, -0.05, -0.17]), orbit(26, 30, 3, [-0.08, 0.05, -0.17]))],
+    [P3[4], drift(t, P3[5] + 0.01, P3[6] - 0.015, orbit(34, 14, 4.8, [-0.08, -0.05, -0.17]), orbit(26, 30, 4.2, [-0.08, 0.05, -0.17]))],
     [P3[6], CAM.front],
   ]);
   const names: CalloutSpec[] = [

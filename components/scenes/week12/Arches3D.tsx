@@ -30,7 +30,8 @@ export function ArchSystem3D({ t }: SceneProps) {
   const pose: ArtPose = { ...AP0, grow: g6(a1, grow(0), grow(1), grow(2), grow(3) * 0.8, grow(4)), fuse, is7: 0, pulm: 0 };
   const camera = cameraAt(t, [
     [0, orbit(8, 10, 14, [0, 0.55, 0.2], [30, 0])],
-    [S2[1], orbit(48, 8, 11, [0, 2.4, 0.1], [30, 0])],
+    // Low enough for the heart the step names (the truncus it leaves from), the first arch still on top.
+    [S2[1], orbit(48, 8, 12.5, [0, 1.5, 0.1], [30, 0])],
     [S2[2], orbit(10, 12, 11.5, [0, 2.2, 0.1], [30, 0])],
     [S2[3], orbit(4, 6, 16, [0, -1.6, -0.4], [30, 0]), 0.05],
     [S2[4], orbit(10, 10, 12.5, [0, 1.6, 0.1], [30, 0]), 0.05],
@@ -48,7 +49,7 @@ export function ArchSystem3D({ t }: SceneProps) {
     { id: 'seigarren-aorta-arkua', p: 'seigarren-aorta-arkuaL', show: vis(t, S2[2] + 0.19, S2[3]), small: true },
     { id: 'aorta-arkuak', p: 'hirugarren-aorta-arkuaR', show: vis(t, S2[2] + 0.02, S2[3]) + vis(t, S2[4] + 0.03), text: 'Aorta arkuak (6 bikote)' },
     { id: 'beheranzko-aorta', p: 'aorta-dortsal-bakarra', show: vis(t, S2[3] + 0.08, S2[4]), text: 'Aorta dortsal bakarra' },
-    { id: 'bihotza', p: 'bihotza', show: vis(t, 0, S2[1]), small: true },
+    { id: 'bihotza', p: 'bihotza', show: vis(t, 0, S2[2]), small: true },
   ];
   return (
     <ArtView
@@ -96,7 +97,8 @@ export function Day27_3D({ t }: SceneProps) {
   const pose: ArtPose = { ...AP0, grow: g6(1, 1, 0.75 + 0.25 * seg(t, S3[3], S3[3] + 0.05), g4, g5 * 0.8, g6_), gone1, gone2, cranGone: gone2, gone5, pulm, is7: 0 };
   const camera = cameraAt(t, [
     [0, orbit(70, 8, 11.5, [0, 2.2, 0.1], [30, 0])],
-    [S3[1], orbit(62, 12, 8.5, [0, 3.3, 0.2], [30, 0])],
+    // The first pair between the truncus and the dorsal aorta (as the step says): both ends in the frame.
+    [S3[1], orbit(62, 12, 10, [0, 2.4, 0.2], [30, 0])],
     [S3[2], orbit(66, 10, 8.5, [0, 2.9, 0.2], [30, 0])],
     [S3[3], orbit(72, 8, 10, [0, 2.1, 0.1], [30, 0])],
     [S3[4], orbit(76, 8, 9, [0, 1.5, 0.1], [30, 0])],
@@ -116,7 +118,7 @@ export function Day27_3D({ t }: SceneProps) {
     { id: 'seigarren-aorta-arkua', p: 'seigarren-aorta-arkuaL', show: vis(t, S3[5]) },
     { id: 'hasierako-birika-arteriak', p: 'hasierako-birika-arteriakL', show: vis(t, S3[5] + 0.08) },
     { id: 'birika-hastapenak', p: 'birika-hastapenak', show: vis(t, S3[5] + 0.08), small: true },
-    { id: 'enbor-arteriosoa', p: 'enbor-arteriosoa', show: vis(t, S3[5] + 0.08), small: true },
+    { id: 'enbor-arteriosoa', p: 'enbor-arteriosoa', show: vis(t, S3[1], S3[2]) + vis(t, S3[5] + 0.08), small: true },
     { id: 'aorta-dortsalak', p: 'aorta-dortsalakL', show: 1, small: true },
   ];
   return (

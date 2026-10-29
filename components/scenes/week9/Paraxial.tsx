@@ -200,6 +200,7 @@ export function ParaxialMap({ t }: SceneProps) {
       {head > 0.02 && (
         <>
           <Label id="somita-okzipitalak" x={790} y={120} ax={atC(somite(1).c)[0]} ay={atC(somite(1).c)[1]} show={trunkSeg(1) * head} small />
+          <Label id="mesodermo-paraxiala" x={790} y={200} span={[atC([SMT[0][0] - 3.5, SMT[0][1] + 3]), atC(somite(4).c)]} show={band * head} small />
           <Label id="somitomeroak" x={230} y={300} ax={atC([SMT[2][0] - 3.5, SMT[2][1] + 3])[0]} ay={atC([SMT[2][0] - 3.5, SMT[2][1] + 3])[1]} show={smt(0) * head} />
           <Label id="begiaren-kanpoko-muskuluak" x={230} y={440} ax={atC(EYE_MUSCLE)[0]} ay={atC(EYE_MUSCLE)[1]} show={toEye * head} />
           <Label id="begia" x={230} y={530} ax={atC(EYE)[0]} ay={atC(EYE)[1]} show={head} small />

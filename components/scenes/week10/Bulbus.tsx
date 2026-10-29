@@ -299,6 +299,8 @@ export function BulbusMap({ t }: SceneProps) {
       <Stream pts={[[RX, RV.cy], ...inf(RX, -8), ...roots(RX, -8)]} t={t} n={6} speed={5} color={T.deo2} r={3} show={trunc * seg(t, S6[4] + 0.1, S6[4] + 0.13)} seed={2} />
       <Stream pts={[[LX, LV.cy], ...inf(LX, 8), ...roots(LX, 8)]} t={t} n={6} speed={5} color={T.o2} r={3} show={trunc * seg(t, S6[4] + 0.1, S6[4] + 0.13)} seed={5} />
 
+      {/* The whole bulbus (its three parts glow): a bracket along its right side, truncus to proximal part. */}
+      <Label id="atal-bulbarra" x={BX + 120} y={64} align="middle" span={[[BX + HW.proximal + 12, Y.truncus[0]], [BX + HW.proximal + 12, Y.proximal[1]]]} />
       <Label id="aorta-zakua" x={160} y={Y.sac + 6} ax={BX - 20} ay={Y.sac + 6} small />
       <Label id="enbor-arteriosoa" x={160} y={yMid(Y.truncus)} ax={BX - 12} ay={yMid(Y.truncus)} />
       <Label id="arteria-konoa" x={160} y={yMid(Y.conus)} ax={BX - 16} ay={yMid(Y.conus)} />

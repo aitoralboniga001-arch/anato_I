@@ -128,7 +128,7 @@ describe('Kimu grounding: answers come from the original notes', () => {
     vi.stubGlobal('fetch', nokey());
     const r = await askKimu('Zein egiturek osatzen dute diafragma?', [], null);
     expect(r.source).toBe('offline');
-    for (const part of ['Septum Transversuma', 'Mintz pleuroperitonealak', 'Hestegorri inguruko mesenkimatik sortutako zuntz muskularrak', 'Diafragmaren alde periferikoko atal muskularra']) expect(r.reply).toContain(part);
+    for (const part of ['Septum Transversuma', 'Mintz pleuroperitonealak', 'AURREKO HESTEAREN inguruko mesenkimatik sortutako zuntz muskularrak', 'Diafragmaren alde periferikoko atal muskularra']) expect(r.reply).toContain(part);
     expect(r.reply).not.toContain('aorta');
     expect(r.sources[0].ref).toMatch(/^7\. gaia · 3\.1 /);
     expect(r.sources[0].open).toMatchObject({ week: 7, notes: true });
@@ -549,19 +549,13 @@ describe('Kimu: topic named or being studied, atlas-only entries, honest fallbac
   };
   const in7 = { week: 7, stage: 'zeloma', beat: 0 };
 
-  it('answers "mediastinoa" from the atlas; named topic 7 has no notes on it, topic 13 mentions it (the thoracic duct)', async () => {
+  it('answers "mediastinoa" in any wording from topic 7, whose notes now explain it (not the thoracic duct of topic 13)', async () => {
     for (const q of ['mediastinoa', 'mediastinoa, 7. gaian', 'zer da mediastinoa', 'que es el mediastino']) {
       const r = await ask(q, in7);
       expect(r.reply, q).toMatch(/Mediastinoa/);
       expect(r.reply, q).toMatch(/Bi pleura barrunbeen arteko/);
       expect(r.targets[0]?.week, q).toBe(7);
-      if (q.includes('7. gaian')) {
-        expect(r.reply, q).toMatch(/^(Ez dut apunteetan|No lo encuentro|I cannot find)/);
-        expect(r.sources, q).toEqual([]);
-      } else {
-        // Topic 13's notes say the thoracic duct climbs «mediastinotik»: the only notes that mention it.
-        expect(r.sources.map((x) => x.week), q).toEqual([13]);
-      }
+      expect(r.sources.map((x) => x.week), q).toEqual([7]);
     }
   });
 
@@ -614,4 +608,84 @@ describe('Kimu: topic named or being studied, atlas-only entries, honest fallbac
     }
     expect(bad).toEqual([]);
   }, 120000);
+});
+
+describe('Kimu sweep fixes (2026-10-29): headings, names, numbers, typos, other languages', () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const ask = async (q: string, history: Parameters<typeof askKimu>[1] = []) => {
+    vi.stubGlobal('fetch', nokey());
+    return askKimu(q, history, null);
+  };
+
+  it.each([
+    ['ATAL BULBARRAREN TRENKADATZE PROZESUA', '11. gaia, 5. atala', /5\.1 Arteria Konoaren trenkadak[\s\S]*5\.2 Enbor arteriosoaren trenkadak/],
+    ['Bihotzaren atal bulbarretik', '10. gaia, 3.1. atala', /arteria zakua/],
+  ])('a question worded as a heading answers with that section: %s', async (q, ref, body) => {
+    const r = await ask(q);
+    expect(r.reply).toContain(ref);
+    expect(r.reply).toMatch(body);
+    expect(r.reply).not.toMatch(/:\s*$/);
+  });
+
+  it('every heading of topics 7–13 is answered as its own section', async () => {
+    vi.stubGlobal('fetch', nokey());
+    const bad: string[] = [];
+    for (const w of [7, 8, 9, 10, 11, 12, 13])
+      for (const b of notesOf(w)) {
+        if (b.kind !== 'h1' && b.kind !== 'h2') continue;
+        const q = blockText(b).replace(/^\s*[\d.]+\s*/, '').replace(/\s*(?:→|->).*$/, '').trim();
+        // A figures-only section ("… beste irudi batzuk") has no text to answer with.
+        if (q.split(/\s+/).length < 2 || /^sarrera$/i.test(q) || /irudi/i.test(q)) continue;
+        const r = await askKimu(q, [], null);
+        if (!r.reply.includes(`${w}. gaia, ${b.section}.`)) bad.push(`${w} ${b.section} ${q}`);
+      }
+    expect(bad).toEqual([]);
+  }, 120000);
+
+  it('a follow-up is not mistaken for a heading that shares its one word', async () => {
+    const r = await ask('¿Y de dónde viene?', [{ role: 'user', text: '¿Cómo se forma la notocorda?' }, { role: 'kimu', text: 'Notokorda…' }]);
+    expect(r.reply).not.toMatch(/apartado|atala/);
+    expect(r.targets[0].structure).toBe('notokorda');
+  });
+
+  it('quotes a sentence that says the name asked, not its neighbour in the same passage', async () => {
+    expect((await ask('zer da Zain muturra')).reply).toMatch(/zain mutur/i);
+    expect((await ask('zer da Kanpoko arteria iliakoa')).reply).toMatch(/kanpoko arteria iliako/i);
+    // "Bena kabaren segmentu hepatiko" is not "bena hepatikoa": the atlas card, said to be the atlas's.
+    expect((await ask('zer da Zain hepatikoak')).reply).toMatch(/^Ez dut apunteetan aurkitu; atlasaren definizioa: \*\*Zain hepatikoak\*\*/);
+  });
+
+  it('a tie goes to the structure called by its own name, not by an alias', async () => {
+    const r = await ask('zer da Birika arteria');
+    expect(r.targets[0].structure).toBe('birika-arteria');
+  });
+
+  it('reads "3." as "third": the arches are told apart', async () => {
+    for (const [q, id] of [['zer da 3. faringe arkua', 'hirugarren-faringe-arkua'], ['hirugarren arku faringeoa', 'hirugarren-faringe-arkua'], ['zer da 1. faringe arkua', 'lehen-faringe-arkua'], ['zer da 4. eta 6. faringe arkuak', 'laugarren-seigarren-arkuak']]) {
+      expect((await ask(q)).targets[0]?.structure, q).toBe(id);
+    }
+  });
+
+  it('a structure named in full is found whatever else is asked ("noiz agertzen da", "nola sortzen da")', async () => {
+    expect((await ask('Notokorda noiz agertzen da?')).targets[0]?.structure).toBe('notokorda');
+    expect((await ask('Aorta noiz agertzen da?')).targets[0]?.structure).toBe('aorta');
+    const how = await ask('nola sortzen da Gorputz paretako mesodermoa?');
+    expect(how.reply).toMatch(/^\*\*Gorputz paretako mesodermoa\*\*/);
+    expect(how.targets[0]?.structure).toBe('gorputz-paretako-mesodermoa');
+  });
+
+  it('corrects a misspelt name', async () => {
+    for (const [q, id] of [['zer da Bihtza', 'bihotza'], ['zer da Somtak', 'somitak'], ['zer da Hodi neuala', 'hodi-neurala'], ['zer da Korion barrnbea', 'korion-barrunbea'], ['zer da Eskleotoma okzipitalak', 'esklerotoma-okzipitalak']]) {
+      expect((await ask(q)).targets[0]?.structure, q).toBe(id);
+    }
+  });
+
+  it('a question in Spanish finds the Basque notes that name the structure (a list item counts)', async () => {
+    const r = await ask('¿qué es esternón?');
+    expect(r.reply).not.toMatch(/No lo encuentro/);
+    expect(r.targets[0].structure).toBe('esternoia');
+    // An atlas-only structure gets no unrelated notes destination.
+    const hum = await ask('¿qué es húmero?');
+    expect(hum.targets.map((t) => t.week)).toEqual([8]);
+  });
 });

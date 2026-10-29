@@ -501,6 +501,8 @@ export function SpinalRami({ t }: SceneProps) {
       {L('domeinu-primaxiala', 690, 176, [846, 150], dom, true)}
       {L('saihets-arteko-muskuluak', 600, 520, [866, 524], dom, true, 'Saihets artekoak (primaxialak)')}
       <Label id="abdomeneko-muskuluak" x={990} y={440} align="end" ax={950} ay={480} show={dom} small text="Abdomenekoak (abaxialak)" />
+      {/* Their domain: here the abdominal muscles are all of it (the same block, its lower half). */}
+      <Label id="domeinu-abaxiala" x={990} y={404} align="end" ax={958} ay={526} show={dom} small />
     </g>
   );
 }
