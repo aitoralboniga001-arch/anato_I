@@ -170,7 +170,7 @@ const TOPICS: Topic[] = [
   {
     week: 7,
     importance: IMPORTANCE_W7,
-    pinned: ['1/p4/s2', '1/p4/s6', '2/p3/s1', '2/p5/s1', '2/p5/s3', '2.1/p3/s4', '2.1/p11/s2', '2.2/p3/s1', '2.2/p8/s1', '2.2/p14/s1', '3/p5/s3', '3/p6/s2', '3/p7/s4', '3.1/p8/s1'],
+    pinned: ['1/p4/s2', '1/p5/s1', '2/p3/s1', '2/p7/s1', '2/p10/s1', '2.1/p4/s1', '2.1/p12/s2', '2.2/p3/s1', '2.2/p9/s1', '3/p4/s5', '3/p5/s2', '3/p7/s2', '3.1/p8/s1'],
     contrastFrom: 'orriak',
     shown: {},
     same: {},
@@ -178,7 +178,7 @@ const TOPICS: Topic[] = [
   {
     week: 8,
     importance: IMPORTANCE_W8,
-    pinned: ['1/p2/s1', '2/p3/s1', '2/p4/s1', '3/p3/s1', '3.1.1/p10/s1', '3.1.2/p2/s2', '3.2/p2/s4', '4/p10/s3', '4/p27/s1', '5.2.1/p3/s2', '5.4/p3/s1'],
+    pinned: ['1/p2/s1', '2/p2/s1', '2/p3/s1', '3/p3/s1', '3.1.1/p10/s1', '3.1.2/p2/s2', '3.2/p3/s4', '4/p6/s3', '4/p20/s1', '5.2.1/p3/s2', '5.4/p3/s1'],
     contrastFrom: 'jatorriak',
     shown: {},
     same: {},
@@ -186,7 +186,7 @@ const TOPICS: Topic[] = [
   {
     week: 9,
     importance: IMPORTANCE_W9,
-    pinned: ['1/p3/s1', '2/p3/s1', '2.1.1/p4/s3', '2.1.2/p6/s1', '2.2/p10/s2', '2.2.1/p5/s3', '2.2.1/p6/s1', '2.2.2/p21/s1', '2.2.2/p22/s1', '2.2.2/p28/s1', '3/p3/s5', '4/p3/s1'],
+    pinned: ['1/p3/s1', '2/p3/s1', '2.1.1/p5/s3', '2.1.2/p8/s1', '2.2/p9/s5', '2.2.1/p5/s3', '2.2.1/p6/s1', '2.2.2/p23/s1', '2.2.2/p24/s1', '2.2.2/p30/s1', '3/p3/s5', '4/p3/s1'],
     contrastFrom: 'ildaskatuak',
     shown: {},
     same: {},
@@ -194,7 +194,7 @@ const TOPICS: Topic[] = [
   {
     week: 10,
     importance: IMPORTANCE_W10,
-    pinned: ['1/p3/s1', '1/p26/s1', '1/p26/s2', '1/p26/s3', '1/p33/s1', '1/p34/s1', '1/p35/s1', '2/p9/s1', '2/p9/s2', '2/p20/s4', '3.3/p3/s1', '3.3/p3/s2', '3.4/p4/s2'],
+    pinned: ['1/p3/s1', '1/p26/s1', '1/p26/s2', '1/p26/s3', '1/p31/s1', '1/p32/s1', '1/p33/s1', '2/p8/s1', '2/p8/s2', '2/p17/s4', '3.3/p3/s1', '3.3/p3/s2', '3.4/p4/s1'],
     contrastFrom: 'bulbarra',
     shown: { 'zirkulazioa#2/aorta-dortsalak': 'Circulation3D: aorta dortsalak izendatuta hasieratik (aorta-dortsalak1 callout)' },
     // 3.2/p5/s1: "atal bentrikularreko paretan, hasierako ezkerreko bentrikulua ere deitua"; the frontal cut draws it under that name.
@@ -205,7 +205,7 @@ const TOPICS: Topic[] = [
   {
     week: 11,
     importance: IMPORTANCE_W11,
-    pinned: ['1/p5/s2', '1/p6/s2', '2.2/p5/s1', '2.2/p7/s4', '3/p18/s1', '3/p19/s1', '4/p6/s3', '5.1/p5/s5', '5.2/p9/s3', '5.2/p12/s4'],
+    pinned: ['1/p5/s2', '1/p6/s2', '2.2/p5/s1', '2.2/p7/s4', '3/p18/s1', '3/p19/s1', '4/p6/s1', '5.1/p4/s5', '5.2/p7/s8', '5.2/p8/s4'],
     contrastFrom: 'erretena',
     shown: {},
     // 3/p5/s1–s2: the ventricular part is the early left ventricle; topic 11's cuts draw it under that name.
@@ -214,7 +214,7 @@ const TOPICS: Topic[] = [
   {
     week: 12,
     importance: IMPORTANCE_W12,
-    pinned: ['1/p4/s3', '2/p3/s3', '2/p4/s1', '2.3.1/p8/s1', '2.3.2/p9/s1', '2.3.4/p6/s1', '2.3.4/p11/s7', '2.4/p4/s4', '2.4/p13/s1', '2.5/p3/s3', '2.5.1/p5/s1', '2.6/p3/s5', '2.7.1/p4/s4'],
+    pinned: ['1/p4/s3', '2/p4/s3', '2/p5/s1', '2.3.2/p4/s1', '2.3.2/p10/s1', '2.3.4/p6/s1', '2.3.4/p11/s7', '2.4/p5/s3', '2.4/p14/s4', '2.5/p3/s3', '2.5.1/p5/s1', '2.6/p3/s5', '2.7.1/p4/s4'],
     contrastFrom: 'sistema',
     shown: {},
     same: {},
@@ -222,7 +222,7 @@ const TOPICS: Topic[] = [
   {
     week: 13,
     importance: IMPORTANCE_W13,
-    pinned: ['1/p3/s1', '1/p5/s2', '2/p3/s2', '2.1.1/p3/s13', '2.2/p5/s2', '2.3/p7/s2', '2.3/p8/s5', '3.1/p9/s7', '3.2/p11/s4', '4.1.1/p3/s7', '4.2/p7/s4', '5/p6/s4'],
+    pinned: ['1/p3/s1', '1/p5/s2', '2/p3/s2', '2.1.1/p5/s4', '2.2/p6/s2', '2.3/p7/s2', '2.3.1/p5/s1', '3.1/p13/s2', '3.2/p10/s4', '4.1.1/p3/s9', '4.2/p11/s1', '5/p10/s1'],
     contrastFrom: 'bitelinoak',
     // Cardinal3D names the whole vein ('Beheko bena kaba') from the beheko-kaba stage's first step, over its three toured segments.
     shown: { 'kabak#3/beheko-kaba-zaina': 'Cardinal3D: beheko kaba izendatuta 1. urratsetik', 'kabak#10/beheko-kaba-zaina': 'Cardinal3D: beheko kaba izendatuta 1. urratsetik' },

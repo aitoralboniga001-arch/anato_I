@@ -85,7 +85,7 @@ const stages: StageDef[] = [
       },
       {
         at: S1[4],
-        notes: ['w13/1/p7/s1-s2'],
+        notes: ['w13/1/p6/s4-s5'],
         idea: 'Alde bakoitzeko zainak bere luzapenera; zain sinuan odola nahasten da.',
         key: 'Zain sinuan odol oxigenatua (zilborrekoa) eta oxigeno gutxikoa (bitelinoak eta kardinalak) nahasten dira.',
         text: 'Hurbiletik ikusten da zain sinua. Ezkerreko zainak ezkerreko luzapenera heltzen dira eta eskuinekoak eskuinekora. Zain sinuan odol nahasketa gertatzen da: karenako odol oxigenatua oxigeno gutxiko odolarekin nahasten da.',
@@ -188,7 +188,7 @@ const stages: StageDef[] = [
       },
       {
         at: S3[2],
-        notes: ['w13/2.1.1/p3/s5-s6', 'w13/2.1.1/p4/s1'],
+        notes: ['w13/2.1.1/p4/s1-s2', 'w13/2.1.1/p6/s1'],
         recall: ['septum-transversum'],
         idea: 'Septum transversumaren mesodermoan gibela garatzen da: gibel hastapena aurreko hestetik.',
         text: 'Plexua sortuta dagoenean, septum transversumaren mesodermoan (laranja) gibela garatzen hasten da. Aurreko hestetik ebaginazio endodermiko bat sortzen da (horia): gibel hastapena. Septum transversumak gero diafragmaren eraketan parte hartuko du.',
@@ -197,7 +197,7 @@ const stages: StageDef[] = [
       },
       {
         at: S3[3],
-        notes: ['w13/2.1.1/p3/s7-s9'],
+        notes: ['w13/2.1.1/p4/s3-s5'],
         idea: 'Zain bitelinoak gibelera sartu eta adarkatzen dira: gibeleko sinusoideak.',
         key: 'Bi plexu: bat duodenoaren inguruan (kanpoan) eta bestea gibel barnean (sinusoideak).',
         text: 'Gibela hazten da, eta zain bitelinoak haren barnera sartzen dira. Gibel barnean adarkatu eta beste zain sare bat sortzen dute: gibel barneko zain horiei gibeleko sinusoideak deritze. Zain bakoitzaren erdiko atala sinusoideetan banatzen da.',
@@ -207,7 +207,7 @@ const stages: StageDef[] = [
       },
       {
         at: S3[4],
-        notes: ['w13/2.1.1/p3/s10-s12'],
+        notes: ['w13/2.1.1/p5/s1-s3'],
         idea: 'Sinusoideetako odola bi hodi hepatokardiakoetatik ateratzen da zain sinura.',
         text: 'Sinusoideetatik irteten den odola gibeletik ateratzen da, eta zain sinuaren bi luzapenetara heltzen da hodi hepatokardiakoen bidez. Bi dira, eskuinekoa eta ezkerrekoa, eta zain bitelinoen azken atalak dira.',
         focus: ['eskuineko-hodi-hepatokardiakoa', 'ezkerreko-hodi-hepatokardiakoa'],
@@ -216,7 +216,7 @@ const stages: StageDef[] = [
       },
       {
         at: S3[5],
-        notes: ['w13/2.1.1/p3/s13'],
+        notes: ['w13/2.1.1/p5/s4'],
         idea: 'Eskuineko hodi hepatokardiakoa beheko bena kabaren gibel atala izango da.',
         key: 'Beheko kabaren goiko zatia zain bitelino batetik dator: eskuineko hodi hepatokardiakotik.',
         text: 'Kamera eskuineko hodi hepatokardiakora hurbiltzen da. Egitura hau oso garrantzitsua da: garapenean beheko bena kabaren gibel atala izango da. Beraz, beheko kabaren goiko zatiak zain bitelinoaren jatorria du (horregatik du kolore turkesa).',
@@ -232,7 +232,7 @@ const stages: StageDef[] = [
       },
       {
         at: S3[6],
-        notes: ['w13/2.1.1/p4/s2-s3'],
+        notes: ['w13/2.1.1/p7/s1-s2'],
         idea: 'Desagertzen dira: ezkerreko zain bitelinoaren urrutiko eta hurbileko atalak, eta eskuinekoaren urrutiko atala.',
         caution: 'Ezkerreko hodi hepatokardiakoa = ezkerreko zain bitelinoaren hurbileko atala: desagertu egiten da.',
         text: 'Hiru atal mehetu eta desagertzen dira (marra arin batek erakusten du non zeuden): ezkerreko zain bitelinoaren urrutiko atala, haren hurbileko atala (ezkerreko hodi hepatokardiakoa) eta eskuineko zain bitelinoaren urrutiko atala.',
@@ -242,7 +242,7 @@ const stages: StageDef[] = [
       },
       {
         at: S3[7],
-        notes: ['w13/2.1.1/p4/s4-s5'],
+        notes: ['w13/2.1.1/p7/s3-s4'],
         idea: 'Eskuineko zain bitelinoaren duodenoaren inguruko ataletik porta zaina sortzen da.',
         text: 'Geratzen den eskuineko zain bitelinoaren atala, duodenoaren ingurukoa, porta zaina da. Abdomeneko errai batzuetatik irteten den odola heltzen zaio, batez ere errai zeliakoetakoa. Porta zainaren odola gibeletik pasatzen da eskuineko hodi hepatokardiakora.',
         focus: ['porta-zaina'],
@@ -311,7 +311,7 @@ const stages: StageDef[] = [
       },
       {
         at: S4[3],
-        notes: ['w13/2.1.2/p5/s2-s4'],
+        notes: ['w13/2.1.2/p6/s1-s3'],
         idea: 'Bi zainak porta zainera; porta gibelean adarkatu, eta gibeletik eskuineko hodi hepatokardiakora.',
         text: 'Goiko zain mesenterikoa eta zain esplenikoa elkartu eta porta zainera heltzen dira. Porta zaina gibelera sartzen da eta bertan adarkatzen da. Gibeletik irteten den odola eskuineko hodi hepatokardiakora doa, eta haren bidez zain sinuaren eskuineko luzapenera.',
         focus: ['porta-zaina', 'eskuineko-hodi-hepatokardiakoa'],
@@ -389,7 +389,7 @@ const stages: StageDef[] = [
       },
       {
         at: S5[2],
-        notes: ['w13/2.2/p3/s3-s4'],
+        notes: ['w13/2.2/p3/s3', 'w13/2.2/p4/s1'],
         idea: 'Bi zilborreko zainen hurbileko atalak desagertzen dira.',
         caution: 'Hurbileko = bihotzetik hurbilen dagoena (bihotza da erreferentzia).',
         text: 'Kamera bihotzera igotzen da. Eskuineko eta ezkerreko zilborreko zainen hurbileko atalak, bihotzetik hurbilen daudenak, mehetu eta desagertzen dira. Baina garapenean aldaketa gehiago daude.',
@@ -398,7 +398,7 @@ const stages: StageDef[] = [
       },
       {
         at: S5[3],
-        notes: ['w13/2.2/p4/s1'],
+        notes: ['w13/2.2/p5/s1'],
         idea: 'Eskuineko zilborreko zain osoa desagertzen da.',
         text: 'Gero eskuineko zilborreko zain osoa desagertzen da: zilborretik gibeleraino. Ezkerrekoa bakarrik geratzen da karenako odola ekartzeko.',
         focus: ['eskuineko-zilbor-zaina'],
@@ -407,7 +407,7 @@ const stages: StageDef[] = [
       },
       {
         at: S5[4],
-        notes: ['w13/2.2/p5/s1-s2'],
+        notes: ['w13/2.2/p6/s1-s2'],
         idea: 'Ezkerrekoaren hurbileko ataltxoa ere desagertzen da; urrutiko atalak hodi benosoa sortzen du.',
         key: 'Hodi benosoa = ezkerreko zilborreko zainaren eta eskuineko hodi hepatokardiakoaren arteko lotura zuzena.',
         text: 'Ezkerreko zilborreko zainaren hurbileko ataltxoa ere desagertu da. Haren urrutiko atalak lotura zuzena (anastomosia) sortzen du eskuineko hodi hepatokardiakoarekin: hodi benosoa. Gibelaren azpitik eta atzetik doa, ezkerretik eskuinera.',
@@ -417,7 +417,7 @@ const stages: StageDef[] = [
       },
       {
         at: S5[5],
-        notes: ['w13/2.2/p5/s3-s7'],
+        notes: ['w13/2.2/p7/s1-s5'],
         idea: 'Karenako odol oxigenatua: ezkerreko zilborreko zaina → hodi benosoa → eskuineko hodi hepatokardiakoa, gibel plexuko odolarekin kontaktuan egon gabe.',
         key: 'Bi bide gibelean: porta zainaren odola gibel barrutik (sinusoideak), zilborreko odola gibelaren azaletik (hodi benosoa).',
         text: 'Karenako odol oxigenatua ezkerreko zilborreko zainetik dator eta hodi benosotik eskuineko hodi hepatokardiakora heltzen da (gero beheko kabaren gibel segmentua). Odol gorri hori ez dago kontaktuan gibel barneko zain plexutik doan porta zainaren odol urdinarekin.',
@@ -432,7 +432,7 @@ const stages: StageDef[] = [
       },
       {
         at: S5[6],
-        notes: ['w13/2.2/p5/s8-s9'],
+        notes: ['w13/2.2/p8/s1', 'w13/2.2/p9/s1'],
         idea: 'Hodi benosoa gibelaren azaleran dago, ez barruan; eta ezkerreko zilborreko ZAINA da, ez arteria.',
         caution: 'Hodi benosoa gibelaren AZALERAN dago, ez barnean (irudietan barruan dirudi). Egelako dokumentuak «arteria» dio: ezkerreko zilborreko ZAINA da.',
         text: 'Kamera gibelaren azpira eta atzera biratzen da, eta gibela opakuagoa egiten da. Ikusten da hodi benosoa gibelaren azalean dagoela, ez barruan, nahiz eta irudietan barruan dagoela dirudien. Gainera, hodi benosoa ezkerreko zilborreko zainari lotzen zaio, ez arteriari.',
@@ -501,7 +501,7 @@ const stages: StageDef[] = [
       },
       {
         at: S6[4],
-        notes: ['w13/2.3/p7/s3'],
+        notes: ['w13/2.3/p7/s6'],
         idea: '2. zain sakrokardinalak: beheko gorputz adarretako zain odola.',
         text: 'Bigarrena: zain sakrokardinalak (magenta), abdomenaren beheko aldean. Beheko gorputz adarretatik iristen den zain odola hara heltzen da.',
         focus: ['zain-sakrokardinalak', 'beheko-gorputz-adarraren-hasikina'],
@@ -510,7 +510,7 @@ const stages: StageDef[] = [
       },
       {
         at: S6[5],
-        notes: ['w13/2.3/p7/s4'],
+        notes: ['w13/2.3.1/p3/s1'],
         idea: '3. kardinal gaineko zainak (horiak): goian atzeko kardinalen hurbileko atalekin jarraiak.',
         text: 'Kamera atzera biratzen da. Hirugarrena: kardinal gaineko zainak, horiz apunteetako irudian bezala. Behetik gora hazten dira, eta goian atzeko kardinalen hurbileko atalekin lotzen dira: haiekin jarraiak dira.',
         focus: ['kardinal-gaineko-zainak', 'atzeko-zain-kardinalak'],
@@ -518,7 +518,7 @@ const stages: StageDef[] = [
       },
       {
         at: S6[6],
-        notes: ['w13/2.3/p7/s5-s6'],
+        notes: ['w13/2.3.1/p4/s1', 'w13/2.3.1/p3/s2'],
         recall: ['saihetsak'],
         idea: 'Gorputz paretako zain odola saihets arteko zainetatik kardinal gaineko zainetara.',
         text: 'Saihetsen artean saihets arteko zainak agertzen dira (hori argiak). Gorputz paretetako zain odola haien bitartez itzultzen da, eta kardinal gaineko zainetara heltzen da.',
@@ -528,7 +528,7 @@ const stages: StageDef[] = [
       },
       {
         at: S6[7],
-        notes: ['w13/2.3/p7/s7-s8'],
+        notes: ['w13/2.3.1/p3/s3-s4'],
         idea: 'Atzeko kardinalen atal gehienak desagertzen dira; haien lana kardinal gaineko zainek egiten dute.',
         key: 'Lan bera, zain berriak: atzeko kardinalak joan, kardinal gainekoak geratu.',
         text: 'Hasieran atzeko kardinalek egiten zuten lan hori. Orain haien atal gehienak mehetu eta desagertzen dira (marra arinak). Haien lana kardinal gaineko zainek egiten dute: odola gora doa, bihotzera.',
@@ -537,7 +537,7 @@ const stages: StageDef[] = [
       },
       {
         at: S6[8],
-        notes: ['w13/2.3/p7/s9'],
+        notes: ['w13/2.3.1/p3/s5'],
         idea: 'Kardinal gaineko zainak euren artean anastomosi baten bidez lotuta.',
         text: 'Bi kardinal gaineko zainen artean anastomosi bat sortzen da, erdiko lerroa zeharkatuz. Odol zelulak ezkerretik eskuinera pasatzen dira.',
         focus: ['kardinal-gaineko-anastomosia'],
@@ -568,7 +568,7 @@ const stages: StageDef[] = [
     beats: [
       {
         at: S7[0],
-        notes: ['w13/2.3/p8/s1'],
+        notes: ['w13/2.3.1/p5/s1'],
         recall: ['kardinal-gaineko-zainak'],
         idea: 'Eskuineko kardinal gaineko zaina eskuineko atzeko kardinalaren hurbileko atalarekin lotzen da.',
         text: 'Atzetik ikusten dugu orain, bizkarretik: zure ezkerrean enbrioiaren ezkerra. Eskuineko kardinal gaineko zainak (horia) eskuineko atzeko kardinalaren hurbileko atalarekin (berdea) kontaktatzen du.',
@@ -579,7 +579,7 @@ const stages: StageDef[] = [
       },
       {
         at: S7[1],
-        notes: ['w13/2.3/p8/s2', 'w13/2.3/p8/s5'],
+        notes: ['w13/2.3.1/p5/s1'],
         idea: 'Bi atal horietatik azigos zaina, goiko bena kaban bukatzen dena.',
         key: 'Azigos zaina = eskuineko kardinal gainekoa + eskuineko atzeko kardinalaren hurbileko atala (arkua).',
         caution: 'Apunteetako esaldi batek «beheko kaba zainan bukatzen dena» dio, baina gainerako guztiek (eta irudiak) goiko bena kaba diote: azigosa goiko bena kaban bukatzen da.',
@@ -596,7 +596,7 @@ const stages: StageDef[] = [
       },
       {
         at: S7[2],
-        notes: ['w13/2.3/p8/s3'],
+        notes: ['w13/2.3.1/p5/s2'],
         idea: 'Eskuineko saihets arteko zainak azigos zainera, eta odola goiko bena kabaraino.',
         text: 'Eskuineko saihets arteko espazioetatik irteten diren zainak azigos zainera heltzen dira. Odol zelulak azigosetik gora doaz eta goiko bena kabara iristen dira.',
         focus: ['saihets-arteko-zainak', 'azigos-zaina'],
@@ -604,7 +604,7 @@ const stages: StageDef[] = [
       },
       {
         at: S7[3],
-        notes: ['w13/2.3/p8/s4'],
+        notes: ['w13/2.3.1/p5/s4'],
         idea: 'Zain lunbarrak (maila lunbarretik gora) azigos zainarekin bat egiten du.',
         text: 'Kamera maila lunbarrera jaisten da. Hortik igotzen den zain lunbarrak azigos zainarekin bat egiten du, eta haren odola ere goiko bena kabaraino heltzen da.',
         focus: ['zain-lunbarra', 'azigos-zaina'],
@@ -612,7 +612,7 @@ const stages: StageDef[] = [
       },
       {
         at: S7[4],
-        notes: ['w13/2.3/p8/s6'],
+        notes: ['w13/2.3.1/p9/s2'],
         idea: 'Hasierako 3 saihets arteko espazioen zainek beste enbor benoso bat: zuzenean azigos zainera.',
         text: 'Goian, lehen hiru saihets arteko espazioetako zainak (1.–3.) elkartu eta beste enbor benoso bat osatzen dute. Enbor hori zuzenean azigos zainera iristen da, haren arkuaren ondoan.',
         focus: ['lehen-saihets-arteko-enborra'],
@@ -620,7 +620,7 @@ const stages: StageDef[] = [
       },
       {
         at: S7[5],
-        notes: ['w13/2.3/p9/s1'],
+        notes: ['w13/2.3.1/p6/s1'],
         idea: 'Ezkerreko kardinal gaineko zainetik bi enbor: hemiazigos zaina eta, haren gainean, hemiazigos laguntzailea.',
         text: 'Kamera ezkerrera doa. Ezkerreko kardinal gaineko zainaren erdiko zatia mehetu eta desagertzen da, eta bi enbor bereizi geratzen dira: behean hemiazigos zaina eta haren goikaldean hemiazigos laguntzailea.',
         focus: ['hemiazigos-zaina', 'hemiazigos-laguntzailea'],
@@ -629,7 +629,7 @@ const stages: StageDef[] = [
       },
       {
         at: S7[6],
-        notes: ['w13/2.3/p9/s2', 'w13/2.3/p10/s1'],
+        notes: ['w13/2.3.1/p9/s1', 'w13/2.3.1/p7/s1'],
         idea: 'Hemiazigos: 9., 10. eta 11. saihets arteko espazioak; anastomosi batetik azigos zainera.',
         text: 'Hemiazigos zainak 9., 10. eta 11. saihets arteko espazioetako odola hartzen du (ezkerreko saihets arteko zainak). Enbor independentea da, eta anastomosi baten bitartez odola eskuineko azigos zainera eramaten du.',
         focus: ['hemiazigos-zaina', 'kardinal-gaineko-anastomosia'],
@@ -638,7 +638,7 @@ const stages: StageDef[] = [
       },
       {
         at: S7[7],
-        notes: ['w13/2.3/p11/s1'],
+        notes: ['w13/2.3.1/p8/s2'],
         idea: 'Hemiazigos laguntzailea: 4.–8. saihets arteko espazioak, beste enbor batetik azigos zainera.',
         key: 'Ezkerrean bi enbor, bakoitza bere espazioekin eta bere zubiarekin azigos zainera: 4.–8. goian, 9.–11. behean.',
         text: 'Goikaldean, hemiazigos laguntzaileak 4., 5., 6., 7. eta 8. saihets arteko espazioetako odola hartzen du. Beste enbor (anastomosi) baten bidez odol hori eskuineko azigos zainera eramaten du.',
@@ -688,7 +688,7 @@ const stages: StageDef[] = [
       },
       {
         at: S8[1],
-        notes: ['w13/3/p4/s1', 'w13/3/p5/s1'],
+        notes: ['w13/3/p3/s2'],
         idea: 'Goiko kaba zaina (goiko bena kaba) eta beheko kaba zaina (beheko bena kaba).',
         text: 'Aurretik begiratzen dugu emaitza: anastomosiak sortzen dira, zati batzuk desagertzen dira eta helduen zainak geratzen dira. Bi zain nagusiak: goiko kaba zaina edo goiko bena kaba, eta beheko kaba zaina edo beheko bena kaba. Hurrengo etapetan banan banan eraikiko ditugu.',
         focus: ['goiko-kaba-zaina', 'beheko-kaba-zaina'],
@@ -696,7 +696,7 @@ const stages: StageDef[] = [
       },
       {
         at: S8[2],
-        notes: ['w13/3/p6/s1-s2'],
+        notes: ['w13/3/p5/s1'],
         recall: ['atal-lisoa'],
         idea: 'Biak eskuineko aurikulan irekitzen dira: goikoa atzeko pareta lisotik, behekoa behetik.',
         text: 'Kamera bihotzaren eskuinera hurbiltzen da, eta bihotza gardenago egiten da. Bi kaba zainak eskuineko aurikulara iristen dira: goiko kaba zaina atzeko pareta lisotik sartzen da, eta beheko kaba zaina behetik.',
@@ -706,7 +706,7 @@ const stages: StageDef[] = [
       },
       {
         at: S8[3],
-        notes: ['w13/3/p7/s1-s2'],
+        notes: ['w13/3/p4/s1'],
         idea: 'Prozesu nagusia: ezkerreko zainetako odola eskuinekoetara, anastomosien bidez.',
         key: 'Lau zubi ezkerretik eskuinera: aurreko kardinalena (goian), kardinal gainekoena (atzean), kardinal azpikoena (giltzurrunetan), sakrokardinalena (behean).',
         text: 'Gogoratu: zain sistemaren garapenean prozesu garrantzitsuenetako bat ezkerreko zainetako odola eskuinekoetara pasatzea da. Horretarako anastomosiak sortzen dira denborarekin: odol zelulak zubi guztietan ezkerretik eskuinera doaz.',
@@ -736,7 +736,7 @@ const stages: StageDef[] = [
     beats: [
       {
         at: S9[0],
-        notes: ['w13/3.1/p3/s1-s3'],
+        notes: ['w13/3.1/p4/s1', 'w13/3.1/p3/s1'],
         recall: ['beheko-kaba-zaina'],
         idea: 'Beheko kaba zaina: abdomeneko zainik garrantzitsuena; atal bakoitzak jatorri desberdina du, eta fusionatzen dira.',
         text: 'Hau da heldutako beheko kaba zaina, kolorez jatorriaren arabera. Abdomenetik heltzen den zainik garrantzitsuena da. Atal desberdinak ditu, bakoitza jatorri desberdinekoa (turkesa, laranja, magenta), baina haien artean fusionatzen dira.',
@@ -747,7 +747,7 @@ const stages: StageDef[] = [
       },
       {
         at: S9[1],
-        notes: ['w13/3.1/p3/s4-s6'],
+        notes: ['w13/3.1/p5/s1', 'w13/3.1/p14/s3', 'w13/3.1/p5/s2'],
         recall: ['eskuineko-hodi-hepatokardiakoa', 'porta-zaina'],
         idea: 'Goiko segmentua = gibel segmentua (eskuineko hodi hepatokardiakotik): eskuineko aurikulara irekitzen da; porta zainaren odola gibeletik hara.',
         text: 'Atzera goaz, 7. astera, eta segmentuak banan banan eraikiko ditugu. Goiko segmentua gibel segmentua da, eskuineko hodi hepatokardiakotik sortua: honen bidez beheko bena kaba eskuineko aurikulara irekitzen da. Porta zainaren odola gibela zeharkatu eta hara heltzen da.',
@@ -757,7 +757,7 @@ const stages: StageDef[] = [
       },
       {
         at: S9[2],
-        notes: ['w13/3.1/p4/s1-s2'],
+        notes: ['w13/3.1/p6/s1-s2'],
         idea: 'Kardinal azpiko zainen artean anastomosi bat: ezkerreko odola eskuinera.',
         text: 'Bi kardinal azpiko zainen artean, giltzurrunen mailan, anastomosi bat agertzen da. Haren bidez ezkerretik datorren odola eskuinera doa: odol zelulak zubia zeharkatzen dute.',
         focus: ['kardinal-azpiko-zainak', 'kardinal-azpiko-anastomosia'],
@@ -765,7 +765,7 @@ const stages: StageDef[] = [
       },
       {
         at: S9[3],
-        notes: ['w13/3.1/p5/s1-s2'],
+        notes: ['w13/3.1/p6/s2', 'w13/3.1/p8/s1'],
         recall: ['giltzurruna', 'gonadak'],
         idea: 'Anastomositik ezkerreko giltzurrun zaina; ezkerreko kardinal azpikoaren urrutiko ataletik ezkerreko zain gonadala; hurbileko atala desagertzen da.',
         key: 'Ezkerreko giltzurrun zaina luzea da, zubi bat delako: ezkerreko giltzurrunetik eskuineko kabaraino.',
@@ -776,7 +776,7 @@ const stages: StageDef[] = [
       },
       {
         at: S9[4],
-        notes: ['w13/3.1/p6/s1-s2'],
+        notes: ['w13/3.1/p8/s1', 'w13/3.1/p13/s2'],
         idea: 'Eskuineko kardinal azpiko zainetik giltzurrun segmentua: goitik gibel segmentuarekin fusionatzen da.',
         text: 'Eskuineko kardinal azpiko zainetik beheko bena kabaren beste atal bat eratzen da: giltzurrun segmentua. Gora hazten da eta goitik gibel segmentuarekin fusionatzen da: odola zuzenean bihotzera doa.',
         focus: ['kabaren-giltzurrun-segmentua', 'kabaren-gibel-segmentua'],
@@ -785,7 +785,7 @@ const stages: StageDef[] = [
       },
       {
         at: S9[5],
-        notes: ['w13/3.1/p7/s1-s2'],
+        notes: ['w13/3.1/p9/s1-s2'],
         idea: 'Zain sakrokardinalen artean beste anastomosi bat.',
         text: 'Kamera pelbisera jaisten da. Bi zain sakrokardinalen artean beste anastomosi (kontaktu) bat agertzen da, eta odola ezkerretik eskuinera pasatzen da.',
         focus: ['zain-sakrokardinalak', 'sakrokardinal-anastomosia'],
@@ -793,7 +793,7 @@ const stages: StageDef[] = [
       },
       {
         at: S9[6],
-        notes: ['w13/3.1/p8/s1', 'w13/3.1/p9/s1-s2'],
+        notes: ['w13/3.1/p9/s2', 'w13/3.1/p10/s1', 'w13/3.1/p11/s1'],
         idea: 'Urrutiko ataletatik zain iliako primitiboak; eskuineko sakrokardinalaren hurbileko ataletik beheko kabaren segmentu sakrokardinala.',
         text: 'Ezkerreko zain sakrokardinalaren urrutiko ataletik (eta anastomositik) ezkerreko zain iliako primitiboa eratzen da; eskuinekoaren urrutiko ataletik eskuineko zain iliako primitiboa. Eskuinekoaren hurbileko ataletik beheko bena kabaren segmentu sakrokardinala sortzen da; ezkerreko hurbileko atala desagertzen da.',
         focus: ['ezkerreko-zain-iliako-primitiboa', 'eskuineko-zain-iliako-primitiboa', 'kabaren-segmentu-sakrokardinala'],
@@ -802,7 +802,7 @@ const stages: StageDef[] = [
       },
       {
         at: S9[7],
-        notes: ['w13/3.1/p9/s3-s4'],
+        notes: ['w13/3.1/p12/s1-s2'],
         idea: 'Bi zain iliako primitiboak elkartuta beheko kabara (atal sakrokardinala); haietara ezkerreko eta eskuineko zain iliakoak.',
         text: 'Bi zain iliako primitiboak elkartuta iristen dira beheko bena kabara, eskuineko sakrokardinalaren hurbileko atalera: hori da atal sakrokardinala. Zain iliako primitiboetara kanpoko eta barneko zain iliakoak heltzen dira.',
         focus: ['zain-iliako-primitiboak', 'kanpoko-zain-iliakoak', 'barneko-zain-iliakoak'],
@@ -810,7 +810,7 @@ const stages: StageDef[] = [
       },
       {
         at: S9[8],
-        notes: ['w13/3.1/p9/s5-s7'],
+        notes: ['w13/3.1/p13/s1-s2'],
         idea: 'Kaba zain guztiak fusionatuz behin betiko beheko bena kaba: 3 atal nagusi.',
         key: 'Beheko kaba = gibel atala (eskuineko hodi hepatokardiakoa) + giltzurrun atala (eskuineko kardinal azpikoa) + atal sakrokardinala (eskuineko sakrokardinala).',
         text: 'Zatiak fusionatu eta beren behin betiko lekura doaz: behin betiko beheko bena kaba. Laburbilduz, hiru atal nagusi ditu: gibel atala (hodi hepatokardiakotik), giltzurrun atalarekin fusionatzen dena (eskuineko kardinal azpikotik), eta hau atal sakrokardinalarekin (eskuineko sakrokardinalaren hurbileko ataletik).',
@@ -826,7 +826,7 @@ const stages: StageDef[] = [
       },
       {
         at: S9[9],
-        notes: ['w13/3.1/p9/s8-s11'],
+        notes: ['w13/3.1/p14/s1-s4'],
         idea: 'Beheko kabara: zain iliako primitiboak, abdomeneko errai batzuen odola (giltzurrunak) eta beheko zain lunbarrak; porta zainaren odola gibeletik.',
         text: 'Beheko bena kabara iristen dira: zain iliako primitiboak (haietan bukatzen dira barneko eta kanpoko zain iliakoak), abdomeneko errai batzuen odola (giltzurrunetakoa) eta beheko zain lunbarrak. Eskuineko aurikularen atzeko pareta lisora heltzen da. Porta zainaren odola gibeletik pasa eta gibel segmentura iristen da.',
         focus: ['zain-iliako-primitiboak', 'ezkerreko-giltzurrun-zaina', 'beheko-zain-lunbarrak', 'porta-zaina'],
@@ -858,7 +858,7 @@ const stages: StageDef[] = [
     beats: [
       {
         at: S10[0],
-        notes: ['w13/3.1/p9/s12'],
+        notes: ['w13/3.1/p15/s1'],
         recall: ['ezkerreko-sinu-luzapena', 'zain-sinua'],
         idea: 'Anastomosien ondorioz zain sinuaren ezkerreko luzapenak garrantzia galtzen du: odol osoa eskuineko luzapenera.',
         text: 'Bihotza atzetik ikusten da. Ezkerreko zainen odola anastomosien bidez eskuinera doanez, zain sinuaren ezkerreko luzapena txikitu egiten da eta garrantzia galtzen du. Ezkerreko kardinal komuna ere mehetzen da. Odol osoa eskuineko luzapenera doa.',
@@ -869,7 +869,7 @@ const stages: StageDef[] = [
       },
       {
         at: S10[1],
-        notes: ['w13/3.1/p9/s13-s14'],
+        notes: ['w13/3.1/p15/s2-s3'],
         idea: 'Ezkerreko luzapena ez da guztiz desagertzen: sinu koronarioa eta ezkerreko aurikularen zain laprana.',
         key: 'Sinu koronarioa = zain sinuaren ezkerreko luzapenaren aztarna, bihotzaren atzeko paretan.',
         text: 'Baina ezkerreko luzapena ez da guztiz desagertzen. Hortik bi egitura sortzen dira: sinu koronarioa, bihotzaren atzeko paretan dagoen zain berezia, eta sinu koronarioraino iristen den beste zain bat, ezkerreko aurikularen zain laprana.',
@@ -879,7 +879,7 @@ const stages: StageDef[] = [
       },
       {
         at: S10[2],
-        notes: ['w13/3.1/p9/s15-s16'],
+        notes: ['w13/3.1/p15/s4-s5'],
         recall: ['beheko-kabaren-balbula', 'sinu-koronarioaren-balbula'],
         idea: 'Eskuineko balbula benosotik bi balbula: beheko kabarena eta sinu koronarioarena; sinu koronarioa eskuineko aurikulan irekitzen da.',
         text: 'Kamera eskuineko aurikulara biratzen da. Gogoratu eskuineko aurikula deskribatzean: beheko aldean, eskuineko balbula benosotik bi balbula agertzen ziren, beheko bena kabarena eta zain sinu koronarioarena. Sinu koronarioa ere eskuineko aurikulan irekitzen da.',
@@ -928,7 +928,7 @@ const stages: StageDef[] = [
       },
       {
         at: S11[2],
-        notes: ['w13/3.2/p5/s1-s3'],
+        notes: ['w13/3.2/p5/s1', 'w13/3.2/p10/s3'],
         idea: 'Anastomositik ezkerreko zain brakiozefalikoa: odola ezkerretik eskuinera; eskuineko brakiozefalikoarekin elkartu, eta biak goiko bena kaban.',
         key: 'Ezkerreko brakiozefalikoa luzea eta zeharkakoa da, zubi bat delako; eskuinekoa laburra eta bertikala.',
         text: 'Konexio horretatik ezkerreko zain brakiozefalikoa sortzen da. Odola ezkerretik eskuinera darama, eta eskuineko zain brakiozefalikoarekin elkartzen da. Biak batera goiko bena kaban irekitzen dira. Ezkerreko aurreko kardinalaren beheko zatia desagertzen da.',
@@ -938,7 +938,7 @@ const stages: StageDef[] = [
       },
       {
         at: S11[3],
-        notes: ['w13/3.2/p6/s1', 'w13/3.2/p7/s1', 'w13/3.2/p8/s1'],
+        notes: ['w13/3.2/p5/s2', 'w13/3.2/p6/s1', 'w13/3.2/p7/s1'],
         recall: ['goiko-gorputz-adarraren-hasikina'],
         idea: 'Ezkerreko brakiozefalikora: ezkerreko barneko jugularra (ezkerreko aurreko kardinalaren urrutiko atala) eta ezkerreko subklabioa (goiko gorputz adarretik).',
         text: 'Kamera ezkerrera doa. Ezkerreko zain brakiozefalikora bi zain nagusi iristen dira: ezkerreko barneko jugularra, ezkerreko aurreko kardinalaren urrutiko ataletik sortua (buruaren eta aurpegiaren ezkerreko aldea drenatzen du), eta ezkerreko lepauztaipeko zaina edo subklabioa, goiko gorputz adarretik hazten dena.',
@@ -947,7 +947,7 @@ const stages: StageDef[] = [
       },
       {
         at: S11[4],
-        notes: ['w13/3.2/p9/s1', 'w13/3.2/p10/s1', 'w13/3.2/p11/s1-s2'],
+        notes: ['w13/3.2/p8/s1', 'w13/3.2/p9/s1', 'w13/3.2/p10/s1-s2'],
         idea: 'Eskuineko brakiozefalikoa: eskuineko barruko jugularra (eskuineko aurreko kardinaletik) eta eskuineko subklabioa, jugularrera heltzen dena.',
         text: 'Eskuinean ere eskuineko zain brakiozefalikoa sortzen da. Hara heltzen dira eskuineko barruko jugularra, eskuineko aurreko kardinalaren urrutiko ataletik sortua, eta eskuineko lepauztaipeko zaina edo subklabioa, eskuineko goiko gorputz adarretik datorrena eta barruko jugularrera heltzen dena.',
         focus: ['barneko-jugularrak', 'zain-subklabioak', 'eskuineko-zain-brakiozefalikoa'],
@@ -955,7 +955,7 @@ const stages: StageDef[] = [
       },
       {
         at: S11[5],
-        notes: ['w13/3.2/p11/s3-s4'],
+        notes: ['w13/3.2/p10/s3-s4'],
         idea: 'Bi zain brakiozefalikoak elkartzean goiko bena kaba; enborra eskuineko kardinal komunetik eta eskuineko aurreko kardinalaren hurbileko ataletik.',
         text: 'Ezkerreko eta eskuineko zain brakiozefalikoak elkartzen direnean goiko bena kaba hasten da. Beraz, goiko bena kabaren enborra eskuineko kardinal komunetik eta eskuineko aurreko kardinalaren hurbileko ataletik sortzen da.',
         focus: ['ezkerreko-zain-brakiozefalikoa', 'eskuineko-zain-brakiozefalikoa', 'goiko-kaba-zaina'],
@@ -970,7 +970,7 @@ const stages: StageDef[] = [
       },
       {
         at: S11[6],
-        notes: ['w13/3.2/p11/s5-s6'],
+        notes: ['w13/3.2/p10/s5-s6'],
         idea: 'Kanpoko zain jugularrak aurpegiko zain sare batetik; subklabioetan bukatzen dira.',
         text: 'Aurpegiko zain sare batetik kanpoko zain jugularrak sortzen dira, bata ezkerrean eta bestea eskuinean. Lepoan behera jaisten dira eta ezkerreko eta eskuineko subklabioetan bukatzen dira.',
         focus: ['kanpoko-jugularrak'],
@@ -978,7 +978,7 @@ const stages: StageDef[] = [
       },
       {
         at: S11[7],
-        notes: ['w13/3.2/p11/s7', 'w13/3.2/p12/s1', 'w13/3.2/p13/s1'],
+        notes: ['w13/3.2/p10/s7', 'w13/3.2/p11/s1', 'w13/3.2/p12/s1'],
         idea: 'Goiko bena kabaren bi atal: hasierakoa eskuineko aurreko kardinaletik, bukaerakoa eskuineko kardinal komunetik.',
         key: 'Goiko kaba bi kolorez: goian urdina (aurreko kardinala), behean urdin argia (kardinal komuna).',
         text: 'Goiko bena kaban bi atal bereizten dira: hasierako atala eskuineko aurreko kardinaletik sortua (goian), eta bukaerako atala eskuineko kardinal komunetik sortua (behean, eskuineko aurikularen ondoan).',
@@ -1012,7 +1012,7 @@ const stages: StageDef[] = [
     beats: [
       {
         at: S12[0],
-        notes: ['w13/3.2/p14/s1', 'w13/3.2/p15/s1-s2'],
+        notes: ['w13/3.2/p13/s1', 'w13/3.2/p14/s1-s2'],
         recall: ['goiko-kaba-zaina'],
         idea: 'Goiko bena kabara: eskuineko eta ezkerreko zain brakiozefalikoak, eta azigos zaina.',
         text: 'Jakin beharrekoa: gure zainik garrantzitsuenak. Goiko bena kabara iristen diren zainik garrantzitsuenak eskuineko eta ezkerreko zain brakiozefalikoak eta azigos zaina dira. Odol zelulek hiru bideak erakusten dituzte.',
@@ -1024,7 +1024,7 @@ const stages: StageDef[] = [
       },
       {
         at: S12[1],
-        notes: ['w13/3.2/p16/s1', 'w13/3.2/p17/s1'],
+        notes: ['w13/3.2/p15/s1'],
         idea: 'Beheko bena kabara beheko gorputz adarretako zain odol guztia: iliakoak, porta, abdomeneko erraiak…',
         text: 'Beheko bena kabara beheko gorputz adarretako zain odol guztia iristen da, zain ezberdinen bitartez: zain iliakoak, porta zaina (gibeletik pasata) eta abdomeneko errai ezberdinetatik datorrena, adibidez giltzurrunetakoa.',
         focus: ['beheko-kaba-zaina', 'zain-iliako-primitiboak', 'porta-zaina'],
@@ -1033,7 +1033,7 @@ const stages: StageDef[] = [
       },
       {
         at: S12[2],
-        notes: ['w13/3.2/p18/s1'],
+        notes: ['w13/3.2/p17/s1'],
         idea: 'Behin betiko beheko bena kaba: atal sakrokardinala (hortik iliako primitiboak), gibel atala, giltzurrun atala.',
         text: 'Behin betiko beheko bena kabaren atalak: atal sakrokardinala (hortik ezkerreko eta eskuineko zain iliako primitiboak), gibel atala (eskuineko hodi hepatokardiakotik) eta giltzurrun atala (eskuineko kardinal azpiko zainetik).',
         focus: ['kabaren-segmentu-sakrokardinala', 'kabaren-gibel-segmentua', 'kabaren-giltzurrun-segmentua'],
@@ -1042,7 +1042,7 @@ const stages: StageDef[] = [
       },
       {
         at: S12[3],
-        notes: ['w13/3.2/p18/s1', 'w13/3.2/p15/s1-s2'],
+        notes: ['w13/3.2/p17/s1', 'w13/3.2/p14/s1-s2'],
         recall: ['bitelo-zainak', 'zilbor-zainak', 'aurreko-zain-kardinalak', 'kardinal-gaineko-zainak', 'kardinal-azpiko-zainak', 'zain-sakrokardinalak'],
         idea: 'Heldu zain bakoitza bere jatorriaren kolorean: taula osoa.',
         key: 'Kolorea = jatorria: turkesa bitelinoak, arrosa zilborrekoak, urdinak aurreko kardinalak, horia gainekoak, laranja azpikoak, magenta sakrokardinalak.',
@@ -1085,7 +1085,7 @@ const stages: StageDef[] = [
       },
       {
         at: S13[1],
-        notes: ['w13/4.1.1/p3/s2-s3'],
+        notes: ['w13/4.1.1/p3/s2', 'w13/4.1.1/p3/s5'],
         recall: ['kabaren-gibel-segmentua'],
         idea: 'Odol gehiena gibelaren azaleko hodi benosotik hodi hepatokardiakora, eta hortik beheko bena kabara.',
         text: 'Kamera gibelera hurbiltzen da. Iristen den odol gehiena gibelaren azalean dagoen hodi benosotik pasatzen da, eta hodi hori hodi hepatokardiakoan sartzen da; hortik odola beheko bena kabara isurtzen da. Garapenaren amaieran hodi hepatokardiakoa beheko bena kabaren gibel segmentua bihurtzen da.',
@@ -1094,7 +1094,7 @@ const stages: StageDef[] = [
       },
       {
         at: S13[2],
-        notes: ['w13/4.1.1/p3/s4'],
+        notes: ['w13/4.1.1/p3/s6'],
         idea: 'Odol nahasketa: zilborreko odol oxigenatua + beheko kabatik (giltzurrunetatik) igotzen den oxigeno gutxikoa.',
         key: 'Lehen nahasketa: hodi benosoa beheko kabara sartzen den lekuan.',
         text: 'Baina beheko bena kabatik ere zain odola igotzen da, oxigeno gutxikoa, adibidez giltzurrunetatik (zelula urdinak). Beraz, odol nahasketa bat gertatzen da: zilborreko zainetik datorren odol oxigenatua eta beheko bena kabatik igotzen den oxigeno gutxikoa. Hortik gora odola morea da.',
@@ -1103,7 +1103,7 @@ const stages: StageDef[] = [
       },
       {
         at: S13[3],
-        notes: ['w13/4.1.1/p3/s5-s6'],
+        notes: ['w13/4.1.1/p3/s7-s8'],
         recall: ['porta-zaina'],
         idea: 'Bena portaren odol desoxigenatuarekin ere nahasten da (gibeletik pasatzen dena): oxigeno kontzentrazioa jaisten da.',
         text: 'Gainera, bena portatik datorren odol desoxigenatuarekin ere nahasten da, gibela zeharkatzen duen odolarekin. Horren ondorioz, odolaren oxigeno kontzentrazioa jaisten da.',
@@ -1113,7 +1113,7 @@ const stages: StageDef[] = [
       },
       {
         at: S13[4],
-        notes: ['w13/4.1.1/p3/s7'],
+        notes: ['w13/4.1.1/p3/s9'],
         recall: ['zulo-obala', 'septum-primum', 'septum-secundum'],
         idea: 'Nahastutako odola eskuineko aurikulara; gehiena (ez osoa) aurikula arteko trenkadako zulo obaletik ezkerreko aurikulara.',
         key: 'Zulo obala = jaio aurreko lasterbidea: biriketatik pasatu gabe ezkerreko bihotzera.',
@@ -1130,7 +1130,7 @@ const stages: StageDef[] = [
       },
       {
         at: S13[5],
-        notes: ['w13/4.1.1/p3/s8'],
+        notes: ['w13/4.1.1/p3/s11'],
         recall: ['ezkerreko-zulo-ab', 'aorta'],
         idea: 'Ezkerreko aurikulatik ezkerreko zulo aurikulobentrikularretik ezkerreko bentrikulura, eta aortatik gorputz osora.',
         text: 'Ezkerreko aurikulara iritsitako odolak ezkerreko zulo aurikulobentrikularra zeharkatzen du eta ezkerreko bentrikulura heltzen da. Hortik aortaren atalen bidez gorputz osora bidaltzen da: goranzko aorta, aorta makoa eta, bukatzeko, beheranzko aorta.',
@@ -1139,7 +1139,7 @@ const stages: StageDef[] = [
       },
       {
         at: S13[6],
-        notes: ['w13/4.1.2/p3/s1-s2'],
+        notes: ['w13/4.1.2/p3/s1', 'w13/4.1.2/p3/s4'],
         idea: 'Kantitate txiki bat eskuineko aurikulan geratzen da (septum secundumaren beheko atalak eragozten du), eta goiko bena kabako odolarekin nahasten da.',
         text: 'Eskuinean: beheko bena kabaren odol guztia ez da ezkerreko aurikulara iristen. Kantitate txiki bat eskuineko aurikulan geratzen da, septum secundumaren beheko atalak ez baitu uzten ezkerrera pasatzen. Geratzen den odol hori goiko bena kabatik sartzen den oxigeno gutxiko odolarekin nahasten da.',
         focus: ['septum-secundum', 'goiko-kaba-zaina', 'eskuineko-aurikula'],
@@ -1147,7 +1147,7 @@ const stages: StageDef[] = [
       },
       {
         at: S13[7],
-        notes: ['w13/4.1.2/p3/s3'],
+        notes: ['w13/4.1.2/p3/s5'],
         idea: 'Eskuineko zulo aurikulobentrikularretik eskuineko bentrikulura, eta birika enborretik irteten da.',
         text: 'Odol hori eskuineko zulo aurikulobentrikularretik eskuineko bentrikulura pasatzen da, eta handik birika enborraren bidez irteten da.',
         focus: ['eskuineko-bentrikulua', 'birika-enborra'],
@@ -1155,7 +1155,7 @@ const stages: StageDef[] = [
       },
       {
         at: S13[8],
-        notes: ['w13/4.1.2/p3/s4-s5'],
+        notes: ['w13/4.1.2/p3/s6-s7'],
         recall: ['hodi-arteriosoa'],
         idea: 'Biriketan erresistentzia handia: odol gutxi heltzen da; gehiena hodi arteriosotik aortara, han nahasteko.',
         key: 'Hodi arteriosoa = bigarren lasterbidea: birika enborretik aortara, biriken saihesbidea.',
@@ -1172,7 +1172,7 @@ const stages: StageDef[] = [
       },
       {
         at: S13[9],
-        notes: ['w13/4.1.2/p3/s6-s7'],
+        notes: ['w13/4.1.2/p3/s8-s9'],
         recall: ['enbor-brakiozefalikoa', 'karotida-komuna'],
         idea: 'Odol aberatsena aortaren lehen adarretatik burura; beherantz doana hodi arteriosokoarekin nahasten da eta saturazioa asko jaisten da.',
         text: 'Kamera burura igotzen da. Oxigenoan aberatsena den odola aortaren lehen adarretatik irteten da goiko egituretara, burura besteak beste. Beherantz doana hodi arteriosotik datorrenarekin nahasten da, eta haren saturazioa asko jaisten da: aortatik jaisten den odolak oxigeno gutxi du.',
@@ -1181,7 +1181,7 @@ const stages: StageDef[] = [
       },
       {
         at: S13[10],
-        notes: ['w13/4.1.2/p3/s8-s9'],
+        notes: ['w13/4.1.2/p3/s10-s11'],
         recall: ['zilbor-arteriak'],
         idea: 'Zilborreko arteriak (aortaren aurreko paretatik): saturazioa %58 inguru; karenara itzultzen dira oxigenatzeko.',
         text: 'Kamera pelbisera jaisten da. Zilborreko arterietatik doan odolaren oxigeno saturazioa askoz baxuagoa da, %58 ingurukoa edo pixka bat gutxiago. Arteria horiek aortaren aurreko paretatik sortu ziren. Haietatik odola karenara itzultzen da berriro oxigenatzeko.',
@@ -1197,7 +1197,7 @@ const stages: StageDef[] = [
       },
       {
         at: S13[11],
-        notes: ['w13/4.1.2/p3/s10'],
+        notes: ['w13/4.1.2/p3/s12'],
         recall: ['barneko-arteria-iliakoa', 'arteria-iliako-primitiboak'],
         idea: 'Hasieran zilbor arteriak aortatik zuzenean; gero arteria iliako komunaren barneko adarrekin (gerriko 5. arteria segmentua) kontaktatzen dute.',
         text: 'Hasieran zilbor arteriak aortatik zuzenean irteten dira. Garapenean aurrerago, gerriko 5. arteria segmentuetatik sortzen diren arteria iliako komunen barneko adarrekin kontaktatzen dute, eta odolak bide hori egiten du karenara joateko.',
@@ -1241,7 +1241,7 @@ const stages: StageDef[] = [
       },
       {
         at: S14[1],
-        notes: ['w13/4.2/p3/s2-s3'],
+        notes: ['w13/4.2/p4/s1-s2'],
         recall: ['zilbor-arteriak'],
         idea: 'Jaiotzaren 2–3 minutuetara zilborreko arterien muskulu lisoak uzkurtzen dira eta arteriak ixten dira.',
         text: 'Jaio eta 2 edo 3 minutura, zilborreko arterien paretetako muskulu lisoak uzkurtu egiten dira eta arteriak ixten dira: mehetu egiten dira eta odol fluxua gelditzen da. Arteria horietatik egitura desberdinak sortuko dira.',
@@ -1250,7 +1250,7 @@ const stages: StageDef[] = [
       },
       {
         at: S14[2],
-        notes: ['w13/4.2/p4/s1'],
+        notes: ['w13/4.2/p5/s1'],
         idea: 'Urrutiko atala: zilborreko erdialdeko lotailuak (fibrosia, jaio osteko hilabeteetan).',
         text: 'Zilbor hestea moztuta dago. Zilborreko arterien urrutiko atala zilborreko erdialdeko lotailu bihurtzen da, fibrosi prozesu baten ondorioz, jaio osteko hurrengo hilabeteetan: kolore grisa, lotailuena.',
         focus: ['erdialdeko-zilbor-lotailua'],
@@ -1259,7 +1259,7 @@ const stages: StageDef[] = [
       },
       {
         at: S14[3],
-        notes: ['w13/4.2/p5/s1'],
+        notes: ['w13/4.2/p6/s1'],
         recall: ['barneko-arteria-iliakoa', 'gernu-maskuria'],
         idea: 'Hurbileko atala irekita: goiko gernu maskuriaren arteriak, barneko arteria iliakoen zatiak.',
         key: 'Zilborreko arteria bi zatitan: hurbila bizirik (gernu maskurira), urrutia lotailu.',
@@ -1270,7 +1270,7 @@ const stages: StageDef[] = [
       },
       {
         at: S14[4],
-        notes: ['w13/4.2/p5/s2-s3', 'w13/4.2/p6/s1-s2'],
+        notes: ['w13/4.2/p7/s1-s2', 'w13/4.2/p8/s1-s2'],
         recall: ['ezkerreko-zilbor-zaina'],
         idea: 'Arterien ondoren ezkerreko zilborreko zaina eta hodi benosoa ixten dira (minutuetan): zaina → gibeleko lotailu borobila (gibeletik zilborrera).',
         text: 'Zilborreko arteriak itxi ondoren, ezkerreko zilborreko zaina eta haren jarraipena den hodi benosoa ere ixten dira, jaiotzaren hurrengo minutuetan. Horiek ere lotailu bihurtzen dira: ezkerreko zilborreko zaina gibeleko lotailu borobila da, gibeletik zilborreraino.',
@@ -1280,7 +1280,7 @@ const stages: StageDef[] = [
       },
       {
         at: S14[5],
-        notes: ['w13/4.2/p7/s1', 'w13/4.2/p7/s2'],
+        notes: ['w13/4.2/p9/s1', 'w13/4.2/p10/s1'],
         recall: ['hodi-benosoa'],
         idea: 'Hodi benosoa → gibeleko lotailu benosoa (gibelaren azalean).',
         text: 'Kamera gibelaren atzera eta azpira biratzen da. Hodi benosoa gibeleko lotailu benoso bihurtzen da, gibelaren azalean, hodia zegoen leku berean.',
@@ -1296,7 +1296,7 @@ const stages: StageDef[] = [
       },
       {
         at: S14[6],
-        notes: ['w13/4.2/p7/s2', 'w13/4.2/p7/s3'],
+        notes: ['w13/4.2/p10/s1', 'w13/4.2/p10/s3'],
         recall: ['hodi-arteriosoa'],
         idea: 'Hodi arteriosoa ixten da → lotailu arteriosoa (2–3 hilabete beranduago): birika arteriaren eta aortaren arteko komunikazioa eteten da.',
         text: 'Hodi arteriosoa ere ixten da, eta lotailu arterioso bihurtzen da hurrengo hilabeteetan, 2 edo 3 hilabete beranduago. Ondorioz, birika arteriaren eta aortaren arteko komunikazioa eteten da: birika enborreko odol guztia biriketara doa.',
@@ -1306,7 +1306,7 @@ const stages: StageDef[] = [
       },
       {
         at: S14[7],
-        notes: ['w13/4.2/p7/s4'],
+        notes: ['w13/4.2/p11/s1'],
         recall: ['zulo-obalaren-balbula', 'septum-secundum'],
         idea: 'Birika zirkulazioarekin ezkerreko aurikularen presioa handitzen da: zulo obalaren balbula (septum primumaren beheko aldetik) septum secundumaren aurka bultzatzen du.',
         key: 'Presioa aldatzen da, balbula ixten da: ezkerrean orain presio handiagoa.',
@@ -1317,7 +1317,7 @@ const stages: StageDef[] = [
       },
       {
         at: S14[8],
-        notes: ['w13/4.2/p7/s5-s6'],
+        notes: ['w13/4.2/p11/s2-s3'],
         idea: 'Septum primuma eta secunduma poliki fusionatzen dira (urtebete inguru): aurikulen arteko komunikazioa ixten da.',
         text: 'Poliki poliki septum primuma eta secunduma fusionatzen hasten dira; ez da bat batekoa, fusio luzea da. Ondorioz eskuineko eta ezkerreko aurikulen arteko komunikazioa ixten da. Prozesu honek urtebete inguru irauten du.',
         focus: ['aurikula-arteko-trenkada'],
@@ -1325,7 +1325,7 @@ const stages: StageDef[] = [
       },
       {
         at: S14[9],
-        notes: ['w13/4.2/p7/s7'],
+        notes: ['w13/4.2/p11/s4'],
         idea: 'Kasuen %20an komunikazioa iragazkor: odol apur bat eskuineko aurikulatik ezkerrekora.',
         text: 'Hala ere, kasuen %20an komunikazioa iragazkor mantentzen da: odol apur bat pasa daiteke eskuineko aurikulatik ezkerreko aurikulara, oso kopuru txikia.',
         focus: ['zulo-obala'],
@@ -1430,7 +1430,7 @@ const stages: StageDef[] = [
       },
       {
         at: S15[7],
-        notes: ['w13/4.3/p4/s3-s5'],
+        notes: ['w13/4.3/p4/s3-s4', 'w13/4.3/p5/s1'],
         idea: 'Koronarioetan saturazioa oso altua (miokardioa, entzefaloa); beherantz gero eta oxigeno gutxiago; zainek berriro eskuineko aurikulara.',
         text: 'Arteria koronarioetan oxigeno saturazioa oso altua da, eta horri esker miokardioa eta entzefaloa irriga daitezke. Organo horietan oxigeno apur bat geratzen da, eta beheranzko aortatik jaisten den odola ez da hain aberatsa, gero eta gutxiago. Oxigenoa galdu ondoren, zainek odola berriro eskuineko aurikulara eramaten dute, batez ere goiko eta beheko kaben bidez.',
         focus: ['arteria-koronarioak', 'beheranzko-aorta', 'goiko-kaba-zaina', 'beheko-kaba-zaina'],
@@ -1438,7 +1438,7 @@ const stages: StageDef[] = [
       },
       {
         at: S15[8],
-        notes: ['w13/4.3/p4/s6-s7'],
+        notes: ['w13/4.3/p6/s1-s2'],
         recall: ['zulo-obala'],
         idea: 'Jaioberriak askotan zianotikoak: aurikula arteko trenkada ez da guztiz ixten eta odola nahasten da; komunikazioa txikia.',
         text: 'Jaioberriak askotan zianotikoak jartzen dira, urdinak: aurikula arteko trenkada ez da guztiz ixten eta odol nahasketa gertatzen da. Dena den, komunikazioa txikia da eta ez da odol asko nahasten.',
@@ -1487,7 +1487,7 @@ const stages: StageDef[] = [
       },
       {
         at: S16[1],
-        notes: ['w13/5/p3/s2', 'w13/5/p3/s3'],
+        notes: ['w13/5/p4/s1', 'w13/5/p4/s2'],
         recall: ['barneko-jugularrak'],
         idea: 'Buruko, lepoko, enborreko eta goiko gorputz-adarretako linfa hodiak → yugular inguruko bi linfa zakuetara.',
         text: 'Kamera lepora hurbiltzen da. Hasieran gorputzeko linfa linfa hodien bidez garraiatzen da: buruko, lepoko, enborreko eta goiko gorputz-adarretako hodi linfatikoak. Hodi horiek yugular inguruan kokatzen diren linfa zakuetara iristen dira: bi linfa zaku yugularrak.',
@@ -1497,7 +1497,7 @@ const stages: StageDef[] = [
       },
       {
         at: S16[2],
-        notes: ['w13/5/p3/s4'],
+        notes: ['w13/5/p5/s1'],
         idea: 'Abdomenean 4 linfa zaku: beheko gorputz-adarretako eta abdomeneko linfa hodiak hara heltzen dira.',
         text: 'Kamera abdomenera jaisten da. Bestalde, abdomenean beste linfa zaku batzuk agertzen dira, eta haietara beheko gorputz-adarretako eta abdomeneko hodi linfatikoak heltzen dira. Lau linfa zaku dira.',
         focus: ['peritoneo-atzeko-linfa-zakua', 'kiloren-zisterna', 'atzeko-linfa-zakuak'],
@@ -1506,7 +1506,7 @@ const stages: StageDef[] = [
       },
       {
         at: S16[3],
-        notes: ['w13/5/p4/s1'],
+        notes: ['w13/5/p6/s1'],
         idea: 'Peritoneo atzeko linfa zakua: peritoneoaren atzekaldean.',
         text: 'Lehenengoa, peritoneo atzeko linfa zakua: peritoneoaren atzekaldean dago, hesteen sustraiaren atzean.',
         focus: ['peritoneo-atzeko-linfa-zakua'],
@@ -1514,7 +1514,7 @@ const stages: StageDef[] = [
       },
       {
         at: S16[4],
-        notes: ['w13/5/p5/s1'],
+        notes: ['w13/5/p7/s1'],
         idea: 'Kiloren zisterna (Pecquet zisterna): abdomenean, eta garrantzitsuena.',
         text: 'Bigarrena, kiloren zisterna, Pecquet zisterna ere deitua: abdomenean dago, eta guztien artean garrantzitsuena da.',
         focus: ['kiloren-zisterna'],
@@ -1523,7 +1523,7 @@ const stages: StageDef[] = [
       },
       {
         at: S16[5],
-        notes: ['w13/5/p6/s1', 'w13/5/p6/s2'],
+        notes: ['w13/5/p8/s1', 'w13/5/p9/s1'],
         recall: ['kanpoko-zain-iliakoak', 'barneko-zain-iliakoak'],
         idea: 'Bi atzeko linfa zaku (eskumakoa eta ezkerrekoa), barneko eta kanpoko zain iliakoak batzen diren eskualdeetan.',
         text: 'Kamera pelbisera doa. Azkenik, bi atzeko linfa zakuak, eskumakoa eta ezkerrekoa: barneko eta kanpoko zain iliakoak batzen diren eskualdeetan kokatzen dira.',
@@ -1532,7 +1532,7 @@ const stages: StageDef[] = [
       },
       {
         at: S16[6],
-        notes: ['w13/5/p6/s2', 'w13/5/p6/s6'],
+        notes: ['w13/5/p9/s1', 'w13/5/p11/s1'],
         idea: 'Linfa zaku guztietako linfa kiloren zisternara; bertatik bi linfa hodi nagusi gorantz: hodi toraxikoak.',
         text: 'Kamera urruntzen da, apunteetako «Zaku linfatikoak» irudian bezala. Linfa zaku guztietara iristen den linfa kiloren zisternara bideratzen da, eta bertatik bi linfa hodi nagusi hasten dira gorantz: hodi toraxikoak.',
         focus: ['kiloren-zisterna', 'hodi-toraxikoa', 'linfa-hodiak'],
@@ -1541,7 +1541,7 @@ const stages: StageDef[] = [
       },
       {
         at: S16[7],
-        notes: ['w13/5/p6/s3'],
+        notes: ['w13/5/p9/s2'],
         idea: 'Garapenean bi hodietatik bat bakarrik mantentzen da: toraxeko linfa hodia.',
         text: 'Garapenaren ondorioz, bi hodi horietatik bat bakarrik mantentzen da: toraxeko linfa hodia. Bestea desagertu egiten da.',
         focus: ['hodi-toraxikoa'],
@@ -1549,7 +1549,7 @@ const stages: StageDef[] = [
       },
       {
         at: S16[8],
-        notes: ['w13/5/p6/s4'],
+        notes: ['w13/5/p10/s1'],
         recall: ['lotura-yugulosubklabikoa'],
         idea: 'Hodi toraxikoak diafragma zeharkatu, mediastinotik gora egin eta ezkerrerantz jotzen du: ezkerreko lotura yugulosubklabikoan irekitzen da.',
         text: 'Hodi toraxikoak diafragma zeharkatzen du, mediastinotik gora egiten du eta ezkerrerantz jotzen du, ezkerreko lotura yugulosubklabikoarekin bat egin eta bertan irekitzeko.',
@@ -1565,7 +1565,7 @@ const stages: StageDef[] = [
       },
       {
         at: S16[9],
-        notes: ['w13/5/p6/s5'],
+        notes: ['w13/5/p10/s2'],
         recall: ['barneko-jugularrak', 'zain-subklabioak'],
         idea: 'Lotura yugulosubklabikoa: ezkerreko zain yugularra eta ezkerreko zain subklabioa elkartzen diren puntua.',
         text: 'Kamera lepoaren oinarrira hurbiltzen da. Lotura yugulosubklabikoa ezkerreko zain yugularra eta ezkerreko zain subklabioa elkartzen diren puntua da. Han itzultzen da linfa zain odolera.',

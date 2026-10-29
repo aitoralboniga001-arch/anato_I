@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { LabelScaleContext, SceneContext, type SceneContextValue } from '@/components/kit/context';
 import { partsOf, structures, weeks } from '@/content/registry';
 import { SceneView } from '@/components/kit/columns';
+import { CONCEPT, mentionedIn } from '@/lib/sim/mentions';
 import type { SceneComponent, StageDef } from '@/lib/sim/types';
 
 /**
@@ -21,12 +22,10 @@ const ctx: SceneContextValue = {
   quiz: false,
   quizFlash: null,
   nameOf: (id) => structures.get(id)?.name ?? id,
+  partsOf,
   onSelect: () => {},
   onHover: () => {},
 };
-
-/** Processes and body axes are named by the step, not drawn as a thing of their own. */
-const CONCEPT = new Set(['prozesua', 'ardatza']);
 
 /**
  * Structures a step names while they change into something else (or are only named in the next
@@ -56,13 +55,11 @@ const GONE: Record<string, string> = {
   '10/eskuineko-aurikula/4/eskuineko-zain-balbula': 'goiko aldea desagertzen da urrats honetan; behekoa kaben eta sinu koronarioaren balbulak (izendatuta)',
 };
 
-/** A structure's name as the text uses it (case and the final article aside). */
-const stem = (n: string) => n.toLowerCase().replace(/[()]/g, '').replace(/a$/, '');
-
 /** Names a step's text says without showing them, on purpose: `week/stage/step/id` → why. */
 const MENTION_ONLY: Record<string, string> = {
   '11/enbor-arteriosoa/1/trenkada-aortikopulmonarra': 'sarrera: trenkada hurrengo urratsean hazten da',
   '11/enbor-arteriosoa/1/birika-arteria': 'sarrera: enborra banatzean sortuko da (3. urratsetik)',
+  '11/arteria-konoa/1/infundibuluak': 'sarrera: konoaren izenaren azpian "hemendik: bi infundibuluak"; 4. urratsetik izendatuta',
   '10/bihotz-hodia/7/errai-orria': 'jatorria aipatzen da: errai orria zeharkako mozketan (4. urratsa); 3D ereduan hodiak, aortak eta notokorda',
   '10/bihotz-hodia/7/endokardioa': 'endokardio hodiak 3D ereduan "bihotz hodiak" izenez marraztuta eta izendatuta',
   '10/eskualde-kardiogenikoa/2/errai-orria': 'diskoa goitik: errai orria zeharkako mozketan ikusten da',
@@ -131,11 +128,11 @@ interface Seen {
 /** HTML elements that never get a closing tag (inside foreignObject). */
 const VOID = new Set(['br', 'hr', 'img', 'input', 'meta', 'link', 'wbr', 'source', 'col', 'area', 'embed', 'track']);
 
-function render(Scene: unknown, t: number): Seen {
+function render(Scene: unknown, t: number, mentioned: readonly string[] = []): Seen {
   const html = renderToStaticMarkup(
     createElement(
       SceneContext.Provider,
-      { value: ctx },
+      { value: { ...ctx, mentioned } },
       createElement(LabelScaleContext.Provider, { value: { k: 1, left: false, right: false } }, createElement(SceneView, { Scene: Scene as SceneComponent, t, reduced: true })),
     ),
   );
@@ -181,7 +178,7 @@ const viewOf = (stage: StageDef, k: number) => {
 for (const w of weeks)
   describe(`${w.week}. gaia`, () => {
     for (const stage of w.stages)
-      it(`${stage.id}: urrats bakoitzak aipatzen duena ikusten da`, () => {
+      it(`${stage.id}: urrats bakoitzak aipatzen duena ikusten da`, { timeout: 20000 }, () => {
         const problems: string[] = [];
         stage.beats.forEach((b, k) => {
           const end = k + 1 < stage.beats.length ? stage.beats[k + 1].at : 1;
@@ -192,7 +189,7 @@ for (const w of weeks)
             { name: 'amaiera', t: Math.max(b.at, end - 0.035) },
           ];
           for (const f of frames) {
-            const seen = render(view.scene, f.t);
+            const seen = render(view.scene, f.t, mentionedIn(b.text, stage.structures, (id) => structures.get(id)));
             for (const id of ids) {
               const where = `${k + 1}. urratsa [${view.id}] ${f.name} t=${f.t.toFixed(3)}: ${id}`;
               for (const d of seen.dots) if (d.id === id && d.o > 0.3 && outside(d.x, d.y)) problems.push(`${where} — izenaren lerroa irudiz kanpo (${d.x.toFixed(0)}, ${d.y.toFixed(0)})`);
@@ -214,33 +211,17 @@ for (const w of weeks)
         stage.beats.forEach((b, k) => {
           const end = k + 1 < stage.beats.length ? stage.beats[k + 1].at : 1;
           const view = viewOf(stage, k);
-          const said = b.text.toLowerCase();
-          // Where each structure of the stage is said (a whole word start), longest names first: a name said
-          // only inside a longer one ("kloaka" in "kloaka mintza") is not a mention of its own.
-          const spans = stage.structures
-            .flatMap((id) => {
-              const s = structures.get(id);
-              // Names are plain words (letters, spaces, hyphens): safe to use as a pattern.
-              return s ? [s.name, ...(s.aka ?? [])].map(stem).filter((n) => n.length > 4).flatMap((n) => [...said.matchAll(new RegExp('(?<!\\p{L})' + n, 'gu'))].map((m) => ({ id, a: m.index!, b: m.index! + n.length }))) : [];
-            })
-            .sort((p, q) => q.b - q.a - (p.b - p.a));
-          const taken: { a: number; b: number }[] = [];
-          const said_ = new Set<string>();
-          for (const sp of spans) {
-            if (taken.some((q) => sp.a >= q.a && sp.b <= q.b)) continue;
-            taken.push(sp);
-            said_.add(sp.id);
-          }
-          const ids = [...said_].filter((id) => {
-            const s = structures.get(id)!;
-            return !CONCEPT.has(s.category) && !(b.focus ?? []).includes(id) && !(b.tour ?? []).includes(id);
-          });
+          const said = mentionedIn(b.text, stage.structures, (id) => structures.get(id));
+          const ids = said.filter((id) => !(b.focus ?? []).includes(id) && !(b.tour ?? []).includes(id));
           if (!ids.length) return;
-          const seen = render(view.scene, Math.max(b.at, end - 0.035));
+          const seen = render(view.scene, Math.max(b.at, end - 0.035), said);
           for (const id of ids) {
             if (MENTION_ONLY[`${w.week}/${stage.id}/${k + 1}/${id}`]) continue;
             const drawn = shown(seen, id) > 0.3 || (seen.labels.get(id) ?? 0) > 0.3;
             if (!drawn) problems.push(`${k + 1}. urratsa [${view.id}]: ${id} — testuan aipatuta, irudian ez`);
+            // From topic 7 on, a structure the text says is also named on screen: present in the model (or
+            // standing in through a group, behind a wall) is not "seen" (owner, 2026-10-29, topic 11's sinus).
+            else if (w.week >= 7 && !((seen.labels.get(id) ?? 0) > 0.3)) problems.push(`${k + 1}. urratsa [${view.id}]: ${id} — testuan aipatuta, izenik gabe`);
           }
         });
         expect(problems).toEqual([]);

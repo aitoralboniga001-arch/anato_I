@@ -111,7 +111,7 @@ export const stageCirculation: StageDef = {
     },
     {
       at: S3[4],
-      notes: ['w10/1/p27/s1', 'w10/1/p28/s1-s3', 'w10/1/p29/s1-s3'],
+      notes: ['w10/1/p26/s4', 'w10/1/p26/s5-s7', 'w10/1/p27/s1-s3'],
       idea: 'Aurreko kardinala + atzeko kardinala = kardinal komuna: buruko eta gorputz beheko oxigeno gutxiko odola zain sinura.',
       key: 'Kardinal komunak enbrioiaren beraren odola biltzen du: burutik (aurrekoa) eta gorputzaren behealdetik (atzekoa).',
       exam: 'Zain kardinal komuna: aurreko eta atzeko zain kardinalak fusionatzean sortzen da; alde zefalikoko eta behe aldeko oxigeno gutxiko odola bihotz hodiaren beheko atalera (zain sinura) eramaten du.',
@@ -121,7 +121,7 @@ export const stageCirculation: StageDef = {
     },
     {
       at: S3[5],
-      notes: ['w10/1/p30/s1-s2'],
+      notes: ['w10/1/p28/s1-s2'],
       idea: 'Zain bitelinoak: bitelo zakutik bihotz hodiaren beheko ataleraino, oxigeno gutxiko odola.',
       exam: 'Zain bitelinoak: oxigeno gutxiko odola, bihotz hodiaren beheko ataleraino.',
       text: 'Zain bitelinoek oxigeno gutxiko odola eramaten dute. Bitelo zakutik abiatu, zilborrestetik enbrioian sartu, septum transversumetik igaro eta bihotz hodiaren beheko ataleraino iristen dira.',
@@ -132,7 +132,7 @@ export const stageCirculation: StageDef = {
     },
     {
       at: S3[6],
-      notes: ['w10/1/p31/s1'],
+      notes: ['w10/1/p29/s1'],
       idea: 'Zilborrestearen zainak: karenatik datoz, odol oxigenatua.',
       key: 'Enbrioiaren odol oxigenatu bakarra karenatik dator, zilbor zainetatik.',
       exam: 'Zilborrestearen zainak karenatik datoz: odol oxigenatua dute.',
@@ -155,7 +155,7 @@ export const stageCirculation: StageDef = {
     },
     {
       at: S3[7],
-      notes: ['w10/1/p32/s1', 'w10/1/p33/s1'],
+      notes: ['w10/1/p30/s1', 'w10/1/p31/s1'],
       idea: 'Arteriak, hauek ere bilateralak: arku aortikoek bihotzetik ateratako odola burura eta aorta dortsaletara eramaten dute.',
       exam: 'Arku aortikoek odol oxigenatua bihotzetik ateratzen dute, burura eta aorta dortsaletara.',
       text: 'Arteriak ere bilateralak dira. Arku aortikoek bihotzetik ateratzen dute odol oxigenatua: aorta zakutik faringe arkuetan barrena igotzen dira, burura eta aorta dortsaletara.',
@@ -165,7 +165,7 @@ export const stageCirculation: StageDef = {
     },
     {
       at: S3[8],
-      notes: ['w10/1/p34/s1'],
+      notes: ['w10/1/p32/s1'],
       idea: 'Aorta dortsalak: odol oxigenatua, gero eta oxigeno gutxiagorekin, gorputzaren beste atal guztietara.',
       exam: 'Aorta dortsalek odol oxigenatua (gero eta oxigeno gutxiagorekin) gorputzaren beste atal guztietara eramaten dute.',
       text: 'Aorta dortsalek odol oxigenatua eramaten dute, gero eta oxigeno gutxiagorekin, gorputzaren beste atal guztietara. Ikusi nola, behera joan ahala, zelula urdinak gero eta gehiago diren.',
@@ -174,7 +174,7 @@ export const stageCirculation: StageDef = {
     },
     {
       at: S3[9],
-      notes: ['w10/1/p35/s1'],
+      notes: ['w10/1/p33/s1'],
       idea: 'Bitelo arteriek eta zilborreko arteriek oxigenorik gabeko odola gorputzetik kanpora eramaten dute, oxigenoa eta makromolekulak har ditzan.',
       key: 'Zirkulua ixten da: aortatik kanpora (arteriak), eta kanpotik bihotzera (zainak).',
       exam: 'Bitelo arteriek eta zilborreko arteriek oxigenorik gabeko odola gorputzetik karenara eramaten dute, oxigenoa eta makromolekulak har ditzan.',
@@ -198,7 +198,7 @@ export const stageCirculation: StageDef = {
     },
     {
       at: S3[10],
-      notes: ['w10/1/p36/s1-s2'],
+      notes: ['w10/1/p34/s1-s2'],
       idea: 'Odolak bihotzean, atrio primitiboan, nahasten dira. Zain eta arteria guztiak bikoitiak dira.',
       key: 'Nahasketa = zelula gorriak eta urdinak elkarren ondoan atrio primitiboan, ez kolore berri bat.',
       exam: 'Zain kardinal komuneko odol oxigenatu gabea eta bitelo zainetik datorren odol oxigenatu gabea bihotzean, atrio primitiboan, nahasten dira. Zain eta arteria mota hauek bikoitiak dira (ezker-eskuin).',
@@ -210,7 +210,7 @@ export const stageCirculation: StageDef = {
     },
     {
       at: S3[11],
-      notes: ['w10/1/p36/s3'],
+      notes: ['w10/1/p34/s3'],
       idea: 'Honela, gorputzaren atal guztietara heltzen da odola.',
       text: 'Honela, gorputzaren atal guztietara heltzen da odola. Laburpenean: zainak bihotzera (zilborrekoak oxigenatuta; bitelinoak eta kardinalak oxigeno gutxirekin), nahasketa atrio primitiboan, eta arteriak bihotzetik kanpora (arkuak eta aortak oxigenatuta; bitelo eta zilborreko arteriak oxigenorik gabe).',
       focus: [],

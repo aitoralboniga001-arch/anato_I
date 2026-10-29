@@ -169,7 +169,8 @@ export function Conus3D({ t }: SceneProps) {
   ]);
   const names: CalloutSpec[] = [
     { id: 'muskulu-trenkadak', p: 'muskulu-trenkadak', show: vis(t, 0.03, P9[1]), small: true },
-    { id: 'arteria-konoa', p: 'arteria-konoa', show: vis(t, 0.03, P9[1]) },
+    // The step says the two infundibula come from it: said under its name until they are there (step 4).
+    { id: 'arteria-konoa', p: 'arteria-konoa', show: vis(t, 0.03, P9[1]), sub: 'hemendik: bi infundibuluak' },
     { id: 'enbor-arteriosoa', p: 'enbor-arteriosoa', show: vis(t, 0.03, P9[1]), small: true },
     { id: 'hasierako-eskuineko-bentrikulua', p: 'hasierako-eskuineko-bentrikulua', show: vis(t, 0.03, P9[1]), small: true },
     { id: 'konoaren-gandorrak', key: 'gandorra-atze-eskuin', p: 'konoaren-gandorrak', text: 'Gandorra: atze-eskuinean', show: vis(t, P9[1] + 0.04, P9[2] + 0.11) },

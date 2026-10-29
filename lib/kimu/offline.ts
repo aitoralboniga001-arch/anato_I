@@ -3,7 +3,7 @@ import { firstSentence } from '@/content/generate';
 import { ancestry, childrenOf } from '@/content/lineage';
 import { structures, weeks } from '@/content/registry';
 import type { StructureDef } from '@/lib/sim/types';
-import { anchorOf, fairHit, headingOf, itemHead, joinBest, quoteOf, refOf, strongHit, type Intent, type NotesHit } from './notes';
+import { anchorOf, fairHit, headingOf, itemHead, joinBest, quoteOf, refOf, strongHit, type Intent, type NotesHit, type SectionHit } from './notes';
 import { confident, SAMPLE_TOPICS, toTarget, type Hit } from './search';
 import { fold, keyWord, match, queryTokens, tokens, type Lang } from './text';
 import type { KimuFrom, KimuHere, KimuReply, KimuSource, KimuTarget } from './types';
@@ -24,6 +24,9 @@ const COPY: Record<Lang, {
   from: (name: string, many?: boolean) => string;
   to: (name: string, many?: boolean) => string;
   practice: (name: string) => string;
+  /** A question that is a section's heading: where it is in the notes, and its parts. */
+  section: (week: number, n: string) => string;
+  parts: (k: number) => string;
 }> = {
   eu: {
     lead: '',
@@ -35,6 +38,8 @@ const COPY: Record<Lang, {
     from: (n, many) => `Nondik ${many ? 'datoz' : 'dator'} ${n}?`,
     to: (n, many) => `Zertan bihurtzen ${many ? 'dira' : 'da'} ${n}?`,
     practice: (n) => `Galdetu niri: ${n}`,
+    section: (w, n) => `(${w}. gaia, ${n}. atala)`,
+    parts: (k) => `Apunteetan ${k} zatitan azaltzen da:`,
   },
   es: {
     lead: 'En los apuntes (en euskera):',
@@ -46,6 +51,8 @@ const COPY: Record<Lang, {
     from: (n, many) => `¿De dónde ${many ? 'vienen' : 'viene'} ${n}?`,
     to: (n, many) => `¿Qué ${many ? 'originan' : 'origina'} ${n}?`,
     practice: (n) => `Pregúntame: ${n}`,
+    section: (w, n) => `(tema ${w}, apartado ${n})`,
+    parts: (k) => `Los apuntes lo explican en ${k} partes:`,
   },
   en: {
     lead: 'From the notes (in Basque):',
@@ -57,6 +64,8 @@ const COPY: Record<Lang, {
     from: (n, many) => `Where ${many ? 'do' : 'does'} ${n} come from?`,
     to: (n, many) => `What ${many ? 'do' : 'does'} ${n} become?`,
     practice: (n) => `Quiz me: ${n}`,
+    section: (w, n) => `(topic ${w}, section ${n})`,
+    parts: (k) => `The notes explain it in ${k} parts:`,
   },
 };
 
@@ -103,11 +112,43 @@ function aboutItself(question: string, s: StructureDef): boolean {
   return queryTokens(question, true).every((alts) => alts.some((a) => names.some((n) => match(a, n, true) >= 0.6)) || /^(sort|agert|era|form|apar|surg|appear)/.test(alts[0]));
 }
 
-/** Does this passage talk about the structure? */
+/** A word's stem, to find it whatever its Basque case ending ("muturra" → "mutur"). */
+const stemWord = (w: string) => {
+  const f = fold(w);
+  return f.length > 6 ? f.slice(0, Math.max(5, f.length - 2)) : f.length > 4 ? f.slice(0, f.length - 1) : f;
+};
+
+/**
+ * Does this sentence say the structure's name: every word of it, close together ("zain muturra", not the
+ * "arteria muturra" beside it; "kanpoko arteria iliakoa", not "arteria iliako primitiboak")?
+ */
+export function says(tok: readonly string[], s: StructureDef): boolean {
+  return [s.name, s.es ?? '', ...(s.aka ?? [])].filter(Boolean).some((n) => {
+    const stems = tokens(n.replace(/\([^)]*\)/g, ' ')).map(stemWord);
+    if (!stems.length) return false;
+    for (let i = 0; i < tok.length; i++) {
+      if (!tok[i].startsWith(stems[0])) continue;
+      // The name's words side by side, one other word allowed between ("bena kabaren segmentu hepatiko" is
+      // not "bena hepatikoa").
+      const near = tok.slice(Math.max(0, i - stems.length), i + stems.length + 1);
+      if (stems.every((st) => near.some((w) => w.startsWith(st)))) return true;
+    }
+    return false;
+  });
+}
+
+/** Does this passage talk about the structure (one of its sentences says its name)? */
 export function mentions(h: NotesHit, s: StructureDef): boolean {
-  const stems = [s.name, s.es ?? '', ...(s.aka ?? [])].filter(Boolean).map(stemOf);
-  const words = h.passage.sentences.flatMap((x) => x.tok);
-  return stems.some((st) => words.some((w) => (st.length >= 6 ? w.includes(st) : w.startsWith(st))));
+  return h.passage.sentences.some((x) => says(x.tok, s));
+}
+
+/** The passage's sentences that say the structure's name, when the chosen ones do not (one, or two when short). */
+function sayingIt(h: NotesHit | undefined, s: StructureDef | undefined): NotesHit | undefined {
+  if (!h || !s || isList(h) || h.best.some((x) => says(x.tok, s))) return h;
+  const all = h.passage.sentences;
+  const i = all.findIndex((x) => says(x.tok, s));
+  if (i < 0) return h;
+  return { ...h, best: all[i].text.length < 90 && all[i + 1] ? [all[i], all[i + 1]] : [all[i]] };
 }
 
 /** Bold the first appearance of the structure's name in a verbatim sentence. */
@@ -226,6 +267,8 @@ export interface Evidence {
   /** Where the student is, and the topic the question names (when it does): to word fallbacks and pick chips. */
   here?: KimuHere | null;
   asked?: number | null;
+  /** The question is a section's heading: answered as that section (its opening and its parts). */
+  section?: SectionHit | null;
 }
 
 /** Where a place is from the student, said in one sentence (stage titles are the notes' own Basque). */
@@ -287,11 +330,16 @@ export function targetsOf(ev: Evidence): KimuTarget[] {
 
 export function offlineReply(ev: Evidence): KimuReply {
   const c = COPY[ev.lang];
+  if (ev.section) return sectionReply(ev, ev.section);
   const { structure: s, intent } = ev;
   // "What is it / how does it form": the passage whose chosen sentence introduces the structure
   // ("… hodi neural izenarekin") answers better than one that only mentions it.
   const intro = s && (intent === 'zer' || intent === 'nola') ? ev.notes.find((h, i) => i > 0 && fairHit(h) && h.score >= ev.notes[0].score * 0.7 && !isList(h) && h.best.some((x) => defines(x.text, s))) : undefined;
-  const best = intro && !ev.notes[0].best.some((x) => defines(x.text, s!)) ? intro : ev.notes[0];
+  const first = intro && !ev.notes[0].best.some((x) => defines(x.text, s!)) ? intro : ev.notes[0];
+  // The question names a structure: quote a sentence that says its name, from the best passage that has
+  // one (the top passage may share the most words yet be about its neighbour).
+  const saying = s ? ev.notes.map((h) => sayingIt(h, s)).find((h) => fairHit(h) && (isList(h!) ? mentions(h!, s) : h!.best.some((x) => says(x.tok, s)))) : undefined;
+  const best = s && first && !(isList(first) ? mentions(first, s) : first.best.some((x) => says(x.tok, s))) ? (saying ?? first) : first;
   const place = ev.places[0];
   const lead = c.lead ? `${c.lead} ` : '';
 
@@ -302,7 +350,8 @@ export function offlineReply(ev: Evidence): KimuReply {
   // A date from the atlas timeline only when the question is about the structure itself ("Noiz sortzen da X?"),
   // not about something that happens to it ("Noiz habiratzen da blastozistoa?").
   const when = s && place?.doc.structure === s.id && !place.doc.atlasOnly && aboutItself(ev.question, s) ? place.doc.where.replace(/^\d+\. gaia · /, '') : '';
-  const card = s && ((intent === 'nondik' && s.origin) || (intent === 'patua' && s.fate) || (intent === 'zer' && s.definition) || (intent === 'noiz' && when));
+  // "How does it form?" with no notes passage about it: where it comes from (or what it is) says the most.
+  const card = s && ((intent === 'nondik' && s.origin) || (intent === 'patua' && s.fate) || (intent === 'zer' && s.definition) || (intent === 'noiz' && when) || (intent === 'nola' && (s.origin || s.definition)));
   const atlasWhen = { eu: 'Atlaseko kronologian', es: 'En la cronología del atlas', en: 'In the atlas timeline' }[ev.lang];
 
   let reply: string;
@@ -325,7 +374,7 @@ export function offlineReply(ev: Evidence): KimuReply {
     sources = [sourceOf(best, false)];
   } else if (s && card) {
     // The atlas card (worded from the notes), with the closest notes passage quoted under it.
-    const text = intent === 'nondik' ? s.origin! : intent === 'patua' ? s.fate! : intent === 'noiz' ? `${when} (${atlasWhen.toLowerCase()}).` : firstSentence(s.definition);
+    const text = intent === 'nondik' || (intent === 'nola' && s.origin) ? s.origin! : intent === 'patua' ? s.fate! : intent === 'noiz' ? `${when} (${atlasWhen.toLowerCase()}).` : firstSentence(s.definition);
     reply = `**${s.name}**: ${text.replace(/^\s+/, '')}`;
     sources = ev.notes.filter((h) => fairHit(h) && mentions(h, s) && !isList(h)).slice(0, 1).map((h) => sourceOf(h, true));
     // Nothing in the notes mentions it: the card is the atlas's own wording, and says so.
@@ -351,3 +400,32 @@ export function offlineReply(ev: Evidence): KimuReply {
     source: 'offline',
   };
 }
+
+/**
+ * "Atal bulbarraren trenkadatze prozesua": the section as a whole. Its own opening sentence (or its first
+ * part's), then each part by its number and title with its opening sentence; the stages that show them.
+ */
+function sectionReply(ev: Evidence, sec: SectionHit): KimuReply {
+  const c = COPY[ev.lang];
+  const [first, ...rest] = sec.parts;
+  const own = first.passage.section === sec.section;
+  const subs = own ? rest : sec.parts;
+  const say = (h: NotesHit) => clipText(h.best.map((x) => x.text).join(' '), 230);
+  const lead = `${c.lead ? `${c.lead} ` : ''}**${sec.title}** ${c.section(sec.week, sec.section)}${own ? `: ${say(first)}` : '.'}`;
+  const parts = subs.length > 1 ? ` ${c.parts(subs.length)} ${subs.map((h) => `**${h.passage.section} ${h.passage.title}**: ${say(h)}`).join(' ')}` : subs.length ? ` ${say(subs[0])}` : '';
+  const targets: KimuTarget[] = [];
+  for (const h of sec.parts) {
+    const t = notesTarget(h);
+    if (t && !targets.some((o) => o.week === t.week && o.stage === t.stage)) targets.push(t);
+  }
+  return {
+    reply: `${lead}${parts}`.replace(/\s+/g, ' ').trim(),
+    targets: targets.slice(0, 2),
+    sources: sec.parts.slice(0, 2).map((h) => sourceOf(h, false)),
+    followups: sampleQuestions(ev.lang, 3, ev.here),
+    mood: 'happy',
+    source: 'offline',
+  };
+}
+
+const clipText = (s: string, n: number) => (s.length <= n ? s : `${s.slice(0, s.lastIndexOf(' ', n - 1)).trimEnd()}…`);

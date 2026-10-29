@@ -97,8 +97,8 @@ const along = (th0: number, th1: number, out: number, x: number, n = 7): V3[] =>
 
 /** The heart loop of topic 10, under the pharynx: its aortic sac at the arches' ventral ends. */
 const HEART_POSE: HeartPose = { ...POSE0, segs: 1, colour: 0, split: 1, loop: 1, atriaFuse: 1, arches: 0, veins: 0 };
-function heartItems(): { items: Item3[]; sac: V3; centre: V3; pts: Record<string, V3> } {
-  const h = heartModel(HEART_POSE, { cavity: 0, septum: 0, gut: 0, aortas: 0, noto: 0 });
+function heartItems(glass: number): { items: Item3[]; sac: V3; centre: V3; pts: Record<string, V3>; horn: [V3, V3]; inflow: [V3[], V3[]]; tube: V3[] } {
+  const h = heartModel({ ...HEART_POSE, glass }, { cavity: 0, septum: 0, gut: 0, aortas: 0, noto: 0 });
   const sac = h.pts['aorta-zakua'];
   const k = 0.36;
   // Tilted forward with the neck (the outflow points at the floor of the pharynx).
@@ -114,7 +114,11 @@ function heartItems(): { items: Item3[]; sac: V3; centre: V3; pts: Record<string
   const place = (v: V3): V3 => [k * v[0] + tr[0], k * (c * v[1] - s * v[2]) + tr[1], k * (s * v[1] + c * v[2]) + tr[2]];
   const pts: Record<string, V3> = {};
   for (const id of ['atal-bulbarra', 'atal-bentrikularra', 'atal-aurikularra', 'zain-sinua', 'enbor-arteriosoa']) if (h.pts[id]) pts[id] = place(h.pts[id]);
-  return { items, sac: target, centre: place(h.pts['atal-bentrikularra']), pts };
+  const { cd } = h;
+  // The blood's way: each sinus horn (where that side's veins end) → atrium → the tube from its atrial end to the sac.
+  const inflow = ([0, 1] as const).map((i) => curve3([cd.horn[i], cd.sinusIn[i], cd.atrium[i], cd.end].map(place), 12)) as [V3[], V3[]];
+  const tube = [...h.line].reverse().map(place);
+  return { items, sac: target, centre: place(h.pts['atal-bentrikularra']), pts, horn: [place(cd.horn[0]), place(cd.horn[1])], inflow, tube };
 }
 
 export function embryoModel(pose: EmbryoPose, o: { flow?: { phase: number; show: number } | null; dim?: { ids: readonly string[]; k: number } | null; bars?: number } = {}): EmbryoModel {
@@ -137,8 +141,8 @@ export function embryoModel(pose: EmbryoPose, o: { flow?: { phase: number; show:
     E.eyes.forEach((m, i) => items.push({ key: `eye${i}`, mesh: m, matrix: BODY_M, color: '#3a2a30', deep: '#140c10', tissue: 'skin', opacity: 0.5 * pose.body, quiet: true }));
   }
 
-  // ———— the heart ————
-  const H = heartItems();
+  // ———— the heart: its wall turns to glass while blood flows, so the mixing shows inside ————
+  const H = heartItems(Math.round(10 * clamp01(o.flow?.show ?? 0)) / 10);
   for (const it of H.items) items.push({ ...it, opacity: (it.opacity ?? 1) * fade('bihotz-lakioa') });
   pts['bihotz-lakioa'] = H.centre;
   Object.assign(pts, H.pts);
@@ -261,8 +265,8 @@ export function embryoModel(pose: EmbryoPose, o: { flow?: { phase: number; show:
       if (s > 0) pts['zilbor-arteriak'] = line[8];
     }
 
-  // ———— veins back to the sinus venosus ————
-  const sinus = (s: number) => P(1.15, -0.7, s * 0.28);
+  // ———— veins back to the sinus venosus: each side's veins end at that side's sinus horn ————
+  const sinus = (s: number) => H.horn[s < 0 ? 0 : 1];
   if (pose.veins > 0.01)
     for (const s of [-1, 1]) {
       const n = s < 0 ? 'R' : 'L';
@@ -293,34 +297,52 @@ export function embryoModel(pose: EmbryoPose, o: { flow?: { phase: number; show:
   // ———— blood ————
   if (o.flow && o.flow.show > 0.01) {
     const f = o.flow;
-    const route = (key: string, line: V3[] | undefined, color: string, deep: string) => {
+    const route = (key: string, line: V3[] | undefined, color: string, deep: string, cells: Cells = CELLS.all) => {
       if (!line || line.length < 2) return;
       const r = vesselRouteOf(line);
-      items.push({ key: `flow-${key}`, mesh: CELL(), color, deep, tissue: 'skin', stream: { route: r, phase: f.phase / Math.max(0.5, routeLength(r)), grow: f.show, ...CELLS } });
+      items.push({ key: `flow-${key}${color === T.o2 ? 'O2' : ''}`, mesh: CELL(), color, deep, tissue: 'skin', stream: { route: r, phase: f.phase / Math.max(0.5, routeLength(r)), grow: f.show, ...cells } });
     };
-    // Out through the 3rd and 4th arches, down the aorta, into the cord.
+    // Mixed blood (topic 10's language: red and blue cells side by side, never a purple): from each sinus
+    // horn into the loop, where the umbilical veins' oxygenated blood meets the vitelline and cardinal blood.
+    const mixed = (key: string, line: V3[], o2: Cells, deo2: Cells) => {
+      route(key, line, T.o2, T.o2Deep, o2);
+      route(key, line, T.deo2, T.deo2Deep, deo2);
+    };
+    H.inflow.forEach((line, i) => mixed(`in${i}`, line, CELLS.mixO2, CELLS.mixDeo2));
+    mixed('tube', H.tube, CELLS.tubeO2, CELLS.tubeDeo2);
+    // Out through the 3rd and 4th arches, down the aorta, into the cord: the mixed blood of the loop.
     for (const n of ['R', 'L']) {
       const a = lines[`arch3${n}`];
-      if (a) route(`a${n}`, [...a, ...(lines[`da${n}`] ?? []).slice(-10)], T.o2, T.o2Deep);
+      if (a) mixed(`a${n}`, [...a, ...(lines[`da${n}`] ?? []).slice(-10)], CELLS.mixO2, CELLS.mixDeo2);
       route(`umbA${n}`, lines[`umbA${n}`], T.deo2, T.deo2Deep);
       route(`umbV${n}`, lines[`umbV${n}`], T.o2, T.o2Deep);
       route(`vitV${n}`, lines[`vitV${n}`], T.deo2, T.deo2Deep);
       route(`cardP${n}`, lines[`cardP${n}`] ? [...lines[`cardP${n}`], ...(lines[`cardC${n}`] ?? [])] : undefined, T.deo2, T.deo2Deep);
       route(`cardA${n}`, lines[`cardA${n}`], T.deo2, T.deo2Deep);
     }
-    route('aorta', lines.aorta, T.o2, T.o2Deep);
+    mixed('aorta', lines.aorta, CELLS.mixO2, CELLS.mixDeo2);
   }
   return { items, pts, lines };
 }
 
 const CELL = () => cachedBlob({ center: [0, 0, 0], radii: [0.035, 0.026, 0.035], rings: 6, sides: 8 });
-const CELLS = (() => {
-  const n = 8;
-  const cells = new Float32Array(n * 4);
-  const gates = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    cells.set([i / n, Math.sin(i * 12.9) * 0.02, Math.cos(i * 7.3) * 0.015, Math.sin(i * 3.1) * 0.02], i * 4);
-    gates[i] = ((i * 0.618034) % 1) * 0.85;
-  }
+type Cells = { cells: Float32Array; gates: Float32Array };
+/** n cells evenly along a route (those `pick` keeps), a little off the centreline, appearing here and there. */
+function cellSet(n: number, pick: (i: number) => boolean): Cells {
+  const idx = Array.from({ length: n }, (_, i) => i).filter(pick);
+  const cells = new Float32Array(idx.length * 4);
+  const gates = new Float32Array(idx.length);
+  idx.forEach((i, k) => {
+    cells.set([i / n, Math.sin(i * 12.9) * 0.02, Math.cos(i * 7.3) * 0.015, Math.sin(i * 3.1) * 0.02], k * 4);
+    gates[k] = ((i * 0.618034) % 1) * 0.85;
+  });
   return { cells, gates };
-})();
+}
+/** 8 cells in a vessel; mixed blood: every third cell oxygenated (more cells along the longer heart tube). */
+const CELLS = {
+  all: cellSet(8, () => true),
+  mixO2: cellSet(8, (i) => i % 3 === 0),
+  mixDeo2: cellSet(8, (i) => i % 3 !== 0),
+  tubeO2: cellSet(14, (i) => i % 3 === 0),
+  tubeDeo2: cellSet(14, (i) => i % 3 !== 0),
+};

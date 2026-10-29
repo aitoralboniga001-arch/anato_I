@@ -91,7 +91,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p1/s1",
         "parts": [
           {
-            "text": "2.2. Hasierako perikardio barrunbea (behin-betiko perikardio barrunbeak eta",
+            "text": "2.2. Hasierako perikardio barrunbea (behin-betiko perikardio barrunbeak eta pleura",
             "b": true
           }
         ]
@@ -107,7 +107,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/intro/p3/s1",
         "parts": [
           {
-            "text": "pleura barrunbeak)",
+            "text": "barrunbeak)",
             "b": true
           }
         ]
@@ -155,7 +155,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/4/p1/s1",
         "parts": [
           {
-            "text": "4. Gogoratu beharrekoa(Rafak esana)",
+            "text": "4. Gogoratu beharrekoa (Rafak esana)",
             "b": true
           }
         ]
@@ -203,7 +203,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/1/p3/s1",
         "parts": [
           {
-            "text": "Garapenaren 3. astearen bukaeran, enbrioiaren tolespenengatik, laua den diskoa tolestu egiten da enbrioiaren atzeko, aurreko eta alboko paretak eratzeko. "
+            "text": "Garapenaren 3. astearen bukaeran (normalean 4en astean) enbrioiaren tolespenengatik, laua den diskoa tolestu egiten da enbrioiaren atzeko, aurreko eta alboko paretak eratzeko. "
           }
         ]
       },
@@ -214,7 +214,14 @@ export const w7: NotesBlock[] = [
             "text": "Horretarako 2 tolespen mota egiten ditu: plano horizontalean gertatzen den "
           },
           {
-            "text": "zeharkako tolespena",
+            "text": "zeharkako",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "tolespena",
             "b": true
           },
           {
@@ -269,7 +276,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/1/p4/s2",
         "parts": [
           {
-            "text": "Alboko mesodermotik 2 orri bereizten dira: paretako orria (somatopleura) eta errai orria (esplaknopleura). "
+            "text": "Alboko mesodermotik 2 orri bereizten dira: paretako orria eta errai orria. "
           }
         ]
       },
@@ -300,12 +307,19 @@ export const w7: NotesBlock[] = [
         "id": "w7/1/p4/s5",
         "parts": [
           {
-            "text": "Hala ere, diskoak bi tolespen mota egiten ditu: zeharkakoa (alboko ertzak aurrerantz eta erdikalderantz mugitzen dira) eta zefalokaudala (alde zefalikoa eta alde kaudala aurrerantz abiatzen dira). "
+            "text": "Hala ere, diskoak bi tolespen mota egiten ditu: zeharkakoa (alboko ertzak aurrerantz eta erdikalderantz mugitzen dira) eta zefalokaudala (alde zefalikoa eta alde kaudala aurrerantz abiatzen dira)."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "1",
+    "id": "w7/1/p5",
+    "sentences": [
       {
-        "id": "w7/1/p4/s6",
+        "id": "w7/1/p5/s1",
         "parts": [
           {
             "text": "Tolespen hauen ondorioz, pareta-orria eta errai-orriaren artean dagoen espazioa, hau da, enbrioi barruko zeloma, enbrioi gorputzaren barnealdean gelditzen da, enbrioi kanpoko zelomatik guztiz isolatuta. "
@@ -313,17 +327,14 @@ export const w7: NotesBlock[] = [
         ]
       },
       {
-        "id": "w7/1/p4/s7",
+        "id": "w7/1/p5/s2",
         "parts": [
           {
             "text": "Sortutako enbrioi barruko zeloma hori gorputzaren barnean hedatzen da geroago izango den"
           },
           {
-            "text": " toraxetik abdomenera",
+            "text": " toraxetik abdomenera.",
             "b": true
-          },
-          {
-            "text": "."
           }
         ]
       }
@@ -332,10 +343,10 @@ export const w7: NotesBlock[] = [
   {
     "kind": "caption",
     "section": "1",
-    "id": "w7/1/p5",
+    "id": "w7/1/p6",
     "sentences": [
       {
-        "id": "w7/1/p5/s1",
+        "id": "w7/1/p6/s1",
         "parts": [
           {
             "text": "3 orriko ernetze diskoaren zeharkako mozketa",
@@ -354,7 +365,14 @@ export const w7: NotesBlock[] = [
         "id": "w7/2/p2/s1",
         "parts": [
           {
-            "text": "2. SEPTUM TRANSVERSUMaren ERAKETA",
+            "text": "2. SEPTUM",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "TRANSVERSUMaren ERAKETA",
             "b": true
           }
         ]
@@ -384,21 +402,22 @@ export const w7: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " izenekoa, "
-          },
+            "text": " izenekoa. "
+          }
+        ]
+      },
+      {
+        "id": "w7/2/p3/s2",
+        "parts": [
           {
-            "text": "3º, 4º eta 5º",
-            "b": true
-          },
-          {
-            "text": " lepo somita mailetan (C3-C4-C5 mailetan) agertzen dena."
+            "text": "Bihotz hodiaren inguruko errai orritik."
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "2",
     "id": "w7/2/p4",
     "sentences": [
@@ -406,7 +425,14 @@ export const w7: NotesBlock[] = [
         "id": "w7/2/p4/s1",
         "parts": [
           {
-            "text": "Mesenkima, mesodermoz osatutako trenkada hori finkatu egiten da gorputzaren aurreko eta alboko paretetan, eta atzekaldetik, finkatzen da aurreko hestearen (gero hestegorria izango den) inguruko mesenkima."
+            "text": "● "
+          },
+          {
+            "text": "3º, 4º eta 5º",
+            "b": true
+          },
+          {
+            "text": " somita zerbikalen mailan agertzen da."
           }
         ]
       }
@@ -421,58 +447,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/2/p5/s1",
         "parts": [
           {
-            "text": "Septum transversum izeneko egitura honen agerpenarekin, goitik behera hedatzen den enbrioi barruko zeloma hori bitan bananduta gelditzen da: goiko atala "
-          },
-          {
-            "text": "hasierako",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "perikardio",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "barrunbea",
-            "b": true
-          },
-          {
-            "text": " da, torax barrunbe osoa okupatzen duena. "
-          }
-        ]
-      },
-      {
-        "id": "w7/2/p5/s2",
-        "parts": [
-          {
-            "text": "Septum Transversum honen azpian geratzen den enbrioi barruko zelomaren atala "
-          },
-          {
-            "text": "peritoneo barrunbea",
-            "b": true
-          },
-          {
-            "text": " da. "
-          }
-        ]
-      },
-      {
-        "id": "w7/2/p5/s3",
-        "parts": [
-          {
-            "text": "Gero aipatuko den moduan, Septum Transversum-ak partzialki banatuko ditu enbrioi barruko zeloma horren goiko eta beheko atalak, Septum Transversum-aren alde dortsolateraletan badaudelako 2 kanal goiko eta beheko atalak komunikatzeko: "
-          },
-          {
-            "text": "erreten perikardioperitonealak",
-            "b": true
-          },
-          {
-            "text": " (Septum Transversumaren atze alboko aldetan dauden behin-behineko egiturak)."
+            "text": "Hemendik askatzen diren zuntzetatik (fibretatik) sortzen dira mioblastoak (somitetatik migratutako mioblastoak), baita hoien lepoko nerbioetatik ."
           }
         ]
       }
@@ -487,8 +462,162 @@ export const w7: NotesBlock[] = [
         "id": "w7/2/p6/s1",
         "parts": [
           {
-            "text": "Septum Transversuma eta inguruko perikardio eta peritoneo barrunbeak; erreten perikardioperitonealak.",
+            "text": "Mesenkima, mesodermoz osatutako trenkada hori finkatu egiten da gorputzaren aurreko eta alboko paretetan, eta atzekaldetik, finkatzen da aurreko hestearen (gero hestegorria izango den) inguruko mesenkima."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2",
+    "id": "w7/2/p7",
+    "sentences": [
+      {
+        "id": "w7/2/p7/s1",
+        "parts": [
+          {
+            "text": "Septum transversum izeneko egitura honen agerpenarekin, goitik behera hedatzen den "
+          },
+          {
+            "text": "enbrioi barruko zeloma",
+            "b": true
+          },
+          {
+            "text": " hori bitan bananduta gelditzen da:"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "2",
+    "id": "w7/2/p8",
+    "sentences": [
+      {
+        "id": "w7/2/p8/s1",
+        "parts": [
+          {
+            "text": "● Goiko atala "
+          },
+          {
+            "text": "hasierako",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "perikardio barrunbea",
+            "b": true
+          },
+          {
+            "text": " da, ez du torax barrunbe osoa okupatzen."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "2",
+    "id": "w7/2/p9",
+    "sentences": [
+      {
+        "id": "w7/2/p9/s1",
+        "parts": [
+          {
+            "text": "● Septum Transversum honen azpian geratzen den enbrioi barruko zelomaren atala "
+          },
+          {
+            "text": "peritoneo barrunbea",
+            "b": true
+          },
+          {
+            "text": " da. "
+          }
+        ]
+      },
+      {
+        "id": "w7/2/p9/s2",
+        "parts": [
+          {
+            "text": "Ez du guztiz okupatzen abdomen barrunbea."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2",
+    "id": "w7/2/p10",
+    "sentences": [
+      {
+        "id": "w7/2/p10/s1",
+        "parts": [
+          {
+            "text": "Gero aipatuko den moduan, Septum Transversum-ak partzialki banatuko ditu enbrioi barruko zeloma horren goiko eta beheko atalak, Septum Transversum-aren alde dortsolateraletan badaudelako 2 kanal goiko eta beheko atalak komunikatzeko: "
+          },
+          {
+            "text": "erreten (kanal)",
+            "b": true,
             "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "perikardioperitonealak",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " ",
+            "i": true
+          },
+          {
+            "text": "(Septum Transversumaren atze alboko aldetan dauden behin- behineko egiturak)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "2",
+    "id": "w7/2/p11",
+    "sentences": [
+      {
+        "id": "w7/2/p11/s1",
+        "parts": [
+          {
+            "text": "Septum Transversuma eta inguruko perikardio eta peritoneo barrunbeak; erreten",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "perikardioperitonealak.",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2",
+    "id": "w7/2/p12",
+    "sentences": [
+      {
+        "id": "w7/2/p12/s1",
+        "parts": [
+          {
+            "text": "***Mesenkima ehun enbrionario primitiboa da, nagusiki mesodermotik eratorria.",
+            "b": true
           }
         ]
       }
@@ -519,7 +648,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.1/p3/s1",
         "parts": [
           {
-            "text": "Hestea alde zefalikotik alde kaudalera hedatzen da eta alboko mesodermoaren errai orriak hestea inguratzen du. "
+            "text": "Hestea alde zefalikotik alde kaudalera hedatzen da eta alboko mesodermoaren errai orriak hestea inguratzen du (hasieran ez du guztiz inguratzen hestea ). "
           }
         ]
       },
@@ -535,38 +664,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.1/p3/s3",
         "parts": [
           {
-            "text": "Egoera hau ezberdina izango da enbrioi barruko zelomako beheko aldean, peritoneo barrunbean. "
-          }
-        ]
-      },
-      {
-        "id": "w7/2.1/p3/s4",
-        "parts": [
-          {
-            "text": "Enbrioi barruko zelomaren beheko aldean, peritoneo barrunbean, alboko mesodermoaren pareta eta errai orriaren artean agertzen da bi orriz osatutako atzeko lotura bat: "
-          },
-          {
-            "text": "mesenterio dortsala",
-            "b": true
-          },
-          {
-            "text": "."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "caption",
-    "section": "2.1",
-    "id": "w7/2.1/p4",
-    "sentences": [
-      {
-        "id": "w7/2.1/p4/s1",
-        "parts": [
-          {
-            "text": "Atzeko mesenterioa ikusi daiteke",
-            "i": true
+            "text": "Egoera hau ezberdina izango da enbrioi barruko zelomako beheko aldean, peritoneo barrunbean."
           }
         ]
       }
@@ -575,35 +673,38 @@ export const w7: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.1",
+    "id": "w7/2.1/p4",
+    "sentences": [
+      {
+        "id": "w7/2.1/p4/s1",
+        "parts": [
+          {
+            "text": "Peritoneo barrunbean, alboko mesodermoaren pareta eta errai orriaren artean agertzen da bi orriz osatutako atzeko lotura baft: "
+          },
+          {
+            "text": "mesenterio dortsala/ atzeko mesenterioa",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": ".",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "2.1",
     "id": "w7/2.1/p5",
     "sentences": [
       {
         "id": "w7/2.1/p5/s1",
         "parts": [
           {
-            "text": "Peritoneo barrunbeko pareta "
-          },
-          {
-            "text": "paretako peritoneoa",
-            "b": true
-          },
-          {
-            "text": " deitzen da eta hestearen inguruan kokatzen den orria "
-          },
-          {
-            "text": "errai peritoneoa",
-            "b": true
-          },
-          {
-            "text": " du izena. "
-          }
-        ]
-      },
-      {
-        "id": "w7/2.1/p5/s2",
-        "parts": [
-          {
-            "text": "Paretako eta errai orri horien arteko lotura aurretik aipatutako mesenterio dortsala da."
+            "text": "Atzeko mesenterioa ikusi daiteke",
+            "i": true
           }
         ]
       }
@@ -618,7 +719,31 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.1/p6/s1",
         "parts": [
           {
-            "text": "Peritoneo barrunbean kokatuko da aurreko hestearen urrutiko atala, baita bitarteko atala eta atzeko hestearen parterik garrantzitsuena (urrutiko atala izan ezik: ondestea). "
+            "text": "Peritoneo barrunbeko pareta "
+          },
+          {
+            "text": "paretako peritoneoa",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " ",
+            "i": true
+          },
+          {
+            "text": "deitzen da eta hestearen inguruan kokatzen den orria "
+          },
+          {
+            "text": "errai peritoneoa",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " ",
+            "i": true
+          },
+          {
+            "text": "du izena. "
           }
         ]
       },
@@ -626,7 +751,14 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.1/p6/s2",
         "parts": [
           {
-            "text": "Heste atal horietatik digestio sistemaren egitura ugari sortuko dira: hestegorriaren urrutiko atala, urdaila, duodenoaren atal guztiak, heste lodiaren atal guztiak…"
+            "text": "Paretako eta errai orri horien arteko lotura aurretik aipatutako "
+          },
+          {
+            "text": "mesenterio dortsala",
+            "i": true
+          },
+          {
+            "text": " da."
           }
         ]
       }
@@ -641,7 +773,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.1/p7/s1",
         "parts": [
           {
-            "text": "Hasiera batean, hortik sortutako egiturak errai peritoneoz inguraturik gelditzen dira eta egitura guzti hauek peritoneo barrunbe horretan kokatuta daude hasiera batean. "
+            "text": "Peritoneo barrunbean kokatuko da: aurreko hestearen urrutiko atala, baita bitarteko atala eta atzeko hestearen parterik garrantzitsuena (urrutiko atala izan ezik: ondestea). "
           }
         ]
       },
@@ -649,7 +781,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.1/p7/s2",
         "parts": [
           {
-            "text": "Beraz, hasieran, peritoneo barruko egiturak deitzen zaie."
+            "text": "Heste atal horietatik digestio sistemaren egitura ugari sortuko dira: hestegorriaren urrutiko atala, urdaila, duodenoaren atal guztiak, heste lodiaren atal guztiak…"
           }
         ]
       }
@@ -664,7 +796,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.1/p8/s1",
         "parts": [
           {
-            "text": "Lehen aipatu den moduan, hasierako perikardio barrunbeak torax barrunbe osoa okupatzen du. "
+            "text": "Hasiera batean, hortik sortutako egiturak errai peritoneoz inguraturik gelditzen dira eta egitura guzti hauek peritoneo barrunbe horretan kokatuta daude hasiera batean. "
           }
         ]
       },
@@ -672,22 +804,14 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.1/p8/s2",
         "parts": [
           {
-            "text": "Ez da gauza bera gertatzen diafragmaren azpian, non peritoneo barrunbeak ez du barrunbe abdominal osoa okupatzen. "
-          }
-        ]
-      },
-      {
-        "id": "w7/2.1/p8/s3",
-        "parts": [
-          {
-            "text": "Abdomenean 2 organo mota bereizten dira:"
+            "text": "Beraz, hasieran, peritoneo barruko egiturak deitzen zaie."
           }
         ]
       }
     ]
   },
   {
-    "kind": "li",
+    "kind": "p",
     "section": "2.1",
     "id": "w7/2.1/p9",
     "sentences": [
@@ -695,14 +819,23 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.1/p9/s1",
         "parts": [
           {
-            "text": "- "
-          },
+            "text": "Peritoneo barrunbeak ez du barrunbe abdominal osoa okupatzen. "
+          }
+        ]
+      },
+      {
+        "id": "w7/2.1/p9/s2",
+        "parts": [
           {
-            "text": "Peritoneo barruko egiturak:",
-            "b": true
-          },
+            "text": "Orduan, abdomeneko 2 organo mota bereizten dira: peritoneo barruko egiturak eta peritoneo kanpoko egiturak. "
+          }
+        ]
+      },
+      {
+        "id": "w7/2.1/p9/s3",
+        "parts": [
           {
-            "text": " peritoneo barrunbean kokatutako organoak, hestetik sortutakoak."
+            "text": "* Badaude ere egitura batzuk garapenaren hasieran barrukoak direnak eta atzekoak bilakatzen direnak (hurrengo orrian azalduta)."
           }
         ]
       }
@@ -717,7 +850,29 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.1/p10/s1",
         "parts": [
           {
-            "text": "- "
+            "text": "● "
+          },
+          {
+            "text": "Peritoneo barruko egiturak:",
+            "b": true
+          },
+          {
+            "text": " peritoneo barrunbean kokatutako organoak, hestetik sortutakoak (errai periotoneoz inguratuak)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "2.1",
+    "id": "w7/2.1/p11",
+    "sentences": [
+      {
+        "id": "w7/2.1/p11/s1",
+        "parts": [
+          {
+            "text": "● "
           },
           {
             "text": "Peritoneo kanpoko egiturak:",
@@ -729,23 +884,23 @@ export const w7: NotesBlock[] = [
         ]
       },
       {
-        "id": "w7/2.1/p10/s2",
+        "id": "w7/2.1/p11/s2",
         "parts": [
           {
-            "text": "Adibidez, bitarteko mesodermotik garatzen diren giltzurrunak (peritoneo barrunbearen atzeko aldean kokatutakoak). "
+            "text": "Adibidez, bitarteko mesodermotik garatzen diren giltzurrunak (peritoneo barrunbearen atzekaldean kokatutakoak). "
           }
         ]
       },
       {
-        "id": "w7/2.1/p10/s3",
+        "id": "w7/2.1/p11/s3",
         "parts": [
           {
-            "text": "Beste adibidea: abdomeneko aorta, jaisten dela toraxetik, zeharkatzen du diafragma eta sartzen da abdomenera, baina ez dago peritoneo barrunbean sartuta, peritoneo barrunbearen atzeko aldean bukatzen baita. "
+            "text": "Beste adibidea: abdomeneko aorta, toraxetik jaisten da, diafragma zeharkatzen du eta abdomenera sartzen da, baina ez dago peritoneo barrunbean sartuta, peritoneo barrunbearen atzeko aldean bukatzen baita. "
           }
         ]
       },
       {
-        "id": "w7/2.1/p10/s4",
+        "id": "w7/2.1/p11/s4",
         "parts": [
           {
             "text": "Beheko bena kabarekin gauza berdina gertatzen da."
@@ -755,23 +910,23 @@ export const w7: NotesBlock[] = [
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "2.1",
-    "id": "w7/2.1/p11",
+    "id": "w7/2.1/p12",
     "sentences": [
       {
-        "id": "w7/2.1/p11/s1",
+        "id": "w7/2.1/p12/s1",
         "parts": [
           {
-            "text": "Bukatzeko, badaude organo batzuk hasieran, sortzen direnean, peritoneo barrukoak direnak, baina garapenean posizioz aldatzen dute barrunbe peritoneal horretan. "
+            "text": "● Badaude organo batzuk hasieran, sortzen direnean, peritoneo barrukoak direnak, baina garapenean posizioz aldatzen dute barrunbe peritoneal horretan. "
           }
         ]
       },
       {
-        "id": "w7/2.1/p11/s2",
+        "id": "w7/2.1/p12/s2",
         "parts": [
           {
-            "text": "Posizio aldaketa horregatik atzeko mesenterioa fusionatzen da atzekaldeko paretako peritoneoarekin, peritoneo atzeko egiturak bihurtuz."
+            "text": "Posizio aldaketa horregatik atzeko mesenterioa fusionatzen da atzekaldeko paretako peritoneoarekin, ( biak desagertuz) ○  Peritoneo barruko egitura hauek peritoneo atzeko egiturak bihurtuko dira"
           }
         ]
       }
@@ -780,21 +935,13 @@ export const w7: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.1",
-    "id": "w7/2.1/p12",
+    "id": "w7/2.1/p13",
     "sentences": [
       {
-        "id": "w7/2.1/p12/s1",
+        "id": "w7/2.1/p13/s1",
         "parts": [
           {
-            "text": "Beraz, argi eduki behar da peritoneo barrunbea ez duela okupatzen abdomeneko barrunbe osoa badaudelako organo batzuk peritoneo kanpokoak direla (abdomen barruan kokatuak) eta beste batzuk peritoneo atzekoak direla; esaterako, duodenoa eta goranzko eta beheranzko kolona. "
-          }
-        ]
-      },
-      {
-        "id": "w7/2.1/p12/s2",
-        "parts": [
-          {
-            "text": "Hasierako perikardio barrunbeak torax barrunbe osoa okupatzen du."
+            "text": "Beraz, argi eduki behar da peritoneo barrunbeak ez duela abdomeneko barrunbe osoa okupatzen badaudelako organo batzuk peritoneo kanpokoak direnak (abdomen barruan kokatuak) eta beste batzuk peritoneo atzekoak direnak; esaterako, duodenoa eta goranzko eta beheranzko kolona."
           }
         ]
       }
@@ -803,10 +950,10 @@ export const w7: NotesBlock[] = [
   {
     "kind": "caption",
     "section": "2.1",
-    "id": "w7/2.1/p13",
+    "id": "w7/2.1/p14",
     "sentences": [
       {
-        "id": "w7/2.1/p13/s1",
+        "id": "w7/2.1/p14/s1",
         "parts": [
           {
             "text": "Peritoneo barrunbea"
@@ -840,7 +987,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p3/s1",
         "parts": [
           {
-            "text": "Hasierako perikardio barrunbeak torax barrunbe osoa okupatzen du, eta beraz, hasierako perikardio barrunbetik hiru barrunbe desberdin sortzen dira garapenean:"
+            "text": "Hasierako perikardio barrunbeak ez du torax barrunbe osoa okupatzen, eta, hasierako perikardio barrunbetik hiru barrunbe desberdin sortzen dira garapenean:"
           }
         ]
       }
@@ -855,7 +1002,10 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p4/s1",
         "parts": [
           {
-            "text": "●​ Bi pleura barrunbe (toraxeko lateraletan), non birikak kokatzen diren.",
+            "text": "● "
+          },
+          {
+            "text": "Bi pleura barrunbe (toraxeko lateraletan), non birikak kokatzen diren.",
             "b": true
           }
         ]
@@ -871,7 +1021,10 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p5/s1",
         "parts": [
           {
-            "text": "●​ Behin-betiko perikardio barrunbea (aurre erdikaldean kokatuta), non bihotza",
+            "text": "● "
+          },
+          {
+            "text": "Behin-betiko perikardio barrunbea (aurre erdikaldean kokatuta), non bihotza",
             "b": true
           },
           {
@@ -894,7 +1047,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p6/s1",
         "parts": [
           {
-            "text": "Enbrioi barruko zelomaren (hasierako perikardio barrunbearen) atzealdean kokatzen da aurreko hestea. "
+            "text": "Enbrioi barruko zelomaren hasierako perikardio barrunbearen atzealdean kokatzen da aurreko hestea. "
           }
         ]
       },
@@ -910,30 +1063,14 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p6/s3",
         "parts": [
           {
-            "text": "Hastapen hau luzatu egiten da, hurbileko atala hodi laringotrakeala deitzen da, eta hastapen horren erpinetik (urrutiko ataletik) bi alboko hastapen edo dibertikulu sortzen dira: "
+            "text": "Hastapen hau luzatzen da, bere hurbileko atala hodi laringotrakeala deitzen da, eta hastapen horren erpinetik (urrutiko ataletik) bi alboko hastapen edo dibertikulu sortzen dira: "
           },
           {
             "text": "birika hastapenak ",
             "b": true
           },
           {
-            "text": "(eskuinekoa eta ezkerrekoa). "
-          }
-        ]
-      },
-      {
-        "id": "w7/2.2/p6/s4",
-        "parts": [
-          {
-            "text": "Birika hastapen horiek behera, eskuinera eta aurrera hazten dira. "
-          }
-        ]
-      },
-      {
-        "id": "w7/2.2/p6/s5",
-        "parts": [
-          {
-            "text": "Hazkuntza honengatik atzeko aldetik enbrioi barruko zelomaren errai orria bultzatzen dute, eta poliki poliki sartu egiten dira eta hasierako perikardio barrunbearen atze alboko aldeak okupatzen hasten dira eta pleura barrunbeak hasten dira eratzen."
+            "text": "(eskuinekoa eta ezkerrekoa)."
           }
         ]
       }
@@ -948,14 +1085,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p7/s1",
         "parts": [
           {
-            "text": "Bestetik, garapenbaren 5.asterako gorputzaren alboko aldeetatik bi mintz agertzen dira, "
-          },
-          {
-            "text": "mintz pleuroperikardiko ",
-            "b": true
-          },
-          {
-            "text": "deritzenak. "
+            "text": "Birika hastapen horiek behera, eskuinera eta aurrera hazten dira. "
           }
         ]
       },
@@ -963,7 +1093,23 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p7/s2",
         "parts": [
           {
-            "text": "Hiru zelula geruza banatzen dira, erdian gorputz paretatik sortutako mesenkima bat kokatzen da eta honen inguruan agertzen diren bi zelula geruzak mesodermoaren alboko zelomaren paretako orritik sortutakoak dira."
+            "text": "Hazkuntza honengatik atzeko aldetik enbrioi barruko zelomaren errai orria bultzatzen dute, eta poliki poliki sartzen dira eta hasierako perikardio barrunbearen atze alboko aldeak okupatzen hasten dira. "
+          }
+        ]
+      },
+      {
+        "id": "w7/2.2/p7/s3",
+        "parts": [
+          {
+            "text": "(Erreten perikardioperitonealaren espazioa okupatzen hasi, baina oraindik mantentzen dira zabalik). "
+          }
+        ]
+      },
+      {
+        "id": "w7/2.2/p7/s4",
+        "parts": [
+          {
+            "text": "Honela pleura barrunbeak hasten dira eratzen."
           }
         ]
       }
@@ -978,14 +1124,21 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p8/s1",
         "parts": [
           {
-            "text": "Bi "
+            "text": "Bestetik, garapenaren 4.asterako enbrioi gorputzaren alboko aldeetatik bi tolesdura agertzen dira, "
           },
           {
-            "text": "mintz pleuroperikardiko",
+            "text": "2 ",
             "b": true
           },
           {
-            "text": " hauek 5.astean erdialderuntz abiatzen dira, haien artean erpinak fusionatu arte, eta era berean, heste gorriaren inguruko mesenkimarekin fusionatzen dira. "
+            "text": "mintz"
+          },
+          {
+            "text": " / tolesdura pleuroperikardiko ",
+            "b": true
+          },
+          {
+            "text": "deritzenak. "
           }
         ]
       },
@@ -993,7 +1146,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p8/s2",
         "parts": [
           {
-            "text": "Modu horretan, gutxi gora behera pleura barrunbeak eta perikardio barrunbea hasten dira eratzen."
+            "text": "Hemen hiru zelula geruza banatzen dira, erdian gorputz paretatik sortutako mesenkima bat kokatzen da eta honen inguruan agertzen diren bi zelula geruzak mesodermoaren alboko zelomaren paretako orritik sortutakoak dira."
           }
         ]
       }
@@ -1008,7 +1161,14 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p9/s1",
         "parts": [
           {
-            "text": "Bitartean, birika hastapenek hazkuntzarekin jarraitu eta poliki-poliki hasierako perikardio barrunbe hauetako alboko espazio guztia okupatzen dute. "
+            "text": "Bi mintz/ "
+          },
+          {
+            "text": "tolesdura pleuroperikardiko",
+            "b": true
+          },
+          {
+            "text": " hauek 5. astean erdikalderantz abiatzen dira, haien artean erpinak fusionatu arte, eta era berean, heste gorriaren inguruko mesenkimarekin fusionatzen dira. "
           }
         ]
       },
@@ -1016,21 +1176,23 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p9/s2",
         "parts": [
           {
-            "text": "Hazkuntza honengatik "
-          },
+            "text": "Modu horretan, bitan banatzen dute hasierako perikardio barrunbea. "
+          }
+        ]
+      },
+      {
+        "id": "w7/2.2/p9/s3",
+        "parts": [
           {
-            "text": "mintz",
-            "b": true
-          },
+            "text": "(Gutxi gora behera 2 pleura barrunbeak eta perikardio barrunbea hasten dira eratzen). "
+          }
+        ]
+      },
+      {
+        "id": "w7/2.2/p9/s4",
+        "parts": [
           {
-            "text": " "
-          },
-          {
-            "text": "pleuroperikardikoen",
-            "b": true
-          },
-          {
-            "text": " oinaldeak aurrerantz eta alborantz abiatzen dira eta birikek hazkuntzarekin bukatzean, mintz horien oinaldeak gorputz paretako aurre erdikaldetik irteten dira."
+            "text": "Tolestura pleuroperikardikoen mesenkimatik jeisten dira nerbio frenikoak, baita birikak ere (behera aurrera eta albora)."
           }
         ]
       }
@@ -1045,6 +1207,51 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p10/s1",
         "parts": [
           {
+            "text": "Bitartean, birika hastapenek hazkuntzarekin jarraitu eta poliki- poliki hasierako perikardio barrunbe hauetako alboko espazio guztia okupatzen dute. "
+          }
+        ]
+      },
+      {
+        "id": "w7/2.2/p10/s2",
+        "parts": [
+          {
+            "text": "(Orduan erreten perikardioperitonealen espazioa ere)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.2",
+    "id": "w7/2.2/p11",
+    "sentences": [
+      {
+        "id": "w7/2.2/p11/s1",
+        "parts": [
+          {
+            "text": "Hazkuntza honengatik mintz"
+          },
+          {
+            "text": " / tolesdura pleuroperikardikoen",
+            "b": true
+          },
+          {
+            "text": " oinaldeak aurrerantz eta alborantz abiatzen dira eta birikak hazkuntzarekin bukatzean, mintz horien oinaldeak gorputz paretako aurre erdialdetik irteten dira."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.2",
+    "id": "w7/2.2/p12",
+    "sentences": [
+      {
+        "id": "w7/2.2/p12/s1",
+        "parts": [
+          {
             "text": "Beraz, hasierako perikardio barrunbe honetan bi motatako barrunbeak agertuko dira, eta barrunbe hauetan beti bereizten da paretako orri bat eta errai orri bat."
           }
         ]
@@ -1054,10 +1261,10 @@ export const w7: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.2",
-    "id": "w7/2.2/p11",
+    "id": "w7/2.2/p13",
     "sentences": [
       {
-        "id": "w7/2.2/p11/s1",
+        "id": "w7/2.2/p13/s1",
         "parts": [
           {
             "text": "● Atze-alboko aldeetan kokatzen diren "
@@ -1072,77 +1279,17 @@ export const w7: NotesBlock[] = [
         ]
       },
       {
-        "id": "w7/2.2/p11/s2",
-        "parts": [
-          {
-            "text": "(Bere errai pleura kontaktuan dago birikarekin, erreflejatu eta pareta pleurarekin jarraitzen du)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "2.2",
-    "id": "w7/2.2/p12",
-    "sentences": [
-      {
-        "id": "w7/2.2/p12/s1",
-        "parts": [
-          {
-            "text": "● Erdikaldean bukatzen den gelditzen den "
-          },
-          {
-            "text": "perikardio barrunbea",
-            "b": true
-          },
-          {
-            "text": ". "
-          }
-        ]
-      },
-      {
-        "id": "w7/2.2/p12/s2",
-        "parts": [
-          {
-            "text": "(gauza bera gertatzen da)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.2",
-    "id": "w7/2.2/p13",
-    "sentences": [
-      {
-        "id": "w7/2.2/p13/s1",
-        "parts": [
-          {
-            "text": "Bi barrunbe hauek espazio "
-          },
-          {
-            "text": "birtualak ",
-            "b": true
-          },
-          {
-            "text": "dira, bi motako pleurak (gauza bera perikardioarekin) bata bestearen aldamenean (paretako pleura orria eta errai orria) daude (tartean espaziorik egon gabe). "
-          }
-        ]
-      },
-      {
         "id": "w7/2.2/p13/s2",
         "parts": [
           {
-            "text": "Bakarrik espazio erreala bihurtzen da egoera patologikoetan (adibidez, pleura barrunbean batzuetan airea edo odola sartzen da)."
+            "text": "(Bere errai pleura kontaktuan dago birikarekin, erreflejatu eta pareta pleurarekin jarraitzen du) ○ Bi pleura barrunbeen artean —> Gune bat dago: mediastinoa ○ Mediastinoak 3 atal ditu:"
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "caption",
     "section": "2.2",
     "id": "w7/2.2/p14",
     "sentences": [
@@ -1150,67 +1297,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/2.2/p14/s1",
         "parts": [
           {
-            "text": "Perikardio barrunbean "
-          },
-          {
-            "text": "mintz pleuroperkardiko",
-            "b": true
-          },
-          {
-            "text": " hauen erdigunean dagoen mesenkimatik "
-          },
-          {
-            "text": "perikardio fibrosoa",
-            "b": true
-          },
-          {
-            "text": " garatzen da. "
-          }
-        ]
-      },
-      {
-        "id": "w7/2.2/p14/s2",
-        "parts": [
-          {
-            "text": "Somatopleura geruzatik "
-          },
-          {
-            "text": "perikardio serosoa",
-            "b": true
-          },
-          {
-            "text": " (bihotz hodiaren inguruan) garatzen da. "
-          }
-        ]
-      },
-      {
-        "id": "w7/2.2/p14/s3",
-        "parts": [
-          {
-            "text": "Perikardio serosoa erreflejatu egiten da perikardio fibrosoaren barneko aurpegia estaltzeko. "
-          }
-        ]
-      },
-      {
-        "id": "w7/2.2/p14/s4",
-        "parts": [
-          {
-            "text": "Laburbilduz, "
-          },
-          {
-            "text": "mintz pleuroperkardikotik",
-            "b": true
-          },
-          {
-            "text": " paretako perikardio fibrosoa eta serosoa sortzen dira. "
-          }
-        ]
-      },
-      {
-        "id": "w7/2.2/p14/s5",
-        "parts": [
-          {
-            "text": "Bi hauek (fibrosoa eta sedosoa) paretako perikardioa osatzen dute."
+            "text": "■ Aurreko mediastinoa (oso estua) ■ Bitarteko mediastinoa: hemen kokatuta dago perikardio barrunbea ■ Atzeko mediastinoa: hemendik hainbat egitura jaitsi (toraxeko aorta, aurreko hestetik eratutako hestegorria, 10. gara nerbioak, toraxeko linfa enborrak…) ○ Egiturak ez daude enbrioi barruko zelomaren barnean"
           }
         ]
       }
@@ -1223,6 +1310,95 @@ export const w7: NotesBlock[] = [
     "sentences": [
       {
         "id": "w7/2.2/p15/s1",
+        "parts": [
+          {
+            "text": "Argazkia ez da klasekoa, mediastinoa zer den ikusteko baizik"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "2.2",
+    "id": "w7/2.2/p16",
+    "sentences": [
+      {
+        "id": "w7/2.2/p16/s1",
+        "parts": [
+          {
+            "text": "● Erdialdean gelditzen den "
+          },
+          {
+            "text": "perikardio barrunbea",
+            "b": true
+          },
+          {
+            "text": ". "
+          }
+        ]
+      },
+      {
+        "id": "w7/2.2/p16/s2",
+        "parts": [
+          {
+            "text": "(Bere errai-perikardioa kontaktuan dago bihotzarekin, erreflejatu eta pareta perikardioarekin jarraitzen du)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.2",
+    "id": "w7/2.2/p17",
+    "sentences": [
+      {
+        "id": "w7/2.2/p17/s1",
+        "parts": [
+          {
+            "text": "Bi barrunbe hauek "
+          },
+          {
+            "text": "espazio",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " ",
+            "i": true
+          },
+          {
+            "text": "birtualak ",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": "dira, bi motako pleurak (gauza bera perikardioarekin) bata bestearen aldamenean (paretako pleura orria eta errai orria) daude (tartean espaziorik egon gabe). "
+          }
+        ]
+      },
+      {
+        "id": "w7/2.2/p17/s2",
+        "parts": [
+          {
+            "text": "Bakarrik espazio erreala ",
+            "b": true
+          },
+          {
+            "text": "bihurtzen da egoera patologikoetan (adibidez, pleura barrunbean batzuetan airea edo odola sartzen da)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "2.2",
+    "id": "w7/2.2/p18",
+    "sentences": [
+      {
+        "id": "w7/2.2/p18/s1",
         "parts": [
           {
             "text": "Tolestura pleuroperikardikoa, Mintz pleuroperikardikoa eta hauen fusioa",
@@ -1257,7 +1433,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/3/p3/s1",
         "parts": [
           {
-            "text": "Diafragma torax eta abdomenaren artean agertzen den "
+            "text": "Diafragma, torax eta abdomenaren artean agertzen den "
           },
           {
             "text": "trenkada muskulu aponeurotikoa",
@@ -1287,7 +1463,15 @@ export const w7: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " da."
+            "text": " da. "
+          }
+        ]
+      },
+      {
+        "id": "w7/3/p3/s4",
+        "parts": [
+          {
+            "text": "Lehen aipatu den bezala, Septum transversuma lepoko C-3, C-4 eta C-5 mailetan agertzen da (oso altu agertu) eta momentu horretan, bere mesordemotik mesenkima sortzen da."
           }
         ]
       }
@@ -1302,14 +1486,6 @@ export const w7: NotesBlock[] = [
         "id": "w7/3/p4/s1",
         "parts": [
           {
-            "text": "Lehen aipatu den bezala, Septum transversuma lepoko C-3, C-4 eta C-5 mailetan agertzen da (oso altu agertu) eta momentu horretan, bere mesordemotik mesenkima sortzen da. "
-          }
-        ]
-      },
-      {
-        "id": "w7/3/p4/s2",
-        "parts": [
-          {
             "text": "Mesenkima edo mesodermo horretan "
           },
           {
@@ -1322,7 +1498,7 @@ export const w7: NotesBlock[] = [
         ]
       },
       {
-        "id": "w7/3/p4/s3",
+        "id": "w7/3/p4/s2",
         "parts": [
           {
             "text": "Gero, mioblasto horiek "
@@ -1332,19 +1508,12 @@ export const w7: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " (zelula muskularrak) bihurtzen dira."
+            "text": " (zelula muskularrak) bihurtzen dira. "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "3",
-    "id": "w7/3/p5",
-    "sentences": [
+      },
       {
-        "id": "w7/3/p5/s1",
+        "id": "w7/3/p4/s3",
         "parts": [
           {
             "text": "Garai horretan, lepo mailan kokatzen den momentuan, septum transversumean garatzen ari diren zelula muskular horietara nerbio zuntzak iristen dira, zelula muskular horiek inerbatzeko. "
@@ -1352,7 +1521,7 @@ export const w7: NotesBlock[] = [
         ]
       },
       {
-        "id": "w7/3/p5/s2",
+        "id": "w7/3/p4/s4",
         "parts": [
           {
             "text": "Zelula muskular horietara iristen diren nerbio zuntz horiek, nerbio errakideoetatik (nerbio motoreak eta sentsorialak) datoz. "
@@ -1360,7 +1529,7 @@ export const w7: NotesBlock[] = [
         ]
       },
       {
-        "id": "w7/3/p5/s3",
+        "id": "w7/3/p4/s5",
         "parts": [
           {
             "text": "Hau da, zelula muskular horiek lepo mailan agertzen direnez, horietaraino nerbio errakideoetatik, nerbio zuntzak iristen dira (nerbio motoreak eta sentsorialak) zelula muskular hauek inerbatzeko 3., 4. eta 5. lepoko nerbio espinale aurreko adarretatik (errakideoak) irtendako zuntzak, hain zuzen ere. "
@@ -1368,7 +1537,7 @@ export const w7: NotesBlock[] = [
         ]
       },
       {
-        "id": "w7/3/p5/s4",
+        "id": "w7/3/p4/s6",
         "parts": [
           {
             "text": "Nerbio zuntz horiek elkartzean "
@@ -1387,24 +1556,32 @@ export const w7: NotesBlock[] = [
   {
     "kind": "p",
     "section": "3",
-    "id": "w7/3/p6",
+    "id": "w7/3/p5",
     "sentences": [
       {
-        "id": "w7/3/p6/s1",
+        "id": "w7/3/p5/s1",
         "parts": [
           {
-            "text": "Enbrioiaren hazkuntzarengatik (gehiago hazi atzetik aurretik baino, bizkarrezurraren garapenagatik) septum transversuma jaisten hasten da lepo mailatik. "
+            "text": "Enbrioiaren hazkuntzarengatik (gehiago hazi atzetik aurretik baino, bizkarrezurraren garapenagatik) "
+          },
+          {
+            "text": "Septum Transversuma ",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": "jaisten hasten da lepo mailatik. "
           }
         ]
       },
       {
-        "id": "w7/3/p6/s2",
+        "id": "w7/3/p5/s2",
         "parts": [
           {
             "text": "5. astearen bukaerarako, septun transversumaren aurreko aldea askoz beherago kokatzen da ("
           },
           {
-            "text": "6. torax",
+            "text": "7. torax",
             "b": true
           },
           {
@@ -1427,10 +1604,25 @@ export const w7: NotesBlock[] = [
         ]
       },
       {
-        "id": "w7/3/p6/s3",
+        "id": "w7/3/p5/s3",
         "parts": [
           {
             "text": "Jaitsiera honekin batera, nerbio frenikoetako zuntz motore eta sentsorialak luzatu egiten dira septum transversumera iritsi ahal izateko."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "3",
+    "id": "w7/3/p6",
+    "sentences": [
+      {
+        "id": "w7/3/p6/s1",
+        "parts": [
+          {
+            "text": "Bestetik, 4. astean goikaldean kokatzen den hasierako perikardio barrunbea (bertatik ondoren pleura barrunbeak) erreten perikardioperitonealen (alde dortsalean) bitartez komunikatuta mantentzen da behekaldeko peritoneo barrunbearekin."
           }
         ]
       }
@@ -1445,19 +1637,12 @@ export const w7: NotesBlock[] = [
         "id": "w7/3/p7/s1",
         "parts": [
           {
-            "text": "Bestetik, 4. astean goikaldean kokatzen den hasierako perikardio barrunbea (bertatik ondoren pleura barrunbeak) erreten perikardioperitonealen (alde dortsalean) bitartez komunikatuta mantentzen da behekaldeko peritoneo barrunbearekin. "
-          }
-        ]
-      },
-      {
-        "id": "w7/3/p7/s2",
-        "parts": [
-          {
             "text": "Garapenaren 5. astean, gorputzaren atze alboko paretetatik "
           },
           {
             "text": "mintz pleuroperitonealak",
-            "b": true
+            "b": true,
+            "i": true
           },
           {
             "text": " agertzen dira. "
@@ -1465,18 +1650,33 @@ export const w7: NotesBlock[] = [
         ]
       },
       {
-        "id": "w7/3/p7/s3",
+        "id": "w7/3/p7/s2",
         "parts": [
           {
-            "text": "Hauek hazi eta hazkuntza horren ondorioz, hestegorri inguruko mesenkimarekin eta septum transversumaren atzeko ertzarekin fusionatzen dira. "
+            "text": "Hauek hazi eta hazkuntza horren ondorioz, hestegorri inguruko mesenkimarekin eta septum transversumaren atzeko ertzarekin fusionatzen dira (7 astean) Horrela, erreten perikardioperitonealak itxita gelditzen dira, pleura eta peritoneo barrunbeen arteko komunikazioa galduz."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "3",
+    "id": "w7/3/p8",
+    "sentences": [
+      {
+        "id": "w7/3/p8/s1",
+        "parts": [
+          {
+            "text": "Ezkerreko erreten perikardioperitoniala handiagoa da eskumakoa baino. "
           }
         ]
       },
       {
-        "id": "w7/3/p7/s4",
+        "id": "w7/3/p8/s2",
         "parts": [
           {
-            "text": "Horrela, erreten perikardioperitonealak itxita gelditzen dira, pleura eta peritoneo barrunbeen arteko komunikazioa galduz."
+            "text": "Diafragmaren erniak gertzaten direnean ezkerreko erreten perikardioperitoneal honetatik"
           }
         ]
       }
@@ -1491,7 +1691,35 @@ export const w7: NotesBlock[] = [
         "id": "w7/3.1/p2/s1",
         "parts": [
           {
-            "text": "3.1. Diafragmaren eraketan parte hartzen duten atalak",
+            "text": "3.1.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Diafragmaren",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "eraketan",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "parte hartzen",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "duten atalak",
             "b": true
           }
         ]
@@ -1510,8 +1738,17 @@ export const w7: NotesBlock[] = [
             "text": "● "
           },
           {
-            "text": "Septum Transversuma:",
-            "b": true
+            "text": "Septum",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Transversuma:",
+            "b": true,
+            "i": true
           },
           {
             "text": " lepo mailan zegoen bitartean bertan bereizitako miozitoek migratzen dute mintz pleuroperitonialetara bertan zelula muskularrak sortzeko."
@@ -1532,11 +1769,32 @@ export const w7: NotesBlock[] = [
             "text": "● "
           },
           {
-            "text": "Mintz pleuroperitonealak:",
+            "text": "Mintz pleuroperitonealak",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": ":",
             "b": true
           },
           {
-            "text": " pleura barrunbeen eta peritoneo barrunbearen arteko komunikazioa itxi egiten dute."
+            "text": " pleura barrunbeen eta peritoneo barrunbearen arteko komunikazioa itxi egiten dute. "
+          }
+        ]
+      },
+      {
+        "id": "w7/3.1/p4/s2",
+        "parts": [
+          {
+            "text": "Gogoratu, mintz pleuroperitoneala fusionatzen dela septum transversumaren atzeko ertzekin, eta aurretik eta albotik aurreko hestearen mesenkimarekin fusionatzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w7/3.1/p4/s3",
+        "parts": [
+          {
+            "text": "Hau garapenaren 7.astean gertatzen da, eta fusioak gertatzen diren momentuan erreten perikardioperitoneala desagertzen da."
           }
         ]
       }
@@ -1551,15 +1809,12 @@ export const w7: NotesBlock[] = [
         "id": "w7/3.1/p5/s1",
         "parts": [
           {
-            "text": "●",
-            "b": true
+            "text": "● "
           },
           {
-            "text": " "
-          },
-          {
-            "text": "Hestegorri inguruko mesenkima",
-            "b": true
+            "text": "AURREKO HESTEAREN inguruko mesenkima",
+            "b": true,
+            "i": true
           },
           {
             "text": "tik sortutako zuntz muskularrak. "
@@ -1570,7 +1825,11 @@ export const w7: NotesBlock[] = [
         "id": "w7/3.1/p5/s2",
         "parts": [
           {
-            "text": "Gerriko atal muskularra garatuko da hemendik."
+            "text": "Diafragmaren atal muskular ",
+            "i": true
+          },
+          {
+            "text": "lumbarra garatuko da hemendik."
           }
         ]
       }
@@ -1595,11 +1854,26 @@ export const w7: NotesBlock[] = [
             "text": ": gorputzeko "
           },
           {
-            "text": "mesodermo paraxialetik",
+            "text": "mesodermo",
             "b": true
           },
           {
-            "text": " sortua."
+            "text": " "
+          },
+          {
+            "text": "paraxialetik ",
+            "b": true
+          },
+          {
+            "text": "sortuta toraxeko beheko sei somitetatik. "
+          }
+        ]
+      },
+      {
+        "id": "w7/3.1/p6/s2",
+        "parts": [
+          {
+            "text": "→ eraztun formako atal muskular periferikoa da."
           }
         ]
       }
@@ -1614,7 +1888,8 @@ export const w7: NotesBlock[] = [
         "id": "w7/3.1/p7/s1",
         "parts": [
           {
-            "text": "Diafragmaren eraketa edo garapen prozesua"
+            "text": "Diafragmaren eraketa edo garapen prozesua",
+            "i": true
           }
         ]
       }
@@ -1632,18 +1907,12 @@ export const w7: NotesBlock[] = [
             "text": "Septum Transversumetik garatzen da diafragmaren erdian dagoen atal tendinosoa: diafragmaren "
           },
           {
-            "text": "zentro tendinosoa",
-            "b": true
+            "text": "zentro tendinosoa/zentro freniko.",
+            "b": true,
+            "i": true
           },
           {
-            "text": "/"
-          },
-          {
-            "text": "erdiko tendoia",
-            "b": true
-          },
-          {
-            "text": ". "
+            "text": " "
           }
         ]
       },
@@ -1651,7 +1920,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/3.1/p8/s2",
         "parts": [
           {
-            "text": "Tendoi horren inguruan zuntz muskularrak (septum transversumetik datozenak eta gainontzeko ataletatik eratorriak) egongo dira. "
+            "text": "Tendoi horren inguruan zuntz (atal) muskularrak (septum transversumetik datozenak eta gainontzeko ataletatik eratorriak) egongo dira. "
           }
         ]
       },
@@ -1659,14 +1928,30 @@ export const w7: NotesBlock[] = [
         "id": "w7/3.1/p8/s3",
         "parts": [
           {
-            "text": "Diafragmaren zentro tendinosoan 3 hosto ezberdin bereizten dira: eskuineko, erdiko eta ezkerreko hostoak."
+            "text": "Diafragmaren zentro tendinosoan 3 hosto ezberdin bereizten dira: eskuineko, erdiko eta ezkerreko hostoak. "
+          }
+        ]
+      },
+      {
+        "id": "w7/3.1/p8/s4",
+        "parts": [
+          {
+            "text": "Gero, diafragmaren atal muskularra zentro tendinosoa inguratuko du eta diafragmaren zentro tendinosoaren inguruan kokatzen den "
+          },
+          {
+            "text": "zuntz muskular",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " horietan hiru azpiatal bereiz daitezke:"
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "3.1",
     "id": "w7/3.1/p9",
     "sentences": [
@@ -1674,14 +1959,14 @@ export const w7: NotesBlock[] = [
         "id": "w7/3.1/p9/s1",
         "parts": [
           {
-            "text": "Diafragmaren zentro tendinosoaren inguruan kokatzen den zuntz muskular horietan hiru azpiatal bereiz daitezke: ○ "
+            "text": "● "
           },
           {
             "text": "Bularrezur atala",
             "b": true
           },
           {
-            "text": ": goi aurrekaldean, bularrezurrean insertatuta. "
+            "text": ": goi aurrekaldean, bularrezurrean (atzeko aurpegian) insertatuta. "
           }
         ]
       },
@@ -1689,7 +1974,22 @@ export const w7: NotesBlock[] = [
         "id": "w7/3.1/p9/s2",
         "parts": [
           {
-            "text": "○ "
+            "text": "ATZEKO AURPEGIAN BULARREZURARREN ATZEKO AURPEGIAN INSERTATU"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "3.1",
+    "id": "w7/3.1/p10",
+    "sentences": [
+      {
+        "id": "w7/3.1/p10/s1",
+        "parts": [
+          {
+            "text": "● "
           },
           {
             "text": "Saihets-hezur atala",
@@ -1701,47 +2001,99 @@ export const w7: NotesBlock[] = [
         ]
       },
       {
-        "id": "w7/3.1/p9/s3",
+        "id": "w7/3.1/p10/s2",
         "parts": [
           {
-            "text": "○ "
+            "text": "7-12 SAHIETS HEZURRERA"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "3.1",
+    "id": "w7/3.1/p11",
+    "sentences": [
+      {
+        "id": "w7/3.1/p11/s1",
+        "parts": [
+          {
+            "text": "● "
           },
           {
             "text": "Atal lumbarra/gerriko atala:",
             "b": true
           },
           {
-            "text": " hestegorriaren inguruko mesenkimatik sortutakoa. "
+            "text": " AURREKO HESTEAREN inguruko mesenkimatik sortutakoa. "
           }
         ]
       },
       {
-        "id": "w7/3.1/p9/s4",
+        "id": "w7/3.1/p11/s2",
         "parts": [
           {
-            "text": "Bertan bi zutabe bereizten dira: "
+            "text": "Bertan bi zutabe bereizten dira: ○ "
           },
           {
-            "text": "eskubikoa",
+            "text": "Eskumakoa",
             "b": true
           },
           {
-            "text": ", hasierako 3 gerri-ornoen aurre alboko aurpegian insertatzen da eta"
+            "text": ", hasierako 3 "
           },
           {
-            "text": " ezkerrekoa",
-            "b": true
+            "text": "orno lunbarren ",
+            "i": true
           },
           {
-            "text": ", lehenengo 2 gerri-ornoen aurre alboko paretetan insertatzen da. "
+            "text": "aurre alboko aurpegian"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "3.1",
+    "id": "w7/3.1/p12",
+    "sentences": [
+      {
+        "id": "w7/3.1/p12/s1",
+        "parts": [
+          {
+            "text": "insertatzen da. "
           }
         ]
       },
       {
-        "id": "w7/3.1/p9/s5",
+        "id": "w7/3.1/p12/s2",
         "parts": [
           {
-            "text": "Bi zutabe horien artean"
+            "text": "LUZEAGOA ○ "
+          },
+          {
+            "text": "Ezkerrekoa",
+            "b": true
+          },
+          {
+            "text": ", hasierako 2 "
+          },
+          {
+            "text": "orno-lunbarren",
+            "i": true
+          },
+          {
+            "text": " aurre alboko paretetan insertatzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w7/3.1/p12/s3",
+        "parts": [
+          {
+            "text": "○ Bi zutabe horien artean"
           },
           {
             "text": " erdiko lotailu arkutua",
@@ -1757,21 +2109,39 @@ export const w7: NotesBlock[] = [
   {
     "kind": "p",
     "section": "3.1",
-    "id": "w7/3.1/p10",
+    "id": "w7/3.1/p13",
     "sentences": [
       {
-        "id": "w7/3.1/p10/s1",
+        "id": "w7/3.1/p13/s1",
         "parts": [
           {
-            "text": "Abdomenaren sabaia eta diafragmaren atzeko pareta. "
+            "text": "Abdomenaren sabaia eta diafragmaren atzeko pareta. ",
+            "i": true
           }
         ]
       },
       {
-        "id": "w7/3.1/p10/s2",
+        "id": "w7/3.1/p13/s2",
         "parts": [
           {
-            "text": "Mozketa frontala aurretik ikusita, kendu egin dira abdomeneko aurreko pareta eta abdomeneko organo guztiak."
+            "text": "Mozketa frontala aurretik ikusita, kendu egin dira",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "3.1",
+    "id": "w7/3.1/p14",
+    "sentences": [
+      {
+        "id": "w7/3.1/p14/s1",
+        "parts": [
+          {
+            "text": "abdomeneko aurreko pareta eta abdomeneko organoak.",
+            "i": true
           }
         ]
       }
@@ -1780,10 +2150,10 @@ export const w7: NotesBlock[] = [
   {
     "kind": "p",
     "section": "3.1",
-    "id": "w7/3.1/p11",
+    "id": "w7/3.1/p15",
     "sentences": [
       {
-        "id": "w7/3.1/p11/s1",
+        "id": "w7/3.1/p15/s1",
         "parts": [
           {
             "text": "LABURPENA",
@@ -1799,13 +2169,13 @@ export const w7: NotesBlock[] = [
   {
     "kind": "p",
     "section": "3.1",
-    "id": "w7/3.1/p12",
+    "id": "w7/3.1/p16",
     "sentences": [
       {
-        "id": "w7/3.1/p12/s1",
+        "id": "w7/3.1/p16/s1",
         "parts": [
           {
-            "text": "Diafragmaren goian kokatzen den barrunbea barrunbe torazikoa da, bertan enbrio barruko zelomatik 2 pleura barrunbe eta perikardio barrunbe bat garatu egin dira."
+            "text": "Diafragmaren goian kokatzen den barrunbea barrunbe torazikoa da, bertan enbrio barruko zelomatik 2 pleura barrunbe eta perikardio barrunbe bat garatu dira."
           }
         ]
       }
@@ -1814,10 +2184,10 @@ export const w7: NotesBlock[] = [
   {
     "kind": "p",
     "section": "3.1",
-    "id": "w7/3.1/p13",
+    "id": "w7/3.1/p17",
     "sentences": [
       {
-        "id": "w7/3.1/p13/s1",
+        "id": "w7/3.1/p17/s1",
         "parts": [
           {
             "text": "Diafragmaren azpian abdomeneko barrunbea dago, eta bertan, enbrioi barruko zelomatik garatu den peritoneo barrunbea dago, baina honek ez du barrunbe osoa (abdomenekoa) okupatzen."
@@ -1829,111 +2199,13 @@ export const w7: NotesBlock[] = [
   {
     "kind": "p",
     "section": "3.1",
-    "id": "w7/3.1/p14",
-    "sentences": [
-      {
-        "id": "w7/3.1/p14/s1",
-        "parts": [
-          {
-            "text": "Diafragmatik egitura asko pasatzen dira eta hauek dira diafragma zeharkatzen duten egiturak:"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "3.1",
-    "id": "w7/3.1/p15",
-    "sentences": [
-      {
-        "id": "w7/3.1/p15/s1",
-        "parts": [
-          {
-            "text": "●"
-          },
-          {
-            "text": " Toraxeko aorta:",
-            "b": true
-          },
-          {
-            "text": " aorta zulotik (aortaren hiatoa), erdiko lotailu arkua zeharkatuz abdomenera sartzen da, bertan bere ibilbidea egiten du et aazkenean bukaerako adarrak ematen ditu: arteria iliako primitiboak."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "3.1",
-    "id": "w7/3.1/p16",
-    "sentences": [
-      {
-        "id": "w7/3.1/p16/s1",
-        "parts": [
-          {
-            "text": "●"
-          },
-          {
-            "text": " Beheko kaba zaina:",
-            "b": true
-          },
-          {
-            "text": " abdomeneko zain garrantzitsuena. "
-          }
-        ]
-      },
-      {
-        "id": "w7/3.1/p16/s2",
-        "parts": [
-          {
-            "text": "Peritoneo atzeko espaziotik igo, diafragma (erdiko eta eskuineko hostoen artean) zeharkatzen du eta toraxean sartzen da, zuzenena eskuineko aurikulara (diafragmaren goiko aurpegian)."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "3.1",
-    "id": "w7/3.1/p17",
-    "sentences": [
-      {
-        "id": "w7/3.1/p17/s1",
-        "parts": [
-          {
-            "text": "● "
-          },
-          {
-            "text": "Hestegorria:",
-            "b": true
-          },
-          {
-            "text": " aurreko hestetik sortuko da, toraxetik jaisten da, diafragma zeharkatzen du eta abdomeneko hestegorria bihurtuko da. "
-          }
-        ]
-      },
-      {
-        "id": "w7/3.1/p17/s2",
-        "parts": [
-          {
-            "text": "Ibilbide labur bat egiten du abdomenean, ondoren urdailarekin jarraitzeko."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "3.1",
     "id": "w7/3.1/p18",
     "sentences": [
       {
         "id": "w7/3.1/p18/s1",
         "parts": [
           {
-            "text": "● Nebio begetatibo desberdinak",
-            "b": true
+            "text": "Diafragmatik egitura asko pasatzen dira eta hauek dira diafragma zeharkatzen duten egiturak:"
           }
         ]
       }
@@ -1948,8 +2220,22 @@ export const w7: NotesBlock[] = [
         "id": "w7/3.1/p19/s1",
         "parts": [
           {
-            "text": "● Toraxeko nerbio esplaknikoak",
+            "text": "● "
+          },
+          {
+            "text": "Toraxeko aorta:",
             "b": true
+          },
+          {
+            "text": " aorta zulotik (aortaren hiatoa), erdiko lotailu arkua zeharkatuz abdomenera sartzen da, bertan bere ibilbidea egiten du eta azkenean bukaerako adarrak ematen ditu: arteria iliako primitiboak. "
+          }
+        ]
+      },
+      {
+        "id": "w7/3.1/p19/s2",
+        "parts": [
+          {
+            "text": "Hau 12 orno toraxiko mailan gertatzen da"
           }
         ]
       }
@@ -1967,8 +2253,49 @@ export const w7: NotesBlock[] = [
             "text": "● "
           },
           {
-            "text": "…",
+            "text": "Beheko kaba zaina/ beheko bena kaba:",
             "b": true
+          },
+          {
+            "text": " abdomeneko zain garrantzitsuena. "
+          }
+        ]
+      },
+      {
+        "id": "w7/3.1/p20/s2",
+        "parts": [
+          {
+            "text": "Peritoneo atzeko espaziotik igo, diafragma (erdiko eta eskuineko hostoen artean) zeharkatzen du eta toraxean sartzen da, zuzenena eskuineko aurikulara (diafragmaren goiko aurpegian)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "3.1",
+    "id": "w7/3.1/p21",
+    "sentences": [
+      {
+        "id": "w7/3.1/p21/s1",
+        "parts": [
+          {
+            "text": "● "
+          },
+          {
+            "text": "Hestegorria:",
+            "b": true
+          },
+          {
+            "text": " aurreko hestetik sortuko da, toraxetik jaisten da, diafragma zeharkatzen du eta abdomeneko hestegorria bihurtuko da. "
+          }
+        ]
+      },
+      {
+        "id": "w7/3.1/p21/s2",
+        "parts": [
+          {
+            "text": "Ibilbide labur bat egiten du abdomenean, ondoren urdailarekin jarraitzeko."
           }
         ]
       }
@@ -2014,7 +2341,7 @@ export const w7: NotesBlock[] = [
         "id": "w7/4/p4/s1",
         "parts": [
           {
-            "text": "Hestetik sortutako atalak hasieran peritoneo barruko egiturak dira, errai peritoneoz inguratuta daudelako, baina horietako batzuk ondoren peritoneo kanpokoak (atzekaldean kokatu) bihurtzen dira."
+            "text": "Hestetik sortutako atalak peritoneo barruko egiturak dira, errai peritoneoz inguratuta daudelako, baina horietako batzuk ondoren peritoneo kanpokoak (atzekaldean kokatu) bihurtzen dira."
           }
         ]
       }

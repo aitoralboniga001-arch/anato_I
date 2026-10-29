@@ -30,7 +30,7 @@ export const stageSegments: StageDef = {
   beats: [
     {
       at: S4[0],
-      notes: ['w10/2/p3/s1-s3'],
+      notes: ['w10/2/p3/s1-s2'],
       recall: ['aorta-arkuak', 'aorta-dortsalak', 'perikardio-barrunbea'],
       idea: 'Goiko muturra arteria muturra da; behekoa, zain muturra. Bihotz hodia perikardio barrunbean dago.',
       key: 'Odola beti behetik gora doa: zainetatik sartu (behean) eta arterietara irten (goian).',
@@ -43,7 +43,7 @@ export const stageSegments: StageDef = {
     },
     {
       at: S4[1],
-      notes: ['w10/2/p3/s4', 'w10/2/p4/s1-s2'],
+      notes: ['w10/2/p3/s3', 'w10/2/p3/s4-s5'],
       idea: '21. egunean estuguneak eta zabalkuntzak agertzen dira, goitik behera: atal desberdinak.',
       key: 'Hodi bera da; estuguneek zatitzen dute atal desberdinetan, eta atal bakoitzetik geroko bihotzaren atal bat sortuko da.',
       exam: '21. eguna: bihotz hodian estuguneak eta hertsadurak (zabalkuntzak) agertzen dira, eta atal desberdinak eratzen dira goitik behera.',
@@ -65,7 +65,7 @@ export const stageSegments: StageDef = {
     },
     {
       at: S4[2],
-      notes: ['w10/2/p4/s3', 'w10/2/p5/s1-s4'],
+      notes: ['w10/2/p3/s6', 'w10/2/p4/s1-s4'],
       idea: 'Goiko atala: atal bulbarra (arteria bulboa), eta haren muturrean aorta zakua.',
       exam: 'Atal bulbarra (arteria bulboa): bihotz hodiaren goiko atala (alde zefalikoa, arteria muturrean); haren muturrean arteria edo aorta zakua.',
       text: 'Atal hauek ditu, goitik behera. Atal bulbarra (arteria bulboa) goiko atala da, alde zefalikoan, arteria muturrean. Haren muturrean arteria zakua edo aorta zakua dago.',
@@ -75,7 +75,7 @@ export const stageSegments: StageDef = {
     },
     {
       at: S4[3],
-      notes: ['w10/2/p6/s1', 'w10/2/p7/s1-s3'],
+      notes: ['w10/2/p5/s1', 'w10/2/p6/s1-s3'],
       idea: 'Atal bentrikularra eta atal aurikularra, jarraiak; atal aurikularra bikoitza da hasieran.',
       key: 'Fusioa goitik behera doanez, behean dagoen atal aurikularra oraindik bi da.',
       exam: 'Atal bentrikularra eta atal aurikularra jarraiak dira; atal aurikularra hasieran bikoitza da, eta gero fusionatzen da.',
@@ -85,7 +85,7 @@ export const stageSegments: StageDef = {
     },
     {
       at: S4[4],
-      notes: ['w10/2/p8/s1-s3'],
+      notes: ['w10/2/p7/s1-s2'],
       idea: 'Zain sinuak: bilateralak eta bikoitzak; ezker eta eskuineko zainak bertan amaitzen dira.',
       exam: 'Zain-sinuak (bilateralak eta bikoitzak, zain muturrean): enbrioiaren ezker eta eskuineko zainak, zilborreko zainak eta abar bertan amaitzen dira; bi alboko luzapen dituzte.',
       text: 'Atal zain-sinuak bilateralak eta bikoitzak dira, eta zain muturrean daude. Ezker eta eskuineko zainak hemen amaitzen dira: enbrioiaren zainak (ezkerrekoak eta eskuinekoak), zilborreko zainak eta abar. Bi alboko luzapen ditu.',
@@ -105,7 +105,7 @@ export const stageSegments: StageDef = {
     },
     {
       at: S4[5],
-      notes: ['w10/2/p9/s1-s2'],
+      notes: ['w10/2/p8/s1-s2'],
       idea: 'Atal bulbarra eta bentrikularra perikardio barrunbean; aurikulak eta zain sinuak septum transversumean.',
       key: 'Bihotzaren goiko erdia barrunbean dago; beheko erdia, oraindik, septum transversumaren mesenkiman.',
       caution: 'Izendatzean esan «odol hodiaren atal aurikularra eta bentrikularra», ez bakarrik aurikula edo bentrikulua: oraindik ez dira behin-betiko barrunbeak.',
@@ -128,7 +128,7 @@ export const stageSegments: StageDef = {
     },
     {
       at: S4[6],
-      notes: ['w10/2/p10/s1', 'w10/2/p11/s1'],
+      notes: ['w10/2/p8/s4', 'w10/2/p8/s5'],
       idea: 'Odolaren bidea: zainak → zain sinuak → atal aurikularra → atal bentrikularra → atal bulbarra.',
       key: 'Odolak bihotz hodia behetik gora zeharkatzen du, hodiaren segmentu ordenan.',
       exam: 'Odolaren bidea: zainak → zain sinuak → atal aurikularra → atal bentrikularra → atal bulbarra. Atalak bereizten direnerako, bihotza lepo mailatik toraxera jaitsi da.',
@@ -190,7 +190,7 @@ export const stageLoop: StageDef = {
   beats: [
     {
       at: S5[0],
-      notes: ['w10/2/p12/s1-s2'],
+      notes: ['w10/2/p9/s1'],
       recall: ['atal-bulbarra', 'atal-bentrikularra', 'atal-aurikularra', 'zain-sinua'],
       idea: '23. egunean bihotz hodi luze eta zuzena tolesten hasten da, bihotz lakioa sortzeko.',
       exam: '23. egunean bihotz hodi luze eta zuzena tolesten hasten da, bihotz lakioa sortzeko.',
@@ -202,7 +202,7 @@ export const stageLoop: StageDef = {
     },
     {
       at: S5[1],
-      notes: ['w10/2/p13/s1'],
+      notes: ['w10/2/p10/s1'],
       idea: 'Alde zefalikoa (arteria bulboa): aurrera, behera eta eskuinera.',
       key: 'Bulboa da mugitzen den lehena: aurrera (bentralera), behera (kaudalera) eta enbrioiaren eskuinera.',
       exam: 'Bihotz lakioa: alde zefalikoa (arteria bulboa) aurrera, behera eta eskuinera.',
@@ -212,7 +212,7 @@ export const stageLoop: StageDef = {
     },
     {
       at: S5[2],
-      notes: ['w10/2/p14/s1'],
+      notes: ['w10/2/p11/s1'],
       idea: 'Alde kaudala (zain sinua eta aurikula): atzera, gora eta ezkerrera.',
       key: 'Beheko muturrak kontrako mugimendua egiten du: atzera (dortsalera), gora eta ezkerrera.',
       exam: 'Bihotz lakioa: alde kaudala (zain sinua eta aurikula) atzera, gora eta ezkerrera.',
@@ -233,7 +233,7 @@ export const stageLoop: StageDef = {
     },
     {
       at: S5[3],
-      notes: ['w10/2/p15/s1', 'w10/2/p16/s1', 'w10/2/p17/s1', 'w10/2/p18/s1', 'w10/2/p19/s1'],
+      notes: ['w10/2/p12/s1', 'w10/2/p13/s1', 'w10/2/p14/s1', 'w10/2/p15/s1', 'w10/2/p16/s1'],
       idea: 'Atalez atal: bulbobentrikularra aurrera-behera-eskuinera, bentrikularra ezkerrera, aurikularrak ezkerrera-atzera-gora.',
       key: 'Atal aurikularrak bulboaren goi-atzekaldean geratzen dira: hor dago gakoa.',
       exam: 'Atal bulbobentrikularra aurrera, behera eta eskuinera; atal bentrikularra ezkerrera; atal aurikularrak ezkerrera, atzera eta gora, atal bulbarraren goi-atzekaldera.',
@@ -243,7 +243,7 @@ export const stageLoop: StageDef = {
     },
     {
       at: S5[4],
-      notes: ['w10/2/p20/s1-s3'],
+      notes: ['w10/2/p17/s1-s3'],
       idea: 'Tolestu ahala, bikoitzak diren egiturak fusionatzen dira: bihotz hodia → bihotz lakioa.',
       exam: 'Tolespena gertatu ahala, bikoitzak diren egiturak (aurikulak, zain sinuak) fusionatu eta egitura komunak bilakatzen dira: bihotz hoditik bihotz lakiora.',
       text: 'Zuzena den bihotz hodia tolesten hasten da, eta tolespen hau gertatzen den heinean bikoitzak diren egiturak fusionatzen dira eta egitura komunak bilakatzen dira. Honela bihotz lakio bat sortzen da: bihotz hodi izatetik bihotz lakio izatera pasatzen da.',
@@ -252,7 +252,7 @@ export const stageLoop: StageDef = {
     },
     {
       at: S5[5],
-      notes: ['w10/2/p20/s4'],
+      notes: ['w10/2/p17/s4'],
       idea: 'Bihotza aurretik ikusten dugu: eskuma eta ezkerra alderantziz daude.',
       caution: 'Aurretik begiratuta, enbrioiaren eskuina irudiaren ezkerrean dago. Bulboa «eskuinera» doa = irudian ezkerrera.',
       text: 'Kontuan hartu bihotza aurretik begiratzen gaudela irudian: eskuma eta ezkerra alderantziz daude. Bulboa enbrioiaren eskuinera joan da, eta horregatik irudiaren ezkerrean ikusten dugu.',
@@ -261,7 +261,7 @@ export const stageLoop: StageDef = {
     },
     {
       at: S5[6],
-      notes: ['w10/2/p21/s1-s4'],
+      notes: ['w10/2/p18/s1-s2', 'w10/2/p19/s2'],
       idea: '28. egunean: bulboa aurre-eskuinean, bentrikulua ezkerrean, aurikula goi-atzean (erreten AB bidez), zain sinua atzean.',
       key: 'Atal guztiak jarraiak dira oraindik: ez dago trenkadarik.',
       exam: '28. eguna: atal bulbarra aurre-eskuinaldean; atal bentrikularra ezkerrean, erreten aurikulubentrikularraren bidez goi-atzeko atal aurikularrarekin jarraia; atal aurikularra atzeko zain-sinuarekin jarraia. Oraindik ez dago trenkadarik.',
@@ -283,7 +283,7 @@ export const stageLoop: StageDef = {
     },
     {
       at: S5[7],
-      notes: ['w10/2/p22/s1'],
+      notes: ['w10/2/p20/s1'],
       idea: 'Bihotza aurretik ikusita: hasierako hodi zuzena eta 28. eguneko lakioa, bata bestearen gainean.',
       text: 'Bihotza aurretik ikusita. Zuri gardenez, hasierako hodi zuzena; koloretan, 28. eguneko bihotz lakioa. Atal bakoitzak bere kolorea gordeko du hurrengo etapetan, bertatik sortzen diren egituretan.',
       focus: ['bihotz-lakioa'],

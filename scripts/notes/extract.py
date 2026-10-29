@@ -23,14 +23,14 @@ FILES = [
     '4. Enbriologia_Garapenaren laugarren astea (ZUZENDUTA).pdf',
     '5. GAIA_Enbrioi eta fetuaren ezaugarri nagusiak (zuzenduta).pdf',
     '6. Enbriologia 3. hilabetetik jaiotzara arte_ fetua eta karena (ZUZENDUTA).docx.pdf',
-    '7.GAIA_Gorputzaren barrunbeak (ZUZENDUTA).pdf',
-    '8. GAIA_ HEZUR SISTEMA (zuzendu gabe).docx.pdf',
-    # Topic 9 came as a DOCX only: exported to PDF with Word (same name + .pdf), text unchanged.
-    '9.GAIA _MUSKULU EDO GIHAR SISTEMA .docx.pdf',
-    '10. GAIA_ ZIRKULAZIO APARATUA (ZUZENDUTA).pdf',
-    '11. GAIA. ZIRKULAZIO-SISTEMA (II) (zuzenduta).pdf',
-    '12. GAIA_ARTERIA SISTEMA (zirkulazio-sistema III) (zuzendu gabe) (1).pdf',
-    '13. GAIA_ZAIN SISTEMA (zirkulazio-sistema IV) (Zuzenduta).pdf',
+    # Topics 7–12 (2026-10-29 versions) came as DOCX only: exported to PDF with Word (same name + .pdf), text unchanged.
+    '7.GAIA. Gorputzaren barrunbeak (zuzenduta) (1).docx.pdf',
+    '8. GAIA. Enbriologia espezifikoa. Hezur sistema (zuzenduta) (1).docx.pdf',
+    '9.GAIA _MUSKULU EDO GIHAR SISTEMA  (2).docx.pdf',
+    '10 gaia. Zirkulazio aparatua.docx.pdf',
+    '11.GAIA. Zirkulazio sistema.docx.pdf',
+    '12. GAIA. ARTERIA SISTEMA.docx.pdf',
+    '13. GAIA_ZAIN SISTEMA (zirkulazio-sistema IV) (zuzendu gabe).pdf',
     '14.GAIA_DIGESTIO APARATUA 1.ATALA (Zuzenduta).pdf',
 ]
 
@@ -73,7 +73,7 @@ def split_sentences(parts, week=0):
         prefix = text[:m.start()]
         token = re.search(r'[\w,]+$', prefix)
         word = token.group() if token else ''
-        if word.isdigit() or re.fullmatch(r'\d+,\d+', word) or len(word) == 1 or word.lower() in {'adib', 'etab', 'etc', 'dr', 'irud', 'vs'} or (week == 12 and (word == 'ezk' or re.fullmatch(r'[IVX]+', word))):
+        if word.isdigit() or re.fullmatch(r'\d+,\d+', word) or len(word) == 1 or word.lower() in {'adib', 'etab', 'etc', 'dr', 'irud', 'vs'} or (week == 12 and word == 'ezk') or (week in {9, 12} and re.fullmatch(r'[IVX]+', word)):
             continue
         ends.append(m.end())
     if not ends or ends[-1] != len(text):
@@ -171,8 +171,8 @@ def extract(path, week):
         elif toc and week == 9:
             # Week 9's TOC numbers its sub-headings in bold capitals too: it ends at the grey note after it.
             toc = not text.startswith('Grisez dena')
-        elif toc and week == 11:
-            # Week 11's TOC sets each number ("2.1.") on its own bold line: it ends at the first body heading.
+        elif toc and week in {11, 13}:
+            # Weeks 11 and 13 set each TOC number ("2.1.") on its own bold line: the TOC ends at the first body heading.
             toc = not text.startswith('1. SARRERA')
         elif toc and heading and (line['bold'] > .75 and text.upper() == text or text.startswith('0. 2.astearen') or line['size'] >= 15.5):
             # Some last TOC lines have an empty 22pt span: size above ignores it.
@@ -212,6 +212,8 @@ def extract(path, week):
             or (kind in {'p', 'caption'} and blocks[-1]['kind'] == 'caption' and line['page'] == previous['page'] and gap < 9 and not (week == 10 and kind == 'p' and not line['italic']) and not (week == 12 and kind == 'p'))
             or (kind == 'title' and blocks[-1]['kind'] == 'title')
             or (kind == 'p' and blocks[-1]['kind'] in {'h1', 'h2'} and line['size'] >= 13.5 and line['bold'] > .7)
+            # Week 9 (2026-10-29) sets one heading number ("2.2.2.") alone and its capital title word by word, wrapping.
+            or (kind == 'p' and blocks[-1]['kind'] in {'h1', 'h2'} and line['page'] == previous['page'] and line['bold'] > .7 and (same_row or re.fullmatch(r'[\d.]+', previous['text']) or (gap < 9 and text.upper() == text)))
         )
         if continuation:
             blocks[-1]['parts'].extend([{'text': ' '}, *line['parts']])

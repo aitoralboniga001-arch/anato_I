@@ -9,6 +9,11 @@ export interface SceneContextValue {
   hovered: string | null;
   /** Structures highlighted by the active narrative beat. */
   focus: readonly string[];
+  /**
+   * Structures the step's text says by name (lib/sim/mentions.ts). A 3D view names each one it draws,
+   * even where the scene gives it no callout: said means seen and named (owner, 2026-10-29).
+   */
+  mentioned?: readonly string[];
   /** Cognitive focus: shade everything the beat is not about (only when its focus is drawn here). */
   dimContext?: boolean;
   /** Guided tour: the one structure lit right now; everything else is shaded. */

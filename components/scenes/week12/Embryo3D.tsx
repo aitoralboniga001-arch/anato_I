@@ -32,6 +32,9 @@ export function IntroView({ t }: SceneProps) {
     [S1[1], orbit(60, 4, 8.5, [0, 1.4, -0.1], [30, 0])],
     [S1[2], orbit(78, -4, 9, [0, 0.9, -0.2], [30, 0])],
     [S1[3], orbit(90, 4, 16, [0, -0.2, 0.2], [30, 0])],
+    // In to the loop while the narration says the two bloods mix there, then out again for the whole way.
+    [S1[3] + 0.065, orbit(86, 2, 4.8, [0, 1.0, 0.05], [30, 0])],
+    [S1[3] + 0.125, orbit(90, 4, 16, [0, -0.2, 0.2], [30, 0])],
     [S1[4], orbit(62, 10, 8.5, [0, 2.1, 0.3], [30, 0])],
     [S1[5], orbit(40, 14, 6.5, [0, 2.2, 0.4], [30, 0])],
   ]);
@@ -39,11 +42,12 @@ export function IntroView({ t }: SceneProps) {
     { id: 'bihotz-lakioa', p: 'bihotz-lakioa', show: vis(t, 0, S1[1]) + vis(t, S1[3], S1[4]) },
     { id: 'aorta-arkuak', p: 'aorta-arkuakL', show: vis(t, 0, S1[1]) + vis(t, S1[5]) },
     { id: 'aorta-dortsalak', p: 'aorta-dortsalakL', show: vis(t, 0, S1[1]) + vis(t, S1[3], S1[4]) },
-    { id: 'zilbor-arteriak', p: 'zilbor-arteriak', show: vis(t, 0, S1[1]) + vis(t, S1[3], S1[4]) },
+    // Out of the frame while the camera is in at the loop (step 4's close-up on the mixing).
+    { id: 'zilbor-arteriak', p: 'zilbor-arteriak', show: vis(t, 0, S1[1]) + vis(t, S1[3], S1[3] + 0.06) + vis(t, S1[3] + 0.13, S1[4]) },
     { id: 'bitelo-arteriak', p: 'bitelo-arteriak', show: vis(t, 0, S1[1]), small: true },
     { id: 'atal-bulbarra', p: 'atal-bulbarra', show: vis(t, S1[1], S1[2]), text: 'Alde bulbarra' },
     { id: 'enbor-arteriosoa', p: 'enbor-arteriosoa', show: vis(t, S1[1], S1[2]), text: 'Arteria enborra', sub: '(arteria bulboa)' },
-    { id: 'zain-sinua', p: 'zain-sinua', show: vis(t, S1[2], S1[3]) },
+    { id: 'zain-sinua', p: 'zain-sinua', show: vis(t, S1[2], S1[4]) },
     { id: 'bitelo-zainak', p: 'bitelo-zainak', show: vis(t, S1[2], S1[4]) },
     { id: 'zilbor-zainak', p: 'zilbor-zainak', show: vis(t, S1[2], S1[4]) },
     { id: 'bena-kardinal-komuna', p: 'bena-kardinal-komuna', show: vis(t, S1[2], S1[4]) },
@@ -72,7 +76,7 @@ export function IntroView({ t }: SceneProps) {
             Zain muturrean zain sinua: bitelo zainak, zilborreko zainak eta kardinal komunak (bi aldeetatik)
           </Note>
           <Note x={500} y={612} tone="accent" show={vis(t, S1[3], S1[4])}>
-            Zilborreko zainetako odola oxigenatua · bitelo eta kardinal zainetakoa oxigeno gutxikoa · bihotzean nahasten dira
+            Zilborreko zainetako odola oxigenatua · bitelo eta kardinal zainetakoa oxigeno gutxikoa · bihotz lakioan nahasten dira
           </Note>
           <Note x={500} y={612} tone="accent" show={vis(t, S1[4], S1[5])}>
             5. astean, lepoan, faringe arkuak (mesodermoa): 6 bikote

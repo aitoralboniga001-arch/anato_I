@@ -23,19 +23,19 @@ const TABLE: BoardItem = {
     {
       id: 'tz-3',
       cells: ['Hirugarrena', 'Karotida komuna eta barneko karotidaren hurbileko zatia'],
-      notes: n('2.3.1/p8/s1'),
+      notes: n('2.3.2/p4/s1'),
       structures: ['hirugarren-aorta-arkua', 'karotida-komuna'],
     },
     {
       id: 'tz-4l',
       cells: ['Laugarrena, ezkerrean', 'Aorta makoaren urrutiko atala'],
-      notes: n('2.3.2/p8/s1'),
+      notes: n('2.3.2/p9/s1'),
       structures: ['laugarren-aorta-arkua', 'makoaren-urrutiko-atala'],
     },
     {
       id: 'tz-4r',
       cells: ['Laugarrena, eskuinean', 'Eskuineko subklabioaren hasierako atala'],
-      notes: n('2.3.2/p5/s1'),
+      notes: n('2.3.2/p11/s1'),
       structures: ['laugarren-aorta-arkua', 'eskuineko-subklabioa'],
     },
     {
@@ -123,27 +123,27 @@ export const LESSON_W12: Lesson = {
       title: 'Arku sistema',
       stage: 'arku-sistema',
       lines: [
-        L(0.1275, 'Enbor arteriosoaren urrutiko atalari aorta zakua deritzo.', n('2/p3/s1'), ['enbor-arteriosoa', 'aorta-zakua'], {
+        L(0.1275, 'Enbor arteriosoaren urrutiko atalari aorta zakua deritzo.', n('2/p4/s1'), ['enbor-arteriosoa', 'aorta-zakua'], {
           plain: 'Arteria enborraren muturrari aorta zakua deitzen zaio: hortik aterako dira arteriak.',
         }),
-        L(0.2975, 'Bi aorta dortsal daude, eskuinekoa eta ezkerrekoa, enbrioiaren atzealdean.', n('2/p3/s1'), ['aorta-dortsalak'], {
+        L(0.2975, 'Bi aorta dortsal daude, eskuinekoa eta ezkerrekoa, enbrioiaren atzealdean.', n('2/p4/s1'), ['aorta-dortsalak'], {
           plain: 'Enbrioiaren bizkarraldean bi aorta luze daude, bat alde bakoitzean: aorta dortsalak.',
         }),
-        L(0.535, 'Aorta zakuaren luzapenak eta aorta dortsalak lotzen dituzten hodiei aorta arkuak deritze: sei bikote, bata bestearen ondoren.', n('2/p3/s2', '2/p3/s3'), ['aorta-zakua', 'aorta-dortsalak', 'aorta-arkuak'], {
+        L(0.535, 'Aorta zakuaren luzapenak eta aorta dortsalak lotzen dituzten hodiei aorta arkuak deritze: sei bikote, bata bestearen ondoren.', n('2/p4/s2', '2/p4/s3'), ['aorta-zakua', 'aorta-dortsalak', 'aorta-arkuak'], {
           tone: 'emphasis',
           writes: 'b-arkuak',
           plain: 'Aorta arkuak zubiak dira, aorta zakuaren eta aorta dortsalen artean. Sei bikote sortzen dira, ez denak batera.',
         }),
-        L(0.765, 'Gero, bi aorta dortsalak T4 mailatik behera fusionatzen dira, eta aorta dortsal bakarra sortzen da.', n('2/p4/s1'), ['aorta-dortsalak'], {
+        L(0.765, 'Gero, bi aorta dortsalak T4 mailatik behera fusionatzen dira, eta aorta dortsal bakarra sortzen da.', n('2/p5/s1'), ['aorta-dortsalak'], {
           tone: 'emphasis',
           writes: 'b-fusioa',
           plain: 'Toraxeko laugarren ornoaren mailatik behera, bi aorta dortsalak bat egiten dute: aorta bakarra geratzen da.',
         }),
-        L(0.955, 'Gainetik, alde zefalikoan, bi aorta dortsalak bananduta geratzen dira.', n('2/p4/s2'), ['aorta-dortsalak'], { plain: 'Goialdean, buruaren aldean, bi aortak bananduta jarraitzen dute.' }),
+        L(0.955, 'Gainetik, alde zefalikoan, bi aorta dortsalak bananduta geratzen dira.', n('2/p5/s2'), ['aorta-dortsalak'], { plain: 'Goialdean, buruaren aldean, bi aortak bananduta jarraitzen dute.' }),
       ],
       board: [
-        { id: 'b-arkuak', kind: 'line', text: 'Aorta arkuak: aorta zakuaren luzapenen eta aorta dortsalen arteko loturak; 6 bikote, banan-banan', notes: n('2/p3/s2', '2/p3/s3'), key: true },
-        { id: 'b-fusioa', kind: 'line', text: 'Bi aorta dortsalak T4tik behera fusionatzen dira: aorta dortsal bakarra', notes: n('2/p4/s1') },
+        { id: 'b-arkuak', kind: 'line', text: 'Aorta arkuak: aorta zakuaren luzapenen eta aorta dortsalen arteko loturak; 6 bikote, banan-banan', notes: n('2/p4/s2', '2/p4/s3'), key: true },
+        { id: 'b-fusioa', kind: 'line', text: 'Bi aorta dortsalak T4tik behera fusionatzen dira: aorta dortsal bakarra', notes: n('2/p5/s1') },
       ],
       checks: [
         {
@@ -164,7 +164,7 @@ export const LESSON_W12: Lesson = {
             'Ez: arkuak zakuaren eta aorta dortsalen arteko loturak dira.',
             'Ez: aorta dortsalak dira T4tik behera fusionatzen direnak.',
           ],
-          notes: n('2/p3/s2', '2/p3/s3', '2/p4/s1'),
+          notes: n('2/p4/s2', '2/p4/s3', '2/p5/s1'),
         },
         { kind: 'pool', id: 'w12-q-fusioa' },
       ],
@@ -291,19 +291,19 @@ export const LESSON_W12: Lesson = {
         L(0.1125, 'Lehenengo arkuak eta bigarrenak 28. egunaren inguruan agertzen dira, eta laster desagertzen dira.', n('2.3.1/p3/s1'), ['lehen-aorta-arkua'], {
           plain: 'Lehen bi arkuak goiz agertzen dira, 28. egunaren inguruan, eta gutxira galtzen dira.',
         }),
-        L(0.42, 'Hirugarren arkuak bi aldeetan batera eta berdin garatzen dira.', n('2.3.1/p7/s1', '2.3.1/p7/s2'), ['hirugarren-aorta-arkua'], {
+        L(0.42, 'Hirugarren arkuak bi aldeetan batera eta berdin garatzen dira.', n('2.3.2/p3/s1', '2.3.2/p3/s2'), ['hirugarren-aorta-arkua'], {
           tone: 'emphasis',
           plain: 'Hirugarren arkuetan bi aldeak berdinak dira: eskuinekoa eta ezkerrekoa berdin aldatzen dira.',
         }),
-        L(0.595, 'Hirugarren arkuetatik karotida komunak sortzen dira, eta haietatik barneko karotiden hurbileko zatia.', n('2.3.1/p8/s1'), ['hirugarren-aorta-arkua', 'karotida-komuna', 'barneko-karotida'], {
+        L(0.595, 'Hirugarren arkuetatik karotida komunak sortzen dira, eta haietatik barneko karotiden hurbileko zatia.', n('2.3.2/p4/s1'), ['hirugarren-aorta-arkua', 'karotida-komuna', 'barneko-karotida'], {
           tone: 'emphasis',
           writes: 'tz-3',
           plain: 'Hirugarren arkutik karotida komuna ateratzen da, eta barneko karotidaren hasiera ere bai.',
         }),
-        L(0.775, 'Barneko karotidaren urrutiko zatia, berriz, aorta dortsalaren alde kranealetik dator.', n('2.3.1/p9/s1'), ['barneko-karotida', 'aorta-dortsalak'], {
+        L(0.775, 'Barneko karotidaren urrutiko zatia, berriz, aorta dortsalaren alde kranealetik dator.', n('2.3.2/p5/s1'), ['barneko-karotida', 'aorta-dortsalak'], {
           plain: 'Barneko karotidaren azken zatia aorta dortsalaren goiko zatitik dator.',
         }),
-        L(0.955, 'Kanpoko karotida karotida komunaren kimu gisa sortzen da.', n('2.3.1/p10/s1'), ['kanpoko-karotida', 'karotida-komuna'], {
+        L(0.955, 'Kanpoko karotida karotida komunaren kimu gisa sortzen da.', n('2.3.2/p6/s1'), ['kanpoko-karotida', 'karotida-komuna'], {
           plain: 'Kanpoko karotida karotida komunetik ateratzen den adar berri bat da, kimu bat bezala.',
         }),
       ],
@@ -326,7 +326,7 @@ export const LESSON_W12: Lesson = {
             'Ez: urrutiko zatia aorta dortsaletik dator.',
             'Ez: kimua kanpoko karotida da.',
           ],
-          notes: n('2.3.1/p8/s1', '2.3.1/p9/s1'),
+          notes: n('2.3.2/p4/s1', '2.3.2/p5/s1'),
         },
         { kind: 'pool', id: 'w12-q-karotidak' },
       ],
@@ -337,32 +337,32 @@ export const LESSON_W12: Lesson = {
       title: 'Laugarren arkua',
       stage: 'laugarren-arkua',
       lines: [
-        L(0.105, 'Laugarren arkuetan, aldiz, ezkerrekoak eta eskuinekoak garapen desberdina dute.', n('2.3.2/p3/s1'), ['laugarren-aorta-arkua'], {
+        L(0.105, 'Laugarren arkuetan, aldiz, ezkerrekoak eta eskuinekoak garapen desberdina dute.', n('2.3.2/p14/s1'), ['laugarren-aorta-arkua'], {
           tone: 'emphasis',
           plain: 'Laugarren arkuetan bi aldeak ez dira berdin aldatzen: bakoitzak gauza desberdina ematen du.',
         }),
-        L(0.26, 'Ezkerrean, laugarren arkua aorta makoaren urrutiko atala bihurtzen da: karotida komunaren eta subklabioaren artekoa.', n('2.3.2/p8/s1', '2.3.2/p10/s1'), ['laugarren-aorta-arkua', 'makoaren-urrutiko-atala', 'karotida-komuna'], {
+        L(0.26, 'Ezkerrean, laugarren arkua aorta makoaren urrutiko atala bihurtzen da: karotida komunaren eta subklabioaren artekoa.', n('2.3.2/p9/s1', '2.3.2/p15/s1'), ['laugarren-aorta-arkua', 'makoaren-urrutiko-atala', 'karotida-komuna'], {
           writes: 'tz-4l',
           plain: 'Ezkerreko laugarren arkua aortaren makoaren zati bat bihurtzen da: karotida komunaren eta subklabioaren arteko tartea.',
         }),
-        L(0.435, 'Ezkerreko subklabioa ezkerreko zazpigarren segmentu arteko arteriatik sortzen da.', n('2.3.2/p9/s1'), ['ezkerreko-subklabioa'], {
+        L(0.435, 'Ezkerreko subklabioa ezkerreko zazpigarren segmentu arteko arteriatik sortzen da.', n('2.3.2/p10/s1'), ['ezkerreko-subklabioa'], {
           plain: 'Ezkerreko subklabioa ez dator arku batetik: zazpigarren segmentu arteko arteriatik dator.',
         }),
-        L(0.435, 'Garapenean askoz gorago kokatzen da, ezkerreko karotidatik gertu.', n('2.3.2/p9/s1'), ['ezkerreko-subklabioa'], {
+        L(0.435, 'Garapenean askoz gorago kokatzen da, ezkerreko karotidatik gertu.', n('2.3.2/p10/s1'), ['ezkerreko-subklabioa'], {
           writes: 'b-ezk-subklabioa',
           plain: 'Gero mugitu egiten da, eta askoz gorago geratzen da, karotidaren ondoan.',
         }),
-        L(0.6, 'Eskuinean, laugarren arkuak eskuineko subklabioaren hasierako zatia ematen du.', n('2.3.2/p5/s1', '2.3.2/p11/s1'), ['laugarren-aorta-arkua', 'eskuineko-subklabioa'], {
+        L(0.6, 'Eskuinean, laugarren arkuak eskuineko subklabioaren hasierako zatia ematen du.', n('2.3.2/p11/s1', '2.3.2/p17/s1'), ['laugarren-aorta-arkua', 'eskuineko-subklabioa'], {
           tone: 'emphasis',
           writes: 'tz-4r',
           plain: 'Eskuineko laugarren arkuak, aldiz, eskuineko subklabioaren lehen zatia baino ez du ematen.',
         }),
-        L(0.775, 'Haren bitarteko zatia eskuineko aorta dortsaletik dator, eta urrutikoa eskuineko zazpigarren segmentu arteko arteriatik.', n('2.3.2/p6/s1', '2.3.2/p7/s1', '2.3.2/p11/s2'), ['eskuineko-subklabioa', 'aorta-dortsalak', 'zazpigarren-segmentu-arteko-arteria'], {
+        L(0.775, 'Haren bitarteko zatia eskuineko aorta dortsaletik dator, eta urrutikoa eskuineko zazpigarren segmentu arteko arteriatik.', n('2.3.2/p12/s1', '2.3.2/p13/s1', '2.3.2/p17/s2'), ['eskuineko-subklabioa', 'aorta-dortsalak', 'zazpigarren-segmentu-arteko-arteria'], {
           tone: 'emphasis',
           writes: 'b-esk-subklabioa',
           plain: 'Bitarteko zatia eskuineko aorta dortsala da, eta azkena zazpigarren segmentu arteko arteria.',
         }),
-        L(0.86, 'Bostgarren arkuak, gogoratu, agertu eta ia berehala desagertzen dira: ez dute ezer sortzen.', n('2.2.1/p7/s1', '2.3.3/p4/s1'), ['bostgarren-aorta-arkua'], {
+        L(0.86, 'Bostgarren arkuak, gogoratu, agertu eta ia berehala desagertzen dira: ez dute ezer sortzen.', n('2.2.1/p7/s1', '2.3.3/p3/s1'), ['bostgarren-aorta-arkua'], {
           tone: 'recall',
           plain: 'Bostgarren arkua ia ez da sortzen, eta ez du arteriarik uzten.',
         }),
@@ -372,13 +372,13 @@ export const LESSON_W12: Lesson = {
           id: 'b-ezk-subklabioa',
           kind: 'line',
           text: 'Ezkerreko subklabioa: ezkerreko zazpigarren segmentu arteko arteriatik; gero gorago, karotidatik gertu',
-          notes: n('2.3.2/p9/s1'),
+          notes: n('2.3.2/p10/s1'),
         },
         {
           id: 'b-esk-subklabioa',
           kind: 'line',
           text: 'Eskuineko subklabioa: hasiera laugarren arkutik; bitartekoa eskuineko aorta dortsaletik; urrutikoa eskuineko zazpigarren segmentu arteko arteriatik',
-          notes: n('2.3.2/p5/s1', '2.3.2/p6/s1', '2.3.2/p7/s1'),
+          notes: n('2.3.2/p11/s1', '2.3.2/p12/s1', '2.3.2/p13/s1'),
           key: true,
         },
       ],
@@ -402,7 +402,7 @@ export const LESSON_W12: Lesson = {
             'Ez: makoa ezkerrean bakarrik.',
             'Ez: subklabioaren hasiera bakarrik, eskuinean.',
           ],
-          notes: n('2.3.2/p5/s1', '2.3.2/p8/s1'),
+          notes: n('2.3.2/p11/s1', '2.3.2/p9/s1'),
         },
       ],
     },
@@ -467,23 +467,23 @@ export const LESSON_W12: Lesson = {
           cues: { 'hodi-karotideoa': 'hirugarren eta laugarren arkuen' },
           plain: 'Hirugarren eta laugarren arkuen artean dagoen hodi zatia galdu egiten da. Zati horiei hodi karotideoak deitzen zaie.',
         }),
-        L(0.4, 'Bigarrena: eskuineko aorta dortsalaren zati bat ere desagertzen da, zazpigarren segmentu arteko arteriaren azpian.', n('2.4/p4/s2', '2.4/p4/s3'), ['aorta-dortsalak'], {
+        L(0.4, 'Bigarrena: eskuineko aorta dortsalaren zati bat ere desagertzen da, zazpigarren segmentu arteko arteriaren azpian.', n('2.4/p5/s1', '2.4/p5/s2'), ['aorta-dortsalak'], {
           plain: 'Eskuineko aorta dortsala moztu egiten da, zazpigarren segmentu arteko arteriaren azpian.',
         }),
-        L(0.4, 'Ondorioz, ezkerreko aorta dortsala bakarrik geratzen da: beheranzko aorta ezkerreko aorta dortsaletik sortzen da.', n('2.4/p4/s3', '2.4/p4/s4'), ['aorta-dortsalak', 'beheranzko-aorta'], {
+        L(0.4, 'Ondorioz, ezkerreko aorta dortsala bakarrik geratzen da: beheranzko aorta ezkerreko aorta dortsaletik sortzen da.', n('2.4/p5/s2', '2.4/p5/s3'), ['aorta-dortsalak', 'beheranzko-aorta'], {
           tone: 'emphasis',
           writes: 'b-beheranzkoa',
           plain: 'Ezkerreko aorta dortsalak bakarrik jarraitzen du, eta hura da beheranzko aorta.',
         }),
-        L(0.62, 'Hirugarrena: bihotz hodia lepotik toraxera jaisten da; horregatik, karotida komunak eta arteria brakiozefalikoa asko luzatzen dira.', n('2.4/p4/s5', '2.4/p4/s6'), ['karotida-komuna', 'enbor-brakiozefalikoa'], {
+        L(0.62, 'Hirugarrena: bihotz hodia lepotik toraxera jaisten da; horregatik, karotida komunak eta arteria brakiozefalikoa asko luzatzen dira.', n('2.4/p6/s1', '2.4/p6/s2'), ['karotida-komuna', 'enbor-brakiozefalikoa'], {
           tone: 'why',
           plain: 'Bihotz hodia lepotik bularrera jaisten da. Horregatik, karotida komunak eta arteria brakiozefalikoa luzatu egin behar dira.',
         }),
-        L(0.815, 'Laugarrena: lepoa eratzean, ezkerreko subklabioak bere jatorria galtzen du, gorago kokatzen da, eta aortatik zuzenean irteten da.', n('2.4/p4/s7'), ['ezkerreko-subklabioa'], {
+        L(0.815, 'Laugarrena: lepoa eratzean, ezkerreko subklabioak bere jatorria galtzen du, gorago kokatzen da, eta aortatik zuzenean irteten da.', n('2.4/p7/s1'), ['ezkerreko-subklabioa'], {
           plain: 'Lepoa luzatzean, ezkerreko subklabioa gora mugitzen da, eta azkenean aortatik bertatik ateratzen da.',
         }),
       ],
-      board: [{ id: 'b-beheranzkoa', kind: 'line', text: 'Beheranzko aorta: ezkerreko aorta dortsaletik', notes: n('2.4/p4/s4'), key: true }],
+      board: [{ id: 'b-beheranzkoa', kind: 'line', text: 'Beheranzko aorta: ezkerreko aorta dortsaletik', notes: n('2.4/p5/s3'), key: true }],
       checks: [
         { kind: 'pool', id: 'mikro:12/beste-aldaketak:3', after: 4 },
         {
@@ -504,7 +504,7 @@ export const LESSON_W12: Lesson = {
             'Ez: ezkerrekoak jarraitzen du.',
             'Ez: hodi arteriosoa jaio arte irekita dago.',
           ],
-          notes: n('2.4/p4/s1', '2.4/p4/s2'),
+          notes: n('2.4/p4/s1', '2.4/p5/s1'),
         },
       ],
     },
@@ -514,34 +514,34 @@ export const LESSON_W12: Lesson = {
       title: 'Nerbio atzerakariak',
       stage: 'nerbio-atzerakariak',
       lines: [
-        L(0.0975, 'Gogoratu: laugarren eta seigarren arkuei lotutako garezur nerbioa nerbio bagoa da, hamargarren bikotea.', n('2.4/p5/s1'), ['nerbio-bagoa', 'laugarren-aorta-arkua', 'seigarren-aorta-arkua'], {
+        L(0.0975, 'Gogoratu: laugarren eta seigarren arkuei lotutako garezur nerbioa nerbio bagoa da, hamargarren bikotea.', n('2.4/p8/s1'), ['nerbio-bagoa', 'laugarren-aorta-arkua', 'seigarren-aorta-arkua'], {
           tone: 'recall',
           plain: 'Arku horien nerbioa nerbio bagoa da, hamargarren garezur nerbioa.',
         }),
-        L(0.235, 'Bagoaren adarrek laringeko muskuluak inerbatzen dituzte: goiko nerbio laringeoa eta nerbio laringeo atzerakaria.', n('2.4/p5/s5'), ['goiko-nerbio-laringeoa', 'nerbio-laringeo-atzerakaria', 'laringea'], {
+        L(0.235, 'Bagoaren adarrek laringeko muskuluak inerbatzen dituzte: goiko nerbio laringeoa eta nerbio laringeo atzerakaria.', n('2.4/p8/s5'), ['goiko-nerbio-laringeoa', 'nerbio-laringeo-atzerakaria', 'laringea'], {
           tone: 'emphasis',
           plain: 'Bagotik bi adar ateratzen dira laringerantz: goiko nerbio laringeoa eta nerbio laringeo atzerakaria.',
         }),
-        L(0.235, 'Atzerakaria deitzen zaio, irten ondoren goruntz itzultzen delako, laringerantz.', n('2.4/p5/s5'), ['nerbio-laringeo-atzerakaria', 'laringea'], {
+        L(0.235, 'Atzerakaria deitzen zaio, irten ondoren goruntz itzultzen delako, laringerantz.', n('2.4/p8/s5'), ['nerbio-laringeo-atzerakaria', 'laringea'], {
           plain: 'Izena hortik dator: nerbioa jaitsi egiten da, eta gero goruntz itzultzen da laringera.',
         }),
-        L(0.3675, 'Arterien aldaketengatik, bi atzerakariek kokapen desberdina dute.', n('2.4/p6/s1'), ['eskuineko-nerbio-atzerakaria', 'ezkerreko-nerbio-atzerakaria'], {
+        L(0.3675, 'Arterien aldaketengatik, bi atzerakariek kokapen desberdina dute.', n('2.4/p9/s1'), ['eskuineko-nerbio-atzerakaria', 'ezkerreko-nerbio-atzerakaria'], {
           plain: 'Arteriak aldatu direnez, eskuineko eta ezkerreko nerbioak ez daude leku berean.',
         }),
-        L(0.5125, 'Ezkerrean, atzerakariak seigarren arkuaren urrutiko zatia inguratzen du: hodi arteriosoa.', n('2.4/p7/s1'), ['ezkerreko-nerbio-atzerakaria', 'seigarren-aorta-arkua', 'hodi-arteriosoa'], {
+        L(0.5125, 'Ezkerrean, atzerakariak seigarren arkuaren urrutiko zatia inguratzen du: hodi arteriosoa.', n('2.4/p10/s1'), ['ezkerreko-nerbio-atzerakaria', 'seigarren-aorta-arkua', 'hodi-arteriosoa'], {
           tone: 'emphasis',
           plain: 'Ezkerreko nerbioak hodi arteriosoaren azpitik egiten du buelta.',
         }),
-        L(0.6775, 'Eskuinean, seigarren arkuaren urrutiko zatia desagertzen da, eta bostgarrena ez da inoiz garatzen.', n('2.4/p9/s2', '2.3.4/p10/s1'), ['seigarren-aorta-arkua'], {
+        L(0.6775, 'Eskuinean, seigarren arkuaren urrutiko zatia desagertzen da, eta bostgarrena ez da inoiz garatzen.', n('2.4/p11/s2', '2.3.4/p10/s1'), ['seigarren-aorta-arkua'], {
           tone: 'recall',
           plain: 'Eskuinean seigarren arkuaren azken zatia galtzen da, eta bostgarrena ez da sortzen.',
         }),
-        L(0.6775, 'Horregatik, eskuineko atzerakaria gorago igotzen da, laugarren arkutik sortutako eskuineko subklabioa inguratu arte.', n('2.4/p9/s1', '2.4/p11/s1'), ['eskuineko-nerbio-atzerakaria', 'laugarren-aorta-arkua', 'eskuineko-subklabioa'], {
+        L(0.6775, 'Horregatik, eskuineko atzerakaria gorago igotzen da, laugarren arkutik sortutako eskuineko subklabioa inguratu arte.', n('2.4/p11/s1', '2.4/p13/s1'), ['eskuineko-nerbio-atzerakaria', 'laugarren-aorta-arkua', 'eskuineko-subklabioa'], {
           tone: 'emphasis',
           plain: 'Eskuineko nerbioa gora mugitzen da, eta eskuineko subklabioaren azpitik egiten du buelta.',
         }),
-        L(0.825, 'Hodi arteriosoak, gogoratu, ezkerreko birika arteria eta aorta lotzen ditu.', n('2.4/p12/s1'), ['hodi-arteriosoa'], { plain: 'Hodi arteriosoa zubi bat da, ezkerreko birika arteriaren eta aortaren artean.' }),
-        L(0.965, 'Jaio ondoren, hodi arteriosoa lotailu bihurtzen da: lotailu arteriosoa. Ezkerreko atzerakariak hura inguratzen du.', n('2.4/p12/s3', '2.4/p13/s1'), ['hodi-arteriosoa', 'lotailu-arteriosoa', 'ezkerreko-nerbio-atzerakaria'], {
+        L(0.825, 'Hodi arteriosoak, gogoratu, ezkerreko birika arteria eta aorta lotzen ditu.', n('2.4/p14/s1'), ['hodi-arteriosoa'], { plain: 'Hodi arteriosoa zubi bat da, ezkerreko birika arteriaren eta aortaren artean.' }),
+        L(0.965, 'Jaio ondoren, hodi arteriosoa lotailu bihurtzen da: lotailu arteriosoa. Ezkerreko atzerakariak hura inguratzen du.', n('2.4/p14/s3', '2.4/p14/s4'), ['hodi-arteriosoa', 'lotailu-arteriosoa', 'ezkerreko-nerbio-atzerakaria'], {
           tone: 'emphasis',
           writes: 'b-nerbioak',
           plain: 'Jaio ondoren hodia itxi eta lokarri bat geratzen da, lotailu arteriosoa. Ezkerreko nerbioak hari ematen dio buelta.',
@@ -552,7 +552,7 @@ export const LESSON_W12: Lesson = {
           id: 'b-nerbioak',
           kind: 'line',
           text: 'Ezkerreko atzerakaria: hodi arteriosoaren azpitik (gero lotailu arteriosoa). Eskuinekoa: eskuineko subklabioaren azpitik',
-          notes: n('2.4/p7/s1', '2.4/p11/s1', '2.4/p13/s1'),
+          notes: n('2.4/p10/s1', '2.4/p13/s1', '2.4/p14/s4'),
           key: true,
         },
       ],
@@ -576,7 +576,7 @@ export const LESSON_W12: Lesson = {
             'Ez: ezkerrekoak lotailu arteriosoa inguratzen du.',
             'Ez: eskuinean ez dago hodi arteriosorik.',
           ],
-          notes: n('2.4/p11/s1', '2.4/p13/s1'),
+          notes: n('2.4/p13/s1', '2.4/p14/s4'),
         },
       ],
     },
@@ -589,11 +589,11 @@ export const LESSON_W12: Lesson = {
         L(0.075, 'Ikus dezagun emaitza: ezkerreko bentrikulutik irteten den aorta, eta haren adarrak, desberdinak eskuinean eta ezkerrean.', n('2.3.4/p11/s1'), ['aorta'], {
           plain: 'Hau da azken emaitza: aorta, eta bertatik ateratzen diren arteriak. Eskuinean eta ezkerrean ez dira berdinak.',
         }),
-        L(0.19, 'Goranzko aorta, hurbileko zatia, enbor arteriosotik dator.', n('2.4/p16/s1'), ['goranzko-aorta'], { plain: 'Aortaren lehen zatia, gorantz doana, enbor arteriosotik sortzen da: goranzko aorta.' }),
-        L(0.31, 'Aortaren makoaren hasierako zatia aorta zakuaren ezkerreko luzapenetik dator.', n('2.4/p17/s1'), ['aortaren-makoa'], {
+        L(0.19, 'Goranzko aorta, hurbileko zatia, enbor arteriosotik dator.', n('2.4/p16/s2'), ['goranzko-aorta'], { plain: 'Aortaren lehen zatia, gorantz doana, enbor arteriosotik sortzen da: goranzko aorta.' }),
+        L(0.31, 'Aortaren makoaren hasierako zatia aorta zakuaren ezkerreko luzapenetik dator.', n('2.4/p16/s3'), ['aortaren-makoa'], {
           plain: 'Makoa aortaren kurba da. Haren hasiera aorta zakuaren ezkerreko luzapenetik dator.',
         }),
-        L(0.445, 'Gero beheranzko aorta dator: toraxetik jaisten da, diafragma zeharkatu, eta abdomenera sartzen da.', n('2.4/p18/s1', '2.4/p18/s2', '2.4/p18/s3'), ['beheranzko-aorta'], {
+        L(0.445, 'Gero beheranzko aorta dator: toraxetik jaisten da, diafragma zeharkatu, eta abdomenera sartzen da.', n('2.4/p16/s7', '2.4/p16/s8', '2.4/p16/s9'), ['beheranzko-aorta'], {
           writes: 'b-aorta',
           plain: 'Makoaren ondoren aorta behera doa: bularra, diafragma eta sabela zeharkatzen ditu.',
         }),
@@ -605,7 +605,7 @@ export const LESSON_W12: Lesson = {
           writes: 'b-bakarra',
           plain: 'Arteria brakiozefalikoa bat bakarrik da, eta eskuinean dago. Ezkerrean ez dago halakorik.',
         }),
-        L(0.725, 'Ezkerrean, berriz, ezkerreko karotida komuna eta ezkerreko subklabioa makotik zuzenean ateratzen dira, enbor komunik gabe.', n('2.4/p19/s1', '2.4/p19/s2'), ['karotida-komuna', 'ezkerreko-subklabioa'], {
+        L(0.725, 'Ezkerrean, berriz, ezkerreko karotida komuna eta ezkerreko subklabioa makotik zuzenean ateratzen dira, enbor komunik gabe.', n('2.4/p16/s5', '2.4/p16/s6'), ['karotida-komuna', 'ezkerreko-subklabioa'], {
           tone: 'emphasis',
           writes: 'b-makoa',
           plain: 'Ezkerreko karotida eta ezkerreko subklabioa bakoitza bere aldetik ateratzen da makotik.',
@@ -616,10 +616,10 @@ export const LESSON_W12: Lesson = {
           id: 'b-aorta',
           kind: 'line',
           text: 'Aorta: goranzkoa enbor arteriosotik; makoaren hasiera ezkerreko luzapenetik; urrutiko atala ezkerreko 4. arkutik',
-          notes: n('2.4/p16/s1', '2.4/p17/s1', '2.4/p18/s2'),
+          notes: n('2.4/p16/s2', '2.4/p16/s3', '2.4/p16/s8'),
         },
         { id: 'b-bakarra', kind: 'line', text: 'Arteria brakiozefalikoa: bakarra, eskuinean (eskuineko karotida komuna eta eskuineko subklabioa)', notes: n('2.3.4/p11/s7'), key: true },
-        { id: 'b-makoa', kind: 'line', text: 'Ezkerrean: karotida komuna eta subklabioa makotik zuzenean, enbor komunik gabe', notes: n('2.4/p19/s1', '2.4/p19/s2') },
+        { id: 'b-makoa', kind: 'line', text: 'Ezkerrean: karotida komuna eta subklabioa makotik zuzenean, enbor komunik gabe', notes: n('2.4/p16/s5', '2.4/p16/s6') },
       ],
       checks: [
         { kind: 'pool', id: 'mikro:12/aorta-heldua:5' },
@@ -641,7 +641,7 @@ export const LESSON_W12: Lesson = {
             'Ez: eskuinean dago.',
             'Ez: eskuineko bi arteriek enbor komun bat dute.',
           ],
-          notes: n('2.3.4/p11/s7', '2.4/p19/s1'),
+          notes: n('2.3.4/p11/s7', '2.4/p16/s5'),
         },
       ],
     },
@@ -657,7 +657,7 @@ export const LESSON_W12: Lesson = {
         L(0.455, 'Hasieran aurreko adarrak bitelo arteriak dira. Bitelo zakua endekatzean, haiek ere bai, eta beste arteria batzuk sortzen dira.', n('2.5.1/p3/s1', '2.5.1/p3/s2'), ['bitelo-arteriak', 'bitelo-zaku-sekundarioa'], {
           plain: 'Lehenengo, bitelo zakura doazen arteriak daude. Zakua txikitzean, arteria horiek ere aldatu egiten dira.',
         }),
-        L(0.62, 'Beheranzko aortatik hiru adar talde ateratzen dira: aurreko errai adarrak, alboko errai adarrak eta atze alboko adarrak.', n('2.5/p3/s3', '2.5/p5/s1', '2.5/p6/s1', '2.5/p7/s1'), ['beheranzko-aorta', 'aurreko-errai-adarrak', 'alboko-errai-adarrak', 'segmentu-arteko-arteriak'], {
+        L(0.62, 'Beheranzko aortatik hiru adar talde ateratzen dira: aurreko errai adarrak, alboko errai adarrak eta atze alboko adarrak.', n('2.5/p3/s3', '2.5/p4/s1', '2.5/p5/s1', '2.5/p6/s1'), ['beheranzko-aorta', 'aurreko-errai-adarrak', 'alboko-errai-adarrak', 'segmentu-arteko-arteriak'], {
           tone: 'emphasis',
           writes: 'b-taldeak',
           plain: 'Hiru adar mota: hestera doazenak, abdomeneko organoetara doazenak, eta bizkarraldera doazenak, maila guztietan.',
@@ -668,7 +668,7 @@ export const LESSON_W12: Lesson = {
         L(0.955, 'Abdomenean hiru arteria daude, hesteko hiru zatientzat: enbor zeliakoa, goiko arteria mesenterikoa eta beheko arteria mesenterikoa.', n('2.5.1/p5/s1'), ['enbor-zeliakoa', 'goiko-arteria-mesenterikoa', 'beheko-arteria-mesenterikoa'], {
           plain: 'Sabelean hiru arteria daude, bakoitza hestearen zati batentzat.',
         }),
-        L(0.955, 'Enbor zeliakoa aurreko hestearen arteria da, eta barea eta gibela irrigatzen ditu.', n('2.5.1/p6/s1'), ['enbor-zeliakoa', 'aurreko-hestea'], {
+        L(0.955, 'Enbor zeliakoa aurreko hestearen arteria da, eta barea eta gibela irrigatzen ditu.', n('2.5.1/p6/s2'), ['enbor-zeliakoa', 'aurreko-hestea'], {
           plain: 'Enbor zeliakoak hestearen lehen zatia elikatzen du, aurreko hestea: barea eta gibela.',
         }),
         L(0.955, 'Goiko mesenterikoa bitarteko hestearena da; beheko mesenterikoa, atzeko hestearena.', n('2.5.1/p7/s1', '2.5.1/p8/s1'), ['goiko-arteria-mesenterikoa', 'erdiko-hestea', 'beheko-arteria-mesenterikoa', 'atzeko-hestea'], {
@@ -682,14 +682,14 @@ export const LESSON_W12: Lesson = {
           id: 'b-taldeak',
           kind: 'line',
           text: 'Beheranzko aortaren adarrak: aurreko errai adarrak (hestera), alboko errai adarrak (abdomenean), atze alboko adarrak (maila guztietan)',
-          notes: n('2.5/p5/s1', '2.5/p6/s1', '2.5/p7/s1', '2.5/p7/s2'),
+          notes: n('2.5/p4/s1', '2.5/p5/s1', '2.5/p6/s1', '2.5/p6/s2'),
           key: true,
         },
         {
           id: 'b-hesteak',
           kind: 'line',
           text: 'Enbor zeliakoa: aurreko hestea. Goiko mesenterikoa: bitarteko hestea. Beheko mesenterikoa: atzeko hestea',
-          notes: n('2.5.1/p6/s1', '2.5.1/p7/s1', '2.5.1/p8/s1'),
+          notes: n('2.5.1/p6/s2', '2.5.1/p7/s1', '2.5.1/p8/s1'),
           key: true,
         },
       ],
@@ -713,7 +713,7 @@ export const LESSON_W12: Lesson = {
             'Ez: aurreko hestearena enbor zeliakoa da.',
             'Ez: behekoa atzeko hestearena da.',
           ],
-          notes: n('2.5.1/p6/s1', '2.5.1/p7/s1', '2.5.1/p8/s1'),
+          notes: n('2.5.1/p6/s2', '2.5.1/p7/s1', '2.5.1/p8/s1'),
         },
       ],
     },
@@ -736,10 +736,10 @@ export const LESSON_W12: Lesson = {
         L(0.52, 'Segmentu arteko arteriak maila guztietan daude, eta bizkarraldeko muskuluak, orno muina eta larruazala irrigatzen dituzte.', n('2.5.3/p3/s1'), ['segmentu-arteko-arteriak'], {
           plain: 'Atzeko adar hauek leku guztietan daude: bizkarreko muskuluak, bizkarrezur muina eta azala elikatzen dituzte.',
         }),
-        L(0.695, 'Lepoan, segmentu arteko arteriak luzetarako anastomosien bidez lotzen dira, eta aortarekiko lotura galtzen dute.', n('2.5.3/p4/s1'), ['segmentu-arteko-arteriak', 'luzetarako-anastomosiak'], {
+        L(0.695, 'Lepoan, segmentu arteko arteriak luzetarako anastomosien bidez lotzen dira, eta aortarekiko lotura galtzen dute.', n('2.5.3/p4/s2'), ['segmentu-arteko-arteriak', 'luzetarako-anastomosiak'], {
           plain: 'Lepoan arteria horiek elkarren artean lotzen dira, kate luze bat eginez, eta aortatik askatzen dira.',
         }),
-        L(0.695, 'Horrela sortzen dira orno arteriak eta lepoko beste arteria batzuk.', n('2.5.3/p4/s2'), ['orno-arteria'], {
+        L(0.695, 'Horrela sortzen dira orno arteriak eta lepoko beste arteria batzuk.', n('2.5.3/p4/s3'), ['orno-arteria'], {
           tone: 'emphasis',
           writes: 'b-lepoa',
           plain: 'Kate horretatik orno arteriak eta lepoko beste arteria batzuk sortzen dira.',
@@ -758,7 +758,7 @@ export const LESSON_W12: Lesson = {
           notes: n('2.5.2/p4/s1', '2.5.2/p5/s1', '2.5.2/p6/s1'),
           key: true,
         },
-        { id: 'b-lepoa', kind: 'line', text: 'Lepoan: luzetarako anastomosiak, aortarekiko lotura galdu: orno arteriak', notes: n('2.5.3/p4/s1', '2.5.3/p4/s2') },
+        { id: 'b-lepoa', kind: 'line', text: 'Lepoan: luzetarako anastomosiak, aortarekiko lotura galdu: orno arteriak', notes: n('2.5.3/p4/s2', '2.5.3/p4/s3') },
         { id: 'b-mailak', kind: 'line', text: 'Segmentu arteko arteriak: toraxean saihets artekoak, gerrian lunbarrak, sakroan alboko sakroak', notes: n('2.5.3/p5/s1', '2.5.3/p6/s1', '2.5.3/p7/s1') },
       ],
       checks: [
@@ -781,7 +781,7 @@ export const LESSON_W12: Lesson = {
             'Ez: atze albokoak maila guztietan daude.',
             'Ez: hestera aurreko errai adarrak doaz.',
           ],
-          notes: n('2.5/p6/s1', '2.5/p7/s1', '2.5/p7/s2'),
+          notes: n('2.5/p5/s1', '2.5/p6/s1', '2.5/p6/s2'),
         },
       ],
     },
@@ -915,7 +915,7 @@ export const LESSON_W12: Lesson = {
       id: 'amaiera',
       title: 'Osatu taula',
       stage: 'gorputz-adarrak',
-      lines: [L(0.965, 'Azken zatia: bete taula oroimenetik, arku bakoitza eta zer sortzen duen. Gero, galdera bat.', n('2/p3/s3'), [], { tone: 'summary', plain: 'Orain zure txanda: bete taula buruz, eta gero galdera bat.' })],
+      lines: [L(0.965, 'Azken zatia: bete taula oroimenetik, arku bakoitza eta zer sortzen duen. Gero, galdera bat.', n('2/p4/s3'), [], { tone: 'summary', plain: 'Orain zure txanda: bete taula buruz, eta gero galdera bat.' })],
       checks: [
         { kind: 'fill', id: 'klasea:12/taula', table: 'taula', blanks: ['tz-1', 'tz-2', 'tz-3', 'tz-4l', 'tz-4r', 'tz-6l', 'tz-6r'] },
         { kind: 'pool', id: 'w12-q-hodi-arteriosoa' },

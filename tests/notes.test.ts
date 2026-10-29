@@ -6,7 +6,7 @@ import { createHash } from 'node:crypto';
 import { blockText, expandNotes, firstAnchorInSection, NOTES_EXCEPTIONS, notesOf, sectionMatches, sentence, sentenceAnchors } from '@/content/notes-text';
 
 describe('original notes and reviewed alignment', () => {
-  const lengths = [17921, 10991, 17577, 23697, 13010, 18297, 14910, 23059, 27672, 22566, 25146, 20131, 24707];
+  const lengths = [17921, 10991, 17577, 23697, 13010, 18297, 16479, 23379, 27720, 20337, 25845, 21028, 25568];
   const hashes = [
     'f8abeb46de6a656b112e6b89b9c99802bab9a7af8affd6c63ed4ac2a6e0524db',
     'fd368f4eb7b398bec5c5275cd244233a86f4f5e099f796bbf42328b3ac32994c',
@@ -14,13 +14,13 @@ describe('original notes and reviewed alignment', () => {
     '87cdeecd4f3886bf3372b8acc920b229a29850a39b48b205fe59d7f2ceb21b28',
     '4854deb7f05ef579b31896d81de6007cfda719875d8a2843d8dbd2b9174c05dd',
     '22cbeeff3550f3b502b61bbeec542930188777fde34fe7f28312142656565e59',
-    'ff4d7aa44e043142f49bf2e045890f4cce02b53438d3205b73089d21e0ced7d8',
-    '048370ce48acf90b2487d95eede57f5cd6fd78018410f286fb1ca70140a96359',
-    '71a3bed50c941e34e6206251606bd654c8fa2e61a74e895f3ff5ee3491d012b0',
-    '5e74a6d4f575b9f0c8c6d58cf70f2366fe71080ec6c31eca43eec20e4e53be3f',
-    'b431fe6ac5cf2556312c20b59a0fd010b1e2addb7a0e2ea2fb2c912a6ccfecd0',
-    '0416f743dcf34dfca8320ad95f01e45be8b43c17b20df62f5409608f14800d35',
-    'a3f3a479f5675524b500248d06e0e140a28e3babe2d9053823a4dd58d7e3c771',
+    '3ff817a459121d8815f306779180034e2635d43d7d3750fff30669e3afed94bb',
+    '283f68c3b4838d9ac8dd8be2e6617080f7cb0dfcc95113be7aaabee3f8415ec1',
+    'b9b2006e6ced9c2db74e985ecde931868e94099e01eee7097c400b396866b7fb',
+    '12d093ae63a37f01e7997b93515016971eac2848edc3151a6d3f949ad7e5aa2c',
+    'b6dc48e720d4e15cb11fc0eab3e5ea8a0266c6ab00d7a7f2e3c01acf669260bc',
+    '69a95d546d5a4b1098039876ec8a68b5549afe5f26afb802937ebb34c035540f',
+    '816d77d255a1465d856f16a63b9e03939b3513406234c9602125776a6e2c25eb',
   ];
 
   it('pins the complete original text of each of the PDFs', () => {
@@ -154,7 +154,7 @@ describe('figure parity: notes captions link to a matching step', () => {
   });
 
   it('opens 2.1 on the notes figure A → C (the fold of stage 1), not on the finished abdomen', () => {
-    const refs = sentenceAnchors.get('w7/2.1/p4/s1') ?? [];
+    const refs = sentenceAnchors.get('w7/2.1/p5/s1') ?? [];
     expect(refs[0]).toEqual({ week: 7, stageId: 'peritoneo-barrunbea', beat: 0 });
     const stage = weeks.find((w) => w.week === 7)!.stages.find((s) => s.id === 'peritoneo-barrunbea')!;
     expect(stage.beats[0].view).toBe('irudia');

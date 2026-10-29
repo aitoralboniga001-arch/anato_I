@@ -171,7 +171,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p3/s1",
         "parts": [
           {
-            "text": "Garapenaren 3. astean enbrioia jada ezin da orain arte bezala elikatu (difusioaren bidez) eta 3. astetik aurrera bere berezko zirkulazio-sistema/sistema kardiobaskularra garatuko da."
+            "text": "Garapenaren 3. astean enbrioia jada ezin da orain arte bezala elikatu (difusioaren bitartez) eta 3. astetik aurrera bere berezko zirkulazio- sistema/sistema kardiobaskularra garatuko da."
           }
         ]
       }
@@ -186,7 +186,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p4/s1",
         "parts": [
           {
-            "text": "Lerro primitiboaren alde zefalikoan kokatzen diren zelula epiblastiko batzuk, lerro primitibotik migratzen dute eta alde zefalikora abiatuz, plaka neuralaren alde zefalikoan eta alde lateraletan, migratutako zelula horiek alboko mesodermoko errai orriraino iristen dira. "
+            "text": "Lerro primitiboaren alde zefalikoan kokatzen diren zelula epiblastiko batzuk, ildo primitibotik inbaginatzen dira eta alde zefalikora abiatuz, plaka neuralaren alde zefalikoan eta lateraletan, alboko mesodermoko errai orrira iristen dira. "
           }
         ]
       },
@@ -194,7 +194,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p4/s2",
         "parts": [
           {
-            "text": "Bertan, ferra formako egitura bat sortzen dute. "
+            "text": "Bertan, ferra formako egitura (zelula metaketa) bat sortzen dute; eremu kardiogeniko primarioa. "
           }
         ]
       },
@@ -232,7 +232,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p4/s5",
         "parts": [
           {
-            "text": "Beraz, hemendik ferra formako odol hodiz osatutako sare bat sortzen da. "
+            "text": "Beraz, hemendik ferra formako odol hodizko sare bat sortzen da. "
           }
         ]
       },
@@ -247,7 +247,15 @@ export const w10: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " sortzen da."
+            "text": " sortzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w10/1/p4/s7",
+        "parts": [
+          {
+            "text": "+ Eremu kardiogeniko sekundarioa: hauetatik sortuko da bihotz hodia."
           }
         ]
       }
@@ -291,7 +299,7 @@ export const w10: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "→ Plaka neuralaren alde zefalikoan kokatuta dago (mintz bukofaringeoaren alde bentralean, eta plaka neuralaren aurreko aldean kokatzen dela ikusten da mozketa sagitalean; kokatzen ari da perikardio barrunbean)."
+            "text": "→ Plaka neuralaren alde zefalikoan (mintz bukofaringeoaren alde bentralean, eta plaka neuralaren aurreko aldean)"
           }
         ]
       }
@@ -311,9 +319,6 @@ export const w10: NotesBlock[] = [
           {
             "text": "Endokardio hodiak",
             "b": true
-          },
-          {
-            "text": " dira."
           }
         ]
       }
@@ -328,7 +333,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p8/s1",
         "parts": [
           {
-            "text": "Aldi berean, alboko mesodermoko errai orritik sortutako beste motako zelula batzuk, notokordaren bi alboetan osatzen dituzten zelula irlatxoetatik, bi luzetarako odol hodi (arteria) agertzen dira. "
+            "text": "Aldi berean, alboko mesodermoko errai orritik sortutako beste zelula batzuk, notokordaren bi alboetan osatzen dituzten zelula irlatxoetatik, bi luzetarako odol hodi agertzen dira. "
           }
         ]
       },
@@ -336,17 +341,10 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p8/s2",
         "parts": [
           {
-            "text": "Hauek,"
+            "text": "Hauek, "
           },
           {
-            "text": " aorta dortsalak ",
-            "b": true
-          },
-          {
-            "text": "(bat ezkerrekoa bat eskumakoa)"
-          },
-          {
-            "text": " ",
+            "text": "aorta dortsalak ",
             "b": true
           },
           {
@@ -358,18 +356,45 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p8/s3",
         "parts": [
           {
-            "text": "Hauek, hasieratik "
+            "text": "Hauek, hasieratik egongo dira "
           },
           {
-            "text": "kontaktuan ",
+            "text": "kontaktuan, alboko hodi",
             "b": true
           },
           {
-            "text": "egongo dira"
+            "text": " "
           },
           {
-            "text": " alboko hodi endokardikoekin.",
+            "text": "endokardioekin. ",
             "b": true
+          }
+        ]
+      },
+      {
+        "id": "w10/1/p8/s4",
+        "parts": [
+          {
+            "text": "Honetara iriste dira baita e.k. sekunadariotatik sortutako zelula",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "desberdinak",
+            "b": true
+          },
+          {
+            "text": " Diskoaren tolespenak ez dira hasi oraindik. "
+          }
+        ]
+      },
+      {
+        "id": "w10/1/p8/s5",
+        "parts": [
+          {
+            "text": "3. aste bukaeran, laua den diskoa tolesten hasi eta 2 tolespen egiten ditu: zefalokaudala eta zeharkakoa."
           }
         ]
       }
@@ -384,7 +409,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p9/s1",
         "parts": [
           {
-            "text": "Diskoaren tolespenak ez dira hasi oraindik (laua mantentzen da oraindik). "
+            "text": "→ Tolespen zefalokaudala (erdiko nerbio sistemaren luzetarako hazkuntzagatik) dela eta, ferra formako plexuaren erdiko atala alde kaudalera abiatzen da. "
           }
         ]
       },
@@ -392,7 +417,15 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p9/s2",
         "parts": [
           {
-            "text": "3. aste bukaeran, laua den diskoa tolesten hasi eta 2 tolespen egiten ditu: zefalokaudala eta zeharkakoa."
+            "text": "Hasieran, plaka kardiogenikoa (perikardio barrunbean sartuta dagoena) lepo mailan dago. "
+          }
+        ]
+      },
+      {
+        "id": "w10/1/p9/s3",
+        "parts": [
+          {
+            "text": "Ostean, gero eta beherago egongo da, azkenean torax barrunbera iritsiko da eta bertan, entzefalo xixkuen eta mintz bukofaringeoaren alde kaudalean geratuko da."
           }
         ]
       }
@@ -407,7 +440,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p10/s1",
         "parts": [
           {
-            "text": "→ Tolespen zefalokaudala (erdiko nerbio sistemaren luzetarako hazkuntzagatik) dela eta, ferra formako plexuaren erdiko atala (plaka kardiogenikoa) alde kaudalera abiatzen da, alde zefalikoan garun xixkuak agertzen hasten baitira. "
+            "text": "→ Zeharkako tolespenagatik (somiten hazkuntzagatik), plexuaren alboko aldeak gero eta lodiagoak egingo dira, hurbilduz, haien artean fusionatzen hasten diren arte. "
           }
         ]
       },
@@ -415,15 +448,35 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p10/s2",
         "parts": [
           {
-            "text": "Hasieran, plaka kardiogenikoa (perikardio barrunbean sartuta dagoena) lepo mailan dago. "
-          }
-        ]
-      },
-      {
-        "id": "w10/1/p10/s3",
-        "parts": [
+            "text": "Tolespen honen ondorioz,"
+          },
           {
-            "text": "Ostean, gero eta beherago egongo da, azkenean torax barrunbera iritsiko da eta bertan, entzefalo xixkuen eta mintz bukofaringeoaren alde kaudalean geratuko da."
+            "text": " endokardio-hodiak",
+            "b": true
+          },
+          {
+            "text": " (ezkerrekoak eta eskuinekoak) haien artean hurbildu eta "
+          },
+          {
+            "text": "fusionatu",
+            "b": true
+          },
+          {
+            "text": " egiten dira, "
+          },
+          {
+            "text": "endokardio",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "hodi ",
+            "b": true
+          },
+          {
+            "text": "bakarra sortuz."
           }
         ]
       }
@@ -438,44 +491,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p11/s1",
         "parts": [
           {
-            "text": "→ Zeharkako tolespenagatik (somiten hazkuntzagatik), plexuaren alboko aldeak gero eta lodiagoak egingo dira, hurbilduz, haien artean fusionatzen hasten diren arte. "
-          }
-        ]
-      },
-      {
-        "id": "w10/1/p11/s2",
-        "parts": [
-          {
-            "text": "Tolespen honen ondorioz, "
-          },
-          {
-            "text": "endokardio-hodiak",
-            "b": true
-          },
-          {
-            "text": " (ezkerrekoak eta eskuinekoak) haien artean hurbildu eta "
-          },
-          {
-            "text": "fusionatu",
-            "b": true
-          },
-          {
-            "text": " egiten dira, "
-          },
-          {
-            "text": "endokardio hodi ",
-            "b": true
-          },
-          {
-            "text": "bakarra sortuz. "
-          }
-        ]
-      },
-      {
-        "id": "w10/1/p11/s3",
-        "parts": [
-          {
-            "text": "Hodi horren inguran, alboko mesodermoaren errai orria kokatuko da, eta errai orri horretatik, "
+            "text": "Hodi horren inguran, alboko mesodermoaren errai orria kokatuko da, eta errai horretatik, "
           },
           {
             "text": "orri",
@@ -494,7 +510,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/1/p11/s4",
+        "id": "w10/1/p11/s2",
         "parts": [
           {
             "text": "Hemendik bihotzeko 2 zelula geruza sortuko dira:"
@@ -512,7 +528,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p12/s1",
         "parts": [
           {
-            "text": "● Miokardio geruza = geruza muskularra"
+            "text": "● Miokardio geruza = geruza muskularra."
           }
         ]
       }
@@ -527,7 +543,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p13/s1",
         "parts": [
           {
-            "text": "● Epikardio geruza edo errai perikardioa→miokardioaren inguruan."
+            "text": "● Epikardio geruza edo errai perikardioa → miokardioaren inguruan."
           }
         ]
       }
@@ -549,7 +565,7 @@ export const w10: NotesBlock[] = [
             "text": "hauek "
           },
           {
-            "text": "bihotzeko gai gelatinakara ",
+            "text": "bihotz gai gelatinakara ",
             "b": true
           },
           {
@@ -598,7 +614,7 @@ export const w10: NotesBlock[] = [
             "b": true
           },
           {
-            "text": ": bihotzaren barruko geruza, hodi-endokardiotik migratutako eta bihotz gelatinatik sortutako zeluletatik sortu."
+            "text": ": barruko geruza, hodi-endokardiotik migratutako eta bihotz gelatinatik sortutako zeluletatik sortu."
           }
         ]
       }
@@ -649,7 +665,7 @@ export const w10: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "geruza, miokardio inguruan."
+            "text": "geruza."
           }
         ]
       }
@@ -667,18 +683,11 @@ export const w10: NotesBlock[] = [
             "text": "Hasieran, bihotz-hodia lotuta mantentzen da perikardio barrunbearen atzeko paretarekin "
           },
           {
-            "text": "mesokardio dortsala ",
+            "text": "mesokardio dortsalaren ",
             "b": true
           },
           {
-            "text": "izeneko loturaren"
-          },
-          {
-            "text": " ",
-            "b": true
-          },
-          {
-            "text": "bitartez, baina garapenean lotura hau desagertu egiten da (behin-behineko egitura da). "
+            "text": "bitartez, baina garapenean lotura hau desagertu egiten da (behin- behineko egitura da). "
           }
         ]
       },
@@ -716,14 +725,14 @@ export const w10: NotesBlock[] = [
             "text": "Hauetatik, "
           },
           {
-            "text": "bi luzetarako",
+            "text": "bi luzetarako odol-",
             "b": true
           },
           {
             "text": " "
           },
           {
-            "text": "odol-hodi ",
+            "text": "hodi ",
             "b": true
           },
           {
@@ -734,15 +743,11 @@ export const w10: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "(enbrioiaren atzekaldean kokatuak). "
-          }
-        ]
-      },
-      {
-        "id": "w10/1/p19/s3",
-        "parts": [
+            "text": "(enbrioiaren atzekaldean kokatuak)"
+          },
           {
-            "text": "Arteria dortsal hauek alde zefalikotik, kontaktatzen dute bihotz hodiaren atal zefalikoarekin."
+            "text": ".",
+            "b": true
           }
         ]
       }
@@ -757,14 +762,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p20/s1",
         "parts": [
           {
-            "text": "Bihotzeko hodiko mozketa frontala, aurretik ikusita Ikusi endokardio-hodiak fusionatzen eta",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "enbrioiaren atzekaldean aorta dortsala goitik behera (gorriz)",
+            "text": "Bihotz hodiko mozketa sagitala Bihotzeko hodiko mozketa frontala",
             "i": true
           }
         ]
@@ -797,11 +795,11 @@ export const w10: NotesBlock[] = [
             "text": "hauen alde "
           },
           {
-            "text": "zefalikoak",
+            "text": "zefalikoak ",
             "b": true
           },
           {
-            "text": " gero eta aurrerago kokatzen dira. "
+            "text": "gero eta aurrerago kokatzen dira. "
           }
         ]
       },
@@ -839,18 +837,11 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p21/s4",
         "parts": [
           {
-            "text": "Lehenengo arku",
+            "text": "Lehenengo arku aortikoen",
             "b": true
           },
           {
-            "text": " "
-          },
-          {
-            "text": "aortikoen ",
-            "b": true
-          },
-          {
-            "text": "bitartez batu egingo dira. "
+            "text": " bitartez batu egingo dira. "
           }
         ]
       },
@@ -888,7 +879,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p23/s1",
         "parts": [
           {
-            "text": "- Beheko muturra→ "
+            "text": "● Beheko muturra→ "
           },
           {
             "text": "Zain muturra: ",
@@ -903,14 +894,14 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p23/s2",
         "parts": [
           {
-            "text": "Hasieran 3 zain mota: zilborrekoak (2 dira, karenatik bueltatzen dira, eta odol oxigenatua garraiatzen dute), bitelinoak"
+            "text": "Hasieran 3 zain mota: zilborrekoak (2 dira, eta odol oxigenatua garraiatzen dute), bitelinoak"
           },
           {
             "text": " ",
             "b": true
           },
           {
-            "text": "(2 dira, bitelo zakutik itzuli eta odol ez-oxigenatua garraiatzen dute), eta kardinal komunak (2 dira, eta alde zefalikotik zein alde kaudaletik itzultzen diren zainak (aurreko eta atzeko kardinalak direnak) elkartzen direnean sortzen dira)."
+            "text": "(2 dira, eta odol ez-oxigenatua garraiatzen dute), eta kardinal komunak (2 dira, eta alde zefalikotik zein alde kaudaletik itzultzen diren zainak (aurreko eta atzeko kardinalak direnak) elkartzen direnean sortzen dira)"
           }
         ]
       }
@@ -925,7 +916,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p24/s1",
         "parts": [
           {
-            "text": "- Goiko muturra (zefalikoa)→ "
+            "text": "● Goiko muturra (zefalikoa)→ "
           },
           {
             "text": "Arteria muturra (edo irteera muturra): ",
@@ -935,11 +926,8 @@ export const w10: NotesBlock[] = [
             "text": "hemendik ateratzen da odola eta dauden arku aortikoen bitartez, aorta dortsaletara pasatu "
           },
           {
-            "text": "(komunikatu).",
+            "text": "(komunikatu). ",
             "i": true
-          },
-          {
-            "text": " "
           }
         ]
       },
@@ -962,7 +950,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p25/s1",
         "parts": [
           {
-            "text": "Arteria bulboaren urrutiko atalak aorta zakua du izena. "
+            "text": "Arteria-bulboaren urrutiko atalari aorta-zakua esaten zaio. "
           }
         ]
       },
@@ -970,7 +958,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p25/s2",
         "parts": [
           {
-            "text": "Hau jarraia bihotzaren atal bentrikularrarekin, hau aurikularrarekin, eta hau bihotzeko zain muturrean dagoen, zain sinua hain zuzen. "
+            "text": "Jarraian, atal bentrikularra dago, ondoren aurikularra, eta, azkenik, bihotzaren zain-bukaeran dagoen zain-sinua. "
           }
         ]
       },
@@ -978,7 +966,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/1/p25/s3",
         "parts": [
           {
-            "text": "Sinu honek bi alboko adar ditu, ezker eta eskubian."
+            "text": "Sinu honek bi alboko adar ditu: ezkerraldekoa eta eskuinaldekoa."
           }
         ]
       }
@@ -1025,30 +1013,23 @@ export const w10: NotesBlock[] = [
             "text": "Bi odol hodi mota hauek "
           },
           {
-            "text": "oxigenaturik",
+            "text": "oxigenaturik ",
             "i": true
           },
           {
-            "text": " dagoen odola edo "
+            "text": "dagoen odola edo "
           },
           {
             "text": "oxigeno gabeko ",
             "i": true
           },
           {
-            "text": "odola eraman dezakete."
+            "text": "odola eraman dezakete. "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "1",
-    "id": "w10/1/p27",
-    "sentences": [
+      },
       {
-        "id": "w10/1/p27/s1",
+        "id": "w10/1/p26/s4",
         "parts": [
           {
             "text": "Garai honetarako, bihotz hodiaren behe atalera heltzen dira "
@@ -1058,19 +1039,12 @@ export const w10: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "(zaina=bena)."
+            "text": "(zaina=bena). "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "1",
-    "id": "w10/1/p28",
-    "sentences": [
+      },
       {
-        "id": "w10/1/p28/s1",
+        "id": "w10/1/p26/s5",
         "parts": [
           {
             "text": "Hiru "
@@ -1085,7 +1059,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/1/p28/s2",
+        "id": "w10/1/p26/s6",
         "parts": [
           {
             "text": "eta ezk.) "
@@ -1093,7 +1067,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/1/p28/s3",
+        "id": "w10/1/p26/s7",
         "parts": [
           {
             "text": "bukatzen dute:"
@@ -1105,13 +1079,13 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "1",
-    "id": "w10/1/p29",
+    "id": "w10/1/p27",
     "sentences": [
       {
-        "id": "w10/1/p29/s1",
+        "id": "w10/1/p27/s1",
         "parts": [
           {
-            "text": "●"
+            "text": "● "
           },
           {
             "text": "Zain kardinal komunak: ",
@@ -1130,7 +1104,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/1/p29/s2",
+        "id": "w10/1/p27/s2",
         "parts": [
           {
             "text": "Aurreko zain kardinala, atzeko zain kardinalarekin fusionatzean denean sortzen da. "
@@ -1138,7 +1112,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/1/p29/s3",
+        "id": "w10/1/p27/s3",
         "parts": [
           {
             "text": "Enbrioiaren alde zefalikoko "
@@ -1164,13 +1138,13 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "1",
-    "id": "w10/1/p30",
+    "id": "w10/1/p28",
     "sentences": [
       {
-        "id": "w10/1/p30/s1",
+        "id": "w10/1/p28/s1",
         "parts": [
           {
-            "text": "●"
+            "text": "● "
           },
           {
             "text": "Zain bitelinoak: ",
@@ -1182,7 +1156,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/1/p30/s2",
+        "id": "w10/1/p28/s2",
         "parts": [
           {
             "text": "Bihotz hodiaren beheko ataleraino iritsi."
@@ -1194,10 +1168,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "1",
-    "id": "w10/1/p31",
+    "id": "w10/1/p29",
     "sentences": [
       {
-        "id": "w10/1/p31/s1",
+        "id": "w10/1/p29/s1",
         "parts": [
           {
             "text": "● Z"
@@ -1216,10 +1190,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "p",
     "section": "1",
-    "id": "w10/1/p32",
+    "id": "w10/1/p30",
     "sentences": [
       {
-        "id": "w10/1/p32/s1",
+        "id": "w10/1/p30/s1",
         "parts": [
           {
             "text": "Arteria",
@@ -1235,10 +1209,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "1",
-    "id": "w10/1/p33",
+    "id": "w10/1/p31",
     "sentences": [
       {
-        "id": "w10/1/p33/s1",
+        "id": "w10/1/p31/s1",
         "parts": [
           {
             "text": "● "
@@ -1257,10 +1231,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "1",
-    "id": "w10/1/p34",
+    "id": "w10/1/p32",
     "sentences": [
       {
-        "id": "w10/1/p34/s1",
+        "id": "w10/1/p32/s1",
         "parts": [
           {
             "text": "● "
@@ -1279,10 +1253,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "1",
-    "id": "w10/1/p35",
+    "id": "w10/1/p33",
     "sentences": [
       {
-        "id": "w10/1/p35/s1",
+        "id": "w10/1/p33/s1",
         "parts": [
           {
             "text": "● "
@@ -1315,10 +1289,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "p",
     "section": "1",
-    "id": "w10/1/p36",
+    "id": "w10/1/p34",
     "sentences": [
       {
-        "id": "w10/1/p36/s1",
+        "id": "w10/1/p34/s1",
         "parts": [
           {
             "text": "Bi motatako odolak (zain kardinal komuneko odol oxigenatu gabea eta bitelo benatik datorren odol oxigenatu gabea) bihotzean (atrio primitiboan) "
@@ -1333,7 +1307,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/1/p36/s2",
+        "id": "w10/1/p34/s2",
         "parts": [
           {
             "text": "Zain eta arteria mota hauek "
@@ -1348,7 +1322,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/1/p36/s3",
+        "id": "w10/1/p34/s3",
         "parts": [
           {
             "text": "Honela, gorputzaren atal guztietara heltzen da odola."
@@ -1382,7 +1356,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/2/p3/s1",
         "parts": [
           {
-            "text": "Bihotz hodiaren goiko aldean duen muturra, arteria muturra deitzen da, bertatik irtetzen da bihotz hodiaren odola, eta arku aortikoen bitartez odola pasatzen da aorta dortsaletara. "
+            "text": "Bihotz hodiaren goiko muturra, arteria muturra deitzen da, bertatik irtetzen da bihotz hodiaren odola, eta arku aortikoen bitartez odola pasatzen da aorta dortsaletara. "
           }
         ]
       },
@@ -1390,20 +1364,12 @@ export const w10: NotesBlock[] = [
         "id": "w10/2/p3/s2",
         "parts": [
           {
-            "text": "Alde kaudala zain muturra da eta bertara heltzen da zainetatik datorren odola. "
-          }
-        ]
-      },
-      {
-        "id": "w10/2/p3/s3",
-        "parts": [
-          {
             "text": "Badakigu bihotz hodia perikardio barruan sartuta dagoela. "
           }
         ]
       },
       {
-        "id": "w10/2/p3/s4",
+        "id": "w10/2/p3/s3",
         "parts": [
           {
             "text": "Garapenaren 21. egunean, bihotz hodian estuguneak eta hertsadurak "
@@ -1427,25 +1393,25 @@ export const w10: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " hedatzen den bihotz hodi honetan."
+            "text": " hedatzen den bihotz hodi honetan. "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2",
-    "id": "w10/2/p4",
-    "sentences": [
+      },
       {
-        "id": "w10/2/p4/s1",
+        "id": "w10/2/p3/s4",
         "parts": [
           {
             "text": "Bi alboko endokardio hodiak fusionatzen dira (alde zefalikoan hasi eta alde kaudalera arte) "
           },
           {
-            "text": "bihotz hodi bakarra sortzeko",
+            "text": "bihotz",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "hodi bakarra sortzeko",
             "b": true
           },
           {
@@ -1454,15 +1420,15 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/2/p4/s2",
+        "id": "w10/2/p3/s5",
         "parts": [
           {
-            "text": "Hasieran, honako hau lineala da, baina garapenak aurrera egin ahala, atal desberdinak agertzen dira (atal horietatik geroago sortuko dira gure bihotzak dituen atalak). "
+            "text": "Hasieran, honako hau lineala da, baina garapenak aurrera egin ahala, atal desberdinak agertzen dira . "
           }
         ]
       },
       {
-        "id": "w10/2/p4/s3",
+        "id": "w10/2/p3/s6",
         "parts": [
           {
             "text": "Honelako atal hauek ditu:"
@@ -1474,10 +1440,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2",
-    "id": "w10/2/p5",
+    "id": "w10/2/p4",
     "sentences": [
       {
-        "id": "w10/2/p5/s1",
+        "id": "w10/2/p4/s1",
         "parts": [
           {
             "text": "● "
@@ -1492,7 +1458,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/2/p5/s2",
+        "id": "w10/2/p4/s2",
         "parts": [
           {
             "text": "Bikoitzak diren bi atal aurikular bakoitzan beste atalarekin jarraitzen dira perikardio barruan. "
@@ -1500,31 +1466,32 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/2/p5/s3",
+        "id": "w10/2/p4/s3",
         "parts": [
           {
-            "text": "(Arteria muturrean, bulboa). ",
-            "i": true
-          }
-        ]
-      },
-      {
-        "id": "w10/2/p5/s4",
-        "parts": [
-          {
-            "text": "Honen muturrean",
+            "text": "(Arteria",
             "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "ARTERIA ZAKUA/ Aorta zakua",
-            "b": true,
+            "text": "muturrean, bulboa) . ",
+            "i": true
+          }
+        ]
+      },
+      {
+        "id": "w10/2/p4/s4",
+        "parts": [
+          {
+            "text": "Honen muturrean ",
             "i": true
           },
           {
-            "text": " (irudian beltzez) dago."
+            "text": "ARTERIA SAKUA",
+            "b": true,
+            "i": true
           }
         ]
       }
@@ -1533,10 +1500,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2",
-    "id": "w10/2/p6",
+    "id": "w10/2/p5",
     "sentences": [
       {
-        "id": "w10/2/p6/s1",
+        "id": "w10/2/p5/s1",
         "parts": [
           {
             "text": "● "
@@ -1555,10 +1522,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2",
-    "id": "w10/2/p7",
+    "id": "w10/2/p6",
     "sentences": [
       {
-        "id": "w10/2/p7/s1",
+        "id": "w10/2/p6/s1",
         "parts": [
           {
             "text": "● "
@@ -1573,7 +1540,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/2/p7/s2",
+        "id": "w10/2/p6/s2",
         "parts": [
           {
             "text": "Bi daude, eta bakoitza jarraia da zain-sinu batekin. "
@@ -1581,7 +1548,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/2/p7/s3",
+        "id": "w10/2/p6/s3",
         "parts": [
           {
             "text": "Hasieran bikoitza da, baina gero fusionatu egingo dira."
@@ -1593,20 +1560,55 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2",
+    "id": "w10/2/p7",
+    "sentences": [
+      {
+        "id": "w10/2/p7/s1",
+        "parts": [
+          {
+            "text": "● "
+          },
+          {
+            "text": "Zain-sinuak ",
+            "b": true
+          },
+          {
+            "text": "(bilaterala eta bikoitza): enbroiaren zain desberdinak hemen bukatzen dira: zilborreko zainak, zain bitelino/onfalomesenterikoak eta zain kardinal komunak. "
+          }
+        ]
+      },
+      {
+        "id": "w10/2/p7/s2",
+        "parts": [
+          {
+            "text": "Bi",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "alboko luzapen ditu (zain muturrean kokatzen da)",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2",
     "id": "w10/2/p8",
     "sentences": [
       {
         "id": "w10/2/p8/s1",
         "parts": [
           {
-            "text": "● "
-          },
-          {
-            "text": "Atal zain-sinuak ",
+            "text": "Atal bulbarra eta bentrikularra ",
             "b": true
           },
           {
-            "text": "(bilaterala eta bikoitza): ezker eta eskuineko zainak hemen amaitzen dira. "
+            "text": "perikardio barrunbean kokatzen dira. "
           }
         ]
       },
@@ -1614,7 +1616,11 @@ export const w10: NotesBlock[] = [
         "id": "w10/2/p8/s2",
         "parts": [
           {
-            "text": "Desberdinak dira, enbrioiaren zain (ezkerrekoak eta eskuinekoak), zilborreko zainak eta abarrekoak. "
+            "text": "Bikoitzak diren atal aurikulak eta zain sinuak ",
+            "b": true
+          },
+          {
+            "text": "hasieran perikardio barrunbearen kanpoan daude, kanpoan dagoen septum transversumean kokatzen dira. "
           }
         ]
       },
@@ -1622,15 +1628,23 @@ export const w10: NotesBlock[] = [
         "id": "w10/2/p8/s3",
         "parts": [
           {
-            "text": "Bi alboko luzapen",
-            "i": true
-          },
+            "text": "Enbrioiaren lepo mailan gutxi gorabehera. "
+          }
+        ]
+      },
+      {
+        "id": "w10/2/p8/s4",
+        "parts": [
           {
-            "text": " "
-          },
+            "text": "(Izendatzeko erabili BIHOTZ HODIAREN atal aurikularra eta bentrikularra, ez bakarrik aurikula/bentrikulua) Odolaren bidea: Zainak → Zain sinuak → Aurikulak → Atal bentrikularra → Atal bulbarra. "
+          }
+        ]
+      },
+      {
+        "id": "w10/2/p8/s5",
+        "parts": [
           {
-            "text": "ditu (zain muturrean kokatzen da).",
-            "i": true
+            "text": "Bihotzaren atal hauek ezberdindu diren momenturako, bihotza lepo mailatik jeitsi da toraxeko barrunbera."
           }
         ]
       }
@@ -1645,37 +1659,21 @@ export const w10: NotesBlock[] = [
         "id": "w10/2/p9/s1",
         "parts": [
           {
-            "text": "Atal bulbarra eta bentrikularra ",
+            "text": "23. egunetik aurrera luzea eta zuzena den bihotz hodia tolesten hasten da, "
+          },
+          {
+            "text": "bihotz lakio ",
             "b": true
           },
           {
-            "text": "(Izendatzeko erabili ODOL HODIAREN atal aurikularra eta bentrikularra, ez bakarrik aurikula/bentrikulua)"
-          },
-          {
-            "text": " ",
-            "b": true
-          },
-          {
-            "text": "perikardio barrunbean kokatzen dira. "
-          }
-        ]
-      },
-      {
-        "id": "w10/2/p9/s2",
-        "parts": [
-          {
-            "text": "Bikoitzak diren aurikulak eta zain sinuak ",
-            "b": true
-          },
-          {
-            "text": "perikardio barrunbe kanpoan dagoen septum transversumean kokatzen dira, enbrioiaren lepo mailan gutxi gorabehera."
+            "text": "bat sortzeko:"
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "2",
     "id": "w10/2/p10",
     "sentences": [
@@ -1683,14 +1681,14 @@ export const w10: NotesBlock[] = [
         "id": "w10/2/p10/s1",
         "parts": [
           {
-            "text": "Odolaren bidea: Zainak → Zain sinuak → Atal aurikularra → Atal bentrikularra → Atal bulbarra."
+            "text": "● Alde zefalikoa (atal bulbarra): aurrera, behera eta eskuinera abiatzen da."
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "2",
     "id": "w10/2/p11",
     "sentences": [
@@ -1698,7 +1696,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/2/p11/s1",
         "parts": [
           {
-            "text": "Bihotzaren atal hauek ezberdindu diren momenturako, bihotza lepo mailatik jaitsi da toraxeko barrunbera."
+            "text": "● Alde kaudala (zain sinua eta aurikula): atzera, ezkerrera eta gora abiatuko da."
           }
         ]
       }
@@ -1713,22 +1711,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/2/p12/s1",
         "parts": [
           {
-            "text": "Garapenaren 23. egunean luzea eta zuzena den bihotz hodia tolesten hasten da, "
-          },
-          {
-            "text": "bihotz lakio",
-            "b": true
-          },
-          {
-            "text": " bat sortzeko. "
-          }
-        ]
-      },
-      {
-        "id": "w10/2/p12/s2",
-        "parts": [
-          {
-            "text": "Bihotz hodiak egiten duen tolespena honakoa da:"
+            "text": "Honela azaldu zuen aurreko urtean:"
           }
         ]
       }
@@ -1741,51 +1724,6 @@ export const w10: NotesBlock[] = [
     "sentences": [
       {
         "id": "w10/2/p13/s1",
-        "parts": [
-          {
-            "text": "●​ Alde zefalikoa (arteria bulboa): aurrera, behera eta eskuinera abiatzen da."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "2",
-    "id": "w10/2/p14",
-    "sentences": [
-      {
-        "id": "w10/2/p14/s1",
-        "parts": [
-          {
-            "text": "●​ Alde kaudala (zain sinua eta aurikula): atzera, gora eta ezkerrera abiatuko da."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2",
-    "id": "w10/2/p15",
-    "sentences": [
-      {
-        "id": "w10/2/p15/s1",
-        "parts": [
-          {
-            "text": "Honela azaldu zuen aurreko urtean:"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "2",
-    "id": "w10/2/p16",
-    "sentences": [
-      {
-        "id": "w10/2/p16/s1",
         "parts": [
           {
             "text": "● "
@@ -1804,10 +1742,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2",
-    "id": "w10/2/p17",
+    "id": "w10/2/p14",
     "sentences": [
       {
-        "id": "w10/2/p17/s1",
+        "id": "w10/2/p14/s1",
         "parts": [
           {
             "text": "● "
@@ -1826,10 +1764,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2",
-    "id": "w10/2/p18",
+    "id": "w10/2/p15",
     "sentences": [
       {
-        "id": "w10/2/p18/s1",
+        "id": "w10/2/p15/s1",
         "parts": [
           {
             "text": "● "
@@ -1848,10 +1786,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2",
-    "id": "w10/2/p19",
+    "id": "w10/2/p16",
     "sentences": [
       {
-        "id": "w10/2/p19/s1",
+        "id": "w10/2/p16/s1",
         "parts": [
           {
             "text": "● "
@@ -1874,10 +1812,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2",
-    "id": "w10/2/p20",
+    "id": "w10/2/p17",
     "sentences": [
       {
-        "id": "w10/2/p20/s1",
+        "id": "w10/2/p17/s1",
         "parts": [
           {
             "text": "Zuzena den bihotz hodia"
@@ -1892,7 +1830,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/2/p20/s2",
+        "id": "w10/2/p17/s2",
         "parts": [
           {
             "text": "Honela, bihotz lakio bat sortzen da. "
@@ -1900,7 +1838,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/2/p20/s3",
+        "id": "w10/2/p17/s3",
         "parts": [
           {
             "text": "Bihotz hodi izatetik "
@@ -1915,7 +1853,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/2/p20/s4",
+        "id": "w10/2/p17/s4",
         "parts": [
           {
             "text": "Kontuan hartu bihotza aurretik begiratzen gaudela irudian: eskuma eta ezkerra alderantziz daude."
@@ -1927,99 +1865,100 @@ export const w10: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2",
-    "id": "w10/2/p21",
+    "id": "w10/2/p18",
     "sentences": [
       {
-        "id": "w10/2/p21/s1",
+        "id": "w10/2/p18/s1",
         "parts": [
           {
-            "text": "28. egunerako prozesu hau amaitu egiten da. "
+            "text": "28. egunerako amaituta dago prozesu hau. "
           }
         ]
       },
       {
-        "id": "w10/2/p21/s2",
+        "id": "w10/2/p18/s2",
         "parts": [
           {
-            "text": "Hurrengo irudian ikusten den moduan, hasieran alde zefalikoan dagoen "
+            "text": "Hurrengo irudian, "
           },
           {
             "text": "atal bulbarra ",
             "b": true
           },
           {
-            "text": "(arteria bulboa, behera eta eskuinera jaisten",
+            "text": "(behera eta eskuinera",
             "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "da) ",
+            "text": "jaisten da) ",
             "i": true
           },
           {
-            "text": "bihotz lakioaren"
+            "text": "aurre eskuinaldean dago eta ezkerrean dagoen "
           },
           {
-            "text": " ",
-            "i": true
-          },
-          {
-            "text": "aurre eskuinaldean kokatzen da, eta berarekin jarraia den "
-          },
-          {
-            "text": "atal",
+            "text": "atal bentrikularrarekin (ezkerrean)",
             "b": true
           },
           {
-            "text": " "
-          },
-          {
-            "text": "bentrikularra (ezkerrean) ",
-            "b": true
-          },
-          {
-            "text": "ezkerrean kokatzen da, eta hau erreten aurikulubentrikularraren "
+            "text": " jarraia da, eta hau erreten aurikulubentrikularraren "
           },
           {
             "text": "(zuloa) ",
             "i": true
           },
           {
-            "text": "bitartez jarraia da goi-atzekaldean gelditu den atal aurikularrarekin (goi atzekaldean). "
-          }
-        ]
-      },
-      {
-        "id": "w10/2/p21/s3",
-        "parts": [
-          {
-            "text": "Aldi berean, atal aurikularra, atzealdean dagoen zain-sinuarekin (atzean) jarraia da ("
-          },
-          {
-            "text": "komunikatuta geratzen da atzeko paretatik). ",
-            "i": true
-          }
-        ]
-      },
-      {
-        "id": "w10/2/p21/s4",
-        "parts": [
-          {
-            "text": "Beraz, bihotz lakio honetako atalak jarraiak dira bata bestearekin, oraindik ez da trenkadarik agertu."
+            "text": "bitartez jarraia da goi-atzekaldean"
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "caption",
     "section": "2",
-    "id": "w10/2/p22",
+    "id": "w10/2/p19",
     "sentences": [
       {
-        "id": "w10/2/p22/s1",
+        "id": "w10/2/p19/s1",
+        "parts": [
+          {
+            "text": "gelditu den atal aurikularrarekin (goi atzekaldean). "
+          }
+        ]
+      },
+      {
+        "id": "w10/2/p19/s2",
+        "parts": [
+          {
+            "text": "Aldi berean, atal aurikularrak atzealdean kokatutako zain- sinuarekin komunikatuta jarraitzen du. "
+          }
+        ]
+      },
+      {
+        "id": "w10/2/p19/s3",
+        "parts": [
+          {
+            "text": "("
+          },
+          {
+            "text": "komunikatuta geratzen da).",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "2",
+    "id": "w10/2/p20",
+    "sentences": [
+      {
+        "id": "w10/2/p20/s1",
         "parts": [
           {
             "text": "Bihotza aurretik ikusita",
@@ -2071,7 +2010,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.1/p3/s1",
         "parts": [
           {
-            "text": "Arteria bulbo honetako urrutiko zatia arteria edo aorta zakua da, eta hau komunikatuta dago ezkerrean eta eskubian kokatuta dauden aorta dortsalekin, komunikazio ezberdinen bidez. "
+            "text": "Arteria bulbo honetako urrutiko zatia arteria zakua da, eta hau komunikatuta dago ezker eta eskubian kokatuta dauden aorta dortsalekin, komunikazio ezberdinen bidez, aorta arkuak izenekoak, hauek tolesdura zefalokaudalean agertzen dira. "
           }
         ]
       },
@@ -2079,14 +2018,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.1/p3/s2",
         "parts": [
           {
-            "text": "Komunikazio horiek "
-          },
-          {
-            "text": "aorta arkuak",
-            "b": true
-          },
-          {
-            "text": " izenekoak dira eta hauek tolesdura zefalokaudalean agertzen dira (Diskoak tolespen zefalokaudala egiten duen bitartean aorta dortsaletatik komunikazio ezberdinak agertzen dira). "
+            "text": "Hemendik iritsiko da ateratzen den odola. "
           }
         ]
       },
@@ -2094,23 +2026,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.1/p3/s3",
         "parts": [
           {
-            "text": "Hemendik iritsiko da ateratzen den odola. "
-          }
-        ]
-      },
-      {
-        "id": "w10/3.1/p3/s4",
-        "parts": [
-          {
-            "text": "Beraz, bihotz lakio honetako arteria muturretik ateratzen den odola komunikazio hauen bidez (aorta arkuak) atzekaldean dauden aorta dortsaletara helduko da. "
-          }
-        ]
-      },
-      {
-        "id": "w10/3.1/p3/s5",
-        "parts": [
-          {
-            "text": "Arteria bulbo honetan hiru azpiatal bereizten dira:"
+            "text": "Hiru azpiatal bereizten dira:"
           }
         ]
       }
@@ -2132,14 +2048,7 @@ export const w10: NotesBlock[] = [
             "i": true
           },
           {
-            "text": "Atal zabal honen paretan hasten dira muskuluak agertzen eta muskulu horiek"
-          },
-          {
-            "text": " muskulu trenkadak",
-            "b": true
-          },
-          {
-            "text": " sortzen dituzte. "
+            "text": "hemendik behin-betiko eskuineko bihotzaren atal trabekulatua sortzen da (hasierako eskuineko bentrikulua). "
           }
         ]
       },
@@ -2147,39 +2056,10 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.1/p4/s2",
         "parts": [
           {
-            "text": "Beraz, hemendik behin-betiko bihotzaren eskuineko bentrikuluak duen atal trabekulatua sortzen da (hasierako eskuineko bentrikulua). "
-          }
-        ]
-      },
-      {
-        "id": "w10/3.1/p4/s3",
-        "parts": [
-          {
             "text": "Hau da, "
           },
           {
-            "text": "hasierako",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "eskuineko bentrikuluaren atal trabekulatua ",
-            "b": true
-          },
-          {
-            "text": "edo"
-          },
-          {
-            "text": " hasierako eskuineko",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "bentrikulua ",
+            "text": "hasierako eskuineko bentrikuluaren atal trabekulatua ",
             "b": true
           },
           {
@@ -2188,10 +2068,17 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.1/p4/s4",
+        "id": "w10/3.1/p4/s3",
         "parts": [
           {
-            "text": "Hori izango da behin betiko eskuineko bentrikuluak izango duen atalik garrantzitsuena, baina ez bakarra."
+            "text": "Bere paretan "
+          },
+          {
+            "text": "muskulu trenkadak",
+            "b": true
+          },
+          {
+            "text": " agertzen dira."
           }
         ]
       }
@@ -2232,23 +2119,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.1/p5/s2",
         "parts": [
           {
-            "text": "Hemendik sortzen dira birika arteria (eskuinekotik) eta aorta arteriak (ezkerrekotik). "
-          }
-        ]
-      },
-      {
-        "id": "w10/3.1/p5/s3",
-        "parts": [
-          {
-            "text": "Arteria konoa trenkadatu egingo da eta espazio horretan trenkada bat agertuko da, espazio hori bitan banatuz. "
-          }
-        ]
-      },
-      {
-        "id": "w10/3.1/p5/s4",
-        "parts": [
-          {
-            "text": "Bi espazio horiek izango dira, hain zuzen ere, bi bentrikuluek dituzten atal lisoak edo infundibuluak."
+            "text": "Hemendik sortzen dira birika arteria (eskuinekotik) eta aorta arteriak (ezkerrekotik)."
           }
         ]
       }
@@ -2263,24 +2134,32 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.1/p6/s1",
         "parts": [
           {
-            "text": "● Urruneko atala edo enbor arteriosoa/arteriala/arteria enborra: Trenkadatzen da eta bertatik sortzen dira bi bentrikuluetatik irteten diren "
+            "text": "● Urruneko atala edo enbor arteriosoa/arteriala: enbor arteriosoa. "
+          }
+        ]
+      },
+      {
+        "id": "w10/3.1/p6/s2",
+        "parts": [
+          {
+            "text": "Trenkadatzen da eta bertatik sortzen dira "
           },
           {
-            "text": "birika arteriaren/",
+            "text": "birika arteriaren/ enborraren hasierako zatiak eta sustraiak",
+            "b": true
+          },
+          {
+            "text": " (eskuineko bentrikularen infundibulutik) eta "
+          },
+          {
+            "text": "aorta arteriaren hasierako zatiak eta",
             "b": true
           },
           {
             "text": " "
           },
           {
-            "text": "enborraren hasierako zatiak eta sustraiak ",
-            "b": true
-          },
-          {
-            "text": "(eskuineko bentrikuluaren infundibulutik) eta "
-          },
-          {
-            "text": "aorta arteriaren hasierako zatiak eta sustraiak ",
+            "text": "sustraiak ",
             "b": true
           },
           {
@@ -2316,39 +2195,28 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.2/p3/s1",
         "parts": [
           {
-            "text": "Atal bentrikularreko paretan muskuluak garatzen hasten dira eta hortik "
+            "text": "Hasierako ezkerreko bentrikuluaren atal trabekulatua ",
+            "b": true
           },
           {
-            "text": "muskulu",
+            "text": "sortzen da, "
+          },
+          {
+            "text": "hasierako ezkerreko",
             "b": true
           },
           {
             "text": " "
           },
           {
-            "text": "trenkadak ",
+            "text": "bentrikulua, ",
             "b": true
           },
           {
-            "text": "sortzen dira. "
-          }
-        ]
-      },
-      {
-        "id": "w10/3.2/p3/s2",
-        "parts": [
-          {
-            "text": "Horrela, "
+            "text": "eta hortik "
           },
           {
-            "text": "hasierako ezkerreko bentrikuluaren atal trabekulatua",
-            "b": true
-          },
-          {
-            "text": " sortzen da, hau da, "
-          },
-          {
-            "text": "hasierako ezkerreko bentrikulua.",
+            "text": "muskulu trenkadak.",
             "b": true
           }
         ]
@@ -2371,38 +2239,17 @@ export const w10: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "hurbileko atala="
+            "text": "hurbileko atala eta atal "
           },
           {
-            "text": "hasierako eskumako",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "bentrikulua",
-            "b": true
-          },
-          {
-            "text": " eta atal "
-          },
-          {
-            "text": "bentrikularretik ",
-            "b": true
-          },
-          {
-            "text": "sortzen den"
-          },
-          {
-            "text": " hasierako ezkerreko bentrikulua",
+            "text": "bentrikularra",
             "b": true
           },
           {
             "text": ") komunikatuta daude "
           },
           {
-            "text": "bentrikulu arteko zulo primarioaren ",
+            "text": "bentrikula arteko zulo primarioaren ",
             "b": true
           },
           {
@@ -2439,11 +2286,11 @@ export const w10: NotesBlock[] = [
             "text": "Bihotz lakioaren atal bentrikularra komunikatuta dago goi-atzekaldean gelditu den bihotz lakioaren atal aurikularrarekin (komuna dena) "
           },
           {
-            "text": "erreten/hodi aurikulubentrikularraren",
+            "text": "erreten/hodi aurikulubentrikularraren ",
             "b": true
           },
           {
-            "text": " bitartez."
+            "text": "bitartez."
           }
         ]
       }
@@ -2482,25 +2329,28 @@ export const w10: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "eratu bitartean atal bulbarraren arteria enborra kokatzen da "
+            "text": "eratu bitartean atal bulbarra kokatzen da "
           },
           {
-            "text": "barrunbe perikardikoaren ",
+            "text": "barrunbe perikardikoaren",
             "b": true
+          },
+          {
+            "text": " "
           },
           {
             "text": "eskuineko ",
             "i": true
           },
           {
-            "text": "aldean, eta garapenean, "
+            "text": "aldean, eta "
           },
           {
             "text": "erdira abiatzen ",
             "i": true
           },
           {
-            "text": "da (Alde medialera mugitzen da). "
+            "text": "da (alde medialera mugitzen da). "
           }
         ]
       },
@@ -2508,17 +2358,17 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.3/p3/s2",
         "parts": [
           {
-            "text": "Hasieran batean, atal aurikularrean aurikula komuna dago, baina mugimendu honekin batera, komuna den aurikulan bi alboko zabalkuntza agertuko dira: "
+            "text": "Mugimendu honekin batera, komuna den aurikulan bi alboko zabalkuntza agertuko dira: "
           },
           {
-            "text": "hasierako eskuineko aurikula ",
+            "text": "hasierako eskuineko ",
             "b": true
           },
           {
             "text": "eta "
           },
           {
-            "text": "hasierako ezkerreko aurikula. ",
+            "text": "hasierako ezkerreko aurikulak. ",
             "b": true
           }
         ]
@@ -2527,12 +2377,27 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.3/p3/s3",
         "parts": [
           {
-            "text": "Bihotzaren atal ezberdinak plano ezberdinean daude: bentrikuluak aurre eskuinaldean eta aurikulak goi atzekaldean. "
+            "text": "Bihotzaren atal ezberdinak plano ezberdinean daude:"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "3.3",
+    "id": "w10/3.3/p4",
+    "sentences": [
+      {
+        "id": "w10/3.3/p4/s1",
+        "parts": [
+          {
+            "text": "bentrikuluak aurre eskuinaldean eta aurikulak goi atzekaldean. "
           }
         ]
       },
       {
-        "id": "w10/3.3/p3/s4",
+        "id": "w10/3.3/p4/s2",
         "parts": [
           {
             "text": "Gogoratu atzekaldean "
@@ -2574,14 +2439,12 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.4/p3/s1",
         "parts": [
           {
-            "text": "Ezkerraldea",
+            "text": "Atzetik ",
+            "b": true,
             "i": true
           },
           {
-            "text": " "
-          },
-          {
-            "text": "Eskumaldea",
+            "text": "ikusita dago, orduan, eskuina eta ezkerra ez dira alderantzizkatu behar",
             "i": true
           }
         ]
@@ -2597,26 +2460,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.4/p4/s1",
         "parts": [
           {
-            "text": "KONTUZ! ",
-            "b": true,
-            "i": true
-          }
-        ]
-      },
-      {
-        "id": "w10/3.4/p4/s2",
-        "parts": [
-          {
-            "text": "Atzetik ",
-            "b": true,
-            "i": true
-          },
-          {
-            "text": "ikusita dago, orduan, eskuina eta ezkerra ez dira alderantzizkatu behar",
-            "i": true
-          },
-          {
-            "text": " Goi ezkerraldeko irudia "
+            "text": "Goi ezkerraldeko irudia "
           },
           {
             "text": "(zurixka atala",
@@ -2635,10 +2479,10 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p4/s3",
+        "id": "w10/3.4/p4/s2",
         "parts": [
           {
-            "text": "Garapenaren 4.astean zain-sinuan ("
+            "text": "Garapenaren 4. astean zain-sinuan ("
           },
           {
             "text": "kolorezko atala",
@@ -2671,10 +2515,18 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
+        "id": "w10/3.4/p4/s3",
+        "parts": [
+          {
+            "text": "Bertan bukatzen dira enbrioiaren ezkerreko eta eskuineko zainak, hasiera batean 3 direnak (zilborreko zainak, zain bitelinoak, eta kardinal komunak). "
+          }
+        ]
+      },
+      {
         "id": "w10/3.4/p4/s4",
         "parts": [
           {
-            "text": "Ezkerreko eta eskumako luzapen horietan bukatzen dira enbrioiaren ezkerreko eta eskuineko zainak, hasiera batean 3 direnak (zain bitelinoak, zilborreko zainak eta kardinalak). "
+            "text": "Kardinal komunak sortzen dira enbrioaren atzeko eta aurreko kardinalak fusionatzerakoan, aurreko kardinala zain odola enbrioaren alde zefalikotik hartzen du eta atzeko kardinala hartu odola enbrioaren alde kaudaletik. "
           }
         ]
       },
@@ -2682,7 +2534,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.4/p4/s5",
         "parts": [
           {
-            "text": "Bi luzapen edo adar horien bidez odola heltzen da zain sinura eta daukan zuloaren bidez odola pasatzen da atal aurikularrera. "
+            "text": "Garapenean zain sisteman aldaketa aunitz gertatzen dira: komunikazioak desberdinak agertu ezkerreko eta eskuineko zainen artean, zain batzuk desagertu (4. asterako desagertzen da karenatik bueltatzen den eskuineko zilborreko zaina, ezkerreko zain bitelinoa eta beranduago gutxi gorabehera 10. astean ezkerreko kardinal komuna). "
           }
         ]
       },
@@ -2690,22 +2542,14 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.4/p4/s6",
         "parts": [
           {
-            "text": "Garapenean, zain sisteman aldaketa anitz gertatzen dira: komunikazioak desberdinak agertu ezkerreko eta eskuineko zainen artean, zain batzuk desagertu (4.asterako desagertzen da karenatik bueltatzen den eskuineko zilborreko zaina, ezkerreko zain bitelinoa eta beranduago gutxi gorabehera 10.astean ezkerreko kardinal komuna). "
-          }
-        ]
-      },
-      {
-        "id": "w10/3.4/p4/s7",
-        "parts": [
-          {
             "text": "Zainaren eta aurikularen arteko komunikazioa, hau da, zati zuria eta urdinaren arteko komunikazioa "
           },
           {
-            "text": "zulo sinuaurikularra",
+            "text": "zulo sinuaurikularra ",
             "b": true
           },
           {
-            "text": " deitzen da (hasieran honako hau oso zabala da, irudian ikusten den moduan)."
+            "text": "deitzen da (hasieran honako hau oso zabala da, irudian ikusten den moduan)."
           }
         ]
       }
@@ -2759,10 +2603,17 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.4/p6/s2",
         "parts": [
           {
-            "text": "Garapenean, enbrioiaren "
+            "text": "Enbrioiaren "
           },
           {
-            "text": "ezkerreko zainetatik ",
+            "text": "ezkerreko",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "zainetatik ",
             "b": true
           },
           {
@@ -2777,7 +2628,14 @@ export const w10: NotesBlock[] = [
             "text": "Horregatik, enbrioiaren "
           },
           {
-            "text": "zain-odol ia guztia ",
+            "text": "zain-odol ia",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "guztia ",
             "b": true
           },
           {
@@ -2796,7 +2654,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.4/p6/s4",
         "parts": [
           {
-            "text": "Ondorioz, zain-sinuaren ezkerreko luzapenak garrantzia galtzen du eta poliki-poliki hasten da txikitzen edo desagertzen. "
+            "text": "Ondorioz, zain-sinuaren ezkerreko luzapenak garrantzia galtzen du eta poliki-poliki hasten da desagertzen. "
           }
         ]
       },
@@ -2833,7 +2691,7 @@ export const w10: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "sortzen dira bakarrik: alde batetik, bihotzaren atze ezkerreko partean kokatzen den zain egitura bat, "
+            "text": "sortzen dira: alde batetik, bihotzaren atze ezkerreko partean kokatzen den zain egitura bat, "
           },
           {
             "text": "sinu koronarioa",
@@ -2843,7 +2701,14 @@ export const w10: NotesBlock[] = [
             "text": ", eta bestetik zain sinu horretan bukatzen edo irekitzen den eta ezkerreko aurikulatik itzultzen den "
           },
           {
-            "text": "ezkerreko aurikularen zain laprana",
+            "text": "ezkerreko aurikularen zain",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "laprana",
             "b": true
           },
           {
@@ -2894,7 +2759,14 @@ export const w10: NotesBlock[] = [
             "text": "zainetara eta hauek "
           },
           {
-            "text": "garrantzi handiagoa irabazten dute",
+            "text": "garrantzi",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "handiagoa irabazten dute",
             "i": true
           },
           {
@@ -2917,11 +2789,11 @@ export const w10: NotesBlock[] = [
             "text": "Hasierako aurikularen eta zain sinuaren arteko komunikazioa "
           },
           {
-            "text": "eskuinalderantz ",
+            "text": "eskumalderantz ",
             "b": true
           },
           {
-            "text": "mugitzen da (Aurikula komunaren eskuineko aldea, hau da, hasierako eskuineko aurikula), zain-sinua aurikula komunaren atzeko paretarekin komunikatzen delarik. "
+            "text": "mugitzen da (Aurikula komunaren eskuineko aldea, hau da hasierako eskuineko aurikula), zain-sinua aurikula komunaren atzeko paretarekin komunikatzen delarik. "
           }
         ]
       },
@@ -2929,7 +2801,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.4/p8/s4",
         "parts": [
           {
-            "text": "Batez ere garatu den zain sinuaren atala da eskuineko luzapena, enbrioiaren odola aunitz iristen delako."
+            "text": "Batez ere garatu den zain sinuaren atala da eskuineko luzapena, odola aunitz iristen delakoz."
           }
         ]
       }
@@ -2958,7 +2830,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.4/p9/s2",
         "parts": [
           {
-            "text": "Aurikula komunaren aurreko ikuspegia.",
+            "text": "Aurikularena",
             "i": true
           }
         ]
@@ -3004,24 +2876,24 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.4/p10/s3",
         "parts": [
           {
-            "text": "Sarrera zuloaren inguruan (sinu aurikularraren ertzeetan) tolesturak agertzen dira, eta hortik sortuko dira "
+            "text": "Sarrera zuloaren inguruan (ertzeetan) tolesturak agertu, hortik sortuko dira "
           },
           {
-            "text": "bi zain-balbula/balbula benosa: eskuineko balbula benosoa ",
-            "b": true
-          },
-          {
-            "text": "eta "
-          },
-          {
-            "text": "ezkerreko balbula",
+            "text": "bi zain-balbula/balbula",
             "b": true
           },
           {
             "text": " "
           },
           {
-            "text": "benosoa (edo zain balbula). ",
+            "text": "benosa, eskuineko balbula benosoa ",
+            "b": true
+          },
+          {
+            "text": "eta "
+          },
+          {
+            "text": "ezkerreko balbula benosoa (edo zain balbula). ",
             "b": true
           }
         ]
@@ -3037,7 +2909,7 @@ export const w10: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "goikaldean (alde kranealan) fusionatuko dira septum trenkadarekin, trenkada bat sortuz plano sagitalean: "
+            "text": "goi atzekaldean (alde kranealan) fusionatuko dira septum trenkadarekin, trenkada bat sortuz plano sagitalean: "
           },
           {
             "text": "Septum Spurium",
@@ -3045,8 +2917,11 @@ export const w10: NotesBlock[] = [
             "i": true
           },
           {
-            "text": "/trenkada spuriuma. ",
+            "text": "/trenkada spuriuma.",
             "b": true
+          },
+          {
+            "text": " "
           }
         ]
       },
@@ -3073,14 +2948,14 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.4/p11/s1",
         "parts": [
           {
-            "text": "Horrez gain, garapena aurrera doan heinean, honako trenkada hau (septum spurium), ezkerreko zain balbularekin batera, momentu horretan garatzen ari den bi aurikula artean agertzen den aurikularteko trenkadarekin fusionatuko da, trenkada hori "
+            "text": "Horrez gain, garapena aurrera doan heinean, honako trenkada hau, ezkerreko zain balbularekin batera, momentu horretan garatzen ari den bi aurikula artean agertzen den aurikularteko trenkadarekin fusionatuko da, trenkada hori "
           },
           {
-            "text": "Septum secundum",
+            "text": "Septum secundum ",
             "b": true
           },
           {
-            "text": " da zehazki. "
+            "text": "da zehazki. "
           }
         ]
       },
@@ -3097,10 +2972,15 @@ export const w10: NotesBlock[] = [
         "parts": [
           {
             "text": "Septum Primuma",
+            "b": true,
             "i": true
           },
           {
-            "text": " momentu honetan agertu den "
+            "text": " ",
+            "i": true
+          },
+          {
+            "text": "momentu honetan agertu den "
           },
           {
             "text": "aurikula arteko trenkada ",
@@ -3122,21 +3002,36 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.4/p12/s1",
         "parts": [
           {
-            "text": "Eskuineko zain balbula bere goiko aldean desagertu egiten da, baina bere beheko aldetik bi balbula berri agertzen dira: "
+            "text": "Bukatzeko, hasierako eskuineko aurikularen atzealdean kokatuta zegoen "
           },
           {
-            "text": "beheko bena kabaren balbula",
+            "text": "zain sinua",
             "b": true
           },
           {
-            "text": " eta "
+            "text": ", garapenean, hasierako eskuineko aurikularen atzeko paretan poliki-poliki inkorporatuko da. "
+          }
+        ]
+      },
+      {
+        "id": "w10/3.4/p12/s2",
+        "parts": [
+          {
+            "text": "Momentu honetan, inkorporazioa gertatu ondoren, hasierako eskuineko aurikula, "
           },
           {
-            "text": "sinu koronarioaren balbula",
+            "text": "behin-betiko eskuineko",
             "b": true
           },
           {
-            "text": ", egitura hauek sarrera zuloetan dituzten balbulak."
+            "text": " "
+          },
+          {
+            "text": "aurikula ",
+            "b": true
+          },
+          {
+            "text": "izatera pasatzen da."
           }
         ]
       }
@@ -3151,44 +3046,7 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.4/p13/s1",
         "parts": [
           {
-            "text": "Bukatzeko, hasierako eskuineko aurikularen atzealdean kokatuta zegoen "
-          },
-          {
-            "text": "zain sinua",
-            "b": true
-          },
-          {
-            "text": ", garapenean, hasierako eskuineko aurikularen atzeko paretan poliki-poliki inkorporatuko da. "
-          }
-        ]
-      },
-      {
-        "id": "w10/3.4/p13/s2",
-        "parts": [
-          {
-            "text": "Momentu honetan, inkorporazioa gertatu ondoren, hasierako eskuineko aurikula, "
-          },
-          {
-            "text": "behin-betiko eskuineko aurikula ",
-            "b": true
-          },
-          {
-            "text": "izatera pasatzen da."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "3.4",
-    "id": "w10/3.4/p14",
-    "sentences": [
-      {
-        "id": "w10/3.4/p14/s1",
-        "parts": [
-          {
-            "text": "Egitura honetan (eratzen ari den eskuineko aurikulan), "
+            "text": "Egitura honetan, "
           },
           {
             "text": "bi ",
@@ -3200,7 +3058,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p14/s2",
+        "id": "w10/3.4/p13/s2",
         "parts": [
           {
             "text": "Alde batetik, "
@@ -3215,7 +3073,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p14/s3",
+        "id": "w10/3.4/p13/s3",
         "parts": [
           {
             "text": "Atal liso hau garapenean gero eta handiagoa egiten da eta honek sortuko du behin-betiko eskuin aurikularen ia ia atzeko pareta osoa. "
@@ -3223,7 +3081,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p14/s4",
+        "id": "w10/3.4/p13/s4",
         "parts": [
           {
             "text": "Bertan, garapena gertatu eta gero, kokatzen dira enbrioiaren zainak. "
@@ -3231,7 +3089,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p14/s5",
+        "id": "w10/3.4/p13/s5",
         "parts": [
           {
             "text": "Zehazki, atal liso honetan bukatzen dira eskuineko aurikulara iristen diren enbrioiaren zainak, goitik "
@@ -3250,7 +3108,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p14/s6",
+        "id": "w10/3.4/p13/s6",
         "parts": [
           {
             "text": "Halaber, bihotzeko atzeko paretaren eskuineko atal liso horretan bukatzen da "
@@ -3265,17 +3123,17 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p14/s7",
+        "id": "w10/3.4/p13/s7",
         "parts": [
           {
             "text": "Beste aldetik, behin-betiko eskuineko aurikularrean "
           },
           {
-            "text": "atal trabekulatua",
+            "text": "atal trabekulatua ",
             "b": true
           },
           {
-            "text": " dago, hasierako eskuineko aurikulatik sortzen dena, behin-betiko eskuineko aurikularen beste atala osatzen du, "
+            "text": "dago, hasierako eskuineko aurikulatik sortzen dena, behin-betiko eskuineko aurikularen beste atala osatzen du, "
           },
           {
             "text": "belarritxo ",
@@ -3298,10 +3156,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "p",
     "section": "3.4",
-    "id": "w10/3.4/p15",
+    "id": "w10/3.4/p14",
     "sentences": [
       {
-        "id": "w10/3.4/p15/s1",
+        "id": "w10/3.4/p14/s1",
         "parts": [
           {
             "text": "Beraz, eskuineko aurikulak "
@@ -3328,18 +3186,47 @@ export const w10: NotesBlock[] = [
             "text": " "
           },
           {
-            "text": "trabekulatua (gainerako pareta ",
+            "text": "trabekulatua (gainerako pareta)",
             "b": true
           },
           {
-            "text": "non muskuluak garatzen diren"
+            "text": ": aurreko pareta muskularra, belarritxoa… (hasierako eskuineko aurikulatik sortzen dira)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "3.4",
+    "id": "w10/3.4/p15",
+    "sentences": [
+      {
+        "id": "w10/3.4/p15/s1",
+        "parts": [
+          {
+            "text": "Bi atal horien artean gandortxo bat egoten da, "
           },
           {
-            "text": ")",
+            "text": "gandor terminala/ bukaera gangarra ",
             "b": true
           },
           {
-            "text": ": aurreko pareta, belarritxoa… (hasierako eskuineko aurikulatik sortzen dira)."
+            "text": "(atal liso eta atal trabekulatuaren artean) eta horren goiko aldean bihotz eroapen sistemako "
+          },
+          {
+            "text": "nodulu",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "sinusala ",
+            "b": true
+          },
+          {
+            "text": "dago, bihotz eroapen sistemako egitura hori non nerbio kinadak sortzen diren, bihotzeko markapasoa dena."
           }
         ]
       }
@@ -3354,41 +3241,12 @@ export const w10: NotesBlock[] = [
         "id": "w10/3.4/p16/s1",
         "parts": [
           {
-            "text": "Bi atal horien artean gandortxo (gandor muskularra da) bat egoten da, "
-          },
-          {
-            "text": "gandor terminala",
-            "b": true
-          },
-          {
-            "text": " (atal liso eta atal trabekulatuaren artean) eta horren goiko aldean bihotz eroapen sistemako "
-          },
-          {
-            "text": "nodulu sinusala ",
-            "b": true
-          },
-          {
-            "text": "dago, bihotz eroapen sistemako egitura hori non nerbio kinadak sortzen diren, bihotzeko markapasoa dena."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "3.4",
-    "id": "w10/3.4/p17",
-    "sentences": [
-      {
-        "id": "w10/3.4/p17/s1",
-        "parts": [
-          {
             "text": "Bukatzeko, hasieran zain sinuaren eta aurikula komunaren artean bi zain balbula daude eta hauetan aldaketak emango dira. "
           }
         ]
       },
       {
-        "id": "w10/3.4/p17/s2",
+        "id": "w10/3.4/p16/s2",
         "parts": [
           {
             "text": "Ezkerreko balbula garatzen ari den aurikula arteko trenkadarekin fusionatuko da. "
@@ -3396,7 +3254,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p17/s3",
+        "id": "w10/3.4/p16/s3",
         "parts": [
           {
             "text": "Aldiz, eskuineko zain balbula, "
@@ -3422,10 +3280,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "3.4",
-    "id": "w10/3.4/p18",
+    "id": "w10/3.4/p17",
     "sentences": [
       {
-        "id": "w10/3.4/p18/s1",
+        "id": "w10/3.4/p17/s1",
         "parts": [
           {
             "text": "● Beheko bena kabaren zain balbula"
@@ -3437,28 +3295,13 @@ export const w10: NotesBlock[] = [
   {
     "kind": "li",
     "section": "3.4",
-    "id": "w10/3.4/p19",
+    "id": "w10/3.4/p18",
     "sentences": [
       {
-        "id": "w10/3.4/p19/s1",
+        "id": "w10/3.4/p18/s1",
         "parts": [
           {
-            "text": "● Sinu koronarioaren zain balbula"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "3.4",
-    "id": "w10/3.4/p20",
-    "sentences": [
-      {
-        "id": "w10/3.4/p20/s1",
-        "parts": [
-          {
-            "text": "Biak "
+            "text": "● Sinu koronarioaren zain balbula Biak "
           },
           {
             "text": "eskuineko zain balbularen ",
@@ -3474,10 +3317,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "p",
     "section": "3.4",
-    "id": "w10/3.4/p21",
+    "id": "w10/3.4/p19",
     "sentences": [
       {
-        "id": "w10/3.4/p21/s1",
+        "id": "w10/3.4/p19/s1",
         "parts": [
           {
             "text": "Irudiaren eskubiko marrazkian ikus daitezke eskubiko aurikularen paretan dauden bi atalak. "
@@ -3485,7 +3328,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p21/s2",
+        "id": "w10/3.4/p19/s2",
         "parts": [
           {
             "text": "Zain sinua inkorporatu den zatian, zati urdinean "
@@ -3500,7 +3343,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p21/s3",
+        "id": "w10/3.4/p19/s3",
         "parts": [
           {
             "text": "Gainerako atala atal "
@@ -3513,7 +3356,7 @@ export const w10: NotesBlock[] = [
             "text": "izango da eta "
           },
           {
-            "text": "muskuluak ",
+            "text": "muskuluak (muskulu peptinatiak) ",
             "b": true
           },
           {
@@ -3522,7 +3365,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p21/s4",
+        "id": "w10/3.4/p19/s4",
         "parts": [
           {
             "text": "Azken hau bihotzaren atal aurikularretik sortzen da. "
@@ -3530,7 +3373,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p21/s5",
+        "id": "w10/3.4/p19/s5",
         "parts": [
           {
             "text": "Atal urdina (lisua), aldiz, zain sinutik. "
@@ -3538,13 +3381,13 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p21/s6",
+        "id": "w10/3.4/p19/s6",
         "parts": [
           {
             "text": "Atal urdinaren eta atal trabekulatuaren artean "
           },
           {
-            "text": "gandor terminala ",
+            "text": "gandor terminala / bukaera gangarra ",
             "b": true
           },
           {
@@ -3557,10 +3400,10 @@ export const w10: NotesBlock[] = [
   {
     "kind": "p",
     "section": "3.4",
-    "id": "w10/3.4/p22",
+    "id": "w10/3.4/p20",
     "sentences": [
       {
-        "id": "w10/3.4/p22/s1",
+        "id": "w10/3.4/p20/s1",
         "parts": [
           {
             "text": "Behin betiko eskuineko aurikularen atzeko pareta lisoa da sortu delakoz zain sinuaren eskuineko luzapenetik, gainerako pareta sortzen da bihotz lakioaren atal aurikularretik, konkretuki kasu honetan eskuineko hasierako aurikulatik. "
@@ -3568,7 +3411,7 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p22/s2",
+        "id": "w10/3.4/p20/s2",
         "parts": [
           {
             "text": "Bertan muskulo finak (pektineoak) garatu. "
@@ -3576,13 +3419,13 @@ export const w10: NotesBlock[] = [
         ]
       },
       {
-        "id": "w10/3.4/p22/s3",
+        "id": "w10/3.4/p20/s3",
         "parts": [
           {
             "text": "Bi atal hauen artean (Eskuineko aurikularen atal liso eta trabekulatuen artean muskuloekin) egoten da gandor bat, gandor muskularra, "
           },
           {
-            "text": "gandor terminal",
+            "text": "gandor terminal / bukaera gangarra",
             "b": true
           },
           {
@@ -3593,22 +3436,15 @@ export const w10: NotesBlock[] = [
     ]
   },
   {
-    "kind": "p",
+    "kind": "caption",
     "section": "3.4",
-    "id": "w10/3.4/p23",
+    "id": "w10/3.4/p21",
     "sentences": [
       {
-        "id": "w10/3.4/p23/s1",
+        "id": "w10/3.4/p21/s1",
         "parts": [
           {
-            "text": "*Goiko eta beheko bena kabak (gorputzeko odol-hodi garrantzitsuenak) iristen dira eskuineko",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "aurikularen atal lisora.",
+            "text": "*Goiko eta beheko bena kabak (gorputzeko odol-hodi garrantzitsuenak) iristen dira eskuineko aurikularen atal lisora.",
             "i": true
           }
         ]

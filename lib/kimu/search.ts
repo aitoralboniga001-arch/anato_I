@@ -10,7 +10,7 @@ import { firstSentence } from '@/content/generate';
 import { structures, weeks } from '@/content/registry';
 import { formationOf } from '@/content/formation';
 import type { KimuFrom, KimuHere, KimuTarget } from './types';
-import { match, queryTokens, tokens, topicIn, withoutTopic } from './text';
+import { match, queryTokens, spell, tokens, topicIn, withoutTopic } from './text';
 
 interface Doc {
   kind: KimuTarget['kind'];
@@ -222,6 +222,9 @@ const index = () => (built ??= build());
 const FORMATION = /(noiz|nola|sort|erak|forma|cuando|cuándo|como|cómo|when|how|aparec|surge|empie|hasi)/i;
 export const isFormationQuestion = (question: string) => FORMATION.test(question);
 
+/** Every word the atlas uses, with its idf (for spelling a misspelt question). */
+export const vocabulary = () => index().idf;
+
 /** Ranks where the simulator explains what the student asked about, best first. */
 export function search(raw: string, limit = 4, week?: number): Hit[] {
   const { docs, idf } = index();
@@ -229,7 +232,7 @@ export function search(raw: string, limit = 4, week?: number): Hit[] {
   const asked = topicIn(raw);
   const question = withoutTopic(raw);
   const prefer = asked ?? week;
-  const q = queryTokens(question);
+  const q = queryTokens(question).map((alts) => spell(alts, idf));
   if (!q.length) return [];
   const qFlat = q.map((alts) => alts[0]).join(' ');
   const wantsFormation = isFormationQuestion(question);

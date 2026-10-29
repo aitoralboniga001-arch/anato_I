@@ -228,7 +228,7 @@ const week: WeekDef = {
       beats: [
         {
           at: 0,
-          notes: ['w10/1/p9/s1-s2'],
+          notes: ['w10/1/p8/s4-s5'],
           idea: 'Diskoa laua da oraindik; 3. aste bukaeran bi tolespen: zefalokaudala eta zeharkakoa.',
           recall: ['plaka-kardiogenikoa', 'odol-irlatxoak'],
           exam: '3. aste bukaeran disko lauak bi tolespen egiten ditu: zefalokaudala eta zeharkakoa.',
@@ -239,7 +239,7 @@ const week: WeekDef = {
         },
         {
           at: 0.1,
-          notes: ['w10/1/p10/s1-s3'],
+          notes: ['w10/1/p9/s1-s3'],
           recall: ['mintz-bukofaringeoa', 'perikardio-barrunbea'],
           idea: 'Tolespen zefalokaudala (garun xixkuak hazten): plaka kardiogenikoa alde kaudalera, lepotik toraxera.',
           key: 'Bihotza buruaren aurrean sortzen da eta burua tolestean bularrera eramaten da.',
@@ -263,7 +263,7 @@ const week: WeekDef = {
         },
         {
           at: 0.32,
-          notes: ['w10/1/p11/s1-s2'],
+          notes: ['w10/1/p10/s1-s2'],
           idea: 'Zeharkako tolespena (somiten hazkuntza): alboko aldeak hurbildu eta bi endokardio hodiak fusionatzen dira.',
           key: 'Bihotza bi hodi alboetatik erdira ekarri eta bat eginda sortzen da.',
           exam: 'Zeharkako tolespenaren ondorioz (somiten hazkuntzagatik), ezkerreko eta eskuineko endokardio hodiak hurbildu eta fusionatzen dira: endokardio hodi bakarra.',
@@ -273,7 +273,7 @@ const week: WeekDef = {
         },
         {
           at: 0.47,
-          notes: ['w10/1/p11/s3-s4', 'w10/1/p12/s1', 'w10/1/p13/s1'],
+          notes: ['w10/1/p11/s1-s2', 'w10/1/p12/s1', 'w10/1/p13/s1'],
           idea: 'Errai orria hodiaren inguruan: orri epimiokardikoa → miokardioa eta epikardioa.',
           exam: 'Hodiaren inguruko errai orritik orri epimiokardikoa sortzen da: hortik miokardioa (geruza muskularra) eta epikardioa (errai perikardioa).',
           text: 'Hodi horren inguruan alboko mesodermoaren errai orria kokatzen da, eta errai orri horretatik orri epimiokardikoa sortzen da. Hemendik bihotzeko bi zelula geruza sortzen dira: miokardio geruza (geruza muskularra) eta epikardio geruza edo errai perikardioa, miokardioaren inguruan.',
@@ -324,7 +324,7 @@ const week: WeekDef = {
         },
         {
           at: 0.82,
-          notes: ['w10/1/p19/s1-s3', 'w10/1/p20/s1'],
+          notes: ['w10/1/p19/s1-s2', 'w10/1/p21/s2'],
           recall: ['aorta-dortsalak'],
           idea: 'Notokordatik gertu, errai orritik: bi arteria dortsal (aorta dortsalak), atzekaldean; alde zefalikotik bihotz hodiaren atal zefalikoarekin kontaktuan.',
           exam: 'Arteria dortsalak enbrioiaren atzekaldean daude, eta alde zefalikotik bihotz hodiaren atal zefalikoarekin kontaktatzen dute.',

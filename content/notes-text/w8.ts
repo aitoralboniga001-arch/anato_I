@@ -11,11 +11,8 @@ export const w8: NotesBlock[] = [
         "id": "w8/intro/p1/s1",
         "parts": [
           {
-            "text": "8. GAIA: ENBRIOLOGIA ESPEZIFIKOA.",
+            "text": "8. GAIA: ENBRIOLOGIA ESPEZIFIKOA. ",
             "b": true
-          },
-          {
-            "text": " "
           }
         ]
       },
@@ -23,7 +20,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/intro/p1/s2",
         "parts": [
           {
-            "text": "HEZUR SISTEMA",
+            "text": "HEZUR",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "SISTEMA",
             "b": true
           }
         ]
@@ -106,7 +110,7 @@ export const w8: NotesBlock[] = [
     ]
   },
   {
-    "kind": "p",
+    "kind": "caption",
     "section": "1",
     "id": "w8/1/p4",
     "sentences": [
@@ -114,12 +118,27 @@ export const w8: NotesBlock[] = [
         "id": "w8/1/p4/s1",
         "parts": [
           {
-            "text": "Garapenean, mesodermo paraxiala segmentatu egiten da. "
+            "text": "Grisez dagoena ez du 2026/2027 kurtsoan aipatu"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "1",
+    "id": "w8/1/p5",
+    "sentences": [
+      {
+        "id": "w8/1/p5/s1",
+        "parts": [
+          {
+            "text": "Garapenean, mesodermo paraxiala (alde zefalikotik alde kaudalera hedatzen dena) segmentatu egiten da. "
           }
         ]
       },
       {
-        "id": "w8/1/p4/s2",
+        "id": "w8/1/p5/s2",
         "parts": [
           {
             "text": "Alde "
@@ -129,12 +148,12 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "somitomeroak agertzen dira (hauetatik mesenkima sortuko da). "
+            "text": "segmentazioa ez da osoa eta somitomeroak agertzen dira (hauetatik mesenkima sortuko da). "
           }
         ]
       },
       {
-        "id": "w8/1/p4/s3",
+        "id": "w8/1/p5/s3",
         "parts": [
           {
             "text": "Alde "
@@ -149,7 +168,7 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/1/p4/s4",
+        "id": "w8/1/p5/s4",
         "parts": [
           {
             "text": "Somitetan, zelulen garapenaren ondorioz zelula multzo ezberdinak agertzen dira: "
@@ -175,10 +194,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "p",
     "section": "1",
-    "id": "w8/1/p5",
+    "id": "w8/1/p6",
     "sentences": [
       {
-        "id": "w8/1/p5/s1",
+        "id": "w8/1/p6/s1",
         "parts": [
           {
             "text": "Esklerotoma",
@@ -188,7 +207,14 @@ export const w8: NotesBlock[] = [
             "text": " zelulak desberdintze prozesu baten bidez "
           },
           {
-            "text": "mesenkima ",
+            "text": "mesenkima (ehun konektibozko enbrioi",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "ehuna bat) ",
             "b": true
           },
           {
@@ -197,33 +223,18 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/1/p5/s2",
+        "id": "w8/1/p6/s2",
         "parts": [
           {
-            "text": "Mesenkima zelula hauek zelula mugikorrak direla esaten da, migratzen dutelako. "
+            "text": "Mesenkima zelula hauek zelula mugikorrak direla esaten <da, migratzen dutelako. "
           }
         ]
       },
       {
-        "id": "w8/1/p5/s3",
+        "id": "w8/1/p6/s3",
         "parts": [
           {
             "text": "Ehun hauetako zelulek bi bide ezberdin har ditzakete:"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "1",
-    "id": "w8/1/p6",
-    "sentences": [
-      {
-        "id": "w8/1/p6/s1",
-        "parts": [
-          {
-            "text": "● Erdialdera migratzea, hodi neurala eta notokorda inguratuz bizkar-hezurreko ornoak, bai sahietsak eratuz."
           }
         ]
       }
@@ -238,14 +249,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/1/p7/s1",
         "parts": [
           {
-            "text": "● Hezurraren eraketan parte hartzen duten zelula ezberdinak eratu dezakete, hala nola, fibroblastoak, kondroblastoak eta osteoblastoak"
+            "text": "● Erdialdera migratzea, hodi neurala eta notokorda inguratuz bizkar-hezurreko ornoak, bai sahiets hezurrak eratuz."
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "1",
     "id": "w8/1/p8",
     "sentences": [
@@ -253,8 +264,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/1/p8/s1",
         "parts": [
           {
-            "text": "ALBOKO MESODERMOKO PARETA ORRITIK",
-            "b": true
+            "text": "● Hezurraren eraketan parte hartzen duten zelula ezberdinak eratu dezakete, hala nola, fibroblastoak, kondroblastoak eta osteoblastoak ."
           }
         ]
       }
@@ -267,6 +277,22 @@ export const w8: NotesBlock[] = [
     "sentences": [
       {
         "id": "w8/1/p9/s1",
+        "parts": [
+          {
+            "text": "ALBOKO MESODERMOKO PARETA ORRITIK",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "1",
+    "id": "w8/1/p10",
+    "sentences": [
+      {
+        "id": "w8/1/p10/s1",
         "parts": [
           {
             "text": "Enbrioi barruko "
@@ -285,28 +311,13 @@ export const w8: NotesBlock[] = [
   {
     "kind": "li",
     "section": "1",
-    "id": "w8/1/p10",
-    "sentences": [
-      {
-        "id": "w8/1/p10/s1",
-        "parts": [
-          {
-            "text": "● Goiko eta beheko gorputz adarren hezurrak"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "1",
     "id": "w8/1/p11",
     "sentences": [
       {
         "id": "w8/1/p11/s1",
         "parts": [
           {
-            "text": "● Esternoia"
+            "text": "● Goiko eta beheko gorputz adarren hezurrak"
           }
         ]
       }
@@ -321,14 +332,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/1/p12/s1",
         "parts": [
           {
-            "text": "● Gerrialdeko hezurrak"
+            "text": "● Esternoia (Alboko mesodermo pareta honetara esklerotoma zelula batzuk iristen dira eratzeko adibidez kartilagoa eta bular hezurra)"
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "1",
     "id": "w8/1/p13",
     "sentences": [
@@ -336,8 +347,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/1/p13/s1",
         "parts": [
           {
-            "text": "GANDOR NEURALETATIK",
-            "b": true
+            "text": "● Gerrialdeko hezurrak"
           }
         ]
       }
@@ -352,35 +362,8 @@ export const w8: NotesBlock[] = [
         "id": "w8/1/p14/s1",
         "parts": [
           {
-            "text": "Enbrioiaren alde zefalikoan dauden gandor neuraletako zelula ektodermiko batzuek hezur desberdinen eraketan parte hartzen dute. "
-          }
-        ]
-      },
-      {
-        "id": "w8/1/p14/s2",
-        "parts": [
-          {
-            "text": "Hau da, zelula hauek alde zefalikorantz migratzen dute eta mesenmika eratzen da. "
-          }
-        ]
-      },
-      {
-        "id": "w8/1/p14/s3",
-        "parts": [
-          {
-            "text": "Alegia, burezurraren buru-ganga eta buru oinaldeko hezurren edo hezurren zatien eraketan parte hartzen dute. "
-          }
-        ]
-      },
-      {
-        "id": "w8/1/p14/s4",
-        "parts": [
-          {
-            "text": "Aurpegiaren eta neurokraneoaren hezurrak",
+            "text": "GANDOR NEURALETATIK",
             "b": true
-          },
-          {
-            "text": " eratzen dituzte, dermisa eta gongoil sentsorialen neuronekin batera."
           }
         ]
       }
@@ -395,14 +378,39 @@ export const w8: NotesBlock[] = [
         "id": "w8/1/p15/s1",
         "parts": [
           {
-            "text": "Irudi honen bidez ikus dezakegu errai kraneoaren atal bakoitza "
-          },
+            "text": "Enbrioiaren alde zefalikoan dauden gandor neuraletako zelula ektodermiko batzuek hezur desberdinen eraketan parte hartzen dute. "
+          }
+        ]
+      },
+      {
+        "id": "w8/1/p15/s2",
+        "parts": [
           {
-            "text": "zein motatako mesenkimatik",
-            "b": true
-          },
+            "text": "Hau da, zelula hauek alde zefalikorantz migratzen dute eta mesenmika eratzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w8/1/p15/s3",
+        "parts": [
           {
-            "text": " eratorria den:"
+            "text": "Aurreko aldeko hezurrak eta aurpegiko hezur guztiak eratu egiten dira mesenkima horretik. "
+          }
+        ]
+      },
+      {
+        "id": "w8/1/p15/s4",
+        "parts": [
+          {
+            "text": "Horrez gain, neurokraneoaren aurreko zatiaren hezurrak ere eratzen dituzte. "
+          }
+        ]
+      },
+      {
+        "id": "w8/1/p15/s5",
+        "parts": [
+          {
+            "text": "Alegia, burezurraren buru-ganga eta buru oinaldeko hezurren edo hezurren zatien eraketan parte hartzen dute."
           }
         ]
       }
@@ -417,7 +425,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/1/p16/s1",
         "parts": [
           {
-            "text": "ektodermo (gandor neuralen), mesodermo paraxial edo endodermo jatorrizkoa hain zuzen ere."
+            "text": "Irudi honen bidez ikus dezakegu errai kraneoaren atal bakoitza "
+          },
+          {
+            "text": "zein motatako mesenkimatik",
+            "b": true
+          },
+          {
+            "text": " eratorria den: ektodermo (gandor neuralen), mesodermo paraxial edo endodermo jatorrizkoa hain zuzen ere."
           }
         ]
       }
@@ -432,7 +447,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/2/p1/s1",
         "parts": [
           {
-            "text": "2. HEZURTZAPEN MOTAK",
+            "text": "2.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "HEZURTZAPEN MOTAK",
             "b": true
           }
         ]
@@ -448,7 +470,21 @@ export const w8: NotesBlock[] = [
         "id": "w8/2/p2/s1",
         "parts": [
           {
-            "text": "Orokorrean bi motatako hezurtzapen mota daude:"
+            "text": "Orokorrean bi motatako hezurtzapen mota daude: 1. "
+          },
+          {
+            "text": "Mintzeko hezurtzapena/mintzezko barrukoa: ",
+            "b": true
+          },
+          {
+            "text": "mesenkimatik "
+          },
+          {
+            "text": " osteoblastoak",
+            "b": true
+          },
+          {
+            "text": " sortuko dira eta horiek hezurtzapen zentroak eratuko dituzte (ehunak berehala hezurtuz, kartilago etapatik pasatu gabe)."
           }
         ]
       }
@@ -463,36 +499,6 @@ export const w8: NotesBlock[] = [
         "id": "w8/2/p3/s1",
         "parts": [
           {
-            "text": "1. "
-          },
-          {
-            "text": "Mintzeko hezurtzapena/mintzezko barrukoa: ",
-            "b": true
-          },
-          {
-            "text": "mesenkimatik hezurren mintzezko ereduak sortzen dira eta zuzenean mesenkima horietan, hezurtzapen zentroak agertzen dira. "
-          }
-        ]
-      },
-      {
-        "id": "w8/2/p3/s2",
-        "parts": [
-          {
-            "text": "Ondorioz, mintzezko hezurrezko eredu horrek zuzenean hezurtzen dira."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2",
-    "id": "w8/2/p4",
-    "sentences": [
-      {
-        "id": "w8/2/p4/s1",
-        "parts": [
-          {
             "text": "2. "
           },
           {
@@ -500,12 +506,12 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "Mesenkimatik hasiera bateran kartilago hialinoaren hezurren ereduak sortzen dira eta ondoren kartilago horiek hezurtuko dira. "
+            "text": "Mesenkimatik hasiera bateran kartilago hialinoaren hezurren ereduak sortzen dira eta ondoren kartilago horiek hezurtuko dira 2. fase batean. "
           }
         ]
       },
       {
-        "id": "w8/2/p4/s2",
+        "id": "w8/2/p3/s2",
         "parts": [
           {
             "text": "Mesenkimatik desberdindutako zelula kondroblastoak sortutako hezur eredu hauek kartilaginotsuak dira hasieran, eta beranduago, 2. fase batean eredu hauek hezurtzapen zentro ezberdinei esker hezurtzen dira."
@@ -577,7 +583,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/3/p3/s3",
         "parts": [
           {
-            "text": "■ Mintzezko zatia / buru-ganga osatzen duten hezur zatiak (sabaiakoak eta albokoak). "
+            "text": "○ Mintzezko zatia / buru-ganga osatzen duten hezur zatiak (sabaiakoak eta albokoak). "
           }
         ]
       },
@@ -585,7 +591,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/3/p3/s4",
         "parts": [
           {
-            "text": "■ Kondrokraneoa = zati kartilagenotsua / burezurraren oinaldean kokatutako hezur multzoa."
+            "text": "○ Kondrokraneoa = zati kartilagenotsua / burezurraren oinaldean kokatutako hezur multzoa."
           }
         ]
       }
@@ -600,7 +606,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/3/p4/s1",
         "parts": [
           {
-            "text": "● "
+            "text": "●  "
           },
           {
             "text": "Errai kraneoa: ",
@@ -639,19 +645,12 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1/p2/s1",
         "parts": [
           {
-            "text": "Neurokraneo honetan bi zati guztiz ezberdin bereizten dira:"
+            "text": "Neurokraneo honetan bi zati guztiz ezberdin bereizten dira. "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "3.1",
-    "id": "w8/3.1/p3",
-    "sentences": [
+      },
       {
-        "id": "w8/3.1/p3/s1",
+        "id": "w8/3.1/p2/s2",
         "parts": [
           {
             "text": "*Neurokraneoa kutxa antzeko egitura bat da. "
@@ -659,7 +658,7 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/3.1/p3/s2",
+        "id": "w8/3.1/p2/s3",
         "parts": [
           {
             "text": "Kutxa horretan, goialdean eta alboetan dauden hezurrak "
@@ -669,10 +668,10 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " dira eta zoruko hezurrak edo hezur zatiak aldiz, "
+            "text": " dira eta zoruko/oinaldeko hezurrak edo hezur zatiak aldiz, "
           },
           {
-            "text": "kondokraneokoak",
+            "text": "kondokraneokoak/zati kartilaginotsua",
             "b": true
           },
           {
@@ -730,7 +729,7 @@ export const w8: NotesBlock[] = [
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "3.1.1",
     "id": "w8/3.1.1/p3",
     "sentences": [
@@ -738,14 +737,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.1/p3/s1",
         "parts": [
           {
-            "text": "○ 2 hezur frontal (kopeta hezur)"
+            "text": "● 2 hezur frontal (kopeta hezur)"
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "3.1.1",
     "id": "w8/3.1.1/p4",
     "sentences": [
@@ -753,14 +752,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.1/p4/s1",
         "parts": [
           {
-            "text": "○ 2 hezur parietal (pareta hezurra)"
+            "text": "● 2 hezur parietal (pareta hezur)"
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "3.1.1",
     "id": "w8/3.1.1/p5",
     "sentences": [
@@ -768,14 +767,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.1/p5/s1",
         "parts": [
           {
-            "text": "○ Hezur okzipitalaren ezkatak (garondoa)"
+            "text": "● Hezur okzipitalaren ezkata (garondo hezurra)"
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "3.1.1",
     "id": "w8/3.1.1/p6",
     "sentences": [
@@ -783,14 +782,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.1/p6/s1",
         "parts": [
           {
-            "text": "○ Loki hezurraren ezkata"
+            "text": "● Loki hezurraren ezkata"
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "caption",
     "section": "3.1.1",
     "id": "w8/3.1.1/p7",
     "sentences": [
@@ -798,28 +797,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.1/p7/s1",
         "parts": [
           {
-            "text": "Jaioberri",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "baten",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "buru-ganga",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "goikaldetik eta eskubiko aldetik ikusita.",
+            "text": "Jaioberri baten buru-ganga goialdetik eta eskubiko aldetik ikusita.",
             "i": true
           }
         ]
@@ -845,7 +823,7 @@ export const w8: NotesBlock[] = [
             "text": " eta "
           },
           {
-            "text": "Fontanelak",
+            "text": "Fontanelak:",
             "b": true
           }
         ]
@@ -861,7 +839,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.1/p9/s1",
         "parts": [
           {
-            "text": "- "
+            "text": "● "
           },
           {
             "text": "Joskurak",
@@ -892,7 +870,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.1/p10/s1",
         "parts": [
           {
-            "text": "- "
+            "text": "● "
           },
           {
             "text": "Fontanelak/fontikuluak: ",
@@ -914,19 +892,21 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.1/p11/s1",
         "parts": [
           {
-            "text": "Ikuspuntuaren arabera lau fontanela desberdin deskribatzen dira: Burezurra "
+            "text": "Ikuspuntuaren arabera "
           },
           {
-            "text": "goitik",
-            "b": true,
-            "i": true
+            "text": "lau fontanela",
+            "b": true
+          },
+          {
+            "text": " desberdin deskribatzen dira:"
           }
         ]
       }
     ]
   },
   {
-    "kind": "caption",
+    "kind": "li",
     "section": "3.1.1",
     "id": "w8/3.1.1/p12",
     "sentences": [
@@ -934,7 +914,29 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.1/p12/s1",
         "parts": [
           {
-            "text": "ikusita:"
+            "text": "● Burezurra "
+          },
+          {
+            "text": "goitik ",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": "ikusita: ○ "
+          },
+          {
+            "text": "Aurreko fontanela edo Bregma:",
+            "b": true
+          },
+          {
+            "text": " bi hezur frontal eta bi parietalen artean (18. hilabetean ixten da) ○ "
+          },
+          {
+            "text": "Atzeko fontanela edo Lambda: ",
+            "b": true
+          },
+          {
+            "text": "bi hezur parietalen eta hezur okzipitalaren ezkataren artean (1-2. hilabetean ixten da)"
           }
         ]
       }
@@ -949,81 +951,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.1/p13/s1",
         "parts": [
           {
-            "text": "● "
-          },
-          {
-            "text": "Aurreko fontanela edo Bregma :",
-            "b": true
-          },
-          {
-            "text": " bi hezur frontal eta bi"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "caption",
-    "section": "3.1.1",
-    "id": "w8/3.1.1/p14",
-    "sentences": [
-      {
-        "id": "w8/3.1.1/p14/s1",
-        "parts": [
-          {
-            "text": "parietalen artean (18. hilabetean ixten da)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "3.1.1",
-    "id": "w8/3.1.1/p15",
-    "sentences": [
-      {
-        "id": "w8/3.1.1/p15/s1",
-        "parts": [
-          {
-            "text": "● "
-          },
-          {
-            "text": "Atzeko fontanela edo Lambda: ",
-            "b": true
-          },
-          {
-            "text": "bi hezur parietalen eta hezur"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "caption",
-    "section": "3.1.1",
-    "id": "w8/3.1.1/p16",
-    "sentences": [
-      {
-        "id": "w8/3.1.1/p16/s1",
-        "parts": [
-          {
-            "text": "okzipitalaren ezkataren artean (1-2. hilabetean ixten da)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "3.1.1",
-    "id": "w8/3.1.1/p17",
-    "sentences": [
-      {
-        "id": "w8/3.1.1/p17/s1",
-        "parts": [
-          {
-            "text": "Neurokraneoa "
+            "text": "● Neurokraneoa "
           },
           {
             "text": "albotik ",
@@ -1031,22 +959,7 @@ export const w8: NotesBlock[] = [
             "i": true
           },
           {
-            "text": "ikusita:"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "3.1.1",
-    "id": "w8/3.1.1/p18",
-    "sentences": [
-      {
-        "id": "w8/3.1.1/p18/s1",
-        "parts": [
-          {
-            "text": "● "
+            "text": "ikusita: fontanela hauek bilateralak dira; izan ere, burezurraren bi aldeetan kokatzen dira ○ "
           },
           {
             "text": "Aurre-alboko fontanela ",
@@ -1058,40 +971,27 @@ export const w8: NotesBlock[] = [
           {
             "text": "esfenoidala (esfenoide).",
             "b": true
+          },
+          {
+            "text": " "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "3.1.1",
-    "id": "w8/3.1.1/p19",
-    "sentences": [
+      },
       {
-        "id": "w8/3.1.1/p19/s1",
+        "id": "w8/3.1.1/p13/s2",
         "parts": [
           {
-            "text": "● "
+            "text": "○ "
           },
           {
             "text": "Atze-alboko fontanela ",
             "b": true
           },
           {
-            "text": "edo fontanela tenporala."
+            "text": "edo "
           },
           {
-            "text": " ",
-            "b": true
-          }
-        ]
-      },
-      {
-        "id": "w8/3.1.1/p19/s2",
-        "parts": [
-          {
-            "text": "(mastoideoa)",
+            "text": "mastoide fontikulua",
             "b": true
           }
         ]
@@ -1099,20 +999,12 @@ export const w8: NotesBlock[] = [
     ]
   },
   {
-    "kind": "caption",
+    "kind": "p",
     "section": "3.1.1",
-    "id": "w8/3.1.1/p20",
+    "id": "w8/3.1.1/p14",
     "sentences": [
       {
-        "id": "w8/3.1.1/p20/s1",
-        "parts": [
-          {
-            "text": "Bi fontanela hauek bilateralak dira; izan ere, burezurraren bi aldeetan kokatzen dira. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.1.1/p20/s2",
+        "id": "w8/3.1.1/p14/s1",
         "parts": [
           {
             "text": "Joskurak eta fontanelak neurokraneoaren barnean entzefaloaren "
@@ -1127,7 +1019,7 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/3.1.1/p20/s3",
+        "id": "w8/3.1.1/p14/s2",
         "parts": [
           {
             "text": "Gainera, erditzean fetuaren zatirik handiena neurokraneoa izanik, "
@@ -1146,26 +1038,26 @@ export const w8: NotesBlock[] = [
   {
     "kind": "p",
     "section": "3.1.1",
-    "id": "w8/3.1.1/p21",
+    "id": "w8/3.1.1/p15",
     "sentences": [
       {
-        "id": "w8/3.1.1/p21/s1",
+        "id": "w8/3.1.1/p15/s1",
         "parts": [
           {
-            "text": "Horregatik, jaiotza ondoren, joskurak zabalik mantentzen dira entzefaloa hazteko aukera izan dezan, eta behin bere tamaina egokia hartzen duenean, itxi egiten dira (aurrekoa beranduago -18 hilabetean-, atzekoa lehenago- 2. hilabetean- ). "
+            "text": "Horregatik, jaiotzaren ondoren, joskurak zabalik mantentzen dira entzefaloa hazteko aukera izan dezan, eta bere tamaina egokia hartzen duenean, ixten dira (atzekoa lehenago, 2. hilabetean eta aurrekoa 18.hilabetean). "
           }
         ]
       },
       {
-        "id": "w8/3.1.1/p21/s2",
+        "id": "w8/3.1.1/p15/s2",
         "parts": [
           {
-            "text": "Halere, batzuk helduaro arte za balik mantentzen dira eta ondoren poliki-poliki ixten doaz. "
+            "text": "Hala ere, batzuk helduarora arte zabalik mantentzen dira eta poliki-poliki ixten doaz. "
           }
         ]
       },
       {
-        "id": "w8/3.1.1/p21/s3",
+        "id": "w8/3.1.1/p15/s3",
         "parts": [
           {
             "text": "Fontanelak joskurak baino lehenago ixten dira."
@@ -1188,7 +1080,7 @@ export const w8: NotesBlock[] = [
             "i": true
           },
           {
-            "text": "(Kolorez, kondrokraneoan bereizten diren kartilago ezberdinak)",
+            "text": "(Kolorez, kondrokraneoaren kartilago ezberdinak)",
             "i": true
           }
         ]
@@ -1215,18 +1107,11 @@ export const w8: NotesBlock[] = [
             "text": "Oinaldean dauden hezur zati hauek "
           },
           {
-            "text": "hezurtzapen",
+            "text": "hezurtzapen endokondralaren ",
             "b": true
           },
           {
-            "text": " "
-          },
-          {
-            "text": "endokondralaren ",
-            "b": true
-          },
-          {
-            "text": "bidez sortzen dira; hau da, mesenkimatik sortutako kartilagoatik eratutako hezurrak dira."
+            "text": "bidez sortzen dira; hau da, mesenkimatik sortutako kartilagotik eratutako hezurrak dira."
           }
         ]
       }
@@ -1241,7 +1126,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.2/p3/s1",
         "parts": [
           {
-            "text": "(Irudi hau ikusteko, buruganga moztu eta neurokraneoaren oinarria ikusten ari gara barrualdetik goiko ikuspegitik.)"
+            "text": "(Irudi hau ikusteko, buru ganga moztu eta neurokraneoaren oinarria ikusten ari gara barrualdetik, goiko ikuspegitik.)"
           }
         ]
       }
@@ -1256,30 +1141,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.2/p4/s1",
         "parts": [
           {
-            "text": "Oinalde horretan dauden hezur edo hezur zatiak bi motatako kartilago plaketatik sortzen dira."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "caption",
-    "section": "3.1.2",
-    "id": "w8/3.1.2/p5",
-    "sentences": [
-      {
-        "id": "w8/3.1.2/p5/s1",
-        "parts": [
-          {
-            "text": "Kondrokraneoa goitik ikusita (ikuspegi",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "endokraneala.)",
-            "i": true
+            "text": "Kondrokraneoaren eraketan 2 motatako plakak bereizi:"
           }
         ]
       }
@@ -1288,56 +1150,37 @@ export const w8: NotesBlock[] = [
   {
     "kind": "li",
     "section": "3.1.2",
-    "id": "w8/3.1.2/p6",
+    "id": "w8/3.1.2/p5",
     "sentences": [
       {
-        "id": "w8/3.1.2/p6/s1",
+        "id": "w8/3.1.2/p5/s1",
         "parts": [
           {
             "text": "● "
           },
           {
-            "text": "Erdiko plaka kartilaginotsua: ",
+            "text": "Erdiko plaka kartilaginotsua:",
             "b": true
           },
           {
-            "text": "(Atzetik aurrera eratua)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "3.1.2",
-    "id": "w8/3.1.2/p7",
-    "sentences": [
-      {
-        "id": "w8/3.1.2/p7/s1",
-        "parts": [
-          {
-            "text": "Atzealedean, hiru somita okzipitalen esklerotomak eta haietatik sortutako mesenkima dago. "
+            "text": "Atzetik aurrera eratua Atzekaldean, hiru somita okzipitalen esklerotomak eta haietatik sortutako mesenkima dago. "
           }
         ]
       },
       {
-        "id": "w8/3.1.2/p7/s2",
+        "id": "w8/3.1.2/p5/s2",
         "parts": [
           {
-            "text": "Mesenkima honen aurrean:"
+            "text": "Mesenkima honen aurrean. "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "3.1.2",
-    "id": "w8/3.1.2/p8",
-    "sentences": [
+      },
       {
-        "id": "w8/3.1.2/p8/s1",
+        "id": "w8/3.1.2/p5/s3",
         "parts": [
+          {
+            "text": "Agertzen diren kartilago motak: ○ "
+          },
           {
             "text": "Kartilago parakordalak (atzekaldean)",
             "b": true
@@ -1348,7 +1191,7 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/3.1.2/p8/s2",
+        "id": "w8/3.1.2/p5/s4",
         "parts": [
           {
             "text": "Bi dira: eskuineko bat eta ezkerreko bat. "
@@ -1356,32 +1199,25 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/3.1.2/p8/s3",
+        "id": "w8/3.1.2/p5/s5",
         "parts": [
           {
-            "text": "Ondoren, kartilago parakordal eta esklerotoma okzipitaletatik, hezur okzipitalaren (oinaldea) "
+            "text": "Kartilago parakordal hauetatik eta somita okzipitaletako mesodermotik garondo- hezurraren alde bazilarrean dagoen ataltxo bat eratu: "
           },
           {
-            "text": "orri/atal/lamina",
+            "text": "lamina/orri/atal basilarra.",
             "b": true
           },
           {
             "text": " "
-          },
-          {
-            "text": "basilarra ",
-            "b": true
-          },
-          {
-            "text": "eratzen da. "
           }
         ]
       },
       {
-        "id": "w8/3.1.2/p8/s4",
+        "id": "w8/3.1.2/p5/s6",
         "parts": [
           {
-            "text": "Okzipitalak bi atal ditu: buru-gangan kokatutako eskata, "
+            "text": "Okzipitalak/garondo-hezurrak bi atal ditu: buru-gangan kokatutako eskata, "
           },
           {
             "text": "mintzezko",
@@ -1398,7 +1234,14 @@ export const w8: NotesBlock[] = [
             "text": "a eta oinaldean kokatutakoa, "
           },
           {
-            "text": "hezurtzapen endokondralekoa.",
+            "text": "hezurtzapen",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "endokondralekoa.",
             "i": true
           },
           {
@@ -1407,10 +1250,345 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
+        "id": "w8/3.1.2/p5/s7",
+        "parts": [
+          {
+            "text": "Bien artean zulo okzipitala dago. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p5/s8",
+        "parts": [
+          {
+            "text": "○ "
+          },
+          {
+            "text": "Hipofisi kartilagoak",
+            "b": true
+          },
+          {
+            "text": ": bi kartilago parakordalen aurrekaldean kokatzen dira. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p5/s9",
+        "parts": [
+          {
+            "text": "Hemendik "
+          },
+          {
+            "text": "esfenoides hezurraren gorputza ",
+            "b": true
+          },
+          {
+            "text": "eratzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p5/s10",
+        "parts": [
+          {
+            "text": "Esfenoides gorputzaren goiko aurpegi horretan hoditxo bat dago, hipofisi hodia, non guruin pituitarioa kokatuko den. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p5/s11",
+        "parts": [
+          {
+            "text": "Guruin honetan adenohipofisia, neurohipofisia… daude. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p5/s12",
+        "parts": [
+          {
+            "text": "○ Hipofisi kartilagoen aurreko aldean "
+          },
+          {
+            "text": "garezurraren trenkadatxo edo trenkada",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "kranealak",
+            "b": true
+          },
+          {
+            "text": ". "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p5/s13",
+        "parts": [
+          {
+            "text": "Hauetatik "
+          },
+          {
+            "text": "etmoides hezurraren gorputza ",
+            "b": true
+          },
+          {
+            "text": "sortzen da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "3.1.2",
+    "id": "w8/3.1.2/p6",
+    "sentences": [
+      {
+        "id": "w8/3.1.2/p6/s1",
+        "parts": [
+          {
+            "text": "● Erdiko bi plaka hauen alboetan, "
+          },
+          {
+            "text": "alboko kartilago plakak: ",
+            "b": true
+          },
+          {
+            "text": "kartilago desberdinak bereizten dira (atzetik aurrera): ○ Atzekaldean "
+          },
+          {
+            "text": "kapsula periotikoa kartilagoa",
+            "b": true
+          },
+          {
+            "text": ": loki hezurraren "
+          },
+          {
+            "text": "harkaitz zatia",
+            "b": true
+          },
+          {
+            "text": " (edo zati petrosoa) eta mastoide apofisia sortzen dira → Harkaitz zatian barneko belarria egongo da kokatuta. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p6/s2",
+        "parts": [
+          {
+            "text": "○ Aurrekaldean, "
+          },
+          {
+            "text": "hego tenporala kartilagoa",
+            "b": true
+          },
+          {
+            "text": ": honetatik "
+          },
+          {
+            "text": "esfenoides hezurraren hego",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "nagusia",
+            "b": true
+          },
+          {
+            "text": " eratzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p6/s3",
+        "parts": [
+          {
+            "text": "○ Hego tenporalaren aurrean "
+          },
+          {
+            "text": "begizulo hegoak",
+            "b": true
+          },
+          {
+            "text": ": hauetatik esfenoides hezurraren "
+          },
+          {
+            "text": "hego",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "txikiak",
+            "b": true
+          },
+          {
+            "text": " sortzen dira."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "3.1.2",
+    "id": "w8/3.1.2/p7",
+    "sentences": [
+      {
+        "id": "w8/3.1.2/p7/s1",
+        "parts": [
+          {
+            "text": "*Kondrokraneoan kokatzen diren hezur multzo",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "horretan, beraz, hezur guztiak sortuko dira kartilago",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "ezberdinetatik. ",
+            "i": true
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p7/s2",
+        "parts": [
+          {
+            "text": "Hasiera batean mesenkimaz osatuko",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "dira egiturak eta mesenkima horretatik geroago,",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "kartilagoak eratzen dira, eta kartilago horretatik,",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "hezurrak edo hezurren atal desberdinak.",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "3.1.2",
+    "id": "w8/3.1.2/p8",
+    "sentences": [
+      {
+        "id": "w8/3.1.2/p8/s1",
+        "parts": [
+          {
+            "text": "Plaka horietatik sortutako hezur-atalak elkarren artean fusionatzen dira. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p8/s2",
+        "parts": [
+          {
+            "text": "Fusio horren ondorioz, "
+          },
+          {
+            "text": "neurokraneoaren oinarrian",
+            "b": true
+          },
+          {
+            "text": " (kondrokraneoan) hainbat "
+          },
+          {
+            "text": "zulo",
+            "b": true
+          },
+          {
+            "text": " agertzen dira, arraildurak... "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p8/s3",
+        "parts": [
+          {
+            "text": "Zulo hauetatik, "
+          },
+          {
+            "text": "gara nerbio/nerbio kraneal",
+            "b": true
+          },
+          {
+            "text": "ean dauden zuntz mota desberdinak irteten dira. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p8/s4",
+        "parts": [
+          {
+            "text": "Guztira "
+          },
+          {
+            "text": "12",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "gara nerbio bikote ",
+            "b": true
+          },
+          {
+            "text": "daude; hauen artean usaimen eta ikusmen nerbioak daude, zuntz sentsorialak soilik dituztenak. "
+          }
+        ]
+      },
+      {
         "id": "w8/3.1.2/p8/s5",
         "parts": [
           {
-            "text": "Hau mesenkimatik sortutako ezkataren jarraipena izango da."
+            "text": "Beste nerbio batzuek, berriz, zuntz mota guztiak dituzte: sentsorialak, motoreak eta autonomoak/begetatiboak. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p8/s6",
+        "parts": [
+          {
+            "text": "Zulo hauek, beraz, zuntz mota desberdinak neurokraneotik irteteko edota sartzeko balio dute, entzefaloarekin harremantzeko. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.1.2/p8/s7",
+        "parts": [
+          {
+            "text": "Hauetatik ere odol hodiak pasatzen dira."
           }
         ]
       }
@@ -1425,11 +1603,42 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.2/p9/s1",
         "parts": [
           {
-            "text": "Hipofisi kartilagoak",
+            "text": "KONTUZ: Bai "
+          },
+          {
+            "text": "buru gangako",
             "b": true
           },
           {
-            "text": ": bi kartilago parakordalen aurrekaldean kokatzen dira. "
+            "text": " hezurrak baita "
+          },
+          {
+            "text": "ektoendokraneoaren",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "hezurrak mesenkimatik ",
+            "b": true
+          },
+          {
+            "text": "etorri, baina "
+          },
+          {
+            "text": "mesenkimak jatorri desberdina",
+            "b": true
+          },
+          {
+            "text": " du "
+          },
+          {
+            "text": "aurrekaldean eta atzekaldean",
+            "b": true
+          },
+          {
+            "text": ". "
           }
         ]
       },
@@ -1437,44 +1646,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.2/p9/s2",
         "parts": [
           {
-            "text": "Hemendik "
-          },
-          {
-            "text": "esfenoides",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "hezurraren gorputza ",
-            "b": true
-          },
-          {
-            "text": "eratzen da. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.1.2/p9/s3",
-        "parts": [
-          {
-            "text": "Esfenoides gorputzaren goiko aurpegian horretan hipofisi hoditxo bat dago non hipofisi guruina (Guruin Pituitarioa) kokatuko den. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.1.2/p9/s4",
-        "parts": [
-          {
-            "text": "Guruin honetan adenohipofisia eta neurohipofisia egonen dira."
+            "text": "Normalean hipofisi hodira garapenean notokorda iristen da, azken hau bertan bukatuz."
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "3.1.2",
     "id": "w8/3.1.2/p10",
     "sentences": [
@@ -1482,26 +1661,21 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.2/p10/s1",
         "parts": [
           {
-            "text": "Trenkadatxo edo trenkada kranealak: ",
+            "text": "● Hipofisi hodiaren aurrean dauden buru ganga eta kondokraneoaren ataleko hezurrak "
+          },
+          {
+            "text": "gandor neuraletik",
             "b": true
           },
           {
-            "text": "hipofisi kartilagoen aurrean baita erdiko plakaren aurrean ere kokatzen diren egiturak. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.1.2/p10/s2",
-        "parts": [
-          {
-            "text": "Hauetatik "
+            "text": " sortutako "
           },
           {
-            "text": "etmoides hezurra ",
-            "b": true
+            "text": "mesenkimatik ",
+            "i": true
           },
           {
-            "text": "sortzen da."
+            "text": "sortuko dira."
           }
         ]
       }
@@ -1516,269 +1690,21 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.1.2/p11/s1",
         "parts": [
           {
-            "text": "●Erdiko bi plaka hauen alboetan, "
+            "text": "● Hipofisi hodiaren atzealdean dauden kondokraneoa eta buru gangako hezurrak, berriz, "
           },
           {
-            "text": "bi alboko kartilago plakak: ",
+            "text": "mesodermo paraxialetik ",
             "b": true
           },
           {
-            "text": "hauetan kartilago desberdinak bereizten dira (atzetik aurrera):"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "3.1.2",
-    "id": "w8/3.1.2/p12",
-    "sentences": [
-      {
-        "id": "w8/3.1.2/p12/s1",
-        "parts": [
-          {
-            "text": "➔ Atzealdean "
+            "text": "sortutako "
           },
           {
-            "text": "kapsula periotikoa",
-            "b": true
-          },
-          {
-            "text": ": hezur tenporalen "
-          },
-          {
-            "text": "harkaitz zatia",
-            "b": true
-          },
-          {
-            "text": " (edo zati petrosoa) eta atal mastoideoa sortzen dira → Harkaitz zatian barneko belarria egongo da kokatuta."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "3.1.2",
-    "id": "w8/3.1.2/p13",
-    "sentences": [
-      {
-        "id": "w8/3.1.2/p13/s1",
-        "parts": [
-          {
-            "text": "➔ Aurrealdean, "
-          },
-          {
-            "text": "hego tenporala",
-            "b": true
-          },
-          {
-            "text": ": esfenoides hezurraren "
-          },
-          {
-            "text": "hego edo hegal handia",
-            "b": true
-          },
-          {
-            "text": " eratzen da. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.1.2/p13/s2",
-        "parts": [
-          {
-            "text": "◆ Hego tenporalaren aurrean "
-          },
-          {
-            "text": "begizulo hegoa",
-            "b": true
-          },
-          {
-            "text": ": hauetatik esfenoides hezurraren "
-          },
-          {
-            "text": "hego (edo",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "hegal) txikiak",
-            "b": true
-          },
-          {
-            "text": " sortzen dira."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "caption",
-    "section": "3.1.2",
-    "id": "w8/3.1.2/p14",
-    "sentences": [
-      {
-        "id": "w8/3.1.2/p14/s1",
-        "parts": [
-          {
-            "text": "*Kondrokraneoan kokatzen diren hezur",
+            "text": "mesenkimatik ",
             "i": true
           },
           {
-            "text": " "
-          },
-          {
-            "text": "multzo horretan, beraz, hezur guztiak",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "sortuko dira kartilago ezberdinetatik.",
-            "i": true
-          },
-          {
-            "text": " "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.1.2/p14/s2",
-        "parts": [
-          {
-            "text": "Hasiera batean mesenkimaz osatuko",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "dira egiturak eta mesenkima horretatik",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "geroago, kartilagoak eratzen dira, eta",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "kartilago",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "horretatik,",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "hezurrak",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "edo",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "hezurren atal desberdinak.",
-            "i": true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "caption",
-    "section": "3.1.2",
-    "id": "w8/3.1.2/p15",
-    "sentences": [
-      {
-        "id": "w8/3.1.2/p15/s1",
-        "parts": [
-          {
-            "text": "Plaka horietatik sortutako hezur-atalak elkarren artean fusionatzen dira. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.1.2/p15/s2",
-        "parts": [
-          {
-            "text": "Fusio horren ondorioz, neurokraneoaren oinarrian (kondrokraneoan) hainbat zulo agertzen dira. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.1.2/p15/s3",
-        "parts": [
-          {
-            "text": "Zulo hauetatik "
-          },
-          {
-            "text": "nerbio kraneal",
-            "b": true
-          },
-          {
-            "text": " desberdinak irteten dira. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.1.2/p15/s4",
-        "parts": [
-          {
-            "text": "Guztira "
-          },
-          {
-            "text": "12 bikote nerbio kraneal/ gara nerbioak ",
-            "b": true
-          },
-          {
-            "text": "daude; hauen artean usaimen eta ikusmen nerbioak daude, zuntz sentsorialak soilik dituzteznak. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.1.2/p15/s5",
-        "parts": [
-          {
-            "text": "Beste nerbio batzuek, berriz, zuntz mota guztiak dituzte: sentsorialak, motoreak eta autonomoak/begetatiboak. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.1.2/p15/s6",
-        "parts": [
-          {
-            "text": "Neurokraneotik irteteko (zuntz motoreak) edo sartzeko (zuntz sentsorialak) balio dute, entzefaloarekin harremantzeko. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.1.2/p15/s7",
-        "parts": [
-          {
-            "text": "Hauetatik ere odol hodiak pasatzen dira."
+            "text": "eratuko dira (bai somitomero bai somita okzipitaletatik)."
           }
         ]
       }
@@ -1810,78 +1736,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.2/p2/s1",
         "parts": [
           {
-            "text": "Errai kraneoa aurpegian kokatzen diren hezurrak dira. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.2/p2/s2",
-        "parts": [
-          {
-            "text": "Gogoratu aurpegiko eskeletoaren eraketan oso garrantzitsuak direla "
-          },
-          {
-            "text": "lepo",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "mailaren ",
-            "b": true
-          },
-          {
-            "text": "alde bietan agertzen diren mesenkima (mesodermoz osatutako egiturak) goragune batzuk, "
-          },
-          {
-            "text": "arku brankial edo faringeoak. ",
-            "b": true
-          }
-        ]
-      },
-      {
-        "id": "w8/3.2/p2/s3",
-        "parts": [
-          {
-            "text": "Hauek beti kanpotik ektodermoz estalita daude. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.2/p2/s4",
-        "parts": [
-          {
-            "text": "Egitura hauetaraino, enbrioiaren alde zefalikoan sortu diren "
-          },
-          {
-            "text": "gandor neuraletako zelulak ",
-            "b": true
-          },
-          {
-            "text": "iristen dira, zelula ektodermikoak direnak, eta arku faringeoetan sortutako "
-          },
-          {
-            "text": "mesenkimatik",
-            "b": true
-          },
-          {
-            "text": " garatuko dira "
-          },
-          {
-            "text": "aurpegiko hezurrak",
-            "b": true
-          },
-          {
-            "text": "; beraz, ez dira mesodermotik sortzen, baizik eta zelula ektodermikoetatik. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.2/p2/s5",
-        "parts": [
-          {
-            "text": "Bertako mesodermotik ere mesenkima sortuko da, baina hortik muskuluak sortuko dira."
+            "text": "Errai kraneoa aurpegian kokatzen diren hezurrak dira."
           }
         ]
       }
@@ -1896,14 +1751,98 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.2/p3/s1",
         "parts": [
           {
-            "text": "Errai kraneoko hezurrak "
+            "text": "Enbrioian, "
           },
           {
-            "text": "lehenengo 2 arku brankialetatik",
+            "text": "lepo mailan",
             "b": true
           },
           {
-            "text": " sortzen dira."
+            "text": " somitak eratu izanaz gain, mesodermoz osatutako beste goragune desberdin batzuk agertuko dira. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.2/p3/s2",
+        "parts": [
+          {
+            "text": "Goragune hauek = "
+          },
+          {
+            "text": "faringe arkuak/arku brankialak.",
+            "b": true
+          },
+          {
+            "text": " "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.2/p3/s3",
+        "parts": [
+          {
+            "text": "Asko dira, egitura bilaterala dute eta kanpotik ektodermoz estalita daude. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.2/p3/s4",
+        "parts": [
+          {
+            "text": "Egitura hauetaraino, enbrioiaren alde zefalikoan sortu diren "
+          },
+          {
+            "text": "gandor neuraletako zelulak ",
+            "b": true
+          },
+          {
+            "text": "iristen dira, jatorri ektodermikoa dutenak, eta arku faringeoetan "
+          },
+          {
+            "text": "mesenkimak ",
+            "b": true
+          },
+          {
+            "text": "sortuko dira. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.2/p3/s5",
+        "parts": [
+          {
+            "text": "Mesenkima honetatik "
+          },
+          {
+            "text": "aurpegiko hezurrak",
+            "b": true
+          },
+          {
+            "text": " garatuko dira. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.2/p3/s6",
+        "parts": [
+          {
+            "text": "Beraz, hezurrak ez dira mesodermotik sortzen, baizik eta zelula ektodermikoetatik. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.2/p3/s7",
+        "parts": [
+          {
+            "text": "Bertako mesodermotik ere mesenkima sortuko da, baina hortik muskuluak garatuko dira. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.2/p3/s8",
+        "parts": [
+          {
+            "text": "Aurpegiko hezur gehienak lehen 2 faringe arkuetatik eratzen dira."
           }
         ]
       }
@@ -1918,7 +1857,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.2/p4/s1",
         "parts": [
           {
-            "text": "1. arku brankial/faringeoak → 2 atal ditu (enbrioiaren tolespen zefalo-kaudalarengatik):"
+            "text": "Errai kraneoko hezurrak "
+          },
+          {
+            "text": "lehenengo 2 arku brankialetatik",
+            "b": true
+          },
+          {
+            "text": " sortzen dira."
           }
         ]
       }
@@ -1936,6 +1882,28 @@ export const w8: NotesBlock[] = [
             "text": "● "
           },
           {
+            "text": "1. arku brankial/faringeoak",
+            "b": true
+          },
+          {
+            "text": " → 2 atal ditu (enbrioiaren tolespen zefalo-kaudalarengatik):"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "3.2",
+    "id": "w8/3.2/p6",
+    "sentences": [
+      {
+        "id": "w8/3.2/p6/s1",
+        "parts": [
+          {
+            "text": "○ "
+          },
+          {
             "text": "Atal dortsala, goragune ",
             "b": true
           },
@@ -1947,33 +1915,7 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "deiturikoa, begizulo eskualdearen behekaldetik hedatzen da (aho primitiboaren goikaldetik)."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "caption",
-    "section": "3.2",
-    "id": "w8/3.2/p6",
-    "sentences": [
-      {
-        "id": "w8/3.2/p6/s1",
-        "parts": [
-          {
-            "text": "○ Maxilar prozesuan, bertara iritsi diren gandor neuraletako zelulek kartilago bat sortzen dute, "
-          },
-          {
-            "text": "barra pterigopalatino karratua, ",
-            "b": true
-          },
-          {
-            "text": "hemendik bitarteko balarrian daukagun hezurtxo bat garatzen da"
-          },
-          {
-            "text": ", ingudea (yunque). ",
-            "b": true
+            "text": "deiturikoa, begizulo eskualdearen behekaldetik hedatzen da (aho primitiboaren goikaldetik). "
           }
         ]
       },
@@ -1981,50 +1923,11 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.2/p6/s2",
         "parts": [
           {
-            "text": "Kartilago horren inguruko mesenkimatik (gandor neuraletako zeluletatik sortua) "
+            "text": "■ Maxilar prozesuan, bertara iritsi diren gandor neuraletako zelulek kartilago bat sortzen dute, "
           },
           {
-            "text": "goiko hezur maxilarra, hezur",
+            "text": "barra pterigopalatino karratua.",
             "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "malarrak",
-            "b": true
-          },
-          {
-            "text": " edo "
-          },
-          {
-            "text": "zigomatikoak",
-            "b": true
-          },
-          {
-            "text": ", eta, "
-          },
-          {
-            "text": "hezur",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "tenporalaren/loki hezurraren ezkata ",
-            "b": true
-          },
-          {
-            "text": "sortzen dira. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.2/p6/s3",
-        "parts": [
-          {
-            "text": "Azkenengotik, estiloide apofisia irteten da."
           }
         ]
       }
@@ -2039,7 +1942,118 @@ export const w8: NotesBlock[] = [
         "id": "w8/3.2/p7/s1",
         "parts": [
           {
+            "text": "● Kartilago honetatik bitarteko balarrian daukagun hezurtxo bat garatzen da"
+          },
+          {
+            "text": ", ingudea (yunque).",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "3.2",
+    "id": "w8/3.2/p8",
+    "sentences": [
+      {
+        "id": "w8/3.2/p8/s1",
+        "parts": [
+          {
             "text": "● "
+          },
+          {
+            "text": "Barra pterigopalatino karratuaren ",
+            "b": true
+          },
+          {
+            "text": "inguruko mesenkimatik (gandor"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "3.2",
+    "id": "w8/3.2/p9",
+    "sentences": [
+      {
+        "id": "w8/3.2/p9/s1",
+        "parts": [
+          {
+            "text": "neuraletako zeluletatik sortua) honako hezur hauek eratzen dira: ○ "
+          },
+          {
+            "text": "Goiko hezur maxilarra",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "3.2",
+    "id": "w8/3.2/p10",
+    "sentences": [
+      {
+        "id": "w8/3.2/p10/s1",
+        "parts": [
+          {
+            "text": "○ "
+          },
+          {
+            "text": "Hezur malarrak ",
+            "b": true
+          },
+          {
+            "text": "edo "
+          },
+          {
+            "text": "zigomatikoak",
+            "b": true
+          },
+          {
+            "text": ", ○ "
+          },
+          {
+            "text": "Hezur tenporalaren/loki hezurraren ezkata",
+            "b": true
+          },
+          {
+            "text": "."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "3.2",
+    "id": "w8/3.2/p11",
+    "sentences": [
+      {
+        "id": "w8/3.2/p11/s1",
+        "parts": [
+          {
+            "text": "■ Hemendik estiloide apofisia irteten da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "3.2",
+    "id": "w8/3.2/p12",
+    "sentences": [
+      {
+        "id": "w8/3.2/p12/s1",
+        "parts": [
+          {
+            "text": "○ "
           },
           {
             "text": "Atal bentrala, barail prozesua ",
@@ -2053,22 +2067,15 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "deiturikoa, aho primitiboaren behekaldetik hedatzen da."
+            "text": "deiturikoa, aho primitiboaren behekaldetik hedatzen da. "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "3.2",
-    "id": "w8/3.2/p8",
-    "sentences": [
+      },
       {
-        "id": "w8/3.2/p8/s1",
+        "id": "w8/3.2/p12/s2",
         "parts": [
           {
-            "text": "○ Barail prozesuan, lehenengo arkuaren atal "
+            "text": "■ Barail prozesuan, lehenengo arkuaren atal "
           },
           {
             "text": "bentralera ",
@@ -2082,32 +2089,47 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "sortzen dute, hemendik ere bitarteko bitarteko belarriaren hezurtxo bat garatzen da, "
+            "text": "sortzen dute."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "3.2",
+    "id": "w8/3.2/p13",
+    "sentences": [
+      {
+        "id": "w8/3.2/p13/s1",
+        "parts": [
+          {
+            "text": "● Kartilago honetatik bitarteko belarriaren hezurtxo bat garatzen da: "
           },
           {
             "text": "mailua",
             "b": true
           },
           {
-            "text": ". "
+            "text": "."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "3.2",
+    "id": "w8/3.2/p14",
+    "sentences": [
       {
-        "id": "w8/3.2/p8/s2",
+        "id": "w8/3.2/p14/s1",
         "parts": [
           {
-            "text": "Meckel kartilagoaren inguruko mesenkimatik, berriz, "
+            "text": "● Meckel kartilagoaren inguruko mesenkimatik, "
           },
           {
-            "text": "beheko",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "maxilarra ",
+            "text": "beheko maxilarra ",
             "b": true
           },
           {
@@ -2125,32 +2147,39 @@ export const w8: NotesBlock[] = [
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "3.2",
-    "id": "w8/3.2/p9",
+    "id": "w8/3.2/p15",
     "sentences": [
       {
-        "id": "w8/3.2/p9/s1",
+        "id": "w8/3.2/p15/s1",
         "parts": [
           {
-            "text": "Barail prozesutik eta bigarren arku faringeoaren mesenkimatik (Mesenkima hau gandor neuraletako zeluletatik agertu delarik) "
+            "text": "● "
+          },
+          {
+            "text": "Barail prozesutik ",
+            "b": true
+          },
+          {
+            "text": "eta"
+          },
+          {
+            "text": " 2. arku faringeoaren mesenkimatik ",
+            "b": true
+          },
+          {
+            "text": "(mesenkima hau gandor neuraletako zeluletatik eratorria) "
           },
           {
             "text": "Reichert kartilagoa ",
             "b": true
           },
           {
-            "text": "sortuko da, eta bertatik ere bitarteko belarriaren hezurtxo bat garatuko da,"
+            "text": "sortuko da, eta bertatik ere bitarteko belarriaren hezurtxo bat garatuko da: "
           },
           {
-            "text": " mailua, ointoki ",
-            "b": true
-          },
-          {
-            "text": "edo "
-          },
-          {
-            "text": "estriboa",
+            "text": "estriboa/ointokia",
             "b": true
           },
           {
@@ -2163,94 +2192,108 @@ export const w8: NotesBlock[] = [
   {
     "kind": "p",
     "section": "3.2",
-    "id": "w8/3.2/p10",
+    "id": "w8/3.2/p16",
     "sentences": [
       {
-        "id": "w8/3.2/p10/s1",
+        "id": "w8/3.2/p16/s1",
         "parts": [
           {
-            "text": "Hasiera batean aurpegiaren tamaina, hau da, "
+            "text": "Hasieran aurpegiaren tamaina, hau da, "
           },
           {
-            "text": "errai kraneoaren tamaina oso txikia ",
-            "b": true
-          },
-          {
-            "text": "dela neurokraneoaren tamainarekin konparatuta. "
-          }
-        ]
-      },
-      {
-        "id": "w8/3.2/p10/s2",
-        "parts": [
-          {
-            "text": "Hau bi arrazoiengatik ematen da."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "3.2",
-    "id": "w8/3.2/p11",
-    "sentences": [
-      {
-        "id": "w8/3.2/p11/s1",
-        "parts": [
-          {
-            "text": "Batetik, jaiotzerakoan airez osotutako "
-          },
-          {
-            "text": "sudur alboko sinuak ",
-            "b": true
-          },
-          {
-            "text": "(sinu paranasalak)"
-          },
-          {
-            "text": " ",
-            "b": true
-          },
-          {
-            "text": "(malarretan, frontalean, maxilarretan eta etmoides hezurrean adibidez ikus daitezkeen aire espazioak) oraindik ez daudelako guztiz garatuta, eta ondorioz, aurpegiaren hezurren tamaina txikiagoa da."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "3.2",
-    "id": "w8/3.2/p12",
-    "sentences": [
-      {
-        "id": "w8/3.2/p12/s1",
-        "parts": [
-          {
-            "text": "Bestetik, jaiotzerakoan aurpegiaren goiko eta beheko maxilarretako "
-          },
-          {
-            "text": "apofisi",
+            "text": "errai",
             "b": true
           },
           {
             "text": " "
           },
           {
-            "text": "albeolarrak ",
+            "text": "kraneoaren",
             "b": true
           },
           {
-            "text": "ez daude guztiz garatuta. "
+            "text": " "
+          },
+          {
+            "text": "tamaina",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "oso",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "txikia",
+            "b": true
+          },
+          {
+            "text": " da neurokraneoaren tamainarekin konparatuta. "
           }
         ]
       },
       {
-        "id": "w8/3.2/p12/s2",
+        "id": "w8/3.2/p16/s2",
         "parts": [
           {
-            "text": "Izan ere, hauetan hortzak txertatzen dira; beraz, hortzeriaren garapenarekin batera garatuko dira apofisi albeolarrak, eta ondorioz, goiko eta beheko maxilarren tamaina askoz handiagoa egiten da."
+            "text": "Hau bi arrazoiengatik ematen da:"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "3.2",
+    "id": "w8/3.2/p17",
+    "sentences": [
+      {
+        "id": "w8/3.2/p17/s1",
+        "parts": [
+          {
+            "text": "● Alde batetik, jaiotzerakoan airez osotutako "
+          },
+          {
+            "text": "sudur alboko sinuak ",
+            "b": true
+          },
+          {
+            "text": "(sinu paranasalak) (malarretan, frontalean, maxilarretan eta etmoides hezurrean adibidez ikus daitezkeen aire espazioak) oraindik ez daudelako guztiz garatuta."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "3.2",
+    "id": "w8/3.2/p18",
+    "sentences": [
+      {
+        "id": "w8/3.2/p18/s1",
+        "parts": [
+          {
+            "text": "● Bestetik, jaiotzerakoan aurpegiaren "
+          },
+          {
+            "text": "goiko eta beheko maxilarretako apofisi albeolarrak",
+            "b": true
+          },
+          {
+            "text": " ez daudelako guztiz garatuta. "
+          }
+        ]
+      },
+      {
+        "id": "w8/3.2/p18/s2",
+        "parts": [
+          {
+            "text": "Hauetan hortzak txertatzen direnez, hortzeriaren garapenarekin batera garatuko dira apofisi albeolarrak, eta ondorioz, goiko eta beheko maxilarren tamaina askoz handiagoa egingo da."
           }
         ]
       }
@@ -2259,21 +2302,28 @@ export const w8: NotesBlock[] = [
   {
     "kind": "p",
     "section": "3.2",
-    "id": "w8/3.2/p13",
+    "id": "w8/3.2/p19",
     "sentences": [
       {
-        "id": "w8/3.2/p13/s1",
+        "id": "w8/3.2/p19/s1",
         "parts": [
           {
-            "text": "Gero, sudur alboko sinu eta apofisi albeolarren garapena ematen da, horrela, errai kraneoko hezurrak gero eta handiago egiten dira. "
+            "text": "Gero, sudur alboko sinu eta apofisi albeolarren garapena ematen da, eta horrela, errai kraneoko hezurrak gero eta handiagoak egiten dira eta ondorioz errai kraneoaren hezurren tamaina handitu egiten da."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "3.2",
+    "id": "w8/3.2/p20",
+    "sentences": [
       {
-        "id": "w8/3.2/p13/s2",
+        "id": "w8/3.2/p20/s1",
         "parts": [
           {
-            "text": "Beraz, bi prozesu hauen ondorioz (sudur alboko sinuen agerpena eta maxilarretan apofisi albeolarren agerpena) errai kraneoaren hezurren tamaina handitu egiten da Errai kraneoko hezur guztiak"
+            "text": "Errai kraneoko hezur guztiak"
           },
           {
             "text": " gandor neuraletik sortutako mesenkimatik",
@@ -2285,7 +2335,7 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/3.2/p13/s3",
+        "id": "w8/3.2/p20/s2",
         "parts": [
           {
             "text": "Kondrokraneoan gauza bera gertatzen da, aurrekaldeko hezur edo hezur zatiak bertaraio iritsitako gandor neuraletako zelulek sortutako mesenkimatik, eta atzealdeko kartilagoak mesodermo paraxialetik sortzen dira."
@@ -2347,7 +2397,14 @@ export const w8: NotesBlock[] = [
             "text": "Gorputzaren aurre-alboko zatietan "
           },
           {
-            "text": "goiko eta beheko gorputzen hastapenak ",
+            "text": "goiko",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "eta beheko gorputzen hastapenak ",
             "b": true
           },
           {
@@ -2359,7 +2416,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/4/p3/s3",
         "parts": [
           {
-            "text": "Pareta-orriko zelula mesodermikoak goiko eta beheko hazikinen erdigunean kokatzen dira, kanpotik ektodermoz estalita. "
+            "text": "Pareta-orriko zelula mesodermikoak goiko eta beheko hasikinen erdigunean kokatzen dira, kanpotik ektodermoz estalita. "
           }
         ]
       },
@@ -2367,22 +2424,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/4/p3/s4",
         "parts": [
           {
-            "text": "Urrutiko atalak zapalagoak egiten dira 6. asterako."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "4",
-    "id": "w8/4/p4",
-    "sentences": [
-      {
-        "id": "w8/4/p4/s1",
-        "parts": [
-          {
-            "text": "Hastapen hauen erpinean ektodermoa loditu egiten da, loditasun bat agertuz: erpineko ektodermo ertza."
+            "text": "Hastapen hauen erpinean ektodermoa loditzen da, loditasun bat agertuz: erpineko ektodermo ertza."
           }
         ]
       }
@@ -2391,10 +2433,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "h2",
     "section": "4",
-    "id": "w8/4/p5",
+    "id": "w8/4/p4",
     "sentences": [
       {
-        "id": "w8/4/p5/s1",
+        "id": "w8/4/p4/s1",
         "parts": [
           {
             "text": "6. astea",
@@ -2408,103 +2450,84 @@ export const w8: NotesBlock[] = [
   {
     "kind": "p",
     "section": "4",
-    "id": "w8/4/p6",
+    "id": "w8/4/p5",
     "sentences": [
       {
-        "id": "w8/4/p6/s1",
+        "id": "w8/4/p5/s1",
         "parts": [
           {
-            "text": "A) Hasieran. "
+            "text": "A) ",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": "Hasieran. "
           }
         ]
       },
       {
-        "id": "w8/4/p6/s2",
+        "id": "w8/4/p5/s2",
         "parts": [
           {
             "text": "Esku eta oin plakak ",
             "b": true
           },
           {
-            "text": "agertzen dira: hastapen hauetako urrutiko atalak lauagoak egiten dira. "
+            "text": "agertzen dira: hastapenen urrutiko atalak lauagoak/zapalagoak egiten dira. "
           }
         ]
       },
       {
-        "id": "w8/4/p6/s3",
+        "id": "w8/4/p5/s3",
         "parts": [
           {
-            "text": "Hasierako hertsadurak ",
+            "text": "Hasierako ertzadurak ",
             "b": true
           },
           {
-            "text": "agertzen dira hastapenetan, modu horretan bi zati desberdintzen dira."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "4",
-    "id": "w8/4/p7",
-    "sentences": [
-      {
-        "id": "w8/4/p7/s1",
-        "parts": [
-          {
-            "text": "B) Beranduago. "
+            "text": "agertzen dira hastapenetan, bi zati desberdinduz/bereiziz. "
           }
         ]
       },
       {
-        "id": "w8/4/p7/s2",
+        "id": "w8/4/p5/s4",
+        "parts": [
+          {
+            "text": "B) ",
+            "b": true
+          },
+          {
+            "text": "Beranduago. "
+          }
+        ]
+      },
+      {
+        "id": "w8/4/p5/s5",
         "parts": [
           {
             "text": "Hurbileko ataletan "
           },
           {
-            "text": "bigarren",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "ertzadura ",
+            "text": "bigarren ertzadura ",
             "b": true
           },
           {
             "text": "bat agertzen da eta hortik aurrera goiko eta beheko hastapenetan 3 atal bereizten dira, izan ere, oin eta esku plaketan, bertako erpineko ertz ektodermikoan "
           },
           {
-            "text": "zelula",
+            "text": "zelula hilketa (apoptosia) ",
             "b": true
           },
           {
-            "text": " "
-          },
-          {
-            "text": "hilketa (apoptosia) ",
-            "b": true
-          },
-          {
-            "text": "gertatzen da."
+            "text": "gertatzen da. "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "4",
-    "id": "w8/4/p8",
-    "sentences": [
+      },
       {
-        "id": "w8/4/p8/s1",
+        "id": "w8/4/p5/s6",
         "parts": [
           {
-            "text": "● "
+            "text": "➢ "
           },
           {
             "text": "Eskukoetan: ",
@@ -2516,15 +2539,15 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/4/p8/s2",
+        "id": "w8/4/p5/s7",
         "parts": [
           {
-            "text": "Programatutako zelula batzuen apoptosia emanez agertu ildo hauek. "
+            "text": "Zelula batzuen apoptosia emanez agertzen dira ildo hauek. "
           }
         ]
       },
       {
-        "id": "w8/4/p8/s3",
+        "id": "w8/4/p5/s8",
         "parts": [
           {
             "text": "Ildo hauen artean gelditzen diren eremuak hatzetako izpiak izango dira, eta hauetatik, eskuetan"
@@ -2539,10 +2562,121 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/4/p8/s4",
+        "id": "w8/4/p5/s9",
         "parts": [
           {
-            "text": "(gainetik azaldu du)"
+            "text": "(gainetik azaldu du) ➢ "
+          },
+          {
+            "text": "Oinekoetan: ",
+            "b": true
+          },
+          {
+            "text": "4 ildo erradiatu agertzen dira. "
+          }
+        ]
+      },
+      {
+        "id": "w8/4/p5/s10",
+        "parts": [
+          {
+            "text": "Ildoen artean gelditzen diren eremuak hatzetako izpiak izango dira, eta hauetatik, oinetan"
+          },
+          {
+            "text": " behatzak",
+            "b": true
+          },
+          {
+            "text": " sortuko dira."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4",
+    "id": "w8/4/p6",
+    "sentences": [
+      {
+        "id": "w8/4/p6/s1",
+        "parts": [
+          {
+            "text": "Gapenaren 6. asterako, lehenengo kartilagoak agertzen dira (geroago hezurrak izango direnak) goiko eta beheko gorputz adarretako mesenkimatik. "
+          }
+        ]
+      },
+      {
+        "id": "w8/4/p6/s2",
+        "parts": [
+          {
+            "text": "Mesenkima hau mesodermoko zelulatik eratu da (alboko mesodermoko paretako orritik sortutakoa). "
+          }
+        ]
+      },
+      {
+        "id": "w8/4/p6/s3",
+        "parts": [
+          {
+            "text": "Beraz, goiko eta beheko gorputz adarretan agertzen diren hezurrak hezurtzapen endokondral prozesu baten bitartez sortzen dira."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "h2",
+    "section": "4",
+    "id": "w8/4/p7",
+    "sentences": [
+      {
+        "id": "w8/4/p7/s1",
+        "parts": [
+          {
+            "text": "8. astea (hau da jakin behar duguna) (7.astea?)",
+            "b": true,
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4",
+    "id": "w8/4/p8",
+    "sentences": [
+      {
+        "id": "w8/4/p8/s1",
+        "parts": [
+          {
+            "text": "8. asterako ",
+            "b": true
+          },
+          {
+            "text": "(enbrioi garaia bukatu denerako), goiko eta beheko gorputz adarretako kartilagoetan "
+          },
+          {
+            "text": "hezurtzapen zentroak ",
+            "b": true
+          },
+          {
+            "text": "azalduko dira erdiko ataletan. "
+          }
+        ]
+      },
+      {
+        "id": "w8/4/p8/s2",
+        "parts": [
+          {
+            "text": "Garapenaren 8. astean gorputz adarrek "
+          },
+          {
+            "text": "kontrako biraketak ",
+            "b": true
+          },
+          {
+            "text": "egiten dituzte:"
           }
         ]
       }
@@ -2560,155 +2694,6 @@ export const w8: NotesBlock[] = [
             "text": "● "
           },
           {
-            "text": "Oinekoetan: ",
-            "b": true
-          },
-          {
-            "text": "4 ildo erradiatu agertzen dira. "
-          }
-        ]
-      },
-      {
-        "id": "w8/4/p9/s2",
-        "parts": [
-          {
-            "text": "Ildo hauen artean gelditzen diren eremuak hatzetako izpiak izango dira, eta hauetatik, oinetan"
-          },
-          {
-            "text": " behatzak",
-            "b": true
-          },
-          {
-            "text": " sortuko dira. "
-          }
-        ]
-      },
-      {
-        "id": "w8/4/p9/s3",
-        "parts": [
-          {
-            "text": "(gainetik azaldu du)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "4",
-    "id": "w8/4/p10",
-    "sentences": [
-      {
-        "id": "w8/4/p10/s1",
-        "parts": [
-          {
-            "text": "Gapenaren 6. asterako, lehenengo kartilagoak agertzen dira (geroago hezurrak izango direnak) goiko eta beheko gorputz adarretako mesenkimatik. "
-          }
-        ]
-      },
-      {
-        "id": "w8/4/p10/s2",
-        "parts": [
-          {
-            "text": "Mesenkima hau mesodermoko zelulatik eratu da (alboko mesodermoko paretako orritik sortutakoa). "
-          }
-        ]
-      },
-      {
-        "id": "w8/4/p10/s3",
-        "parts": [
-          {
-            "text": "Beraz, goiko eta beheko gorputz adarretan agertzen diren hezurrak hezurtzapen endokondral prozesu baten bitartez sortzen dira."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "h2",
-    "section": "4",
-    "id": "w8/4/p11",
-    "sentences": [
-      {
-        "id": "w8/4/p11/s1",
-        "parts": [
-          {
-            "text": "8. astea (hau da jakin behar duguna) (7.astea?)",
-            "b": true,
-            "i": true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "4",
-    "id": "w8/4/p12",
-    "sentences": [
-      {
-        "id": "w8/4/p12/s1",
-        "parts": [
-          {
-            "text": "8. asterako",
-            "b": true
-          },
-          {
-            "text": ", goiko eta beheko gorputz adarretako kartilagoetan "
-          },
-          {
-            "text": "hezurtzapen zentroak ",
-            "b": true
-          },
-          {
-            "text": "azalduko dira erdiko ataletan. "
-          }
-        ]
-      },
-      {
-        "id": "w8/4/p12/s2",
-        "parts": [
-          {
-            "text": "(Enbrioi garaia bukatu denerako)."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "4",
-    "id": "w8/4/p13",
-    "sentences": [
-      {
-        "id": "w8/4/p13/s1",
-        "parts": [
-          {
-            "text": "Adar hauetan, garapenaren 8. astean gorputz adarrek "
-          },
-          {
-            "text": "kontrako biraketak ",
-            "b": true
-          },
-          {
-            "text": "egiten dituzte."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "4",
-    "id": "w8/4/p14",
-    "sentences": [
-      {
-        "id": "w8/4/p14/s1",
-        "parts": [
-          {
-            "text": "● "
-          },
-          {
             "text": "Goiko gorputz adarretako ",
             "b": true
           },
@@ -2718,17 +2703,17 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/4/p14/s2",
+        "id": "w8/4/p9/s2",
         "parts": [
           {
             "text": "Biraketa honen ondorioz: ○ Goiko gorputz adarretako "
           },
           {
-            "text": "aurreko aldean",
+            "text": "aurreko aldean ",
             "b": true
           },
           {
-            "text": " gelditzen diren muskuluak "
+            "text": "gelditzen diren muskuluak "
           },
           {
             "text": "muskulu tolestatzaileak ",
@@ -2742,36 +2727,29 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "dira."
+            "text": "dira. "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "4",
-    "id": "w8/4/p15",
-    "sentences": [
+      },
       {
-        "id": "w8/4/p15/s1",
+        "id": "w8/4/p9/s3",
         "parts": [
           {
             "text": "○ Goiko gorputz adarretako "
           },
           {
-            "text": "alde dortsalean",
+            "text": "alde dortsalean ",
             "b": true
           },
           {
-            "text": " eta "
+            "text": "eta "
           },
           {
             "text": "lateraletan ",
             "b": true
           },
           {
-            "text": "gelditzen direnak, berriz, muskulu "
+            "text": "gelditzen direnak, muskulu "
           },
           {
             "text": "hedatzaileak ",
@@ -2781,11 +2759,11 @@ export const w8: NotesBlock[] = [
             "text": "edo "
           },
           {
-            "text": "extensoreak",
+            "text": "extensoreak ",
             "b": true
           },
           {
-            "text": "."
+            "text": "dira."
           }
         ]
       }
@@ -2794,10 +2772,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "li",
     "section": "4",
-    "id": "w8/4/p16",
+    "id": "w8/4/p10",
     "sentences": [
       {
-        "id": "w8/4/p16/s1",
+        "id": "w8/4/p10/s1",
         "parts": [
           {
             "text": "● "
@@ -2812,7 +2790,7 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/4/p16/s2",
+        "id": "w8/4/p10/s2",
         "parts": [
           {
             "text": "Beheko gorputz adarretako hastapenak (hazikinak) "
@@ -2829,36 +2807,29 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "90 graduko biraketa egiten dute eta biraketa honen ondorioz, beheko gorputz adarretako aurreko aldean kokatzen diren muskuluak "
+            "text": "90 graduko biraketa egiten dute. "
+          }
+        ]
+      },
+      {
+        "id": "w8/4/p10/s3",
+        "parts": [
+          {
+            "text": "Biraketa honen ondorioz: ○ Beheko gorputz adarretako aurreko aldean kokatzen diren muskuluak "
           },
           {
             "text": "muskulu hedatzaileak ",
             "b": true
           },
           {
-            "text": "dira eta atzealdean kokatzen direnak "
+            "text": "dira ○ Beheko gorputz adarretako atzekaldean kokatzen direnak "
           },
           {
-            "text": "muskulu",
+            "text": "muskulu tolestatzaileak",
             "b": true
           },
           {
-            "text": " "
-          },
-          {
-            "text": "tolestatzaileak",
-            "b": true
-          },
-          {
-            "text": ". "
-          }
-        ]
-      },
-      {
-        "id": "w8/4/p16/s3",
-        "parts": [
-          {
-            "text": "8 asterako, beraz, biraketa hauek emanda egongo dira."
+            "text": "."
           }
         ]
       }
@@ -2867,10 +2838,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "h2",
     "section": "4",
-    "id": "w8/4/p17",
+    "id": "w8/4/p11",
     "sentences": [
       {
-        "id": "w8/4/p17/s1",
+        "id": "w8/4/p11/s1",
         "parts": [
           {
             "text": "12.astea",
@@ -2884,10 +2855,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "p",
     "section": "4",
-    "id": "w8/4/p18",
+    "id": "w8/4/p12",
     "sentences": [
       {
-        "id": "w8/4/p18/s1",
+        "id": "w8/4/p12/s1",
         "parts": [
           {
             "text": "12. asterako",
@@ -2899,17 +2870,17 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/4/p18/s2",
+        "id": "w8/4/p12/s2",
         "parts": [
           {
             "text": "Goi eta beheko gorputz adarretako hezur luzeetan "
           },
           {
-            "text": "bi atal",
+            "text": "bi atal ",
             "b": true
           },
           {
-            "text": " bereizten dira:"
+            "text": "bereizten dira:"
           }
         ]
       }
@@ -2918,10 +2889,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "li",
     "section": "4",
-    "id": "w8/4/p19",
+    "id": "w8/4/p13",
     "sentences": [
       {
-        "id": "w8/4/p19/s1",
+        "id": "w8/4/p13/s1",
         "parts": [
           {
             "text": "● "
@@ -2940,10 +2911,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "li",
     "section": "4",
-    "id": "w8/4/p20",
+    "id": "w8/4/p14",
     "sentences": [
       {
-        "id": "w8/4/p20/s1",
+        "id": "w8/4/p14/s1",
         "parts": [
           {
             "text": "● "
@@ -2962,10 +2933,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "p",
     "section": "4",
-    "id": "w8/4/p21",
+    "id": "w8/4/p15",
     "sentences": [
       {
-        "id": "w8/4/p21/s1",
+        "id": "w8/4/p15/s1",
         "parts": [
           {
             "text": "Jaio aurretik:",
@@ -2978,34 +2949,27 @@ export const w8: NotesBlock[] = [
   {
     "kind": "li",
     "section": "4",
-    "id": "w8/4/p22",
+    "id": "w8/4/p16",
     "sentences": [
       {
-        "id": "w8/4/p22/s1",
+        "id": "w8/4/p16/s1",
         "parts": [
           {
-            "text": "● Hasieran, hezurtzapen zentroak, "
+            "text": "● Hezurtzapen zentroak, "
           },
           {
-            "text": "hezurtzapen zentro",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "primario ",
+            "text": "hezurtzapen zentro primario ",
             "b": true
           },
           {
             "text": "deituak, "
           },
           {
-            "text": "diafisiak ",
+            "text": "diafisian",
             "b": true
           },
           {
-            "text": "hezurtzen hasten dira zentrotik ertzetaraino."
+            "text": " agertzen dira, eta hezurtzea pixkanaka diafisi osoan zehar hedatzen da."
           }
         ]
       }
@@ -3014,10 +2978,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "li",
     "section": "4",
-    "id": "w8/4/p23",
+    "id": "w8/4/p17",
     "sentences": [
       {
-        "id": "w8/4/p23/s1",
+        "id": "w8/4/p17/s1",
         "parts": [
           {
             "text": "● Epifisiak, aldiz, kartilogenotsuak mantentzen dira jaiotza arte."
@@ -3029,44 +2993,32 @@ export const w8: NotesBlock[] = [
   {
     "kind": "p",
     "section": "4",
-    "id": "w8/4/p24",
+    "id": "w8/4/p18",
     "sentences": [
       {
-        "id": "w8/4/p24/s1",
+        "id": "w8/4/p18/s1",
         "parts": [
           {
-            "text": "Beraz, jaiotzean, hezur luze guztien diafisiak hezurtuta daude; epifisiak, ordea, hezurtu barik daude oraindik."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "4",
-    "id": "w8/4/p25",
-    "sentences": [
-      {
-        "id": "w8/4/p25/s1",
-        "parts": [
-          {
-            "text": "Jaio ondoren:",
+            "text": "Jaio ondoren: ",
             "b": true
+          },
+          {
+            "text": "hezur luze guztien diafisiak hezurtuta daude, baina epifisiak hezurtu barik oraindik."
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "4",
-    "id": "w8/4/p26",
+    "id": "w8/4/p19",
     "sentences": [
       {
-        "id": "w8/4/p26/s1",
+        "id": "w8/4/p19/s1",
         "parts": [
           {
-            "text": "Epifisietan (muturretan) "
+            "text": "● Epifisietan "
           },
           {
             "text": "hezurtzapen zentro sekundarioak ",
@@ -3087,15 +3039,15 @@ export const w8: NotesBlock[] = [
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "4",
-    "id": "w8/4/p27",
+    "id": "w8/4/p20",
     "sentences": [
       {
-        "id": "w8/4/p27/s1",
+        "id": "w8/4/p20/s1",
         "parts": [
           {
-            "text": "Hezurtuta dauden hezur luzeen diafisi eta epifisien artean beti eskualde bat "
+            "text": "● Hezurtuta dauden hezur luzeen diafisi eta epifisien artean beti eskualde bat "
           },
           {
             "text": "hezurtu gabe",
@@ -3114,38 +3066,31 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/4/p27/s2",
+        "id": "w8/4/p20/s2",
         "parts": [
           {
-            "text": "Jaiotzean hezur hauen luzetarako hazkuntza bermatzeko hain zuzen ere ez da hezurtzen. "
+            "text": "Eskualde hori ez da hezurtzen, hezurraren luzetarako hazkuntza ahalbidetzeko. "
           }
         ]
       },
       {
-        "id": "w8/4/p27/s3",
+        "id": "w8/4/p20/s3",
         "parts": [
           {
-            "text": "Behin luzetarako hazkuntza maximoa lortu denean, metafisia desagertu egiten da eta diafisia epifisiekin fusionatzen da."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "4",
-    "id": "w8/4/p28",
-    "sentences": [
-      {
-        "id": "w8/4/p28/s1",
-        "parts": [
-          {
-            "text": "Hezurren arabera agertzen dira hezurtzapen kopurua ezberdina da. "
+            "text": "Behin luzetarako hazkuntza maximoa lortu denean, metafisia desagertu egiten da eta diafisia epifisiekin fusionatzen da. "
           }
         ]
       },
       {
-        "id": "w8/4/p28/s2",
+        "id": "w8/4/p20/s4",
+        "parts": [
+          {
+            "text": "Hezurren arabera agertzen diren hezurtzapen zentro kopurua ezberdina da. "
+          }
+        ]
+      },
+      {
+        "id": "w8/4/p20/s5",
         "parts": [
           {
             "text": "Hezur luzeetan, "
@@ -3161,10 +3106,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "li",
     "section": "4",
-    "id": "w8/4/p29",
+    "id": "w8/4/p21",
     "sentences": [
       {
-        "id": "w8/4/p29/s1",
+        "id": "w8/4/p21/s1",
         "parts": [
           {
             "text": "● Normalean "
@@ -3174,15 +3119,15 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "plaka egoten dira: bi muturretatik hazten da hezurra (izter hezurrean esaterako). "
+            "text": "plaka egoten dira: bi muturretatik hazten da hezurra (izter hezurrean adb.). "
           }
         ]
       },
       {
-        "id": "w8/4/p29/s2",
+        "id": "w8/4/p21/s2",
         "parts": [
           {
-            "text": "(Hezurrak erabat luzeak direlako bi epifisi plaka behar dira)"
+            "text": "(Hezurrak erabat luzeak direlako bi epifisi plaka behar dira) ."
           }
         ]
       }
@@ -3191,10 +3136,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "li",
     "section": "4",
-    "id": "w8/4/p30",
+    "id": "w8/4/p22",
     "sentences": [
       {
-        "id": "w8/4/p30/s1",
+        "id": "w8/4/p22/s1",
         "parts": [
           {
             "text": "● Epifisi plaka "
@@ -3204,7 +3149,7 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": ": mutur bakarretik hazten da hezurra (hatzetako falangeetan esaterako)."
+            "text": ": mutur bakarretik hazten da hezurra (hatzetako falangeetan adb.)."
           }
         ]
       }
@@ -3235,7 +3180,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.1/p1/s1",
         "parts": [
           {
-            "text": "5.1. Ornoak",
+            "text": "5.1. Ornoak:",
             "b": true,
             "i": true
           }
@@ -3259,7 +3204,7 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": ": aldea bentralerantz kokatuta dago."
+            "text": ": alde bentralerantz kokatuta dago."
           }
         ]
       }
@@ -3281,7 +3226,7 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": ": Orno gorputzaren atze- alboko zatian kokatua dago. "
+            "text": ": Orno gorputzaren atze-alboko zatian kokatua dago. "
           }
         ]
       },
@@ -3289,7 +3234,25 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.1/p3/s2",
         "parts": [
           {
-            "text": "Bertatik hainbat apofisi irteten dira:"
+            "text": "Bertatik hainbat apofisi irteten dira: ○ Alboetara: "
+          },
+          {
+            "text": "Apofisi zeharrak / Zeharkako apofisiak",
+            "b": true
+          },
+          {
+            "text": " ○ Atzealdera: "
+          },
+          {
+            "text": "Arantza apofisia ",
+            "b": true
+          },
+          {
+            "text": "(bizkarrean ikusten ditugunak) ○ "
+          },
+          {
+            "text": "Giltzadura apofisiak",
+            "b": true
           }
         ]
       }
@@ -3302,62 +3265,6 @@ export const w8: NotesBlock[] = [
     "sentences": [
       {
         "id": "w8/5.1/p4/s1",
-        "parts": [
-          {
-            "text": "● Alboetara: "
-          },
-          {
-            "text": "Apofisi zeharrak / Zeharkako apofisiak",
-            "b": true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "5.1",
-    "id": "w8/5.1/p5",
-    "sentences": [
-      {
-        "id": "w8/5.1/p5/s1",
-        "parts": [
-          {
-            "text": "● Atzealdera: "
-          },
-          {
-            "text": "Arantza apofisia ",
-            "b": true
-          },
-          {
-            "text": "(bizkarrean ikusten ditugunak)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "5.1",
-    "id": "w8/5.1/p6",
-    "sentences": [
-      {
-        "id": "w8/5.1/p6/s1",
-        "parts": [
-          {
-            "text": "● Apofisi artikularrak"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "5.1",
-    "id": "w8/5.1/p7",
-    "sentences": [
-      {
-        "id": "w8/5.1/p7/s1",
         "parts": [
           {
             "text": "● "
@@ -3421,7 +3328,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2/p2/s2",
         "parts": [
           {
-            "text": "Somitetako zelula guztiak berdinak dira hasieran baina prozesu desberdinak eginez gaitasun ezberdineko zelulak agertzen dira: miotoma, dermotoma eta esklerotoma zelulak."
+            "text": "Hasieran somitetako zelulak antzekoak dira, baina diferentziazio prozesuen ondorioz dermotoma, miotoma eta esklerotoma eratzen dira."
           }
         ]
       }
@@ -3444,7 +3351,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2/p3/s2",
         "parts": [
           {
-            "text": "Esklerotomako zelula hauek bi aldetako somitetatik erdialdera migratzen"
+            "text": "Esklerotomako zelula hauek bi aldetako somitetatik erdialdera migratzen dute hodi neurala eta notokorda inguratzeko, maila guztietan alde okzipitaletik behera."
           }
         ]
       }
@@ -3459,21 +3366,6 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2/p4/s1",
         "parts": [
           {
-            "text": "dute hodi neurala eta notokorda inguratzeko, maila guztietan alde okzipitaletik behera."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.2",
-    "id": "w8/5.2/p5",
-    "sentences": [
-      {
-        "id": "w8/5.2/p5/s1",
-        "parts": [
-          {
             "text": "Erdikalderantz migratutako esklerotoma zelula horiek hodi neural eta notokorda inguruan "
           },
           {
@@ -3486,7 +3378,7 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/5.2/p5/s2",
+        "id": "w8/5.2/p4/s2",
         "parts": [
           {
             "text": "Zutabe honetan, segmentu ezberdinak bereizten dira , segmentu horien artean "
@@ -3496,20 +3388,20 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "kokatzen dalarik. "
+            "text": "kokatzen delarik. "
           }
         ]
       },
       {
-        "id": "w8/5.2/p5/s3",
+        "id": "w8/5.2/p4/s3",
         "parts": [
           {
-            "text": "Hau gertatzen dan aldi berean, erdikalderantz migratzen dute segmentu desberdinetako miotomak, mesenkima zutabe hoietako segmentuetan finkatzeko. "
+            "text": "Hau gertatzen den aldi berean, erdikalderantz migratzen dute segmentu desberdinetako miotomak, mesenkima zutabe horietako segmentuetan finkatzeko. "
           }
         ]
       },
       {
-        "id": "w8/5.2/p5/s4",
+        "id": "w8/5.2/p4/s4",
         "parts": [
           {
             "text": "Hemendik gero maila guztietako muskuluak eratuko dira."
@@ -3544,28 +3436,49 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2.1/p2/s1",
         "parts": [
           {
-            "text": "Somitetako "
+            "text": "Somiten "
           },
           {
             "text": "esklerotoma ",
             "b": true
           },
           {
-            "text": "zelulek erdikaldera migratzean (4. astean), hodi neurala eta notokordaren inguruan "
+            "text": "zelulak erdikaldera migratzean (4. astean), hodi neurala eta notokordaren inguruan "
           },
           {
-            "text": "mesenkima zutabea",
+            "text": "mesenkima",
             "b": true
           },
           {
             "text": " "
           },
           {
-            "text": "/ esklerotoma zutabea ",
+            "text": "zutabea",
             "b": true
           },
           {
-            "text": "(bizkarrezurrarena) deituriko egitura sortzen da. "
+            "text": " "
+          },
+          {
+            "text": "/",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "esklerotoma",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "zutabea",
+            "b": true
+          },
+          {
+            "text": " (bizkarrezurrarena) deituriko egitura sortzen da. "
           }
         ]
       },
@@ -3581,12 +3494,20 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2.1/p2/s3",
         "parts": [
           {
-            "text": "Hau gertatzen den aldi berean, erdialderantz migratzen dute finkatzeko mesenkima zutabe horietako segmentuetan, segmentu desberdinetako miotomak nondik maila guztietako muskuluak eratuko diren. "
+            "text": "Hau gertatzen den aldi berean, segmentu desberdinetako miotomak ere erdialderantz migratzen dute mesenkima-zutabeko segmentuetan finkatzeko. "
           }
         ]
       },
       {
         "id": "w8/5.2.1/p2/s4",
+        "parts": [
+          {
+            "text": "Miotoma horietatik gorputzeko maila guztietako muskulu eskeletikoak garatuko dira. "
+          }
+        ]
+      },
+      {
+        "id": "w8/5.2.1/p2/s5",
         "parts": [
           {
             "text": "Mesenkima zutabe horietan, birsegmentazio prozesu bat ematen da, non jatorrizko esklerotoma segmentu guztietan bi atal bereizten diren, goiko eta beheko atalak."
@@ -3604,7 +3525,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2.1/p3/s1",
         "parts": [
           {
-            "text": "Esklerotoma segmentu horien behe erdiko zelulak ugaldu egiten dira, eta behean duten esklerotoma segmentuaren goiko erdiko atalarekin fusionatzen dira. "
+            "text": "Esklerotoma segmentu horien behe erdiko zelulak ugaldu egiten dira, eta behean duten esklerotoma segmentuaren goiko erdiko atalarekin fusionatzen dira, orno gorputza bat sortzeko. "
           }
         ]
       },
@@ -3620,7 +3541,37 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2.1/p3/s3",
         "parts": [
           {
-            "text": "Prozesu honen ondorioz ornogorputzak eratzen dira."
+            "text": "Prozesu honen ondorioz orno-gorputzak eratzen dira. "
+          }
+        ]
+      },
+      {
+        "id": "w8/5.2.1/p3/s4",
+        "parts": [
+          {
+            "text": "Esaten da segmentuen arteko mailetan eratzen direla bizkarrezurraren orno gorputzak. "
+          }
+        ]
+      },
+      {
+        "id": "w8/5.2.1/p3/s5",
+        "parts": [
+          {
+            "text": "Prozesu hau modu honetan gertatu denez, ornoak daukaten "
+          },
+          {
+            "text": "jatorri",
+            "b": true
+          },
+          {
+            "text": "a "
+          },
+          {
+            "text": "intersegmentarioa ",
+            "b": true
+          },
+          {
+            "text": "dela esaten da (segmentu arteko mailan gertatzen delako ornoen eraketa)."
           }
         ]
       }
@@ -3635,14 +3586,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2.1/p4/s1",
         "parts": [
           {
-            "text": "Fusio horretan, segmentu arteko hasierako mesenkima, barruankokatuta gelditzen da, eta ornoak sortzn dira."
+            "text": "Jatorrizko esklerotoman bereizten diren atalak:"
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "5.2.1",
     "id": "w8/5.2.1/p5",
     "sentences": [
@@ -3650,7 +3601,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2.1/p5/s1",
         "parts": [
           {
-            "text": "Jatorrizko esklerotoman bereizten diren atalak:"
+            "text": "● Trinkoak diren mesenkima segmentuak (jatorri segmentarioa mantendu)."
           }
         ]
       }
@@ -3665,14 +3616,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2.1/p6/s1",
         "parts": [
           {
-            "text": "● Trinkoak diren mesenkima segmentuak (jatorri segmetarioa mantendu)."
+            "text": "● Hain trinkoa ez den eta estuagoa den mesenkima eskualdea (segmentu arteko mesenkima)."
           }
         ]
       }
     ]
   },
   {
-    "kind": "li",
+    "kind": "p",
     "section": "5.2.1",
     "id": "w8/5.2.1/p7",
     "sentences": [
@@ -3680,7 +3631,42 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2.1/p7/s1",
         "parts": [
           {
-            "text": "● Hain trinkoa ez den eta estuagoa den mesenkima eskualdea (segmetu arteko mesenkima)."
+            "text": "Esklerotoma segmentu baten goi eta beheko-erdiko atal hauen artean gelditzen diren zelula hauetatik "
+          },
+          {
+            "text": "orno arteko diskoa",
+            "b": true
+          },
+          {
+            "text": " eratzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w8/5.2.1/p7/s2",
+        "parts": [
+          {
+            "text": "➢ Notokorda endekatu eta desagertu egiten da ornogorputzaren mailetan, baina ornoarteko diskoetan ez da desagertzen. "
+          }
+        ]
+      },
+      {
+        "id": "w8/5.2.1/p7/s3",
+        "parts": [
+          {
+            "text": "➢ Ornoarteko diskoaren mailan, notokordak ez du erabat desagertzen; aitzitik, eraldatu egiten da eta ornoarteko diskoaren nukleo pulposoa eratzen du. "
+          }
+        ]
+      },
+      {
+        "id": "w8/5.2.1/p7/s4",
+        "parts": [
+          {
+            "text": "→ notokorda orno arteko diskoaren mailan ez da desagertzen ○ Nukleo pulposo honen inguruko mesenkimatik sortzen da ornoarteko diskoaren gainerako atala: "
+          },
+          {
+            "text": "Eraztun fibrosoa (ehun fibrosoz eratutako eraztuna).",
+            "b": true
           }
         ]
       }
@@ -3695,14 +3681,15 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2.1/p8/s1",
         "parts": [
           {
-            "text": "Esklerotoma segmentu baten goi eta beheko-erdiko atal hauen artean gelditzen diren zelula hauetatik "
-          },
+            "text": "Hasieran, mesenkima zutabe honetaraino (segmentu arteko mesenkimaren mailetara) segmentu bakoitzean sortzen ari diren miotoma edo muskuluak iristen dira. "
+          }
+        ]
+      },
+      {
+        "id": "w8/5.2.1/p8/s2",
+        "parts": [
           {
-            "text": "orno arteko diskoa",
-            "b": true
-          },
-          {
-            "text": " eratzen da."
+            "text": "Horrez gain, segmentu arteko arteria desberdinak iristen dira"
           }
         ]
       }
@@ -3717,14 +3704,14 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2.1/p9/s1",
         "parts": [
           {
-            "text": "➢ Notokorda endekatu eta desagertuegiten da ornogorputzaren mailetan, baina ornoarteko diskoetan ez da desagertzen."
+            "text": "Birsegmentazio prozesuaren ondorioz:"
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "5.2.1",
     "id": "w8/5.2.1/p10",
     "sentences": [
@@ -3732,29 +3719,7 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2.1/p10/s1",
         "parts": [
           {
-            "text": "➢ Ornoarteko diskoaren arteko mailetan notokorda endekapen prozesu berezi bat eginez, "
-          },
-          {
-            "text": "ornoarteko",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "diskoaren nukleo/gune pulposoa ",
-            "b": true
-          },
-          {
-            "text": "sortzen du. "
-          }
-        ]
-      },
-      {
-        "id": "w8/5.2.1/p10/s2",
-        "parts": [
-          {
-            "text": "→ notokorda orno arteko diskoaren mailan ez da desagertzen"
+            "text": "● Hasieran mesenkima zutabe honetaraino iritsi diren somita guztietako miotomek haien kokapena aldatuko dute."
           }
         ]
       }
@@ -3769,205 +3734,25 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.2.1/p11/s1",
         "parts": [
           {
-            "text": "- Nukleo pulposo honen inguruko mesenkimatik sortzen da ornoarteko diskoaren gainerako atala: "
-          },
-          {
-            "text": "Eraztun",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "fibrosoa.",
-            "b": true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.2.1",
-    "id": "w8/5.2.1/p12",
-    "sentences": [
-      {
-        "id": "w8/5.2.1/p12/s1",
-        "parts": [
-          {
-            "text": "Birsegmentazio prozesuaren ondorioz:"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "5.2.1",
-    "id": "w8/5.2.1/p13",
-    "sentences": [
-      {
-        "id": "w8/5.2.1/p13/s1",
-        "parts": [
-          {
-            "text": "● Hasieran mesenkima zutabe honetaraino iritsi diren somita guztietako miotomek haien kokapena aldatuko dute."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "5.2.1",
-    "id": "w8/5.2.1/p14",
-    "sentences": [
-      {
-        "id": "w8/5.2.1/p14/s1",
-        "parts": [
-          {
-            "text": "● Honen logika: Muskuluek bizkarrezurra mugitu egin behar dute, horretarako, orno batetik bestera hedatu behar dira."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.2.1",
-    "id": "w8/5.2.1/p15",
-    "sentences": [
-      {
-        "id": "w8/5.2.1/p15/s1",
-        "parts": [
-          {
-            "text": "Gauza bera gertatuko da ornomuinaren segmentu desberdinetatik irtetzen diren nerbio espespinalekin/ errakideokin."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.2.1",
-    "id": "w8/5.2.1/p16",
-    "sentences": [
-      {
-        "id": "w8/5.2.1/p16/s1",
-        "parts": [
-          {
-            "text": "Hasieran, mesenkima zutabe honetaraino (segmentu arteko mesenkimaren mailetara) segmentu arteko arteria desberdinak iristen dira. "
+            "text": "● Gauza bera gertatuko da ornomuinaren segmentu desberdinetatik irtetzen diren nerbio espinalekin/ errakideokin. "
           }
         ]
       },
       {
-        "id": "w8/5.2.1/p16/s2",
+        "id": "w8/5.2.1/p11/s2",
         "parts": [
           {
-            "text": "Gainera, mesenkima zutabe honetara segmentu bakoitzean sortzen ari diren miotoma edo muskuluak iristen dira."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.2.1",
-    "id": "w8/5.2.1/p17",
-    "sentences": [
-      {
-        "id": "w8/5.2.1/p17/s1",
-        "parts": [
-          {
-            "text": "○ Prozesu hau modu honetan gertatu denez, ornoak daukaten "
+            "text": "Honen logika→ Muskuluek bizkarrezurra "
           },
           {
-            "text": "jatorri",
+            "text": "mugitu ",
             "b": true
           },
           {
-            "text": "a "
+            "text": "behar dute, beraz "
           },
           {
-            "text": "intersegmentarioa",
-            "b": true
-          },
-          {
-            "text": " dela esaten da (segmentu arteko mailan gertatzen delako ornoen eraketa)."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.2.1",
-    "id": "w8/5.2.1/p18",
-    "sentences": [
-      {
-        "id": "w8/5.2.1/p18/s1",
-        "parts": [
-          {
-            "text": "b. ",
-            "b": true
-          },
-          {
-            "text": "Hasierako segmentu trinko hauek "
-          },
-          {
-            "text": "jatorri segmentarioa ",
-            "b": true
-          },
-          {
-            "text": "mantentzen dute hasiera batean; baina ondoren, segmentuen artean "
-          },
-          {
-            "text": "fusioa ",
-            "b": true
-          },
-          {
-            "text": "gertatzen da. "
-          }
-        ]
-      },
-      {
-        "id": "w8/5.2.1/p18/s2",
-        "parts": [
-          {
-            "text": "Ornoak bi segmentu desberdinetatik sortzen dira."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "5.2.1",
-    "id": "w8/5.2.1/p19",
-    "sentences": [
-      {
-        "id": "w8/5.2.1/p19/s1",
-        "parts": [
-          {
-            "text": "● "
-          },
-          {
-            "text": "Birsegmentazio prozesuaren ondoren:",
-            "b": true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.2.1",
-    "id": "w8/5.2.1/p20",
-    "sentences": [
-      {
-        "id": "w8/5.2.1/p20/s1",
-        "parts": [
-          {
-            "text": "a. Miotoma ",
+            "text": "Miotoma ",
             "b": true
           },
           {
@@ -3992,77 +3777,44 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "dira→ Muskuluek bizkarrezurra "
-          },
-          {
-            "text": "mugitu ",
-            "b": true
-          },
-          {
-            "text": "behar dutelako."
+            "text": "dira"
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "li",
     "section": "5.2.1",
-    "id": "w8/5.2.1/p21",
+    "id": "w8/5.2.1/p12",
     "sentences": [
       {
-        "id": "w8/5.2.1/p21/s1",
+        "id": "w8/5.2.1/p12/s1",
         "parts": [
           {
-            "text": "b. ",
-            "b": true
-          },
-          {
-            "text": "Bizkarrezurrera iristen diren arteria adarrak:"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.2.1",
-    "id": "w8/5.2.1/p22",
-    "sentences": [
-      {
-        "id": "w8/5.2.1/p22/s1",
-        "parts": [
-          {
-            "text": "➢ Prozesuaren "
+            "text": "● Bizkarrezurrera iristen diren arteria adarrak: ○ Prozesuaren "
           },
           {
             "text": "hasieran",
             "b": true
           },
           {
-            "text": ": Segmentu arteko arteriak."
+            "text": ": Segmentu arteko arteriak. "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.2.1",
-    "id": "w8/5.2.1/p23",
-    "sentences": [
+      },
       {
-        "id": "w8/5.2.1/p23/s1",
+        "id": "w8/5.2.1/p12/s2",
         "parts": [
           {
-            "text": "➢ Prozesuaren "
+            "text": "○ Prozesuaren "
           },
           {
             "text": "bukaeran",
             "b": true
           },
           {
-            "text": ": Orno gorputzaren mailetakoa"
+            "text": ": Orno gorputzaren mailetakoak"
           }
         ]
       }
@@ -4071,10 +3823,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "p",
     "section": "5.2.1",
-    "id": "w8/5.2.1/p24",
+    "id": "w8/5.2.1/p13",
     "sentences": [
       {
-        "id": "w8/5.2.1/p24/s1",
+        "id": "w8/5.2.1/p13/s1",
         "parts": [
           {
             "text": "Bizkarrezuraren makurdurak:",
@@ -4087,10 +3839,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "li",
     "section": "5.2.1",
-    "id": "w8/5.2.1/p25",
+    "id": "w8/5.2.1/p14",
     "sentences": [
       {
-        "id": "w8/5.2.1/p25/s1",
+        "id": "w8/5.2.1/p14/s1",
         "parts": [
           {
             "text": "● "
@@ -4112,7 +3864,7 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/5.2.1/p25/s2",
+        "id": "w8/5.2.1/p14/s2",
         "parts": [
           {
             "text": "2",
@@ -4122,14 +3874,14 @@ export const w8: NotesBlock[] = [
             "text": " makurdura bereizten dira: "
           },
           {
-            "text": "bizkarrezkoa ",
+            "text": "toraxeko zifosia ",
             "b": true
           },
           {
             "text": "eta "
           },
           {
-            "text": "sakroarena",
+            "text": "sakro zifosia",
             "b": true
           },
           {
@@ -4142,10 +3894,10 @@ export const w8: NotesBlock[] = [
   {
     "kind": "li",
     "section": "5.2.1",
-    "id": "w8/5.2.1/p26",
+    "id": "w8/5.2.1/p15",
     "sentences": [
       {
-        "id": "w8/5.2.1/p26/s1",
+        "id": "w8/5.2.1/p15/s1",
         "parts": [
           {
             "text": "● "
@@ -4160,36 +3912,29 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/5.2.1/p26/s2",
+        "id": "w8/5.2.1/p15/s2",
         "parts": [
           {
             "text": "Burua altxatuz "
           },
           {
-            "text": "lepokoa ",
+            "text": "lepoko lordosia ",
             "b": true
           },
           {
             "text": "garatzen da eta ibiltzean "
           },
           {
-            "text": "gerrikoa ",
+            "text": "gerriko lordosia ",
             "b": true
           },
           {
-            "text": "(lumbar) agertzen da."
+            "text": "(lumbar) agertzen da. "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.2.1",
-    "id": "w8/5.2.1/p27",
-    "sentences": [
+      },
       {
-        "id": "w8/5.2.1/p27/s1",
+        "id": "w8/5.2.1/p15/s3",
         "parts": [
           {
             "text": "Makurdura horiei esker bizkarrezurrak tentsio edo indar gehiago jaso dezake."
@@ -4257,14 +4002,28 @@ export const w8: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "bat eratuko dute eta "
+            "text": "bat eratuko dute "
           },
           {
             "text": "ornomuina ",
             "b": true
           },
           {
-            "text": "hemen kokatuko da. "
+            "text": "hemen kokatuko da ○ Ornomuin horretan goitik behera "
+          },
+          {
+            "text": "segmentu ",
+            "b": true
+          },
+          {
+            "text": "desberdinak daude (lepokoak, bizkarrekoak, gerrikoak) ■ Segmentu bakoitzarekin "
+          },
+          {
+            "text": "nerbio errakideo / espinal bikote ",
+            "b": true
+          },
+          {
+            "text": "bat erlazionatzen da. "
           }
         ]
       },
@@ -4272,80 +4031,28 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.3/p3/s2",
         "parts": [
           {
-            "text": "○ Ornomuin horretan goitik behera "
+            "text": "■ Orno muinaren segmentu ezberdinekin erlazionatzen diren "
           },
           {
-            "text": "segmentu ",
+            "text": "errakideoak /",
             "b": true
           },
           {
-            "text": "desberdinak daude (lepokoak, bizkarrekoak, gerrikoak)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.3",
-    "id": "w8/5.3/p4",
-    "sentences": [
-      {
-        "id": "w8/5.3/p4/s1",
-        "parts": [
-          {
-            "text": "➢ Segmentu bakoitzarekin "
+            "text": " "
           },
           {
-            "text": "nerbio errakideo / espinal bikote ",
+            "text": "espinalak ",
             "b": true
           },
           {
-            "text": "bat erlazionatzen da."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.3",
-    "id": "w8/5.3/p5",
-    "sentences": [
-      {
-        "id": "w8/5.3/p5/s1",
-        "parts": [
-          {
-            "text": "➢ Orno muinaren segmentu ezberdinekin erlazionatzen diren "
-          },
-          {
-            "text": "errakideoak / espinalak",
-            "b": true
-          },
-          {
-            "text": " bizkarezurreko "
+            "text": "bizkarezurreko "
           },
           {
             "text": "orno arteko zuloetatik ",
             "b": true
           },
           {
-            "text": "irteten dira (zulo hauek orno arteko diskoaren mailetan kokatuak daude)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.3",
-    "id": "w8/5.3/p6",
-    "sentences": [
-      {
-        "id": "w8/5.3/p6/s1",
-        "parts": [
-          {
-            "text": "➢ Orno gorputzak eratzeko esklerotomako zelulak segmentu arteko mailetan eratzen dira, baina somitetatik irtetzen diren gainerako egiturak, miotomak edo miotometara heltzen diren nerbio espinalak, kokatuko dira orno gorputzen artean."
+            "text": "irteten dira (zulo hauek orno arteko diskoaren mailetan kokatuak daude) ■ Orno gorputzak eratzeko esklerotomako zelulak segmentu arteko mailetan eratzen dira, baina somitetatik irtetzen diren gainerako egiturak, miotomak edo miotometara heltzen diren nerbio espinalak, kokatuko dira orno gorputzen artean."
           }
         ]
       }
@@ -4397,6 +4104,17 @@ export const w8: NotesBlock[] = [
           {
             "text": "hezurrezkoa → Saihets hezurra.",
             "b": true
+          },
+          {
+            "text": " "
+          }
+        ]
+      },
+      {
+        "id": "w8/5.4/p3/s2",
+        "parts": [
+          {
+            "text": "○ Gorputzaren atze eta aurreko paretan kokatuta."
           }
         ]
       }
@@ -4411,52 +4129,22 @@ export const w8: NotesBlock[] = [
         "id": "w8/5.4/p4/s1",
         "parts": [
           {
-            "text": "○ ",
-            "b": true
-          },
-          {
-            "text": "Gorputzaren atze eta aurreko paretan kokatuta."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.4",
-    "id": "w8/5.4/p5",
-    "sentences": [
-      {
-        "id": "w8/5.4/p5/s1",
-        "parts": [
-          {
-            "text": "○ ",
-            "b": true
-          },
-          {
-            "text": "Somitetako "
+            "text": "○ Somitetako "
           },
           {
             "text": "esklerotomatik ",
             "b": true
           },
           {
-            "text": "eratzen dira."
+            "text": "eratzen dira. "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.4",
-    "id": "w8/5.4/p6",
-    "sentences": [
+      },
       {
-        "id": "w8/5.4/p6/s1",
+        "id": "w8/5.4/p4/s2",
         "parts": [
           {
-            "text": "➢ Esklerotoma zelula batzuk "
+            "text": "■ Esklerotoma zelula batzuk "
           },
           {
             "text": "alboetara ",
@@ -4466,55 +4154,41 @@ export const w8: NotesBlock[] = [
             "text": "migratu eta somiten alde "
           },
           {
-            "text": "lateralean ",
+            "text": "lateralean",
             "b": true
           },
           {
-            "text": "dagoen muga bat gurutzatu: "
+            "text": " dagoen muga bat gurutzatu: "
           },
           {
             "text": "Somitaren alboko muga",
             "b": true
           },
           {
-            "text": "."
+            "text": ". "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.4",
-    "id": "w8/5.4/p7",
-    "sentences": [
+      },
       {
-        "id": "w8/5.4/p7/s1",
+        "id": "w8/5.4/p4/s3",
         "parts": [
           {
-            "text": "➢ Alboko mesodermoaren "
+            "text": "■ Alboko mesodermoaren "
           },
           {
             "text": "pareta orriraino ",
             "b": true
           },
           {
-            "text": "iritsi."
+            "text": "iritsi. "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.4",
-    "id": "w8/5.4/p8",
-    "sentences": [
+      },
       {
-        "id": "w8/5.4/p8/s1",
+        "id": "w8/5.4/p4/s4",
         "parts": [
           {
-            "text": "➢ Bertan sahiets hezurrak sortu."
+            "text": "■  Bertan sahiets hezurrak sortu."
           }
         ]
       }
@@ -4523,36 +4197,28 @@ export const w8: NotesBlock[] = [
   {
     "kind": "li",
     "section": "5.4",
-    "id": "w8/5.4/p9",
+    "id": "w8/5.4/p5",
     "sentences": [
       {
-        "id": "w8/5.4/p9/s1",
+        "id": "w8/5.4/p5/s1",
         "parts": [
           {
-            "text": "● Aurreko atala "
+            "text": "● Aurreko atal "
           },
           {
             "text": "kartilagenozkoa → Saihets kartilagoa.",
             "b": true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.4",
-    "id": "w8/5.4/p10",
-    "sentences": [
-      {
-        "id": "w8/5.4/p10/s1",
-        "parts": [
-          {
-            "text": "○ ",
-            "b": true
           },
           {
-            "text": "Alboko mesodermoaren "
+            "text": " "
+          }
+        ]
+      },
+      {
+        "id": "w8/5.4/p5/s2",
+        "parts": [
+          {
+            "text": "○ Alboko mesodermoaren "
           },
           {
             "text": "paretako orritik ",
@@ -4564,41 +4230,33 @@ export const w8: NotesBlock[] = [
         ]
       },
       {
-        "id": "w8/5.4/p10/s2",
+        "id": "w8/5.4/p5/s3",
         "parts": [
           {
-            "text": "○ ",
-            "b": true
-          },
-          {
-            "text": "Torax aurreko esternoiarekin (bularezurra) antzekoa gertatu. "
+            "text": "○ Torax aurreko esternoiarekin (bularezurra) antzekoa gertatu. "
           }
         ]
       },
       {
-        "id": "w8/5.4/p10/s3",
+        "id": "w8/5.4/p5/s4",
         "parts": [
           {
-            "text": "➢ Paretetik kartilago desberdinak agertu (goitik behera) ➢ Beraien artean "
+            "text": "■ Paretetik kartilago desberdinak agertu (goitik behera) ■ Beraien artean "
           },
           {
             "text": "fusionatu.",
             "b": true
+          },
+          {
+            "text": " "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "5.4",
-    "id": "w8/5.4/p11",
-    "sentences": [
+      },
       {
-        "id": "w8/5.4/p11/s1",
+        "id": "w8/5.4/p5/s5",
         "parts": [
           {
-            "text": "➢ 3 atal eratu: "
+            "text": "■ 3 atal eratu: "
           },
           {
             "text": "Kirtena, gorputza eta xifoide apofisia.",

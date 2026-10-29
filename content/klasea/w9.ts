@@ -18,14 +18,14 @@ const TABLE: BoardItem = {
   kind: 'table',
   head: ['Jatorria', 'Nerbio kraneala'],
   rows: [
-    { id: 'tz-1-2', cells: ['1. eta 2. somitomeroak', 'III: nerbio begi eragilea'], notes: n('2.1.1/p4/s3'), structures: ['begiaren-kanpoko-muskuluak'] },
-    { id: 'tz-3', cells: ['3. somitomeroa', 'IV: troklea nerbioa'], notes: n('2.1.1/p4/s3'), structures: ['begi-goiko-laprana'] },
-    { id: 'tz-4', cells: ['4. somitomeroa (1. arkua)', 'V: trigeminoa'], notes: n('2.1.1/p5/s2', '2.1.1/p5/s3'), structures: ['muskulu-murtsikatzaileak'] },
-    { id: 'tz-5', cells: ['5. somitomeroa', 'VI: nerbio aldentzailea'], notes: n('2.1.1/p4/s3'), structures: ['begi-alboko-zuzena'] },
-    { id: 'tz-6', cells: ['6. somitomeroa (2. arkua)', 'VII: aurpegi nerbioa'], notes: n('2.1.1/p5/s4', '2.1.1/p5/s5'), structures: ['muskulu-mimikoak'] },
-    { id: 'tz-7', cells: ['7. somitomeroa (3. arkua)', 'IX: glosofaringeoa'], notes: n('2.1.1/p5/s6', '2.1.1/p5/s7'), structures: ['muskulu-estilofaringeoa'] },
+    { id: 'tz-1-2', cells: ['1. eta 2. somitomeroak', 'III: nerbio begi eragilea'], notes: n('2.1.1/p5/s3'), structures: ['begiaren-kanpoko-muskuluak'] },
+    { id: 'tz-3', cells: ['3. somitomeroa', 'IV: troklea nerbioa'], notes: n('2.1.1/p5/s3'), structures: ['begi-goiko-laprana'] },
+    { id: 'tz-4', cells: ['4. somitomeroa (1. arkua)', 'V: trigeminoa'], notes: n('2.1.1/p6/s2', '2.1.1/p7/s1'), structures: ['muskulu-murtsikatzaileak'] },
+    { id: 'tz-5', cells: ['5. somitomeroa', 'VI: nerbio aldentzailea'], notes: n('2.1.1/p5/s3'), structures: ['begi-alboko-zuzena'] },
+    { id: 'tz-6', cells: ['6. somitomeroa (2. arkua)', 'VII: aurpegi nerbioa'], notes: n('2.1.1/p7/s2', '2.1.1/p7/s3'), structures: ['muskulu-mimikoak'] },
+    { id: 'tz-7', cells: ['7. somitomeroa (3. arkua)', 'IX: glosofaringeoa'], notes: n('2.1.1/p8/s1', '2.1.1/p9/s1'), structures: ['muskulu-estilofaringeoa'] },
     { id: 'tz-ok-1-2', cells: ['1. eta 2. somita okzipitalak (4. eta 6. arkuak)', 'X: bagoa'], notes: n('2.1.2/p4/s1', '2.1.2/p4/s2'), structures: ['laringearen-muskuluak'] },
-    { id: 'tz-ok-2-5', cells: ['2.–5. somita okzipitalak', 'XII: hipoglosoa'], notes: n('2.1.2/p5/s1', '2.1.2/p5/s2'), structures: ['mihiaren-muskuluak'] },
+    { id: 'tz-ok-2-5', cells: ['2.–5. somita okzipitalak', 'XII: hipoglosoa'], notes: n('2.1.2/p6/s1', '2.1.2/p6/s2'), structures: ['mihiaren-muskuluak'] },
   ],
 };
 
@@ -161,24 +161,24 @@ export const LESSON_W9: Lesson = {
           'begi-erdiko-zuzena',
           'begi-beheko-laprana',
         ], { plain: 'Lehen bi somitomeroetatik lau muskulu: goiko, beheko eta erdialdeko zuzenak, eta beheko muskulu laprana.' }),
-        L(0.38, '3. somitomerotik goiko muskulu laprana sortzen da, eta 5.etik alboko muskulu zuzena.', n('2.1.1/p3/s3', '2.1.1/p3/s4'), ['begi-goiko-laprana', 'begi-alboko-zuzena'], {
+        L(0.38, '3. somitomerotik goiko muskulu laprana sortzen da, eta 5.etik alboko muskulu zuzena.', n('2.1.1/p4/s1', '2.1.1/p4/s2'), ['begi-goiko-laprana', 'begi-alboko-zuzena'], {
           plain: 'Hirugarren somitomerotik goiko muskulu laprana; bosgarrenetik alboko muskulu zuzena.',
         }),
-        L(0.46, 'Muskulu horiek hiru nerbio kranialek inerbatzen dituzte.', n('2.1.1/p4/s1'), [], {
+        L(0.46, 'Muskulu horiek hiru nerbio kranialek inerbatzen dituzte.', n('2.1.1/p5/s1'), [], {
           plain: 'Hiru nerbio kranial arduratzen dira begiaren muskuluez.',
         }),
-        L(0.46, 'Hirugarrenak, nerbio begi eragileak, 1. eta 2. somitomeroetatik sortutakoak inerbatzen ditu.', n('2.1.1/p4/s3'), ['nerbio-begi-eragilea'], {
+        L(0.46, 'Hirugarrenak, nerbio begi eragileak, 1. eta 2. somitomeroetatik sortutakoak inerbatzen ditu.', n('2.1.1/p5/s3'), ['nerbio-begi-eragilea'], {
           tone: 'emphasis',
           writes: 'b-begi-nerbioak',
           plain: 'Hirugarren nerbioa, begi eragilea, lehen bi somitomeroetatik sortutako lau muskuluetara doa.',
         }),
-        L(0.46, 'Laugarrenak, troklea nerbioak, 3.etik sortutakoa; eta seigarrenak, nerbio aldentzaileak, 5.etik sortutakoa.', n('2.1.1/p4/s3'), ['nerbio-troklearra', 'nerbio-aldentzailea'], {
+        L(0.46, 'Laugarrenak, troklea nerbioak, 3.etik sortutakoa; eta seigarrenak, nerbio aldentzaileak, 5.etik sortutakoa.', n('2.1.1/p5/s3'), ['nerbio-troklearra', 'nerbio-aldentzailea'], {
           plain: 'Laugarrena, troklea nerbioa, goiko laprana; seigarrena, nerbio aldentzailea, alboko zuzena.',
         }),
       ],
       board: [
         { id: 'b-begia', kind: 'line', text: 'Begiaren muskuluak: 1., 2., 3. eta 5. somitomeroetatik', notes: n('2.1.1/p3/s1'), key: true },
-        { id: 'b-begi-nerbioak', kind: 'line', text: '1.–2. somitomeroak: III. 3.a: IV. 5.a: VI', notes: n('2.1.1/p4/s3'), key: true },
+        { id: 'b-begi-nerbioak', kind: 'line', text: '1.–2. somitomeroak: III. 3.a: IV. 5.a: VI', notes: n('2.1.1/p5/s3'), key: true },
       ],
       checks: [
         {
@@ -193,7 +193,7 @@ export const LESSON_W9: Lesson = {
             'Ez: alderantziz da.',
             'Ez: begi eragileak 1. eta 2. somitomeroetako lau muskuluak bakarrik inerbatzen ditu.',
           ],
-          notes: n('2.1.1/p3/s3', '2.1.1/p3/s4', '2.1.1/p4/s3'),
+          notes: n('2.1.1/p4/s1', '2.1.1/p4/s2', '2.1.1/p5/s3'),
         },
       ],
     },
@@ -203,36 +203,36 @@ export const LESSON_W9: Lesson = {
       title: 'Faringe arkuetako muskuluak',
       stage: 'somitomeroak-burua',
       lines: [
-        L(0.56, 'Beste somitomero batzuetako mesodermoak lepo mailan faringe arkuak sortzen ditu.', n('2.1.1/p5/s1'), [
+        L(0.56, 'Beste somitomero batzuetako mesodermoak lepo mailan faringe arkuak sortzen ditu.', n('2.1.1/p6/s1'), [
           'faringe-arkuak',
           'lehen-faringe-arkua',
           'hioide-arkua',
           'hirugarren-faringe-arkua',
         ], { view: 'burua', plain: 'Beste somitomero batzuk lepora doaz, eta han faringe arkuak sortzen dituzte, muskuluak egiteko.' }),
-        L(0.66, '4. somitomeroa 1. faringe arkuan kokatzen da, eta hortik muskulu murtsikatzaileak sortzen dira, barailaren jasotzaileak.', n('2.1.1/p5/s2'), [
+        L(0.66, '4. somitomeroa 1. faringe arkuan kokatzen da, eta hortik muskulu murtsikatzaileak sortzen dira, barailaren jasotzaileak.', n('2.1.1/p6/s2'), [
           'lehen-faringe-arkua',
           'muskulu-murtsikatzaileak',
         ], { view: 'heldua', writes: 'b-arkuak', plain: 'Laugarren somitomeroa 1. faringe arkura doa: hortik murtsikatzeko muskuluak, barailaren jasotzaileak.' }),
-        L(0.66, 'Nerbio trigeminoak inerbatzen ditu, bosgarren bikote kranialak.', n('2.1.1/p5/s3'), ['nerbio-trigeminoa'], {
+        L(0.66, 'Nerbio trigeminoak inerbatzen ditu, bosgarren bikote kranialak.', n('2.1.1/p7/s1'), ['nerbio-trigeminoa'], {
           plain: 'Horien nerbioa bosgarrena da: trigeminoa.',
         }),
-        L(0.76, '6. somitomeroa 2. arkuan kokatzen da: hortik muskulu mimikoak, keinuak egiteko, eta barailaren jeistaileak.', n('2.1.1/p5/s4'), [
+        L(0.76, '6. somitomeroa 2. arkuan kokatzen da: hortik muskulu mimikoak, keinuak egiteko, eta barailaren jeistaileak.', n('2.1.1/p7/s2'), [
           'hioide-arkua',
           'muskulu-mimikoak',
           'barailaren-muskulu-jeistaileak',
         ], { plain: 'Seigarren somitomeroa bigarren arkura doa: hortik aurpegiko keinuen muskuluak eta barailaren jeistaileak.' }),
-        L(0.76, 'Haren nerbioa aurpegi nerbioa da, zazpigarrena.', n('2.1.1/p5/s5'), ['aurpegi-nerbioa'], {
+        L(0.76, 'Haren nerbioa aurpegi nerbioa da, zazpigarrena.', n('2.1.1/p7/s3'), ['aurpegi-nerbioa'], {
           plain: 'Bigarren arkuaren nerbioa aurpegi nerbioa da, zazpigarrena.',
         }),
-        L(0.86, '7. somitomeroa 3. arkuan kokatzen da, eta hortik muskulu estilofaringeoa sortzen da.', n('2.1.1/p5/s6'), ['hirugarren-faringe-arkua', 'muskulu-estilofaringeoa'], {
+        L(0.86, '7. somitomeroa 3. arkuan kokatzen da, eta hortik muskulu estilofaringeoa sortzen da.', n('2.1.1/p8/s1'), ['hirugarren-faringe-arkua', 'muskulu-estilofaringeoa'], {
           plain: 'Zazpigarren somitomeroa hirugarren arkura doa: hortik muskulu estilofaringeoa.',
         }),
-        L(0.86, 'Haren nerbioa bederatzigarrena da: nerbio glosofaringeoa.', n('2.1.1/p5/s7'), ['nerbio-glosofaringeoa'], {
+        L(0.86, 'Haren nerbioa bederatzigarrena da: nerbio glosofaringeoa.', n('2.1.1/p9/s1'), ['nerbio-glosofaringeoa'], {
           plain: 'Hirugarren arkuaren nerbioa bederatzigarrena da, glosofaringeoa.',
         }),
       ],
       board: [
-        { id: 'b-arkuak', kind: 'line', text: '4. somitomeroa: 1. arkua, murtsikatzaileak (V). 6.a: 2. arkua, mimikoak (VII). 7.a: 3. arkua, estilofaringeoa (IX)', notes: n('2.1.1/p5/s2', '2.1.1/p5/s4', '2.1.1/p5/s6'), key: true },
+        { id: 'b-arkuak', kind: 'line', text: '4. somitomeroa: 1. arkua, murtsikatzaileak (V). 6.a: 2. arkua, mimikoak (VII). 7.a: 3. arkua, estilofaringeoa (IX)', notes: n('2.1.1/p6/s2', '2.1.1/p7/s2', '2.1.1/p8/s1'), key: true },
       ],
       checks: [
         {
@@ -247,7 +247,7 @@ export const LESSON_W9: Lesson = {
             'Ez: alderantziz da.',
             'Ez: mihiaren muskuluak somita okzipitaletatik datoz.',
           ],
-          notes: n('2.1.1/p5/s2', '2.1.1/p5/s4'),
+          notes: n('2.1.1/p6/s2', '2.1.1/p7/s2'),
         },
         { kind: 'pool', id: 'mikro:9/somitomeroak-burua:9' },
       ],
@@ -272,22 +272,22 @@ export const LESSON_W9: Lesson = {
         L(0.1, 'Nerbio bagoak inerbatzen ditu, hamargarren bikote kranialak.', n('2.1.2/p4/s2'), ['nerbio-bagoa'], {
           plain: 'Laringearen muskuluen nerbioa bagoa da, hamargarrena.',
         }),
-        L(0.2, 'Azken somita okzipitaletatik, 2.etik 5.era, mihiaren muskulu guztiak sortzen dira, denak ildaskatuak.', n('2.1.2/p5/s1'), ['somita-okzipitalak', 'mihiaren-muskuluak'], {
+        L(0.2, 'Azken somita okzipitaletatik, 2.etik 5.era, mihiaren muskulu guztiak sortzen dira, denak ildaskatuak.', n('2.1.2/p6/s1'), ['somita-okzipitalak', 'mihiaren-muskuluak'], {
           writes: 'b-okzipitalak',
           plain: 'Azken somita okzipitaletatik mihiko muskulu guztiak sortzen dira, eta denak ildaskatuak dira.',
         }),
-        L(0.2, 'Nerbio hipoglosoak inerbatzen ditu, 12. bikote kranialak, eta zuntz motoreak bakarrik ditu.', n('2.1.2/p5/s2'), ['nerbio-hipoglosoa'], {
+        L(0.2, 'Nerbio hipoglosoak inerbatzen ditu, 12. bikote kranialak, eta zuntz motoreak bakarrik ditu.', n('2.1.2/p6/s2'), ['nerbio-hipoglosoa'], {
           plain: 'Mihiko muskuluen nerbioa hipoglosoa da, hamabigarrena; zuntz motoreak bakarrik ditu.',
         }),
-        L(0.3, 'Beraz, buruko muskulu ildaskatu guztiak nerbio kranialek inerbatzen dituzte.', n('2.1.2/p6/s1'), ['nerbio-kranialak'], {
+        L(0.3, 'Beraz, buruko muskulu ildaskatu guztiak nerbio kranialek inerbatzen dituzte.', n('2.1.2/p8/s1'), ['nerbio-kranialak'], {
           tone: 'emphasis',
           writes: 'b-kranialak',
           plain: 'Laburbilduz: buruko muskulu ildaskatu guztiak nerbio kranialek mugitzen dituzte.',
         }),
       ],
       board: [
-        { id: 'b-okzipitalak', kind: 'line', text: 'Somita okzipitalak 1–2: 4. eta 6. arkuak, laringea (X). 2–5: mihia (XII)', notes: n('2.1.2/p4/s1', '2.1.2/p5/s1'), key: true },
-        { id: 'b-kranialak', kind: 'line', text: 'Buruko muskulu ildaskatu guztiak: nerbio kranialak', notes: n('2.1.2/p6/s1'), key: true },
+        { id: 'b-okzipitalak', kind: 'line', text: 'Somita okzipitalak 1–2: 4. eta 6. arkuak, laringea (X). 2–5: mihia (XII)', notes: n('2.1.2/p4/s1', '2.1.2/p6/s1'), key: true },
+        { id: 'b-kranialak', kind: 'line', text: 'Buruko muskulu ildaskatu guztiak: nerbio kranialak', notes: n('2.1.2/p8/s1'), key: true },
       ],
       checks: [
         {
@@ -298,7 +298,7 @@ export const LESSON_W9: Lesson = {
           options: ['Laringekoak bagoak; mihikoak hipoglosoak', 'Laringekoak hipoglosoak; mihikoak bagoak', 'Biak aurpegi nerbioak'],
           answer: 0,
           why: ['Bai: laringea 4. eta 6. arkuetan, bagoa; mihia azken somita okzipitaletatik, hipoglosoa.', 'Ez: alderantziz da.', 'Ez: aurpegi nerbioa 2. arkuarena da.'],
-          notes: n('2.1.2/p4/s2', '2.1.2/p5/s2'),
+          notes: n('2.1.2/p4/s2', '2.1.2/p6/s2'),
         },
       ],
     },
@@ -322,11 +322,11 @@ export const LESSON_W9: Lesson = {
           tone: 'caution',
           plain: 'Lasai: ez dituzu muskulu guztien izenak buruz ikasi behar.',
         }),
-        L(0.84, '1. eta 2. somita okzipitalak 4. eta 6. faringe arkuetan garatzen dira.', n('2.1.4/p20/s1'), ['somita-okzipitalak', 'laringearen-muskuluak'], {
+        L(0.84, '1. eta 2. somita okzipitalak 4. eta 6. faringe arkuetan garatzen dira.', n('2.1.3/p24/s1'), ['somita-okzipitalak', 'laringearen-muskuluak'], {
           view: 'burua',
           plain: 'Lehen bi somita okzipitalak laugarren eta seigarren arkuetan garatzen dira.',
         }),
-        L(0.92, 'Nerbio batek mota askotako zuntzak izan ditzake; hipoglosoak, aldiz, zuntz motoreak bakarrik ditu.', n('2.1/p5/s1', '2.1/p5/s3'), ['nerbio-hipoglosoa'], {
+        L(0.92, 'Nerbio batek mota askotako zuntzak izan ditzake; hipoglosoak, aldiz, zuntz motoreak bakarrik ditu.', n('2.1/p5/s3', '2.1/p5/s5'), ['nerbio-hipoglosoa'], {
           plain: 'Nerbio askok zuntz mota asko dituzte; hipoglosoak, ordea, motoreak bakarrik.',
         }),
       ],
@@ -340,7 +340,7 @@ export const LESSON_W9: Lesson = {
           options: ['Hipoglosoak motoreak bakarrik; trigeminoak mota askotakoak', 'Hipoglosoak mota askotakoak; trigeminoak motoreak bakarrik', 'Biek sentsorialak bakarrik'],
           answer: 0,
           why: ['Bai: trigeminoaren adarretan zuntz sentsorialak, motoreak eta begetatiboak daude.', 'Ez: alderantziz da.', 'Ez: biek dituzte zuntz motoreak.'],
-          notes: n('2.1/p5/s2', '2.1/p5/s3'),
+          notes: n('2.1/p5/s4', '2.1/p5/s5'),
         },
         { kind: 'pool', id: 'mikro:9/okzipitalak:11' },
       ],
@@ -351,28 +351,28 @@ export const LESSON_W9: Lesson = {
       title: 'Ehun konektibozko patroiak',
       stage: 'ehun-konektiboa',
       lines: [
-        L(0, 'Eskualde guztietako muskuluak garatzeko ehun konektibozko patroiak behar dira.', n('2.1.4/p24/s1'), ['ehun-konektibozko-patroiak'], {
+        L(0, 'Eskualde guztietako muskuluak garatzeko ehun konektibozko patroiak behar dira.', n('2.1.4/p3/s1'), ['ehun-konektibozko-patroiak'], {
           tone: 'emphasis',
           writes: 'b-patroiak',
           plain: 'Muskulu batek euskarri bat behar du hazteko: ehun konektibozko patroia.',
         }),
-        L(0, 'Patroi horietara mioblastoak iristen dira, eta poliki-poliki muskulu bihurtzen dira.', n('2.1.4/p24/s2'), ['mioblastoak'], {
+        L(0, 'Patroi horietara mioblastoak iristen dira, eta poliki-poliki muskulu bihurtzen dira.', n('2.1.4/p3/s2'), ['mioblastoak'], {
           plain: 'Muskulu zelula gazteak, mioblastoak, patroira sartzen dira eta han muskulu bihurtzen dira.',
         }),
-        L(0.12, 'Buruan, patroiak gandor neuraleko zelulek osatzen dituzte.', n('2.1.4/p25/s1'), ['gandor-neurala'], {
+        L(0.12, 'Buruan, patroiak gandor neuraleko zelulek osatzen dituzte.', n('2.1.4/p4/s1'), ['gandor-neurala'], {
           plain: 'Buruko patroiak gandor neuraletik datoz.',
         }),
-        L(0.24, 'Lepoan, somitaren mesodermo zelulek.', n('2.1.4/p25/s2'), ['somitak'], {
+        L(0.24, 'Lepoan, somitaren mesodermo zelulek.', n('2.1.4/p4/s2'), ['somitak'], {
           plain: 'Lepokoak somitetatik datoz.',
         }),
-        L(0.36, 'Gorputzaren paretetan eta gorputz-adarretan, alboko mesodermoaren paretako orriko zelulek.', n('2.1.4/p26/s1'), ['paretako-orria', 'gorputz-adarren-mesenkima'], {
+        L(0.36, 'Gorputzaren paretetan eta gorputz-adarretan, alboko mesodermoaren paretako orriko zelulek.', n('2.1.4/p5/s1'), ['paretako-orria', 'gorputz-adarren-mesenkima'], {
           plain: 'Paretetako eta gorputz-adarretako patroiak paretako orritik datoz.',
         }),
-        L(0.6, 'Mioblastoak elkarren artean fusionatzen dira, eta nukleo ugariko zuntzak osatzen dituzte.', n('2.1.4/p27/s1'), ['mioblastoak', 'zuntz-muskularrak'], {
+        L(0.6, 'Mioblastoak elkarren artean fusionatzen dira, eta nukleo ugariko zuntzak osatzen dituzte.', n('2.2.1/p7/s1'), ['mioblastoak', 'zuntz-muskularrak'], {
           writes: 'b-fusioa',
           plain: 'Mioblastoak elkartu egiten dira, eta zuntz luze bat sortzen da, nukleo askorekin.',
         }),
-        L(0.6, 'Zuntz horiek ildaskatuak dira. Gogoratu: ildaskatu, mugimendu.', n('2.1.4/p27/s2', '2.1.4/p28/s1'), ['zuntz-muskularrak'], {
+        L(0.6, 'Zuntz horiek ildaskatuak dira. Gogoratu: ildaskatu, mugimendu.', n('2.2.1/p7/s2', '2.2.1/p8/s1'), ['zuntz-muskularrak'], {
           plain: 'Zuntz horiek ildaskatuak dira, eta ildaskatuak mugimenduarekin lotzen dira.',
         }),
         L(0.72, 'Gorputz-adarrek biratu ondoren, tolestatzaileak eta hedatzaileak alderantziz kokatzen dira goiko eta beheko adarretan.', n('2.1.3/p5/s3'), [
@@ -381,8 +381,8 @@ export const LESSON_W9: Lesson = {
         ], { plain: 'Biraketaren ondoren, goiko eta beheko adarretan tolestatzaileen eta hedatzaileen aldeak alderantzizkoak dira.' }),
       ],
       board: [
-        { id: 'b-patroiak', kind: 'line', text: 'Patroiak: buruan gandor neurala; lepoan somitak; paretetan eta gorputz-adarretan paretako orria', notes: n('2.1.4/p25/s1', '2.1.4/p25/s2', '2.1.4/p26/s1'), key: true },
-        { id: 'b-fusioa', kind: 'line', text: 'Mioblastoak fusionatu: nukleo ugariko zuntzak', notes: n('2.1.4/p27/s1') },
+        { id: 'b-patroiak', kind: 'line', text: 'Patroiak: buruan gandor neurala; lepoan somitak; paretetan eta gorputz-adarretan paretako orria', notes: n('2.1.4/p4/s1', '2.1.4/p4/s2', '2.1.4/p5/s1'), key: true },
+        { id: 'b-fusioa', kind: 'line', text: 'Mioblastoak fusionatu: nukleo ugariko zuntzak', notes: n('2.2.1/p7/s1') },
       ],
       checks: [
         {
@@ -393,7 +393,7 @@ export const LESSON_W9: Lesson = {
           options: ['Buruan gandor neuralak; gorputz-adarretan paretako orriak', 'Buruan paretako orriak; gorputz-adarretan gandor neuralak', 'Bietan somitek'],
           answer: 0,
           why: ['Bai: buruko patroia gandor neuralekoa da; gorputz-adarretakoa, paretako orrikoa.', 'Ez: alderantziz da.', 'Ez: somitek lepoko patroia osatzen dute.'],
-          notes: n('2.1.4/p25/s1', '2.1.4/p26/s1'),
+          notes: n('2.1.4/p4/s1', '2.1.4/p5/s1'),
         },
       ],
     },
@@ -427,30 +427,30 @@ export const LESSON_W9: Lesson = {
         L(0.32, 'Horietatik sortzen dira, adibidez, gorputzaren aurrealdeko saihets kartilagoak.', n('2.2/p6/s6'), ['saihets-kartilagoa'], {
           plain: 'Zelula horietatik saihets kartilagoak sortzen dira, gorputzaren aurrealdean.',
         }),
-        L(0.59, 'Atzeko paretan, erdiko zelulek dermatoma osatzen dute; ertzetakoak muskulu zelulen aintzindariak dira.', n('2.2/p9/s1', '2.2/p9/s2'), [
+        L(0.59, 'Atzeko paretan, erdiko zelulek dermatoma osatzen dute; ertzetakoak muskulu zelulen aintzindariak dira.', n('2.2/p9/s1', '2.2/p9/s3'), [
           'somitaren-atzeko-pareta',
           'dermatoma',
           'muskulu-zelula-atze-erdialdekoak',
           'aurre-alboko-muskulu-zelulak',
         ], { plain: 'Atzeko paretaren erdian dermatoma dago; ertzetan, muskulu bihurtuko diren zelulak.' }),
-        L(0.64, 'Muskulu zelula horiek dermatomaren alde bentralean miotoma osatzen dute.', n('2.2/p10/s1'), ['dermatoma', 'miotoma'], {
+        L(0.64, 'Muskulu zelula horiek dermatomaren alde bentralean miotoma osatzen dute.', n('2.2/p9/s4'), ['dermatoma', 'miotoma'], {
           plain: 'Zelula horiek dermatomaren aurrean biltzen dira, eta miotoma osatzen dute.',
         }),
-        L(0.64, 'Miotomatik bizkarreko muskulu ildaskatuak, eskapula ingurukoak eta saihets artekoak sortzen dira.', n('2.2/p10/s2'), ['miotoma'], {
+        L(0.64, 'Miotomatik bizkarreko muskulu ildaskatuak, eskapula ingurukoak eta saihets artekoak sortzen dira.', n('2.2/p9/s5'), ['miotoma'], {
           tone: 'emphasis',
           writes: 'b-miotoma',
           plain: 'Miotomatik bizkarreko muskuluak, eskapula ingurukoak eta saihets artekoak datoz.',
         }),
-        L(0.8, 'Aurre-alboko zelula batzuek, berriz, alboko muga gurutzatu eta paretako orrira heltzen dira.', n('2.2/p11/s1'), ['aurre-alboko-muskulu-zelulak', 'paretako-orria'], {
+        L(0.8, 'Aurre-alboko zelula batzuek, berriz, alboko muga gurutzatu eta paretako orrira heltzen dira.', n('2.2/p9/s6'), ['aurre-alboko-muskulu-zelulak', 'paretako-orria'], {
           plain: 'Beste zelula batzuk mugaz haratago joaten dira, alboko mesodermoaren paretako orrira.',
         }),
-        L(0.8, 'Hortik gorputz paretako eta gorputz-adarretako muskulu ildaskatuak sortzen dira.', n('2.2/p11/s1'), ['paretako-orria'], {
+        L(0.8, 'Hortik gorputz paretako eta gorputz-adarretako muskulu ildaskatuak sortzen dira.', n('2.2/p9/s6'), ['paretako-orria'], {
           plain: 'Han gorputz paretako eta gorputz-adarretako muskuluak egiten dituzte.',
         }),
       ],
       board: [
         { id: 'b-esklerotoma', kind: 'line', text: 'Erdialdeko eta aurreko paretak: esklerotoma, ornoak', notes: n('2.2/p6/s1', '2.2/p6/s4'), key: true },
-        { id: 'b-miotoma', kind: 'line', text: 'Miotoma: bizkarreko muskuluak, eskapula ingurukoak, saihets artekoak', notes: n('2.2/p10/s2'), key: true },
+        { id: 'b-miotoma', kind: 'line', text: 'Miotoma: bizkarreko muskuluak, eskapula ingurukoak, saihets artekoak', notes: n('2.2/p9/s5'), key: true },
       ],
       checks: [
         {
@@ -462,7 +462,7 @@ export const LESSON_W9: Lesson = {
           options: ['Esklerotomak hezurrak eta ornoak; miotomak muskuluak', 'Esklerotomak muskuluak; miotomak hezurrak', 'Biek larruazala'],
           answer: 0,
           why: ['Bai: esklerotoma hodi neuralaren inguruan biltzen da; miotomak muskulu ildaskatuak ematen ditu.', 'Ez: alderantziz da.', 'Ez: hori dermatomari dagokio.'],
-          notes: n('2.2/p6/s2', '2.2/p6/s4', '2.2/p10/s2'),
+          notes: n('2.2/p6/s2', '2.2/p6/s4', '2.2/p9/s5'),
         },
       ],
     },
@@ -496,7 +496,7 @@ export const LESSON_W9: Lesson = {
           writes: 'b-abaxiala',
           plain: 'Domeinu abaxialetik goiko eta beheko gorputz-adarretako muskulu guztiak datoz.',
         }),
-        L(0.44, 'Lepoan, toraxean eta goiko gorputz-adarrean, muskulu batzuk primaxialak dira, eta beste batzuk abaxialak.', n('2.2.1/p8/s3'), ['domeinu-primaxiala'], {
+        L(0.44, 'Lepoan, toraxean eta goiko gorputz-adarrean, muskulu batzuk primaxialak dira, eta beste batzuk abaxialak.', n('2.2.1/p10/s3'), ['domeinu-primaxiala'], {
           plain: 'Lepoan, toraxean eta goiko gorputz-adarrean bi domeinuetako muskuluak nahasten dira.',
         }),
       ],
@@ -545,16 +545,16 @@ export const LESSON_W9: Lesson = {
         L(0.36, 'Atzeko adarretan, neurona sentsorialak.', n('2.2.2/p7/s1', '2.2.2/p7/s2'), ['atzeko-adarra', 'neurona-sentsorialak'], {
           plain: 'Atzeko adarretan sentsazioak jasotzen dituztenak: neurona sentsorialak.',
         }),
-        L(0.44, 'Alboko adarretan, ez beti, neurona begetatiboak; eta erdian, enimo hodia.', n('2.2.2/p8/s1'), ['alboko-adarra', 'neurona-begetatiboak', 'enimo-hodia'], {
+        L(0.44, 'Alboko adarretan, ez beti, neurona begetatiboak; eta erdian, enimo hodia.', n('2.2.2/p9/s1'), ['alboko-adarra', 'neurona-begetatiboak', 'enimo-hodia'], {
           plain: 'Batzuetan alboko adarrak ere badaude, neurona begetatiboekin; erdian, enimo hodia.',
         }),
-        L(0.52, 'Gai grisaren kanpoan gai zuria dago, hiru kordoirekin: atzekoa, albokoa eta aurrekoa.', n('2.2.2/p8/s2', '2.2.2/p8/s3'), ['gai-zuria', 'gai-grisa', 'atzeko-kordoia', 'alboko-kordoia', 'aurreko-kordoia'], {
+        L(0.52, 'Gai grisaren kanpoan gai zuria dago, hiru kordoirekin: atzekoa, albokoa eta aurrekoa.', n('2.2.2/p9/s2', '2.2.2/p9/s3'), ['gai-zuria', 'gai-grisa', 'atzeko-kordoia', 'alboko-kordoia', 'aurreko-kordoia'], {
           plain: 'Gai grisaren inguruan gai zuria dago; hor informazioa gora eta behera doa, traktuetan.',
         }),
       ],
       board: [
         { id: 'b-pareak', kind: 'line', text: 'Ornomuinaren segmentu bakoitzean nerbio espinal pare bat (ezkerrekoa eta eskuinekoa)', notes: n('2.2.2/p4/s1') },
-        { id: 'b-gai-grisa', kind: 'line', text: 'Gai grisa: aurreko adarrak motoreak; atzekoak sentsorialak; albokoak begetatiboak', notes: n('2.2.2/p6/s2', '2.2.2/p7/s2', '2.2.2/p8/s1'), key: true },
+        { id: 'b-gai-grisa', kind: 'line', text: 'Gai grisa: aurreko adarrak motoreak; atzekoak sentsorialak; albokoak begetatiboak', notes: n('2.2.2/p6/s2', '2.2.2/p7/s2', '2.2.2/p9/s1'), key: true },
       ],
       checks: [
         {
@@ -575,35 +575,35 @@ export const LESSON_W9: Lesson = {
       title: 'Sustraiak eta nerbio espinala',
       stage: 'nerbio-espinala',
       lines: [
-        L(0.62, 'Neurona motoreen axoiak aurreko sustraitik pasatzen dira, eta nerbio espinalaren enborrean kokatzen dira.', n('2.2.2/p9/s3'), [
+        L(0.62, 'Neurona motoreen axoiak aurreko sustraitik pasatzen dira, eta nerbio espinalaren enborrean kokatzen dira.', n('2.2.2/p10/s3'), [
           'axoi-motoreak',
           'aurreko-sustraia',
           'nerbio-espinalak',
           'neurona-motoreak',
         ], { plain: 'Neurona motoreen hariak aurreko sustraitik irten, eta nerbio espinalera sartzen dira.' }),
-        L(0.62, 'Beraz, informazio motorea ornomuinetik alde periferikora doa, muskulu ildaskatuetara.', n('2.2.2/p9/s4'), ['ornomuina', 'muskulu-ildaskatuak'], {
+        L(0.62, 'Beraz, informazio motorea ornomuinetik alde periferikora doa, muskulu ildaskatuetara.', n('2.2.2/p10/s4'), ['ornomuina', 'muskulu-ildaskatuak'], {
           tone: 'emphasis',
           writes: 'b-motorea',
           plain: 'Agindua ornomuinetik muskuluetara doa, kanpora.',
         }),
-        L(0.76, 'Nerbio espinala aurreko eta atzeko sustraiak batzean sortzen da.', n('2.2.2/p10/s1'), ['aurreko-sustraia', 'atzeko-sustraia', 'nerbio-espinalak'], {
+        L(0.76, 'Nerbio espinala aurreko eta atzeko sustraiak batzean sortzen da.', n('2.2.2/p11/s1'), ['aurreko-sustraia', 'atzeko-sustraia', 'nerbio-espinalak'], {
           plain: 'Bi sustraiak, aurrekoa eta atzekoa, elkartu egiten dira, eta nerbio espinala osatzen dute.',
         }),
-        L(0.76, 'Horregatik, zuntz motoreez gain, zuntz sentsorialak ere baditu.', n('2.2.2/p10/s1'), ['nerbio-espinalak'], {
+        L(0.76, 'Horregatik, zuntz motoreez gain, zuntz sentsorialak ere baditu.', n('2.2.2/p11/s1'), ['nerbio-espinalak'], {
           plain: 'Beraz, nerbio espinalak bi zuntz mota ditu: motoreak eta sentsorialak.',
         }),
-        L(0.86, 'Atzeko sustraian beti gongoil bat dago: gongoil errakideoa.', n('2.2.2/p11/s1'), ['atzeko-sustraia', 'gongoil-errakideoak'], {
+        L(0.86, 'Atzeko sustraian beti gongoil bat dago: gongoil errakideoa.', n('2.2.2/p12/s1'), ['atzeko-sustraia', 'gongoil-errakideoak'], {
           plain: 'Atzeko sustraian lodigune bat dago, gongoil errakideoa.',
         }),
-        L(0.86, 'Haren neuronek bi luzapen dituzte: zentripetoa, ornomuinera, eta zentrifugoa, alde periferikora.', n('2.2.2/p11/s2'), [
+        L(0.86, 'Haren neuronek bi luzapen dituzte: zentripetoa, ornomuinera, eta zentrifugoa, alde periferikora.', n('2.2.2/p12/s2'), [
           'luzapen-zentripetoa',
           'luzapen-zentrifugoa',
           'ornomuina',
         ], { writes: 'b-luzapenak', plain: 'Gongoileko neuronek bi hari dituzte: bata ornomuinera doa, zentripetoa; bestea kanpora, zentrifugoa.' }),
       ],
       board: [
-        { id: 'b-motorea', kind: 'line', text: 'Axoi motoreak: aurreko sustraia, nerbio espinala, muskulu ildaskatuak', notes: n('2.2.2/p9/s3', '2.2.2/p9/s4'), key: true },
-        { id: 'b-luzapenak', kind: 'line', text: 'Gongoil errakideoa (atzeko sustraia): luzapen zentripetoa ornomuinera, zentrifugoa periferiara', notes: n('2.2.2/p11/s1', '2.2.2/p11/s2'), key: true },
+        { id: 'b-motorea', kind: 'line', text: 'Axoi motoreak: aurreko sustraia, nerbio espinala, muskulu ildaskatuak', notes: n('2.2.2/p10/s3', '2.2.2/p10/s4'), key: true },
+        { id: 'b-luzapenak', kind: 'line', text: 'Gongoil errakideoa (atzeko sustraia): luzapen zentripetoa ornomuinera, zentrifugoa periferiara', notes: n('2.2.2/p12/s1', '2.2.2/p12/s2'), key: true },
       ],
       checks: [
         {
@@ -614,7 +614,7 @@ export const LESSON_W9: Lesson = {
           options: ['Zentripetoa ornomuinera; zentrifugoa alde periferikora', 'Zentripetoa alde periferikora; zentrifugoa ornomuinera', 'Biak muskuluetara'],
           answer: 0,
           why: ['Bai: zentripetoa erdirantz, ornomuinera; zentrifugoa kanpora.', 'Ez: alderantziz da.', 'Ez: gongoileko neuronak sentsorialak dira.'],
-          notes: n('2.2.2/p11/s2'),
+          notes: n('2.2.2/p12/s2'),
         },
         { kind: 'pool', id: 'w9-q-erroak' },
       ],
@@ -625,47 +625,47 @@ export const LESSON_W9: Lesson = {
       title: 'Epaxialak eta hipaxialak',
       stage: 'epaxial-hipaxial',
       lines: [
-        L(0, 'Nerbio espinalaren enborretik bi adar nagusi sortzen dira: aurreko adar primarioa eta atzeko adar primarioa.', n('2.2.2/p12/s1'), [
+        L(0, 'Nerbio espinalaren enborretik bi adar nagusi sortzen dira: aurreko adar primarioa eta atzeko adar primarioa.', n('2.2.2/p13/s1'), [
           'aurreko-adar-primarioa',
           'atzeko-adar-primarioa',
         ], { plain: 'Nerbio espinala bitan banatzen da: aurreko adar primarioa eta atzeko adar primarioa.' }),
-        L(0, 'Bietan zuntz sentsorialak eta mugimendukoak daude.', n('2.2.2/p12/s2'), [], {
+        L(0, 'Bietan zuntz sentsorialak eta mugimendukoak daude.', n('2.2.2/p13/s2'), [], {
           plain: 'Bi adarrek dituzte bi zuntz motak.',
         }),
-        L(0.14, 'Kontuz: ez nahastu adar primario hauek gai grisaren adarrekin, ezta sustraiekin ere.', n('2.2.2/p13/s1'), [
+        L(0.14, 'Kontuz: ez nahastu adar primario hauek gai grisaren adarrekin, ezta sustraiekin ere.', n('2.2.2/p14/s1'), [
           'aurreko-adar-primarioa',
           'atzeko-adar-primarioa',
           'aurreko-adarra',
           'atzeko-adarra',
         ], { tone: 'caution', plain: 'Kontuz: hiru adar mota daude izen antzekoekin. Hauek nerbioaren adarrak dira, ez gai grisarenak.' }),
-        L(0.26, 'Muskuluen inerbazioak ez du zerikusirik haien jatorriarekin.', n('2.2.2/p13/s2'), [], {
+        L(0.26, 'Muskuluen inerbazioak ez du zerikusirik haien jatorriarekin.', n('2.2.2/p15/s2'), [], {
           tone: 'emphasis',
           writes: 'b-jatorria',
           plain: 'Garrantzitsua: muskulu baten jatorriak ez du esaten zein nerbiok mugitzen duen.',
         }),
-        L(0.26, 'Gauza bat da muskuluaren jatorria; beste bat, zein adarrek inerbatzen duen.', n('2.2.2/p13/s3'), ['saihets-arteko-muskuluak', 'abdomeneko-muskuluak'], {
+        L(0.26, 'Gauza bat da muskuluaren jatorria; beste bat, zein adarrek inerbatzen duen.', n('2.2.2/p15/s3'), ['saihets-arteko-muskuluak', 'abdomeneko-muskuluak'], {
           plain: 'Adibidez, saihets artekoak eta abdomenekoak domeinu desberdinetakoak dira, baina adar berak inerbatzen ditu.',
         }),
-        L(0.38, 'Aurreko adar primarioak ia muskulu ildaskatu guztiak inerbatzen ditu: gorputz paretakoak eta gorputz-adarretakoak.', n('2.2.2/p15/s1', '2.2.2/p16/s1', '2.2.2/p18/s1'), [
+        L(0.38, 'Aurreko adar primarioak ia muskulu ildaskatu guztiak inerbatzen ditu: gorputz paretakoak eta gorputz-adarretakoak.', n('2.2.2/p17/s1', '2.2.2/p18/s1', '2.2.2/p20/s1'), [
           'aurreko-adar-primarioa',
           'gorputz-paretako-muskuluak',
         ], { plain: 'Aurreko adar primarioak muskulu gehienak hartzen ditu: paretakoak eta gorputz-adarretakoak.' }),
-        L(0.38, 'Baita bizkarraren muskulu autoktonoen azalean daudenak ere.', n('2.2.2/p17/s1'), [], {
+        L(0.38, 'Baita bizkarraren muskulu autoktonoen azalean daudenak ere.', n('2.2.2/p19/s1'), [], {
           plain: 'Baita bizkarreko muskulu sakonen gainean daudenak ere.',
         }),
-        L(0.5, 'Inerbazioaren arabera, bizkarrezurreko muskulu sakonak muskulu epaxialak dira, eta atzeko adar primarioak inerbatzen ditu.', n('2.2.2/p20/s1', '2.2.2/p21/s1', '2.2.2/p21/s2'), [
+        L(0.5, 'Inerbazioaren arabera, bizkarrezurreko muskulu sakonak muskulu epaxialak dira, eta atzeko adar primarioak inerbatzen ditu.', n('2.2.2/p22/s1', '2.2.2/p23/s1', '2.2.2/p23/s2'), [
           'muskulu-epaxialak',
           'atzeko-adar-primarioa',
           'bizkarreko-muskulu-sakonak',
         ], { tone: 'emphasis', writes: 'b-epaxialak', plain: 'Bizkarreko muskulu sakonak epaxialak dira: atzeko adar primarioak mugitzen ditu.' }),
-        L(0.5, 'Gainerako muskulu ildaskatu guztiak hipaxialak dira, eta aurreko adar primarioak inerbatzen ditu.', n('2.2.2/p22/s1', '2.2.2/p22/s2'), [
+        L(0.5, 'Gainerako muskulu ildaskatu guztiak hipaxialak dira, eta aurreko adar primarioak inerbatzen ditu.', n('2.2.2/p24/s1', '2.2.2/p24/s2'), [
           'muskulu-hipaxialak',
           'aurreko-adar-primarioa',
         ], { plain: 'Beste guztiak hipaxialak dira: aurreko adar primarioak mugitzen ditu.' }),
       ],
       board: [
-        { id: 'b-jatorria', kind: 'line', text: 'Inerbazioak ez du zerikusirik jatorriarekin', notes: n('2.2.2/p13/s2'), key: true },
-        { id: 'b-epaxialak', kind: 'line', text: 'Epaxialak (bizkarreko muskulu sakonak): atzeko adar primarioa. Hipaxialak (gainerakoak): aurreko adar primarioa', notes: n('2.2.2/p21/s1', '2.2.2/p21/s2', '2.2.2/p22/s1', '2.2.2/p22/s2'), key: true },
+        { id: 'b-jatorria', kind: 'line', text: 'Inerbazioak ez du zerikusirik jatorriarekin', notes: n('2.2.2/p15/s2'), key: true },
+        { id: 'b-epaxialak', kind: 'line', text: 'Epaxialak (bizkarreko muskulu sakonak): atzeko adar primarioa. Hipaxialak (gainerakoak): aurreko adar primarioa', notes: n('2.2.2/p23/s1', '2.2.2/p23/s2', '2.2.2/p24/s1', '2.2.2/p24/s2'), key: true },
       ],
       checks: [
         {
@@ -676,7 +676,7 @@ export const LESSON_W9: Lesson = {
           options: ['Epaxialak atzeko adar primarioak; hipaxialak aurrekoak', 'Epaxialak aurreko adar primarioak; hipaxialak atzekoak', 'Biak nerbio kranialek'],
           answer: 0,
           why: ['Bai: bizkarreko muskulu sakonak atzeko adarrarenak dira; beste guztiak, aurrekoarenak.', 'Ez: alderantziz da.', 'Ez: nerbio kranialak buruko muskuluenak dira.'],
-          notes: n('2.2.2/p21/s1', '2.2.2/p21/s2', '2.2.2/p22/s1', '2.2.2/p22/s2'),
+          notes: n('2.2.2/p23/s1', '2.2.2/p23/s2', '2.2.2/p24/s1', '2.2.2/p24/s2'),
         },
       ],
     },
@@ -686,32 +686,32 @@ export const LESSON_W9: Lesson = {
       title: 'Segmentuak eta sareak',
       stage: 'epaxial-hipaxial',
       lines: [
-        L(0.7, 'Toraxean, saihets arteko muskuluen inerbazioa metamerikoa da, edo segmentarioa.', n('2.2.2/p26/s2'), ['saihets-arteko-nerbioak'], {
+        L(0.7, 'Toraxean, saihets arteko muskuluen inerbazioa metamerikoa da, edo segmentarioa.', n('2.2.2/p28/s2'), ['saihets-arteko-nerbioak'], {
           plain: 'Toraxean, segmentu bakoitzak bere saihets arteko nerbioa du.',
         }),
-        L(0.8, 'Gorputz-adarretan, aldiz, maila desberdinetako zuntzek nerbio sareak osatzen dituzte.', n('2.2.2/p26/s3'), ['nerbio-sareak'], {
+        L(0.8, 'Gorputz-adarretan, aldiz, maila desberdinetako zuntzek nerbio sareak osatzen dituzte.', n('2.2.2/p28/s3'), ['nerbio-sareak'], {
           writes: 'b-sareak',
           plain: 'Gorputz-adarretan, ordea, hainbat mailatako zuntzak nahasten dira: nerbio sareak sortzen dira.',
         }),
-        L(0.8, 'Sare horietatik nerbio jakin batzuk irteten dira.', n('2.2.2/p26/s3'), ['nerbio-sareak'], {
+        L(0.8, 'Sare horietatik nerbio jakin batzuk irteten dira.', n('2.2.2/p28/s3'), ['nerbio-sareak'], {
           plain: 'Eta sareetatik nerbio izendun batzuk ateratzen dira.',
         }),
-        L(0.88, 'Beheko gorputz-adarrean, adibidez, nerbio femorala eta ziatikoa; goikoan, erradiala, ertaina eta kubitala.', n('2.2.2/p27/s1', '2.2.2/p28/s1'), [
+        L(0.88, 'Beheko gorputz-adarrean, adibidez, nerbio femorala eta ziatikoa; goikoan, erradiala, ertaina eta kubitala.', n('2.2.2/p29/s1', '2.2.2/p30/s1'), [
           'nerbio-femorala',
           'nerbio-ziatikoa',
           'nerbio-erradiala',
           'nerbio-ertaina',
           'nerbio-kubitala',
         ], { plain: 'Hankan, nerbio femorala eta ziatikoa; besoan, nerbio erradiala, ertaina eta kubitala.' }),
-        L(0.88, 'Nerbio espinalek gorputzeko muskulu guztiak inerbatzen dituzte, burukoak izan ezik.', n('2.2.2/p28/s1'), [], {
+        L(0.88, 'Nerbio espinalek gorputzeko muskulu guztiak inerbatzen dituzte, burukoak izan ezik.', n('2.2.2/p30/s1'), [], {
           tone: 'emphasis',
           writes: 'b-espinalak',
           plain: 'Nerbio espinalek gorputzeko muskulu guztiak mugitzen dituzte, buruko muskuluak izan ezik.',
         }),
       ],
       board: [
-        { id: 'b-sareak', kind: 'line', text: 'Saihets artekoak: metamerikoak. Gorputz-adarrak: nerbio sareak', notes: n('2.2.2/p26/s2', '2.2.2/p26/s3'), key: true },
-        { id: 'b-espinalak', kind: 'line', text: 'Nerbio espinalak: muskulu guztiak, burukoak izan ezik', notes: n('2.2.2/p28/s1'), key: true },
+        { id: 'b-sareak', kind: 'line', text: 'Saihets artekoak: metamerikoak. Gorputz-adarrak: nerbio sareak', notes: n('2.2.2/p28/s2', '2.2.2/p28/s3'), key: true },
+        { id: 'b-espinalak', kind: 'line', text: 'Nerbio espinalak: muskulu guztiak, burukoak izan ezik', notes: n('2.2.2/p30/s1'), key: true },
       ],
       checks: [
         {
@@ -722,7 +722,7 @@ export const LESSON_W9: Lesson = {
           options: ['Saihets artekoei segmentuka; gorputz-adarretakoei nerbio sareetatik', 'Saihets artekoei sareetatik; gorputz-adarretakoei segmentuka', 'Biei nerbio kranialetatik'],
           answer: 0,
           why: ['Bai: toraxean erlazioa metamerikoa da; gorputz-adarretan zuntzak sareetan nahasten dira.', 'Ez: alderantziz da.', 'Ez: nerbio kranialak buruko muskuluenak dira.'],
-          notes: n('2.2.2/p26/s2', '2.2.2/p26/s3'),
+          notes: n('2.2.2/p28/s2', '2.2.2/p28/s3'),
         },
         { kind: 'pool', id: 'w9-q-sareak' },
       ],
@@ -820,7 +820,7 @@ export const LESSON_W9: Lesson = {
         L(0.84, 'Horrez gain, bihotzak kanpoko inerbazioa du: nerbio sistema begetatiboa.', n('4/p5/s4'), ['nerbio-sistema-begetatiboa'], {
           plain: 'Gainera, nerbio sistema begetatiboak ere kontrolatzen du bihotza, kanpotik.',
         }),
-        L(0.945, 'Gogoratu: erraien eta bihotzaren inerbazioa begetatiboa da; muskulu ildaskatuena, kraniala edo espinala.', n('4/p8/s1', '2.1.2/p6/s1', '2.2.2/p28/s1'), [
+        L(0.945, 'Gogoratu: erraien eta bihotzaren inerbazioa begetatiboa da; muskulu ildaskatuena, kraniala edo espinala.', n('4/p8/s1', '2.1.2/p8/s1', '2.2.2/p30/s1'), [
           'muskulu-ildaskatuak',
           'muskulu-leuna',
           'miokardioa',
@@ -856,7 +856,7 @@ export const LESSON_W9: Lesson = {
           tone: 'summary',
           plain: 'Gogoratu: ildaskatuak mesodermo paraxialetik; leunak eta bihotzekoa, errai orritik.',
         }),
-        L(0.84, 'Buruko muskuluak nerbio kranialek inerbatzen dituzte; gainerakoak, nerbio espinalek.', n('2.1.2/p6/s1', '2.2.2/p28/s1'), ['nerbio-kranialak'], {
+        L(0.84, 'Buruko muskuluak nerbio kranialek inerbatzen dituzte; gainerakoak, nerbio espinalek.', n('2.1.2/p8/s1', '2.2.2/p30/s1'), ['nerbio-kranialak'], {
           view: 'garuna',
           tone: 'summary',
           plain: 'Buruko muskuluak nerbio kranialek mugitzen dituzte; beste guztiak, nerbio espinalek.',
@@ -865,7 +865,7 @@ export const LESSON_W9: Lesson = {
           tone: 'summary',
           plain: 'Erraiak eta bihotza, nerbio sistema begetatiboak.',
         }),
-        L(0.84, 'Orain zure txanda: osatu buruko muskuluen taula oroimenetik, eta gero galdera bat.', n('2.1.4/p20/s1'), [], {
+        L(0.84, 'Orain zure txanda: osatu buruko muskuluen taula oroimenetik, eta gero galdera bat.', n('2.1.3/p24/s1'), [], {
           tone: 'summary',
           plain: 'Orain zu: bete taula buruz, eta gero erantzun galdera bati.',
         }),

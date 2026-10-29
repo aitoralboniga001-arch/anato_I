@@ -146,7 +146,7 @@ const week: WeekDef = {
       beats: [
         {
           at: S2[0],
-          notes: ['w12/2/p3/s1'],
+          notes: ['w12/2/p4/s1'],
           recall: ['enbor-arteriosoa'],
           idea: 'Enbor arteriosoaren urrutiko atala, aorta zakua: hortik bi luzapen, eskuinekoa eta ezkerrekoa.',
           text: 'Enbor arteriosoaren urrutiko ataletik, aorta zakutik, bi alboko luzapen ateratzen dira. Atzean bi aorta dortsalak daude, eskuinekoa eta ezkerrekoa. Eredua aurretik ikusten da: enbrioiaren ezkerra zure eskuinean.',
@@ -155,7 +155,7 @@ const week: WeekDef = {
         },
         {
           at: S2[1],
-          notes: ['w12/2/p3/s2'],
+          notes: ['w12/2/p4/s2'],
           idea: 'Zeharkako tolespenaren ondorioz bi aorta dortsalak aorta zakuaren luzapenekin komunikatzen dira.',
           text: 'Enbrioiaren zeharkako tolespenaren ondorioz, bi aorta dortsalak bihotz hodiaren enbor arteriosoarekin komunikatzen dira, hain zuzen ere aorta zakutik ateratzen diren ezkerreko eta eskuineko luzapenekin. Lehen komunikazioa lehen aorta arkua da.',
           focus: ['aorta-dortsalak', 'lehen-aorta-arkua'],
@@ -163,7 +163,7 @@ const week: WeekDef = {
         },
         {
           at: S2[2],
-          notes: ['w12/2/p3/s3', 'w12/2/p5/s1'],
+          notes: ['w12/2/p4/s3', 'w12/2/p3/s1'],
           idea: 'Komunikazio horiek aorta arkuak dira: 6 bikote, kronologikoki, goitik behera.',
           key: 'Aorta arkuak = aorta zakuaren luzapenen eta aorta dortsalen arteko komunikazioak: 6 bikote.',
           ask: {
@@ -186,7 +186,7 @@ const week: WeekDef = {
         },
         {
           at: S2[3],
-          notes: ['w12/2/p4/s1'],
+          notes: ['w12/2/p5/s1'],
           idea: 'Bi aorta dortsalak T4tik behera fusionatzen dira: aorta dortsal bakarra.',
           key: 'T4tik behera: aorta dortsal bakarra.',
           text: 'Aorta dortsalak hasieran banatuta daude, baina garapenean 4. maila torazikotik (T4) behera fusionatuko dira, aorta dortsal bakarra eratuz. Kremailera bat bezala ixten da, behetik gora.',
@@ -196,7 +196,7 @@ const week: WeekDef = {
         },
         {
           at: S2[4],
-          notes: ['w12/2/p4/s2'],
+          notes: ['w12/2/p5/s2'],
           idea: 'Alde zefalikoan (arkuen mailan) bi aorta dortsalak banatuta geratzen dira.',
           text: 'Beraz, ezkerreko eta eskuineko aorta dortsalak alde zefalikoan soilik mantenduko dira banatuta, arkuen mailan. Hantxe gertatuko dira hurrengo etapetako aldaketa guztiak.',
           focus: ['aorta-dortsalak'],
@@ -421,7 +421,7 @@ const week: WeekDef = {
         },
         {
           at: S5[2],
-          notes: ['w12/2.3.1/p6/s1', 'w12/2.3.1/p7/s1-s2'],
+          notes: ['w12/2.3.1/p1/s1', 'w12/2.3.2/p3/s1-s2'],
           idea: '3. arkuak une berean garatzen dira, eta eskuinean eta ezkerrean garapen berdina dute.',
           key: '3. arkua: bi aldeetan BERDIN (simetrikoa).',
           text: 'Hirugarren arkuak momentu berean garatuko dira, eta eskuineko eta ezkerreko aldeetan garapen berdina egiten dute. Kamera aurrera biratzen da bi aldeak batera ikusteko.',
@@ -431,7 +431,7 @@ const week: WeekDef = {
         },
         {
           at: S5[3],
-          notes: ['w12/2.3.1/p8/s1'],
+          notes: ['w12/2.3.2/p4/s1'],
           idea: '3. arkuetatik karotida komunak; haietatik barneko karotiden hurbileko zatiak.',
           key: '3. arkua → karotida komuna + barneko karotidaren hurbileko zatia.',
           text: 'Ezkerreko eta eskuineko arkuetatik arteria karotida komunak sortzen dira, eta hauetatik barneko karotiden hurbileko zatiak eratuko dira.',
@@ -441,7 +441,7 @@ const week: WeekDef = {
         },
         {
           at: S5[4],
-          notes: ['w12/2.3.1/p9/s1'],
+          notes: ['w12/2.3.2/p5/s1'],
           idea: 'Aorta dortsalen alde kranealetik (3. arkuaren gainetik) barneko karotiden urrutiko atala.',
           text: 'Atzean dauden aorta dortsalen urrutiko ataletatik, eskuineko eta ezkerreko alde kranealetik, barneko karotiden urrutiko atala garatuko da. Kamera ezkerretik begiratzen du: aorta dortsalaren goiko zatia barneko karotida bihurtzen da.',
           focus: ['barneko-karotida', 'aorta-dortsalak'],
@@ -450,7 +450,7 @@ const week: WeekDef = {
         },
         {
           at: S5[5],
-          notes: ['w12/2.3.1/p10/s1'],
+          notes: ['w12/2.3.2/p6/s1'],
           idea: 'Kanpoko karotidak karotida komunaren kimu (ebaginazio) bezala.',
           ask: {
             q: 'Nondik sortzen da barneko karotidaren urrutiko atala?',
@@ -492,7 +492,7 @@ const week: WeekDef = {
       beats: [
         {
           at: S6[0],
-          notes: ['w12/2.3.2/p3/s1', 'w12/2.3.2/p4/s1'],
+          notes: ['w12/2.3.2/p14/s1', 'w12/2.3.2/p8/s1'],
           idea: '4. arkuek garapen desberdina dute ezkerrean eta eskuinean.',
           key: '4. arkua: ezkerra ≠ eskuina.',
           text: 'Ezkerreko eta eskuineko laugarren aorta arkuek garapen desberdina dute. Lehenik ezkerra ikusiko dugu, gero eskuina.',
@@ -501,7 +501,7 @@ const week: WeekDef = {
         },
         {
           at: S6[1],
-          notes: ['w12/2.3.2/p8/s1', 'w12/2.3.2/p10/s1'],
+          notes: ['w12/2.3.2/p9/s1', 'w12/2.3.2/p15/s1'],
           idea: 'Ezkerreko 4. arkua → aorta makoaren urrutiko atala: ezkerreko karotida komunaren eta ezkerreko subklabioaren artekoa.',
           key: 'Ezkerreko 4. arkua → aorta makoaren urrutiko atala.',
           text: 'Ezkerreko aldetik aorta makoaren urrutiko atala eratzen da: ezkerreko karotida komunaren eta ezkerreko arteria subklabioaren arteko atala. Kamera ezkerrera biratzen da.',
@@ -511,7 +511,7 @@ const week: WeekDef = {
         },
         {
           at: S6[2],
-          notes: ['w12/2.3.2/p9/s1', 'w12/2.3.2/p10/s2-s4'],
+          notes: ['w12/2.3.2/p10/s1', 'w12/2.3.2/p15/s2-s4'],
           idea: 'Ezkerreko subklabioa ezkerreko 7. segmentu arteko arteriatik; garapenean askoz gorago kokatzen da, ezkerreko karotidatik gertu.',
           caution: 'Ezkerreko subklabioa ez dator 4. arkutik: ezkerreko 7. segmentu arteko arteriatik dator.',
           text: 'Ezkerreko arteria subklabioa ezkerreko zazpigarren lepoko segmentu arteko arteriatik eratzen da. Hala ere, garapenean bere jatorria aldatu eta askoz gorago kokatuko da, ezkerreko karotidatik oso gertu.',
@@ -521,7 +521,7 @@ const week: WeekDef = {
         },
         {
           at: S6[3],
-          notes: ['w12/2.3.2/p5/s1', 'w12/2.3.2/p11/s1'],
+          notes: ['w12/2.3.2/p11/s1', 'w12/2.3.2/p17/s1'],
           idea: 'Eskuineko 4. arkua → eskuineko subklabioaren hasierako (hurbileko) atala.',
           key: 'Eskuineko 4. arkua → eskuineko subklabioaren hasiera.',
           text: 'Kamera eskuinera biratzen da. Eskuineko aldetik eskuineko arteria subklabioaren hasierako atala eratuko da (eskuineko lepauztaipeko arteria).',
@@ -531,7 +531,7 @@ const week: WeekDef = {
         },
         {
           at: S6[4],
-          notes: ['w12/2.3.2/p6/s1', 'w12/2.3.2/p7/s1', 'w12/2.3.2/p11/s2', 'w12/2.3.2/p12/s1'],
+          notes: ['w12/2.3.2/p12/s1', 'w12/2.3.2/p13/s1', 'w12/2.3.2/p17/s2', 'w12/2.3.2/p16/s1'],
           idea: 'Eskuineko subklabioa hiru zatitan: 4. arkua (hasiera) + eskuineko aorta dortsala (bitartekoa) + eskuineko 7. segmentu arteko arteria (urrutikoa).',
           key: 'Eskuineko subklabioa = 4. arkua + eskuineko aorta dortsala + eskuineko 7. segmentu arteko arteria.',
           ask: {
@@ -553,7 +553,7 @@ const week: WeekDef = {
         {
           at: S6[5],
           tourAt: S6[5] + 0.04,
-          notes: ['w12/2.3.3/p3/s1', 'w12/2.3.3/p4/s1-s2'],
+          notes: ['w12/2.3.2/p16/s1', 'w12/2.3.3/p3/s1-s2'],
           idea: '5. arkuak guztiz desagertzen dira eta ez dute ezer sortzen (faringe arkuetan ere gauza bera).',
           text: 'Bostgarren arku hauek guztiz desagertzen dira, eta ez dute ezer sortzen. Gauza bera gertatzen da faringe arkuetan. Kamera aurrera itzultzen da: 4. eta 6. arkuen artean ez da ezer geratzen.',
           focus: ['bostgarren-aorta-arkua'],
@@ -672,7 +672,7 @@ const week: WeekDef = {
         },
         {
           at: S8[2],
-          notes: ['w12/2.4/p4/s2-s4'],
+          notes: ['w12/2.4/p5/s1-s3'],
           idea: '2. Eskuineko 7. segmentu arteko arteriaren eta aorta dortsal komunaren arteko atala desagertzen da: ezkerreko aorta bakarrik geratzen da.',
           key: 'Beheranzko aorta = ezkerreko aorta dortsala.',
           caution: 'Beheranzko aorta ezkerreko aorta dortsaletik dator; makoaren urrutiko atala, berriz, ezkerreko 4. arkutik.',
@@ -683,7 +683,7 @@ const week: WeekDef = {
         },
         {
           at: S8[3],
-          notes: ['w12/2.4/p4/s5-s6'],
+          notes: ['w12/2.4/p6/s1-s2'],
           idea: '3. Tolespenengatik bihotza lepora eta gero toraxera jaisten da: karotida komunak eta arteria brakiozefalikoa asko luzatzen dira.',
           ask: {
             q: 'Zergatik luzatzen dira karotida komunak eta arteria brakiozefalikoa?',
@@ -703,7 +703,7 @@ const week: WeekDef = {
         },
         {
           at: S8[4],
-          notes: ['w12/2.4/p4/s7'],
+          notes: ['w12/2.4/p7/s1'],
           idea: '4. Lepoa eratzean ezkerreko subklabioak bere jatorria galdu eta askoz gorago kokatzen da: aortaren makotik irteten da.',
           key: 'Ezkerreko subklabioa makora igotzen da.',
           text: 'Laugarren aldaketa: lepoaren eraketarekin arteria brakiozefalikoa eta karotidak luzatzen dira, eta, ondorioz, ezkerreko subklabioak bere jatorria galdu eta askoz gorago kokatuko da: aortaren makotik irtengo da. Jaitsiera berriro ikusten da, oraingoan ezkerreko subklabioaren igoerari begira.',
@@ -713,7 +713,7 @@ const week: WeekDef = {
         },
         {
           at: S8[5],
-          notes: ['w12/2.4/p4/s8'],
+          notes: ['w12/2.4/p7/s2'],
           recall: ['bihotza'],
           idea: 'Lepo mailan sortutako bihotza toraxeko perikardio barrunbera jaisten da.',
           text: 'Lepo mailan sortu den bihotza toraxeko perikardio barrunbera jaisten da. Hau da aldaketa guztien ondoren geratzen den irudia.',
@@ -745,7 +745,7 @@ const week: WeekDef = {
       beats: [
         {
           at: S9[0],
-          notes: ['w12/2.4/p5/s1-s3'],
+          notes: ['w12/2.4/p8/s1-s3'],
           recall: ['nerbio-bagoa'],
           idea: 'Nerbio bagoa: IV. eta VI. arkuekin lotutako X. garezur bikotea; lepotik eta toraxetik jaitsi eta diafragma zeharkatzen du.',
           text: 'Gogoratu: IV. eta VI. arku brankialekin erlazionatutako garezur bikotea 10.a da, nerbio bagoa. Garezurretik irten, lepotik eta toraxetik jaitsi eta diafragma zeharkatuz abdomenera heltzen da. Ibilbide luze horretan adar desberdinak ematen ditu.',
@@ -754,7 +754,7 @@ const week: WeekDef = {
         },
         {
           at: S9[1],
-          notes: ['w12/2.4/p5/s4-s5'],
+          notes: ['w12/2.4/p8/s4-s5'],
           idea: 'IV. eta VI. arkuetako muskulu laringeoak inerbatzeko bi adar: goiko nerbio laringeoa eta nerbio laringeo atzerakaria.',
           key: 'Atzerakaria: bagotik irten, behera jaitsi eta GORA itzultzen da laringera.',
           text: 'Adar horien artean, IV. eta VI. faringe arkuetatik sortzen diren muskulu ildaskatuak (muskulu laringeoak) inerbatzen dituzten nerbioak daude: goiko nerbio laringeoa eta nerbio laringeo atzerakaria. Atzerakaria deitzen da irten eta goruntz abiatzen delako, laringeruntz.',
@@ -764,7 +764,7 @@ const week: WeekDef = {
         },
         {
           at: S9[2],
-          notes: ['w12/2.4/p6/s1'],
+          notes: ['w12/2.4/p9/s1'],
           idea: 'Arterien aldaketengatik eskuineko eta ezkerreko atzerakariek kokapen desberdina izango dute.',
           text: 'Arterietan gertatu diren aldaketen ondorioz, eskuineko eta ezkerreko nerbio bagoetatik irteten diren nerbio atzerakariek kokapen ezberdinak izango dituzte. Hasieran biak seigarren arkuaren azpitik igarotzen dira.',
           focus: ['eskuineko-nerbio-atzerakaria', 'ezkerreko-nerbio-atzerakaria'],
@@ -772,7 +772,7 @@ const week: WeekDef = {
         },
         {
           at: S9[3],
-          notes: ['w12/2.4/p7/s1-s2', 'w12/2.4/p8/s1'],
+          notes: ['w12/2.4/p10/s1-s2', 'w12/2.4/p11/s1'],
           idea: 'Ezkerrean atzerakariak 6. arkuaren urrutiko atala inguratzen du, non hodi arteriosoa kokatzen den, eta gora doa.',
           text: 'Ezkerreko aldean, ezkerreko nerbio bagotik irteten den ezkerreko nerbio atzerakariak seigarren arkuaren urrutiko atala inguratzen du; bertan hodi arteriosoa kokatzen da. Inguratu eta goruntz abiatzen da.',
           focus: ['ezkerreko-nerbio-atzerakaria', 'hodi-arteriosoa'],
@@ -781,7 +781,7 @@ const week: WeekDef = {
         },
         {
           at: S9[4],
-          notes: ['w12/2.4/p9/s1-s2', 'w12/2.4/p10/s1', 'w12/2.4/p11/s1'],
+          notes: ['w12/2.4/p11/s1-s2', 'w12/2.4/p12/s1', 'w12/2.4/p13/s1'],
           idea: 'Eskuinean atzerakaria gorago kokatzen da (6.aren urrutiko atala desagertu eta 5.a ez da garatzen): 4. arkuko subklabioa inguratzen du.',
           key: 'Eskuineko atzerakaria: eskuineko subklabioaren azpitik (4. arkua).',
           ask: {
@@ -802,7 +802,7 @@ const week: WeekDef = {
         },
         {
           at: S9[5],
-          notes: ['w12/2.4/p12/s1-s2'],
+          notes: ['w12/2.4/p14/s1-s2'],
           idea: 'Ezkerrean 6. arkuaren urrutiko atala hodi arteriosoa da: birika arteriako odola aortara.',
           text: 'Ezkerrean, seigarren arkuaren urrutiko atala hodi bihurtzen da, hodi arteriosoa, ezkerreko birika arteria aortarekin komunikatzeko. Hodi arterioso horren bidez birika arteriatik doan odola aortara pasatzen da.',
           focus: ['hodi-arteriosoa', 'ezkerreko-nerbio-atzerakaria'],
@@ -810,7 +810,7 @@ const week: WeekDef = {
         },
         {
           at: S9[6],
-          notes: ['w12/2.4/p12/s3', 'w12/2.4/p13/s1'],
+          notes: ['w12/2.4/p14/s3', 'w12/2.4/p14/s4'],
           idea: 'Jaio ostean hodi arteriosoa lotailu arteriosoa bihurtzen da; ezkerreko atzerakariak hura inguratzen du.',
           key: 'Ezkerreko atzerakaria: lotailu arteriosoaren azpitik.',
           text: 'Jaio ostean gertatutako aldaketengatik, hodi arterioso hau lotailu bihurtzen da: lotailu arteriosoa. Ondorioz, ezkerreko nerbio laringeo atzerakariak lotailu arteriosoa inguratuko du.',
@@ -841,7 +841,7 @@ const week: WeekDef = {
       beats: [
         {
           at: S10[0],
-          notes: ['w12/2.4/p14/s1', 'w12/2.4/p15/s1-s2', 'w12/2.3.4/p11/s1'],
+          notes: ['w12/2.4/p15/s1', 'w12/2.4/p16/s1-s2', 'w12/2.3.4/p11/s1'],
           idea: 'Ezkerreko bentrikulutik aorta: goranzko aorta, makoa eta beheranzko aorta; adarrak desberdinak bi aldeetan.',
           text: 'Beraz, hauek dira gorputzean ditugun arteria handiak. Ezkerreko bentrikulutik aorta irteten da, eta egitura horretan hainbat atal bereiz ditzakegu. Aortatik adar desberdinak sortzen dira, desberdinak eskuineko eta ezkerreko aldeetan.',
           focus: ['aorta'],
@@ -849,7 +849,7 @@ const week: WeekDef = {
         },
         {
           at: S10[1],
-          notes: ['w12/2.4/p16/s1'],
+          notes: ['w12/2.4/p16/s2'],
           idea: 'Goranzko aorta: hurbileko atala, enbor arteriosotik.',
           text: 'Goranzko aorta: aortaren hurbileko atala, enbor arteriosotik sortzen da.',
           focus: ['goranzko-aorta'],
@@ -858,7 +858,7 @@ const week: WeekDef = {
         },
         {
           at: S10[2],
-          notes: ['w12/2.4/p17/s1', 'w12/2.3.4/p11/s2'],
+          notes: ['w12/2.4/p16/s3', 'w12/2.3.4/p11/s2'],
           idea: 'Aortaren makoa: hasierako zatia enbor arteriosoaren (aorta zakuaren) ezkerreko adarretik; goranzko aorta makoarekin jarraitzen da eta tolestu egiten da.',
           text: 'Goranzko aorta aorta makoarekin jarraitzen da, eta tolestu egiten da. Aortaren makoaren hasierako zatia enbor arteriosoak duen ezkerreko adarretik sortzen da (aorta zakuaren ezkerreko luzapena).',
           focus: ['aortaren-makoa'],
@@ -867,7 +867,7 @@ const week: WeekDef = {
         },
         {
           at: S10[3],
-          notes: ['w12/2.4/p18/s1-s3', 'w12/2.3.4/p11/s3', 'w12/2.3.4/p11/s6'],
+          notes: ['w12/2.4/p16/s7-s9', 'w12/2.3.4/p11/s3', 'w12/2.3.4/p11/s6'],
           idea: 'Beheranzko aorta: toraxetik jaitsi, diafragma zeharkatu eta abdomenera.',
           text: 'Makotik aorta jaisten hasten da, beheranzko aorta bezala. Toraxetik jaisten da, diafragma zeharkatzen du eta abdomenera sartzen da. Makoaren urrutiko atala ezkerreko 4. arkutik dator, eta beheranzko aorta ezkerreko aorta dortsaletik.',
           focus: ['beheranzko-aorta'],
@@ -875,7 +875,7 @@ const week: WeekDef = {
         },
         {
           at: S10[4],
-          notes: ['w12/2.3.4/p11/s4', 'w12/2.3.4/p11/s7', 'w12/2.4/p18/s4'],
+          notes: ['w12/2.3.4/p11/s4', 'w12/2.3.4/p11/s7', 'w12/2.4/p16/s4'],
           idea: 'Makoaren lehen adarra: arteria (enbor) brakiozefalikoa, BAKARRA → eskuineko karotida komuna eta eskuineko subklabioa.',
           key: 'Arteria brakiozefalikoa bakarra da, eskuinean: ez esan "eskuineko brakiozefalikoa".',
           caution: 'Enbor brakiozefaliko bakarra dago: ez jarri eskuinekoa/ezkerrekoa.',
@@ -886,7 +886,7 @@ const week: WeekDef = {
         },
         {
           at: S10[5],
-          notes: ['w12/2.3.4/p11/s5', 'w12/2.3.4/p11/s8-s9', 'w12/2.4/p19/s1-s2'],
+          notes: ['w12/2.3.4/p11/s5', 'w12/2.3.4/p11/s8-s9', 'w12/2.4/p16/s5-s6'],
           idea: 'Ezkerrean enbor komunik ez: ezkerreko karotida komuna eta ezkerreko subklabioa makotik zuzenean.',
           key: 'Makoaren hiru adarrak: brakiozefalikoa, ezkerreko karotida komuna, ezkerreko subklabioa.',
           ask: {
@@ -907,7 +907,7 @@ const week: WeekDef = {
         },
         {
           at: S10[6],
-          notes: ['w12/2.4/p20/s1'],
+          notes: ['w12/2.4/p17/s1'],
           idea: 'Eskuineko bentrikuluaren infundibulutik birika arteria (enborra): eskuineko eta ezkerreko birika arteriak.',
           text: 'Bukatzeko, eskuineko bentrikuluaren infundibulutik irteten den birika arteriak (birika enborrak) bi adar ditu: eskuineko eta ezkerreko birika arteriak.',
           focus: ['birika-arteria', 'eskuineko-birika-arteria', 'ezkerreko-birika-arteria'],
@@ -915,7 +915,7 @@ const week: WeekDef = {
         },
         {
           at: S10[7],
-          notes: ['w12/2.4/p21/s1', 'w12/2.3.2/p12/s1'],
+          notes: ['w12/2.4/p16/s2', 'w12/2.3.2/p16/s1'],
           idea: 'Laburpena: arteria bakoitza bere jatorriaren kolorean; eredua 29. egunera itzuli eta berriro heldura.',
           key: 'Kolore bat = jatorri bat: aorta zakua, 3., 4., 6. arkuak, aorta dortsalak, 7. segmentu arteko arteriak.',
           text: 'Orain kolorea jatorria da, apunteetako irudian bezala. Eredua 29. egunera itzultzen da eta berriro heldura: atal bakoitzak bere arkuaren kolorea gordetzen du. Goranzko aorta eta brakiozefalikoa aorta zakutik; karotidak 3. arkutik; makoa eta eskuineko subklabioaren hasiera 4. arkutik; birika arteriak eta hodi arteriosoa 6. arkutik; beheranzko aorta ezkerreko aorta dortsaletik; subklabioen urrutiko atala 7. segmentu arteko arteriatik.',
@@ -975,7 +975,7 @@ const week: WeekDef = {
         },
         {
           at: S11[3],
-          notes: ['w12/2.5/p3/s3-s4', 'w12/2.5/p4/s1', 'w12/2.5/p5/s1', 'w12/2.5/p6/s1-s2', 'w12/2.5/p7/s1-s2'],
+          notes: ['w12/2.5/p3/s3-s4', 'w12/2.5/p7/s1', 'w12/2.5/p4/s1', 'w12/2.5/p5/s1-s2', 'w12/2.5/p6/s1-s2'],
           idea: 'Beheranzko aortaren adarrak hiru taldetan: aurreko errai adarrak (hestera), alboko errai adarrak (abdomenean) eta atze alboko adarrak (segmentu arteko arteriak, maila guztietan).',
           key: 'Hiru adar talde: aurreko errai adarrak, alboko errai adarrak, atze alboko (segmentu arteko) adarrak.',
           ask: {
@@ -1007,7 +1007,7 @@ const week: WeekDef = {
         },
         {
           at: S11[5],
-          notes: ['w12/2.5.1/p5/s1-s2', 'w12/2.5.1/p6/s1', 'w12/2.5.1/p7/s1', 'w12/2.5.1/p8/s1'],
+          notes: ['w12/2.5.1/p5/s1-s2', 'w12/2.5.1/p6/s2', 'w12/2.5.1/p7/s1', 'w12/2.5.1/p8/s1'],
           idea: 'Abdomenean 3 arteria: enbor zeliakoa (aurreko hestea), goiko arteria mesenterikoa (bitarteko hestea), beheko arteria mesenterikoa (atzeko hestea).',
           key: 'Enbor zeliakoa → aurreko hestea; goiko mesenterikoa → bitarteko hestea; beheko mesenterikoa → atzeko hestea.',
           ask: {
@@ -1049,7 +1049,7 @@ const week: WeekDef = {
       beats: [
         {
           at: S12[0],
-          notes: ['w12/2.5.2/p3/s1', 'w12/2.5.2/p7/s1'],
+          notes: ['w12/2.5.2/p3/s1', 'w12/2.5/p5/s1'],
           idea: 'Abdomenean alboko errai adarrak: gehiago daude, baina hiru ikasi behar ditugu.',
           text: 'Abdomenean alboko errai adar asko daude, baina hiru bakarrik ikasi behar ditugu. Abdomena aurretik ikusten da, hestea gardena: atzean giltzurrun gaineko guruinak, giltzurrunak eta gonadak.',
           focus: ['alboko-errai-adarrak', 'giltzurruna'],
@@ -1074,7 +1074,7 @@ const week: WeekDef = {
         },
         {
           at: S12[3],
-          notes: ['w12/2.5.3/p3/s1-s2'],
+          notes: ['w12/2.5.3/p3/s1', 'w12/2.5.3/p3/s3'],
           idea: 'Segmentu arteko arteriak maila guztietan, atze alboko paretatik: atzeko adarrak bizkarreko muskuluetara, orno muinera eta larruazalera.',
           key: 'Segmentu arteko arteriak: maila guztietan; atzeko adarra bizkarrera.',
           text: 'Kamera atzera biratzen da, ezkerretik eta atzetik. Segmentu arteko arteriak maila guztietan ikusten dira, eta guztietatik, atze alboko paretatik, atzeko adar bat irteten da bizkarreko muskulu ildaskatuak, orno muina eta larruazala irrigatzeko. Mailaka izen desberdinak dituzte.',
@@ -1084,7 +1084,7 @@ const week: WeekDef = {
         },
         {
           at: S12[4],
-          notes: ['w12/2.5.3/p4/s1-s2', 'w12/2.5.3/p9/s1'],
+          notes: ['w12/2.5.3/p4/s2-s3', 'w12/2.5.3/p9/s1'],
           idea: 'Lepoan segmentu arteko arteriek luzetarako anastomosiak eratu eta aortarekiko lotura galtzen dute: orno arteriak (eta beste batzuk).',
           key: 'Lepoan: anastomosiak + aortarekiko lotura galdu → orno arteriak.',
           ask: {

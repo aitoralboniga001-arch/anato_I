@@ -1,11 +1,11 @@
 import { expandNotes } from '@/content/notes-text';
 import { structures, weeks } from '@/content/registry';
 import type { Answers } from '@/components/shell/answers';
-import { evidenceOf, intentOf, numbersIn, passagesOfSentences, searchNotes, strongHit, warmNotes, type NotesContext, type NotesHit } from './notes';
+import { evidenceOf, intentOf, numbersIn, passagesOfSentences, searchNotes, sectionAsked, strongHit, warmNotes, type NotesContext, type NotesHit } from './notes';
 import { boldName, followupsFor, fromSentence, lineageOf, notesTarget, offlineReply, SAYS_WHERE, sourceOf, targetsOf, type Evidence } from './offline';
 import { pickPractice, wantsPractice } from './practice';
-import { CONFIDENT, confident, describeHere, factsFrom, GO, isFormationQuestion, nearestFrom, search, toTarget, wantsPlace, withFrom, type Hit } from './search';
-import { detectLang, keyWords, match, queryTokens, topicIn, withoutTopic, type Lang } from './text';
+import { CONFIDENT, confident, describeHere, factsFrom, GO, isFormationQuestion, nearestFrom, search, toTarget, vocabulary, wantsPlace, withFrom, type Hit } from './search';
+import { detectLang, keyWords, match, queryTokens, spell, tokens, topicIn, withoutTopic, type Lang } from './text';
 import type { KimuAsk, KimuHere, KimuModelReply, KimuReply, KimuTurn } from './types';
 
 /** "Explain this", "zer da hau?": the question is about what is on screen, not about a named thing. */
@@ -31,11 +31,11 @@ export function retrievalQuestion(question: string, history: KimuTurn[], here: K
 }
 
 /** Does the question name this structure (its first word, in any case ending or spelling)? */
-export function namedIn(question: string, id: string): boolean {
+export function namedIn(question: string, id: string, akas = true): boolean {
   const st = structures.get(id);
   if (!st) return false;
-  const q = queryTokens(question).flat();
-  return [st.name, st.es ?? '', ...(st.aka ?? [])].filter(Boolean).some((n) => {
+  const q = queryTokens(question).flatMap((alts) => spell(alts, vocabulary()));
+  return [st.name, st.es ?? '', ...(akas ? (st.aka ?? []) : [])].filter(Boolean).some((n) => {
     // Every word that names it ("zeloma" in "Enbrioi barruko zeloma"; "hodi" and "neurala"), so
     // "zeloma" alone does not name "Heuser-en mintza (zeloma kanpoko mintza)".
     const own = keyWords(n);
@@ -153,7 +153,16 @@ export async function askKimu(question: string, history: KimuTurn[], here: KimuH
   const rq = withoutTopic(full);
   let places = step ? [] : search(full, 3, week);
   // The structure the question names: the best place that is one (not always the first place found).
-  const named = places.find((h) => h.doc.kind === 'structure' && confident(h) && !!h.doc.structure && namedIn(rq, h.doc.structure));
+  // A tie goes to the structure the question calls by its own name ("birika arteria"), not to one it names
+  // only through an alias ("Birika enborraren sustraiak", aka birika arteria).
+  // A structure called by its own full name counts even when the question's other words lower its cover
+  // ("Notokorda noiz agertzen da?": "agertzen" is not in the notochord's entry, yet it is what is asked).
+  const own = (h: Hit) => h.doc.kind === 'structure' && h.score >= CONFIDENT && !!h.doc.structure && namedIn(rq, h.doc.structure, false);
+  let namedAll = places.filter((h) => h.doc.kind === 'structure' && confident(h) && !!h.doc.structure && namedIn(rq, h.doc.structure));
+  if (!namedAll.length) namedAll = places.filter(own);
+  const named = namedAll.find((h) => namedIn(rq, h.doc.structure!, false)) ?? namedAll[0];
+  // …and it takes the alias's place among the destinations too.
+  if (named && namedAll[0] !== named) places = places.map((h) => (h === namedAll[0] ? named : h === named ? namedAll[0] : h));
   // "Take me to X": the nearest place that shows X at or after the student's position comes first, and
   // X's usual place second when it is in another stage (the same stage: the usual place says it best).
   const near = going && named ? nearestFrom(here!, named) : null;
@@ -164,8 +173,15 @@ export async function askKimu(question: string, history: KimuTurn[], here: KimuH
   const ctx = notesContext(here);
   if (asked) { ctx.week = asked; ctx.only = asked; }
   if (named) ctx.focus = { week: named.doc.week, sentences: reviewedSentences(named.doc.structure!), home: stageSentences(named.doc.week, named.doc.stage) };
-  const notes = step ? step.notes : searchNotes(rq, ctx, 3);
-  const ev: Evidence = { question: rq, lang, intent, structure: s, notes, places, going: going && !!named, here, asked };
+  // A question worded as a section's heading ("Atal bulbarraren trenkadatze prozesua") is about that
+  // whole section: its opening and its parts, not the one sentence that shares the most words.
+  const section = step || going ? null : sectionAsked(rq, ctx);
+  // The notes are in Basque: a question that calls the structure otherwise (in Spanish, English or misspelt)
+  // searches them with its Basque name too.
+  const q = queryTokens(rq).flat();
+  const inBasque = !!s && tokens(s.name).every((w) => q.some((x) => match(x, w, false) >= 0.85));
+  const notes = step ? step.notes : section ? section.parts : s && !inBasque ? searchNotes(s.name, ctx, 3, rq) : searchNotes(rq, ctx, 3);
+  const ev: Evidence = { question: rq, lang, intent, structure: s, notes, places, going: going && !!named, here, asked, section };
   const offline = located(step ? step.reply : offlineReply(ev), here, ev.going ? lang : null);
 
   // Nothing the notes really answer: the model would have nothing to stand on, so it is not asked.

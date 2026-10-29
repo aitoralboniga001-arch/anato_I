@@ -71,6 +71,21 @@ export const solid = (it: Item3) => !it.stream && !!it.id && (it.opacity ?? 1) *
 /** The item is the named structure itself (or one of its pieces). */
 const isOwn = (it: Item3, id: string) => it.id === id || !!it.groups?.includes(id);
 
+/**
+ * Where a structure is when the model gives it no named point (drawn only as pieces, or as a group of
+ * other parts): the middle of its biggest drawn piece. Null when nothing of it is drawn.
+ */
+export function ownCentre(items: Item3[], id: string): V3 | null {
+  let best: Sphere | null = null;
+  for (const it of items) {
+    // Anything drawn, glassy organs included (a lung seen through is still where its name points).
+    if (!isOwn(it, id) || it.stream || (it.opacity ?? 1) * (it.show ?? 1) < 0.05) continue;
+    const b = boundOf(it);
+    if (!best || b.r > best.r) best = b;
+  }
+  return best ? best.c : null;
+}
+
 /** Whether the segment o → o + d (of length len) comes within the sphere. */
 function nearSphere(s: Sphere, o: V3, d: V3, len: number) {
   const oc: V3 = [s.c[0] - o[0], s.c[1] - o[1], s.c[2] - o[2]];

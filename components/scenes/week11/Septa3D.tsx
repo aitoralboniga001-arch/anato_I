@@ -7,7 +7,7 @@ import { blendCamera } from '@/lib/three-d/aim';
 import { Steps, vis } from './common';
 import { P1, P2, STEPS1, STEPS2, primumStage, secundumStage } from './Atria';
 import { P3, STEPS3, birthStage } from './Birth';
-import { AT0, YF, atriaModel, type AtriaFlow, type AtriaState } from './atria3d';
+import { AT0, YF, atriaModel, chamber, type AtriaFlow, type AtriaState } from './atria3d';
 
 /**
  * The 3D main views of stages 2–4 of topic 11 (notes 2.1–2.2): both atria in one room opened from the
@@ -137,6 +137,8 @@ export function Secundum3D({ t }: SceneProps) {
     os2: 1,
     closeOP: 1,
     ...k,
+    // Step 1: the sinus venosus behind the right atrium, taken into its back wall (stage 5 tells it in full).
+    sinus: 1 - seg(t, P2[0] + 0.025, P2[1]),
     glassRA: glass(t, [[0, P2[4]]]),
     glassLA: glass(t, [[P2[6], 2]]),
     // From the left atrium the foramen lies behind the valve: the valve goes see-through to show it.
@@ -158,9 +160,11 @@ export function Secundum3D({ t }: SceneProps) {
     [P2[6], CAM.left, 0.07],
   ]);
   const names: CalloutSpec[] = [
-    // The two atria are named with the way between them (the oblique path).
-    { id: 'hasierako-eskuineko-aurikula', p: 'hasierako-eskuineko-aurikula', show: vis(t, P2[5], P2[6]) },
-    { id: 'hasierako-ezkerreko-aurikula', p: 'hasierako-ezkerreko-aurikula', show: vis(t, P2[5], P2[6]) },
+    // The two atria are named all along (small), full size with the way between them (the oblique path).
+    // Seen from inside it (its wall clear), its point would land on the septum: named on its front wall then.
+    { id: 'hasierako-eskuineko-aurikula', p: t < P2[4] ? chamber(314, 112, 1.0) : 'hasierako-eskuineko-aurikula', show: 1, small: t < P2[5] || t >= P2[6] },
+    { id: 'hasierako-ezkerreko-aurikula', p: 'hasierako-ezkerreko-aurikula', show: 1, small: t < P2[5] || t >= P2[6] },
+    { id: 'zain-sinua', p: 'zain-sinua', show: vis(t, 0, P2[1]) },
     { id: 'septum-primum', p: 'septum-primum', show: vis(t, 0, P2[6] + 0.04) },
     { id: 'ostium-secunduma', p: 'ostium-secunduma', show: vis(t, 0, P2[1]) + vis(t, P2[4], P2[6] + 0.06) },
     { id: 'septum-secundum', p: 'septum-secundum', show: vis(t, P2[1] + 0.02, P2[6]) },
@@ -218,7 +222,8 @@ export function wallsStage(t: number) {
     sinus: 1 - seg(t, P5[0] + 0.03, P5[0] + 0.1),
     smoothWide: seg(t, P5[0] + 0.03, P5[0] + 0.11),
     walls: t >= P5[1],
-    cs: seg(t, P5[1], P5[1] + 0.03),
+    // The left horn's mouth in the wall, as the right horn is taken in: the coronary sinus.
+    cs: seg(t, P5[0] + 0.07, P5[0] + 0.11),
     pect: seg(t, P5[2] + 0.005, P5[2] + 0.05),
     crista: seg(t, P5[3] + 0.005, P5[3] + 0.04),
     node: seg(t, P5[3] + 0.04, P5[3] + 0.07),
@@ -245,15 +250,15 @@ export function Walls3D({ t }: SceneProps) {
     spurium: 1,
     stub: 1,
     ...k,
-    // Through the right atrium's wall: the sinus behind it; through the left's: the vein behind it.
-    glassRA: 0.7 * glass(t, [[0, P5[1]]]) + glass(t, [[P5[5], P5[6]]]),
+    // Through the left atrium's wall: the vein behind it (the sinus is seen from outside, behind).
+    glassRA: glass(t, [[P5[5], P5[6]]]),
     glassLA: glass(t, [[P5[4], P5[6]], [P5[7], 2]]),
   };
   const flow: AtriaFlow = { phase: t, low: 0, high: 1, down: 1, born: 0, slit: 0 };
   const camera = cameraAt(t, [
-    // From the front and the right, a little above: the sinus behind the right atrium (its wall clear),
-    // reached by carrying on the turn from the front (the stage before).
-    [0, drift(t, 0.01, P5[1] - 0.015, orbit(-28, 14, 8.6, [-0.4, 0, -0.4]), orbit(-50, 16, 7.6, [-0.5, 0, -0.45]))],
+    // From behind and the right, a little above: the sinus venosus outside the atria, both horns and the
+    // cavae; turning a little to the right as the horn sinks into the wall and the wall bulges.
+    [0, drift(t, 0.01, P5[1] - 0.015, orbit(-156, 22, 8.6, [-0.2, -0.1, -0.55]), orbit(-142, 16, 8.2, [-0.35, -0.1, -0.55]))],
     // The right atrium's back wall: the smooth part and the veins' openings.
     [P5[1], orbit(-24, 8, 6.2, [-0.75, -0.05, -0.45])],
     // Its lateral wall, from the left across the room (through the front opening): the trabeculated part.
@@ -270,10 +275,15 @@ export function Walls3D({ t }: SceneProps) {
     [P5[7], orbit(40, 12, 7.6, [0.8, 0, -1.0])],
   ]);
   const names: CalloutSpec[] = [
-    { id: 'hasierako-eskuineko-aurikula', p: 'hasierako-eskuineko-aurikula', show: vis(t, 0, P5[1]) },
-    { id: 'hasierako-ezkerreko-aurikula', p: 'hasierako-ezkerreko-aurikula', show: vis(t, 0, P5[1]), small: true },
+    { id: 'aurikula-komuna', p: chamber(166, 40, 1.0), show: vis(t, 0, P5[1]), small: true },
+    { id: 'hasierako-eskuineko-aurikula', p: chamber(246, 60, 1.0), show: vis(t, 0, P5[1]) },
+    { id: 'hasierako-ezkerreko-aurikula', p: chamber(130, 70, 1.0), show: vis(t, 0, P5[1]), small: true },
     { id: 'zain-sinua', p: 'zain-sinua', show: vis(t, 0, P5[1]) },
-    { id: 'zulo-sinoaurikularra', p: 'zulo-sinoaurikularra', show: vis(t, 0, P5[0] + 0.07), small: true },
+    { id: 'zulo-sinoaurikularra', p: 'zulo-sinoaurikularra', show: vis(t, 0, P5[1]), small: true },
+    { id: 'goiko-kaba-zaina', key: 'svc-sinus', p: 'goiko-kaba-zaina', show: vis(t, 0, P5[0] + 0.06), small: true },
+    { id: 'beheko-kaba-zaina', key: 'ivc-sinus', p: 'beheko-kaba-zaina', show: vis(t, 0, P5[0] + 0.06), small: true },
+    // The left horn, thinner and venous as the right one is taken in: the coronary sinus.
+    { id: 'sinu-koronarioa', key: 'cs-horn', p: 'sinus-left', show: vis(t, P5[0] + 0.07, P5[1]), small: true },
     { id: 'atal-lisoa', p: 'atal-lisoa', show: vis(t, P5[1], P5[2]) },
     { id: 'goiko-kaba-zaina', p: 'goiko-kaba-zaina', show: vis(t, P5[1], P5[2]), small: true },
     { id: 'beheko-kaba-zaina', p: 'beheko-kaba-zaina', show: vis(t, P5[1], P5[2]), small: true },
@@ -302,7 +312,7 @@ export function Walls3D({ t }: SceneProps) {
       over={(_, asked) => (
         <>
           <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, 0, P5[1]) * asked}>
-            Aurretik eta eskuinetik: eskuineko aurikularen pareta gardena, zain sinua haren atzean
+            Atzetik eta eskuinetik: zain sinua aurikulen atzean, ferra itxuran (eskuineko eta ezkerreko adarrak)
           </Note>
           <Note x={500} y={22} size={12.5} tone="dim" show={vis(t, P5[1], P5[2]) * asked}>
             Eskuineko aurikularen atzeko pareta, aurretik: atal lisoa (morea)

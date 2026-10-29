@@ -375,37 +375,6 @@ export const w9: NotesBlock[] = [
     ]
   },
   {
-    "kind": "p",
-    "section": "intro",
-    "id": "w9/intro/p5",
-    "sentences": [
-      {
-        "id": "w9/intro/p5/s1",
-        "parts": [
-          {
-            "text": "Hasi baino lehen, buru ganga deskribatzean, irakasleak fontanelak nola ixten ziren komentatu zuen. "
-          }
-        ]
-      },
-      {
-        "id": "w9/intro/p5/s2",
-        "parts": [
-          {
-            "text": "Badaezpada, aipatu behar da atzeko fontanela jaio osteko 1. eta 2. lauhilabetetan ixten dela. "
-          }
-        ]
-      },
-      {
-        "id": "w9/intro/p5/s3",
-        "parts": [
-          {
-            "text": "Aurrekoa, aldiz, 18. hilabetera arte zabalik mantentzen da."
-          }
-        ]
-      }
-    ]
-  },
-  {
     "kind": "h1",
     "section": "1",
     "id": "w9/1/p2",
@@ -445,7 +414,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/1/p3/s2",
         "parts": [
           {
-            "text": "Salbuespenak badira: errai batzuetan diren gihar batzuk ektodermotik sortzen dira: begi- niniko muskulu estutazil eta zabaltzailea, titi-guruinetako hodi galaktoforoan dauden muskuluak, izerdi guruinetako muskulu lisoak…"
+            "text": "Salbuespenak: errai batzuetan dauden gihar batzuk ektodermotik sortzen dira: Begi-niniko muskulu estutzaile eta zabaltzailea, titi-guruinetako hodi galaktoforoan dauden muskuluak, izerdi guruinetako muskulu lisoak…"
           }
         ]
       }
@@ -475,7 +444,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/1/p5/s1",
         "parts": [
           {
-            "text": "● Muskulu ildaskatuak edo borondatezko muskuluak: Lokomozio sistemarekin/mugimenduarekin erlazionatuta daude."
+            "text": "● Muskulu ildaskatuak / borondatezko muskuluak: Lokomozio sistemarekin/ mugimenduarekin erlazionatuta daude."
           }
         ]
       }
@@ -490,7 +459,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/1/p6/s1",
         "parts": [
           {
-            "text": "● Muskulu lisoak edo leunak (erraiekin erlazionatutako muskuluak): Heste eta hesteen eratorrien inguruan dagoen alboko mesodermoaren errai orritik sortzen dira. "
+            "text": "● Muskulu lisoak / leunak (erraiekin erlazionatutako muskuluak): Hestearen eta bere eratorrien inguruan dagoen alboko mesodermoaren errai orritik sortzen dira. "
           }
         ]
       },
@@ -498,7 +467,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/1/p6/s2",
         "parts": [
           {
-            "text": "Gure gorputzaren erraietan, arterietan eta zainetan kokatzen dira. "
+            "text": "Gure erraietan, arterietan eta zainetan kokatzen dira. "
           }
         ]
       },
@@ -521,7 +490,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/1/p7/s1",
         "parts": [
           {
-            "text": "● Bihotzeko muskulua edo miokardioa: Bihotz hodiaren inguruan kokatzen den alboko mesodermoaren errai orritik sortzen da. "
+            "text": "● Bihotzeko muskulua / miokardioa: Bihotz hodiaren inguruan kokatzen den alboko mesodermoaren errai orritik sortzen da. "
           }
         ]
       },
@@ -575,14 +544,14 @@ export const w9: NotesBlock[] = [
         "id": "w9/2/p3/s2",
         "parts": [
           {
-            "text": "Alde zefalikoan mesordermo hori segmentatu egiten da baina segmentazioa ez da osoa: "
+            "text": "Alde zefalikoan mesordermo hori segmentatzen da baina segmentazioa ez da osoa: "
           },
           {
             "text": "somitomeroak ",
             "b": true
           },
           {
-            "text": "agertzen dira (ez da gertatuko somitetan bezala pareten diferentziazioa). "
+            "text": "agertzen dira (ez da egongo pareten diferentziazioa, somitetan gertatzen den bezala). "
           }
         ]
       },
@@ -623,7 +592,7 @@ export const w9: NotesBlock[] = [
             "text": "Alde zefalikoan dauden muskulu ildaskatuak (buruan, baita faringean eta laringean) batez ere "
           },
           {
-            "text": "somitomeroetako mesodermotik",
+            "text": "somitomeroen mesodermotik",
             "b": true
           },
           {
@@ -635,7 +604,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2/p4/s2",
         "parts": [
           {
-            "text": "Alde zefalikoko muskulu batzuk begien inguruan kokatzen direnak sortzen dira, begiaren kanpotar muskuluak deitzen dira (hezurretan baita begian insertatzen dira). "
+            "text": "Alde zefalikoko muskulu batzuk sortzen dira, begien inguruan kokatzen direnak, begiaren kanpotar muskuluak deiturikoak (hezurretan baita begian insertatzen dira). "
           }
         ]
       },
@@ -643,14 +612,14 @@ export const w9: NotesBlock[] = [
         "id": "w9/2/p4/s3",
         "parts": [
           {
-            "text": "Beste muskulu batzuk sortzen dira (buruan dauzkagunak) eta "
+            "text": "Buruan dauzkagun beste muskulu batzuk sortzen dira, "
           },
           {
             "text": "faringe-arkuetako mesodermotik",
             "b": true
           },
           {
-            "text": " sortzen dira (somitomeroen mesodermoa arku horietan kokatzen da eta bakoitzean muskulu jakin batzuk sortuko dira."
+            "text": " (somitomeroen mesodermoa arku horietan kokatzen da eta bakoitzean muskulu jakin batzuk sortuko dira)."
           }
         ]
       }
@@ -709,7 +678,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2/p6/s2",
         "parts": [
           {
-            "text": "Somitomeroetako mesodermotik eta somitetatik zelula muskular desberdinak desberdintzen dira:"
+            "text": "Somitomeroen mesodermotik eta somitetatik zelula muskular desberdinak desberdintzen dira:"
           }
         ]
       }
@@ -767,7 +736,7 @@ export const w9: NotesBlock[] = [
             "b": true
           },
           {
-            "text": ", berriz, somitetako aurre-alboko eta atze-erdialdeko ertzetako zelulak "
+            "text": ", berriz, somitetako aurre-alboko eta atze- erdialdeko ertzetako zelulak "
           },
           {
             "text": "mioblastoak ",
@@ -812,7 +781,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2/p9/s1",
         "parts": [
           {
-            "text": "Mioblastoek haien artean fusionatzen dira eta nukleo ugariko zuntz muskular luzeak agertzen dira. "
+            "text": "Mioblastoak haien artean fusionatzen dira eta nukleo ugariko zuntz muskular luzeak eratzen dira. "
           }
         ]
       },
@@ -827,14 +796,22 @@ export const w9: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "batzuk agertzen dira eta garapenaren 3. hilabetearen bukarearako zuntz horietan "
+            "text": "batzuk agertzen dira eta garapenaren 3. hilabetearen bukaerarako zuntz horietan "
           },
           {
             "text": "ildaskak ",
             "b": true
           },
           {
-            "text": "agertzen dira eta horrela "
+            "text": "agertzen dira. "
+          }
+        ]
+      },
+      {
+        "id": "w9/2/p9/s3",
+        "parts": [
+          {
+            "text": "Horrela "
           },
           {
             "text": "zuntz muskular ildaskatuak",
@@ -856,7 +833,31 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.1/p2/s1",
         "parts": [
           {
-            "text": "2.1. BURUKO ETA LEPOKO MUSKULU ILDASKATUAK",
+            "text": "2.1. BURUKO",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "ETA LEPOKO",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "MUSKULU",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "ILDASKATUAK",
             "b": true,
             "i": true
           }
@@ -873,7 +874,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.1/p3/s1",
         "parts": [
           {
-            "text": "Buruko eta lepoko muskulu ildaskatuak arku faringeo desberdinetan eta begiaren inguruan dagoen mesodermotik sortzen dira. "
+            "text": "Buruko eta lepoko muskulu ildaskatuak faringe-arku desberdinetatik eta begiaren inguruan dagoen mesodermotik sortzen dira. "
           }
         ]
       },
@@ -881,7 +882,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.1/p3/s2",
         "parts": [
           {
-            "text": "Mesodermo mota hauek berriz, mesodermo paraxialetik sortzen dira: alde batetik, somitomeroetako mesodermoetatik; eta bestetik, somita okzipitaletatik. "
+            "text": "Egitura hauek, mesodermo paraxialetik sortzen dira: alde batetik, somitomeroetatik; eta bestetik, somita okzipitaletatik. "
           }
         ]
       },
@@ -904,7 +905,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.1/p4/s1",
         "parts": [
           {
-            "text": "Buruko eta lepoko muskuluen artean, batzuk "
+            "text": "Buruko eta lepoko muskulu batzuk "
           },
           {
             "text": "begi kupularen inguruan",
@@ -919,45 +920,21 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.1/p4/s2",
         "parts": [
           {
-            "text": "Eta beste batzuk, faringearen mailan somitomeroetatik sortutako mesenkimak lepoaren bi aldeetan "
+            "text": "Eta beste batzuk, faringearen mailan kokatzen dira, somitomeroetatik lepoaren bi aldeetan "
           },
           {
             "text": "mesenkimaz osatutako goraguneak",
             "b": true
           },
           {
-            "text": " eragiten ditu, "
+            "text": " eratzen dira: "
           },
           {
             "text": "faringe arkuak",
             "b": true
           },
           {
-            "text": ". "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.1/p4/s3",
-        "parts": [
-          {
-            "text": "Bertatik muskulu ezberdinak garatzen dira *lehenengoan: begiaren beheko laprana ere sortzen da. "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.1/p4/s4",
-        "parts": [
-          {
-            "text": "* seigarrenean: muskulu mimikoak ere sortzen dira. "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.1/p4/s5",
-        "parts": [
-          {
-            "text": "* barailaren m. depresoreak = barailaren m. jeistaileak"
+            "text": ", eta bertatik muskulu ezberdinak eratuko dira."
           }
         ]
       }
@@ -972,6 +949,25 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.1/p5/s1",
         "parts": [
           {
+            "text": "*lehenengoan: begiaren beheko laprana ere sortzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w9/2.1/p5/s2",
+        "parts": [
+          {
+            "text": "* seigarrenean: muskulu mimikoak ere sortzen dira. "
+          }
+        ]
+      },
+      {
+        "id": "w9/2.1/p5/s3",
+        "parts": [
+          {
+            "text": "* barailaren m. depresoreak = barailaren m. jeistaileak "
+          },
+          {
             "text": "TAULAK EZ DU ESAN NAHI BAKOITZAK ZUNTZ BAKARRA DUELA",
             "b": true
           },
@@ -981,7 +977,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.1/p5/s2",
+        "id": "w9/2.1/p5/s4",
         "parts": [
           {
             "text": "Adibidez, Trigeminoek 3 adar dituzte, eta horien artean zuntz sentsorial, motoreak edo begetatiboak topa daitezke, larruazal aurpegiaren sentsibilitatea adibidez. "
@@ -989,7 +985,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.1/p5/s3",
+        "id": "w9/2.1/p5/s5",
         "parts": [
           {
             "text": "Hipoglosoak, aldiz, soilik zuntz motoreak izango ditu. "
@@ -997,7 +993,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.1/p5/s4",
+        "id": "w9/2.1/p5/s6",
         "parts": [
           {
             "text": "Hau da, batzuek zuntz bakarra badute ere, beste batzuek mota anitzeko zuntzak izan ditzakete."
@@ -1039,7 +1035,7 @@ export const w9: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " (begia mugitzeko) 1., 2., 3. eta 5. somitomeroen mesodermotik sortzen dira. "
+            "text": " (begia mugitzeko) 1º, 2º, 3º eta 5º somitomeroen mesodermotik sortzen dira. "
           }
         ]
       },
@@ -1047,30 +1043,14 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.1.1/p3/s2",
         "parts": [
           {
-            "text": "○ 1 eta 2 somitomeroetan dagoen mesodermotik begiaren inguruko muskulu ildaskatuak sortzen dira: begiaren goiko, beheko eta erdialdeko muskulu zuzenak eta begiaren beheko muskulu laprana. "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.1.1/p3/s3",
-        "parts": [
-          {
-            "text": "○ 3. somitomeroko mesodermotik begiaren goiko muskulu laprana. "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.1.1/p3/s4",
-        "parts": [
-          {
-            "text": "○ 5. somitomeroaren mesodermotik begiaren alboko muskulu zuzena sortzen da."
+            "text": "○ 1º eta 2º somitomeroetan dagoen mesodermotik begiaren inguruko muskulu ildaskatuak sortzen dira: begiaren goiko, beheko eta erdialdeko muskulu zuzenak eta begiaren beheko muskulu laprana."
           }
         ]
       }
     ]
   },
   {
-    "kind": "p",
+    "kind": "caption",
     "section": "2.1.1",
     "id": "w9/2.1.1/p4",
     "sentences": [
@@ -1078,7 +1058,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.1.1/p4/s1",
         "parts": [
           {
-            "text": "Muskulu guzti hauen inerbazioan 3 gara nerbio (entzefaloarekin erlazionatzen diren nerbioak) desberdinek parte hartzen dute. "
+            "text": "○ III. gara nerbioa (begi-eragilea) ○ 3º somitomeroko mesodermotik begiaren goiko muskulu laprana. "
           }
         ]
       },
@@ -1086,7 +1066,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.1.1/p4/s2",
         "parts": [
           {
-            "text": "Hamabi dira eta hiru nerbioetan (hirugarrena nerbio begi eragilea, laugarrena troklea nerbioa eta seigarrena nerbio aldentzailea) diren zuntz motoreek inerbatzen dute begiaren inguruan kokatzen diren muskulu guztiak. "
+            "text": "○ IV. gara nerbioa (troklea-nerbioa) ○ 5º somitomeroaren mesodermotik begiaren alboko muskulu zuzena sortzen da. "
           }
         ]
       },
@@ -1094,7 +1074,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.1.1/p4/s3",
         "parts": [
           {
-            "text": "Beraz hirugarren gara nerbioak 1 eta 2 somitomeroetatik sortutako muskuluak inerbatzen ditu, laugarrenak 3. somitomeroetik sortutakoak eta seigarrenak 5. somitomeroetaik eratorriak diren muskuluak."
+            "text": "○ VI. gara nerbioa (nerbio aldentzailea)"
           }
         ]
       }
@@ -1107,6 +1087,37 @@ export const w9: NotesBlock[] = [
     "sentences": [
       {
         "id": "w9/2.1.1/p5/s1",
+        "parts": [
+          {
+            "text": "12 gara nerbio daude guztira, baina muskulu hauen inerbazioan 3 gara nerbio (entzefaloarekin erlazionatzen diren nerbioak) parte hartzen dute: III nerbio begi.eragilea, IV:troklea-nerbioa eta VI: nerbio aldentzailea. "
+          }
+        ]
+      },
+      {
+        "id": "w9/2.1.1/p5/s2",
+        "parts": [
+          {
+            "text": "Hiru nerbio hauetan dauden zuntz motoreek inerbatzen dute begiaren inguruan kokatzen diren muskulu guztiak. "
+          }
+        ]
+      },
+      {
+        "id": "w9/2.1.1/p5/s3",
+        "parts": [
+          {
+            "text": "Beraz hirugarren gara nerbioak 1 eta 2 somitomeroetatik sortutako muskuluak inerbatzen ditu, laugarrenak 3. somitomeroetik sortutakoak eta seigarrenak 5. somitomeroetaik eratorriak diren muskuluak."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.1.1",
+    "id": "w9/2.1.1/p6",
+    "sentences": [
+      {
+        "id": "w9/2.1.1/p6/s1",
         "parts": [
           {
             "text": "Beste somitomero jakin batzuetako mesodermoak lepo mailan "
@@ -1128,7 +1139,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.1.1/p5/s2",
+        "id": "w9/2.1.1/p6/s2",
         "parts": [
           {
             "text": "○ 4. somitomeroko mesodermoa 1. arku faringeoan kokatzen da eta mesodermo horretatik "
@@ -1138,20 +1149,27 @@ export const w9: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " (barailaren muskulu jasotzaileak) sortzen dira (Loki muskulua, maseter muskulua, alboko eta erdialdeko muskulu perigoidea…(horiek burua eta lepoaren eraketan ikasiko ditugu)). "
+            "text": " (barailaren muskulu jasotzaileak) sortzen dira (Loki muskulua, maseter muskulua, alboko eta erdialdeko muskulu perigoidea…(horiek burua eta lepoaren eraketan ikasiko ditugu))."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "2.1.1",
+    "id": "w9/2.1.1/p7",
+    "sentences": [
       {
-        "id": "w9/2.1.1/p5/s3",
+        "id": "w9/2.1.1/p7/s1",
         "parts": [
           {
-            "text": "Muskulu guzti hauek bosgarren gara nerbioak inerbatzen ditu (trigemino gara nerbioa). "
+            "text": "○ Muskulu hauek V. gara nerbioak inerbatzen ditu (trigemino nerbioa). "
           }
         ]
       },
       {
-        "id": "w9/2.1.1/p5/s4",
+        "id": "w9/2.1.1/p7/s2",
         "parts": [
           {
             "text": "○ 6. somitomeroko mesodermoa 2. arku faringeoan kokatzen da eta bertako mesodermotik "
@@ -1166,33 +1184,54 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.1.1/p5/s5",
+        "id": "w9/2.1.1/p7/s3",
         "parts": [
           {
-            "text": "2. faringe arkuaren gara nerbioa aurpegi nerbioa da (zazpigarrena). "
+            "text": "○ Muskulu hauek VII. gara nerbioak inerbatzen ditu (aurpegi-nerbioa)"
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.1.1",
+    "id": "w9/2.1.1/p8",
+    "sentences": [
       {
-        "id": "w9/2.1.1/p5/s6",
+        "id": "w9/2.1.1/p8/s1",
         "parts": [
           {
-            "text": "○ 7. somitomeroaren mesodermoa 3. arku faringeoan kokatzen da eta bertatik "
+            "text": "○ 7. somitomeroko mesodermoa 3. arku faringeoan kokatzen da eta bertatik "
           },
           {
-            "text": "muskulu estilofaringeoa",
+            "text": "muskulu",
             "b": true
           },
           {
-            "text": " sortzen da. "
+            "text": " "
+          },
+          {
+            "text": "estilofaringeoa",
+            "b": true
+          },
+          {
+            "text": " sortzen da."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "2.1.1",
+    "id": "w9/2.1.1/p9",
+    "sentences": [
       {
-        "id": "w9/2.1.1/p5/s7",
+        "id": "w9/2.1.1/p9/s1",
         "parts": [
           {
-            "text": "Bere gara nerbioa bederatzigarrena da, nerbio glosofaringeoa/mihi estarrietako nerbioa."
+            "text": "○ Muskulu hauek IX. gara nerbioak inerbatzen ditu (mihi-eztarriko nerbioa / nerbio glosofaringeoa)"
           }
         ]
       }
@@ -1254,24 +1293,22 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.1.2/p4/s2",
         "parts": [
           {
-            "text": "Vagus ",
-            "b": true,
-            "i": true
-          },
-          {
-            "text": "nerbioak ",
-            "b": true
-          },
-          {
-            "text": "(nerbio bagoa), 10. bikote kranealeko zuntz motoreek inerbatzen dituzte muskulu horiek. "
+            "text": "○ Muskulu hauek X. gara nerbioak inerbatzen ditu (Vagus-nerbioa)."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "2.1.2",
+    "id": "w9/2.1.2/p5",
+    "sentences": [
       {
-        "id": "w9/2.1.2/p4/s3",
+        "id": "w9/2.1.2/p5/s1",
         "parts": [
           {
-            "text": "Honetan zuntz sentsorialak ere badaude."
+            "text": "■ Gara nerbio honetan zuntz sentsorialak ere badaude."
           }
         ]
       }
@@ -1280,10 +1317,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.1.2",
-    "id": "w9/2.1.2/p5",
+    "id": "w9/2.1.2/p6",
     "sentences": [
       {
-        "id": "w9/2.1.2/p5/s1",
+        "id": "w9/2.1.2/p6/s1",
         "parts": [
           {
             "text": "● Azken somita okzipitaletako (2-5 somitak) mesodermotik mihiaren muskulu guztiak sortzen dira, denak ildaskatuak. "
@@ -1291,17 +1328,25 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.1.2/p5/s2",
+        "id": "w9/2.1.2/p6/s2",
         "parts": [
           {
-            "text": "12. bikote kranealak edo nerbio "
-          },
+            "text": "○ Muskulu hauek XII. gara nerbioak inerbatzen ditu (nerbio hipoglosoa)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "2.1.2",
+    "id": "w9/2.1.2/p7",
+    "sentences": [
+      {
+        "id": "w9/2.1.2/p7/s1",
+        "parts": [
           {
-            "text": "hipoglosoak",
-            "b": true
-          },
-          {
-            "text": " inerbatzen ditu eta honek zuntz motoreak ditu bakarrik."
+            "text": "■ Gara nerbio honek zuntz motoreak ditu soilik."
           }
         ]
       }
@@ -1310,10 +1355,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.1.2",
-    "id": "w9/2.1.2/p6",
+    "id": "w9/2.1.2/p8",
     "sentences": [
       {
-        "id": "w9/2.1.2/p6/s1",
+        "id": "w9/2.1.2/p8/s1",
         "parts": [
           {
             "text": "Beraz, alde zefalikoan dauden muskulu ildaskatu guztien inerbazioa, nerbio kranealen ardurapean dago."
@@ -1472,7 +1517,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.1.3/p5/s3",
         "parts": [
           {
-            "text": "Beheko adarrean tolestatzailea aurrean eta hedatzaiea atzean ikusiko dugu eta goiko adarrean alderantziz, hau da, hedatazilea aurrean egongo da eta tolestatzailea atzealdean. "
+            "text": "Beheko adarrean tolestatzailea aurrean eta hedatzaiea atzean ikusiko dugu eta goiko adarrean alderantziz, hau da, hedatzailea aurrean egongo da eta tolestatzailea atzealdean. "
           }
         ]
       },
@@ -1533,7 +1578,7 @@ export const w9: NotesBlock[] = [
             "text": "Ondorengo taulan, aurrean aipatutako guztia "
           },
           {
-            "text": "laburtura ",
+            "text": "laburtuta ",
             "b": true
           },
           {
@@ -1557,29 +1602,12 @@ export const w9: NotesBlock[] = [
     ]
   },
   {
-    "kind": "h2",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p2",
-    "sentences": [
-      {
-        "id": "w9/2.1.4/p2/s1",
-        "parts": [
-          {
-            "text": "2.1.4. EHUN KONEKTIBOZKO PATROIAK",
-            "b": true,
-            "i": true
-          }
-        ]
-      }
-    ]
-  },
-  {
     "kind": "p",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p3",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p8",
     "sentences": [
       {
-        "id": "w9/2.1.4/p3/s1",
+        "id": "w9/2.1.3/p8/s1",
         "parts": [
           {
             "text": "BURUKO MUSKULUEN JATORRIA",
@@ -1591,11 +1619,11 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "p",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p4",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p9",
     "sentences": [
       {
-        "id": "w9/2.1.4/p4/s1",
+        "id": "w9/2.1.3/p9/s1",
         "parts": [
           {
             "text": "JATORRI MESODERMIKOA",
@@ -1635,33 +1663,18 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "p",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p5",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p10",
     "sentences": [
       {
-        "id": "w9/2.1.4/p5/s1",
+        "id": "w9/2.1.3/p10/s1",
         "parts": [
           {
             "text": "1. eta 2. somitomero ",
             "b": true
           },
           {
-            "text": "(begiaren inguruan)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p6",
-    "sentences": [
-      {
-        "id": "w9/2.1.4/p6/s1",
-        "parts": [
-          {
-            "text": "- Begiko goiko, beheko eta erdialdeko"
+            "text": "(begiaren inguruan) - Begiko goiko, beheko eta erdialdeko"
           }
         ]
       }
@@ -1669,11 +1682,11 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "caption",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p7",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p11",
     "sentences": [
       {
-        "id": "w9/2.1.4/p7/s1",
+        "id": "w9/2.1.3/p11/s1",
         "parts": [
           {
             "text": "muskulu zuzena"
@@ -1684,11 +1697,11 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "li",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p8",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p12",
     "sentences": [
       {
-        "id": "w9/2.1.4/p8/s1",
+        "id": "w9/2.1.3/p12/s1",
         "parts": [
           {
             "text": "- Beheko muskulu laprana"
@@ -1699,22 +1712,14 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "caption",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p9",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p13",
     "sentences": [
       {
-        "id": "w9/2.1.4/p9/s1",
+        "id": "w9/2.1.3/p13/s1",
         "parts": [
           {
-            "text": "III. "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.1.4/p9/s2",
-        "parts": [
-          {
-            "text": "bikotea (BOM; nerbio okulo motorea) "
+            "text": "III. bikotea (BOM; nerbio okulo motorea) "
           },
           {
             "text": "(nerbio",
@@ -1733,18 +1738,25 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "p",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p10",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p14",
     "sentences": [
       {
-        "id": "w9/2.1.4/p10/s1",
+        "id": "w9/2.1.3/p14/s1",
         "parts": [
           {
-            "text": "3 somitomeroa ",
+            "text": "3",
             "b": true
           },
           {
-            "text": "(begiko paretaren inguruan)"
+            "text": " "
+          },
+          {
+            "text": "somitomeroa",
+            "b": true
+          },
+          {
+            "text": " (begiko paretaren inguruan)"
           }
         ]
       }
@@ -1752,22 +1764,14 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "caption",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p11",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p15",
     "sentences": [
       {
-        "id": "w9/2.1.4/p11/s1",
+        "id": "w9/2.1.3/p15/s1",
         "parts": [
           {
-            "text": "Begiaren inguruko goiko muskulu laprana IV. "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.1.4/p11/s2",
-        "parts": [
-          {
-            "text": "bikotea (nerbio troklearra/patetikoa)"
+            "text": "Begiaren inguruko goiko muskulu laprana IV. bikotea (nerbio troklearra/patetikoa)"
           }
         ]
       }
@@ -1775,11 +1779,11 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "p",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p12",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p16",
     "sentences": [
       {
-        "id": "w9/2.1.4/p12/s1",
+        "id": "w9/2.1.3/p16/s1",
         "parts": [
           {
             "text": "4 Somitomeroa ",
@@ -1801,11 +1805,11 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "caption",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p13",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p17",
     "sentences": [
       {
-        "id": "w9/2.1.4/p13/s1",
+        "id": "w9/2.1.3/p17/s1",
         "parts": [
           {
             "text": "Barailaren m. jasotzailea edo muskulu murtzikatzaileak (muskulu asko dira) V. bikotea (nerbio trigeminoa) 3 adar ditu. "
@@ -1813,7 +1817,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.1.4/p13/s2",
+        "id": "w9/2.1.3/p17/s2",
         "parts": [
           {
             "text": "Bakarrik zuntz motoreak."
@@ -1824,26 +1828,18 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "p",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p14",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p18",
     "sentences": [
       {
-        "id": "w9/2.1.4/p14/s1",
+        "id": "w9/2.1.3/p18/s1",
         "parts": [
           {
             "text": "5 Somitomeroa ",
             "b": true
           },
           {
-            "text": "(begiko paretan) Begiaren alboko muskulu zuzena VI. "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.1.4/p14/s2",
-        "parts": [
-          {
-            "text": "bikotea (KNO;"
+            "text": "(begiko paretan) Begiaren alboko muskulu zuzena VI. bikotea (KNO;"
           }
         ]
       }
@@ -1851,11 +1847,11 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "caption",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p15",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p19",
     "sentences": [
       {
-        "id": "w9/2.1.4/p15/s1",
+        "id": "w9/2.1.3/p19/s1",
         "parts": [
           {
             "text": "kanpoko nerbio okulomotorea /nerbio abdutzailea)"
@@ -1866,11 +1862,11 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "p",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p16",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p20",
     "sentences": [
       {
-        "id": "w9/2.1.4/p16/s1",
+        "id": "w9/2.1.3/p20/s1",
         "parts": [
           {
             "text": "6 Somitomeroa ",
@@ -1892,11 +1888,11 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "caption",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p17",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p21",
     "sentences": [
       {
-        "id": "w9/2.1.4/p17/s1",
+        "id": "w9/2.1.3/p21/s1",
         "parts": [
           {
             "text": "Barailaren m.depresoreak eta aurpegiko muskulu mimikoak. "
@@ -1904,18 +1900,10 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.1.4/p17/s2",
+        "id": "w9/2.1.3/p21/s2",
         "parts": [
           {
-            "text": "VII. "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.1.4/p17/s3",
-        "parts": [
-          {
-            "text": "bikotea (nerbio faziala, aurpegi nerbioa)"
+            "text": "VII. bikotea (nerbio faziala, aurpegi nerbioa)"
           }
         ]
       }
@@ -1923,11 +1911,11 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "p",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p18",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p22",
     "sentences": [
       {
-        "id": "w9/2.1.4/p18/s1",
+        "id": "w9/2.1.3/p22/s1",
         "parts": [
           {
             "text": "7 Somitomeroa ",
@@ -1941,7 +1929,7 @@ export const w9: NotesBlock[] = [
             "b": true
           },
           {
-            "text": ") Estilofaringeoa (faringearen muskulu"
+            "text": ") Estilofaringeoa (faringearen muskulu bat) IX. bikotea (n"
           }
         ]
       }
@@ -1949,22 +1937,14 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "caption",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p19",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p23",
     "sentences": [
       {
-        "id": "w9/2.1.4/p19/s1",
+        "id": "w9/2.1.3/p23/s1",
         "parts": [
           {
-            "text": "bat) IX. "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.1.4/p19/s2",
-        "parts": [
-          {
-            "text": "bikotea (n glosofaringeoa/ mihieztarrietako n))"
+            "text": "glosofaringeoa/ mihieztarrietako n))"
           }
         ]
       }
@@ -1972,11 +1952,11 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "p",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p20",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p24",
     "sentences": [
       {
-        "id": "w9/2.1.4/p20/s1",
+        "id": "w9/2.1.3/p24/s1",
         "parts": [
           {
             "text": "1 eta 2 somita okzipitalak ",
@@ -1986,14 +1966,14 @@ export const w9: NotesBlock[] = [
             "text": "("
           },
           {
-            "text": "4. eta 6.",
+            "text": "4. eta 6. arku",
             "b": true
           },
           {
             "text": " "
           },
           {
-            "text": "arku faringeotan",
+            "text": "faringeotan",
             "b": true
           },
           {
@@ -2005,11 +1985,11 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "caption",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p21",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p25",
     "sentences": [
       {
-        "id": "w9/2.1.4/p21/s1",
+        "id": "w9/2.1.3/p25/s1",
         "parts": [
           {
             "text": "M. laringeoak (laringeko muskulu ildaskatuak) X. bikotea (bagoa) Vagus nerbioa"
@@ -2020,25 +2000,18 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "p",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p22",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p26",
     "sentences": [
       {
-        "id": "w9/2.1.4/p22/s1",
+        "id": "w9/2.1.3/p26/s1",
         "parts": [
           {
-            "text": "Somitak",
+            "text": "Somitak 2-5 ",
             "b": true
           },
           {
-            "text": " "
-          },
-          {
-            "text": "2-5",
-            "b": true
-          },
-          {
-            "text": " (2,3,4,5 somita okzipitalak)"
+            "text": "(2,3,4,5 somita okzipitalak) Mihiko muskulu ildaskatuak XII. bikotea (hipoglosoa)"
           }
         ]
       }
@@ -2046,22 +2019,31 @@ export const w9: NotesBlock[] = [
   },
   {
     "kind": "caption",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p23",
+    "section": "2.1.3",
+    "id": "w9/2.1.3/p27",
     "sentences": [
       {
-        "id": "w9/2.1.4/p23/s1",
+        "id": "w9/2.1.3/p27/s1",
         "parts": [
           {
-            "text": "Mihiko muskulu ildaskatuak XII. "
+            "text": "(zuntz motoreak mihiraino iritsi eta bertako muskulu ildaskatu guztiak inerbatzen dituzte)"
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "h2",
+    "section": "2.1.4",
+    "id": "w9/2.1.4/p2",
+    "sentences": [
       {
-        "id": "w9/2.1.4/p23/s2",
+        "id": "w9/2.1.4/p2/s1",
         "parts": [
           {
-            "text": "bikotea (hipoglosoa) (zuntz motoreak mihiraino iritsi eta bertako muskulu ildaskatu guztiak inerbatzen dituzte)"
+            "text": "2.1.4. EHUN KONEKTIBOZKO PATROIAK",
+            "b": true,
+            "i": true
           }
         ]
       }
@@ -2070,10 +2052,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.1.4",
-    "id": "w9/2.1.4/p24",
+    "id": "w9/2.1.4/p3",
     "sentences": [
       {
-        "id": "w9/2.1.4/p24/s1",
+        "id": "w9/2.1.4/p3/s1",
         "parts": [
           {
             "text": "Eskualde guztietako muskuluak garatzeko ehun konektibozko patroiak behar dira. "
@@ -2081,7 +2063,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.1.4/p24/s2",
+        "id": "w9/2.1.4/p3/s2",
         "parts": [
           {
             "text": "Patroi horietara iristen diren zelula muskularren aitzindariak ("
@@ -2096,7 +2078,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.1.4/p24/s3",
+        "id": "w9/2.1.4/p3/s3",
         "parts": [
           {
             "text": "Adibideak:"
@@ -2108,10 +2090,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.1.4",
-    "id": "w9/2.1.4/p25",
+    "id": "w9/2.1.4/p4",
     "sentences": [
       {
-        "id": "w9/2.1.4/p25/s1",
+        "id": "w9/2.1.4/p4/s1",
         "parts": [
           {
             "text": "● Buruan sortzen diren ehun konektibozko patroi horiek, gandor neuraletako zelulek osatzen dituzte. "
@@ -2119,7 +2101,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.1.4/p25/s2",
+        "id": "w9/2.1.4/p4/s2",
         "parts": [
           {
             "text": "Horiek somitaren mesodermo zelulek osatzen dituzte."
@@ -2131,66 +2113,13 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.1.4",
-    "id": "w9/2.1.4/p26",
+    "id": "w9/2.1.4/p5",
     "sentences": [
       {
-        "id": "w9/2.1.4/p26/s1",
+        "id": "w9/2.1.4/p5/s1",
         "parts": [
           {
             "text": "● Gorputzaren paretetan eta goiko eta beheko gorputz adarretan dauden muskuluak garatzeko ehun konektibozko patroi horiek, alboko mesodermoaren parteako zelula mesodermikoek osatzen dute."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p27",
-    "sentences": [
-      {
-        "id": "w9/2.1.4/p27/s1",
-        "parts": [
-          {
-            "text": "Bi motatako domeinuetan dauden zelula aintzindariak migratu egiten dute domeinu abakzialera eta zelula horien desberdintze prozezuetan (aintzindariak, mioblastoak) haien artean fusionatu egiten dituzte, nukleo ugari dituzten zuntzak osatuz. "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.1.4/p27/s2",
-        "parts": [
-          {
-            "text": "Hauek "
-          },
-          {
-            "text": "muskulo",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "ildaskatuaren osagarriak izango dira ",
-            "b": true
-          },
-          {
-            "text": "(mikrofibrila ildoak osatzen direnez muskulo ildaskatuak izango dira)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.1.4",
-    "id": "w9/2.1.4/p28",
-    "sentences": [
-      {
-        "id": "w9/2.1.4/p28/s1",
-        "parts": [
-          {
-            "text": "* Ildaskatu=mugimendu.",
-            "i": true
           }
         ]
       }
@@ -2245,7 +2174,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2/p4/s1",
         "parts": [
           {
-            "text": "Hasieran, muskulu horiek guztiak somitetako mesodermotik sortzen dira. ",
+            "text": "Hasieran, muskulu guztiak somitetako mesodermotik sortzen dira. ",
             "i": true
           }
         ]
@@ -2254,14 +2183,14 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2/p4/s2",
         "parts": [
           {
-            "text": "Hasieran somita",
+            "text": "Hasieran somita guztiak",
             "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "guztiak berdinak dira (zelula mesodermiko paraxialak). ",
+            "text": "berdinak dira (zelula mesodermiko paraxialak). ",
             "i": true
           }
         ]
@@ -2270,21 +2199,14 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2/p4/s3",
         "parts": [
           {
-            "text": "Baina, somiten eskualde",
+            "text": "Baina, somiten eskualde desberdinetako",
             "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "desberdinetako zelulek desberdintze prozesuak egitean mota desberdinetako zelulak sortzen",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "dituzte.",
+            "text": "zelulek desberdintze prozesuak egitean mota desberdinetako zelulak sortzen dituzte.",
             "i": true
           }
         ]
@@ -2532,23 +2454,14 @@ export const w9: NotesBlock[] = [
             "i": true
           },
           {
-            "text": "Desberdintze-prozesu bat eginez, pareta erdikoek ",
-            "i": true
-          },
-          {
-            "text": "dermatoma",
-            "b": true,
-            "i": true
-          },
-          {
-            "text": " zelula",
+            "text": "Desberdintze-prozesu bat eginez, somitaren alde dortsalean",
             "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "multzoa osatzen dute. ",
+            "text": "dermomiotoma eratzen da. ",
             "i": true
           }
         ]
@@ -2557,24 +2470,14 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2/p9/s2",
         "parts": [
           {
-            "text": "Somitetako atzeko paretako ertzetan dauden zelulak, ",
-            "i": true
-          },
-          {
-            "text": "zelula",
-            "b": true,
+            "text": "Hortik dermatoma eta muskulu-zelulen aitzindariak bereizten",
             "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "muskularren aintzindariak",
-            "b": true,
-            "i": true
-          },
-          {
-            "text": " dira. ",
+            "text": "dira. ",
             "i": true
           }
         ]
@@ -2583,21 +2486,33 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2/p9/s3",
         "parts": [
           {
-            "text": "Horiek bi prozesu egiten dituzte:",
+            "text": "Somitetako atzeko paretako ertzetan dauden zelulak, ",
+            "i": true
+          },
+          {
+            "text": "zelula muskularren aintzindariak",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "dira. ",
             "i": true
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.2",
-    "id": "w9/2.2/p10",
-    "sentences": [
+      },
       {
-        "id": "w9/2.2/p10/s1",
+        "id": "w9/2.2/p9/s4",
         "parts": [
+          {
+            "text": "Horiek bi prozesu egiten dituzte:",
+            "i": true
+          },
+          {
+            "text": " "
+          },
           {
             "text": "1) Alde batetik, ",
             "i": true
@@ -2646,7 +2561,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2/p10/s2",
+        "id": "w9/2.2/p9/s5",
         "parts": [
           {
             "text": "Miotoma multzoan dauden zeluletatik bizkarraren",
@@ -2665,18 +2580,14 @@ export const w9: NotesBlock[] = [
           {
             "text": "muskuluak eratuko dituzte.",
             "i": true
+          },
+          {
+            "text": " "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.2",
-    "id": "w9/2.2/p11",
-    "sentences": [
+      },
       {
-        "id": "w9/2.2/p11/s1",
+        "id": "w9/2.2/p9/s6",
         "parts": [
           {
             "text": "2) Bestetik, somitaren ",
@@ -2704,21 +2615,14 @@ export const w9: NotesBlock[] = [
             "i": true
           },
           {
-            "text": " gurutzatu eta alboko mesodermoaren pareta orrira heltzen dira, gorputz",
+            "text": " gurutzatu eta alboko mesodermoaren pareta orrira heltzen dira, goiko",
             "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "paretako muskulu ildaskatuak eta gorputz behe adarretako muskulu ildaskatuak",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "sortzeko.",
+            "text": "eta beheko gorputz adarretako gihar ildaskatuak sortzeko.",
             "i": true
           }
         ]
@@ -2842,7 +2746,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p6/s2",
         "parts": [
           {
-            "text": "Domeinu abaxialetik muskulu infraioideoak, pektoralak, muskulu esternalak, abdomeneko muskulu gehienak eta diafragma pelbikoarena sortu egiten dira, hau da, goiko eta beheko gorputz adarreko muskulu guztiak."
+            "text": "Domeinu abaxialetik muskulu infraioideoak, pektoralak, muskulu esternalak, abdomeneko muskulu gehienak eta diafragma pelbikoarena sortu egiten dira, hau da, goiko eta beheko gorputz adarreko berezkomuskulu guztiak."
           }
         ]
       }
@@ -2857,8 +2761,29 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p7/s1",
         "parts": [
           {
-            "text": "Bi domeinu hauetatik eskualde desberdinetan muskulu ildaskatu ezberdinak garatuko dira.",
-            "i": true
+            "text": "Bi motatako domeinuetan dauden zelula aintzindariak migratu egiten dute domeinu abaxialera eta zelula horien desberdintze prozezuetan (aintzindariak, mioblastoak) haien artean fusionatu egiten dituzte, nukleo ugari dituzten zuntzak osatuz. "
+          }
+        ]
+      },
+      {
+        "id": "w9/2.2.1/p7/s2",
+        "parts": [
+          {
+            "text": "Hauek "
+          },
+          {
+            "text": "muskulo",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "ildaskatuaren osagarriak izango dira ",
+            "b": true
+          },
+          {
+            "text": "(mikrofibrila ildoak osatzen direnez muskulo ildaskatuak izango dira)"
           }
         ]
       }
@@ -2873,27 +2798,8 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p8/s1",
         "parts": [
           {
-            "text": "Bizkarreko muskuluen jatorria",
-            "b": true
-          },
-          {
-            "text": ": bizkarraren sakontasunean bizkarraren muskulu zutitzaileak daude. "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.2.1/p8/s2",
-        "parts": [
-          {
-            "text": "Domeinu primaxialetik sortu, miotomatik. "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.2.1/p8/s3",
-        "parts": [
-          {
-            "text": "Lepoan, toraxean/abdomenean, goiko gorputz adarrean… dauden muskulu batzuk domeinu primaxialetik sortu, eta besteak abaxialetik."
+            "text": "* Ildaskatu=mugimendu.",
+            "i": true
           }
         ]
       }
@@ -2908,7 +2814,8 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p9/s1",
         "parts": [
           {
-            "text": "* Muskuluen izenak ez dira ikasi behar!!"
+            "text": "Bi domeinu hauetatik eskualde desberdinetan muskulu ildaskatu ezberdinak garatuko dira.",
+            "i": true
           }
         ]
       }
@@ -2921,6 +2828,56 @@ export const w9: NotesBlock[] = [
     "sentences": [
       {
         "id": "w9/2.2.1/p10/s1",
+        "parts": [
+          {
+            "text": "Bizkarreko muskuluen jatorria",
+            "b": true
+          },
+          {
+            "text": ": bizkarraren sakontasunean bizkarraren muskulu zutitzaileak daude (oso muskulu luzeak dira). "
+          }
+        ]
+      },
+      {
+        "id": "w9/2.2.1/p10/s2",
+        "parts": [
+          {
+            "text": "Domeinu primaxialetik sortu, miotomatik. "
+          }
+        ]
+      },
+      {
+        "id": "w9/2.2.1/p10/s3",
+        "parts": [
+          {
+            "text": "Lepoan, toraxean/abdomenean, goiko gorputz adarrean… dauden muskulu batzuk domeinu primaxialetik sortu, eta besteak abaxialetik."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.2.1",
+    "id": "w9/2.2.1/p11",
+    "sentences": [
+      {
+        "id": "w9/2.2.1/p11/s1",
+        "parts": [
+          {
+            "text": "* Muskuluen izenak ez dira ikasi behar!!"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.2.1",
+    "id": "w9/2.2.1/p12",
+    "sentences": [
+      {
+        "id": "w9/2.2.1/p12/s1",
         "parts": [
           {
             "text": "DOMEINU PRIMAXIALA",
@@ -2947,10 +2904,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p11",
+    "id": "w9/2.2.1/p13",
     "sentences": [
       {
-        "id": "w9/2.2.1/p11/s1",
+        "id": "w9/2.2.1/p13/s1",
         "parts": [
           {
             "text": "LEPOKO ESKUALDEA",
@@ -2966,10 +2923,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p12",
+    "id": "w9/2.2.1/p14",
     "sentences": [
       {
-        "id": "w9/2.2.1/p12/s1",
+        "id": "w9/2.2.1/p14/s1",
         "parts": [
           {
             "text": "- Genihioideoak"
@@ -2981,10 +2938,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p13",
+    "id": "w9/2.2.1/p15",
     "sentences": [
       {
-        "id": "w9/2.2.1/p13/s1",
+        "id": "w9/2.2.1/p15/s1",
         "parts": [
           {
             "text": "- Ornoaurrekoak"
@@ -2996,10 +2953,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "caption",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p14",
+    "id": "w9/2.2.1/p16",
     "sentences": [
       {
-        "id": "w9/2.2.1/p14/s1",
+        "id": "w9/2.2.1/p16/s1",
         "parts": [
           {
             "text": "Hioide azpiko muskuluak"
@@ -3011,10 +2968,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p15",
+    "id": "w9/2.2.1/p17",
     "sentences": [
       {
-        "id": "w9/2.2.1/p15/s1",
+        "id": "w9/2.2.1/p17/s1",
         "parts": [
           {
             "text": "ESKUALDE TORAKO-",
@@ -3034,43 +2991,13 @@ export const w9: NotesBlock[] = [
   {
     "kind": "caption",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p16",
-    "sentences": [
-      {
-        "id": "w9/2.2.1/p16/s1",
-        "parts": [
-          {
-            "text": "Saihets artekoak (muskulu interkostalak)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "2.2.1",
-    "id": "w9/2.2.1/p17",
-    "sentences": [
-      {
-        "id": "w9/2.2.1/p17/s1",
-        "parts": [
-          {
-            "text": "- Bularreko gihar nagusia eta txikia"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "caption",
-    "section": "2.2.1",
     "id": "w9/2.2.1/p18",
     "sentences": [
       {
         "id": "w9/2.2.1/p18/s1",
         "parts": [
           {
-            "text": "(pektoralak)"
+            "text": "Saihets artekoak (muskulu interkostalak)"
           }
         ]
       }
@@ -3085,22 +3012,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p19/s1",
         "parts": [
           {
-            "text": "- Bularrezur giharra"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "2.2.1",
-    "id": "w9/2.2.1/p20",
-    "sentences": [
-      {
-        "id": "w9/2.2.1/p20/s1",
-        "parts": [
-          {
-            "text": "- Abdomenean dauden muskulu-ildaskatu"
+            "text": "- Bularreko gihar nagusia eta txikia"
           }
         ]
       }
@@ -3109,13 +3021,28 @@ export const w9: NotesBlock[] = [
   {
     "kind": "caption",
     "section": "2.2.1",
+    "id": "w9/2.2.1/p20",
+    "sentences": [
+      {
+        "id": "w9/2.2.1/p20/s1",
+        "parts": [
+          {
+            "text": "(pektoralak)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "2.2.1",
     "id": "w9/2.2.1/p21",
     "sentences": [
       {
         "id": "w9/2.2.1/p21/s1",
         "parts": [
           {
-            "text": "guztiak"
+            "text": "- Bularrezur giharra"
           }
         ]
       }
@@ -3130,14 +3057,14 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p22/s1",
         "parts": [
           {
-            "text": "- Abdomineko lapraneko kanpoko giharra"
+            "text": "- Abdomenean dauden muskulu-ildaskatu"
           }
         ]
       }
     ]
   },
   {
-    "kind": "li",
+    "kind": "caption",
     "section": "2.2.1",
     "id": "w9/2.2.1/p23",
     "sentences": [
@@ -3145,7 +3072,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p23/s1",
         "parts": [
           {
-            "text": "- Abdomineko lapraneko barruko giharra"
+            "text": "gehienak"
           }
         ]
       }
@@ -3160,7 +3087,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p24/s1",
         "parts": [
           {
-            "text": "- Abdominekol zeharkakoa"
+            "text": "- Abdomineko lapraneko kanpoko giharra"
           }
         ]
       }
@@ -3175,6 +3102,36 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p25/s1",
         "parts": [
           {
+            "text": "- Abdomineko lapraneko barruko giharra"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "2.2.1",
+    "id": "w9/2.2.1/p26",
+    "sentences": [
+      {
+        "id": "w9/2.2.1/p26/s1",
+        "parts": [
+          {
+            "text": "- Abdominekol zeharkakoa"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "2.2.1",
+    "id": "w9/2.2.1/p27",
+    "sentences": [
+      {
+        "id": "w9/2.2.1/p27/s1",
+        "parts": [
+          {
             "text": "- Azpi diafragmaren giharrak (pelbisekoak)"
           }
         ]
@@ -3184,10 +3141,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p26",
+    "id": "w9/2.2.1/p28",
     "sentences": [
       {
-        "id": "w9/2.2.1/p26/s1",
+        "id": "w9/2.2.1/p28/s1",
         "parts": [
           {
             "text": "GOIKO GORPUTZ",
@@ -3207,43 +3164,13 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p27",
-    "sentences": [
-      {
-        "id": "w9/2.2.1/p27/s1",
-        "parts": [
-          {
-            "text": "- Hurbileko muskuluak:"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "caption",
-    "section": "2.2.1",
-    "id": "w9/2.2.1/p28",
-    "sentences": [
-      {
-        "id": "w9/2.2.1/p28/s1",
-        "parts": [
-          {
-            "text": "Erronboideak (nagusia eta txikia)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "2.2.1",
     "id": "w9/2.2.1/p29",
     "sentences": [
       {
         "id": "w9/2.2.1/p29/s1",
         "parts": [
           {
-            "text": "- Eskapularen muskulu"
+            "text": "- Hurbileko muskuluak:"
           }
         ]
       }
@@ -3258,7 +3185,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p30/s1",
         "parts": [
           {
-            "text": "jasotzailea"
+            "text": "Erronboideak (nagusia eta txikia)"
           }
         ]
       }
@@ -3273,7 +3200,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p31/s1",
         "parts": [
           {
-            "text": "- Bizkarraldeko muskulu"
+            "text": "- Eskapularen muskulu"
           }
         ]
       }
@@ -3288,14 +3215,14 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p32/s1",
         "parts": [
           {
-            "text": "zabala"
+            "text": "jasotzailea"
           }
         ]
       }
     ]
   },
   {
-    "kind": "caption",
+    "kind": "li",
     "section": "2.2.1",
     "id": "w9/2.2.1/p33",
     "sentences": [
@@ -3303,7 +3230,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p33/s1",
         "parts": [
           {
-            "text": "*Migratutako muskuluak dira, bizkarrean kokatuko dira."
+            "text": "- Bizkarraldeko muskulu zabala"
           }
         ]
       }
@@ -3318,12 +3245,27 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.1/p34/s1",
         "parts": [
           {
+            "text": "*Migratutako muskuluak dira, bizkarrean kokatuko dira."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "2.2.1",
+    "id": "w9/2.2.1/p35",
+    "sentences": [
+      {
+        "id": "w9/2.2.1/p35/s1",
+        "parts": [
+          {
             "text": "Nahiz eta jatorria primaxialan izan, hauek dira gero muskulo autoktonoen azalaldea. "
           }
         ]
       },
       {
-        "id": "w9/2.2.1/p34/s2",
+        "id": "w9/2.2.1/p35/s2",
         "parts": [
           {
             "text": "Urrutiko muskuluak"
@@ -3335,10 +3277,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p35",
+    "id": "w9/2.2.1/p36",
     "sentences": [
       {
-        "id": "w9/2.2.1/p35/s1",
+        "id": "w9/2.2.1/p36/s1",
         "parts": [
           {
             "text": "BEHEKO GORPUTZ",
@@ -3358,10 +3300,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "caption",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p36",
+    "id": "w9/2.2.1/p37",
     "sentences": [
       {
-        "id": "w9/2.2.1/p36/s1",
+        "id": "w9/2.2.1/p37/s1",
         "parts": [
           {
             "text": "Ez dago hain argi Muskulu guztiak"
@@ -3373,10 +3315,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p37",
+    "id": "w9/2.2.1/p38",
     "sentences": [
       {
-        "id": "w9/2.2.1/p37/s1",
+        "id": "w9/2.2.1/p38/s1",
         "parts": [
           {
             "text": "BIZKARRAREN",
@@ -3396,13 +3338,13 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p38",
+    "id": "w9/2.2.1/p39",
     "sentences": [
       {
-        "id": "w9/2.2.1/p38/s1",
+        "id": "w9/2.2.1/p39/s1",
         "parts": [
           {
-            "text": "- Bizkarrezurraren"
+            "text": "- Bizkarrezurraren muskulu"
           }
         ]
       }
@@ -3411,13 +3353,13 @@ export const w9: NotesBlock[] = [
   {
     "kind": "caption",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p39",
+    "id": "w9/2.2.1/p40",
     "sentences": [
       {
-        "id": "w9/2.2.1/p39/s1",
+        "id": "w9/2.2.1/p40/s1",
         "parts": [
           {
-            "text": "muskulu zuitzailea (goitik behera atzekaldean)"
+            "text": "zuitzaileak (goitik behera atzekaldean)"
           }
         ]
       }
@@ -3426,10 +3368,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p40",
+    "id": "w9/2.2.1/p41",
     "sentences": [
       {
-        "id": "w9/2.2.1/p40/s1",
+        "id": "w9/2.2.1/p41/s1",
         "parts": [
           {
             "text": "- "
@@ -3442,14 +3384,14 @@ export const w9: NotesBlock[] = [
             "text": " "
           },
           {
-            "text": "muskulu-ildaskatu",
+            "text": "muskulu-",
             "b": true
           },
           {
             "text": " "
           },
           {
-            "text": "sakona",
+            "text": "ildaskatu sakona",
             "b": true
           },
           {
@@ -3462,10 +3404,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "caption",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p41",
+    "id": "w9/2.2.1/p42",
     "sentences": [
       {
-        "id": "w9/2.2.1/p41/s1",
+        "id": "w9/2.2.1/p42/s1",
         "parts": [
           {
             "text": "muskulu autoktonoak) (bizkarrezurraren muskulu hedatzailea, 3 muskulu desberdinez osatuta)"
@@ -3477,10 +3419,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p42",
+    "id": "w9/2.2.1/p43",
     "sentences": [
       {
-        "id": "w9/2.2.1/p42/s1",
+        "id": "w9/2.2.1/p43/s1",
         "parts": [
           {
             "text": "-"
@@ -3490,15 +3432,15 @@ export const w9: NotesBlock[] = [
     ]
   },
   {
-    "kind": "caption",
+    "kind": "p",
     "section": "2.2.1",
-    "id": "w9/2.2.1/p43",
+    "id": "w9/2.2.1/p44",
     "sentences": [
       {
-        "id": "w9/2.2.1/p43/s1",
+        "id": "w9/2.2.1/p44/s1",
         "parts": [
           {
-            "text": "* GOGORATU: alboko mesodermoren paretako orrira migratzen duten alboko ertzeko zelulak orokorrean gorputz-paretako eta goiko eta beheko gorputz adarretako muskulu gehienak sortzen dituzte."
+            "text": "*GOGORATU: alboko mesodermoren paretako orrira migratzen duten alboko ertzeko zelulak orokorrean gorputz-paretako eta goiko eta beheko gorputz adarretako muskulu gehienak sortzen dituzte."
           }
         ]
       }
@@ -3513,7 +3455,31 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.2/p2/s1",
         "parts": [
           {
-            "text": "2.2.2. INERBAZIOAREN ARABERAKO SAILKAPENA",
+            "text": "2.2.2.",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "INERBAZIOAREN",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "ARABERAKO",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "SAILKAPENA",
             "b": true,
             "i": true
           }
@@ -3760,64 +3726,14 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.2/p8/s1",
         "parts": [
           {
-            "text": "- Albokoak (ez beti): neurona begetatiboak "
+            "text": "- Albokoak (ez beti): "
           },
           {
-            "text": "Erdian ornomuineko sistema bentrikularreko atala dago,",
-            "i": true
-          },
-          {
-            "text": " enimo hodia",
-            "b": true,
-            "i": true
-          },
-          {
-            "text": ". ",
-            "i": true
-          }
-        ]
-      },
-      {
-        "id": "w9/2.2.2/p8/s2",
-        "parts": [
-          {
-            "text": "Gai gris honen kanpoan "
-          },
-          {
-            "text": "gai zuria",
+            "text": "neurona begetatiboak",
             "b": true
           },
           {
-            "text": " kokatzen da eta honetan 3 motako kordoi bereizten dira: "
-          },
-          {
-            "text": "atzeko, alboko",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "eta aurreko kordoia",
-            "b": true
-          },
-          {
-            "text": ". "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.2.2/p8/s3",
-        "parts": [
-          {
-            "text": "Hauetan "
-          },
-          {
-            "text": "goranzko eta beheranzko traktuak",
-            "b": true
-          },
-          {
-            "text": " kokatzen dira (informazioa goiko zentruetara bidaltzeko edo goiko zentruetatik ornomuinera garraiatzeko)."
+            "text": ", sinpatikoak zein parasinpatikoak"
           }
         ]
       }
@@ -3830,6 +3746,83 @@ export const w9: NotesBlock[] = [
     "sentences": [
       {
         "id": "w9/2.2.2/p9/s1",
+        "parts": [
+          {
+            "text": "Erdian ornomuineko sistema bentrikularreko atala dago,",
+            "i": true
+          },
+          {
+            "text": " ependimo hodia (edo kanak",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "zentrala)",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": ". ",
+            "i": true
+          }
+        ]
+      },
+      {
+        "id": "w9/2.2.2/p9/s2",
+        "parts": [
+          {
+            "text": "Gai gris honen kanpoan "
+          },
+          {
+            "text": "gai zuria",
+            "b": true
+          },
+          {
+            "text": " kokatzen da eta honetan 3 motako kordoi bereizten dira: "
+          },
+          {
+            "text": "atzeko, alboko eta aurreko kordoiak",
+            "b": true
+          },
+          {
+            "text": ". "
+          }
+        ]
+      },
+      {
+        "id": "w9/2.2.2/p9/s3",
+        "parts": [
+          {
+            "text": "Hauetan "
+          },
+          {
+            "text": "goranzko eta beheranzko",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "traktuak",
+            "b": true
+          },
+          {
+            "text": " kokatzen dira (informazioa goiko zentruetara bidaltzeko edo goiko zentruetatik ornomuinera garraiatzeko)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.2.2",
+    "id": "w9/2.2.2/p10",
+    "sentences": [
+      {
+        "id": "w9/2.2.2/p10/s1",
         "parts": [
           {
             "text": "Aurreko adarretako neurona motoreen sometatik irteten diren axoiak "
@@ -3858,22 +3851,22 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p9/s2",
+        "id": "w9/2.2.2/p10/s2",
         "parts": [
           {
             "text": "Axoi hauek ornomuinetik irteten dira bere aurre-alboko aldetik eta danak batera nerbioaren "
           },
           {
-            "text": "aurreko sustraia",
+            "text": "aurreko adarrak ",
             "b": true
           },
           {
-            "text": " osatzen dute. "
+            "text": "osatzen dute. "
           }
         ]
       },
       {
-        "id": "w9/2.2.2/p9/s3",
+        "id": "w9/2.2.2/p10/s3",
         "parts": [
           {
             "text": "Aurreko sustrai honetatik pasatuz, "
@@ -3888,7 +3881,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p9/s4",
+        "id": "w9/2.2.2/p10/s4",
         "parts": [
           {
             "text": "Ondorioz, neurona hauetako zuntz motoreetatik informazioa ("
@@ -3924,7 +3917,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p9/s5",
+        "id": "w9/2.2.2/p10/s5",
         "parts": [
           {
             "text": "Nerbio-kinada hauek motoreak dira eta "
@@ -3950,10 +3943,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.2.2",
-    "id": "w9/2.2.2/p10",
+    "id": "w9/2.2.2/p11",
     "sentences": [
       {
-        "id": "w9/2.2.2/p10/s1",
+        "id": "w9/2.2.2/p11/s1",
         "parts": [
           {
             "text": "Nerbio espinaletan ("
@@ -3986,10 +3979,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.2.2",
-    "id": "w9/2.2.2/p11",
+    "id": "w9/2.2.2/p12",
     "sentences": [
       {
-        "id": "w9/2.2.2/p11/s1",
+        "id": "w9/2.2.2/p12/s1",
         "parts": [
           {
             "text": "Nerbio espinalen atzeko sustraian beti goingoil bat kokatzen da: "
@@ -4011,7 +4004,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p11/s2",
+        "id": "w9/2.2.2/p12/s2",
         "parts": [
           {
             "text": "Gongoil honetako neuronak 2 motako luzapenak dituzte: "
@@ -4028,24 +4021,24 @@ export const w9: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " bat (ornomuinera abiatzen dira, informazioa ornomuineko atzeko adarretako neuronetara garraiatzeko) eta"
+            "text": " bat (ornomuinera abiatzen dira, (nerbio espinalak eramateko), informazioa ornomuineko atzeko adarretako neuronetara garraiatzeko) eta"
           },
           {
             "text": " luzapen zentrifugo",
             "b": true
           },
           {
-            "text": " bat ("
+            "text": " bat (nerbio sistemaren enborran dauden, "
           },
           {
-            "text": "alde periferikora abiatzen dira,",
+            "text": "alde periferikora abiatzen dira, informazioa",
             "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "informazioa neuronetako gorputzetara iristeko",
+            "text": "neuronetako gorputzetara iristeko",
             "i": true
           },
           {
@@ -4054,7 +4047,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p11/s3",
+        "id": "w9/2.2.2/p12/s3",
         "parts": [
           {
             "text": "Bi motako luzapen hauetatik, nerbio hauek (sentsorialek) "
@@ -4076,40 +4069,40 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p11/s4",
+        "id": "w9/2.2.2/p12/s4",
         "parts": [
           {
-            "text": "Atzeko adarretan dauden neurona sentsorialetan (gongoil errakideoetan egoten direnak)",
+            "text": "Atzeko adarretan",
             "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "informazioa transkribatzen da. ",
+            "text": "dauden neurona sentsorialetan (gongoil errakideoetan egoten direnak) informazioa",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "transmititzen da. ",
             "i": true
           }
         ]
       },
       {
-        "id": "w9/2.2.2/p11/s5",
+        "id": "w9/2.2.2/p12/s5",
         "parts": [
           {
-            "text": "Azkenik, neurona horietatik irteten diren axoiak gai zurian",
+            "text": "Azkenik, neurona horietatik irteten diren axoiak gai zurian dagoen mota",
             "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "dagoen mota desberdineko traktuan kokatzen dira informazio hori goiko zentroetara",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "eramateko.",
+            "text": "desberdineko traktuan kokatzen dira informazio hori goiko zentroetara eramateko.",
             "i": true
           }
         ]
@@ -4119,10 +4112,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.2.2",
-    "id": "w9/2.2.2/p12",
+    "id": "w9/2.2.2/p13",
     "sentences": [
       {
-        "id": "w9/2.2.2/p12/s1",
+        "id": "w9/2.2.2/p13/s1",
         "parts": [
           {
             "text": "Nerbio espinal baten enborretik bi adar nagusi sortzen dira: aurreko adar ("
@@ -4151,7 +4144,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p12/s2",
+        "id": "w9/2.2.2/p13/s2",
         "parts": [
           {
             "text": "Bi adar hauetan zuntz sentsorialak eta motoreak daude. "
@@ -4159,49 +4152,10 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p12/s3",
-        "parts": [
-          {
-            "text": "Aurreko adarrean dauden zuntz motoreak orokorrean aurrekaldean kokatzen diren muskulu ildaskatuak inerbatzen dituzte, eta atzekaldeko adarrean dauden zuntz motoreak, berriz, atzekaldean dauden muskulu ildaskatuak inerbatuko dituzte."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.2.2",
-    "id": "w9/2.2.2/p13",
-    "sentences": [
-      {
-        "id": "w9/2.2.2/p13/s1",
-        "parts": [
-          {
-            "text": "* Ez nahastu nerbio espinaletik irteten diren aurreko eta atzeko adarrak (primarioak) ornomuinaren gai grisatik ateratzen diren aurreko eta atzeko adarrekin (sustraiak) * KONTUZ! "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.2.2/p13/s2",
-        "parts": [
-          {
-            "text": "Muskuluen inerbazioa ez du zerikusirik jatorriarekin. "
-          }
-        ]
-      },
-      {
         "id": "w9/2.2.2/p13/s3",
         "parts": [
           {
-            "text": "Gauza bat da muskuluek daukaten jatorria eta beste gauza bat da nerbio hauetako aurreko eta atzeko adarretan dauden zuntz motoreak ze motako muskuluak inerbatzen dituzten. "
-          }
-        ]
-      },
-      {
-        "id": "w9/2.2.2/p13/s4",
-        "parts": [
-          {
-            "text": "Bi adarrek domeinu primaxialeko zein domeinu abaxialeko muskuluak inerbatuko dituzte."
+            "text": "Aurreko adarrean dauden zuntz motoreak orokorrean aurrekaldean kokatzen diren muskulu ildaskatuak inerbatzen dituzte, eta atzekaldeko adarrean dauden zuntz motoreak, berriz, atzekaldean dauden muskulu ildaskatuak inerbatuko dituzte."
           }
         ]
       }
@@ -4214,6 +4168,60 @@ export const w9: NotesBlock[] = [
     "sentences": [
       {
         "id": "w9/2.2.2/p14/s1",
+        "parts": [
+          {
+            "text": "* Ez nahastu nerbio espinaletik irteten diren aurreko eta atzeko adarrak (primarioak) ornomuinaren gai grisatik ateratzen diren aurreko eta atzeko adarrekin (sustraiak)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.2.2",
+    "id": "w9/2.2.2/p15",
+    "sentences": [
+      {
+        "id": "w9/2.2.2/p15/s1",
+        "parts": [
+          {
+            "text": "* KONTUZ! "
+          }
+        ]
+      },
+      {
+        "id": "w9/2.2.2/p15/s2",
+        "parts": [
+          {
+            "text": "Muskuluen inerbazioa ez du zerikusirik jatorriarekin. "
+          }
+        ]
+      },
+      {
+        "id": "w9/2.2.2/p15/s3",
+        "parts": [
+          {
+            "text": "Gauza bat da muskuluek daukaten jatorria eta beste gauza bat da nerbio hauetako aurreko eta atzeko adarretan dauden zuntz motoreak ze motako muskuluak inerbatzen dituzten. "
+          }
+        ]
+      },
+      {
+        "id": "w9/2.2.2/p15/s4",
+        "parts": [
+          {
+            "text": "Bi adarrek domeinu primaxialeko zein domeinu abaxialeko muskuluak inerbatuko dituzte."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.2.2",
+    "id": "w9/2.2.2/p16",
+    "sentences": [
+      {
+        "id": "w9/2.2.2/p16/s1",
         "parts": [
           {
             "text": "AURREKO ADARREKO ZUNTZ MOTOREAK",
@@ -4247,43 +4255,13 @@ export const w9: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.2.2",
-    "id": "w9/2.2.2/p15",
-    "sentences": [
-      {
-        "id": "w9/2.2.2/p15/s1",
-        "parts": [
-          {
-            "text": "Gorputz paretako muskulu ildaskatu guztiak."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.2.2",
-    "id": "w9/2.2.2/p16",
-    "sentences": [
-      {
-        "id": "w9/2.2.2/p16/s1",
-        "parts": [
-          {
-            "text": "Goiko eta beheko gorputz adarretako muskulu guztiak."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.2.2",
     "id": "w9/2.2.2/p17",
     "sentences": [
       {
         "id": "w9/2.2.2/p17/s1",
         "parts": [
           {
-            "text": "Bizkarraren muskulu autoktonoen azalean kokatzen diren muskulu ildasktuak."
+            "text": "Gorputz paretako muskulu ildaskatu guztiak."
           }
         ]
       }
@@ -4298,14 +4276,14 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.2/p18/s1",
         "parts": [
           {
-            "text": "(Ia-ia gure gorputzeko muskulu ildaskatu guztiak inerbatzen dituzte)."
+            "text": "Goiko eta beheko gorputz adarretako muskulu guztiak."
           }
         ]
       }
     ]
   },
   {
-    "kind": "caption",
+    "kind": "p",
     "section": "2.2.2",
     "id": "w9/2.2.2/p19",
     "sentences": [
@@ -4313,7 +4291,7 @@ export const w9: NotesBlock[] = [
         "id": "w9/2.2.2/p19/s1",
         "parts": [
           {
-            "text": "Bizkarreko muskulu sakonak (bizkarrezurreko muskulu hedatzaileak, muskulu autoktonoak)."
+            "text": "Bizkarraren muskulu autoktonoen azalean kokatzen diren muskulu ildasktuak."
           }
         ]
       }
@@ -4326,6 +4304,36 @@ export const w9: NotesBlock[] = [
     "sentences": [
       {
         "id": "w9/2.2.2/p20/s1",
+        "parts": [
+          {
+            "text": "(Ia-ia gure gorputzeko muskulu ildaskatu guztiak inerbatzen dituzte)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "2.2.2",
+    "id": "w9/2.2.2/p21",
+    "sentences": [
+      {
+        "id": "w9/2.2.2/p21/s1",
+        "parts": [
+          {
+            "text": "Bizkarreko muskulu sakonak (bizkarrezurreko muskulu hedatzaileak, muskulu autoktonoak)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.2.2",
+    "id": "w9/2.2.2/p22",
+    "sentences": [
+      {
+        "id": "w9/2.2.2/p22/s1",
         "parts": [
           {
             "text": "Ondorioz,"
@@ -4341,10 +4349,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.2.2",
-    "id": "w9/2.2.2/p21",
+    "id": "w9/2.2.2/p23",
     "sentences": [
       {
-        "id": "w9/2.2.2/p21/s1",
+        "id": "w9/2.2.2/p23/s1",
         "parts": [
           {
             "text": "- Bizkarrezurreko muskulu sakonak: "
@@ -4366,7 +4374,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p21/s2",
+        "id": "w9/2.2.2/p23/s2",
         "parts": [
           {
             "text": "Nerbio espinaletako atzeko adarretako zuntz motoreek inerbatzen dituzte. "
@@ -4374,7 +4382,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p21/s3",
+        "id": "w9/2.2.2/p23/s3",
         "parts": [
           {
             "text": "Oso",
@@ -4397,7 +4405,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p21/s4",
+        "id": "w9/2.2.2/p23/s4",
         "parts": [
           {
             "text": "Hau da, zuntz motoreek bakarrik",
@@ -4417,10 +4425,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.2.2",
-    "id": "w9/2.2.2/p22",
+    "id": "w9/2.2.2/p24",
     "sentences": [
       {
-        "id": "w9/2.2.2/p22/s1",
+        "id": "w9/2.2.2/p24/s1",
         "parts": [
           {
             "text": "- Gainerako gorputzeko muskulu ildaskatu guztiak (aurreko taulan aipatutakoak): "
@@ -4435,7 +4443,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p22/s2",
+        "id": "w9/2.2.2/p24/s2",
         "parts": [
           {
             "text": "Nerbio espinaletako aurreko adarretako zuntz motoreek inerbatzen dituzte."
@@ -4447,10 +4455,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.2.2",
-    "id": "w9/2.2.2/p23",
+    "id": "w9/2.2.2/p25",
     "sentences": [
       {
-        "id": "w9/2.2.2/p23/s1",
+        "id": "w9/2.2.2/p25/s1",
         "parts": [
           {
             "text": "BI MUSKULU MOTA DAUZKAGU:",
@@ -4463,10 +4471,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.2.2",
-    "id": "w9/2.2.2/p24",
+    "id": "w9/2.2.2/p26",
     "sentences": [
       {
-        "id": "w9/2.2.2/p24/s1",
+        "id": "w9/2.2.2/p26/s1",
         "parts": [
           {
             "text": "- "
@@ -4482,10 +4490,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.2.2",
-    "id": "w9/2.2.2/p25",
+    "id": "w9/2.2.2/p27",
     "sentences": [
       {
-        "id": "w9/2.2.2/p25/s1",
+        "id": "w9/2.2.2/p27/s1",
         "parts": [
           {
             "text": "- "
@@ -4501,10 +4509,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.2.2",
-    "id": "w9/2.2.2/p26",
+    "id": "w9/2.2.2/p28",
     "sentences": [
       {
-        "id": "w9/2.2.2/p26/s1",
+        "id": "w9/2.2.2/p28/s1",
         "parts": [
           {
             "text": "Gorputz paretako muskuluen kokapena eta hedapena, eta goiko",
@@ -4523,7 +4531,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p26/s2",
+        "id": "w9/2.2.2/p28/s2",
         "parts": [
           {
             "text": "Toraxean",
@@ -4574,7 +4582,7 @@ export const w9: NotesBlock[] = [
         ]
       },
       {
-        "id": "w9/2.2.2/p26/s3",
+        "id": "w9/2.2.2/p28/s3",
         "parts": [
           {
             "text": "Goiko eta beheko gorputz adarretako muskuluen",
@@ -4601,10 +4609,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.2.2",
-    "id": "w9/2.2.2/p27",
+    "id": "w9/2.2.2/p29",
     "sentences": [
       {
-        "id": "w9/2.2.2/p27/s1",
+        "id": "w9/2.2.2/p29/s1",
         "parts": [
           {
             "text": "- "
@@ -4620,10 +4628,10 @@ export const w9: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.2.2",
-    "id": "w9/2.2.2/p28",
+    "id": "w9/2.2.2/p30",
     "sentences": [
       {
-        "id": "w9/2.2.2/p28/s1",
+        "id": "w9/2.2.2/p30/s1",
         "parts": [
           {
             "text": "- "
@@ -4633,20 +4641,15 @@ export const w9: NotesBlock[] = [
             "i": true
           },
           {
-            "text": " "
-          },
+            "text": " Nerbio espinaletako zuntz motorrek enborreko eta gorputz-adarretako muskulu eskeletiko gehienak inerbatzen dituzte. "
+          }
+        ]
+      },
+      {
+        "id": "w9/2.2.2/p30/s2",
+        "parts": [
           {
-            "text": "Nerbio espinalean dauden zuntz motoreak gure gorputzeko muskulu guztiak inerbatzen",
-            "b": true,
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "dituzte (burukoak izan ezik).",
-            "b": true,
-            "i": true
+            "text": "Buru eta lepoko zenbait muskuluk, aldiz, garezur-nerbioen bidezko inerbazio motorra dute."
           }
         ]
       }
@@ -4692,7 +4695,7 @@ export const w9: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " dauden muskuluak dira. "
+            "text": " dauden muskuluak dira (bihotza izan ezik). "
           }
         ]
       },
@@ -4719,14 +4722,14 @@ export const w9: NotesBlock[] = [
             "text": "Orokorrean, "
           },
           {
-            "text": "heste eta heste-eratorrien inguruan",
+            "text": "heste eta heste-",
             "b": true
           },
           {
             "text": " "
           },
           {
-            "text": "kokatzen den alboko mesodermoaren errai-orritik ",
+            "text": "eratorrien inguruan kokatzen den alboko mesodermoaren errai-orritik ",
             "b": true
           },
           {
@@ -5164,7 +5167,7 @@ export const w9: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " Bihotzaren eskuineko aurikulan nodulu sinusala (markapasosa) daukagu, aurikularen beheko aldean nodulu aurikobentrikularra dago, eta nodulu hauen artean, traktu desberdinak daude, aurikularteko balak. "
+            "text": " Bihotzaren eskuineko aurikulan nodulu sinusala (markapasosa) daukagu, aurikularen beheko aldean nodulu aurikobentrikularra dago, eta nodulu hauen artean, traktu desberdinak daude, nodoenarteko traktua. "
           }
         ]
       },

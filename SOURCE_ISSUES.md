@@ -25,3 +25,7 @@ Etapa bakoitzak apuntearen fitxategia eta atala edo orrialdea gordetzen ditu. It
 - Aortaren paretako muskulu leuna: apunteek «uste da gaur egun» diote (paretako orria eta gandor neurala). Enbrioiaren irudian oraindik bi aorta dortsal daude; heldu baten aorta bakarra geroago sortzen da.
 - Bihotzaren eroapen sistema: noduluak zuntz muskular espezializatuak dira, ez nerbio-ehuna. Horregatik zian kolorez marrazten dira, eta ez nerbioen horiz. Bihotz helduaren irudia (lau ganberako ebakidura koronala) testuingurua da: apunteek ez dute irudirik.
 - Fontanelak: 9. gaiko apunteen sarreran atzeko fontanela «jaio osteko 1. eta 2. lauhilabetetan» ixten dela dio; 8. gaiko apunteek eta simulazioak «1.–2. hilabetean». Ez da aldatu: irakaslearekin egiaztatu beharreko puntua da.
+
+## 12. gaia: arteria sistema (2026-10-29ko bertsioa)
+
+- Apunteek bi atali ematen diete «2.3.2» zenbakia («Hirugarren arkuen garapena» eta «Laugarren arkuen garapena»); aurkibidean ere horrela dago. Testua ez da zuzendu: biak `w12/2.3.2/…` atalean daude, eta hirugarren arkuen lehen paragrafoa `w12/2.3.2/p2`-n hasten da.

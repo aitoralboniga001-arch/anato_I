@@ -472,7 +472,8 @@ function wallsOnce() {
       const phi = right ? lerp(180, 360 - f, u) : lerp(f, 180, u);
       return chamber(phi, th);
     }, C);
-  const part = (right: boolean): Part => ({ mesh: side(right, 1), hit: side(right, 3) });
+  // Two-sided: the room is seen from inside, and (stage 5) from behind, outside.
+  const part = (right: boolean): Part => ({ mesh: twoSided(side(right, 1)), hit: side(right, 3) });
   // The cut edge of the opened front: where the plane z = ZC leaves the wall, round the window.
   const thA = (Math.asin(ZC / RZ) * 180) / Math.PI + 0.3;
   const thB = 180 - thA;
@@ -517,7 +518,23 @@ const PVS = [
   { phi: 160, th: 106, ea: 6, eb: 6, out: [-0.36, -0.22, -2.26] as V3 },
 ];
 /** The coronary sinus: low in the right atrium's back wall, near the septum. */
-const CS = { phi: 197, th: 126, ea: 7, eb: 6.5, out: [0.45, -1.3, -1.4] as V3 };
+const CS = { phi: 197, th: 128, ea: 7, eb: 6.5, out: [0.45, -1.3, -1.4] as V3 };
+/** The sinus venosus outside the back wall (φ, θ): its right horn, from the superior to the inferior cava, then into the body. */
+const SINUS_HORN: [number, number][] = [
+  [216, 26],
+  [226, 60],
+  [227, 100],
+  [216, 136],
+  [197, 128],
+];
+/** Its body and left horn, low behind the left atrium; what stays of it is the coronary sinus, from its opening. */
+const SINUS_LEFT: [number, number][] = [
+  [197, 128],
+  [178, 131],
+  [152, 128],
+  [128, 124],
+  [108, 120],
+];
 /** The primitive pulmonary vein: where it leaves the left atrium, where it branches (left lung, right lung). */
 const PV_O = { phi: 153, th: 85 };
 const PV_T: V3 = [0.86, 0.1, -1.32];
@@ -602,25 +619,29 @@ function buildAtria(s: AtriaState): AtriaModel {
 
   // The veins' openings: the cavae in the right atrium's back wall (the sinus side), the pulmonary veins in the left's.
   // Several openings of one structure (the four pulmonary veins) are one piece each of holes, rims and veins.
-  const opening = (key: string, id: string, os: { phi: number; th: number; ea: number; eb: number; out: V3 }[], k: number, red: boolean) => {
+  const opening = (key: string, id: string, os: { phi: number; th: number; ea: number; eb: number; out: V3 }[], k: number, red: boolean, veinK = k) => {
+    if (veinK > 0.01) {
+      const veins = os.map((o) => {
+        const from = chamber(o.phi, o.th, 1.02);
+        const mid = (f: number): V3 => [lerp(from[0], o.out[0], f), lerp(from[1], o.out[1], f), lerp(from[2], o.out[2], f)];
+        return tubeParts([from, mid(0.35), mid(0.7), o.out], { radius: () => 0.016 * Math.max(o.ea, o.eb), ref: [0, 0, 1], sides: 14, capEnd: true });
+      });
+      items.push({ key: `${key}-vein`, id, mesh: cachedMerge(veins.map((r) => r.mesh)), hit: cachedMerge(veins.map((r) => r.hit)), color: red ? T.o2 : T.deo2, deep: red ? T.o2Deep : T.deo2Deep, tissue: 'vessel', opacity: 0.85 * veinK });
+      pts[id] = mix3(chamber(os[0].phi, os[0].th, 1.02), os[0].out, 0.3);
+    }
     if (k <= 0.01) return;
     const holes = os.map((o) => patch(o.phi, o.th, o.ea * k, o.eb * k, 0.985));
     const rims = os.map((o) => ridge(Array.from({ length: 29 }, (_, i) => {
       const a = (i / 28) * Math.PI * 2;
       return chamber(o.phi + o.ea * k * Math.cos(a), o.th - o.eb * k * Math.sin(a), 0.982);
     }), 0.024));
-    const veins = os.map((o) => {
-      const from = chamber(o.phi, o.th, 1.02);
-      const mid = (f: number): V3 => [lerp(from[0], o.out[0], f), lerp(from[1], o.out[1], f), lerp(from[2], o.out[2], f)];
-      return tubeParts([from, mid(0.35), mid(0.7), o.out], { radius: () => 0.016 * Math.max(o.ea, o.eb), ref: [0, 0, 1], sides: 14, capEnd: true });
-    });
     items.push({ key: `${key}-hole`, id, mesh: cachedMerge(holes), color: '#12070c', deep: '#000000', tissue: 'vessel', outline: false });
     items.push({ key: `${key}-rim`, id, mesh: cachedMerge(rims.map((r) => r.mesh)), hit: cachedMerge(rims.map((r) => r.hit)), color: red ? T.o2Deep : K.smoothDeep, deep: '#2a1050', tissue: 'vessel', opacity: k });
-    items.push({ key: `${key}-vein`, id, mesh: cachedMerge(veins.map((r) => r.mesh)), hit: cachedMerge(veins.map((r) => r.hit)), color: red ? T.o2 : T.deo2, deep: red ? T.o2Deep : T.deo2Deep, tissue: 'vessel', opacity: 0.85 * k });
     pts[id] = chamber(os[0].phi, os[0].th, 0.96);
   };
-  opening('svc', 'goiko-kaba-zaina', [SVC], 1, false);
-  opening('ivc', 'beheko-kaba-zaina', [IVC], 1, false);
+  // Until the sinus is taken in, the cavae open into its right horn, not into the atrium.
+  opening('svc', 'goiko-kaba-zaina', [SVC], 1 - s.sinus, false, 1);
+  opening('ivc', 'beheko-kaba-zaina', [IVC], 1 - s.sinus, false, 1);
   opening('pv', 'birika-zainak', PVS, s.pulmonary, true);
   if (s.pulmonary > 0.01) pts['birika-zainak'] = chamber(153, 84, 0.96);
   // The smooth (sinus) part round the cavae in the right atrium's back wall (topic 10, stage 10); in
@@ -825,30 +846,55 @@ function buildAtria(s: AtriaState): AtriaModel {
 
 // ———————————————————————————— stage 5: the walls' two origins ————————————————————————————
 
-type Opening = (key: string, id: string, os: { phi: number; th: number; ea: number; eb: number; out: V3 }[], k: number, red: boolean) => void;
+type Opening = (key: string, id: string, os: { phi: number; th: number; ea: number; eb: number; out: V3 }[], k: number, red: boolean, veinK?: number) => void;
 
 function walls5(s: AtriaState, items: Item3[], pts: Record<string, V3>, opening: Opening, ra: number, la: number) {
-  // The sinus venosus behind the right atrium, opening into it by the sinoatrial orifice (the violet strip);
-  // taken into the back wall, it is gone as a sac and the smooth part spreads.
-  if (s.sinus > 0.01) {
-    const k = s.sinus;
-    // Pressed against the back wall, flat front to back (it sinks into the wall as it is taken in).
-    const w = chamber(220, 90, 1);
-    const c: V3 = [w[0] * 0.92, w[1], w[2] - 0.08 - 0.2 * k];
-    items.push({ key: 'sinus', id: 'zain-sinua', ...blobParts({ center: c, radii: [0.1 + 0.38 * k, 0.2 + 0.72 * k, 0.05 + 0.2 * k], rings: 14, sides: 20 }), color: K.smoothRA, deep: K.smoothDeep, tissue: 'vessel', opacity: Math.min(1, k * 1.6) });
-    pts['zain-sinua'] = [c[0], c[1] - 0.25 * k, c[2]];
+  // The sinus venosus behind the atria (notes 2.2 p8): a horseshoe. Its right horn lies along the right
+  // atrium's back wall and takes both cavae; a neck joins it to the atrium (the sinoatrial orifice). Its
+  // body and left horn run left, low behind the left atrium. Taken in, the right horn sinks into the back
+  // wall, which bulges out (the right atrium grows) and turns smooth; the left horn, thinner, stays as the
+  // coronary sinus, which opens low in that wall.
+  const k = s.sinus;
+  if (k > 0.01) {
+    const out = 1 + 0.22 * k;
+    const horn = alongWall(SINUS_HORN, out, 28);
+    const sac = tubeParts(horn, { radius: (u) => (0.05 + 0.2 * k) * (0.6 + 0.4 * Math.sin(Math.PI * u)), ref: [0, 0, 1], sides: 18, capStart: true, capEnd: true });
+    items.push({ key: 'sinus', id: 'zain-sinua', ...sac, color: K.smoothRA, deep: K.smoothDeep, tissue: 'vessel', opacity: Math.min(1, k * 2) });
+    pts['zain-sinua'] = chamber(226, 84, out + 0.2 * k);
+    // The neck between the horn and the wall: narrower than the horn while the sinus stands apart.
+    const neck = tubeParts(alongWall(SINUS_HORN.slice(1, 4), 1 + 0.1 * k, 16), { radius: () => 0.04 + 0.08 * k, ref: [0, 0, 1], sides: 14, capStart: true, capEnd: true });
+    items.push({ key: 'sa-neck', id: 'zulo-sinoaurikularra', ...neck, color: K.smoothDeep, deep: '#1a0730', tissue: 'vessel', opacity: Math.min(1, k * 2) });
+    pts['zulo-sinoaurikularra'] = chamber(233, 96, 1 + 0.1 * k);
+    // Seen from inside the atrium: the orifice's rim in the back wall.
     const sea = lerp(10, 24, s.smoothWide);
     const ring = Array.from({ length: 41 }, (_, i) => {
       const a = (i / 40) * Math.PI * 2;
       return chamber(222 + sea * Math.cos(a), 88 - 40 * Math.sin(a), 0.982);
     });
     items.push({ key: 'sa-rim', id: 'zulo-sinoaurikularra', ...ridge(ring, 0.026), color: '#1a0710', deep: '#000000', tissue: 'vessel', opacity: Math.min(1, k * 2) });
-    pts['zulo-sinoaurikularra'] = chamber(222 - sea, 104, 0.975);
   } else if (s.walls || s.smoothWide > 0.01) {
     // Taken in: the sinus is the smooth part now.
     pts['zain-sinua'] = chamber(222 + 0.3 * lerp(10, 24, s.smoothWide), 76, 0.96);
   }
-  opening('cs', 'sinu-koronarioa', [CS], s.cs, false);
+  // The left horn, then the coronary sinus: one vessel, thinner and venous as the sinus is taken in.
+  if (k > 0.01 || s.cs > 0.01) {
+    const path = alongWall(SINUS_LEFT, 1.06 + 0.04 * k, 24);
+    const tube = tubeParts(path, { radius: (u) => lerp(0.055, 0.15, k) * (1 - 0.35 * u), ref: [0, 0, 1], sides: 14, capEnd: true });
+    const cs = k < 0.5;
+    items.push({ key: 'sinus-left', id: cs ? 'sinu-koronarioa' : 'zain-sinua', groups: [cs ? 'zain-sinua' : 'sinu-koronarioa'], ...tube, color: mixHex(T.deo2, K.smoothRA, k), deep: mixHex(T.deo2Deep, K.smoothDeep, k), tissue: 'vessel', opacity: Math.min(1, Math.max(k * 3, s.cs)) });
+    pts['sinus-left'] = path[14];
+  }
+  // Taken in: the back wall bulges out where the sinus was (the right atrium is bigger), smooth outside too.
+  if (s.smoothWide > 0.01) {
+    const e = s.smoothWide;
+    const sea = lerp(10, 24, e);
+    const dome = cachedMesh('atria sinus dome', [sea, e], () => twoSided(grid(10, 32, (r, t) => {
+      const a = t * Math.PI * 2;
+      return chamber(222 + sea * r * Math.cos(a), 88 - 58 * r * Math.sin(a), 1.005 + 0.16 * e * (1 - r * r));
+    }, [0, 0, 0])));
+    items.push({ key: 'sinus-dome', id: 'atal-lisoa', groups: ['zain-sinua'], mesh: dome, color: K.smoothRA, deep: K.smoothDeep, tissue: 'vessel', opacity: Math.min(1, e * 2) });
+  }
+  opening('cs', 'sinu-koronarioa', [CS], s.cs, false, 0);
 
   // Right atrium: the crista terminalis between the two parts, the sinus node at its top.
   if (s.crista > 0.01) {

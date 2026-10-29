@@ -8,6 +8,7 @@ import { getWeek, isSpace, partsOf, nameOf, structures, weeks } from '@/content/
 import { firstSeenOf, periodOf, weekOfDay } from '@/content/chronology';
 import { clockLabel, spanOf } from '@/lib/sim/age';
 import { doneAt } from '@/lib/sim/beat-completion';
+import { mentionedIn } from '@/lib/sim/mentions';
 import { categoryColor, categoryLabel } from '@/lib/sim/palette';
 import type { PlaneKind, StageDef, StructureCategory, StructureDef, WeekDef } from '@/lib/sim/types';
 import { Glossary } from './Glossary';
@@ -344,6 +345,16 @@ const fsAccepted = () => {
     return false;
   }
 };
+
+const NONE: readonly string[] = [];
+const saidCache = new Map<string, readonly string[]>();
+/** The structures a step's text names (cached: the player re-renders every frame while it plays). */
+function saidIn(text: string, ids: readonly string[]) {
+  const key = `${ids.join(' ')}|${text}`;
+  let out = saidCache.get(key);
+  if (!out) saidCache.set(key, (out = mentionedIn(text, ids, (id) => structures.get(id))));
+  return out;
+}
 
 export function Simulator({ weekNumber }: { weekNumber: number }) {
   const week = getWeek(weekNumber) ?? weeks[0];
@@ -1620,6 +1631,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
     selected: find || !selectedLit ? null : selected,
     hovered: find ? hovered : hovered,
     focus: classOn ? classFocus : find || intro !== null ? [] : formation ? (formation.highlight ?? [formation.structure]) : voice && audioState.focus.length ? audioState.focus : (beat?.focus ?? []),
+    mentioned: classOn || find || intro !== null || formation || !beat ? NONE : saidIn(beat.text, stage.structures),
     dimContext: classOn ? classLit && !view.ownFocus : !formation && focusLit && !view.ownFocus && !find && intro === null,
     spotlight: classOn ? (classLit ? classPoint : null) : !find && intro === null && tour ? tour.items[tour.idx] : null,
     spotKeep: classOn,

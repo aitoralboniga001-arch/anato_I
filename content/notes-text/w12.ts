@@ -374,6 +374,9 @@ export const w12: NotesBlock[] = [
           {
             "text": "Embrioiaren zirkulazio sistema 4.-5. astean",
             "i": true
+          },
+          {
+            "text": " Arteriak, bihotzetik gorputzeko beste ataletarantz odola"
           }
         ]
       }
@@ -388,7 +391,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/1/p4/s1",
         "parts": [
           {
-            "text": "Arteriak, bihotzetik gorputzeko beste ataletarantz odola eramaten dituzten odol-hodiak dira. "
+            "text": "eramaten dituzten odol-hodiak dira. "
           }
         ]
       },
@@ -399,18 +402,11 @@ export const w12: NotesBlock[] = [
             "text": "Enbrioi aroan, "
           },
           {
-            "text": "bihotz",
+            "text": "bihotz lakioa ",
             "b": true
           },
           {
-            "text": " "
-          },
-          {
-            "text": "lakioa",
-            "b": true
-          },
-          {
-            "text": " garatzen da hasierako bihotz-hoditik. "
+            "text": "garatzen da hasierako bihotz-hoditik. "
           }
         ]
       },
@@ -421,18 +417,25 @@ export const w12: NotesBlock[] = [
             "text": "Bihotz-lakioaren alde bulbarraren urrutiko atalari "
           },
           {
-            "text": "arteria enbor ",
+            "text": "arteria",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "enbor ",
             "b": true
           },
           {
             "text": "eta"
           },
           {
-            "text": " arteria bulboa",
+            "text": " arteria bulboa ",
             "b": true
           },
           {
-            "text": " deritzo; hortik garatuko dira gure gorputzeko arteria garrantzitsuenak (birika-arteria/birika enborra eta aorta-arteria). "
+            "text": "deritzo; hortik garatuko dira gure gorputzeko arteria garrantzitsuenak (birika- arteria/birika enborra eta aorta-arteria). "
           }
         ]
       },
@@ -447,7 +450,7 @@ export const w12: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " kokatzen da, zeinetara enbrioiak dituen zain desberdinak heltzen dira, bai ezkerreko bai eskumako zainak (bitelio-zainak, zilborreko zainak eta kardinal komunak). "
+            "text": " kokatzen da, zeinetara enbrioiak dituen zain desberdinak heltzen dira, bai ezkerreko bai eskuinako zainak (bitelio-zainak, zilborreko zainak eta kardinal komunak). "
           }
         ]
       },
@@ -455,7 +458,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/1/p4/s5",
         "parts": [
           {
-            "text": "Zilborretako zainetatik karenatik datorren odola “oxigenatua” da (hau da, odol kontzentrazio altukoa), eta bitelino eta kardinal zainetatik datorren odolak oxigeno gutxi dauka. "
+            "text": "Zilborretako zainetatik karenatik datorren odola “oxigenatua” da (hau da, oxigeno kontzentrazio altukoa), eta bitelino eta kardinal zainetatik datorren odolak oxigeno gutxi dauka. "
           }
         ]
       },
@@ -478,7 +481,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/1/p5/s1",
         "parts": [
           {
-            "text": "Garapenaren 5. astean, lepo mailan arku faringeoak agertzen dira mesodermoz eratutakoak; guztira, 6 arku faringeo bikote azalduz. "
+            "text": "Garapenaren 4-5. astean, lepo mailan arku faringeoak agertzen dira mesodermoz eratutakoak; guztira, 6 arku faringeo bikote daude. "
           }
         ]
       },
@@ -486,17 +489,10 @@ export const w12: NotesBlock[] = [
         "id": "w12/1/p5/s2",
         "parts": [
           {
-            "text": "Arku faringeo bakoitzak arteria bat izango du, "
+            "text": "Arku faringeo bakoitzak gara nerbio bat eta arteria bat izango du, "
           },
           {
-            "text": "arku",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "aortikoak ",
+            "text": "arku aortikoak ",
             "b": true
           },
           {
@@ -523,7 +519,7 @@ export const w12: NotesBlock[] = [
     ]
   },
   {
-    "kind": "p",
+    "kind": "caption",
     "section": "2",
     "id": "w12/2/p3",
     "sentences": [
@@ -531,44 +527,8 @@ export const w12: NotesBlock[] = [
         "id": "w12/2/p3/s1",
         "parts": [
           {
-            "text": "Enbor arteriosoaren urrutiko ataletik (aorta zakua), bi alboko luzapeneko odol-hodi eratzen dira: "
-          },
-          {
-            "text": "aorta",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "dortsalak ",
-            "b": true
-          },
-          {
-            "text": "(eskumako bat eta ezkerreko beste bat). "
-          }
-        ]
-      },
-      {
-        "id": "w12/2/p3/s2",
-        "parts": [
-          {
-            "text": "Enbrioiaren zeharkako tolespenaren ondorioz, bi aorta dortsalak bihotz-hodiaren enbor arteriosoarekin komunikatzen dira, hain zuzen ere, enborraren urrutiko ataletik (aorta-zakua) ateratzen diren ezkerreko eta eskuineko luzapenekin. "
-          }
-        ]
-      },
-      {
-        "id": "w12/2/p3/s3",
-        "parts": [
-          {
-            "text": "Komunikazio hauei "
-          },
-          {
-            "text": "aorta-arkuak",
-            "b": true
-          },
-          {
-            "text": " deritze, eta 6 bikote garatuko dira, kronologikoki."
+            "text": "Arku sistema hasierako garapenean",
+            "i": true
           }
         ]
       }
@@ -583,7 +543,52 @@ export const w12: NotesBlock[] = [
         "id": "w12/2/p4/s1",
         "parts": [
           {
-            "text": "Aorta dortsalak (2) hasiera batean banatuta egongo dira, baina garapenean, 4. maila torazikotik (T4) behera fusionatuko dira, "
+            "text": "Enbor arteriosoaren urrutiko ataletik (aorta zakua), bi alboko luzapeneko odol-hodi eratzen dira: "
+          },
+          {
+            "text": "aorta dortsalak",
+            "b": true
+          },
+          {
+            "text": " (eskuineko bat eta ezkerreko beste bat). "
+          }
+        ]
+      },
+      {
+        "id": "w12/2/p4/s2",
+        "parts": [
+          {
+            "text": "Enbrioiaren zeharkako tolespenaren ondorioz, bi aorta dortsalak bihotz-hodiaren enbor arteriosoarekin komunikatzen dira, hain zuzen ere, enborraren urrutiko ataletik (aorta-zakua) ateratzen diren ezkerreko eta eskuineko luzapenekin. "
+          }
+        ]
+      },
+      {
+        "id": "w12/2/p4/s3",
+        "parts": [
+          {
+            "text": "Komunikazio hauei "
+          },
+          {
+            "text": "aorta-arkuak ",
+            "b": true
+          },
+          {
+            "text": "deritze, eta 6 bikote garatuko dira, kronologikoki."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2",
+    "id": "w12/2/p5",
+    "sentences": [
+      {
+        "id": "w12/2/p5/s1",
+        "parts": [
+          {
+            "text": "Aorta dortsalak hasiera batean banatuta egongo dira (bi izanez), baina garapenean, 4. maila torazikotik (T4) behera fusionatuko egiten dira, "
           },
           {
             "text": "aorta-dortsal bakarra ",
@@ -595,26 +600,10 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2/p4/s2",
+        "id": "w12/2/p5/s2",
         "parts": [
           {
             "text": "Beraz, ezkerreko eta eskuineko aorta dortsalak soilik alde zefalikoan mantenduko dira banatuta."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "caption",
-    "section": "2",
-    "id": "w12/2/p5",
-    "sentences": [
-      {
-        "id": "w12/2/p5/s1",
-        "parts": [
-          {
-            "text": "Arku sistema hasierako garapenean",
-            "i": true
           }
         ]
       }
@@ -650,7 +639,14 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.1/p3/s1",
         "parts": [
           {
-            "text": "Hurrengo aorta arkuak, arku faringeo edo brankialen agerpenarekin batera sortuko dira:"
+            "text": "Hurrengo "
+          },
+          {
+            "text": "aorta arkuak",
+            "b": true
+          },
+          {
+            "text": ", arku faringeo edo brankialen agerpenarekin batera sortuko dira, alde zefalikotik kaudalera."
           }
         ]
       }
@@ -750,7 +746,7 @@ export const w12: NotesBlock[] = [
             "text": "eta "
           },
           {
-            "text": "ointoki muskuluaren",
+            "text": "ointoki hezurraren",
             "b": true
           },
           {
@@ -866,7 +862,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.1/p10/s3",
         "parts": [
           {
-            "text": "Hauek kontaktatu egingo dute enbor arteriosotik sortutako birika enborrarekin, hau da, eskumako bentrikulotik irteten den enborrarekin."
+            "text": "Hauek kontaktatu egingo dute enbor arteriosotik sortutako birika enborrarekin, hau da, eskuinako bentrikulotik irteten den enborrarekin."
           }
         ]
       }
@@ -980,7 +976,15 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.2.1/p7/s1",
         "parts": [
           {
-            "text": "- Bostgarren aorta-arkuak agertzen baina ia guztiz desagertzen dira."
+            "text": "- Bostgarren aorta-arkuak agertzen baina ia guztiz desagertzen dira oso azkar. "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.2.1/p7/s2",
+        "parts": [
+          {
+            "text": "Ez dira garatzen."
           }
         ]
       }
@@ -1006,14 +1010,7 @@ export const w12: NotesBlock[] = [
             "text": "Enbor arteriosotik, trenkada eratu ondoren 2 arteria desberdin bereizten dira: "
           },
           {
-            "text": "aortaren hasierako zatia/goranzko aorta eta",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "birika-enborra",
+            "text": "aortaren hasierako zatia/goranzko aorta eta birika-enborra",
             "b": true
           },
           {
@@ -1056,7 +1053,7 @@ export const w12: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " bihurtuko da eta hortik ezkerreko eta eskumako luzapenetatik arteria berriak eratuko dira, era ez simetrikoan:"
+            "text": " bihurtuko da eta hortik ezkerreko eta eskuinako luzapenetatik arteria berriak eratuko dira, era ez simetrikoan:"
           }
         ]
       }
@@ -1094,10 +1091,10 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.2.2/p5/s1",
         "parts": [
           {
-            "text": "-​ "
+            "text": "- "
           },
           {
-            "text": "Aorta makoaren hasiera zatia",
+            "text": "Aorta makoaren hasierako zatia",
             "b": true
           },
           {
@@ -1116,14 +1113,42 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.2.2/p6/s1",
         "parts": [
           {
-            "text": "-​ "
+            "text": "- "
           },
           {
-            "text": "Arteria brakiozefalikoa ",
+            "text": "Arteria",
             "b": true
           },
           {
-            "text": "eratu (Bertatik eskuineko karotida komuna eta eskuineko arteria subklabioa eratuko dira)"
+            "text": " "
+          },
+          {
+            "text": "brakiozefalikoa",
+            "b": true
+          },
+          {
+            "text": " edo "
+          },
+          {
+            "text": "besondo",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "buruetako",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "enborra",
+            "b": true
+          },
+          {
+            "text": " eratu (Bertatik eskuineko karotida komuna eta eskuineko arteria subklabioa eratuko dira)"
           }
         ]
       }
@@ -1138,7 +1163,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.2.2/p7/s1",
         "parts": [
           {
-            "text": "- Ezkerreko luzapenetik (lodigoa) "
+            "text": "- Ezkerreko luzapenetik (lodiagoa) "
           },
           {
             "text": "aorta makoaren hasierako zatia ",
@@ -1172,6 +1197,20 @@ export const w12: NotesBlock[] = [
           },
           {
             "text": "arteria brakiozefalikoa ",
+            "b": true
+          },
+          {
+            "text": "edo"
+          },
+          {
+            "text": " besondo buruetako",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "enborra ",
             "b": true
           },
           {
@@ -1232,7 +1271,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.3.1/p3/s1",
         "parts": [
           {
-            "text": "Lehenengo eta bigarren arkuak gutxi gora behera enbriioiaren 28. egunean agertzen dira, baina gutxira desagertu egiten dira."
+            "text": "Lehenengo eta bigarren arkuak gutxi gora behera enbrioiaren 28. egunean agertzen dira, baina gutxira desagertu egiten dira."
           }
         ]
       }
@@ -1247,7 +1286,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.3.1/p4/s1",
         "parts": [
           {
-            "text": "-​ Lehenengo arkuetatik: bakarrik ataltxo txiki bat geratzen da arku horiertatik, hots, "
+            "text": "- Lehenengo arkuetatik bakarrik ataltxo txiki bat geratzen da, hots, "
           },
           {
             "text": "arteria maxilarrak",
@@ -1269,10 +1308,10 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.3.1/p5/s1",
         "parts": [
           {
-            "text": "-​ Bigarren arkutik: "
+            "text": "- Bigarren arkuetatik: "
           },
           {
-            "text": "hioide arteriak",
+            "text": "hioideazpiko arteriak",
             "b": true
           },
           {
@@ -1288,14 +1327,14 @@ export const w12: NotesBlock[] = [
   },
   {
     "kind": "h2",
-    "section": "2.3.1",
-    "id": "w12/2.3.1/p6",
+    "section": "2.3.2",
+    "id": "w12/2.3.2/p2",
     "sentences": [
       {
-        "id": "w12/2.3.1/p6/s1",
+        "id": "w12/2.3.2/p2/s1",
         "parts": [
           {
-            "text": "2.3.1. Hirugarren arkuen garapena",
+            "text": "2.3.2. Hirugarren arkuen garapena",
             "b": true,
             "i": true
           }
@@ -1305,11 +1344,11 @@ export const w12: NotesBlock[] = [
   },
   {
     "kind": "p",
-    "section": "2.3.1",
-    "id": "w12/2.3.1/p7",
+    "section": "2.3.2",
+    "id": "w12/2.3.2/p3",
     "sentences": [
       {
-        "id": "w12/2.3.1/p7/s1",
+        "id": "w12/2.3.2/p3/s1",
         "parts": [
           {
             "text": "Hirugarren arkuak momentu eta une berean garatuko dira. "
@@ -1317,10 +1356,10 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.3.1/p7/s2",
+        "id": "w12/2.3.2/p3/s2",
         "parts": [
           {
-            "text": "Eskumako eta ezkerreko aldeetan "
+            "text": "Eskuinako eta ezkerreko aldeetan "
           },
           {
             "text": "garapen",
@@ -1334,7 +1373,7 @@ export const w12: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " egiten dute:"
+            "text": " dute:"
           }
         ]
       }
@@ -1342,11 +1381,11 @@ export const w12: NotesBlock[] = [
   },
   {
     "kind": "li",
-    "section": "2.3.1",
-    "id": "w12/2.3.1/p8",
+    "section": "2.3.2",
+    "id": "w12/2.3.2/p4",
     "sentences": [
       {
-        "id": "w12/2.3.1/p8/s1",
+        "id": "w12/2.3.2/p4/s1",
         "parts": [
           {
             "text": "- Ezkerreko eta eskuineko arkuetatik "
@@ -1356,7 +1395,7 @@ export const w12: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "sortzen dira eta hauetatik "
+            "text": "sortzen dira eta hauetatik irteten diren "
           },
           {
             "text": "barneko karotiden hurbileko zatiak ",
@@ -1371,11 +1410,11 @@ export const w12: NotesBlock[] = [
   },
   {
     "kind": "li",
-    "section": "2.3.1",
-    "id": "w12/2.3.1/p9",
+    "section": "2.3.2",
+    "id": "w12/2.3.2/p5",
     "sentences": [
       {
-        "id": "w12/2.3.1/p9/s1",
+        "id": "w12/2.3.2/p5/s1",
         "parts": [
           {
             "text": "- Atzean dauden aorta dortsalen urrutiko ataletatik eskuineko eta ezkerreko alde kranealetik, "
@@ -1393,11 +1432,11 @@ export const w12: NotesBlock[] = [
   },
   {
     "kind": "li",
-    "section": "2.3.1",
-    "id": "w12/2.3.1/p10",
+    "section": "2.3.2",
+    "id": "w12/2.3.2/p6",
     "sentences": [
       {
-        "id": "w12/2.3.1/p10/s1",
+        "id": "w12/2.3.2/p6/s1",
         "parts": [
           {
             "text": "- "
@@ -1416,10 +1455,10 @@ export const w12: NotesBlock[] = [
   {
     "kind": "h2",
     "section": "2.3.2",
-    "id": "w12/2.3.2/p2",
+    "id": "w12/2.3.2/p7",
     "sentences": [
       {
-        "id": "w12/2.3.2/p2/s1",
+        "id": "w12/2.3.2/p7/s1",
         "parts": [
           {
             "text": "2.3.2. Laugarren arkuen garapena",
@@ -1433,25 +1472,10 @@ export const w12: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.3.2",
-    "id": "w12/2.3.2/p3",
+    "id": "w12/2.3.2/p8",
     "sentences": [
       {
-        "id": "w12/2.3.2/p3/s1",
-        "parts": [
-          {
-            "text": "Ezkerreko eta eskumako aorta-arkuek garapen desberdina dute:"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.3.2",
-    "id": "w12/2.3.2/p4",
-    "sentences": [
-      {
-        "id": "w12/2.3.2/p4/s1",
+        "id": "w12/2.3.2/p8/s1",
         "parts": [
           {
             "text": "EZKERREKO LAUGARREN",
@@ -1474,13 +1498,57 @@ export const w12: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.3.2",
-    "id": "w12/2.3.2/p5",
+    "id": "w12/2.3.2/p9",
     "sentences": [
       {
-        "id": "w12/2.3.2/p5/s1",
+        "id": "w12/2.3.2/p9/s1",
         "parts": [
           {
-            "text": "-​ "
+            "text": "- "
+          },
+          {
+            "text": "Aorta makuaren urrutiko atala ",
+            "b": true
+          },
+          {
+            "text": "eratu (ezkerreko karotida komunaren eta ezkerreko arteria subklabioaren arteko atala)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "2.3.2",
+    "id": "w12/2.3.2/p10",
+    "sentences": [
+      {
+        "id": "w12/2.3.2/p10/s1",
+        "parts": [
+          {
+            "text": "- "
+          },
+          {
+            "text": "Ezkerreko arteria subklabioa",
+            "b": true
+          },
+          {
+            "text": ": ezkerreko zazpigarren segmentuarteko arteria batetik eratu baina garapenean askoz gorago kokatu (ezk. karotidatik gertu)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "2.3.2",
+    "id": "w12/2.3.2/p11",
+    "sentences": [
+      {
+        "id": "w12/2.3.2/p11/s1",
+        "parts": [
+          {
+            "text": "- "
           },
           {
             "text": "Eskuineko",
@@ -1504,11 +1572,11 @@ export const w12: NotesBlock[] = [
             "text": " "
           },
           {
-            "text": "hasierako atala",
+            "text": "hasierako atala ",
             "b": true
           },
           {
-            "text": " (proximaletik) eratu"
+            "text": "(proximaletik)"
           }
         ]
       }
@@ -1517,13 +1585,13 @@ export const w12: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.3.2",
-    "id": "w12/2.3.2/p6",
+    "id": "w12/2.3.2/p12",
     "sentences": [
       {
-        "id": "w12/2.3.2/p6/s1",
+        "id": "w12/2.3.2/p12/s1",
         "parts": [
           {
-            "text": "-​ "
+            "text": "- "
           },
           {
             "text": "Bitarteko",
@@ -1546,13 +1614,13 @@ export const w12: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.3.2",
-    "id": "w12/2.3.2/p7",
+    "id": "w12/2.3.2/p13",
     "sentences": [
       {
-        "id": "w12/2.3.2/p7/s1",
+        "id": "w12/2.3.2/p13/s1",
         "parts": [
           {
-            "text": "-​ "
+            "text": "- "
           },
           {
             "text": "Urrutiko",
@@ -1573,22 +1641,15 @@ export const w12: NotesBlock[] = [
     ]
   },
   {
-    "kind": "li",
+    "kind": "p",
     "section": "2.3.2",
-    "id": "w12/2.3.2/p8",
+    "id": "w12/2.3.2/p14",
     "sentences": [
       {
-        "id": "w12/2.3.2/p8/s1",
+        "id": "w12/2.3.2/p14/s1",
         "parts": [
           {
-            "text": "-​ "
-          },
-          {
-            "text": "Aorta makuaren urrutiko atala ",
-            "b": true
-          },
-          {
-            "text": "eratu (ezkerreko karotida komunaren eta ezkerreko arteria subklabioaren arteako atala)"
+            "text": "Ezkerreko eta eskumako aorta-arkuek garapen desberdina dute:"
           }
         ]
       }
@@ -1597,49 +1658,13 @@ export const w12: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.3.2",
-    "id": "w12/2.3.2/p9",
+    "id": "w12/2.3.2/p15",
     "sentences": [
       {
-        "id": "w12/2.3.2/p9/s1",
+        "id": "w12/2.3.2/p15/s1",
         "parts": [
           {
-            "text": "-​ "
-          },
-          {
-            "text": "Ezkerreko",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "arteria",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "subklabioa",
-            "b": true
-          },
-          {
-            "text": ": ezkerreko zazpigarren segmentuarteko arteria batetik eratu baina garapenean askoz gorago kokatu (ezk. karotidatik gertu)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "2.3.2",
-    "id": "w12/2.3.2/p10",
-    "sentences": [
-      {
-        "id": "w12/2.3.2/p10/s1",
-        "parts": [
-          {
-            "text": "-​ EZKERREKO ALDETIK:"
+            "text": "- EZKERREKO ALDETIK:"
           },
           {
             "text": " Aorta makuaren urrutiko atala",
@@ -1658,7 +1683,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.3.2/p10/s2",
+        "id": "w12/2.3.2/p15/s2",
         "parts": [
           {
             "text": "Honako hau, ezkerreko zazpigarren lepoko segmentuarteko arteriatik eratzen da. "
@@ -1666,7 +1691,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.3.2/p10/s3",
+        "id": "w12/2.3.2/p15/s3",
         "parts": [
           {
             "text": "Hala ere, garapenean, bere jatorria aldatu eta askoz gorago kokatuko da. "
@@ -1674,7 +1699,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.3.2/p10/s4",
+        "id": "w12/2.3.2/p15/s4",
         "parts": [
           {
             "text": "(Ezkerreko karotidatik oso gertu)."
@@ -1684,15 +1709,38 @@ export const w12: NotesBlock[] = [
     ]
   },
   {
-    "kind": "li",
+    "kind": "caption",
     "section": "2.3.2",
-    "id": "w12/2.3.2/p11",
+    "id": "w12/2.3.2/p16",
     "sentences": [
       {
-        "id": "w12/2.3.2/p11/s1",
+        "id": "w12/2.3.2/p16/s1",
         "parts": [
           {
-            "text": "-​ ESKUINEKO ALDETIK: "
+            "text": "Arkuetatik eratutako arteria",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "ezberdinak",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "2.3.2",
+    "id": "w12/2.3.2/p17",
+    "sentences": [
+      {
+        "id": "w12/2.3.2/p17/s1",
+        "parts": [
+          {
+            "text": "- ESKUINEKO ALDETIK: "
           },
           {
             "text": "Eskuineko arteria subklabioaren",
@@ -1711,7 +1759,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.3.2/p11/s2",
+        "id": "w12/2.3.2/p17/s2",
         "parts": [
           {
             "text": "Bitarteko atala ",
@@ -1726,22 +1774,6 @@ export const w12: NotesBlock[] = [
           },
           {
             "text": "eskuineko aorta dortsaletik irteten den eskuineko zazpigarren lepoko segmentuarteko arteriatik."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "caption",
-    "section": "2.3.2",
-    "id": "w12/2.3.2/p12",
-    "sentences": [
-      {
-        "id": "w12/2.3.2/p12/s1",
-        "parts": [
-          {
-            "text": "Arkuetatik eratutako arteria",
-            "i": true
           }
         ]
       }
@@ -1765,7 +1797,7 @@ export const w12: NotesBlock[] = [
     ]
   },
   {
-    "kind": "caption",
+    "kind": "p",
     "section": "2.3.3",
     "id": "w12/2.3.3/p3",
     "sentences": [
@@ -1773,31 +1805,15 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.3.3/p3/s1",
         "parts": [
           {
-            "text": "ezberdinak",
-            "i": true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.3.3",
-    "id": "w12/2.3.3/p4",
-    "sentences": [
-      {
-        "id": "w12/2.3.3/p4/s1",
-        "parts": [
-          {
             "text": "Bostgarren arku hauek guztiz desagertzen dira eta ez dute ezer sortzen. "
           }
         ]
       },
       {
-        "id": "w12/2.3.3/p4/s2",
+        "id": "w12/2.3.3/p3/s2",
         "parts": [
           {
-            "text": "(gauza bera gertatzen da arku faringeoetan)"
+            "text": "Gauza bera gertatzen da 5.arku faringeoetan."
           }
         ]
       }
@@ -1896,11 +1912,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.3.4/p5/s1",
         "parts": [
           {
-            "text": "-​",
-            "b": true
-          },
-          {
-            "text": " "
+            "text": "- "
           },
           {
             "text": "Ezkerreko birika-arteria: ",
@@ -1922,21 +1934,14 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.3.4/p6/s1",
         "parts": [
           {
-            "text": "-​ "
+            "text": "- "
           },
           {
-            "text": "Hodi",
+            "text": "Hodi arteriosoa",
             "b": true
           },
           {
-            "text": " "
-          },
-          {
-            "text": "arteriosoa",
-            "b": true
-          },
-          {
-            "text": ": urrutiko ataletik (ezkerreko birika-arteria aorta-arteriarekin komunikatu)"
+            "text": ": urrutiko ataletik (ezkerreko birika-arteria aorta- arteriarekin komunikatu)"
           }
         ]
       }
@@ -1951,11 +1956,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.3.4/p7/s1",
         "parts": [
           {
-            "text": "-​",
-            "b": true
-          },
-          {
-            "text": " Seigarren arkuaren urrutiko atala desagertzen da"
+            "text": "- Seigarren arkuaren urrutiko atala desagertzen da"
           }
         ]
       }
@@ -1970,11 +1971,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.3.4/p8/s1",
         "parts": [
           {
-            "text": "-​",
-            "b": true
-          },
-          {
-            "text": " "
+            "text": "- "
           },
           {
             "text": "Eskumako",
@@ -1988,7 +1985,7 @@ export const w12: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " arkuaren hurbileko ataletik (eta horretatik irtendako hasierako eskuineko birika-arteriatik)"
+            "text": " arkuaren hurbileko ataletik (eta horretatik irtendako hasierako eskuineko birika- arteriatik) sortu."
           }
         ]
       }
@@ -2003,7 +2000,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.3.4/p9/s1",
         "parts": [
           {
-            "text": "-​ EZKERREKO ALDEAN: seigarren arkuaren hurbileko ataletik eta arku honetan garatutako hasierako ezkerreko birika-arteriatik "
+            "text": "- EZKERREKO ALDEAN: seigarren arkuaren hurbileko ataletik eta arku honetan garatutako hasierako ezkerreko birika-arteriatik "
           },
           {
             "text": "ezkerreko birika-arteria ",
@@ -2040,7 +2037,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.3.4/p10/s1",
         "parts": [
           {
-            "text": "-​ ESKUINEKO ALDEAN: seigarren arkuaren urrutiko atala desagertzen da eta hurbileko ataletik (eta arku horretatik irtendako hasierako eskuineko birika-arteriatik) "
+            "text": "- ESKUINEKO ALDEAN: seigarren arkuaren urrutiko atala desagertzen da eta hurbileko ataletik (eta arku horretatik irtendako hasierako eskuineko birika-arteriatik) "
           },
           {
             "text": "eskumako",
@@ -2069,7 +2066,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.3.4/p11/s1",
         "parts": [
           {
-            "text": "Ezkerreko bentrikulutik irteten den aortatik adar desberdinak sortu egiten dira, desberdinak direnak eskumako eta ezkerreko aldeetan. "
+            "text": "Ezkerreko bentrikulutik irteten den aortatik adar desberdinak sortzen dira, desberdinak direnak eskumako eta ezkerreko aldeetan. "
           }
         ]
       },
@@ -2096,7 +2093,7 @@ export const w12: NotesBlock[] = [
             "text": "Makotik ateratzen den lehenengo adarra "
           },
           {
-            "text": "arteria brakiozefalikoa",
+            "text": "arteria brakiozefalikoa edo besondo buruetako enborra",
             "b": true
           },
           {
@@ -2110,14 +2107,7 @@ export const w12: NotesBlock[] = [
             "text": " eta eskuineko "
           },
           {
-            "text": "karotida",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "komuna",
+            "text": "karotida komuna",
             "b": true
           },
           {
@@ -2163,7 +2153,14 @@ export const w12: NotesBlock[] = [
             "text": "Beheranzko aortatik eta "
           },
           {
-            "text": "ezkerreko lepoko 7. segmentu arteko arterietatik ",
+            "text": "ezkerreko lepoko 7. segmentu",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "arteko arterietatik ",
             "b": true
           },
           {
@@ -2248,14 +2245,18 @@ export const w12: NotesBlock[] = [
           {
             "text": "karotideoak.",
             "b": true
-          },
-          {
-            "text": " "
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.4",
+    "id": "w12/2.4/p5",
+    "sentences": [
       {
-        "id": "w12/2.4/p4/s2",
+        "id": "w12/2.4/p5/s1",
         "parts": [
           {
             "text": "2. Eskuineko aortaren ataltxo bat ere desagertzen da: "
@@ -2284,7 +2285,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.4/p4/s3",
+        "id": "w12/2.4/p5/s2",
         "parts": [
           {
             "text": "(Bi hauek lotzen zituen atala desagertu; ondorioz, ezkerreko aorta bakarrik geldituko da.) "
@@ -2292,15 +2293,22 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.4/p4/s4",
+        "id": "w12/2.4/p5/s3",
         "parts": [
           {
-            "text": "Beraz, beheranzko aorta, ezkerreko aorta dortsaletik eratuko da. "
+            "text": "Beraz, beheranzko aorta, ezkerreko aorta dortsaletik eratuko da."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.4",
+    "id": "w12/2.4/p6",
+    "sentences": [
       {
-        "id": "w12/2.4/p4/s5",
+        "id": "w12/2.4/p6/s1",
         "parts": [
           {
             "text": "3. Enbrioiak egiten duen tolespenengatik, hasieran goikaldean kokatzen den bihotz-hodia, lepo-eskualdera jaitsi ez ezik, ondoren, torax barrunbean ere kokatuko da"
@@ -2312,7 +2320,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.4/p4/s6",
+        "id": "w12/2.4/p6/s2",
         "parts": [
           {
             "text": "Hori dela eta, "
@@ -2329,12 +2337,19 @@ export const w12: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "asko luzatzen dira. "
+            "text": "asko luzatzen dira."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.4",
+    "id": "w12/2.4/p7",
+    "sentences": [
       {
-        "id": "w12/2.4/p4/s7",
+        "id": "w12/2.4/p7/s1",
         "parts": [
           {
             "text": "4. Lepoaren eraketarekin arteria brakiozefalikoa eta karotidak luzatu egiten dira, ondorioz, "
@@ -2349,7 +2364,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.4/p4/s8",
+        "id": "w12/2.4/p7/s2",
         "parts": [
           {
             "text": "Lepoaren eraketarekin lepo mailan sortu den bihotza toraxeko perikardio barrunbera jaisten da ere."
@@ -2361,10 +2376,10 @@ export const w12: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.4",
-    "id": "w12/2.4/p5",
+    "id": "w12/2.4/p8",
     "sentences": [
       {
-        "id": "w12/2.4/p5/s1",
+        "id": "w12/2.4/p8/s1",
         "parts": [
           {
             "text": "Gogoratu, arku brankialak aipatu genituenean, IV. eta VI. arku brankealekin erlazionatutako bikote kraneala, 10. bikote kraneala dela: "
@@ -2376,7 +2391,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.4/p5/s2",
+        "id": "w12/2.4/p8/s2",
         "parts": [
           {
             "text": "Honako hau, burezurretik irten, lepotik eta toraxetik jaitsi eta diafragma zeharkatuz abdomen zonaldera heltzen da. "
@@ -2384,7 +2399,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.4/p5/s3",
+        "id": "w12/2.4/p8/s3",
         "parts": [
           {
             "text": "Nerbio bago honetatik adar desberdinak irteten dira ematen duen ibilbide luze honetan. "
@@ -2392,7 +2407,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.4/p5/s4",
+        "id": "w12/2.4/p8/s4",
         "parts": [
           {
             "text": "Horien artean, IV. eta VI. faringe arkuetatik sortzen diren muskulu ildaskatuak (muskulu laringeoak) inerbatzen dituzten nerbioak. "
@@ -2400,7 +2415,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.4/p5/s5",
+        "id": "w12/2.4/p8/s5",
         "parts": [
           {
             "text": "Muskulu laringeo horiek inerbatzeko nerbio bagotik sortutako adarrak daude, hots, "
@@ -2413,18 +2428,18 @@ export const w12: NotesBlock[] = [
             "text": "eta"
           },
           {
-            "text": " nerbio laringeo atzerakaria ",
+            "text": " nerbio laringeo atzerakaria edo zintzur nerbio",
             "b": true
-          },
-          {
-            "text": "(horrela deitu",
-            "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "irten eta goruntz abiatzen delako, laringeruntz).",
+            "text": "atzerakariak ",
+            "b": true
+          },
+          {
+            "text": "(horrela deitu irten eta goruntz abiatzen delako, laringeruntz).",
             "i": true
           }
         ]
@@ -2434,13 +2449,13 @@ export const w12: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.4",
-    "id": "w12/2.4/p6",
+    "id": "w12/2.4/p9",
     "sentences": [
       {
-        "id": "w12/2.4/p6/s1",
+        "id": "w12/2.4/p9/s1",
         "parts": [
           {
-            "text": "Arterietan gertatu diren aldaketen ondorioz, eskumako eta ezkerreko nerbio bago hauetatik irteten diren nerbio atzerakari horiek kokapen ezberdinak izango dituzte."
+            "text": "Arterietan gertatu diren aldaketen ondorioz, eskumako eta ezkerreko nerbio bago hauetatik irteten diren nerbio atzerakariek kokapen ezberdinak izango dituzte."
           }
         ]
       }
@@ -2449,16 +2464,23 @@ export const w12: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.4",
-    "id": "w12/2.4/p7",
+    "id": "w12/2.4/p10",
     "sentences": [
       {
-        "id": "w12/2.4/p7/s1",
+        "id": "w12/2.4/p10/s1",
         "parts": [
           {
-            "text": "-​ EZKERREKO aldean ezkerreko nerbio laringeotik irtetzen den ezkerreko nerbio atzerakariak inguratzen du ezkerreko seigarren arkuaren urrutiko atala, bertan "
+            "text": "- EZKERREKO aldean ezkerreko nerbio laringeotik irtetzen den ezkerreko nerbio atzerakariak inguratzen du ezkerreko seigarren arkuaren urrutiko atala, bertan "
           },
           {
-            "text": "hodi arteriosoa",
+            "text": "hodi",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "arteriosoa",
             "b": true
           },
           {
@@ -2467,107 +2489,10 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.4/p7/s2",
+        "id": "w12/2.4/p10/s2",
         "parts": [
           {
-            "text": "Inguratzen du eta goruntz abiatzen da"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "caption",
-    "section": "2.4",
-    "id": "w12/2.4/p8",
-    "sentences": [
-      {
-        "id": "w12/2.4/p8/s1",
-        "parts": [
-          {
-            "text": "Nerbioak aorta arkua eta ezk.",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "arteria subklabioa inguratzen",
-            "i": true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "2.4",
-    "id": "w12/2.4/p9",
-    "sentences": [
-      {
-        "id": "w12/2.4/p9/s1",
-        "parts": [
-          {
-            "text": "-​ ESKUINEKO nerbio bagotik irtendako eskuineko nerbio laringeo atzerakariak gero eta gorago kokatuko da eta azkenan 4. arkutik sortutako "
-          },
-          {
-            "text": "arteria subklabioa",
-            "b": true
-          },
-          {
-            "text": " inguratuko du. "
-          }
-        ]
-      },
-      {
-        "id": "w12/2.4/p9/s2",
-        "parts": [
-          {
-            "text": "(Seigarren",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "arkuak",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "jasandako",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "aldaketengatik eta bostgarrena ez delako inoiz",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "garatzen)",
-            "i": true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.4",
-    "id": "w12/2.4/p10",
-    "sentences": [
-      {
-        "id": "w12/2.4/p10/s1",
-        "parts": [
-          {
-            "text": "Garapenaren bukaeran:"
+            "text": "Inguratzen du eta goruntz abiatzen da."
           }
         ]
       }
@@ -2582,6 +2507,66 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.4/p11/s1",
         "parts": [
           {
+            "text": "- ESKUINEKO nerbio bagotik irtendako eskuineko nerbio laringeo atzerakariak gero eta gorago kokatuko da eta azkenean eskuineko 4. arkutik sortutako "
+          },
+          {
+            "text": "arteria",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "subklabioa",
+            "b": true
+          },
+          {
+            "text": " inguratuko du. "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.4/p11/s2",
+        "parts": [
+          {
+            "text": "(Seigarren arkuak jasandako",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "aldaketengatik eta bostgarrena ez delako inoiz garatzen",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.4",
+    "id": "w12/2.4/p12",
+    "sentences": [
+      {
+        "id": "w12/2.4/p12/s1",
+        "parts": [
+          {
+            "text": "Garapenaren bukaeran:"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "2.4",
+    "id": "w12/2.4/p13",
+    "sentences": [
+      {
+        "id": "w12/2.4/p13/s1",
+        "parts": [
+          {
             "text": "- ESKUINEAN: Eskuineko nerbio laringeo atzerakariak gero eta altuago kokatuko dira, IV. arkuetatik sortutako eskuineko arteria subklabioaren hasierako atala inguratu arte."
           }
         ]
@@ -2591,10 +2576,10 @@ export const w12: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.4",
-    "id": "w12/2.4/p12",
+    "id": "w12/2.4/p14",
     "sentences": [
       {
-        "id": "w12/2.4/p12/s1",
+        "id": "w12/2.4/p14/s1",
         "parts": [
           {
             "text": "- EZKERREAN: VI. arkuaren urrutiko atala hodi bihurtzen da, hodi arteriosoa, ezkerreko birika arteria aortarekin komunikatzeko. "
@@ -2602,7 +2587,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.4/p12/s2",
+        "id": "w12/2.4/p14/s2",
         "parts": [
           {
             "text": "Hodi arterioso honen bidez, birika arteriatik doan odola aortara pasatzen da. "
@@ -2610,7 +2595,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.4/p12/s3",
+        "id": "w12/2.4/p14/s3",
         "parts": [
           {
             "text": "Hala ere, jaio ostean gertatutako aldaketengatik, hodi arterioso hau lotailu bat bihurtzen da: "
@@ -2618,36 +2603,17 @@ export const w12: NotesBlock[] = [
           {
             "text": "LOTAILU ARTERIOSOA.",
             "b": true
+          },
+          {
+            "text": " "
           }
         ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.4",
-    "id": "w12/2.4/p13",
-    "sentences": [
+      },
       {
-        "id": "w12/2.4/p13/s1",
+        "id": "w12/2.4/p14/s4",
         "parts": [
           {
             "text": "Ondorioz, ezkerreko nerbio laringeo atzerakariak, hodi arterioso horretatik sortutako lotailu arteriosoa inguratuko du."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.4",
-    "id": "w12/2.4/p14",
-    "sentences": [
-      {
-        "id": "w12/2.4/p14/s1",
-        "parts": [
-          {
-            "text": "Beraz, orokorrean hauek dira gorputzean ditugun arteriak."
           }
         ]
       }
@@ -2662,15 +2628,8 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.4/p15/s1",
         "parts": [
           {
-            "text": "Ezkerreko bentrikulutik sortzen den aorta. "
-          }
-        ]
-      },
-      {
-        "id": "w12/2.4/p15/s2",
-        "parts": [
-          {
-            "text": "Egitura honetan hainbat atal bereiz ditzakegu:"
+            "text": "Beraz, orokorrean hauek dira gorputzean ditugun arteriak:",
+            "b": true
           }
         ]
       }
@@ -2685,14 +2644,141 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.4/p16/s1",
         "parts": [
           {
-            "text": "- "
+            "text": "● Ezkerreko bentrikulutik sortzen den "
+          },
+          {
+            "text": "AORTA",
+            "b": true
+          },
+          {
+            "text": ". "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.4/p16/s2",
+        "parts": [
+          {
+            "text": "Egitura honetan hainbat atal daude: ○ "
           },
           {
             "text": "Goranzko aorta ",
             "b": true
           },
           {
-            "text": "(hurbileko atala, enbor arteriosotik sortzen da)."
+            "text": "(hurbileko atala, enbor arteriosotik sortzen da). "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.4/p16/s3",
+        "parts": [
+          {
+            "text": "○ "
+          },
+          {
+            "text": "Aortaren makoa ",
+            "b": true
+          },
+          {
+            "text": "(hasierako zatia, enbor arteriosoaren ezkerreko adarretik sortzen da): ■ Aorta honetatik,"
+          },
+          {
+            "text": " eskuineko aldean, arteria brakiozefaliko",
+            "b": true
+          },
+          {
+            "text": " bat irtetzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.4/p16/s4",
+        "parts": [
+          {
+            "text": "Ondoren, enbor brakiozefaliko honetatik"
+          },
+          {
+            "text": " eskuineko karotida",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "komuna ",
+            "b": true
+          },
+          {
+            "text": "eta "
+          },
+          {
+            "text": "eskuineko arteria subklabioa",
+            "b": true
+          },
+          {
+            "text": " sortuko (bertatik ezkerreko zazpigarren segmentuarteko arteria sortuko da) dira. "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.4/p16/s5",
+        "parts": [
+          {
+            "text": "■ Hala ere, ezkerreko aldean ez da gauza bera gertatzen, izan ere, "
+          },
+          {
+            "text": "ezkerreko karotida komuna ",
+            "b": true
+          },
+          {
+            "text": "eta "
+          },
+          {
+            "text": "ezkerreko arteria subklabioa osoa",
+            "b": true
+          },
+          {
+            "text": " (hasieran beherago dagoena eta gero makora mugituko da) ez dira enbor komun batetik irteten. "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.4/p16/s6",
+        "parts": [
+          {
+            "text": "Kasu honetan, makotik zuzenean (independenteki) agertuko dira. "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.4/p16/s7",
+        "parts": [
+          {
+            "text": "○ "
+          },
+          {
+            "text": "Beheranzko aorta",
+            "b": true
+          },
+          {
+            "text": ". "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.4/p16/s8",
+        "parts": [
+          {
+            "text": "(urrutiko atala, ezkerreko 4. arkutik). "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.4/p16/s9",
+        "parts": [
+          {
+            "text": "Toraxetik jaitsi, diafragma zeharkatu eta abdomenerantz abiatuko da."
           }
         ]
       }
@@ -2707,153 +2793,18 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.4/p17/s1",
         "parts": [
           {
-            "text": "- "
+            "text": "● Eskuineko bentrikuluaren infundibulutik irteten den "
           },
           {
-            "text": "Aortaren makoa ",
+            "text": "BIRIKA ARTERIAK",
             "b": true
           },
           {
-            "text": "(hasierako zatia, enbor arteriosoak duen ezkerreko adarretik sortzen da)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "2.4",
-    "id": "w12/2.4/p18",
-    "sentences": [
-      {
-        "id": "w12/2.4/p18/s1",
-        "parts": [
-          {
-            "text": "- "
+            "text": " bi adar ditu: ○ "
           },
           {
-            "text": "Beheranzko aorta",
+            "text": "Eskumako eta ezkerreko birika arteriak.",
             "b": true
-          },
-          {
-            "text": ". "
-          }
-        ]
-      },
-      {
-        "id": "w12/2.4/p18/s2",
-        "parts": [
-          {
-            "text": "(urrutiko atala, ezkerreko 4. arkutik). "
-          }
-        ]
-      },
-      {
-        "id": "w12/2.4/p18/s3",
-        "parts": [
-          {
-            "text": "Toraxetik jaitsi, diafragma zeharkatu eta abdomenerantz abiatuko da. "
-          }
-        ]
-      },
-      {
-        "id": "w12/2.4/p18/s4",
-        "parts": [
-          {
-            "text": "Horrez gain, aorta honetatik, eskuineko aldean, arteria brakiozefaliko bat irten ez ezik, ondoren, enbor brakiozefaliko honetatik eskuineko karotida komuna eta eskuineko arteria subklabioa sortuko (bertatik ezkerreko zazpigarren segmentuarteko arteria sortuko da) dira."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.4",
-    "id": "w12/2.4/p19",
-    "sentences": [
-      {
-        "id": "w12/2.4/p19/s1",
-        "parts": [
-          {
-            "text": "Hala ere, ezkerreko aldean ez da gauza bera gertatzen, izan ere, "
-          },
-          {
-            "text": "ezkerreko karotida komuna ",
-            "b": true
-          },
-          {
-            "text": "eta "
-          },
-          {
-            "text": "ezkerreko arteria",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "subklabioa osoa ",
-            "b": true
-          },
-          {
-            "text": "(hasieran beherago dagoena eta gero makora mugituko da) ez dira enbor komun batetik irteten. "
-          }
-        ]
-      },
-      {
-        "id": "w12/2.4/p19/s2",
-        "parts": [
-          {
-            "text": "Kasu honetan, makotik zuzenean (independenteki) agertuko dira."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "2.4",
-    "id": "w12/2.4/p20",
-    "sentences": [
-      {
-        "id": "w12/2.4/p20/s1",
-        "parts": [
-          {
-            "text": "Bukatzeko, eskuineko bentrikuluaren infundibulutik irteten den birika arteriak bi adar ditu:"
-          },
-          {
-            "text": "eskumako eta ezkerreko",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "birika arteriak.",
-            "b": true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "caption",
-    "section": "2.4",
-    "id": "w12/2.4/p21",
-    "sentences": [
-      {
-        "id": "w12/2.4/p21/s1",
-        "parts": [
-          {
-            "text": "Aortaren atalak eta bertatik",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "ateratako arteriak",
-            "i": true
           }
         ]
       }
@@ -2923,7 +2874,7 @@ export const w12: NotesBlock[] = [
     ]
   },
   {
-    "kind": "caption",
+    "kind": "li",
     "section": "2.5",
     "id": "w12/2.5/p4",
     "sentences": [
@@ -2931,26 +2882,10 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.5/p4/s1",
         "parts": [
           {
-            "text": "Aorta dortsalaren fusioa",
-            "i": true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "2.5",
-    "id": "w12/2.5/p5",
-    "sentences": [
-      {
-        "id": "w12/2.5/p5/s1",
-        "parts": [
-          {
-            "text": "●​"
+            "text": "● "
           },
           {
-            "text": " Aurrerantz",
+            "text": "Aurrerantz",
             "b": true
           },
           {
@@ -2974,16 +2909,16 @@ export const w12: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.5",
-    "id": "w12/2.5/p6",
+    "id": "w12/2.5/p5",
     "sentences": [
       {
-        "id": "w12/2.5/p6/s1",
+        "id": "w12/2.5/p5/s1",
         "parts": [
           {
-            "text": "●​"
+            "text": "● "
           },
           {
-            "text": " Abdomenean",
+            "text": "Abdomenean",
             "b": true
           },
           {
@@ -2999,7 +2934,7 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.5/p6/s2",
+        "id": "w12/2.5/p5/s2",
         "parts": [
           {
             "text": "Abdomeneko adarrak irrigatzeko."
@@ -3011,16 +2946,16 @@ export const w12: NotesBlock[] = [
   {
     "kind": "li",
     "section": "2.5",
-    "id": "w12/2.5/p7",
+    "id": "w12/2.5/p6",
     "sentences": [
       {
-        "id": "w12/2.5/p7/s1",
+        "id": "w12/2.5/p6/s1",
         "parts": [
           {
-            "text": "●​"
+            "text": "● "
           },
           {
-            "text": " Atze alboko paretetatik",
+            "text": "Atze alboko paretetatik",
             "b": true
           },
           {
@@ -3043,10 +2978,26 @@ export const w12: NotesBlock[] = [
         ]
       },
       {
-        "id": "w12/2.5/p7/s2",
+        "id": "w12/2.5/p6/s2",
         "parts": [
           {
             "text": "Maila guztietan agertzen dira."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "caption",
+    "section": "2.5",
+    "id": "w12/2.5/p7",
+    "sentences": [
+      {
+        "id": "w12/2.5/p7/s1",
+        "parts": [
+          {
+            "text": "Aorta dortsalaren fusioa",
+            "i": true
           }
         ]
       }
@@ -3141,7 +3092,7 @@ export const w12: NotesBlock[] = [
             "b": true
           },
           {
-            "text": ": 3 arteria desberdin agertzen dira, aurreko hestetik, bitarteko hestetik eta atzeko hestetik sortzen den eratorri guztiak irrigatzeko. "
+            "text": ": 3 arteria/enbor desberdin agertzen dira, aurreko hestetik, bitarteko hestetik eta atzeko hestetik sortzen den eratorri guztiak irrigatzeko. "
           }
         ]
       },
@@ -3168,7 +3119,15 @@ export const w12: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "aurreko hestearen arteria (barea, area eta gibela irrigatzen ditu)."
+            "text": "aurreko hestearen arteria irrigatu. "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.5.1/p6/s2",
+        "parts": [
+          {
+            "text": "(barea, area eta gibela irrigatzen ditu)."
           }
         ]
       }
@@ -3187,7 +3146,15 @@ export const w12: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "bitarteko hesteko eratorriak irrigatu (duodeno distala eta hesteen bi heren)"
+            "text": "bitarteko hesteko eratorriak irrigatu. "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.5.1/p7/s2",
+        "parts": [
+          {
+            "text": "(duodeno distala eta hesteen bi heren)"
           }
         ]
       }
@@ -3224,7 +3191,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.5.1/p9/s1",
         "parts": [
           {
-            "text": "Aurreko errai adarrak",
+            "text": "Aurreko errai adarrak.",
             "i": true
           }
         ]
@@ -3267,8 +3234,18 @@ export const w12: NotesBlock[] = [
             "text": " "
           },
           {
-            "text": "(gehiago dira baina 3 bakarrik ikasi behar ditugu)",
+            "text": "(gehiago dira baina 3 bakarrik",
             "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "ikasi behar ditugu) ",
+            "i": true
+          },
+          {
+            "text": "Abdomeneko erraiak irrigatzen dituzte."
           }
         ]
       }
@@ -3283,11 +3260,18 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.5.2/p4/s1",
         "parts": [
           {
-            "text": "- Giltzurrun gaineko arteriak = arteria adrenalak: ",
+            "text": "- Erdiko giltzurrun gaineko arteriak = arteria",
             "b": true
           },
           {
-            "text": "giltzurrun gaineko guruinen irrigazioan parte hartu"
+            "text": " "
+          },
+          {
+            "text": "adrenalak:",
+            "b": true
+          },
+          {
+            "text": " giltzurrun gaineko guruinen irrigazioan parte hartu"
           }
         ]
       }
@@ -3321,11 +3305,25 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.5.2/p6/s1",
         "parts": [
           {
-            "text": "- Arteria gonadalak: ",
+            "text": "-",
             "b": true
           },
           {
-            "text": "obulutegiak edo barrabilak irrigatu. "
+            "text": " "
+          },
+          {
+            "text": "Arteria",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "gonadalak:",
+            "b": true
+          },
+          {
+            "text": " obulutegiak edo barrabilak irrigatu. "
           }
         ]
       },
@@ -3333,14 +3331,28 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.5.2/p6/s2",
         "parts": [
           {
-            "text": "Emakumeetan obulutegi-arteriak izango dira eta gizonetan arteria espermatikoak-barrabiletako arteriak (luzeagoak dira beherago daudelako)."
+            "text": "Emakumeetan "
+          },
+          {
+            "text": "obulutegi-arteriak",
+            "b": true
+          },
+          {
+            "text": " izango dira eta gizonetan arteria "
+          },
+          {
+            "text": "espermatikoak-barrabiletako arteriak",
+            "b": true
+          },
+          {
+            "text": " (luzeagoak dira beherago daudelako)."
           }
         ]
       }
     ]
   },
   {
-    "kind": "caption",
+    "kind": "li",
     "section": "2.5.2",
     "id": "w12/2.5.2/p7",
     "sentences": [
@@ -3348,8 +3360,14 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.5.2/p7/s1",
         "parts": [
           {
-            "text": "Alboko errai adarrak",
-            "i": true
+            "text": "- "
+          },
+          {
+            "text": "Beheko diafragma arteriak",
+            "b": true
+          },
+          {
+            "text": ": Diafragmaren beherako aurpegia irrigatu."
           }
         ]
       }
@@ -3389,6 +3407,18 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.5.3/p3/s2",
         "parts": [
           {
+            "text": "Segmentu arteko arteriak",
+            "b": true
+          },
+          {
+            "text": " deitzen dira; izan ere, somiten artean kokatzen dira. "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.5.3/p3/s3",
+        "parts": [
+          {
             "text": "Mailaka izen desberdinak dituzte:"
           }
         ]
@@ -3411,19 +3441,34 @@ export const w12: NotesBlock[] = [
             "b": true
           },
           {
-            "text": " Segmentu arteria hauen garapena desberdina izango da, segementu arteko arteria hauetatik "
-          },
-          {
-            "text": "luzetarako ANASTOMOSIAK (konexioak) ",
-            "b": true
-          },
-          {
-            "text": "agertzen dira eta aortarekin daukaten komunikazioa galtzen dute. "
+            "text": " Arteria suklabioen eraketan parte hartu. "
           }
         ]
       },
       {
         "id": "w12/2.5.3/p4/s2",
+        "parts": [
+          {
+            "text": "Segmentu arteria hauen garapena desberdina izango da, segmentu arteko arteria hauetatik "
+          },
+          {
+            "text": "luzetarako",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "ANASTOMOSIAK (konexioak) ",
+            "b": true
+          },
+          {
+            "text": "agertzen dira eta horietako batzuk aortarekin daukaten komunikazioa/konexioa galtzen dute. "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.5.3/p4/s3",
         "parts": [
           {
             "text": "Hori dela eta adar/arteria desberdinak agertzen dira (orno arteriak, lepoko arteria sakonak, lepoko goranzko arteria, arteria epigastriko, titiko arteriak…)"
@@ -3482,7 +3527,16 @@ export const w12: NotesBlock[] = [
             "text": "➔"
           },
           {
-            "text": " SAKRO: Alboko arteria sakroak",
+            "text": " SAKRO: Alboko arteria sakroak. ",
+            "b": true
+          }
+        ]
+      },
+      {
+        "id": "w12/2.5.3/p7/s2",
+        "parts": [
+          {
+            "text": "Alboko errain hezur arteriak.",
             "b": true
           }
         ]
@@ -3490,7 +3544,7 @@ export const w12: NotesBlock[] = [
     ]
   },
   {
-    "kind": "caption",
+    "kind": "p",
     "section": "2.5.3",
     "id": "w12/2.5.3/p8",
     "sentences": [
@@ -3498,7 +3552,14 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.5.3/p8/s1",
         "parts": [
           {
-            "text": "Atze alboko arteriak (segmentuarteko arteriak)",
+            "text": "Atze alboko arteriak",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "(segmentuarteko arteriak)",
             "i": true
           }
         ]
@@ -3514,11 +3575,11 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.5.3/p9/s1",
         "parts": [
           {
-            "text": "*ANASTOMOSIA: ",
+            "text": "*ANASTOMOSIA:",
             "b": true
           },
           {
-            "text": "egitura tubularren (adibidez odol-hodiak) artean sortutako konexio bat esan nahi du."
+            "text": " egitura tubularren (adibidez odol-hodiak) artean sortutako konexio bat esan nahi du."
           }
         ]
       }
@@ -3592,7 +3653,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.6/p3/s3",
         "parts": [
           {
-            "text": "Zilborreko arteria horiek aortarekin duten kontaktua galtzen dute beste arteria batekin kontaktatzeko (barneko arteria iliakoekin). "
+            "text": "Zilborreko arteria horiek aortarekin duten kontaktua galtzen dute beste arteria batekin kontaktatzeko (barneko arteria iliakotik irtendako goiko gernu maskuriaren arteriarekin.). "
           }
         ]
       },
@@ -3600,7 +3661,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.6/p3/s4",
         "parts": [
           {
-            "text": "Garapenean, zilborreko arteria horiek bigarren konekzio bat egiten dute gainerako arteriekin. "
+            "text": "Garapenean, zilborreko arteria horiek bigarren konexio bat egiten dute gainerako arteriekin. "
           }
         ]
       },
@@ -3608,25 +3669,25 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.6/p3/s5",
         "parts": [
           {
-            "text": "Gerriko V. segmentu",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "arteko arteriatik ",
+            "text": "Gerriko V. segmentu arteko arteriatik ",
             "b": true
           },
           {
             "text": "sortzen dira "
           },
           {
-            "text": "arteria iliako primitiboak ",
+            "text": "arteria iliako",
             "b": true
           },
           {
-            "text": "(ezker eta eskumaldean). "
+            "text": " "
+          },
+          {
+            "text": "primitiboak ",
+            "b": true
+          },
+          {
+            "text": "(ezker eta eskuinaldean). "
           }
         ]
       },
@@ -3679,7 +3740,15 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.6/p4/s2",
         "parts": [
           {
-            "text": "Beheko gorputz adarretako arteria gehienak arteria femoraletik eratorriak dira."
+            "text": "Beheko gorputz adarretako arteria gehienak arteria femoraletik eratorriak dira. "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.6/p4/s3",
+        "parts": [
+          {
+            "text": "Beheneko gorputz adarreko ia atal guztiak irrigatu, ipurmasaila izan ezik."
           }
         ]
       }
@@ -3717,7 +3786,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.6/p5/s3",
         "parts": [
           {
-            "text": "Arteria honetatik irteten diren adarrek pelbiseko organoak eta ipurmasailak irrigatzen dituzte."
+            "text": "Arteria honetatik irteten diren adarrek pelbiseko organoak (gernu maskuria, umetokia, bagina…) eta ipurmasailak irrigatzen dituzte."
           }
         ]
       }
@@ -3732,17 +3801,10 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.6/p6/s1",
         "parts": [
           {
-            "text": "Jaio ondoren, zilborreko arteriak ixten dira eta urrutiko ataletik hedatzen dira "
+            "text": "Jaio ondoren, zilborreko arteriak ixten dira eta abdomeneko urrutiko ataletik hedatzen dira "
           },
           {
-            "text": "erdialdeko",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "zilborreko lotailuak. ",
+            "text": "erdialdeko zilborreko lotailuak. ",
             "b": true
           }
         ]
@@ -3781,7 +3843,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.6/p8/s1",
         "parts": [
           {
-            "text": "- Hurbileko ataletik goiko gernu maskuriaren arteria"
+            "text": "- Hurbileko ataletik goiko gernu maskuriaren arteria zilbor arteko arteriarekin lotu."
           }
         ]
       }
@@ -3796,7 +3858,7 @@ export const w12: NotesBlock[] = [
         "id": "w12/2.7/p2/s1",
         "parts": [
           {
-            "text": "2.7. Goiko eta beheko gorputz adarren arteriak",
+            "text": "2.7. Goiko eta beheko gorputz adarren arteriak (EZ DA JAKIN BEHARRA)",
             "b": true,
             "i": true
           }
@@ -4029,7 +4091,7 @@ export const w12: NotesBlock[] = [
             "text": " "
           },
           {
-            "text": "poplitioa",
+            "text": "popliteoa",
             "b": true
           },
           {
@@ -4049,6 +4111,33 @@ export const w12: NotesBlock[] = [
         "parts": [
           {
             "text": "Gehienak, arteria femoraletatik sortu egiten dira."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.7.2",
+    "id": "w12/2.7.2/p4",
+    "sentences": [
+      {
+        "id": "w12/2.7.2/p4/s1",
+        "parts": [
+          {
+            "text": "ATAL HONETAN JAKIN BEHARREKOA:",
+            "b": true
+          },
+          {
+            "text": " Hasieran goiko eta beheko gorputz adarretan sortzen diren ardatzeko arteriak bertaraino iritsitako kanpoko arteria iliakorekin edo arteria subklabioekin kontaktatzen dute. "
+          }
+        ]
+      },
+      {
+        "id": "w12/2.7.2/p4/s2",
+        "parts": [
+          {
+            "text": "Ez ahaztu aortak dauzkan atal desberdinak eta zeintzuk diren aortatik irteten diren adarrak eta ze jatorri duten."
           }
         ]
       }

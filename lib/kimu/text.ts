@@ -143,10 +143,35 @@ const SYNONYMS: Record<string, string[]> = {
   week: ['aste'],
   dia: ['egun'],
   day: ['egun'],
+  // Split into two: the notes say "trenkadatze" (septation) and "trenkada" (septum).
+  banatzen: ['trenkadatze', 'trenkada'],
+  banatu: ['trenkadatze', 'trenkada'],
+  banaketa: ['trenkadatze', 'trenkada'],
+  zatitzen: ['trenkadatze', 'trenkada'],
+  tabicacion: ['trenkadatze', 'trenkada'],
+  tabique: ['trenkada'],
+  tabiques: ['trenkada'],
+  septacion: ['trenkadatze', 'trenkada'],
+  septation: ['trenkadatze', 'trenkada'],
+  divide: ['trenkadatze', 'trenkada'],
+  division: ['trenkadatze', 'trenkada'],
+  bulbo: ['bulbar'],
+  bulbus: ['bulbar'],
+  cono: ['kono'],
+  conus: ['kono'],
+  tronco: ['enbor'],
+  truncus: ['enbor'],
 };
 
+/**
+ * "3. faringe arkua" → "hirugarren faringe arkua": a single-digit ordinal is a word too (it tells the 3rd
+ * arch from the 1st), and the notes write it both ways. Section numbers ("3.1.") and dates stay out.
+ */
+const ORDINAL = ['', 'lehen', 'bigarren', 'hirugarren', 'laugarren', 'bosgarren', 'seigarren', 'zazpigarren', 'zortzigarren', 'bederatzigarren'];
+const ordinals = (text: string) => text.replace(/(^|[^\d.])([1-9])\.(?=\s+\p{L})/gu, (_, pre: string, d: string) => `${pre}${ORDINAL[+d]}`);
+
 export const tokens = (text: string): string[] =>
-  text
+  ordinals(text)
     .toLowerCase()
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
@@ -162,7 +187,7 @@ const ASKING_KEEP = new Set(['jaisten', 'habiratzen', 'ixten', 'itxi', 'agertzen
 /** Query tokens with the sound-alike synonyms added (each synonym counts as an alternative). */
 export function queryTokens(text: string, asking = false): string[][] {
   const out: string[][] = [];
-  const raw = text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[^a-z0-9ñ]+/).filter((w) => w.length > 1);
+  const raw = ordinals(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[^a-z0-9ñ]+/).filter((w) => w.length > 1);
   for (const w of raw) {
     const f = fold(w);
     if (f.length < 2 || STOP.has(f)) continue;
@@ -255,3 +280,55 @@ export function topicIn(question: string): number | null {
 /** The question without its topic phrase, tidied (commas and spaces left behind). */
 export const withoutTopic = (question: string): string =>
   topicIn(question) === null ? question : question.replace(TOPIC, ' ').replace(/\s*,\s*(?=,|$)/g, ' ').replace(/\s+/g, ' ').replace(/^[\s,;]+|[\s,;]+$/g, '');
+
+/** Edit distance (a swap of two letters counts once), or `max + 1` as soon as it is surely more than `max`. */
+function edits(a: string, b: string, max: number): number {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev2: number[] = [];
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    let low = i;
+    for (let j = 1; j <= b.length; j++) {
+      let d = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d = Math.min(d, prev2[j - 2] + 1);
+      cur.push(d);
+      low = Math.min(low, d);
+    }
+    if (low > max) return max + 1;
+    prev2 = prev;
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+/**
+ * A misspelt word ("bihtza", "somtak", "neuala"): the closest word the atlas or the notes use, added as
+ * one more alternative (one letter off for short words, two for long ones; same first letter). A word
+ * already known, or known through its case ending, is left alone.
+ */
+const spelt = new WeakMap<Map<string, number>, Map<string, string>>();
+export function spell(alts: string[], vocab: Map<string, number>): string[] {
+  const w = alts[0];
+  if (w.length < 5 || /\d/.test(w) || alts.some((a) => vocab.has(a))) return alts;
+  let seen = spelt.get(vocab);
+  if (!seen) spelt.set(vocab, (seen = new Map()));
+  let fix = seen.get(w);
+  if (fix === undefined) seen.set(w, (fix = closest(w, vocab)));
+  return fix ? [...alts, fix] : alts;
+}
+
+function closest(w: string, vocab: Map<string, number>): string {
+  const max = w.length >= 8 ? 2 : 1;
+  let best = '';
+  let bestD = max + 1;
+  let bestIdf = Infinity;
+  for (const [v, idf] of vocab) {
+    if (v[0] !== w[0]) continue;
+    if (match(w, v, false) >= 0.85) return '';
+    const d = edits(w, v, max);
+    // The closest; among equals, the commonest (the lowest idf).
+    if (d < bestD || (d === bestD && d <= max && idf < bestIdf)) { best = v; bestD = d; bestIdf = idf; }
+  }
+  return bestD <= max ? best : '';
+}

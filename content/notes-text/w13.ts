@@ -11,7 +11,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/intro/p1/s1",
         "parts": [
           {
-            "text": "13. GAIA: ZAIN-SISTEMA",
+            "text": "13. GAIA: ZAIN-SISTEMA (ZIRKULAZIO SISTEMA IV)",
             "b": true
           }
         ]
@@ -43,7 +43,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/1/p1/s1",
         "parts": [
           {
-            "text": "1. Sarrera"
+            "text": "1.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Sarrera",
+            "b": true
           }
         ]
       }
@@ -58,7 +66,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/2/p1/s1",
         "parts": [
           {
-            "text": "2. Zain nagusien garapena"
+            "text": "2.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Zain nagusien garapena",
+            "b": true
           }
         ]
       }
@@ -73,7 +89,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.1/p1/s1",
         "parts": [
           {
-            "text": "2.1. Zain bitelinoak"
+            "text": "2.1.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Zain bitelinoak",
+            "b": true
           }
         ]
       }
@@ -88,11 +112,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.1.1/p1/s1",
         "parts": [
           {
-            "text": "2.1.1. "
+            "text": "2.1.1.",
+            "b": true
+          },
+          {
+            "text": " "
           },
           {
             "text": "Zain bitelinoak eta haietatik sortutako egiturak",
-            "i": true
+            "b": true
           }
         ]
       }
@@ -107,7 +135,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.1.2/p1/s1",
         "parts": [
           {
-            "text": "2.1.2 Duodenoaren inguruko zain plexua"
+            "text": "2.1.2.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Duodenoaren inguruko zain plexua",
+            "b": true
           }
         ]
       }
@@ -122,7 +158,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.1.3/p1/s1",
         "parts": [
           {
-            "text": "2.1.3 Hodi hepatokardiakoak"
+            "text": "2.1.3.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Hodi hepatokardiakoak",
+            "b": true
           }
         ]
       }
@@ -137,7 +181,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.2/p1/s1",
         "parts": [
           {
-            "text": "2.2. Zilborreko zainak"
+            "text": "2.2.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Zilborreko zainak",
+            "b": true
           }
         ]
       }
@@ -152,7 +204,38 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.3/p1/s1",
         "parts": [
           {
-            "text": "2.3. Kardinal zainak"
+            "text": "2.3.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Kardinal zainak",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "toc",
+    "section": "2.3.1",
+    "id": "w13/2.3.1/p1",
+    "sentences": [
+      {
+        "id": "w13/2.3.1/p1/s1",
+        "parts": [
+          {
+            "text": "2.3.1.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Kardinal gaineko zainak",
+            "b": true
           }
         ]
       }
@@ -167,15 +250,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/3/p1/s1",
         "parts": [
           {
-            "text": "3. Kaba zinak. "
-          }
-        ]
-      },
-      {
-        "id": "w13/3/p1/s2",
-        "parts": [
+            "text": "3.",
+            "b": true
+          },
           {
-            "text": "Goiko eta behekoak."
+            "text": " "
+          },
+          {
+            "text": "Goiko eta beheko kaba benak",
+            "b": true
           }
         ]
       }
@@ -190,7 +273,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.1/p1/s1",
         "parts": [
           {
-            "text": "3.1. Beheko kaba zaina"
+            "text": "3.1.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Beheko kaba zaina",
+            "b": true
           }
         ]
       }
@@ -205,7 +296,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.2/p1/s1",
         "parts": [
           {
-            "text": "3.2. Goiko kaba zaina"
+            "text": "3.2.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Goiko kaba zaina",
+            "b": true
           }
         ]
       }
@@ -220,7 +319,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/4/p1/s1",
         "parts": [
           {
-            "text": "4. Jaio aurreko eta jaio osteko zirkulazio sistemak"
+            "text": "4.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Jaio aurreko eta jaio osteko zirkulazio sistemak",
+            "b": true
           }
         ]
       }
@@ -235,7 +342,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1/p1/s1",
         "parts": [
           {
-            "text": "4.1. Jaio aurreko zirkulazioa"
+            "text": "4.1.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Jaio aurreko zirkulazioa",
+            "b": true
           }
         ]
       }
@@ -250,7 +365,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.1/p1/s1",
         "parts": [
           {
-            "text": "4.1.1. Ezkerrean"
+            "text": "4.1.1.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Ezkerrean",
+            "b": true
           }
         ]
       }
@@ -265,7 +388,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.2/p1/s1",
         "parts": [
           {
-            "text": "4.1.2. Eskuinean"
+            "text": "4.1.2.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Eskuinean",
+            "b": true
           }
         ]
       }
@@ -280,7 +411,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.2/p1/s1",
         "parts": [
           {
-            "text": "4.2. Jaiotzaren momentuan ematen diren aldaketak"
+            "text": "4.2.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Jaiotzaren momentuan ematen diren aldaketak",
+            "b": true
           }
         ]
       }
@@ -295,7 +434,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.3/p1/s1",
         "parts": [
           {
-            "text": "4.3. Jaio osteko zirkulazioa"
+            "text": "4.3.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Jaio osteko zirkulazioa",
+            "b": true
           }
         ]
       }
@@ -310,7 +457,15 @@ export const w13: NotesBlock[] = [
         "id": "w13/5/p1/s1",
         "parts": [
           {
-            "text": "5.Linfa sistema"
+            "text": "5.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Linfa sistema",
+            "b": true
           }
         ]
       }
@@ -341,7 +496,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/1/p3/s1",
         "parts": [
           {
-            "text": "Garapenaren 5. astean, enbrioiaren zain sinura 3 motako zain ezberdinak iristen dira, bikoitzak guztiak (eskumakoa eta ezkerrekoa dute):"
+            "text": "Garapenaren 5. astean, enbrioiaren zain sinura hiru motako zain ezberdinak iristen dira, bikoitzak guztiak (eskumakoa eta ezkerrekoa dute):"
           }
         ]
       }
@@ -426,15 +581,18 @@ export const w13: NotesBlock[] = [
             "text": " (odola enbrioiaren alde zefalikotik hartzen dutenak) eta "
           },
           {
-            "text": "atzeko kardinalak ",
+            "text": "atzeko kardinalak",
             "b": true
           },
           {
-            "text": "(odola alde kaudaletik hartzen dutenak,) elkartu egiten dira "
+            "text": " (odola alde kaudaletik hartzen dutenak,) elkartu egiten dira "
           },
           {
-            "text": "zain kardinal komuna eratuz. ",
+            "text": "zain kardinal komuna eratuz.",
             "b": true
+          },
+          {
+            "text": " "
           }
         ]
       },
@@ -443,6 +601,10 @@ export const w13: NotesBlock[] = [
         "parts": [
           {
             "text": "Era honetan, ezkerreko eta eskuineko zain kardinalak sortzen dira, zeinak zain sinura iritsiko diren. "
+          },
+          {
+            "text": " ",
+            "b": true
           }
         ]
       },
@@ -450,27 +612,20 @@ export const w13: NotesBlock[] = [
         "id": "w13/1/p6/s3",
         "parts": [
           {
-            "text": "Beraz, zain sinura bueltatzen den odola oxigeno gutxikoa da."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "1",
-    "id": "w13/1/p7",
-    "sentences": [
-      {
-        "id": "w13/1/p7/s1",
-        "parts": [
-          {
-            "text": "Beraz, 3 motako zain desberdin heltzen dira zain sinuaren alboko luzapenetaraino (ezkerreko zainak ezkerreko luzapenera eta eskumako zainak eskumako luzapenera) eta bihotz hodiaren zain sinuan, odol nahasketa ematen da. "
+            "text": "Beraz, zain sinura bueltatzen den odola oxigeno gutxikoa da. "
           }
         ]
       },
       {
-        "id": "w13/1/p7/s2",
+        "id": "w13/1/p6/s4",
+        "parts": [
+          {
+            "text": "Beraz, hiru motako zain desberdin heltzen dira zain sinuaren alboko luzapenetaraino (ezkerreko zainak ezkerreko luzapenera eta eskumako zainak eskumako luzapenera) eta bihotz hodiaren zain sinuan, odol nahasketa ematen da. "
+          }
+        ]
+      },
+      {
+        "id": "w13/1/p6/s5",
         "parts": [
           {
             "text": "Oxigeno gutxiko odola nahasten delako karenatik datorren odol oxigenatuarekin."
@@ -512,10 +667,10 @@ export const w13: NotesBlock[] = [
         "id": "w13/2/p3/s2",
         "parts": [
           {
-            "text": "Zainen artean"
+            "text": "Zainen artean "
           },
           {
-            "text": " anastomosiak",
+            "text": "anastomosiak",
             "b": true
           },
           {
@@ -542,9 +697,8 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.1/p2/s1",
         "parts": [
           {
-            "text": "2.1. Zain bitelinoak/onfalomesenterikoak",
-            "b": true,
-            "i": true
+            "text": "2.1. ZAIN BITELINOAK / ONFALOMESENTERIKOAK",
+            "b": true
           }
         ]
       }
@@ -559,9 +713,8 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.1.1/p2/s1",
         "parts": [
           {
-            "text": "2.1.1 Zain bitelinoak eta haietatik sortutako egiturak",
-            "b": true,
-            "i": true
+            "text": "2.1.1. ZAIN BITELINOAK ETA HAIETATIK SORTUTAKO EGITURAK",
+            "b": true
           }
         ]
       }
@@ -592,7 +745,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.1.1/p3/s3",
         "parts": [
           {
-            "text": "Zain sinura egiten duten ibilbide horretan, zain bitelinoak adarkatu egiten dira aurreko hestetik sortzen den duodenoaren (heste meharreko lehenengo zatia) inguruan. "
+            "text": "Zain sinura egiten duten ibilbide horretan, zain bitelinoak adarkatu egiten dira aurreko eta bitarteko hestetik sortzen den duodenoaren (heste meharreko lehenengo zatia) inguruan. "
           }
         ]
       },
@@ -603,16 +756,23 @@ export const w13: NotesBlock[] = [
             "text": "Bertan, zain bitelinoen arteko anastomosiak* (=bi egituren arteko lotura) kokatuko dira, "
           },
           {
-            "text": "zain-sare/plexu ",
+            "text": "zain-sare/plexu",
             "b": true
           },
           {
-            "text": "bat osatuz. "
+            "text": " bat osatuz."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.1.1",
+    "id": "w13/2.1.1/p4",
+    "sentences": [
       {
-        "id": "w13/2.1.1/p3/s5",
+        "id": "w13/2.1.1/p4/s1",
         "parts": [
           {
             "text": "Beranduago, zain plexua sortuta dagoenean, "
@@ -628,10 +788,10 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/2.1.1/p3/s6",
+        "id": "w13/2.1.1/p4/s2",
         "parts": [
           {
-            "text": "Aurreko hestetik ebaginazio bat sortu (endodermikoa dena) eta hori "
+            "text": "Aurreko hestetik ebaginazio bat irteten da (endodermikoa dena), septum transversumera sartu eta hori "
           },
           {
             "text": "gibel hastapena ",
@@ -643,7 +803,7 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/2.1.1/p3/s7",
+        "id": "w13/2.1.1/p4/s3",
         "parts": [
           {
             "text": "Orduan, zain bitelinoak sartzen dira gibelera (garatzen ari dena). "
@@ -651,64 +811,39 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/2.1.1/p3/s8",
+        "id": "w13/2.1.1/p4/s4",
         "parts": [
           {
-            "text": "Gibel barnean adarkatu egiten dira eta beste zain sare/plexu bat sortzen dute. "
-          }
-        ]
-      },
-      {
-        "id": "w13/2.1.1/p3/s9",
-        "parts": [
-          {
-            "text": "Sare honetako gibel barneko zainak "
+            "text": "Gibel barnean adarkatu egiten dira eta beste zain sare/plexu bat sortzen dute, "
           },
           {
-            "text": "gibeleko sinusoideak ",
+            "text": "gibel barneko zain-sare edo plexua",
             "b": true
           },
           {
-            "text": "deitzen dira. "
+            "text": ". "
           }
         ]
       },
       {
-        "id": "w13/2.1.1/p3/s10",
+        "id": "w13/2.1.1/p4/s5",
         "parts": [
           {
-            "text": "Gibeleko sinusoideetatik irteten den odola gibeletik atera ondoren, zain sinuaren eskumako eta ezkerreko luzapenetara iritsiko da "
+            "text": "Sare honetako gibel barneko zainak"
           },
           {
-            "text": "hodi hepatokardiakoen ",
+            "text": " gibeleko",
             "b": true
           },
           {
-            "text": "bitartez. "
-          }
-        ]
-      },
-      {
-        "id": "w13/2.1.1/p3/s11",
-        "parts": [
+            "text": " "
+          },
           {
-            "text": "Hodi hepatokardiakoak bi dira: eskumakoa eta ezkerrekoa. "
-          }
-        ]
-      },
-      {
-        "id": "w13/2.1.1/p3/s12",
-        "parts": [
+            "text": "sinusoideak",
+            "b": true
+          },
           {
-            "text": "Hauek zain bitelinoen azken atalak dira. "
-          }
-        ]
-      },
-      {
-        "id": "w13/2.1.1/p3/s13",
-        "parts": [
-          {
-            "text": "Egitura hauek garrantzi handikoak dira, garapenaren ondorioz, eskuineko hodi hepatokardiakoa beheko bena kabaren gibel atala izango delako."
+            "text": " deitzen dira."
           }
         ]
       }
@@ -717,10 +852,56 @@ export const w13: NotesBlock[] = [
   {
     "kind": "p",
     "section": "2.1.1",
-    "id": "w13/2.1.1/p4",
+    "id": "w13/2.1.1/p5",
     "sentences": [
       {
-        "id": "w13/2.1.1/p4/s1",
+        "id": "w13/2.1.1/p5/s1",
+        "parts": [
+          {
+            "text": "Gibeleko sinusoideetatik irteten den odola gibeletik atera ondoren, zain sinuaren eskuineko eta ezkerreko luzapenetara iritsiko da "
+          },
+          {
+            "text": "hodi hepatokardiakoen",
+            "b": true
+          },
+          {
+            "text": " bitartez. "
+          }
+        ]
+      },
+      {
+        "id": "w13/2.1.1/p5/s2",
+        "parts": [
+          {
+            "text": "Hodi hepatokardiakoak bi dira: eskuinekoa eta ezkerrekoa. "
+          }
+        ]
+      },
+      {
+        "id": "w13/2.1.1/p5/s3",
+        "parts": [
+          {
+            "text": "Hauek zain bitelinoen azken atalak dira. "
+          }
+        ]
+      },
+      {
+        "id": "w13/2.1.1/p5/s4",
+        "parts": [
+          {
+            "text": "Egitura hauek garrantzi handikoak dira, garapenaren ondorioz, eskuineko hodi hepatokardiakoa beheko bena kabaren gibel segmentua izango delako."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.1.1",
+    "id": "w13/2.1.1/p6",
+    "sentences": [
+      {
+        "id": "w13/2.1.1/p6/s1",
         "parts": [
           {
             "text": "(*"
@@ -730,50 +911,50 @@ export const w13: NotesBlock[] = [
             "i": true
           },
           {
-            "text": "ak diafragmaren eraketan parte hartuko du.) "
+            "text": "ak diafragmaren eraketan parte hartuko du.)"
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.1.1",
+    "id": "w13/2.1.1/p7",
+    "sentences": [
       {
-        "id": "w13/2.1.1/p4/s2",
+        "id": "w13/2.1.1/p7/s1",
         "parts": [
           {
-            "text": "Ondoren, zain bitelinoaren hurbileko eta urrutiko atalak desagertu egiten dira. "
+            "text": "Ondoren, zain bitelinoaren hurbileko eta urrutiko atalak geroz eta txikiagoak egiten dira eta desagertu egiten dira. "
           }
         ]
       },
       {
-        "id": "w13/2.1.1/p4/s3",
+        "id": "w13/2.1.1/p7/s2",
         "parts": [
           {
-            "text": "Zehazki, ezkerreko zain bitelinoaren urrutiko atala eta hurbilekoa (edo ezkerreko hodi hepatokardiakoa) desagertuz, baita ere eskuineko zain bitelinoaren urritiko atala. "
+            "text": "Zehazki, ezkerreko zain bitelinoaren urrutiko atala eta hurbilekoa (edo ezkerreko hodi hepatokardiakoa) desagertuz, baita ere eskuineko zain bitelinoaren urrutiko atala. "
           }
         ]
       },
       {
-        "id": "w13/2.1.1/p4/s4",
+        "id": "w13/2.1.1/p7/s3",
         "parts": [
           {
             "text": "Geratzen den eskuineko zain bitelinoaren duodenoaren inguruko atal honetatik "
           },
           {
-            "text": "porta",
+            "text": "porta zaina",
             "b": true
           },
           {
-            "text": " "
-          },
-          {
-            "text": "zaina ",
-            "b": true
-          },
-          {
-            "text": "sortuko da. "
+            "text": " sortuko da. "
           }
         ]
       },
       {
-        "id": "w13/2.1.1/p4/s5",
+        "id": "w13/2.1.1/p7/s4",
         "parts": [
           {
             "text": "Bena portara iristen dira abdomeneko errai batzuetatik irteten den odola, batez ere errai zeliakoetatik irteten den odola helduko da."
@@ -791,9 +972,8 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.1.2/p2/s1",
         "parts": [
           {
-            "text": "2.1.2 Duodenoaren inguruko zain plexua",
-            "b": true,
-            "i": true
+            "text": "2.1.2. DUODENOAREN INGURUKO ZAIN PLEXUA",
+            "b": true
           }
         ]
       }
@@ -808,14 +988,14 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.1.2/p3/s1",
         "parts": [
           {
-            "text": "Duodenoaren inguruko plexutik"
+            "text": "Duodenoaren inguruko plexutik "
           },
           {
-            "text": " porta zaina",
+            "text": "porta zaina",
             "b": true
           },
           {
-            "text": " sortzen da, zain hau eskuineko zain bitelinotik sortzen da eta bertatik irekitzen diren (bertan bukatzen duten) porta zain garrantzitsuenak hauek 2 dira:"
+            "text": " sortzen da, zain hau eskuineko zain bitelinotik sortzen da eta bertatik irekitzen diren (bertan bukatzen duten) porta zain garrantzitsuenak hauek bi dira:"
           }
         ]
       }
@@ -867,7 +1047,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.1.2/p5/s2",
         "parts": [
           {
-            "text": "Bi zain hauek elkartu eta porta zainera heltzen dira. "
+            "text": "Zain honetara, beheko bena mesenterikoa iritsiko da ( ezkerreko bitelinoaren urrutiko ataletik sortuta). "
           }
         ]
       },
@@ -875,26 +1055,50 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.1.2/p5/s3",
         "parts": [
           {
-            "text": "Porta zaina gibelera sartzen da, bertan adarkatu egiten da eta gibeletik irteten den odola,"
-          },
-          {
-            "text": " eskuineko hodi",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "hepatokardiakora ",
-            "b": true
-          },
-          {
-            "text": "abiatzen da. "
+            "text": "Beheko bena honetara iristen da odola, abdomeneko errai jakin batzuetatik. "
           }
         ]
       },
       {
         "id": "w13/2.1.2/p5/s4",
+        "parts": [
+          {
+            "text": "Ondoren gibelera sartuko da eta beheko bena kabara iritsiko da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.1.2",
+    "id": "w13/2.1.2/p6",
+    "sentences": [
+      {
+        "id": "w13/2.1.2/p6/s1",
+        "parts": [
+          {
+            "text": "Bi zain hauek elkartu eta porta zainera heltzen dira. "
+          }
+        ]
+      },
+      {
+        "id": "w13/2.1.2/p6/s2",
+        "parts": [
+          {
+            "text": "Porta zaina gibelera sartzen da, bertan adarkatu egiten da eta gibeletik irteten den odola, "
+          },
+          {
+            "text": "eskuineko hodi hepatokardiakora",
+            "b": true
+          },
+          {
+            "text": " abiatzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w13/2.1.2/p6/s3",
         "parts": [
           {
             "text": "Azken hodi honen bitartez odola iristen da zain sinuaren eskuineko luzapenera."
@@ -912,9 +1116,8 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.1.3/p2/s1",
         "parts": [
           {
-            "text": "2.1.3 Hodi hepatokardiakoak",
-            "b": true,
-            "i": true
+            "text": "2.1.3. HODI HEPATOKARDIAKOAK",
+            "b": true
           }
         ]
       }
@@ -947,11 +1150,11 @@ export const w13: NotesBlock[] = [
             "text": "➔"
           },
           {
-            "text": " EZKERREKO hodi hepatokardiakoa ",
+            "text": " EZKERREKO hodi hepatokardiakoa",
             "b": true
           },
           {
-            "text": "desagertuko da. "
+            "text": " desagertuko da. "
           }
         ]
       },
@@ -996,9 +1199,8 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.2/p2/s1",
         "parts": [
           {
-            "text": "2.2. Zilborreko zainak",
-            "b": true,
-            "i": true
+            "text": "2.2. ZILBORREKO ZAINAK",
+            "b": true
           }
         ]
       }
@@ -1021,7 +1223,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.2/p3/s2",
         "parts": [
           {
-            "text": "Bi zilborreko zain hauek, egiten duten ibilbidean gibel barneko zain plexuarekin kontaktatzen dute, hau da, gibel barneko zain sarearekin. "
+            "text": "Bi zilborreko zain hauek, egiten duten ibilbidean adarkatu eta gibel barneko zain plexuarekin kontaktatzen dute haien bidez, hau da, gibel barneko zain sarearekin. "
           }
         ]
       },
@@ -1029,22 +1231,14 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.2/p3/s3",
         "parts": [
           {
-            "text": "Eskumako eta ezkerreko zilborreko zain hauen hurbileko atalak (bihotza erreferentziatzat hartuta), desagertzen dira. "
-          }
-        ]
-      },
-      {
-        "id": "w13/2.2/p3/s4",
-        "parts": [
-          {
-            "text": "Baina, gero garapenean ere:"
+            "text": "Eskumako eta ezkerreko zilborreko zain hauen hurbileko atalak (bihotza erreferentziatzat hartuta), desagertzen dira."
           }
         ]
       }
     ]
   },
   {
-    "kind": "li",
+    "kind": "p",
     "section": "2.2",
     "id": "w13/2.2/p4",
     "sentences": [
@@ -1052,14 +1246,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.2/p4/s1",
         "parts": [
           {
-            "text": "➔ ESKUINEKO zilborreko zain "
-          },
-          {
-            "text": "osoa desagertuko ",
-            "b": true
-          },
-          {
-            "text": "da."
+            "text": "Baina, gero garapenean ere:"
           }
         ]
       }
@@ -1074,17 +1261,39 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.2/p5/s1",
         "parts": [
           {
-            "text": "➔ EZKERREKO zilborreko zainaren"
+            "text": "➔ ESKUINEKO zilborreko zain "
           },
           {
-            "text": " hurbileko ataltxoa",
+            "text": "osoa desagertuko",
             "b": true
           },
           {
-            "text": " ere"
+            "text": " da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "2.2",
+    "id": "w13/2.2/p6",
+    "sentences": [
+      {
+        "id": "w13/2.2/p6/s1",
+        "parts": [
+          {
+            "text": "➔ EZKERREKO zilborreko zainaren "
           },
           {
-            "text": " desagertzen",
+            "text": "hurbileko ataltxoa",
+            "b": true
+          },
+          {
+            "text": " ere "
+          },
+          {
+            "text": "desagertzen",
             "b": true
           },
           {
@@ -1093,29 +1302,29 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/2.2/p5/s2",
+        "id": "w13/2.2/p6/s2",
         "parts": [
           {
-            "text": "Eta ezkerreko zilborreko zainaren urrutiko atalak zuzeneko komunikazioa edo anastomosia sortzen du eskuineko hodi hepatokardiakoarekin: "
+            "text": "Urrutiko atala soilik mantentzen da, eta zuzeneko komunikazioa edo anastomosia sortzen du eskuineko hodi hepatokardiakoarekin: "
           },
           {
-            "text": "Hodi",
+            "text": "hodi benosoa",
             "b": true
           },
           {
-            "text": " "
-          },
-          {
-            "text": "benosoa",
-            "b": true
-          },
-          {
-            "text": " (behean berriz azaltzen da). "
+            "text": "."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.2",
+    "id": "w13/2.2/p7",
+    "sentences": [
       {
-        "id": "w13/2.2/p5/s3",
+        "id": "w13/2.2/p7/s1",
         "parts": [
           {
             "text": "Beraz, karenatik datorren odol oxigenatua ezkerreko zilborreko zaina*ren bitartez garraiatzen da. "
@@ -1123,20 +1332,13 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/2.2/p5/s4",
+        "id": "w13/2.2/p7/s2",
         "parts": [
           {
-            "text": "Ezkerreko zilbor-zain honek zuzeneko anastomosi/konexio bat egingo du eskuineko hodi hepatokardiakoarekin, "
+            "text": "Ezkerreko zilbor-zain honek zuzeneko anastomosi/konexio bat egingo du eskuineko hodi hepatokardiakoarekin (beheko bena kabarekin), "
           },
           {
-            "text": "hodi",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "benosoa*",
+            "text": "hodi benosoa*",
             "b": true
           },
           {
@@ -1145,7 +1347,7 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/2.2/p5/s5",
+        "id": "w13/2.2/p7/s3",
         "parts": [
           {
             "text": "Honek ere odol oxigenatua eramango du. "
@@ -1153,7 +1355,7 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/2.2/p5/s6",
+        "id": "w13/2.2/p7/s4",
         "parts": [
           {
             "text": "Zuzeneko konexio honen bitartez, ezkerreko zilborreko zainaren bidez garraiatzen den odola eskuineko hodi hepatokardiakora iritsiko da, gero, beheko bena kaba daukan gibel segmentua izango dena. "
@@ -1161,15 +1363,22 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/2.2/p5/s7",
+        "id": "w13/2.2/p7/s5",
         "parts": [
           {
-            "text": "Odol hau ez dago kontaktuan gibel barneko zain plexutik doan odolarekin. "
+            "text": "Odol hau ez dago kontaktuan gibel barneko zain plexutik doan odolarekin."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.2",
+    "id": "w13/2.2/p8",
+    "sentences": [
       {
-        "id": "w13/2.2/p5/s8",
+        "id": "w13/2.2/p8/s1",
         "parts": [
           {
             "text": "*",
@@ -1181,14 +1390,18 @@ export const w13: NotesBlock[] = [
           {
             "text": "ezkerreko zilborreko zaina.",
             "b": true
-          },
-          {
-            "text": " "
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.2",
+    "id": "w13/2.2/p9",
+    "sentences": [
       {
-        "id": "w13/2.2/p5/s9",
+        "id": "w13/2.2/p9/s1",
         "parts": [
           {
             "text": "*KONTUZ: Hodi benosoa"
@@ -1213,9 +1426,8 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.3/p2/s1",
         "parts": [
           {
-            "text": "2.3. Kardinal zainak",
-            "b": true,
-            "i": true
+            "text": "2.3. KARDINAL ZAINAK",
+            "b": true
           }
         ]
       }
@@ -1230,7 +1442,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.3/p3/s1",
         "parts": [
           {
-            "text": "Hasieran, garapenaren 5. astera arte 2 motatako zain kardinal daude:"
+            "text": "Hasieran, garapenaren 5. astera arte bi motatako zain kardinal daude:"
           }
         ]
       }
@@ -1248,7 +1460,7 @@ export const w13: NotesBlock[] = [
             "text": "●"
           },
           {
-            "text": " AURREKO kardinalak",
+            "text": " Aurreko kardinalak",
             "b": true
           },
           {
@@ -1270,11 +1482,11 @@ export const w13: NotesBlock[] = [
             "text": "●"
           },
           {
-            "text": " ATZEKO kardinalak",
+            "text": " Atzeko kardinalak",
             "b": true
           },
           {
-            "text": ": enbrioiaren alde kaudaldeko paretetatik odola hartu."
+            "text": ": enbrioiaren alde kaudaldeko paretetatik odola hartzen dute."
           }
         ]
       }
@@ -1292,11 +1504,11 @@ export const w13: NotesBlock[] = [
             "text": "Kardinal hauek elkartuz gero, "
           },
           {
-            "text": "KARDINAL KOMUNAK ",
+            "text": "kardinal komunak",
             "b": true
           },
           {
-            "text": "eratzen dituzte, bata ezkerrekoa eta bestea eskumakoa. "
+            "text": " eratzen dituzte, bata ezkerrekoa eta bestea eskuinekoa. "
           }
         ]
       },
@@ -1327,21 +1539,21 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.3/p7/s2",
         "parts": [
           {
-            "text": "Baina garapenaren 5. eta 7. asteen artean, beste 3 zain-sistema berri agertzen dira, guztiak "
+            "text": "Baina garapenaren 5. eta 7. asteen artean, beste "
           },
           {
-            "text": "bilateralak ",
+            "text": "hiru zain-sistema berri agertzen",
             "b": true
           },
           {
-            "text": "(eskumako bat eta ezkerreko beste bat): "
+            "text": " dira, guztiak "
           },
           {
-            "text": "1. Kardinal azpiko zainak/subkardinalak: ",
+            "text": "bilateralak",
             "b": true
           },
           {
-            "text": "Giltzurrunetatik irteten den zain odola (desoxigenatua) kardinal azpiko zain hauetara bueltatzeaz arduratzen dira. "
+            "text": " (eskuineko bat eta ezkerreko beste bat). "
           }
         ]
       },
@@ -1349,21 +1561,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.3/p7/s3",
         "parts": [
           {
-            "text": "(Abdomenean kokatuak) "
-          },
-          {
-            "text": "2.",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "Zain sakrokardinalak: ",
-            "b": true
-          },
-          {
-            "text": "Beheko gorputz adarretatik iristen den zain odola hona heltzen da. "
+            "text": "Hauetatik eratuko dira gorputzeko zain garrantzitsuenak: goiko bena kaba eta beheko kaba bena. "
           }
         ]
       },
@@ -1371,11 +1569,11 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.3/p7/s4",
         "parts": [
           {
-            "text": "3. Kardinal gaineko zainak/suprakardinalak",
+            "text": "1. Kardinal azpiko zainak (subkardinalak): ",
             "b": true
           },
           {
-            "text": " (horiz argazkian): Hauek goikaldetik jarraiak dira atzeko kardinalekin, hau da, kardinal gaineko zainak goikaldetik kontaktatzen dute atzeko kardinalen (hasieran, iristen da enbrioiaren alde kaudaleko paretetatik irtetzen odola) hurbileko atalekin. "
+            "text": "giltzurrunetatik irteten den zain odola (desoxigenatua) kardinal azpiko zain hauetara bueltatzeaz arduratzen dira (abdomenean kokatuak). "
           }
         ]
       },
@@ -1383,7 +1581,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.3/p7/s5",
         "parts": [
           {
-            "text": "Zonalde hauetara gorputz paretako zainen oldola iritsikoa da, iritsitako odola saihets arteko zainen bitartez itzultzen da. "
+            "text": "Giltzurrunetatik eta gonadetatik hartzen dute odola batez ere. "
           }
         ]
       },
@@ -1391,7 +1589,11 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.3/p7/s6",
         "parts": [
           {
-            "text": "Kardinal gaineko zainetara gorputz paretetatik irteten den zain-odola heltzen da. "
+            "text": "2. Zain sakrokardinalak: ",
+            "b": true
+          },
+          {
+            "text": "beheko gorputz adarretatik iristen den zain odola hona heltzen da. "
           }
         ]
       },
@@ -1399,12 +1601,60 @@ export const w13: NotesBlock[] = [
         "id": "w13/2.3/p7/s7",
         "parts": [
           {
+            "text": "3. Kardinal gaineko zainak (suprakardinalak)",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "h2",
+    "section": "2.3.1",
+    "id": "w13/2.3.1/p2",
+    "sentences": [
+      {
+        "id": "w13/2.3.1/p2/s1",
+        "parts": [
+          {
+            "text": "2.3.1. KARDINAL GAINEKO ZAINAK",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.3.1",
+    "id": "w13/2.3.1/p3",
+    "sentences": [
+      {
+        "id": "w13/2.3.1/p3/s1",
+        "parts": [
+          {
+            "text": "Kardinal gaineko zainak goialdetik jarraiak dira atzeko kardinalen hurbileko atalekin. "
+          }
+        ]
+      },
+      {
+        "id": "w13/2.3.1/p3/s2",
+        "parts": [
+          {
+            "text": "Kardinal gaineko zainetara gorputz paretetatik irteten den zain-odola heltzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w13/2.3.1/p3/s3",
+        "parts": [
+          {
             "text": "Hasieran, atzeko kardinal zainek egiten dute funtzio hori, baina momentu jakin batean zain horien atal gehienak desagertu egiten dira. "
           }
         ]
       },
       {
-        "id": "w13/2.3/p7/s8",
+        "id": "w13/2.3.1/p3/s4",
         "parts": [
           {
             "text": "Ondorioz, lehen atzeko kardinal zainek egiten zuten lana, beranduago kardinal gaineko zainek egiten dute. "
@@ -1412,7 +1662,7 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/2.3/p7/s9",
+        "id": "w13/2.3.1/p3/s5",
         "parts": [
           {
             "text": "Kardinal gaineko zainak euren artean anastomosi baten bidez daude elkartuta."
@@ -1422,107 +1672,105 @@ export const w13: NotesBlock[] = [
     ]
   },
   {
-    "kind": "li",
-    "section": "2.3",
-    "id": "w13/2.3/p8",
+    "kind": "p",
+    "section": "2.3.1",
+    "id": "w13/2.3.1/p4",
     "sentences": [
       {
-        "id": "w13/2.3/p8/s1",
+        "id": "w13/2.3.1/p4/s1",
         "parts": [
           {
-            "text": "● Eskuineko kardinal gaineko zainak kontaktatzen du eskuineko atzeko kardinalaren hurbileko atalarekin. "
-          }
-        ]
-      },
-      {
-        "id": "w13/2.3/p8/s2",
-        "parts": [
-          {
-            "text": "Orduan, eskuineko kardinal gaineko zain honetatik, eta baita eskuineko atzeko kardinalaren hurbileko ataletik, paretako zain bat sortzen da,"
+            "text": "Eskuineko eta ezkerreko kardinal gaineko zainetara iristen den odola batez ere "
           },
           {
-            "text": " azigos zaina, ",
+            "text": "saihets arteko",
             "b": true
-          },
-          {
-            "text": "beheko kaba zainan bukatzen dena. "
-          }
-        ]
-      },
-      {
-        "id": "w13/2.3/p8/s3",
-        "parts": [
-          {
-            "text": "Azigos zain honetara heltzen dira eskuineko saihets arteko espaziotik irteten diren zainak, eta odola handik goiko bena kabaraino iristen da. "
-          }
-        ]
-      },
-      {
-        "id": "w13/2.3/p8/s4",
-        "parts": [
-          {
-            "text": "Gainera, maila lunbarretik igotzen den zain lunbarrak, azigos zainarekin bat egiten du, eta azkenik goiko bena kabaraino heltzen da. "
-          }
-        ]
-      },
-      {
-        "id": "w13/2.3/p8/s5",
-        "parts": [
-          {
-            "text": "*Beraz, azigos zainaren eraketan parte hartzen du eskuineko kardinal gaineko",
-            "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "zaina eta eskuineko atzeko kardinalaren hurbileko atala.",
-            "i": true
+            "text": "zainen",
+            "b": true
+          },
+          {
+            "text": " bitartez iristen da; gerriko bi zainetatik doan odola ere zain horietara iristen da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.3.1",
+    "id": "w13/2.3.1/p5",
+    "sentences": [
+      {
+        "id": "w13/2.3.1/p5/s1",
+        "parts": [
+          {
+            "text": "Eskuineko kardinal gaineko zainetik ",
+            "b": true
+          },
+          {
+            "text": "eta "
+          },
+          {
+            "text": "eskuineko atzeko kardinalaren hurbileko ataletik Azigos",
+            "b": true
           },
           {
             "text": " "
+          },
+          {
+            "text": "zaina ",
+            "b": true
+          },
+          {
+            "text": "eratzen da, paretako zain bat. "
           }
         ]
       },
       {
-        "id": "w13/2.3/p8/s6",
+        "id": "w13/2.3.1/p5/s2",
         "parts": [
           {
-            "text": "Hasierako 3. sahiets-arteko espaziotik irteten diren sahiets-arteko zainek osatzen dute beste enbor benoso bat, zuzenean iristen dena azigos zainera."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "2.3",
-    "id": "w13/2.3/p9",
-    "sentences": [
-      {
-        "id": "w13/2.3/p9/s1",
-        "parts": [
-          {
-            "text": "● Ezkerreko kardinal gaineko zainetik, bi zain enbor ezberdin eratuko dira: "
-          },
-          {
-            "text": "hemiazigos zaina ",
-            "b": true
-          },
-          {
-            "text": "eta bere goikaldean "
-          },
-          {
-            "text": "hemiazigos laguntzailea. ",
-            "b": true
+            "text": "Zain horretara eskuineko saihets arteko zain gehienak iristen dira. "
           }
         ]
       },
       {
-        "id": "w13/2.3/p9/s2",
+        "id": "w13/2.3.1/p5/s3",
         "parts": [
           {
-            "text": "Bi zain hauek, enbor independienteen bidez, odola (ezkerreko saihets arteko zainetatik datorrena) eramaten dute eskuineko aldean kokatzen den azigos zainera, anastomosi baten bitartez:"
+            "text": "Azigos zaina, goiko aldetik, goiko bena kabara iritsi eta irekitzen da, mako bat eginez. "
+          }
+        ]
+      },
+      {
+        "id": "w13/2.3.1/p5/s4",
+        "parts": [
+          {
+            "text": "Gainera, maila lunbarretik igotzen den zain lunbarrak, azigos zainarekin bat egiten du, eta azkenik goiko bena kabaraino heltzen da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.3.1",
+    "id": "w13/2.3.1/p6",
+    "sentences": [
+      {
+        "id": "w13/2.3.1/p6/s1",
+        "parts": [
+          {
+            "text": "Ezkerreko kardinal gaineko zainetik ",
+            "b": true
+          },
+          {
+            "text": "bi zain agertzen dira:"
           }
         ]
       }
@@ -1530,14 +1778,18 @@ export const w13: NotesBlock[] = [
   },
   {
     "kind": "li",
-    "section": "2.3",
-    "id": "w13/2.3/p10",
+    "section": "2.3.1",
+    "id": "w13/2.3.1/p7",
     "sentences": [
       {
-        "id": "w13/2.3/p10/s1",
+        "id": "w13/2.3.1/p7/s1",
         "parts": [
           {
-            "text": "- Hemiazigos: 9, 10 eta 11. sahiets-arteko espazioetatik odola hartzen dute eskuinean kokatzen den azigos zaineraino."
+            "text": "● Hemiazigos zaina: ",
+            "b": true
+          },
+          {
+            "text": "zain honetara 9, 10 eta 11. ezkerreko saihets arteko espazioetan dauden zainak iristen dira."
           }
         ]
       }
@@ -1545,14 +1797,88 @@ export const w13: NotesBlock[] = [
   },
   {
     "kind": "li",
-    "section": "2.3",
-    "id": "w13/2.3/p11",
+    "section": "2.3.1",
+    "id": "w13/2.3.1/p8",
     "sentences": [
       {
-        "id": "w13/2.3/p11/s1",
+        "id": "w13/2.3.1/p8/s1",
         "parts": [
           {
-            "text": "- Hemiazigos laguntzailea: goikaldean ezkerreko kardinal gaineko zainetik 4., 5., 6., 7., 8., saihets-arteko espazioetatik zainek eramaten duten odola beste enbor baten bidez garraiatzen dute odola eskuinean kokatzen den azigos zainera."
+            "text": "●"
+          },
+          {
+            "text": " Hemiazigos laguntzailea: ",
+            "b": true
+          },
+          {
+            "text": "pixkat gorago kokatzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w13/2.3.1/p8/s2",
+        "parts": [
+          {
+            "text": "Zain honetara 4, 5, 6, 7 eta 8. ezkerreko saihets arteko espazioetako zainak iristen dira."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "2.3.1",
+    "id": "w13/2.3.1/p9",
+    "sentences": [
+      {
+        "id": "w13/2.3.1/p9/s1",
+        "parts": [
+          {
+            "text": "Hemiazigos zainak eta hemiazigos laguntzaileak, zeharkako komunikazioen bitartez, ezkerreko zainetara iristen den odola"
+          },
+          {
+            "text": " azigos zainera",
+            "b": true
+          },
+          {
+            "text": " eramaten dute anastomosi bidez, eta bertatik goiko bena kabara doa. "
+          }
+        ]
+      },
+      {
+        "id": "w13/2.3.1/p9/s2",
+        "parts": [
+          {
+            "text": "1, 2 eta 3. ezkerreko saihets arteko espazioetan dauden zainek beste enbor bat osatzen dute: "
+          },
+          {
+            "text": "goi ezkerreko saihets arteko zaina",
+            "b": true
+          },
+          {
+            "text": ". "
+          }
+        ]
+      },
+      {
+        "id": "w13/2.3.1/p9/s3",
+        "parts": [
+          {
+            "text": "Zain hori zuzenean"
+          },
+          {
+            "text": " ezkerreko zain",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "brakiozefalikora",
+            "b": true
+          },
+          {
+            "text": " iristen da."
           }
         ]
       }
@@ -1567,16 +1893,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/3/p2/s1",
         "parts": [
           {
-            "text": "3. KABA ZAINAK. ",
-            "b": true
-          }
-        ]
-      },
-      {
-        "id": "w13/3/p2/s2",
-        "parts": [
-          {
-            "text": "(Goiko eta behekoak).",
+            "text": "3. GOIKO ETA BEHEKO KABA ZAINAK",
             "b": true
           }
         ]
@@ -1592,7 +1909,14 @@ export const w13: NotesBlock[] = [
         "id": "w13/3/p3/s1",
         "parts": [
           {
-            "text": "3 zain sistema hauetatik (kardinal gaineko eta azpiko zainak eta zain sakrokardinalak) 2 zain sistema nagusiak sortzen dira. "
+            "text": "Hiru zain sistema hauetatik (kardinal gaineko zainak, kardinal azpiko zainak eta zain sakrokardinalak) "
+          },
+          {
+            "text": "bi zain sistema nagusiak",
+            "b": true
+          },
+          {
+            "text": " sortzen dira. "
           }
         ]
       },
@@ -1600,14 +1924,25 @@ export const w13: NotesBlock[] = [
         "id": "w13/3/p3/s2",
         "parts": [
           {
-            "text": "Sistema guzti hauetatik gure gorputzean ditugun zainik garrantzitsuenak sortuko dira:"
+            "text": "Sistema hauetatik gure gorputzean ditugun zainik garrantzitsuenak sortuko dira: "
+          },
+          {
+            "text": "goiko kaba bena ",
+            "b": true
+          },
+          {
+            "text": "eta "
+          },
+          {
+            "text": "beheko kaba bena.",
+            "b": true
           }
         ]
       }
     ]
   },
   {
-    "kind": "li",
+    "kind": "p",
     "section": "3",
     "id": "w13/3/p4",
     "sentences": [
@@ -1615,15 +1950,14 @@ export const w13: NotesBlock[] = [
         "id": "w13/3/p4/s1",
         "parts": [
           {
-            "text": "● GOIKO KABA ZAINA edo GOIKO BENA KABA",
-            "b": true
+            "text": "Orokorrean, zain sistemaren garapenean gertatzen den moduan, ezkerreko zainetan dagoen odola eskuineko zainetara pasatzen da, eskuineko eta ezkerreko zainen artean agertzen den anastomosiari esker (komunikazioa)."
           }
         ]
       }
     ]
   },
   {
-    "kind": "li",
+    "kind": "p",
     "section": "3",
     "id": "w13/3/p5",
     "sentences": [
@@ -1631,68 +1965,23 @@ export const w13: NotesBlock[] = [
         "id": "w13/3/p5/s1",
         "parts": [
           {
-            "text": "● BEHEKO KABA ZAINA edo BEHEKO BENA KABA",
-            "b": true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "3",
-    "id": "w13/3/p6",
-    "sentences": [
-      {
-        "id": "w13/3/p6/s1",
-        "parts": [
-          {
-            "text": "2 zain horiek bihotzaren ESKUINEKO AURIKULAra iristen dira eta bertan ireki. "
+            "text": "Goiko eta beheko bena kabak bihotzeko eskuineko aurikulara iristen dira; zehazki, atzeko pareta lisora. "
           }
         ]
       },
       {
-        "id": "w13/3/p6/s2",
+        "id": "w13/3/p5/s2",
         "parts": [
           {
-            "text": "("
-          },
-          {
-            "text": "atzeko",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "pareta lisotik ",
-            "b": true
-          },
-          {
-            "text": "goiko kaba zaina sartuko da eta behetik beheko kaba zaina)."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "p",
-    "section": "3",
-    "id": "w13/3/p7",
-    "sentences": [
-      {
-        "id": "w13/3/p7/s1",
-        "parts": [
-          {
-            "text": "Gogoratu, zain sistemaren garapenean gertatzen den prozesu garrantzitsuenetarikoa dela ezkerreko zainetik doan odola eskumako zainetara pasatzen dela. "
+            "text": "Beheko bena kabaren sarrera zuloan balbula bat dago, eskuineko zain balbulatik sortua. "
           }
         ]
       },
       {
-        "id": "w13/3/p7/s2",
+        "id": "w13/3/p5/s3",
         "parts": [
           {
-            "text": "Beraz, eskumako eta ezkerreko zainen artean anastomosiak (konexioak) sortuko dira denborarekin:"
+            "text": "Horiez gain, eskuineko aurikulara sinu koronarioa iristen da, beste balbula batekin."
           }
         ]
       }
@@ -1707,9 +1996,8 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.1/p2/s1",
         "parts": [
           {
-            "text": "3.1. BEHEKO kaba zaina:",
-            "b": true,
-            "i": true
+            "text": "3.1. BEHEKO KABA ZAINA",
+            "b": true
           }
         ]
       }
@@ -1724,7 +2012,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.1/p3/s1",
         "parts": [
           {
-            "text": "BEHEKO kaba zainan atal desberdinak bereiziko dira. "
+            "text": "Gorputzaren behealdeko benarik garrantzitsuena da. "
           }
         ]
       },
@@ -1732,53 +2020,14 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.1/p3/s2",
         "parts": [
           {
-            "text": "Abdomenetik heltzen den zainik garrantzitsuena da. "
-          }
-        ]
-      },
-      {
-        "id": "w13/3.1/p3/s3",
-        "parts": [
-          {
-            "text": "Bakoitzak jatorri desberdina duena, baina haien artean fusionatzen dira. "
-          }
-        ]
-      },
-      {
-        "id": "w13/3.1/p3/s4",
-        "parts": [
-          {
-            "text": "Beheko bena kabaren goiko segmentua"
-          },
-          {
-            "text": " Gibel segmentua",
-            "b": true
-          },
-          {
-            "text": " da (eskuineko hodi hepatokardiakotik sortua). "
-          }
-        ]
-      },
-      {
-        "id": "w13/3.1/p3/s5",
-        "parts": [
-          {
-            "text": "Honen bitartez beheko bena kaba irekitzen da eskuineko aurikulara. "
-          }
-        ]
-      },
-      {
-        "id": "w13/3.1/p3/s6",
-        "parts": [
-          {
-            "text": "Honetara iristen da bena portatik doan odola, gibela zeharkatuko duena, eta ondoren, irtetengo da beheko bena kabaren gibel segmentu honetara iritsiz."
+            "text": "Beheko gorputz adarretatik irteten den odola zain iliako primitiboen bitartez beheko bena kabara iristen da, abdomenetik igotzen da (diafragma zeharkatuz) eta eskuineko aurikulara iristen da."
           }
         ]
       }
     ]
   },
   {
-    "kind": "li",
+    "kind": "p",
     "section": "3.1",
     "id": "w13/3.1/p4",
     "sentences": [
@@ -1786,26 +2035,32 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.1/p4/s1",
         "parts": [
           {
-            "text": "● Kardinal azpiko zainak:",
+            "text": "Beheko kaba benan atal desberdinak bereizten dira, jatorri desberdinekin: "
+          },
+          {
+            "text": "gibel segmentua,",
             "b": true
           },
           {
-            "text": " kardinal azpiko zainen artean (ezkerrekoa eta eskumakoa) ANASTOMOSI bat agertuko da, ezkerretik datorren odola eskumaldera eramateko. "
-          }
-        ]
-      },
-      {
-        "id": "w13/3.1/p4/s2",
-        "parts": [
+            "text": " "
+          },
           {
-            "text": "Hortik, eratuko dira:"
+            "text": "giltzurrun segmentua ",
+            "b": true
+          },
+          {
+            "text": "eta "
+          },
+          {
+            "text": "segmentu sakrokardinala.",
+            "b": true
           }
         ]
       }
     ]
   },
   {
-    "kind": "li",
+    "kind": "p",
     "section": "3.1",
     "id": "w13/3.1/p5",
     "sentences": [
@@ -1813,28 +2068,14 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.1/p5/s1",
         "parts": [
           {
-            "text": "➔"
+            "text": "Beheko bena kabaren goiko segmentua"
           },
           {
-            "text": " EZKERREKO giltzurrun zaina:",
+            "text": " gibel segmentua ",
             "b": true
           },
           {
-            "text": " Horretan, ezkerreko kardinal azpiko zainaren urrutiko ataletik:"
-          },
-          {
-            "text": " ezkerreko zain gonadala ",
-            "b": true
-          },
-          {
-            "text": "(obolutegikoa edo barrabiletako) agertuko da ("
-          },
-          {
-            "text": "*",
-            "b": true
-          },
-          {
-            "text": "irudian ezkerreko giltzurrun benaren behetik*) eta honek eskuineko kardinal azpiko zainera iritsiko da. "
+            "text": "edo gibel bihotzetako segmentua da, eta eskuineko hodi hepatokardiakotik sortzen da. "
           }
         ]
       },
@@ -1842,7 +2083,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.1/p5/s2",
         "parts": [
           {
-            "text": "Ezkerreko kardinal azpiko hurbileko atala, aldiz, desagertzen da."
+            "text": "Segmentu horretara, bena portatik gibelera sartu den odola iristen da."
           }
         ]
       }
@@ -1857,18 +2098,18 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.1/p6/s1",
         "parts": [
           {
-            "text": "➔"
-          },
-          {
-            "text": " ESKUINEKO kardinal azpiko zain",
+            "text": "● Kardinal azpiko zainak (ezkerrekoa eta eskuinekoa): ",
             "b": true
           },
           {
-            "text": "etik beheko bena kabaren beste atal bat eratuko da: Beheko bena kabaren "
+            "text": "bien artean "
           },
           {
-            "text": "giltzurrun segmentua. ",
+            "text": "anastomosi",
             "b": true
+          },
+          {
+            "text": " bat agertuko da, ezkerreko zainetatik datorren odola eskuineko zainetara eramateko. "
           }
         ]
       },
@@ -1876,7 +2117,28 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.1/p6/s2",
         "parts": [
           {
-            "text": "Atal hau goitik fusionatu egiten da gibel segmentuarekin."
+            "text": "Komunikazio horretatik hauek garatuko dira: "
+          },
+          {
+            "text": "○",
+            "b": true
+          },
+          {
+            "text": " Ezkerreko eta eskuineko kardinal azpiko zainen anastomositik →"
+          },
+          {
+            "text": " ezkerreko",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "giltzurrun zaina",
+            "b": true
+          },
+          {
+            "text": " ○ Ezkerreko kardinal azpiko zainetik"
           }
         ]
       }
@@ -1891,11 +2153,21 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.1/p7/s1",
         "parts": [
           {
-            "text": "● Zain sakrokardinalak:",
+            "text": "● Urrutiko ataletik → "
+          },
+          {
+            "text": "ezkerreko",
             "b": true
           },
           {
-            "text": " (Eskuineko eta ezkerrekoa daude) Haien artean beste ANASTOMOSI (kontaktu) bat agertuko da. "
+            "text": " "
+          },
+          {
+            "text": "zain gonadala ",
+            "b": true
+          },
+          {
+            "text": "(obolutegikoa edo barrabiletako). "
           }
         ]
       },
@@ -1903,7 +2175,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.1/p7/s2",
         "parts": [
           {
-            "text": "Anastomosi honetatik:"
+            "text": "Eskuineko kardinal azpiko zainera iritsiko da."
           }
         ]
       }
@@ -1918,14 +2190,11 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.1/p8/s1",
         "parts": [
           {
-            "text": "➔ EZKERREKO zainaren urrutiko ataletik: "
+            "text": "● Hurbileko atala → desagertu ○ Eskuineko kardinal azpiko zainetik → "
           },
           {
-            "text": "ezkerreko zain iliako primitiboa",
+            "text": "beheko bena kabaren giltzurrun segmentua.",
             "b": true
-          },
-          {
-            "text": " eratuko da."
           }
         ]
       }
@@ -1940,10 +2209,36 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.1/p9/s1",
         "parts": [
           {
-            "text": "➔ ESKUINEKO sakrokardinalaren urrutiko ataletik:"
+            "text": "● Zain sakrokardinalak",
+            "b": true
           },
           {
-            "text": " eskuineko zain iliako",
+            "text": " "
+          },
+          {
+            "text": "(eskuineko eta ezkerrekoa): ",
+            "b": true
+          },
+          {
+            "text": "bien artean "
+          },
+          {
+            "text": "anastomosi ",
+            "b": true
+          },
+          {
+            "text": "bat agertuko da. "
+          }
+        ]
+      },
+      {
+        "id": "w13/3.1/p9/s2",
+        "parts": [
+          {
+            "text": "Komunikazio horretatik hauek garatuko dira: ○ Ezkerreko eta eskuineko zain sakrokardinalen anastomositik → "
+          },
+          {
+            "text": "ezkerreko zain iliako",
             "b": true
           },
           {
@@ -1954,114 +2249,117 @@ export const w13: NotesBlock[] = [
             "b": true
           },
           {
-            "text": ". "
+            "text": " ○ Eskuineko zain sakrokardinaletik"
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "3.1",
+    "id": "w13/3.1/p10",
+    "sentences": [
       {
-        "id": "w13/3.1/p9/s2",
+        "id": "w13/3.1/p10/s1",
         "parts": [
           {
-            "text": "Hurbileko ataletik, beheko bena kabaren"
+            "text": "● Urrutiko ataletik → "
           },
           {
-            "text": " segmentu",
+            "text": "eskuineko zain iliako primitiboa",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "3.1",
+    "id": "w13/3.1/p11",
+    "sentences": [
+      {
+        "id": "w13/3.1/p11/s1",
+        "parts": [
+          {
+            "text": "● Hurbileko ataletik → "
+          },
+          {
+            "text": "beheko bena kabaren",
             "b": true
           },
           {
             "text": " "
           },
           {
-            "text": "sakrokardinala ",
+            "text": "segmentu sakrokardinala",
             "b": true
-          },
-          {
-            "text": "sortzen da. "
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "3.1",
+    "id": "w13/3.1/p12",
+    "sentences": [
       {
-        "id": "w13/3.1/p9/s3",
+        "id": "w13/3.1/p12/s1",
         "parts": [
           {
-            "text": "Zain iliako primitibo biak elkartuta iritsiko dira (eskuineko zain sakorkardinalaren hurbileko atalera) beheko bena kabara → beheko bena kabaren atal sakrokardinala eratzen da. "
+            "text": "Bi zain iliako primitiboak elkartu egiten dira beheko bena kabara jarraitzeko (eskuineko zain sakorkardinalaren hurbileko atalera) → beheko bena kabaren atal sakrokardinala eratzen da. "
           }
         ]
       },
       {
-        "id": "w13/3.1/p9/s4",
+        "id": "w13/3.1/p12/s2",
         "parts": [
           {
-            "text": "Zain iliako komunera, ezkerreko eta eskuineko zain iliakoak iritsiko dira. "
+            "text": "Zain iliako komunera, ezkerreko eta eskuineko zain iliakoak iritsiko dira."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "3.1",
+    "id": "w13/3.1/p13",
+    "sentences": [
       {
-        "id": "w13/3.1/p9/s5",
+        "id": "w13/3.1/p13/s1",
         "parts": [
           {
-            "text": "Kaba zain guztiek ",
+            "text": "Beheko kaba benaren "
+          },
+          {
+            "text": "hiru segmentuak fusionatu",
             "b": true
           },
           {
-            "text": "haien artean "
-          },
-          {
-            "text": "fusionatu",
-            "b": true
-          },
-          {
-            "text": "z "
-          },
-          {
-            "text": "BEHIN BETIKO BENA KABA ",
-            "b": true
-          },
-          {
-            "text": "sortuko dute. "
+            "text": " egiten dira. "
           }
         ]
       },
       {
-        "id": "w13/3.1/p9/s6",
+        "id": "w13/3.1/p13/s2",
         "parts": [
           {
-            "text": "Laburbilduz, beheko kaba zainan 3 atal nagusi daude."
-          },
-          {
-            "text": " ",
-            "b": true
+            "text": "Gibel segmentua (goikoa) giltzurrun segmentuarekin (tartekoa) fusionatzen da, eta giltzurrun segmentua segmentu sakrokardinalarekin (behekoa) fusionatzen da."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "3.1",
+    "id": "w13/3.1/p14",
+    "sentences": [
       {
-        "id": "w13/3.1/p9/s7",
-        "parts": [
-          {
-            "text": "Gibel segmentua",
-            "b": true
-          },
-          {
-            "text": "/atala (hodi hepatokardiakotik sortua), fusionatzen dena eskuineko kardinal azpitik sortutako "
-          },
-          {
-            "text": "gilltzurrun segmentuarekin ",
-            "b": true
-          },
-          {
-            "text": "(eskuineko kardinal azpiko zainetik sorturikoa), eta azken hau "
-          },
-          {
-            "text": "atal sakrokardinalarekin ",
-            "b": true
-          },
-          {
-            "text": "(eskuin zain sakrokardinalaren hurbileko ataletik garatu). "
-          }
-        ]
-      },
-      {
-        "id": "w13/3.1/p9/s8",
+        "id": "w13/3.1/p14/s1",
         "parts": [
           {
             "text": "Beraz, beheko bena kabara iristen diren zainak, zain iliako primitiboak dira, non bukatzen dira barneko eta kanpoko zain iliako primitiboak. "
@@ -2069,7 +2367,7 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/3.1/p9/s9",
+        "id": "w13/3.1/p14/s2",
         "parts": [
           {
             "text": "Baita abdomeneko errai batzuetatik irteten den odola (giltzurrunetatik…) eta beheko zain lunbarrak iristen dira. "
@@ -2077,7 +2375,7 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/3.1/p9/s10",
+        "id": "w13/3.1/p14/s3",
         "parts": [
           {
             "text": "Lehen aipatu den bezala, beheko bena kaba bihotzaren eskuineko aurikularen atzeko pareta lisora heltzen da. "
@@ -2085,22 +2383,36 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/3.1/p9/s11",
+        "id": "w13/3.1/p14/s4",
         "parts": [
           {
             "text": "Kontuan izan ere, "
           },
           {
-            "text": "bena porta",
+            "text": "bena",
             "b": true
           },
           {
-            "text": "tik doan odola eskuineko hodi hepatokardiakora heltzen dela; eta hori beheko bena kabaren gibel segmentua denez, bena portatik datorren odola, gibeletik pasa (gibel barneko zain plexutik) eta beheko bena kabara iritsiko da. "
+            "text": " "
+          },
+          {
+            "text": "porta",
+            "b": true
+          },
+          {
+            "text": "tik doan odola eskuineko hodi hepatokardiakora heltzen dela; eta hori beheko bena kabaren gibel segmentua denez, bena portatik datorren odola, gibeletik pasa (gibel barneko zain plexutik) eta beheko bena kabara iritsiko da."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "3.1",
+    "id": "w13/3.1/p15",
+    "sentences": [
       {
-        "id": "w13/3.1/p9/s12",
+        "id": "w13/3.1/p15/s1",
         "parts": [
           {
             "text": "Ezkerreko eta eskuineko zainen artean gertatzen diren anastomosien ondorioz, zain sinuaren ezkerreko luzapena galtzen du daukan garrantzia eta odol osoa abiatzen da eskuineko luzapenera. "
@@ -2108,7 +2420,7 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/3.1/p9/s13",
+        "id": "w13/3.1/p15/s2",
         "parts": [
           {
             "text": "Baina ezkerreko zain sinuaren ezkerreko luzapen hori ez da guztiz desagertzen. "
@@ -2116,7 +2428,7 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/3.1/p9/s14",
+        "id": "w13/3.1/p15/s3",
         "parts": [
           {
             "text": "Honetatik, bi egitura sortzen dira: "
@@ -2138,7 +2450,7 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/3.1/p9/s15",
+        "id": "w13/3.1/p15/s4",
         "parts": [
           {
             "text": "Gogoratu eskumako aurikularen deskribatzen genuenean, beheko aldean eskuineko balbula benosotik bi balbula agertzen zirela: beheko bena kabarena eta zain sinu koronarioarena. "
@@ -2146,7 +2458,7 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/3.1/p9/s16",
+        "id": "w13/3.1/p15/s5",
         "parts": [
           {
             "text": "Azkenengoa baita ere irekitzen da eskuineko aurikulara."
@@ -2164,9 +2476,8 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.2/p2/s1",
         "parts": [
           {
-            "text": "3.2. GOIKO kaba zaina:",
-            "b": true,
-            "i": true
+            "text": "3.2. GOIKO KABA ZAINA",
+            "b": true
           }
         ]
       }
@@ -2181,7 +2492,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.2/p3/s1",
         "parts": [
           {
-            "text": "Sortu egingo da eskuineko kardinal komunetik eta eskuineko aurreko zain kardinalaren hurbileko ataletik."
+            "text": "Eskuineko kardinal komunetik eta eskuineko aurreko zain kardinalaren hurbileko ataletik sortuko da."
           }
         ]
       }
@@ -2200,7 +2511,14 @@ export const w13: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "EZKERREKO aurreko kardinalaren eta ESKUINEKO aurreko kardinalaren artean beste ANASTOMOSI bat emango da. "
+            "text": "ezkerreko eta eskuineko aurreko kardinalen artean "
+          },
+          {
+            "text": "anastomosi",
+            "b": true
+          },
+          {
+            "text": " bat emango da. "
           }
         ]
       },
@@ -2208,7 +2526,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.2/p4/s2",
         "parts": [
           {
-            "text": "Konexio horretatik:"
+            "text": "Komunikazio horretatik hauek garatzen dira:"
           }
         ]
       }
@@ -2226,11 +2544,11 @@ export const w13: NotesBlock[] = [
             "text": "➔"
           },
           {
-            "text": " EZKERREKO zain brakiozefalikoa",
+            "text": " Ezkerreko zain brakiozefalikoa",
             "b": true
           },
           {
-            "text": " sortuko da. "
+            "text": ": odola eramango du ezkerreko ataletik eskuineko atalera. "
           }
         ]
       },
@@ -2238,15 +2556,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.2/p5/s2",
         "parts": [
           {
-            "text": "Odola eramango du ezkerreko partetik eskumako partera, eta elkartuko da eskuineko aldean dagoen eskuineko zain brakozefalikoarekin. "
-          }
-        ]
-      },
-      {
-        "id": "w13/3.2/p5/s3",
-        "parts": [
-          {
-            "text": "Biak batera irekitzen dira goiko bena kaban."
+            "text": "Ezkerreko zain brakiozefaliko horretara bi zain nagusi iristen dira:"
           }
         ]
       }
@@ -2261,7 +2571,22 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.2/p6/s1",
         "parts": [
           {
-            "text": "➔ Ezkerreko zain brakiozefaliko horretara, bi zain nagusi iristen dira:"
+            "text": "- "
+          },
+          {
+            "text": "Ezkerreko barruko jugularra:",
+            "b": true
+          },
+          {
+            "text": " ezkerreko aurreko zain kardinalaren urrutiko ataletik sortzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w13/3.2/p6/s2",
+        "parts": [
+          {
+            "text": "Buruaren eta aurpegiaren ezkerreko aldetik hartzen du odola."
           }
         ]
       }
@@ -2279,11 +2604,19 @@ export const w13: NotesBlock[] = [
             "text": "- "
           },
           {
-            "text": "Ezkerreko barneko jugularra",
+            "text": "Ezkerreko zain subklabioa (lepauztaipekoa): ",
             "b": true
           },
           {
-            "text": " (ezkerreko aurreko kardinalaren urrutiko ataletik sortzen dena) → buruaren eta aurpegiaren ezkerreko aldea drenatzeko."
+            "text": "ezkerreko goiko gorputz adarretako hastapenean sortzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w13/3.2/p7/s2",
+        "parts": [
+          {
+            "text": "Ezkerreko goiko gorputz adarretik hartzen du odola."
           }
         ]
       }
@@ -2298,14 +2631,14 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.2/p8/s1",
         "parts": [
           {
-            "text": "- "
+            "text": "➔"
           },
           {
-            "text": "Ezkerreko lepauztaipeko zaina/subklabioa",
+            "text": " Eskuineko zain brakiozefalikoa",
             "b": true
           },
           {
-            "text": " (ezkerreko goiko gorputz adarretik irteten dena)."
+            "text": ": bi zain nagusi iristen dira bertara"
           }
         ]
       }
@@ -2320,14 +2653,14 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.2/p9/s1",
         "parts": [
           {
-            "text": "➔"
+            "text": "- "
           },
           {
-            "text": " ESKUINEKO zain brakiozefalikoa ",
+            "text": "Eskuineko barruko jugularra: ",
             "b": true
           },
           {
-            "text": "sortuko da ere bai."
+            "text": "eskuineko aurreko zain kardinalaren urrutiko ataletik sortzen da."
           }
         ]
       }
@@ -2345,25 +2678,87 @@ export const w13: NotesBlock[] = [
             "text": "- "
           },
           {
-            "text": "Eskuineko",
+            "text": "Eskuineko zain subklabioa (lepauztaipekoa)",
+            "b": true
+          },
+          {
+            "text": ": eskuineko goiko gorputz adarretik irteten da. "
+          }
+        ]
+      },
+      {
+        "id": "w13/3.2/p10/s2",
+        "parts": [
+          {
+            "text": "Eskuineko barruko jugularrera heltzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w13/3.2/p10/s3",
+        "parts": [
+          {
+            "text": "Ezkerreko eta eskuineko zain brakiozefalikoak elkartzen direnean, "
+          },
+          {
+            "text": "goiko bena kabaren",
             "b": true
           },
           {
             "text": " "
           },
           {
-            "text": "barruko",
+            "text": "enborrera ",
             "b": true
           },
           {
-            "text": " "
+            "text": "iristen dira. "
+          }
+        ]
+      },
+      {
+        "id": "w13/3.2/p10/s4",
+        "parts": [
+          {
+            "text": "Beraz, goiko bena kabaren enborra "
           },
           {
-            "text": "jugularra",
+            "text": "eskuineko kardinal komunetik",
             "b": true
           },
           {
-            "text": " (eskuineko aurreko zain kardinalaren urrutiko ataletik sortu)."
+            "text": " eta "
+          },
+          {
+            "text": "eskuineko aurreko kardinalaren hurbileko ataletik",
+            "b": true
+          },
+          {
+            "text": " sortzen da; hau da, bi jatorri ditu. "
+          }
+        ]
+      },
+      {
+        "id": "w13/3.2/p10/s5",
+        "parts": [
+          {
+            "text": "*Kanpoko zain jugularrak aurpegian ditugun zain sare batetik sortzen dira, bata ezkerrekoa eta bestea eskuinekoa. "
+          }
+        ]
+      },
+      {
+        "id": "w13/3.2/p10/s6",
+        "parts": [
+          {
+            "text": "Bi horiek ezkerreko eta eskuineko subklabioetan bukatzen dira. "
+          }
+        ]
+      },
+      {
+        "id": "w13/3.2/p10/s7",
+        "parts": [
+          {
+            "text": "Horretatik bi atal bereizten dira:"
           }
         ]
       }
@@ -2378,76 +2773,14 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.2/p11/s1",
         "parts": [
           {
-            "text": "- "
+            "text": "●"
           },
           {
-            "text": "Eskuineko lepauztaipeko zaina /subklabioa",
+            "text": " Hasierako atala:",
             "b": true
           },
           {
-            "text": ": (eskuineko goiko gorputz adarretik iristen dena). "
-          }
-        ]
-      },
-      {
-        "id": "w13/3.2/p11/s2",
-        "parts": [
-          {
-            "text": "Eskuineko barruko jugularrera heltzen da. "
-          }
-        ]
-      },
-      {
-        "id": "w13/3.2/p11/s3",
-        "parts": [
-          {
-            "text": "Ezkerreko eta eskuineko zain brakiozefalikoak elkartzen direnean, "
-          },
-          {
-            "text": "GOIKO bena",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "kaba",
-            "b": true
-          },
-          {
-            "text": " hedatzen da. "
-          }
-        ]
-      },
-      {
-        "id": "w13/3.2/p11/s4",
-        "parts": [
-          {
-            "text": "Beraz, goiko bena kabaren enborra eskuineko kardinal komunetik eta eskuineko aurreko kardinalaren hurbileko ataletik sortzen da. "
-          }
-        ]
-      },
-      {
-        "id": "w13/3.2/p11/s5",
-        "parts": [
-          {
-            "text": "*Kanpoko zain jugularrak aurpegian ditugun zain sare batetik sortzen dira, bata ezkerrekoa eta bestea eskuinekoa. "
-          }
-        ]
-      },
-      {
-        "id": "w13/3.2/p11/s6",
-        "parts": [
-          {
-            "text": "Bi horiek ezkerreko eta eskuineko subklabioetan bukatzen dira. "
-          }
-        ]
-      },
-      {
-        "id": "w13/3.2/p11/s7",
-        "parts": [
-          {
-            "text": "Horretatik 2 atal bereizten dira:"
+            "text": " eskuineko aurreko kardinaletik sortua."
           }
         ]
       }
@@ -2465,33 +2798,11 @@ export const w13: NotesBlock[] = [
             "text": "●"
           },
           {
-            "text": " Hasierako atala: ",
+            "text": " Bukaerazko atala:",
             "b": true
           },
           {
-            "text": "eskuineko aurreko kardinaletik sortua."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "3.2",
-    "id": "w13/3.2/p13",
-    "sentences": [
-      {
-        "id": "w13/3.2/p13/s1",
-        "parts": [
-          {
-            "text": "●"
-          },
-          {
-            "text": " Bukaerazko atala: ",
-            "b": true
-          },
-          {
-            "text": "eskuineko kardinal komunetik sortuko da."
+            "text": " eskuineko kardinal komunetik sortuko da"
           }
         ]
       }
@@ -2500,10 +2811,10 @@ export const w13: NotesBlock[] = [
   {
     "kind": "p",
     "section": "3.2",
-    "id": "w13/3.2/p14",
+    "id": "w13/3.2/p13",
     "sentences": [
       {
-        "id": "w13/3.2/p14/s1",
+        "id": "w13/3.2/p13/s1",
         "parts": [
           {
             "text": "JAKIN BEHARREKOA: "
@@ -2519,10 +2830,10 @@ export const w13: NotesBlock[] = [
   {
     "kind": "li",
     "section": "3.2",
-    "id": "w13/3.2/p15",
+    "id": "w13/3.2/p14",
     "sentences": [
       {
-        "id": "w13/3.2/p15/s1",
+        "id": "w13/3.2/p14/s1",
         "parts": [
           {
             "text": "● Goiko bena kabak → "
@@ -2537,10 +2848,25 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/3.2/p15/s2",
+        "id": "w13/3.2/p14/s2",
         "parts": [
           {
             "text": "○ Azigos zaina."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "3.2",
+    "id": "w13/3.2/p15",
+    "sentences": [
+      {
+        "id": "w13/3.2/p15/s1",
+        "parts": [
+          {
+            "text": "● Beheko bena kabak: ○ Beheko gorputz-adarretako zain-odol guztia iristen da zain ezberdinen bitartez: iliakoak, porta, abdomeneko errai-ezberdinetatik datorrena…"
           }
         ]
       }
@@ -2555,7 +2881,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.2/p16/s1",
         "parts": [
           {
-            "text": "● Beheko bena kabak: ○ Beheko gorputz-adarretako zain-odol guztia iristen da zain ezberdinen bitartez: iliakoak, porta, abdomeneko errai-ezberdinetatik datorrena…"
+            "text": "----------------------------------------------------------------------------------------------------------------"
           }
         ]
       }
@@ -2570,22 +2896,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/3.2/p17/s1",
         "parts": [
           {
-            "text": "-------------"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "li",
-    "section": "3.2",
-    "id": "w13/3.2/p18",
-    "sentences": [
-      {
-        "id": "w13/3.2/p18/s1",
-        "parts": [
-          {
-            "text": "● Behin-betiko beheko bena kabaren atalak: ○ Atal sakrokardinala (honetatik ezkerreko eta eskuineko zain iliako primitiboak garatu) ○ Gibel atala (eskuineko hodi hepatotokardiakotik sortzen da) ○ Giltzurrun atala (eskuineko kardinal azpiko zainetik sorturikoa)"
+            "text": "● Behin-betiko beheko bena kabaren atalak: ○ Atal sakrokardinala (honetatik ezkerreko eta eskuineko zain iliako primitiboak garatu) ○ Gibel atala (eskuineko hodi hepatotokardiakotik sortzen da)"
           }
         ]
       }
@@ -2600,7 +2911,14 @@ export const w13: NotesBlock[] = [
         "id": "w13/4/p2/s1",
         "parts": [
           {
-            "text": "4. ZIRKULAZIO SISTEMAK.",
+            "text": "4.",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "ZIRKULAZIO SISTEMAK",
             "b": true
           }
         ]
@@ -2616,9 +2934,8 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1/p2/s1",
         "parts": [
           {
-            "text": "4.1. Jaio aurreko zirkulazioa:",
-            "b": true,
-            "i": true
+            "text": "4.1. JAIO AURREKO ZIRKULAZIOA",
+            "b": true
           }
         ]
       }
@@ -2633,9 +2950,8 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.1/p2/s1",
         "parts": [
           {
-            "text": "4.1.1. Ezkerrean:",
-            "b": true,
-            "i": true
+            "text": "4.1.1. EZKERREAN",
+            "b": true
           }
         ]
       }
@@ -2650,14 +2966,18 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.1/p3/s1",
         "parts": [
           {
-            "text": "Karenatik enbrioira itzultzen den odol oxigenatua (%80ko saturazioa)"
+            "text": "Karenatik enbrioira ",
+            "b": true
           },
           {
-            "text": " ezkerreko zilborreko zainaren",
+            "text": "itzultzen den odol oxigenatua (%80 inguruko saturazioa du) "
+          },
+          {
+            "text": "ezkerreko zilborreko zainaren ",
             "i": true
           },
           {
-            "text": " bidez itzultzen da, zuzeneko konexioa (hodi benosoa) egiten duena beheko bena kabarekin. "
+            "text": "bidez itzultzen da, zuzeneko konexioa (hodi benosoa) egiten duena beheko bena kabarekin. "
           }
         ]
       },
@@ -2673,7 +2993,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.1/p3/s3",
         "parts": [
           {
-            "text": "Garapenaren amaieran (hodi hepatokardiakoa beheko bena kabaren segmentu hepatiko bihurtzen da). "
+            "text": "Odol kantitate txiki bat gibel barneko plexura sartzen da (gibelaren mailara heltzen denean). "
           }
         ]
       },
@@ -2681,14 +3001,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.1/p3/s4",
         "parts": [
           {
-            "text": "Baina beheko bena kabatik zain-odola (oxigeno gutxiko odola /desoxigenatua) ere igotzen denez (esaterako giltzurrunetatik),"
-          },
-          {
-            "text": " odol-nahasketa",
-            "b": true
-          },
-          {
-            "text": " bat ematen da: zilborreko zainetatik datorren odol oxigenatua eta beheko bena kabatik igotzen den oxigeno gutxiko odola. "
+            "text": "Hemen portatik datorren odolarekin nahasten da. "
           }
         ]
       },
@@ -2696,7 +3009,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.1/p3/s5",
         "parts": [
           {
-            "text": "Baita nahasten da bena portatik datorren (odol desoxigenatua) eta gibeletik pasatzen den odolarekin. "
+            "text": "Garapenaren amaieran (hodi hepatokardiakoa beheko bena kabaren segmentu hepatiko bihurtzen da). "
           }
         ]
       },
@@ -2704,7 +3017,21 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.1/p3/s6",
         "parts": [
           {
-            "text": "Honen ondorioz, odolaren oxigeno kontzentrazioa jeisten da. "
+            "text": "Baina beheko bena kabatik"
+          },
+          {
+            "text": " zain-odola",
+            "b": true
+          },
+          {
+            "text": " (oxigeno gutxiko odola / desoxigenatua) ere igotzen denez (esaterako giltzurrunetatik), "
+          },
+          {
+            "text": "odol-nahasketa",
+            "b": true
+          },
+          {
+            "text": " bat ematen da: zilborreko zainetatik datorren odol oxigenatua (karenatik datorrelako) eta beheko bena kabatik igotzen den oxigeno gutxiko odola. "
           }
         ]
       },
@@ -2712,14 +3039,65 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.1/p3/s7",
         "parts": [
           {
-            "text": "Nahastutako odol hori eskuineko aurikulara iristen da beheko bena kabaren bidez, eta ondoren, odol-kopururik handiena (ez osoa), "
+            "text": "Baita nahasten da "
           },
           {
-            "text": "aurikula arteko trenkadatik ",
+            "text": "bena portatik",
+            "b": true
+          },
+          {
+            "text": " datorren (odol desoxigenatua/zain odola) eta "
+          },
+          {
+            "text": "gibeletik ",
+            "b": true
+          },
+          {
+            "text": "pasatzen den odolarekin. "
+          }
+        ]
+      },
+      {
+        "id": "w13/4.1.1/p3/s8",
+        "parts": [
+          {
+            "text": "Honen ondorioz, odolaren oxigeno kontzentrazioa jeisten da. "
+          }
+        ]
+      },
+      {
+        "id": "w13/4.1.1/p3/s9",
+        "parts": [
+          {
+            "text": "Nahastutako odol hori "
+          },
+          {
+            "text": "eskuineko aurikulara",
+            "b": true
+          },
+          {
+            "text": " iristen da "
+          },
+          {
+            "text": "beheko bena kabaren bidez,",
+            "b": true
+          },
+          {
+            "text": " eta ondoren, odol-kopururik handiena (ez osoa), "
+          },
+          {
+            "text": "aurikula arteko trenkadatik",
             "i": true
           },
           {
-            "text": "igaroz, ezkerreko aurikulara iristen da "
+            "text": " igaroz, "
+          },
+          {
+            "text": "ezkerreko aurikulara",
+            "b": true
+          },
+          {
+            "text": " iristen da "
           },
           {
             "text": "zulo obala",
@@ -2731,45 +3109,54 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/4.1.1/p3/s8",
+        "id": "w13/4.1.1/p3/s10",
         "parts": [
           {
-            "text": "Hori dela eta, bertara ailegatutako odola "
+            "text": "Biriketatik iristen den odol desoxigenatu kopuru txiki batekin nahasten da(birikak ez dira funtzionamenduarekin hasi oraindik). "
+          }
+        ]
+      },
+      {
+        "id": "w13/4.1.1/p3/s11",
+        "parts": [
+          {
+            "text": "Odola"
           },
           {
-            "text": "ezkerreko",
+            "text": " ezkerreko zulo aurikulobentrilukarra zeharkatuz,",
             "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "zulo",
+            "text": "ezkerreko bentrikulura",
+            "b": true
+          },
+          {
+            "text": " heltzen da, eta hemendik, "
+          },
+          {
+            "text": "aortak ",
+            "b": true
+          },
+          {
+            "text": "dituen atal ezberdinetatik abiatuko da gorputz osora bidaliz ("
+          },
+          {
+            "text": "goranzko aorta, aorta makoa eta bukatzeko beheranzko aortatik",
             "i": true
           },
           {
-            "text": " "
-          },
+            "text": "). "
+          }
+        ]
+      },
+      {
+        "id": "w13/4.1.1/p3/s12",
+        "parts": [
           {
-            "text": "aurikulobentrilukarra zeharkatuz,",
-            "i": true
-          },
-          {
-            "text": " ezkerreko bentrikulura heltzen da, eta hemendik, aortak dituen atal ezberdinetatik abiatuko da gorputz osora bidaliz ("
-          },
-          {
-            "text": "goranzko aorta,",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "aorta makoa eta bukatzeko beheranzko aortatik",
-            "i": true
-          },
-          {
-            "text": ")."
+            "text": "Miokardioa eta entzefaloa nahiko ondo oxigenatuta daude, aortaren lehenengo adarra direlako."
           }
         ]
       }
@@ -2784,9 +3171,8 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.2/p2/s1",
         "parts": [
           {
-            "text": "4.1.2. Eskuinean:",
-            "b": true,
-            "i": true
+            "text": "4.1.2. ESKUINEAN",
+            "b": true
           }
         ]
       }
@@ -2801,7 +3187,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.2/p3/s1",
         "parts": [
           {
-            "text": "Esan bezala, beheko bena kabaren odol guztia ez da ezkerreko aurikulara iristen. "
+            "text": "Esan bezala, beheko bena kabaren odol guztia ez da ezkerreko aurikulara iristen (Beheko bena kaba beheko gorputz adarretatik, giltzurrunetik.. "
           }
         ]
       },
@@ -2809,28 +3195,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.2/p3/s2",
         "parts": [
           {
-            "text": "Kantitate txiki bat gelditzen da eskuineko aurikula horretan, zeren eta"
-          },
-          {
-            "text": " Septum",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "secundum-aren",
-            "i": true
-          },
-          {
-            "text": " beheko atalak ez du baimentzen odolaren garraioa ezkerreko aurikulara, eta horretan gelditu den odola"
-          },
-          {
-            "text": " nahasten ",
-            "b": true
-          },
-          {
-            "text": "da eskuineko aurikula horretan goiko bena kabatik sartzen den oxigeno gutxiko odolarekin (odol desoxigenatua). "
+            "text": "hartzen du odola eta eskualde horietatik irteten den odola zain odola da. "
           }
         ]
       },
@@ -2838,21 +3203,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.2/p3/s3",
         "parts": [
           {
-            "text": "Odol hori pasatzen da eskuineko"
-          },
-          {
-            "text": " zulo aurikulobentrikularretik",
-            "i": true
-          },
-          {
-            "text": " eskumako bentrikulora, eta handik"
-          },
-          {
-            "text": " birika enborraren",
-            "i": true
-          },
-          {
-            "text": " bidez odola irteten da. "
+            "text": "Honen oxigeno saturazioa baxua da). "
           }
         ]
       },
@@ -2860,12 +3211,60 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.2/p3/s4",
         "parts": [
           {
-            "text": "Jaioaurretik eskumako biriketan erresistentzia (odol hodietan) handia dago. "
+            "text": "Kantitate txiki bat gelditzen da eskuineko aurikula horretan, zeren eta "
+          },
+          {
+            "text": "Septum secundum-aren",
+            "i": true
+          },
+          {
+            "text": " beheko atalak ez du baimentzen odolaren garraioa ezkerreko aurikulara, eta horretan gelditu den odola "
+          },
+          {
+            "text": "nahasten",
+            "b": true
+          },
+          {
+            "text": " da eskuineko aurikula horretan goiko bena kabatik sartzen den oxigeno saturazio baxuko odolarekin (odol desoxigenatua). "
           }
         ]
       },
       {
         "id": "w13/4.1.2/p3/s5",
+        "parts": [
+          {
+            "text": "Odol hori pasatzen da eskuineko "
+          },
+          {
+            "text": "zulo aurikulobentrikularretik",
+            "b": true
+          },
+          {
+            "text": " ",
+            "i": true
+          },
+          {
+            "text": "eskuineko bentrikulora, eta handik "
+          },
+          {
+            "text": "birika enborraren",
+            "b": true
+          },
+          {
+            "text": " bidez odola irteten da. "
+          }
+        ]
+      },
+      {
+        "id": "w13/4.1.2/p3/s6",
+        "parts": [
+          {
+            "text": "Jaioaurretik eskumako biriketan erresistentzia (odol hodietan) handia dago. "
+          }
+        ]
+      },
+      {
+        "id": "w13/4.1.2/p3/s7",
         "parts": [
           {
             "text": "Beraz, odola neurri txiki batean biriketara helduko da, baina batez ere odol hori "
@@ -2875,23 +3274,7 @@ export const w13: NotesBlock[] = [
             "b": true
           },
           {
-            "text": "erabiliz pasatzen da aortara eta nahasten da aortatik jeisten den odolarekin. "
-          }
-        ]
-      },
-      {
-        "id": "w13/4.1.2/p3/s6",
-        "parts": [
-          {
-            "text": "Hori dela eta, nahaste horren ondorioz, aortatik jaisten den odola oxigeno gutxi edukiko du. "
-          }
-        ]
-      },
-      {
-        "id": "w13/4.1.2/p3/s7",
-        "parts": [
-          {
-            "text": "Izan ere, oxigenoan aberatsa den odola aortaren lehen adarkaduretatik abiatzen da goikaldeko zenbait egituretara (burua…) eta beherantza doana, nahastean hodi arteriosotik datorrenarekin, odol saturazioa asko jaitsiko da. "
+            "text": "erabiliz pasatzen da aortara eta nahasten da aortatik jaisten den odolarekin. "
           }
         ]
       },
@@ -2899,7 +3282,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.2/p3/s8",
         "parts": [
           {
-            "text": "Hori dela eta, zilborreko arteriatik (aortaren aurreko paretatik sortuak) doan odolaren oxigeno saturazioa askoz baxuagoa da, gutxi gora behera %58 ingurukoa (pixka bat gutxiago). "
+            "text": "Hori dela eta, nahaste horren ondorioz, aortatik jaisten den odolak oxigeno gutxi edukiko du. "
           }
         ]
       },
@@ -2907,7 +3290,7 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.2/p3/s9",
         "parts": [
           {
-            "text": "Beraz, zilborreko arteria hauetatik doan odola karenara abiatzen da berriz oxigenatzeko. "
+            "text": "Izan ere, oxigenoan aberatsa den odola aortaren lehen adarkaduretatik abiatzen da goikaldeko zenbait egituretara (burua…) eta beherantza doana, nahastean hodi arteriosotik ○ Giltzurrun atala (eskuineko kardinal azpiko zainetik sorturikoa) datorrenarekin, odol saturazioa asko jaitsiko da. "
           }
         ]
       },
@@ -2915,28 +3298,37 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.1.2/p3/s10",
         "parts": [
           {
-            "text": "*Hasieran aortatik zuzenean irteten dira zilbor arteriak, baina garapenean aurrerago,",
+            "text": "Hori dela eta, zilborreko arteriatik (aortaren aurreko paretatik sortuak) doan odolaren oxigeno saturazioa askoz baxuagoa da, gutxi gora behera %58 ingurukoa (pixka bat gutxiago). "
+          }
+        ]
+      },
+      {
+        "id": "w13/4.1.2/p3/s11",
+        "parts": [
+          {
+            "text": "Beraz, zilborreko arteria hauetatik doan odola karenara abiatzen da berriz oxigenatzeko. "
+          }
+        ]
+      },
+      {
+        "id": "w13/4.1.2/p3/s12",
+        "parts": [
+          {
+            "text": "*Hasieran aortatik zuzenean irteten dira zilbor arteriak, baina garapenean aurrerago, gerriko",
             "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "gerriko 5.arteria segmentuetatik irteten diren arteria iliako komunaren barneko",
+            "text": "5.arteria segmentuetatik irteten diren arteria iliako komunaren barneko adarrekin kontaktatzen",
             "i": true
           },
           {
             "text": " "
           },
           {
-            "text": "adarrekin kontaktatzen dute eta beraz, odolak, ibilbide hori egiten du karenara",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "abiatzeko eta oxigenatzeko.",
+            "text": "dute eta beraz, odolak, ibilbide hori egiten du karenara abiatzeko eta oxigenatzeko.",
             "i": true
           }
         ]
@@ -2952,9 +3344,8 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.2/p2/s1",
         "parts": [
           {
-            "text": "4.2. Jaiotzaren momentuan ematen diren aldaketak:",
-            "b": true,
-            "i": true
+            "text": "4.2. JAIOTZEAN EMATEN DIREN ALDAKETAK",
+            "b": true
           }
         ]
       }
@@ -2969,37 +3360,14 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.2/p3/s1",
         "parts": [
           {
-            "text": "Jaiotza momentuan birika zirkulazioa hasten da. "
-          }
-        ]
-      },
-      {
-        "id": "w13/4.2/p3/s2",
-        "parts": [
-          {
-            "text": "Jaiotzaren 2-3 minutuetara, zilborreko arterien paretetan dauden muskulu lisoak uzkurtu egiten dira,"
-          },
-          {
-            "text": " zilborreko arteriak",
-            "b": true
-          },
-          {
-            "text": " itxiz. "
-          }
-        ]
-      },
-      {
-        "id": "w13/4.2/p3/s3",
-        "parts": [
-          {
-            "text": "Arteria horietatik egitura ezberdinak sortzen dira:"
+            "text": "Jaiotzaren momentuan birika zirkulazioa hasten da, eta lau aldaketa nagusi ematen dira."
           }
         ]
       }
     ]
   },
   {
-    "kind": "li",
+    "kind": "p",
     "section": "4.2",
     "id": "w13/4.2/p4",
     "sentences": [
@@ -3007,18 +3375,22 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.2/p4/s1",
         "parts": [
           {
-            "text": "● Urrutiko atala: "
+            "text": "Jaiotzaren 2-3 minutuetara, zilborreko arterien paretetan dauden muskulu lisoak uzkurtu egiten dira, "
           },
           {
-            "text": "zilborreko erdialdeko lotailuak ",
+            "text": "zilborreko arteriak",
             "b": true
           },
           {
-            "text": "bihurtuko dira, fibrosi prozesu baten ondorioz (jaio osteko hurrengo hilabeteetan gertatzen dena)"
-          },
+            "text": " itxiz (itxiera funtzionala gertatzen da; itxiera fisiko beranduago ematen da(jaio ostean hiru hilabete odoren)). "
+          }
+        ]
+      },
+      {
+        "id": "w13/4.2/p4/s2",
+        "parts": [
           {
-            "text": ".",
-            "b": true
+            "text": "Arteria horietatik egitura ezberdinak sortzen dira:"
           }
         ]
       }
@@ -3033,44 +3405,18 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.2/p5/s1",
         "parts": [
           {
-            "text": "● Hurbileko atala: Permeable mantentzen dira eta bertatik "
+            "text": "● Urrutiko atala: "
           },
           {
-            "text": "goiko gernu maskuriaren arteriak ",
+            "text": "erdialdeko zilborreko lotailuak",
             "b": true
           },
           {
-            "text": "eratuko dira, barneko arteria iliakoen zatiak direnak. "
-          }
-        ]
-      },
-      {
-        "id": "w13/4.2/p5/s2",
-        "parts": [
-          {
-            "text": "Zilborreko arterien itxieraren ostean, "
+            "text": " bihurtuko dira, fibrosi prozesu baten ondorioz (jaio osteko hurrengo hilabeteetan gertatzen dena)"
           },
           {
-            "text": "ezkerreko zilborreko zaina",
+            "text": ".",
             "b": true
-          },
-          {
-            "text": " eta horren jarraipena den"
-          },
-          {
-            "text": " hodi benosoa",
-            "b": true
-          },
-          {
-            "text": " ere itxi egiten dira (jaiotzaren hurrengo minutuetan). "
-          }
-        ]
-      },
-      {
-        "id": "w13/4.2/p5/s3",
-        "parts": [
-          {
-            "text": "Horiek ere lotailu bihurtzen dira:"
           }
         ]
       }
@@ -3085,19 +3431,82 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.2/p6/s1",
         "parts": [
           {
-            "text": "● Ezkerreko zilborreko zaina →"
+            "text": "● Hurbileko atala: Permeable mantentzen dira eta bertatik "
           },
           {
-            "text": " gibeleko lotailu borobila.",
+            "text": "goiko gernu maskuriaren arteriak",
             "b": true
           },
           {
-            "text": " "
+            "text": " eratuko dira, barneko arteria iliakoen zatiak direnak."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.2",
+    "id": "w13/4.2/p7",
+    "sentences": [
+      {
+        "id": "w13/4.2/p7/s1",
+        "parts": [
+          {
+            "text": "Zilborreko arterien itxieraren ostean, "
+          },
+          {
+            "text": "ezkerreko zilborreko zaina",
+            "b": true
+          },
+          {
+            "text": " eta horren jarraipena den "
+          },
+          {
+            "text": "hodi benosoa",
+            "b": true
+          },
+          {
+            "text": " ere itxi egiten dira (arterien itxiera baino pixkat beranduago; jaiotzaren hurrengo minutuetan). "
           }
         ]
       },
       {
-        "id": "w13/4.2/p6/s2",
+        "id": "w13/4.2/p7/s2",
+        "parts": [
+          {
+            "text": "Horiek ere "
+          },
+          {
+            "text": "lotailu bihurtzen",
+            "b": true
+          },
+          {
+            "text": " dira:"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "4.2",
+    "id": "w13/4.2/p8",
+    "sentences": [
+      {
+        "id": "w13/4.2/p8/s1",
+        "parts": [
+          {
+            "text": "● Ezkerreko zilborreko zaina → "
+          },
+          {
+            "text": "gibelaren lotailu borobila. ",
+            "b": true
+          }
+        ]
+      },
+      {
+        "id": "w13/4.2/p8/s2",
         "parts": [
           {
             "text": "(Gibeletik zilborrera)"
@@ -3109,86 +3518,122 @@ export const w13: NotesBlock[] = [
   {
     "kind": "li",
     "section": "4.2",
-    "id": "w13/4.2/p7",
+    "id": "w13/4.2/p9",
     "sentences": [
       {
-        "id": "w13/4.2/p7/s1",
+        "id": "w13/4.2/p9/s1",
         "parts": [
           {
             "text": "● Hodi benosoa → "
           },
           {
-            "text": "gibeleko lotailu benosoa. ",
+            "text": "gibelaren lotailu benosoa ",
             "b": true
+          },
+          {
+            "text": "(gibelaren azalean)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.2",
+    "id": "w13/4.2/p10",
+    "sentences": [
+      {
+        "id": "w13/4.2/p10/s1",
+        "parts": [
+          {
+            "text": "Hodi arteriosoa ",
+            "b": true
+          },
+          {
+            "text": "ere itxi egiten da eta "
+          },
+          {
+            "text": "lotailu arteriosoa ",
+            "b": true
+          },
+          {
+            "text": "bihurtzen da, hirugarren hilabeterako. "
           }
         ]
       },
       {
-        "id": "w13/4.2/p7/s2",
+        "id": "w13/4.2/p10/s2",
         "parts": [
           {
-            "text": "(gibelaren azalean) "
-          },
-          {
-            "text": "Hodi arteriosoa",
-            "b": true
-          },
-          {
-            "text": " ere itxi egiten da eta"
-          },
-          {
-            "text": " lotailu arteriosoa",
-            "b": true
-          },
-          {
-            "text": " bihurtzen da, hurrengo hilabeteetan (2-3 hilabete beranduago). "
+            "text": "Honen inguruan kokatzen da ezkerreko nerbio laringio atzerakaria. "
           }
         ]
       },
       {
-        "id": "w13/4.2/p7/s3",
+        "id": "w13/4.2/p10/s3",
         "parts": [
           {
-            "text": "Ondorioz, birika arteriaren eta aortaren arteko komunikazioa eten egiten da. "
+            "text": "Ondorioz, birika arteriaren eta aortaren arteko komunikazioa eten egiten da."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.2",
+    "id": "w13/4.2/p11",
+    "sentences": [
       {
-        "id": "w13/4.2/p7/s4",
+        "id": "w13/4.2/p11/s1",
         "parts": [
           {
-            "text": "Aurikula arteko trenkadan",
+            "text": "Aurikula arteko trenkadan ",
             "b": true
           },
           {
-            "text": " (bertan dagoen zulo obala ixten da) gertatzen den ibilbidearen itxiera ere ematen da: jaio ostean, birika zirkulazioa hastean ezkerreko aurikularen presioa zeharo handitzen da (odol oxigenatua heltzen baita ezkerreko aurikulara),"
+            "text": "(bertan dagoen arrautza itxurako zuloa ixten da)"
           },
           {
-            "text": " Septum Sekundum",
+            "text": " ",
+            "b": true
+          },
+          {
+            "text": "gertatzen den ibilbidearen itxiera ere ematen da: jaio ostean, birika zirkulazioa hastean ezkerreko aurikularen presioa zeharo handitzen da (odol oxigenatua heltzen baita ezkerreko aurikulara), "
+          },
+          {
+            "text": "Septum",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "Secundum",
             "b": true
           },
           {
             "text": "-aren aurka, "
           },
           {
-            "text": "zulo obalaren balbula ",
+            "text": "zulo obalaren balbula",
             "b": true
           },
           {
-            "text": "bultzatuz (Septum Primum-aren beheko aldetik sortutako zuloa). "
+            "text": " bultzatuz (Septum Primum-aren beheko aldetik sortutako zuloa). "
           }
         ]
       },
       {
-        "id": "w13/4.2/p7/s5",
+        "id": "w13/4.2/p11/s2",
         "parts": [
           {
-            "text": "Poliki-poliki septum primum eta secundum-a, fusionatzen hasten dira ( ez da bat batekoa, fusio luzea izaten da), eta ondorioz, eskuineko eta ezkerreko aurikulen arteko komunikazioa itxi egiten da. "
+            "text": "Poliki-poliki septum primum eta secundum-a, fusionatzen hasten dira (ez da bat batekoa, fusio luzea izaten da), eta ondorioz, eskuineko eta ezkerreko aurikulen arteko komunikazioa itxi egiten da. "
           }
         ]
       },
       {
-        "id": "w13/4.2/p7/s6",
+        "id": "w13/4.2/p11/s3",
         "parts": [
           {
             "text": "Prozesu honek urtebete inguru irauten du. "
@@ -3196,7 +3641,7 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/4.2/p7/s7",
+        "id": "w13/4.2/p11/s4",
         "parts": [
           {
             "text": "Hala ere, kasuen %20an komunikazioa iragazkor mantentzen da, hau da, odola apur bat pasa daiteke eskumako aurikulatik ezkerreko aurikulara (oso kopuru txikia)."
@@ -3214,9 +3659,8 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.3/p2/s1",
         "parts": [
           {
-            "text": "4.3. Jaio osteko zirkulazioa:",
-            "b": true,
-            "i": true
+            "text": "4.3. JAIO OSTEKO ZIRKULAZIOA",
+            "b": true
           }
         ]
       }
@@ -3231,14 +3675,14 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.3/p3/s1",
         "parts": [
           {
-            "text": "Gure gorputzaren zain-odol guztia"
+            "text": "Gure gorputzaren zain-odol guztia "
           },
           {
-            "text": " goiko eta beheko bena kaben",
+            "text": "goiko eta beheko bena kaben ",
             "i": true
           },
           {
-            "text": " bitartez eskuineko aurikulara iristen da. "
+            "text": "bitartez eskuineko aurikulara iristen da. "
           }
         ]
       },
@@ -3246,10 +3690,10 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.3/p3/s2",
         "parts": [
           {
-            "text": "Ondoren,"
+            "text": "Ondoren, "
           },
           {
-            "text": " eskuineko zulo aurikulobentrikularretik",
+            "text": "eskuineko zulo aurikulobentrikularretik",
             "i": true
           },
           {
@@ -3261,17 +3705,10 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.3/p3/s3",
         "parts": [
           {
-            "text": "Hemendik, zain-odola"
+            "text": "Hemendik, zain-odola "
           },
           {
-            "text": " birika arteriaren eskuineko",
-            "i": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "eta ezkerreko arterien",
+            "text": "birika arteriaren eskuineko eta ezkerreko arterien",
             "i": true
           },
           {
@@ -3283,24 +3720,22 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.3/p3/s4",
         "parts": [
           {
-            "text": "Behin oxigenatuta, odol hori ezkerreko aurikulara itzultzen da dauzkagun"
+            "text": "Behin oxigenatuta, odol hori ezkerreko aurikulara itzultzen da dauzkagun "
           },
           {
-            "text": " 4 birika zainen",
+            "text": "lau birika zainen",
+            "b": true,
             "i": true
           },
           {
-            "text": " bitartez, eta bertatik odol oxigenatua ezkerreko bentrikulura iristen da "
+            "text": " bitartez",
+            "b": true
           },
           {
-            "text": "ezkerreko zulo",
-            "i": true
+            "text": ", eta bertatik odol oxigenatua ezkerreko bentrikulura iristen da "
           },
           {
-            "text": " "
-          },
-          {
-            "text": "aurikulobentrikularretik",
+            "text": "ezkerreko zulo aurikulobentrikularretik",
             "i": true
           },
           {
@@ -3312,21 +3747,21 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.3/p3/s5",
         "parts": [
           {
-            "text": "Zain-odola"
+            "text": "Zain-odola "
           },
           {
-            "text": " aortaren",
+            "text": "aortaren",
             "i": true
           },
           {
             "text": " bidez irteten da ("
           },
           {
-            "text": "goranzkoa-makoa-beheranzkoa) ",
+            "text": "goranzkoa-makoa-beheranzkoa)",
             "i": true
           },
           {
-            "text": "eta bukatzeko, aortak dituen adar ezberdinen bitartez odol oxigenatua gure gorputzaren ehun eta atal guztietara helduko da."
+            "text": " eta bukatzeko, aortak dituen adar ezberdinen bitartez odol oxigenatua gure gorputzaren ehun eta atal guztietara helduko da."
           }
         ]
       }
@@ -3344,14 +3779,7 @@ export const w13: NotesBlock[] = [
             "text": "Aortaren irteeran balbula bat dago, 3 balbez osatua: alboko balbula horiek "
           },
           {
-            "text": "Valsalva",
-            "b": true
-          },
-          {
-            "text": " "
-          },
-          {
-            "text": "sinuak",
+            "text": "Valsalva sinuak",
             "b": true
           },
           {
@@ -3363,10 +3791,10 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.3/p4/s2",
         "parts": [
           {
-            "text": "Horietako paretetatik"
+            "text": "Horietako paretetatik "
           },
           {
-            "text": " arteria koronarioak",
+            "text": "arteria koronarioak",
             "b": true
           },
           {
@@ -3386,26 +3814,40 @@ export const w13: NotesBlock[] = [
         "id": "w13/4.3/p4/s4",
         "parts": [
           {
-            "text": "Organo horietan oxigeno apur bat gelditzen da eta horrela beheranzko aortatik jaisten den odola ez da hain aberatsa oxigenotan (gero eta gutxiago izango du). "
+            "text": "Organo horietan oxigeno apur bat gelditzen da eta horrela beheranzko aortatik jaisten den odola ez da hain aberatsa oxigenotan (gero eta gutxiago izango du)."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.3",
+    "id": "w13/4.3/p5",
+    "sentences": [
       {
-        "id": "w13/4.3/p4/s5",
+        "id": "w13/4.3/p5/s1",
         "parts": [
           {
-            "text": "Oxigenoa galdu ondoren, zain-sistema berriro hasten da odola eskuineko aurikulara eramaten (batez ere goiko eta beheko kaben bidez). "
+            "text": "Oxigenoa galdu ondoren, zain-sistema berriro hasten da odola eskuineko aurikulara eramaten (batez ere goiko eta beheko kaben bidez)."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.3",
+    "id": "w13/4.3/p6",
+    "sentences": [
       {
-        "id": "w13/4.3/p4/s6",
+        "id": "w13/4.3/p6/s1",
         "parts": [
           {
-            "text": "Jaioberriak askotan"
+            "text": "Jaioberriak askotan "
           },
           {
-            "text": " zianotikoak",
+            "text": "zianotikoak",
             "b": true
           },
           {
@@ -3414,7 +3856,7 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/4.3/p4/s7",
+        "id": "w13/4.3/p6/s2",
         "parts": [
           {
             "text": "Dena den, komunikazioa txikia da eta ez da odol kopuru ugari nahasten."
@@ -3448,12 +3890,19 @@ export const w13: NotesBlock[] = [
         "id": "w13/5/p3/s1",
         "parts": [
           {
-            "text": "Sistema linfatikoaren egiturak (linfa eramaten dituztenak), hau da, linfa zakuak eta linfa hodiak, alboko mesodermoaren errai orritik garatzen dira. "
+            "text": "Sistema linfatikoaren egiturak (linfa eramaten dituztenak), hau da, linfa zakuak eta linfa hodiak, alboko mesodermoaren errai orritik garatzen dira."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5",
+    "id": "w13/5/p4",
+    "sentences": [
       {
-        "id": "w13/5/p3/s2",
+        "id": "w13/5/p4/s1",
         "parts": [
           {
             "text": "Hasiera batean, gure gorputzaren eskualde ezberdinetan sortzen den linfa linfa-hodien bidez garraiatzen da, hau da, buruko, lepoko, enborreko eta goiko gorputz-adarretako hodi linfatikoen bidez. "
@@ -3461,29 +3910,29 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/5/p3/s3",
+        "id": "w13/5/p4/s2",
         "parts": [
           {
-            "text": "Hodi horiek yugular inguruan kokatzen diren"
+            "text": "Hodi horiek jugular inguruan kokatzen diren "
           },
           {
-            "text": " linfa-zaku",
+            "text": "linfa-zaku jugular",
             "b": true
           },
           {
-            "text": " "
-          },
-          {
-            "text": "yugular",
-            "b": true
-          },
-          {
-            "text": "retara (bi dira) iristen dira. "
+            "text": "retara (bi dira) iristen dira."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5",
+    "id": "w13/5/p5",
+    "sentences": [
       {
-        "id": "w13/5/p3/s4",
+        "id": "w13/5/p5/s1",
         "parts": [
           {
             "text": "Bestalde, abdomenean beste linfa zaku ezberdinak agertzen dira zeintzuetara beheko gorputz adarretako eta abdomeneko hodi linfatikoak heltzen diren, 4 linfa zaku dira:"
@@ -3495,10 +3944,10 @@ export const w13: NotesBlock[] = [
   {
     "kind": "li",
     "section": "5",
-    "id": "w13/5/p4",
+    "id": "w13/5/p6",
     "sentences": [
       {
-        "id": "w13/5/p4/s1",
+        "id": "w13/5/p6/s1",
         "parts": [
           {
             "text": "- "
@@ -3538,10 +3987,10 @@ export const w13: NotesBlock[] = [
   {
     "kind": "li",
     "section": "5",
-    "id": "w13/5/p5",
+    "id": "w13/5/p7",
     "sentences": [
       {
-        "id": "w13/5/p5/s1",
+        "id": "w13/5/p7/s1",
         "parts": [
           {
             "text": "- "
@@ -3560,16 +4009,16 @@ export const w13: NotesBlock[] = [
   {
     "kind": "li",
     "section": "5",
-    "id": "w13/5/p6",
+    "id": "w13/5/p8",
     "sentences": [
       {
-        "id": "w13/5/p6/s1",
+        "id": "w13/5/p8/s1",
         "parts": [
           {
             "text": "- "
           },
           {
-            "text": "2 Atzeko linfa zakuak:",
+            "text": "Bi atzeko linfa zakuak:",
             "b": true
           },
           {
@@ -3578,23 +4027,45 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/5/p6/s2",
+        "id": "w13/5/p8/s2",
         "parts": [
           {
-            "text": "(barneko eta kanpoko zain iliakoak batzen diren eskualdeetan kokatzen dira) Linfa-zaku guztietara iristen den linfa, ondoren, kiloren zisternara bideratzen da, eta bertatik bi linfa-hodi nagusi hasten dira gorantz: hodi toraxikoak. "
+            "text": "(barneko eta kanpoko zain iliakoak batzen diren eskualdeetan kokatzen dira)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5",
+    "id": "w13/5/p9",
+    "sentences": [
+      {
+        "id": "w13/5/p9/s1",
+        "parts": [
+          {
+            "text": "Linfa-zaku guztietara iristen den linfa, ondoren, kiloren zisternara bideratzen da, eta bertatik bi linfa-hodi nagusi hasten dira gorantz: hodi toraxikoak. "
           }
         ]
       },
       {
-        "id": "w13/5/p6/s3",
+        "id": "w13/5/p9/s2",
         "parts": [
           {
-            "text": "Garapenaren ondorioz, hodi horietatik bat bakarrik mantentzen da (toraxeko linfa hodia). "
+            "text": "Garapenaren ondorioz, hodi horietatik bat bakarrik mantentzen da (toraxeko linfa hodia)."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5",
+    "id": "w13/5/p10",
+    "sentences": [
       {
-        "id": "w13/5/p6/s4",
+        "id": "w13/5/p10/s1",
         "parts": [
           {
             "text": "Hodi toraxikoak diafragma zeharkatu, mediastinotik gora egiten du eta ezkerrerantz jotzen du, ezkerreko lotura yugulosubklabikoarekin bat egiteko eta bertan ireki dadin. "
@@ -3602,15 +4073,22 @@ export const w13: NotesBlock[] = [
         ]
       },
       {
-        "id": "w13/5/p6/s5",
+        "id": "w13/5/p10/s2",
         "parts": [
           {
-            "text": "Lotura yugulosubklabikoa ezkerreko zain yugularra eta ezkerreko zain subklabia elkartzen diren puntua da. "
+            "text": "Lotura yugulosubklabikoa ezkerreko zain jugularra eta ezkerreko zain subklabia elkartzen diren puntua da."
           }
         ]
-      },
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5",
+    "id": "w13/5/p11",
+    "sentences": [
       {
-        "id": "w13/5/p6/s6",
+        "id": "w13/5/p11/s1",
         "parts": [
           {
             "text": "Zaku linfatikoak",

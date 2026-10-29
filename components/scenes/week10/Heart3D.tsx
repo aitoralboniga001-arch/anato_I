@@ -1,11 +1,11 @@
 'use client';
 
-import { Callouts, Note, lerp, type Callout, type SceneProps } from '@/components/kit';
+import { Callouts, Note, lerp, useScene, type Callout, type SceneProps } from '@/components/kit';
 import { Stage3D, type At3 } from '@/components/kit/three/Stage3D';
 import { blendCamera } from '@/lib/three-d/aim';
 import { add, deg, norm, sub, type Camera3, type V3, type View3 } from '@/lib/three-d/math';
 import type { Scene3 } from '@/lib/three-d/scene';
-import { visibleAnchor } from '@/lib/three-d/occlusion';
+import { ownCentre, visibleAnchor } from '@/lib/three-d/occlusion';
 import { seg } from '@/lib/sim/anim';
 import { vis } from './common';
 import { POSE0, centreline, caudal, heartModel, type HeartOpts, type HeartPose } from './model3d';
@@ -207,6 +207,7 @@ export function ModelView({
   right,
 }: ViewProps & { model: { items: Scene3['items']; pts: Record<string, V3> }; continuity: string }) {
   const scene: Scene3 = { camera, items: model.items };
+  const { mentioned, partsOf } = useScene();
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="none" />
@@ -227,6 +228,19 @@ export function ModelView({
             // A dot behind another structure would sit on that one: it moves to the part of its own the eye sees.
             const q = at(typeof n.p === 'string' ? visibleAnchor(model.items, view.eye, p, n.id, inFrame) : p);
             items.push({ id: n.id, at: q, show: n.show, small: n.small, text: n.text, sub: n.sub, key: n.key });
+          }
+          // What the step's text says is named too, when the model draws it in the frame, even where the
+          // scene's own callouts leave it out at this moment.
+          for (const id of mentioned ?? []) {
+            if (items.some((c) => c.id === id && c.show > 0.3)) continue;
+            // Drawn (as itself, as a group of parts, or as the members of a whole), named where the model says
+            // or else at its biggest piece.
+            const own = [id, ...(partsOf?.(id) ?? [])].find((o) => ownCentre(model.items, o));
+            if (process.env.SAID_DEBUG) console.log('SAID', id, own, JSON.stringify(partsOf?.(id)), !!model.pts[id]);
+            if (!own) continue;
+            const q = visibleAnchor(model.items, view.eye, model.pts[id] ?? model.pts[own] ?? ownCentre(model.items, own)!, own, inFrame);
+            if (!inFrame(q)) continue;
+            items.push({ id, key: `${id}-said`, at: at(q), show: 1, small: true });
           }
           return (
             <>

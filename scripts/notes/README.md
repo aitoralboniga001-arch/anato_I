@@ -1,6 +1,6 @@
 # Original course notes
 
-`python scripts/notes/extract.py` generates the six checked-in documents from the original PDFs in Downloads. `--source-dir PATH` selects another source folder. No PDF is modified or copied into the website.
+`python scripts/notes/extract.py` generates the checked-in documents (`w1.ts`–`w14.ts`) from the original PDFs in Downloads; `FILES` in the script lists the exact file names. Topics 7–12 use the 2026-10-29 notes, which came as DOCX only: each was exported to PDF with Word (same name + `.pdf`, text unchanged). Topic 13 uses the 2026-10-29 PDF. What changed for the simulation is listed in `docs/notes-update-2026-10-29.md`. `--source-dir PATH` selects another source folder. No PDF is modified or copied into the website.
 
 `python scripts/notes/extract.py --check` is read-only. It checks the complete text against the PDF's independent plain-text extraction, ignoring whitespace and only the exact header/footer lines recorded in `content/notes-text/manifest.json`. It also checks generated formatting, stable IDs, and the manifest against the checked-in files. Spelling and factual errors in the originals are preserved.
 

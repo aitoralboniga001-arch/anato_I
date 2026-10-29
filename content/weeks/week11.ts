@@ -420,7 +420,7 @@ const week: WeekDef = {
         },
         {
           at: P2[3],
-          notes: ['w11/2.2/p3/s5-s7'],
+          notes: ['w11/2.2/p3/s5-s6'],
           recall: ['septum-spurium', 'ezkerreko-zain-balbula'],
           idea: 'Septum secunduma eskuineko aurikulako bi egiturekin fusionatzen da: septum spuriuma eta ezkerreko zain balbula.',
           text: 'Gogoratu septum secunduma eskuineko aurikulan kokatzen diren egitura batzuekin fusionatzen dela: septum spuriuma eta ezkerreko zain balbula. Eskuineko aurikulatik ikusita, atzeko ertzean ikusten dira, septum secundumarekin bat egiten.',
@@ -676,7 +676,7 @@ const week: WeekDef = {
         },
         {
           at: P5[1],
-          notes: ['w11/2.2/p8/s3', 'w11/2.2/p9/s1'],
+          notes: ['w11/2.2/p9/s1', 'w11/2.2/p10/s1'],
           idea: 'Eskuineko aurikularen atzeko pareta lisoa zain sinutik dator: bertan irekitzen dira goiko eta beheko kaba zainak eta sinu koronarioa.',
           key: 'Bi jatorri, bi atal: atzeko pareta lisoa = zain sinua.',
           text: 'Inkorporazioa gertatu ondoren, eskuineko aurikularen paretan bi atal bereizten dira, jatorri ezberdinekoak. Atzeko pareta lisoa zain sinutik dator, eta bertan irekitzen dira eskuineko aurikulara iristen diren zainak: goiko kaba zaina (goitik), beheko kaba zaina (abdomenetik, diafragma zeharkatuz) eta sinu koronarioa (zain sinuaren ezkerreko luzapenetik sortua), behetik.',
@@ -686,7 +686,7 @@ const week: WeekDef = {
         },
         {
           at: P5[2],
-          notes: ['w11/2.2/p10/s1-s3'],
+          notes: ['w11/2.2/p11/s1-s2'],
           idea: 'Gainerako pareta muskularra (aurrekoa) atal aurikularretik dator: atal trabekulatua, belarritxoa, muskulu pektinioak.',
           ask: {
             q: 'Nondik dator eskuineko aurikularen atal trabekulatua (belarritxoa)?',
@@ -706,7 +706,7 @@ const week: WeekDef = {
         },
         {
           at: P5[3],
-          notes: ['w11/2.2/p11/s1'],
+          notes: ['w11/2.2/p12/s1'],
           idea: 'Bi atalen artean gandor terminala; haren goiko aldean nodulu sinusala.',
           key: 'Gandor terminala = atal lisoaren eta trabekulatuaren arteko muga.',
           text: 'Bi atalen artean gandor muskular bat dago, gandor terminala. Haren goiko aldean bihotz sistemako nodulu sinusala kokatzen da: bihotzak uzkurtzeko behar dituen nerbio kinadak sortzen ditu.',
@@ -716,7 +716,7 @@ const week: WeekDef = {
         },
         {
           at: P5[4],
-          notes: ['w11/2.2/p12/s1', 'w11/2.2/p13/s1-s2'],
+          notes: ['w11/2.2/p13/s1', 'w11/2.2/p14/s1'],
           idea: 'Ezkerreko aurikulan ere atzeko pareta lisoa eta atal trabekulatua; atzeko paretatik ebaginazio bat irteten da: birika zain primitiboa.',
           text: 'Ezkerreko aurikularekin antzeko prozesu bat gertatzen da: hemen ere atzeko pareta lisoa eta atal trabekulatua (gainerako pareta, aurrekoa) daude. Ezkerreko aurikula ere tamainaz handitzen da, garapenean haren atzeko paretatik ebaginazio bat irteten delako: hasierako birika zaina edo birika zain primitiboa.',
           focus: ['birika-zain-primitiboa'],
@@ -725,7 +725,7 @@ const week: WeekDef = {
         },
         {
           at: P5[5],
-          notes: ['w11/2.2/p13/s3'],
+          notes: ['w11/2.2/p14/s2'],
           idea: 'Birika zain primitiboa adarkatzen da (4 adar) eta birika hastapenetako zainekin kontaktatzen du: 2 ezkerrera, 2 eskuinera.',
           text: 'Birika zain primitiboa adarkatu egiten da, eta lau adar sortzen dira. Adar hauek birika hastapenetan dauden birika zainekin kontaktatzen dute: bi ezkerreko birikara eta bi eskuinekora.',
           focus: ['birika-zain-primitiboa', 'birika-hastapenak'],
@@ -733,7 +733,7 @@ const week: WeekDef = {
         },
         {
           at: P5[6],
-          notes: ['w11/2.2/p13/s4-s5'],
+          notes: ['w11/2.2/p14/s3', 'w11/2.2/p15/s1'],
           idea: 'Azkenean 4 birika zain (birika bakoitzetik 2) ezkerreko aurikularen atzeko paretara iristen dira: atal lisoa. Gainerakoa trabekulatua, atal aurikularraren ezkerreko zabalkuntzatik.',
           key: 'Ezkerreko aurikularen atal lisoa = birika zainak; trabekulatua = atal aurikularra.',
           ask: {
@@ -754,7 +754,7 @@ const week: WeekDef = {
         },
         {
           at: P5[7],
-          notes: ['w11/2.2/p14/s1-s3', 'w11/2.2/p15/s1-s3'],
+          notes: ['w11/2.2/p14/s1', 'w11/2.2/p14/s2-s3'],
           idea: 'Birika zainaren jatorria: mesokardio dortsaleko mesenkima, ezkerreko aurikularen atzeko paretara inkorporatua.',
           text: 'Mesokardio dortsala behin-behineko lotura da: perikardio barrunbean garatzen den bihotz hodia perikardioaren atzeko paretarekin lotuta mantentzen du. Garapenean desagertzen da, baina desagertu aurretik mesenkima bat sortzen du, ezkerreko aurikularen atzeko paretara inkorporatzen dena. Mesenkima horretatik birika bena enbrionarioa eratzen da; hazi egiten da, eta bere adarren bidez birika hastapen bakoitzean agertzen diren bi birika benekin kontaktatzen du.',
           focus: ['mesokardio-dortsala', 'birika-zain-primitiboa'],
@@ -828,7 +828,7 @@ const week: WeekDef = {
         },
         {
           at: P6[1],
-          notes: ['w11/3/p6/s1'],
+          notes: ['w11/3/p7/s1'],
           idea: '(1) Atal bulbarraren eta bentrikularraren arteko ertza (gandorra), hasieran zorrotza, gero eta txikiagoa (zapalagoa) egiten da.',
           text: 'Erretenaren trenkadatzeak hiru prozesu ditu. Lehenengoa: bihotz lakioaren atal bulbarraren eta atal bentrikularraren artean dagoen ertza edo gandorra (ertz bulbobentrikularra), hasieran nahiko zorrotza dena, gero eta txikiagoa (zapalagoa) egiten da.',
           focus: ['ertz-bulbobentrikularra'],
@@ -889,7 +889,7 @@ const week: WeekDef = {
         },
         {
           at: P6[5],
-          notes: ['w11/3/p9/s3', 'w11/3/p10/s1-s2'],
+          notes: ['w11/3/p9/s3', 'w11/3/p7/s5', 'w11/3/p8/s3'],
           idea: 'Goiko eta beheko kuxinak hurbildu eta fusionatzen dira (trenkada): erretena bi zulotan banatzen da, eskuineko eta ezkerreko zulo aurikulubentrikularrak.',
           key: 'Goikoa + behekoa → trenkada → eskuineko eta ezkerreko zulo AB.',
           text: 'Garapenean goiko eta beheko kuxinak elkarrengana hurbiltzen dira, trenkada sortuz, eta erretena bi zulo desberdin bihurtzen dute: eskuineko eta ezkerreko zulo aurikulubentrikularrak. Hauek komunikatzen dituzte goi-atzean dauden aurikulak eta behe-aurrean dauden bentrikuluak: ezkerreko aurikula ezkerreko bentrikuluarekin, eta eskuineko aurikula eskuineko bentrikuluarekin.',
@@ -899,7 +899,7 @@ const week: WeekDef = {
         },
         {
           at: P6[6],
-          notes: ['w11/3/p10/s3'],
+          notes: ['w11/3/p8/s4'],
           idea: 'Aurikulak eta bentrikuluak ia plano frontalean daudenez, bi zuloak plano frontalean daude: horregatik kuxinak goikoa eta behekoa dira.',
           key: 'Zuloak plano frontalean → kuxinak goikoa eta behekoa (ez aurrekoa eta atzekoa).',
           ask: {
@@ -920,7 +920,7 @@ const week: WeekDef = {
         },
         {
           at: P6[7],
-          notes: ['w11/3/p11/s1-s4', 'w11/3/p12/s1', 'w11/3/p13/s1', 'w11/3/p14/s1', 'w11/3/p15/s1'],
+          notes: ['w11/3/p10/s1-s4', 'w11/3/p11/s1', 'w11/3/p12/s1', 'w11/3/p13/s1', 'w11/3/p14/s1'],
           recall: ['bihotz-lakioa', 'atal-bulbarra', 'atal-bentrikularra', 'atal-aurikularra', 'zain-sinua'],
           idea: 'Lakioa albotik: atal bulbarra aurrera, behera eta eskuinera (aurrean); atal bentrikularra haren ezkerrean; atal aurikularra eta zain sinua gora, atzera eta ezkerrera (atzean).',
           caution: 'Apunteen "albotik ikusita" zerrendak atal aurikularra "gora, aurrera eta atzera" doala dio; testuaren gainerakoak (eta 10. gaiak) "gora, atzera eta ezkerrera". Atzean geratzen da: hori da gakoa.',
@@ -931,7 +931,7 @@ const week: WeekDef = {
         },
         {
           at: P6[8],
-          notes: ['w11/3/p16/s1-s2'],
+          notes: ['w11/3/p15/s1-s2'],
           idea: 'Bi hasierako bentrikuluen arteko komunikazioa: bentrikulu arteko zulo primarioa.',
           key: 'Bentrikulu arteko zulo primarioa = bi hasierako bentrikuluen arteko komunikazioa.',
           text: 'Bi hasierako bentrikuluen arteko komunikazioari bentrikulu arteko zulo primarioa deitzen zaio: ertz bulbobentrikularraren gainetik, odola bentrikulu batetik bestera igaro daiteke. Hasierako ezkerreko bentrikulua (atal bentrikularra) atal aurikularrarekin kontaktuan dago, erretenaren bitartez.',
@@ -1027,7 +1027,7 @@ const week: WeekDef = {
         },
         {
           at: P7[2],
-          notes: ['w11/3/p20/s1'],
+          notes: ['w11/3/p23/s1'],
           idea: 'Zuloetatik pasatzen den odolak goraguneen azalera bentrikularra zulatzen du: balbak gero eta meheagoak.',
           text: 'Kontuan hartu: zulo aurikulubentrikularretatik pasatzen den odolak mesenkima goraguneen azalera bentrikularra zulatzen du, eta balbak gero eta meheagoak egiten dira.',
           focus: ['balbula-trikuspidea', 'balbula-mitrala'],
@@ -1036,7 +1036,7 @@ const week: WeekDef = {
         },
         {
           at: P7[3],
-          notes: ['w11/3/p21/s1-s2'],
+          notes: ['w11/3/p20/s1', 'w11/3/p21/s1'],
           idea: 'Balbak muskulu papilarrei lotuta geratzen dira soka tendinosoen bidez; sokak hasieran muskularrak, gero fibrotsuak (tendinosoak).',
           key: 'Balba ← soka tendinosoak (muskular → fibrotsu) → muskulu papilarrak.',
           ask: {
@@ -1057,7 +1057,7 @@ const week: WeekDef = {
         },
         {
           at: P7[4],
-          notes: ['w11/3/p21/s3'],
+          notes: ['w11/3/p21/s2'],
           idea: 'Muskulu papilarrak uzkurtzean soka tendinosoetatik tiratzen dute: balbak mugitu, zuloa ireki edo itxi, odola pasa dadin.',
           text: 'Muskulu papilar horiek uzkurtzen direnean, soka tendinosoetatik tiratzen dute balbak mugitzeko, eta zulo aurikulubentrikularra zabaldu edo ixten da, odola pasa dadin.',
           focus: ['muskulu-papilarrak', 'soka-tendinosoak'],
@@ -1119,7 +1119,7 @@ const week: WeekDef = {
       beats: [
         {
           at: P8[0],
-          notes: ['w11/4/p3/s1-s2'],
+          notes: ['w11/3/p8/s1', 'w11/4/p3/s2'],
           recall: ['bulboaren-hurbileko-atala', 'atal-bentrikularra', 'muskulu-trenkadak'],
           idea: 'Hasierako eskuineko bentrikulua atal bulbarraren hurbileko ataletik, ezkerrekoa atal bentrikularretik; ezkerrekoaren paretan ere muskulu trenkadak (haren atal trabekulatua).',
           text: 'Gogoratu: hasierako eskuineko bentrikulua (atal trabekulatua) atal bulbarraren hurbileko ataletik agertzen da, eta hasierako ezkerreko bentrikulua bihotz lakioaren atal bentrikularretik garatzen da. Honen paretan ere muskulu trenkadak sortzen dira: gero ezkerreko bentrikuluaren atal trabekulatua izango da.',
@@ -1140,7 +1140,7 @@ const week: WeekDef = {
         },
         {
           at: P8[2],
-          notes: ['w11/4/p5/s1-s2'],
+          notes: ['w11/4/p5/s3', 'w11/4/p5/s1'],
           idea: 'Bi bentrikuluen artean ere trenkada bat eratzen da. 4. astearen bukaeran paretetan muskulu trenkadak (trabekulak) eta muskulu papilarrak.',
           text: 'Bi bentrikuluen artean ere trenkada bat eratzen da. 4. astearen bukaeran, bi bentrikuluetako paretetan, batez ere miokardiotik, muskulu trenkada edo trabekula pila agertzen dira, baita muskulu papilarrak ere, soka tendinosoak insertatzeko.',
           focus: ['muskulu-trenkadak', 'muskulu-papilarrak'],
@@ -1149,7 +1149,7 @@ const week: WeekDef = {
         },
         {
           at: P8[3],
-          notes: ['w11/4/p6/s1-s3'],
+          notes: ['w11/4/p5/s2-s3', 'w11/4/p6/s1'],
           idea: 'Bentrikuluak handitzean barneko paretak hurbildu: bentrikulu arteko trenkada muskularra. Ez da osoa: haren goiko aldetik odola eskuinetik ezkerrera pasa daiteke.',
           key: 'Trenkada muskularra EZ da osoa: goiko aldetik odola pasatzen da.',
           ask: {
@@ -1170,7 +1170,7 @@ const week: WeekDef = {
         },
         {
           at: P8[4],
-          notes: ['w11/4/p6/s4-s5', 'w11/4/p7/s1'],
+          notes: ['w11/4/p6/s2-s3', 'w11/4/p7/s1'],
           idea: 'Arteria konoaren trenkadatzearekin batera bigarren trenkada bat, ez muskularra: mintzezko trenkada (konoaren trenkadaren beheko aldea). Muskularrean finkatzean bentrikuluak guztiz banatuta.',
           key: 'Bentrikulu arteko trenkada = muskularra + mintzezkoa (konoaren trenkadaren beheko aldea).',
           ask: {
@@ -1237,7 +1237,7 @@ const week: WeekDef = {
       beats: [
         {
           at: P9[0],
-          notes: ['w11/5/p3/s1', 'w11/5.1/p3/s1', 'w11/5.1/p4/s1-s2'],
+          notes: ['w11/5/p2/s1', 'w11/5.1/p3/s1', 'w11/5.1/p3/s1-s2'],
           recall: ['atal-bulbarra', 'bulboaren-hurbileko-atala', 'arteria-konoa', 'enbor-arteriosoa'],
           idea: 'Bentrikuluetan bi atal: trabekulatua (muskuluekin) eta lisoa edo infundibulua (arteriak irteten dira). Atal bulbarra: hurbileko atala → eskuineko atal trabekulatua; urrutikoa → enbor arteriosoa.',
           text: 'Atal bulbarrean kiribil formako trenkadak sortzen dira. Bentrikuluetan guztiz desberdinak diren bi atal bereizten dira: atal trabekulatua (muskuluekin) eta atal lisoa edo infundibulua (hortik arteriak irteten dira). Atal bulbarrean hiru atal bereizten dira: hurbileko ataletik eskuineko bentrikuluaren atal trabekulatua garatuko da, eta urruneko ataletik enbor arteriosoa sortuko da.',
@@ -1248,7 +1248,7 @@ const week: WeekDef = {
         },
         {
           at: P9[1],
-          notes: ['w11/5.1/p5/s1-s2'],
+          notes: ['w11/5.1/p4/s1-s2'],
           idea: 'Arteria konotik bi bentrikuluen atal lisoak (infundibuluak). Konoaren alboko paretetan bi gandor: atze-eskuinean eta aurre-ezkerrean.',
           key: 'Konoaren gandorrak: ATZE-ESKUINEAN eta AURRE-EZKERREAN.',
           text: 'Arteria konotik bi bentrikuluen atal lisoak edo infundibuluak sortzen dira. Arteria konoaren mailan, alboko paretetan, bi endokardio kuxin (gandor) agertzen dira: bat atze-eskuineko aldean eta bestea aurre-ezkerreko aldean.',
@@ -1258,7 +1258,7 @@ const week: WeekDef = {
         },
         {
           at: P9[2],
-          notes: ['w11/5.1/p5/s3-s4'],
+          notes: ['w11/5.1/p4/s3-s4'],
           idea: 'Bi gandorrak hazi eta fusionatzen dira: arteria konoa trenkadatzen da. Trenkada laprana da.',
           caution: 'Apunteen hurrengo esaldiak alderantziz dio ("aurre-eskuinaldean eta atze-ezkerrean"); gandorren kokapena aurreko esaldiarena da: atze-eskuinean eta aurre-ezkerrean. Trenkada laprana da bi kasuetan.',
           ask: {
@@ -1279,7 +1279,7 @@ const week: WeekDef = {
         },
         {
           at: P9[3],
-          notes: ['w11/5.1/p5/s5-s8'],
+          notes: ['w11/5.1/p4/s5-s8'],
           idea: 'Aurre-eskuinean eskuineko bentrikuluaren infundibulua (birika arteria); atze-ezkerrean ezkerrekoaren infundibulua (aorta). Ez daude plano berean.',
           key: 'Aurre-eskuina → eskuineko infundibulua → birika arteria; atze-ezkerra → ezkerreko infundibulua → aorta.',
           ask: {
@@ -1300,7 +1300,7 @@ const week: WeekDef = {
         },
         {
           at: P9[4],
-          notes: ['w11/5.1/p6/s1-s4', 'w11/5.1/p7/s1'],
+          notes: ['w11/5.1/p4/s10-s13', 'w11/5.1/p4/s14'],
           idea: 'Konoaren trenkada behetik hazi eta trenkada muskularraren goiko aldearekin eta beheko endokardio kuxinarekin fusionatzen da: haren beheko ataltxoa mintzezko trenkada. Bentrikuluak guztiz banatuta.',
           key: 'Konoaren trenkadaren beheko ataltxoa = mintzezko trenkada: zuloa ixten du.',
           text: 'Arteria konoaren trenkada beheko aldetik hazten da, eta azkenean bentrikulu arteko trenkada muskularraren goiko aldearekin eta erreten aurikulubentrikularreko beheko endokardio kuxinarekin fusionatzen da. Konoaren beheko ataltxo hau bentrikuluen arteko trenkadaren mintzezko zatia izango da (bi atal: muskularra eta haren gainean mintzezkoa). Horrela eskuineko eta ezkerreko bentrikuluak guztiz banatuta geratzen dira, eta bi bentrikuluen arteko zulotxoa ixten da.',
@@ -1431,7 +1431,7 @@ const week: WeekDef = {
         },
         {
           at: P10[4],
-          notes: ['w11/5.2/p6/s1', 'w11/5.2/p7/s1-s4'],
+          notes: ['w11/5.2/p6/s1', 'w11/5.2/p6/s2-s5'],
           idea: 'Urrutiko atalean berriro zeharkakoa, baina aorta aurrean eta birika arteria atzean. Mailaz maila trenkada biratzen da: hodiek posizio desberdinak.',
           key: 'Urrutian: zeharkakoa; aorta AURREAN, birika arteria ATZEAN.',
           text: 'Enbor arteriosoaren urrutiko atalean (goikaldean) trenkada aortiko-pulmonarra berriro zeharkakoa da, baina kasu honetan aorta aurreko aldean dago eta birika arteria (birika enborra) atzean. Trenkadaren kokapena desberdina da enbor arteriosoaren maila bakoitzean; kiribila denez, aortak eta birika arteriak posizio desberdinak hartzen dituzte mailaren arabera, eta endokardio kuxinen kokapenak ere desberdinak dira.',
@@ -1441,7 +1441,7 @@ const week: WeekDef = {
         },
         {
           at: P10[5],
-          notes: ['w11/5.2/p8/s1-s5'],
+          notes: ['w11/5.2/p7/s1-s5'],
           idea: 'Enborreko trenkada kiribila beheko aldetik konoaren trenkadarekin fusionatzen da: jarraiak dira. Konoarena trenkada muskularrarekin eta beheko kuxinarekin → mintzezko zatia.',
           key: 'Enborreko trenkada + konoaren trenkada: JARRAIAK. Birika arteria aurretik, aorta atzetik.',
           text: 'Enbor arteriosoko trenkada kiribila beheko aldetik arteria konoaren trenkadarekin fusionatzen da: jarraiak dira. Konoaren trenkada, berriz, behealdetik hazten da eta bentrikulu arteko trenkada muskularrarekin eta beheko endokardio kuxinarekin fusionatzen da; fusioaren ondorioz bentrikulu arteko mintzezko zatia sortzen da. Eskuineko bentrikuluaren infundibulutik birika arteria irteten da, aurretik, eta ezkerreko bentrikulutik aorta, trenkadaren atzetik.',
@@ -1451,7 +1451,7 @@ const week: WeekDef = {
         },
         {
           at: P10[6],
-          notes: ['w11/5.2/p9/s1-s3'],
+          notes: ['w11/5.2/p7/s6-s8'],
           idea: 'Bihotza apur bat biratuta: eskuineko bentrikulua aurrerago. Behean birika arteria aurrean, tartean parean, goian aorta aurrean: bi hodiak bata bestearen inguruan.',
           key: 'Behean birika arteria aurrean → tartean parean → goian aorta aurrean.',
           ask: {
@@ -1472,7 +1472,7 @@ const week: WeekDef = {
         },
         {
           at: P10[7],
-          notes: ['w11/5.2/p10/s1-s3'],
+          notes: ['w11/5.2/p7/s9-s11'],
           idea: 'Aurikuletan eta bentrikuluetan atal lisoa eta trabekulatua. Bentrikuluen atal trabekulatuak hasierako bentrikuluetatik, lisoak arteria konotik; enbor arteriosotik aorta eta birika enborra.',
           key: 'Bentrikuluak: trabekulatua hasierako bentrikuluetatik, lisoa (infundibulua) konotik; aorta eta birika enborra enbor arteriosotik.',
           text: 'Laburbilduz: aurikuletan bi atal desberdin ditugu, atal lisoa eta atal trabekulatua, eta gauza bera gertatzen da bentrikuluetan. Bentrikuluen atal trabekulatuak hasierako eskuineko eta ezkerreko bentrikuluetatik garatzen dira, eta atal lisoak arteria konotik. Infundibulu horietatik aorta eta birika enborra irteten dira, bihotz lakioaren urrutiko ataletik (enbor arteriosoa), non trenkada aortiko-pulmonar kiribila agertzen den.',
@@ -1527,7 +1527,7 @@ const week: WeekDef = {
       beats: [
         {
           at: P11[0],
-          notes: ['w11/5.2/p12/s1', 'w11/5.2/p12/s6'],
+          notes: ['w11/5.2/p8/s1', 'w11/5.2/p9/s2'],
           recall: ['aorta', 'birika-arteria', 'endokardio-kuxinak'],
           idea: 'Aortaren eta birika arteriaren hasierako zatietan balbula semilunarrak, endokardio kuxinetatik: hiru gandor, goian goraguneak (tuberkuluak).',
           key: 'Balbula semilunarrak endokardio kuxinetatik: hiru gandor → goraguneak.',
@@ -1538,7 +1538,7 @@ const week: WeekDef = {
         },
         {
           at: P11[1],
-          notes: ['w11/5.2/p12/s3'],
+          notes: ['w11/5.2/p8/s3'],
           idea: 'Goraguneak goiko aldetik zulatzen dira: balbak ahurrak, enara kabiko formakoak.',
           key: 'Balbak: ENARA KABIKO forma, ahurrak (goitik zulatuta).',
           ask: {
@@ -1558,7 +1558,7 @@ const week: WeekDef = {
         },
         {
           at: P11[2],
-          notes: ['w11/5.2/p12/s2'],
+          notes: ['w11/5.2/p8/s2'],
           idea: 'Trikuspideak: aorta balbulan bi alboko balba eta atzeko bat; birika balbulan bi alboko eta aurreko bat.',
           key: 'Aorta: 2 alboko + ATZEKOA. Birika: 2 alboko + AURREKOA.',
           ask: {
@@ -1579,7 +1579,7 @@ const week: WeekDef = {
         },
         {
           at: P11[3],
-          notes: ['w11/5.2/p12/s4-s5'],
+          notes: ['w11/5.2/p8/s4', 'w11/5.2/p9/s1'],
           idea: 'Aorta balbularen eskuineko eta ezkerreko balben sinuetatik arteria koronarioak: aortaren lehen adarrak, miokardioa irrigatzen dute.',
           key: 'Koronarioak: aortaren LEHEN adarrak, eskuineko eta ezkerreko sinuetatik.',
           ask: {
@@ -1644,7 +1644,7 @@ const week: WeekDef = {
         },
         {
           at: Q[1],
-          notes: ['w11/3/p11/s1-s3'],
+          notes: ['w11/3/p10/s1-s3'],
           idea: 'Bulboa aurrera, behera eta eskuinera; atal aurikularra eta zain sinua gora, atzera eta ezkerrera: hodia bihotz lakio bihurtzen da.',
           key: 'Bulboa aurrera-behera-eskuinera; atal aurikularra + sinua gora-atzera-ezkerrera.',
           text: 'Hodia tolesten da. Bulboa aurrera, behera eta eskuinera abiatzen da, eta ezkerreko bentrikuluarekin jarraitzen du, eta hori atal aurikularrarekin. Atal aurikularra eta bere jarraipena, zain sinua, gora, atzera eta ezkerrera abiatzen dira. Mugimendu hauen ondoren, bihotz hodia bihotz lakio bihurtzen da.',
@@ -1654,7 +1654,7 @@ const week: WeekDef = {
         },
         {
           at: Q[2],
-          notes: ['w11/3/p8/s1', 'w11/5.2/p10/s1'],
+          notes: ['w11/3/p8/s1', 'w11/5.2/p7/s9'],
           recall: ['hasierako-eskuineko-bentrikulua', 'hasierako-ezkerreko-bentrikulua'],
           idea: 'Lakioa bere lekuan bihotz trenkadatua bihurtzen da: hurbileko atala (berdea) → eskuineko bentrikuluaren atal trabekulatua; atal bentrikularra (urdin-berdea) → ezkerrekoarena.',
           key: 'Trabekulatuak: eskuinekoa ← hurbileko atala; ezkerrekoa ← atal bentrikularra.',
@@ -1676,7 +1676,7 @@ const week: WeekDef = {
         },
         {
           at: Q[3],
-          notes: ['w11/5.1/p5/s1', 'w11/5.2/p10/s2'],
+          notes: ['w11/5.1/p4/s1', 'w11/5.2/p7/s10'],
           idea: 'Arteria konotik (lima) bi bentrikuluen atal lisoak: infundibuluak. Konoaren trenkadak bi infundibuluak bereizten ditu.',
           key: 'Infundibuluak (atal lisoak) ← arteria konoa.',
           text: 'Arteria konotik bi bentrikuluen zati lisoak edo infundibuluak sortzen dira: eskuineko bentrikuluarena eta ezkerrekoarena. Zati trabekulatuak hasierako eskuineko eta ezkerreko bentrikuluetatik garatzen dira, eta bi bentrikulu horien zati lisoak arteria kono espaziotik.',
@@ -1686,7 +1686,7 @@ const week: WeekDef = {
         },
         {
           at: Q[4],
-          notes: ['w11/5.2/p10/s3', 'w11/5.2/p3/s7'],
+          notes: ['w11/5.2/p7/s11', 'w11/5.2/p3/s7'],
           idea: 'Enbor arteriosotik (marfila), trenkada aortiko-pulmonar kiribilaz banatuta, aorta eta birika enborra; aorta ezkerreko infundibulutik irteten da, birika enborra eskuinekotik.',
           key: 'Aorta + birika enborra ← enbor arteriosoa (urrutiko atala).',
           text: 'Infundibulu horietatik aorta eta birika enborra irteten dira, lakioaren urrutiko ataletik: enbor arteriosotik. Bertan agertzen da trenkada aortiko-pulmonar kiribila. Birika arteria eskuineko bentrikuluaren infundibuluarekin komunikatuta mantentzen da, eta aorta ezkerrekoarekin.',
@@ -1696,7 +1696,7 @@ const week: WeekDef = {
         },
         {
           at: Q[5],
-          notes: ['w11/2.2/p8/s3', 'w11/2.2/p9/s1', 'w11/2.2/p10/s1', 'w11/2.2/p13/s4-s5'],
+          notes: ['w11/2.2/p9/s1', 'w11/2.2/p10/s1', 'w11/2.2/p11/s1', 'w11/2.2/p14/s3', 'w11/2.2/p15/s1'],
           recall: ['zain-sinua', 'birika-zain-primitiboa'],
           idea: 'Atzetik: eskuineko aurikularen atal lisoa zain sinutik (kaba zainak bertan), ezkerrekoarena birika zainetatik (lau zain bertan); gainerako pareta trabekulatua atal aurikularretik.',
           key: 'Atal lisoak: eskuinean zain sinua, ezkerrean birika zainak. Trabekulatuak: atal aurikularra.',
@@ -1707,7 +1707,7 @@ const week: WeekDef = {
         },
         {
           at: Q[6],
-          notes: ['w11/5.2/p10/s1'],
+          notes: ['w11/5.2/p7/s9'],
           idea: 'Laburpena: bihotz hodiaren atal bakoitza eta haren eratorria bihotz osoan, kolore kode berarekin.',
           key: 'Kolore bat = jatorri bat: bihotz hodiaren atalak bihotz osoan.',
           text: 'Laburbilduz: aurikuletan bi atal desberdin ditugu, atal lisoa eta atal trabekulatua, eta gauza bera gertatzen da bentrikuluetan. Taulak atal bakoitza bere kolorez biltzen du, hodiaren segmentutik bihotz osoko egituraraino.',

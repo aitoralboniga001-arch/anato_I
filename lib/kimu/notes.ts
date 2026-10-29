@@ -11,7 +11,7 @@
 import { NOTES } from '@/content/notes';
 import { notesOf, sentenceAnchors, sentenceText, type NotesBlock } from '@/content/notes-text';
 import { weeks } from '@/content/registry';
-import { match, queryTokens, tokens } from './text';
+import { match, queryTokens, spell, tokens } from './text';
 
 export interface NotesSentenceRef {
   id: string;
@@ -29,6 +29,8 @@ export interface Passage {
   title: string;
   /** The heading as printed above the passage (it may word the section differently from the TOC). */
   heading: string;
+  /** The headings of the sections it is part of ("5. Atal bulbarraren trenkadatze prozesua" for 5.1). */
+  parents: string;
   kind: 'p' | 'li' | 'caption';
   /** For a list: the paragraph that introduces it (its sentences come first in `sentences`). */
   lead?: string;
@@ -79,12 +81,32 @@ function titleOf(week: number, section: string, heading: string): string {
   return t;
 }
 
-function build(): { passages: Passage[]; idf: Map<string, number>; vocab: string[] } {
+/** A section of the notes by its heading (as printed, or its table-of-contents title). */
+interface Section {
+  week: number;
+  section: string;
+  heading: string;
+  tok: Set<string>;
+}
+
+function build(): { passages: Passage[]; idf: Map<string, number>; vocab: string[]; sections: Section[] } {
   const passages: Passage[] = [];
+  const sections: Section[] = [];
   for (const w of weeks) {
     const blocks: NotesBlock[] = notesOf(w.week);
     let heading = '';
     let headSection = '';
+    // Every heading by its section: a subsection's passages answer to the section above it too (section 5
+    // of topic 11 has no paragraph of its own, only 5.1 and 5.2 under its title).
+    const heads = new Map<string, string>();
+    const parentsOf = (section: string) => {
+      const out: string[] = [];
+      for (let up = section.replace(/\.?[^.]+$/, ''); up; up = up.replace(/\.?[^.]+$/, '')) {
+        const h = heads.get(up) ?? (NOTES[w.week]?.find((x) => x.n === up)?.title ?? '');
+        if (h) out.push(h);
+      }
+      return out.join(' ');
+    };
     const titleFor = (section: string) => (section === headSection && heading ? titleOf(w.week, section, heading) : titleOf(w.week, section, ''));
     for (let i = 0; i < blocks.length; i++) {
       const b = blocks[i];
@@ -92,6 +114,8 @@ function build(): { passages: Passage[]; idf: Map<string, number>; vocab: string
       if (b.kind === 'h1' || b.kind === 'h2') {
         heading = b.sentences.map(sentenceText).join(' ');
         headSection = b.section;
+        heads.set(b.section, heading);
+        sections.push({ week: w.week, section: b.section, heading, tok: new Set(tokens(bareHeading(heading))) });
         continue;
       }
       const sentences = b.sentences.map((s) => ({ id: s.id, text: clean(sentenceText(s)), tok: tokens(sentenceText(s)) })).filter((s) => s.text.length > 1);
@@ -111,22 +135,22 @@ function build(): { passages: Passage[]; idf: Map<string, number>; vocab: string
           listOf.sentences.push(...sentences);
           continue;
         }
-        passages.push({ id: b.id, week: w.week, section: b.section, title: titleFor(b.section), heading: b.section === headSection ? heading : '', kind: 'li', items: [item], sentences, tok: new Set(), headTok: new Set() });
+        passages.push({ id: b.id, week: w.week, section: b.section, title: titleFor(b.section), heading: b.section === headSection ? heading : '', parents: parentsOf(b.section), kind: 'li', items: [item], sentences, tok: new Set(), headTok: new Set() });
         continue;
       }
-      passages.push({ id: b.id, week: w.week, section: b.section, title: titleFor(b.section), heading: b.section === headSection ? heading : '', kind: b.kind === 'caption' ? 'caption' : 'p', sentences, tok: new Set(), headTok: new Set() });
+      passages.push({ id: b.id, week: w.week, section: b.section, title: titleFor(b.section), heading: b.section === headSection ? heading : '', parents: parentsOf(b.section), kind: b.kind === 'caption' ? 'caption' : 'p', sentences, tok: new Set(), headTok: new Set() });
     }
   }
   const df = new Map<string, number>();
   for (const p of passages) {
     p.tok = new Set(p.sentences.flatMap((s) => s.tok));
     // A list with its own lead sentence is about that sentence; the section heading speaks for the rest.
-    p.headTok = new Set(tokens(p.kind === 'li' && p.lead ? p.lead : `${p.title} ${p.heading}`));
+    p.headTok = new Set(tokens(`${p.kind === 'li' && p.lead ? p.lead : `${p.title} ${p.heading}`} ${p.parents}`));
     for (const t of new Set([...p.tok, ...p.headTok])) df.set(t, (df.get(t) ?? 0) + 1);
   }
   const idf = new Map<string, number>();
   for (const [t, n] of df) idf.set(t, Math.log(1 + passages.length / (1 + n)));
-  return { passages, idf, vocab: [...df.keys()] };
+  return { passages, idf, vocab: [...df.keys()], sections };
 }
 
 let built: ReturnType<typeof build> | null = null;
@@ -138,7 +162,7 @@ export const allPassages = () => index().passages;
 /** For each query word: the notes words it matches, and how well (computed once per question). */
 function expand(question: string) {
   const { vocab, idf, passages } = index();
-  return queryTokens(question, true).map((alts) => {
+  return queryTokens(question, true).map((a) => spell(a, idf)).map((alts) => {
     const m = new Map<string, number>();
     for (const alt of alts) {
       const fuzzy = alt.length >= 6;
@@ -196,10 +220,12 @@ export const strongHit = (h: NotesHit | undefined): h is NotesHit => !!h && h.co
 export const fairHit = (h: NotesHit | undefined): h is NotesHit => !!h && h.cover >= 0.5 && h.score >= 3;
 
 /** Ranks the passages of the notes for a question, best first. */
-export function searchNotes(question: string, ctx: NotesContext = {}, limit = 3): NotesHit[] {
+export function searchNotes(question: string, ctx: NotesContext = {}, limit = 3, asked = question): NotesHit[] {
   const q = expand(question);
   if (!q.length) return [];
-  const intent = intentOf(question);
+  // What kind of answer is wanted comes from the student's own words (`asked`), even when the notes are
+  // searched with other words (a structure's Basque name for a question in Spanish).
+  const intent = intentOf(asked);
   const cue = CUE[intent];
   const out: NotesHit[] = [];
   for (const p of index().passages) {
@@ -225,6 +251,72 @@ export function searchNotes(question: string, ctx: NotesContext = {}, limit = 3)
   const top = out.slice(0, limit);
   for (const h of top) h.best = bestSentences(h.passage, q, cue, intent);
   return top;
+}
+
+/** A question that is a section's heading ("Atal bulbarraren trenkadatze prozesua"), answered as that section. */
+export interface SectionHit {
+  week: number;
+  section: string;
+  /** The heading in sentence case, without its number. */
+  title: string;
+  /** The section's own opening, then the opening of each subsection (one hit each, in the notes' order). */
+  parts: NotesHit[];
+}
+
+/** Sentence case, no number, no trailing arrow note: "5. ATAL … PROZESUA → kiribil…" → "Atal … prozesua". */
+const bareHeading = (h: string) => {
+  const t = h.replace(/^\s*[\d.]+\s*/, '').replace(/\s*(?:→|->).*$/, '').replace(/[:.]\s*$/, '').trim();
+  return t === t.toUpperCase() ? t.charAt(0) + t.slice(1).toLowerCase() : t;
+};
+
+/**
+ * The section a question names by its heading: every word of the question is in the heading, and the
+ * question says most of the heading (so "septum primum" stays a question about the structure, while
+ * "septum primumaren sorrera" is the section 2.1). Null when no heading fits.
+ */
+export function sectionAsked(question: string, ctx: NotesContext = {}): SectionHit | null {
+  // Matched against the heading's own words, not the passages' vocabulary: a heading's word may appear in
+  // no paragraph ("bulbarretik" in topic 10, 3.1).
+  const q = queryTokens(question, true);
+  if (q.length < 2) return null;
+  const { sections, passages } = index();
+  let best: { s: Section; v: number } | null = null;
+  for (const sec of sections) {
+    if (ctx.only && sec.week !== ctx.only) continue;
+    let score = 0;
+    let covered = 0;
+    for (const alts of q) {
+      let m = 0;
+      for (const alt of alts) for (const w of sec.tok) m = Math.max(m, match(alt, w, alt.length >= 6));
+      if (m > 0) covered += 1;
+      score += m;
+    }
+    if (covered < q.length || covered < sec.tok.size * 0.7) continue;
+    const v = (score / sec.tok.size) * (ctx.week === sec.week ? 1.2 : 1);
+    if (!best || v > best.v) best = { s: sec, v };
+  }
+  if (!best) return null;
+  const { week, section } = best.s;
+  const opening = (p: Passage): NotesHit => {
+    const pool = p.kind === 'li' && p.leadCount ? p.sentences.slice(0, p.leadCount) : p.sentences;
+    // One sentence, or two when the first is short (a heading-like opening).
+    const two = pool[0].text.length < 90 && pool[1] ? [pool[0], pool[1]] : [pool[0]];
+    return { passage: p, score: 20, cover: 1, best: two };
+  };
+  // A section's opening, skipping a paragraph whose first sentence is broken in the notes themselves (an
+  // unclosed bracket running into the next line: topic 11, 5.1) when a clean one follows.
+  const whole = (t: string) => (t.match(/\(/g) ?? []).length === (t.match(/\)/g) ?? []).length && /[.!?:)»"]$/.test(t.trim());
+  const openingOf = (x: string) => {
+    const own = passages.filter((p) => p.week === week && p.section === x && p.kind !== 'caption');
+    return own.find((p) => whole(p.sentences[0].text)) ?? own[0];
+  };
+  const own = openingOf(section);
+  // Its direct subsections, in order: 5 → 5.1, 5.2 (not 5.1.1).
+  const depth = section.split('.').length + 1;
+  const subs = [...new Set(passages.filter((p) => p.week === week && p.section.startsWith(`${section}.`) && p.section.split('.').length === depth).map((p) => p.section))];
+  const parts = [own, ...subs.map(openingOf)].filter((p): p is Passage => !!p).map(opening);
+  if (!parts.length) return null;
+  return { week, section, title: bareHeading(best.s.heading), parts };
 }
 
 /** The one or two sentences of a passage that answer the question (adjacent, in reading order). */
