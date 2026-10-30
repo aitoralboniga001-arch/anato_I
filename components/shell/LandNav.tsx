@@ -21,7 +21,7 @@ export function Wordmark({ size = 22 }: { size?: number }) {
   );
 }
 
-type Section = 'kronologia' | 'fitxak' | 'irudiak' | 'eratorriak' | 'egiturak';
+type Section = 'kronologia' | 'fitxak' | 'belortzioak' | 'irudiak' | 'eratorriak' | 'egiturak';
 
 /** The site bar; `current` marks the page you are on (aria-current), so the bar also says where you are. */
 export function LandNav({ current, help }: { current?: Section; help?: ReactNode }) {
@@ -35,6 +35,7 @@ export function LandNav({ current, help }: { current?: Section; help?: ReactNode
         <Link href="/kronologia" aria-current={here('kronologia')} data-tour="kronologia">Kronologia</Link>
         <Link href="/#gaiak">Gaiak</Link>
         <Link href="/fitxak" aria-current={here('fitxak')}>Fitxak</Link>
+        <Link href="/belortzioak" aria-current={here('belortzioak')}>Belortzioak</Link>
         <Link href="/irudiak" aria-current={here('irudiak')}>Irudiak</Link>
         <Link href="/eratorriak" aria-current={here('eratorriak')}>Eratorriak</Link>
         <Link href="/egiturak" className={atlasStyles.entry} aria-current={here('egiturak')}>Egiturak</Link>
