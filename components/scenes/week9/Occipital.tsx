@@ -361,7 +361,7 @@ export function CranialWiring({ t }: SceneProps) {
       </Note>
       <Label id="nerbio-kranialak" x={560} y={58} ax={PLUG_X + 8} ay={82} align="middle" small />
       {/* The skull base the fibres cross: named on its wall, between two holes. */}
-      <Label id="neurokraneoa" x={(WALL.x0 + WALL.x1) / 2} y={32} ax={(WALL.x0 + WALL.x1) / 2} ay={70} align="middle" small />
+      <Label id="neurokraneoa" x={(WALL.x0 + WALL.x1) / 2} y={512} ax={(WALL.x0 + WALL.x1) / 2} ay={478} align="middle" small />
       <Steps
         t={t}
         steps={[

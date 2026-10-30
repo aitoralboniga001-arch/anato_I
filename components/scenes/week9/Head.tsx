@@ -173,7 +173,7 @@ export function HeadEmbryo({ t }: SceneProps) {
       <Label id="somita-okzipitalak" x={700} y={30} ax={hz(somite(1).c)[0]} ay={hz(somite(1).c)[1]} align="middle" />
       <Label id="somitak" x={990} y={250} ax={hz(somite(5).c)[0]} ay={hz(somite(5).c)[1]} align="end" small />
       {/* Paraxial mesoderm: the whole column, somitomeres to trunk somites (a span, its parts glow). */}
-      <Label id="mesodermo-paraxiala" x={990} y={190} span={[sm[0], hz(somite(5).c)]} align="end" small />
+      <Label id="mesodermo-paraxiala" x={190} y={180} span={[sm[0], hz(somite(5).c)]} small />
       <Label id="azaleko-ektodermoa" x={190} y={110} ax={skin[0]} ay={skin[1]} small />
       <Label id="laugarren-seigarren-arkuak" x={810} y={356} ax={hz(BARS[3].bot)[0] + 4} ay={hz(BARS[3].bot)[1] - 4} small />
       <Label id="hirugarren-faringe-arkua" x={810} y={396} ax={hz(BARS[2].bot)[0] + 6} ay={hz(BARS[2].bot)[1] - 8} small />
@@ -329,8 +329,8 @@ export function OrbitScene({ t }: SceneProps) {
       />
 
       {/* The three cranial nerves, each on its twig, and their family name as the key to their numbers. */}
-      <Label id="nerbio-begi-eragilea" x={900} y={330} ax={707} ay={361} align="middle" show={nerves} small />
-      <Label id="nerbio-troklearra" x={990} y={150} ax={809} ay={91} align="end" show={nerves} small />
+      <Label id="nerbio-begi-eragilea" x={900} y={280} ax={707} ay={361} align="middle" show={nerves} small />
+      <Label id="nerbio-troklearra" x={920} y={150} ax={809} ay={91} align="end" show={nerves} small />
       <Label id="nerbio-aldentzailea" x={120} y={250} ax={257} ay={305} align="middle" show={nerves} small />
       <Label id="nerbio-kranialak" x={30} y={606} align="start" text="Nerbio kranialak: III, IV, VI" show={nerves} small />
       <Label id="begi-goiko-zuzena" x={420} y={62} ax={G[0] - 8} ay={150} align="middle" />

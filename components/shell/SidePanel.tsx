@@ -273,7 +273,7 @@ interface InfoProps {
   guide?: ReactNode;
 }
 
-type Tab = 'gakoak' | 'egiturak' | 'leinuak';
+type Tab = 'gakoak' | 'egiturak' | 'eratorriak';
 
 /** Which summary sections the student folded, remembered per browser (all open by default). */
 const FOLD_KEY = 'enbrioatlas:info-folded';
@@ -345,7 +345,7 @@ export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, 
   const [picked, setTab] = useState<Tab>('gakoak');
   const dates = stageExamDates(week, stage);
   const branch = branchOf(stage.structures);
-  const tab = picked === 'leinuak' && !branch ? 'gakoak' : picked;
+  const tab = picked === 'eratorriak' && !branch ? 'gakoak' : picked;
   return (
     <div className="info-body">
       <div className="tabs" role="tablist">
@@ -356,8 +356,8 @@ export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, 
           Egiturak <small>{stage.structures.length}</small>
         </button>
         {branch && (
-          <button role="tab" aria-selected={tab === 'leinuak'} className={tab === 'leinuak' ? 'is-on' : ''} onClick={() => setTab('leinuak')} title="Nondik datoz eta zer bihurtzen dira etapa honetako egiturak">
-            Leinuak
+          <button role="tab" aria-selected={tab === 'eratorriak'} className={tab === 'eratorriak' ? 'is-on' : ''} onClick={() => setTab('eratorriak')} title="Nondik datoz eta zer bihurtzen dira etapa honetako egiturak">
+            Eratorriak
           </button>
         )}
         <button className="icon-btn info-close" onClick={onDismiss} aria-label="Itxi panela" data-tip="Panela itxi · ]" data-tip-pos="bottom-end">
@@ -365,7 +365,7 @@ export function StageInfo({ week, stage, activeBeat, onSeek, onSelect, onHover, 
         </button>
       </div>
 
-      {tab === 'leinuak' && branch ? (
+      {tab === 'eratorriak' && branch ? (
         <StageLineage ids={stage.structures} root={branch} onSelect={onSelect} />
       ) : tab === 'gakoak' ? (
         <div className="info-scroll">

@@ -260,7 +260,7 @@ export function AdultHead({ t }: SceneProps) {
       <Label id="barailaren-muskulu-jeistaileak" x={990} y={556} ax={664} ay={528} align="end" small />
       <Label id="hioidesa" x={404} y={592} ax={672} ay={558} align="end" small />
       <Label id="faringe-heldua" x={990} y={616} ax={650} ay={604} align="end" small />
-      <Label id="nerbio-kranialak" x={404} y={172} align="end" text="Nerbio kranialak: V, VII, IX" show={n1} small />
+      <Label id="nerbio-kranialak" x={404} y={250} align="end" text="Nerbio kranialak: V, VII, IX" show={n1} small />
       <Label id="nerbio-trigeminoa" x={404} y={210} ax={614} ay={232} align="end" show={n1} small />
       <Label id="aurpegi-nerbioa" x={404} y={430} ax={608} ay={412} align="end" show={n2} small />
       <Label id="apofisi-estiloidea" x={404} y={470} ax={606} ay={436} align="end" small />

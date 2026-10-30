@@ -99,14 +99,17 @@ function EarlyLayers() {
 export function Lineage() {
   return (
     <div className="landing ln-page">
-      <LandNav current="leinuak" />
+      <LandNav current="eratorriak" />
       <section className="ln-hero">
-        <p className="eyebrow">Leinuak</p>
-        <h1>Ernetze orrien leinuak</h1>
+        <p className="eyebrow">Eratorriak</p>
+        <h1>Nondik datoz eta zer bihurtzen dira</h1>
         <p className="hero-lead">
           Blastozistotik hiru ernetze orrietara, eta 7. gaitik aurrera egitura bakoitza nondik datorren, nora migratzen den eta zertan bihurtzen den. Egitura bakoitzean klikatuz, simulagailuan agertzen den etapa irekitzen da.
         </p>
         <nav className="ln-jump" aria-label="Orrialdeko atalak">
+          <a href="#a12-mapa">
+            12. gaia · Arteriak: ikasgela osoa (eskema, 3D, taulak, fitxak) <span aria-hidden>↓</span>
+          </a>
           <a href="#gaia-7">
             7.–13. gaiak · Migrazioak eta bilakaerak <span aria-hidden>↓</span>
           </a>

@@ -1796,7 +1796,7 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
           </div>
           <Popover
             trigger={({ open, toggle }) => (
-              <button data-tour="tresnak" className={`tool${open ? ' is-on' : ''}`} aria-label="Tresnak" onClick={toggle} aria-expanded={open} aria-haspopup="menu" data-tip="Glosarioa, kronologia, leinuak, irudiak…" data-tip-pos="bottom">
+              <button data-tour="tresnak" className={`tool${open ? ' is-on' : ''}`} aria-label="Tresnak" onClick={toggle} aria-expanded={open} aria-haspopup="menu" data-tip="Glosarioa, kronologia, eratorriak, irudiak…" data-tip-pos="bottom">
                 <IconMore size={16} /> <span>Tresnak</span>
               </button>
             )}
@@ -1834,8 +1834,8 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                 <Link role="menuitem" href={`/kronologia?eguna=${Math.round(day)}`} onClick={close}>
                   <IconClock size={16} /> Kronologia <small>zer dago egun honetan?</small>
                 </Link>
-                <Link role="menuitem" href="/leinuak" onClick={close}>
-                  <IconTree size={16} /> Leinuak <small>ernetze orrien zuhaitza</small>
+                <Link role="menuitem" href="/eratorriak" onClick={close}>
+                  <IconTree size={16} /> Eratorriak <small>nondik datoz, zer bihurtzen dira</small>
                 </Link>
                 <Link role="menuitem" href="/fitxak" onClick={close}>
                   <IconImage size={16} /> Irudi-fitxak <small>irudiak zenbakiekin</small>

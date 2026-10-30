@@ -11464,7 +11464,7 @@ a.tc-in:hover .tc-go span {
 /* Kronologia: key dates under the ruler, each a jump to its day. */
 
 
-/* Leinuak: three germ-layer columns in the Langman colours; the connectors carry the layer's colour. */
+/* Eratorriak: three germ-layer columns in the Langman colours; the connectors carry the layer's colour. */
 @media (min-width: 821px) and (max-width: 1320px) {
   .ln-layers {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -11510,7 +11510,7 @@ a.ln-chip:focus-visible {
   outline-offset: 2px;
 }
 
-/* Leinuak: section headings sized as study headings, not posters. */
+/* Eratorriak: section headings sized as study headings, not posters. */
 .ln-page .ln-early {
   padding-top: 32px;
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { MIGRATIONS, migrationIds, sourceIds, flowIds } from '@/content/migrations';
 import { getWeek, structures, weeks } from '@/content/registry';
 
-describe('migration maps (Leinuak, topics 7+)', () => {
+describe('migration maps (Eratorriak, topics 7+)', () => {
   it('uses only structures that exist', () => {
     const missing = migrationIds().filter((id) => !structures.has(id));
     expect(missing).toEqual([]);

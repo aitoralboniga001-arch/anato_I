@@ -1,6 +1,6 @@
 /**
  * Migrazioak eta bilakaerak: for topics 7 onwards, where each structure comes from, where it moves and
- * what it ends up as, drawn on the Leinuak page as left-to-right schemes. Every flow follows the notes
+ * what it ends up as, drawn on the Eratorriak page as left-to-right schemes. Every flow follows the notes
  * (prose over tables) and the structures' own origin/fate fields; ids are checked by tests/migrations.test.ts.
  */
 import { descendantsOf } from './lineage';

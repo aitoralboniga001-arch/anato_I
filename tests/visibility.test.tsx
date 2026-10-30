@@ -58,6 +58,7 @@ const GONE: Record<string, string> = {
 /** Names a step's text says without showing them, on purpose: `week/stage/step/id` → why. */
 const MENTION_ONLY: Record<string, string> = {
   '11/enbor-arteriosoa/1/trenkada-aortikopulmonarra': 'sarrera: trenkada hurrengo urratsean hazten da',
+  '11/septum-primum/1/aurikula-arteko-trenkada': 'sarrera: "sortuko da"; 2. urratsetik septum primumarekin izendatuta',
   '11/enbor-arteriosoa/1/birika-arteria': 'sarrera: enborra banatzean sortuko da (3. urratsetik)',
   '11/arteria-konoa/1/infundibuluak': 'sarrera: konoaren izenaren azpian "hemendik: bi infundibuluak"; 4. urratsetik izendatuta',
   '10/bihotz-hodia/7/errai-orria': 'jatorria aipatzen da: errai orria zeharkako mozketan (4. urratsa); 3D ereduan hodiak, aortak eta notokorda',

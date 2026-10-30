@@ -126,7 +126,7 @@ export function OriginsArt({ t, zoom = 0 }: { t: number; zoom?: number }) {
     { id: 'perikardio-barrunbea', x: 200, y: 470, a: [350, 470], zy: 462, small: true },
     { id: 'azaleko-ektodermoa', x: 200, y: 560, a: ectoDot, zoomOut: true, small: true },
     // The somites are the paraxial mesoderm of this level: named on the other one, below its muscle cap.
-    { id: 'mesodermo-paraxiala', x: 800, y: 140, a: [SOM_R[0] + 10, SOM_R[1] + 18], zoomOut: true, small: true },
+    { id: 'mesodermo-paraxiala', x: 200, y: 320, a: [SOM_L[0] + 8, SOM_L[1] + 20], zoomOut: true, small: true },
     { id: 'notokorda', x: 800, y: 196, a: [503, 198], zoomOut: true, small: true },
     { id: 'aurreko-hestea', x: 800, y: 258, a: [517, 278], zy: 120 },
     { id: 'muskulu-leuna', x: 800, y: 330, a: [538, 324], zy: 200, show: smooth },

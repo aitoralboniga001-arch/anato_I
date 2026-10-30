@@ -156,12 +156,12 @@ export function PeritoneumTypes({ t }: SceneProps) {
       <Label id="peritoneo-atzeko-egiturak" x={c} y={64} align="middle" show={s3} />
 
       {/* A few names inside the sketches. */}
-      <Label id="mesenterio-dortsala" x={a + 52} y={200} align="start" ax={a + 8} ay={204} show={s1} small />
+      <Label id="mesenterio-dortsala" x={a + 52} y={184} align="start" ax={a + 8} ay={204} show={s1} small />
       <Label id="errai-peritoneoa" x={a + 70} y={320} align="start" ax={a + 36} ay={286} show={s1} small />
       <Label id="paretako-peritoneoa" x={b} y={250} align="middle" ax={b + 40} ay={WALL_Y + 2} show={s2} small />
       <Label id="peritoneo-barrunbea" x={b} y={330} align="middle" ax={b + 70} ay={312} show={s2} small />
       <Label id="giltzurruna" x={b + 84} y={204} align="middle" ax={b + 66} ay={130} show={s2} small />
-      <Label id="beheko-kaba-zaina" x={b - 74} y={206} align="middle" ax={b - 20} ay={141} show={s2} small />
+      <Label id="beheko-kaba-zaina" x={b - 74} y={214} align="middle" ax={b - 20} ay={141} show={s2} small />
       <Label id="beheranzko-kolona" x={c} y={334} align="middle" ax={c} ay={colon[1] + CR - 10} show={s3} small />
 
       {rows(a, s1, ['Hestetik sortuak', 'Mesenterioa: BAI, zintzilik', 'Errai peritoneoz inguratuta', 'Adib.: urdaila (hestetik sortutakoak)'])}

@@ -1,8 +1,6 @@
-import type { Metadata } from 'next';
-import { Lineage } from '@/components/shell/Lineage';
+import { permanentRedirect } from 'next/navigation';
 
-export const metadata: Metadata = { title: 'Ernetze orrien leinuak — EnbrioAtlas' };
-
-export default function LineagePage() {
-  return <Lineage />;
+/** The page was renamed from "Leinuak" to "Eratorriak": old links and bookmarks land on the new one. */
+export default function OldLineagePage() {
+  permanentRedirect('/eratorriak');
 }

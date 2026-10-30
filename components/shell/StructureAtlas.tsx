@@ -301,7 +301,7 @@ export function StructureAtlas() {
           <p className="eyebrow">1.–{weeks.length}. gaiak · Egituren atlasa</p>
           <h1>Egituren garapena, eskema batean</h1>
           <p>Gai guztietako egiturak eta haien garapen-loturak, adarrez adar.</p>
-          <Link href="/leinuak" className={styles.related}>Ernetze orrien leinuak ikusi <span aria-hidden="true">↗</span></Link>
+          <Link href="/eratorriak" className={styles.related}>Eratorriak orrian ikusi <span aria-hidden="true">↗</span></Link>
         </header>
           <section className={styles.filters} aria-label="Eskemen iragazkiak">
             <label className={styles.field}>

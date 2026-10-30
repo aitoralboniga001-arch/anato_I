@@ -1,5 +1,5 @@
 /**
- * Lineage: which structure gives rise to which. One tree, used by the Leinuak page (drawn as trees)
+ * Lineage: which structure gives rise to which. One tree, used by the Eratorriak page (drawn as trees)
  * and by the structure passport (the "Nondik?" chain and the "Zertan bihurtzen da?" children).
  */
 import { structures } from './registry';

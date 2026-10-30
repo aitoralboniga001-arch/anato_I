@@ -60,7 +60,7 @@ function Node({ node, here, onSelect }: { node: LNode; here: Set<string>; onSele
 }
 
 /**
- * "Leinuak" inside the simulator: the branch of the lineage this stage works on, with its structures
+ * "Eratorriak" inside the simulator: the branch of the lineage this stage works on, with its structures
  * lit, so the student sees where each one comes from and what it becomes without leaving the scene.
  */
 export function StageLineage({ ids, root, onSelect }: { ids: readonly string[]; root: LNode; onSelect: (id: string) => void }) {
@@ -77,8 +77,8 @@ export function StageLineage({ ids, root, onSelect }: { ids: readonly string[]; 
       <ul className="lm-tree">
         <Node node={root} here={here} onSelect={onSelect} />
       </ul>
-      <Link className="lm-all" href="/leinuak">
-        Leinu guztiak ikusi <span aria-hidden>→</span>
+      <Link className="lm-all" href="/eratorriak">
+        Eratorri guztiak ikusi <span aria-hidden>→</span>
       </Link>
     </div>
   );

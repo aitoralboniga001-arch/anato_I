@@ -6,6 +6,10 @@ import { appearances, getWeek, structures } from '@/content/registry';
 import { EARLY, LAYERS, type LNode } from '@/content/lineage';
 import { MIGRATIONS, SOURCES, flowIds, sourceIds, type Flow, type MNode } from '@/content/migrations';
 import { categoryColor } from '@/lib/sim/palette';
+import { Topic12Study } from './eratorriak/Topic12';
+
+/** Topics with a study room above their schemes (tables, time diagram, 3D, flashcards). */
+const STUDY: Record<number, () => ReactNode> = { 12: () => <Topic12Study /> };
 
 /** A topic tab (week 0 = the topics 1–6 germ-layer trees) or one origin followed across topics. */
 type Mode = { week: number; source?: undefined } | { source: string; week?: undefined };
@@ -230,6 +234,9 @@ const parseHash = (): Mode | null => {
   if (h === 'orriak') return { week: 0 };
   const w = /^gaia-(\d+)$/.exec(h);
   if (w && MIGRATIONS.some((t) => t.week === +w[1])) return { week: +w[1] };
+  // A section of a topic's study room ("a12-taula"): that topic's tab.
+  const room = /^a(\d+)-/.exec(h);
+  if (room && STUDY[+room[1]]) return { week: +room[1] };
   const s = /^iturria-(.+)$/.exec(h);
   if (s && SOURCES.some((x) => x.id === s[1])) return { source: s[1] };
   return null;
@@ -252,7 +259,10 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
       const m = parseHash();
       if (!m) return;
       setMode(m);
-      top.current?.scrollIntoView({ block: 'start' });
+      // A study-room section scrolls itself into view (its own anchor); a tab goes to the top of the map.
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      if (/^a\d+-/.test(id)) requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }));
+      else top.current?.scrollIntoView({ block: 'start' });
     };
     read();
     window.addEventListener('hashchange', read);
@@ -328,7 +338,7 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
         })}
       </div>
 
-      {!layersTab && legend}
+      {!layersTab && !(topic && STUDY[topic.week]) && legend}
 
       <div className={`mg-list${quizOn ? ' is-quiz' : ''}`} key={mode.source ?? mode.week}>
         {layersTab && <div className="mg-early">{layers}</div>}
@@ -344,7 +354,14 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
         )}
         {topic && (
           <>
+            {STUDY[topic.week] && (
+              <>
+                {STUDY[topic.week]()}
+                {legend}
+              </>
+            )}
             <p className="mg-intro">
+              {STUDY[topic.week] && <span className="mg-intro-k">Eskemak · </span>}
               <b>{getWeek(topic.week)?.title}</b> · {topic.flows.length} eskema
             </p>
             {topic.flows.map((f) => (
