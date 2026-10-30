@@ -555,6 +555,6 @@ export const CoelomMapDiaphragm = coelomMap({
   notes: [
     { a: 0, b: 0.62, text: 'Goian hasierako perikardio barrunbea · behean peritoneo barrunbea · tartean erretenak' },
     { a: 0.62, b: 0.74, text: '4. astea: erreten perikardioperitonealek (atzean) goiko eta beheko barrunbeak lotzen dituzte' },
-    { a: 0.74, b: 2, text: '5. astea: mintz pleuroperitonealek erretenak ixten dituzte' },
+    { a: 0.74, b: 2, text: '5. astea: mintz pleuroperitonealak agertzen dira · 7. astea: erretenak ixten dituzte' },
   ],
 });

@@ -59,7 +59,7 @@ export const MIGRATIONS: MigrationTopic[] = [
               n('pleura-barrunbea', undefined, { via: 'birika hastapenak sartu', note: 'atze-alboetan, bi' }),
               n('perikardio-barrunbea', undefined, { via: 'mintz pleuroperikardikoak', note: 'aurre erdian' }),
             ], { via: 'septum transversuma', note: 'goian' }),
-            n('erreten-perikardioperitonealak', [l('Itxita', undefined, { via: 'mintz pleuroperitonealak', gone: true, note: '5. astea' })], { via: 'atze-alboetan' }),
+            n('erreten-perikardioperitonealak', [l('Itxita', undefined, { via: 'mintz pleuroperitonealak', gone: true, note: '7. astea' })], { via: 'atze-alboetan' }),
             n('peritoneo-barrunbea', undefined, { via: 'septum transversuma', note: 'behean' }),
           ]),
         ],
@@ -70,7 +70,7 @@ export const MIGRATIONS: MigrationTopic[] = [
         lead: 'Lepo mailan sortzen da; enbrioiaren hazkuntzarekin jaitsi egiten da eta nerbio frenikoak harekin luzatzen dira.',
         stage: 'diafragma-eraketa',
         roots: [
-          n('septum-transversum', [l('T6 aurrean · T12 atzean', undefined, { via: 'jaitsi', move: true, note: '5. astearen bukaera' })], { note: 'C3–C5 maila, 4. astea' }),
+          n('septum-transversum', [l('T7 aurrean · T12 atzean', undefined, { via: 'jaitsi', move: true, note: '5. astearen bukaera' })], { note: 'C3–C5 maila, 4. astea' }),
           n('lepoko-nerbio-espinalak', [n('nerbio-frenikoa', [l('Septum transversumera iritsi', undefined, { via: 'luzatu', move: true })], { via: 'zuntzak elkartu' })], { note: 'aurreko adarrak' }),
         ],
       },
@@ -156,7 +156,7 @@ export const MIGRATIONS: MigrationTopic[] = [
             n('osteoblastoak', [n('hezur-espikulak', [l('Hezur lauak', undefined, { note: 'buru-ganga' })], { via: 'elkartu, hedatu' })], { via: 'mintzezko hezurtzapena' }),
             n('kondroblastoak', [
               n('kartilago-eredua', [
-                n('diafisia', undefined, { via: 'zentro primarioa', note: '12. astea' }),
+                n('diafisia', undefined, { via: 'zentro primarioa', note: '8. astean hasiera; 12. asterako hezur luze guztietan' }),
                 n('epifisiak', undefined, { via: 'zentro sekundarioak', note: 'jaio ondoren' }),
               ]),
             ], { via: 'hezurtzapen endokondrala' }),
@@ -192,7 +192,7 @@ export const MIGRATIONS: MigrationTopic[] = [
               n('tenporalaren-ezkata', undefined, { via: 'barraren inguruko mesenkima' }),
             ], { via: '1. arkua' }),
             n('barail-prozesua', [n('meckel-kartilagoa', [n('mailua')]), n('beheko-maxilarra', undefined, { via: 'Meckelen inguruko mesenkima' })], { via: '1. arkua' }),
-            n('hioide-arkua', [n('reichert-kartilagoa', [n('ointokia'), n('apofisi-estiloidea')]), n('hioidesa', undefined, { note: 'ondorengo arkuarekin' })], { via: '2. arkua' }),
+            n('hioide-arkua', [n('reichert-kartilagoa', [n('ointokia')])], { via: '2. arkua' }),
           ]),
         ],
       },
@@ -213,9 +213,9 @@ export const MIGRATIONS: MigrationTopic[] = [
         id: 'okzipital-oinaldea',
         title: 'Okzipitalaren oinaldea: bi iturri',
         stage: 'kondrokraneoa',
-        roots: [n('esklerotoma-okzipitalak'), n('kartilago-parakordalak', undefined, { note: '3 somita okzipital + 1. lepokoa' })],
-        join: n('okzipitalaren-oinaldea'),
-        joinVia: 'fusionatu',
+        roots: [n('esklerotoma-okzipitalak', undefined, { note: '3 somita okzipital' }), l('Lehen lepoko somitaren esklerotoma')],
+        join: n('kartilago-parakordalak', [n('okzipitalaren-oinaldea')]),
+        joinVia: 'mesenkimatik kartilagoa',
       },
       {
         id: 'esklerotoma-ornoak',
@@ -237,13 +237,14 @@ export const MIGRATIONS: MigrationTopic[] = [
       },
       {
         id: 'esklerotoma-saihetsak',
-        title: 'Esklerotoma → saihetsak',
-        lead: 'Esklerotoma zelula batzuek alboetara migratzen dute, somitaren alboko muga gurutzatu eta paretako orriraino iristen dira.',
+        title: 'Saihets hezurra eta kartilagoa: bi iturri',
+        lead: 'Esklerotoma zelulek saihets hezurra ematen dute; aurreko kartilagoa pareta orritik sortzen da zuzenean (5.4).',
         stage: 'saihetsak',
         roots: [
           n('esklerotoma', [
-            l('Paretako orrian', [n('saihets-hezurra'), n('saihets-kartilagoa')], { via: 'alboko muga gurutzatu', move: true }),
+            l('Paretako orrian', [n('saihets-hezurra')], { via: 'alboko muga gurutzatu', move: true }),
           ]),
+          n('paretako-orria', [n('saihets-kartilagoa', undefined, { via: 'zuzenean · 5.4' })]),
         ],
       },
       {
@@ -421,7 +422,7 @@ export const MIGRATIONS: MigrationTopic[] = [
         stage: 'bihotz-hodia',
         roots: [
           n('errai-orria', [n('orri-epimiokardikoa', [n('miokardioa', [n('bihotz-gelatina', undefined, { via: 'jariatu' })]), n('epikardioa')])]),
-          l('Endokardio hodia', [n('endokardioa', undefined, { via: 'gelatinara migratu', move: true })]),
+          l('Endokardio hodia', [n('endokardioa', undefined, { note: 'barruko geruza; zelula batzuk gelatinara migratu' })]),
         ],
       },
       {
@@ -531,14 +532,14 @@ export const MIGRATIONS: MigrationTopic[] = [
       {
         id: 'erreten-ab',
         title: 'Erreten aurikulubentrikularra → bi zulo eta balbulak',
-        lead: 'Goiko eta beheko kuxinak fusionatu eta erretena bitan banatzen dute; kuxinen mesenkimatik balbulak.',
+        lead: 'Goiko eta beheko kuxinak fusionatu eta erretena bitan banatzen dute; balbetan mesenkima goraguneak eta mehetutako miokardioa.',
         stage: 'balbula-ab',
         roots: [
           n('erreten-aurikulubentrikularra', [
             n('kuxin-aurikulubentrikularrak', [
               n('zulo-aurikulubentrikularrak', [
-                n('eskuineko-zulo-ab', [n('balbula-trikuspidea', undefined, { via: 'mesenkima goraguneak' })]),
-                n('ezkerreko-zulo-ab', [n('balbula-mitrala', undefined, { via: 'mesenkima goraguneak' })]),
+                n('eskuineko-zulo-ab', [n('balbula-trikuspidea', undefined, { via: 'mesenkima + miokardioa' })]),
+                n('ezkerreko-zulo-ab', [n('balbula-mitrala', undefined, { via: 'mesenkima + miokardioa' })]),
               ], { via: 'goikoa + behekoa fusionatu' }),
               n('ostium-primuma', [l('Itxita', undefined, { gone: true })], { via: 'luzapenak' }),
             ], { via: '4 kuxin' }),

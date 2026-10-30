@@ -107,9 +107,15 @@ export function Lineage() {
           Blastozistotik hiru ernetze orrietara, eta 7. gaitik aurrera egitura bakoitza nondik datorren, nora migratzen den eta zertan bihurtzen den. Egitura bakoitzean klikatuz, simulagailuan agertzen den etapa irekitzen da.
         </p>
         <nav className="ln-jump" aria-label="Orrialdeko atalak">
+          <a href="#a7-mapa">7 · Barrunbeak <span aria-hidden>↓</span></a>
+          <a href="#a8-mapa">8 · Hezurrak <span aria-hidden>↓</span></a>
+          <a href="#a9-mapa">9 · Muskuluak <span aria-hidden>↓</span></a>
+          <a href="#a10-mapa">10 · Bihotz hodia <span aria-hidden>↓</span></a>
+          <a href="#a11-mapa">11 · Bihotz trenkadak <span aria-hidden>↓</span></a>
           <a href="#a12-mapa">
-            12. gaia · Arteriak: ikasgela osoa (eskema, 3D, taulak, fitxak) <span aria-hidden>↓</span>
+            12 · Arteriak <span aria-hidden>↓</span>
           </a>
+          <a href="#a13-mapa">13 · Zainak <span aria-hidden>↓</span></a>
           <a href="#gaia-7">
             7.–13. gaiak · Migrazioak eta bilakaerak <span aria-hidden>↓</span>
           </a>

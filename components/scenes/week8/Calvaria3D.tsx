@@ -392,7 +392,7 @@ function build(): Geo {
   return part as Geo;
 }
 
-const GEO = geoSlot('calvaria', build);
+export const GEO = geoSlot('calvaria', build);
 
 const shift = (d: V3): M4 => {
   const m = new Float32Array(16);

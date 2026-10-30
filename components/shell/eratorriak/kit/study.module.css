@@ -1,0 +1,139 @@
+/* Additions for new rooms only. Topic 12 keeps its existing layout unchanged. */
+.tableWrap table {
+  min-width: 0;
+  table-layout: fixed;
+}
+.tableWrap table tbody th {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.hasLinks table th:last-child,
+.hasLinks table td:last-child {
+  width: 90px;
+}
+.tableWrap table th,
+.tableWrap table td {
+  padding: 10px 12px;
+  overflow-wrap: anywhere;
+}
+.room button {
+  max-width: 100%;
+}
+.room [class*='pick_'] {
+  height: auto;
+  min-height: 28px;
+  text-align: left;
+  padding-block: 5px;
+}
+.room [class*='compHead_'] {
+  flex-wrap: wrap;
+}
+.room [class*='bar_'] > span {
+  min-width: 0;
+}
+.room [class*='bar_'] {
+  height: 8px;
+}
+.diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.diagram text {
+  fill: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+}
+.diagram text.small {
+  fill: var(--text-3);
+  font-size: 13px;
+  font-weight: 400;
+}
+.diagram [data-key] {
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.25s ease;
+}
+.diagram [data-key]:focus-visible {
+  filter: drop-shadow(0 0 5px white);
+}
+.diagram text {
+  pointer-events: none;
+}
+.diagram [data-key] text {
+  pointer-events: auto;
+}
+.panelTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+.diagramScroll {
+  overflow-x: auto;
+}
+.diagramScroll > svg {
+  min-width: 620px;
+}
+.figureGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr));
+  gap: 14px;
+}
+.figureGrid h4 {
+  font-size: 16px;
+  margin: 0 0 12px;
+}
+.figureGrid svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.figureGrid svg text {
+  font-size: 14px;
+  fill: var(--text);
+}
+.figureGrid p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-3);
+}
+.figureGrid a {
+  display: inline-flex;
+  margin-top: 8px;
+}
+.source {
+  font: 11px/1.4 var(--font-mono);
+  color: var(--text-4);
+}
+.room input {
+  width: min(100%, 380px);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--bg-1);
+  color: var(--text);
+  padding: 7px 10px;
+  font: inherit;
+  font-size: 13px;
+}
+.room [class*='stageBar_'] {
+  flex-wrap: wrap;
+}
+.room [class*='stages_'] {
+  flex-basis: calc(100% - 92px);
+  order: 0;
+  scrollbar-width: thin;
+}
+.room [class*='stageBar_'] > button:last-child:not([aria-label]) {
+  margin-left: auto;
+}
+@media (max-width: 1100px) {
+  .room [class*='timeline_'] {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .diagram [data-key] {
+    transition: none;
+  }
+}

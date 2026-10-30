@@ -13,7 +13,7 @@ import { SUMMARY } from './timing';
  *  2. 4. astea: septum transversumak bitan banatzen du (goian hasierako perikardio barrunbea, behean peritoneo
  *     barrunbea); atzealdeko alboetan bi erreten perikardioperitonealek komunikatzen dituzte;
  *  3. 5. astetik aurrera: mintz pleuroperikardikoek goiko barrunbea hirutan banatzen dute (bi pleura barrunbe
- *     eta perikardio barrunbea) eta mintz pleuroperitonealek erretenak ixten dituzte: diafragmaren gainean
+ *     eta perikardio barrunbea) eta mintz pleuroperitonealek (7. astean) erretenak ixten dituzte: diafragmaren gainean
  *     toraxeko hiru barrunbeak, azpian peritoneo barrunbea.
  * Mintz bakoitzaren izenak esaten du zein bi barrunbe bereizten dituen.
  */

@@ -42,7 +42,7 @@ export const structures7: StructureDef[] = [
     color: '#7fc8e8',
     definition: 'Septum transversumaren atze-alboko aldeetan dauden bi kanal behin-behinekoak: goiko barrunbea (hasierako perikardio barrunbea) eta beheko barrunbea (peritoneo barrunbea) komunikatzen dituzte.',
     location: 'Alde dortsalean, aurreko hestearen (hestegorriaren) bi aldeetan.',
-    fate: 'Birika hastapenak bertan sartzen dira (pleura barrunbeen hasiera). 5. astean mintz pleuroperitonealek ixten dituzte.',
+    fate: 'Birika hastapenak bertan sartzen dira (pleura barrunbeen hasiera). 7. astean mintz pleuroperitonealek ixten dituzte (5. astean agertzen dira).',
     related: ['septum-transversum', 'mintz-pleuroperitonealak', 'birika-hastapenak'],
   },
   {

@@ -467,7 +467,7 @@ function DiaphragmDome3DView({ t, reduced }: SceneProps) {
                 Erretenak zabalik: goiko barrunbea (pleura) ↔ beheko barrunbea (peritoneoa)
               </Note>
               <Note x={500} y={612} tone="accent" show={vis(t, DOME_T.close[0], DOME_T.rim[0]) * L}>
-                5. astea: mintz pleuroperitonealak hazi eta erretenak ixten dituzte
+                Mintz pleuroperitonealak: 5. astean agertu, 7. astean erretenak itxi
               </Note>
               <Note x={500} y={612} tone="accent" show={vis(t, DOME_T.rim[0], DOME_T.dome[0]) * L}>
                 Miozitoak septumetik mintzetara · gorputz paretak ertz muskularra

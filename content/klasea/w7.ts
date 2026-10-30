@@ -767,7 +767,7 @@ export const LESSON_W7: Lesson = {
         {
           id: 'b-pleuroperitonealak',
           kind: 'line',
-          text: 'Mintz pleuroperitonealak (5. astea): erreten perikardioperitonealak ixten dituzte',
+          text: 'Mintz pleuroperitonealak (5. astean agertu): 7. astean erretenak ixten dituzte',
           notes: n('3/p7/s1', '3/p7/s2'),
           key: true,
         },

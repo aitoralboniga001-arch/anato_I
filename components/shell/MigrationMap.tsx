@@ -7,9 +7,15 @@ import { EARLY, LAYERS, type LNode } from '@/content/lineage';
 import { MIGRATIONS, SOURCES, flowIds, sourceIds, type Flow, type MNode } from '@/content/migrations';
 import { categoryColor } from '@/lib/sim/palette';
 import { Topic12Study } from './eratorriak/Topic12';
+import { Topic13Study } from './eratorriak/Topic13';
+import { Topic7Study } from './eratorriak/Topic7';
+import { Topic8Study } from './eratorriak/Topic8';
+import { Topic9Study } from './eratorriak/Topic9';
+import { Topic10Study } from './eratorriak/Topic10';
+import { Topic11Study } from './eratorriak/Topic11';
 
 /** Topics with a study room above their schemes (tables, time diagram, 3D, flashcards). */
-const STUDY: Record<number, () => ReactNode> = { 12: () => <Topic12Study /> };
+const STUDY: Record<number, () => ReactNode> = { 7: () => <Topic7Study />, 8: () => <Topic8Study />, 9: () => <Topic9Study />, 10: () => <Topic10Study />, 11: () => <Topic11Study />, 12: () => <Topic12Study />, 13: () => <Topic13Study /> };
 
 /** A topic tab (week 0 = the topics 1–6 germ-layer trees) or one origin followed across topics. */
 type Mode = { week: number; source?: undefined } | { source: string; week?: undefined };

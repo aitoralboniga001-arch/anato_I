@@ -139,7 +139,8 @@ export const MILESTONES: Milestone[] = [
   { day: 28, to: 32, short: 'Gorputz-adarren hasikinak', text: 'Gorputz-adarren hasikinak: goikoak lehenago, behekoak 2–3 egun beranduago. Hilabete 1en bukaeran hasikinak bakarrik, ez gorputz-adarrak', week: 5, stage: 'enbrioia-28-32', weight: 'gakoa', system: 'kanpo-itxura', notes: ['w5/1/p12/s1', 'w5/1/p12/s3'], makes: ['goiko-gorputz-adarraren-hasikina', 'beheko-gorputz-adarraren-hasikina'] },
   // 7. gaia
   { day: 29, to: 35, short: 'Mintz pleuroperikardikoak', text: '5. astean mintz pleuroperikardikoak erdialderantz doaz eta fusionatzen dira: pleura eta perikardio barrunbeak bereizten dira', week: 7, stage: 'pleura-perikardioa', weight: 'gakoa', system: 'barrunbeak', notes: ['w7/2.2/p8/s1', 'w7/2.2/p9/s1'], makes: ['mintz-pleuroperikardikoak', 'pleura-barrunbea', 'perikardio-barrunbea'] },
-  { day: 29, to: 35, short: 'Mintz pleuroperitonealak', text: '5. astean mintz pleuroperitonealak atze-alboko paretetatik agertzen dira eta erreten perikardioperitonealak ixten dituzte', week: 7, stage: 'diafragma-eraketa', weight: 'gakoa', system: 'barrunbeak', notes: ['w7/3/p7/s1', 'w7/3.1/p4/s1'], makes: ['mintz-pleuroperitonealak'] },
+  { day: 29, to: 35, short: 'Mintz pleuroperitonealak', text: '5. astean mintz pleuroperitonealak atze-alboko paretetatik agertzen dira', week: 7, stage: 'diafragma-eraketa', weight: 'gakoa', system: 'barrunbeak', notes: ['w7/3/p7/s1', 'w7/3.1/p4/s1'], makes: ['mintz-pleuroperitonealak'] },
+  { day: 43, to: 49, short: 'Erretenen itxiera', text: '7. astean mintz pleuroperitonealak hestegorri inguruko mesenkimarekin eta septumaren atzeko ertzarekin fusionatzen dira: erreten perikardioperitonealak itxi, pleura eta peritoneo barrunbeak bereizita', week: 7, stage: 'diafragma-heldua', weight: 'gakoa', system: 'barrunbeak', notes: ['w7/3/p7/s2'] },
   { day: 35, short: 'Azken somitak', text: 'Somitak 5. astearen bukaerara arte agertzen dira', week: 4, stage: 'somitak', weight: 'xehetasuna', system: 'hasiera', notes: ['w4/3.1/p4/s3'] },
   { day: 35, short: 'Septumaren jaitsiera', text: '5. astearen bukaerarako septum transversuma jaitsita: aurrea T6 mailan, atzea T12 mailan; nerbio frenikoa (C3–C5) luzatzen da', week: 7, stage: 'diafragma-eraketa', weight: 'gakoa', system: 'barrunbeak', notes: ['w7/3/p5/s2', 'w7/3/p4/s6'] },
   // 5. eta 8. gaiak
@@ -283,7 +284,7 @@ export const LIFE: Record<string, Life> = {
   // Gorputzaren barrunbeak (7. gaia)
   'septum-transversum': { from: 22, becomes: ['zentro-tendinosoa'], note: '4. astean, C3–C5 mailan; diafragmaren zentro tendinosoa bihurtzen da.' },
   'hasierako-perikardio-barrunbea': { from: 22, to: 35, becomes: ['perikardio-barrunbea', 'pleura-barrunbea'], note: '5. astean mintz pleuroperikardikoek banatzen dute.' },
-  'erreten-perikardioperitonealak': { from: 22, to: 35, note: '5. astean mintz pleuroperitonealek ixten dituzte.' },
+  'erreten-perikardioperitonealak': { from: 22, to: 49, note: '7. astean mintz pleuroperitonealek ixten dituzte (5. astean agertzen dira).' },
   'mintz-pleuroperikardikoak': { from: 29, note: '5. astean erdialderantz doaz eta fusionatzen dira.' },
   'mintz-pleuroperitonealak': { from: 29, note: '5. astean atze-alboko paretetatik.' },
   'pleura-barrunbea': { from: 35 },

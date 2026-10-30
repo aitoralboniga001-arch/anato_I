@@ -860,7 +860,8 @@ function buildAtria(s: AtriaState): AtriaModel {
   }
 
   // —— septum spurium and the left venous valve on the right atrium's back wall, merging into septum secundum ——
-  if (s.spurium > 0.005 && s.secundum > 0.3) {
+  // Before they merge (spurium ≤ 0.5) they are the sinus orifice's two venous valves on the back wall.
+  if (s.spurium > 0.005) {
     const k = clamp01(s.spurium);
     const merged = clamp01((k - 0.5) / 0.5);
     const xr = lerp(-0.42, XS - HS * 0.6, merged);

@@ -82,7 +82,7 @@ describe('what changes', () => {
     const { born, gone } = changesBetween(7, 8);
     expect(born).toEqual(expect.arrayContaining(['epiblastoa', 'hipoblastoa', 'amnios-barrunbea']));
     expect(gone).toEqual(expect.arrayContaining(['enbrioblastoa', 'trofoblastoa']));
-    expect(changesBetween(30, 40).gone).toEqual(expect.arrayContaining(['erreten-perikardioperitonealak']));
+    expect(changesBetween(40, 50).gone).toEqual(expect.arrayContaining(['erreten-perikardioperitonealak']));
   });
 
   it('dates the cavities, skeleton and muscles from the notes', () => {

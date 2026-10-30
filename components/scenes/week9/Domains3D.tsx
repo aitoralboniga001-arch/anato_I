@@ -228,7 +228,7 @@ function build(): Geo {
   return { neural, noto, sclero, dermato, myo, inter, aorta, gut, parietal, visceral, ecto, frontier, prim, abax, cell: blob({ center: [0, 0, 0], radii: [0.04, 0.04, 0.04], rings: 6, sides: 8 }) };
 }
 
-const GEO = geoSlot('domains', build);
+export const GEO = geoSlot('domains', build);
 
 const at3 = (p: V3): M4 => {
   const m = new Float32Array(16);
