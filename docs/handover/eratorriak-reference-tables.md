@@ -71,16 +71,28 @@ The following mapping includes every entry once. IDs below are developer-only pr
 - Every row has `level` 1–3 (Funtsezkoa / Garrantzitsua / Osagarria). Ranking rule (developer-only, never shown): 1 = concept is the answer or a trap option in two or more entries of the compilation; 2 = one entry; 3 = none. Rows render level-first; tables with more level-1 rows come first. Legend chips filter levels. The app never says why a row is ranked.
 - Arch questions were checked: almost all are pairings "arch/pouch number ↔ nerve / muscle / cartilage / artery / derivative" (D04, OH21-13, OH26-15, EO26-10, EO21-15, D02, D05, EO21-13, EO26-09, OH26-16, OH21-15) plus the recurrent-nerve variant (A04, B02, C10). Hence the `ARCH_GRID` master table (arches 1,2,3,4,6 × nerve, muscles, skeleton, aortic arch, pouch, cleft/membrane) with per-cell recall, and the reverse table `arkua-ala-poltsa` (structure → which arch/pouch/cleft). The ★ Arku sistemak view (default) shows the grid plus `ARCH_TABLE_IDS`.
 
-## One page, one thing at a time (2026-10-31)
+## Tables first, topics on the left (2026-10-31)
 
-Superseded the earlier declutter (hero jump nav, separate tables toolbar, separate "Gaiz gai" section): the owner found the page split in two and disliked content stacked above and below.
+Owner feedback: a first-time student felt lost (two rows of topic chips, a source select, a quiz switch, a parts row and a 10-item room index). The page now opens on the short tables, because they are its point: the essentials, ranked by importance.
 
-- `Lineage.tsx` is now a slim `.ln-head` (title + one line) and `MigrationMap`; no hero, no jump nav, no standalone tables section.
-- `MigrationMap` owns one sticky bar: topic tabs (1–6 … 14, then ★ Arku sistemak), "Iturri bat jarraitu…" select, "Proba modua". Under it, for topics 7–14, a parts row: 1 Ikasgela · 2 Taula laburrak · 3 Eskemak. Only the chosen part renders.
-- Hashes: `#gaia-N` / `#aN-<room anchor>` → Ikasgela, `#aN-laburrak` → Taula laburrak, `#aN-eskemak` → Eskemak, `#arku-sistemak`, `#iturria-X`. A room's own subnav entries "Taula laburrak" / "Eskemak" switch the part through the hash.
-- `ReferenceTables` is an embedded block taking `scope` (topic number or `'arkuak'`) and `quiz` from the page switch; level chips filter; "Ezkutatu: Eratorria / Jatorria" shows only in quiz mode.
-- CSS pitfall: `.ln-page .land-section` (later in `globals.css`) beats `.ln-page .ln-migrations`; the zero top padding needs `.ln-page .land-section.ln-migrations`. `.mg-bar` must `flex-wrap` at every width or the parts row squeezes the tabs into a column.
-- Checked headless at 1280, 1024 and 768: bar fits in 3 rows (4 at 768), each part switches with no JS errors, the room link to Taula laburrak switches part.
+- `Lineage.tsx`: slim `.ln-head` (title + one line), then `MigrationMap`.
+- `MigrationMap`: `.mg` is a grid. On the left, `.mg-side` holds ★ Arku sistemak, then 1–6 and 7–14 by short name. On the right, `.mg-head` shows the topic (eyebrow + short name + "Proba modua"), then underline tabs **Taulak · Ikasgela · Eskemak**. Taulak is first and the default. Only the chosen part renders.
+- Below 1200px the list folds into one sticky button (`.mg-side-toggle`, "7 Barrunbeak ▾") that opens it as a panel; a click outside or Escape closes it.
+- "Iturri bat gai guztietan jarraitu…" moved into the Eskemak header (it only concerns schemes).
+- `ReferenceTables` lost its own eyebrow/h2 (the page head names the topic) and opens with levels 1–2 only; "Osagarria" is one tap.
+- Hashes: `#gaia-N` (Taulak), `#aN-laburrak`, `#aN-ikasgela`, `#aN-eskemak`, room anchors `#aN-<section>` (Ikasgela, scrolled to), `#arku-sistemak`, `#iturria-X`, `#orriak`.
+- Room subnavs no longer list Taula laburrak / Eskemak (the tabs above do).
+- CSS pitfall: `.ln-page .land-section` (later in `globals.css`) beats `.ln-page .ln-migrations`; zero top padding needs `.ln-page .land-section.ln-migrations`.
+- Checked headless at 1440, 1024 and 768 (arrival, panel, arch, topic 12 Ikasgela/Eskemak): no JS errors.
+
+## Study rooms moved to /ikasgela/N (2026-10-31)
+
+- Eratorriak is now only **Taulak · Eskemak** per topic (plus ★ Arku sistemak and 1–6). A link on the tabs row, "Ikasgela: 3D eredua eta fitxak →", opens the topic's room.
+- New route `app/ikasgela/[week]` (static params from `components/shell/eratorriak/roomWeeks.ts`, weeks 7–13); `/ikasgela` redirects to the first. Page: `components/shell/IkasgelaPage.tsx` (topic row 7–13, links to Taulak/eskemak and the simulator, then the room).
+- Entry points: top bar "Ikasgelak" (`LandNav`, section `ikasgela`), the simulator's Tresnak menu ("Ikasgela", only for weeks with a room), the Eratorriak link.
+- Old links `/eratorriak#aN-<section>` (and `#aN-ikasgela`) forward to `/ikasgela/N#aN-<section>`; the page scrolls to the anchor.
+- Fixed in passing: `MomentBar` used `scrollIntoView` to keep the current moment visible, which also scrolled the page ~190px on load; it now scrolls only its own row.
+- Dev-server note: after adding the nav link the running `next dev` kept serving the old `LandNav` in SSR (hydration mismatch); a restart fixed it.
 
 ## Verification
 

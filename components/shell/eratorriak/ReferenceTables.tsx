@@ -30,7 +30,8 @@ export const TABLE_TOPICS = [...new Set(REFERENCE_TABLES.map((table) => table.to
 export function ReferenceTables({ scope, quiz }: { scope: TableScope; quiz: boolean }) {
   const [ask, setAsk] = useState<Exclude<Hide, 'none'>>('derivative');
   const hide: Hide = quiz ? ask : 'none';
-  const [levels, setLevels] = useState<ReadonlySet<ReferenceLevel>>(new Set([1, 2, 3]));
+  // Opens on what matters most; "Osagarria" is one tap away.
+  const [levels, setLevels] = useState<ReadonlySet<ReferenceLevel>>(new Set([1, 2]));
   const [revealed, setRevealed] = useState<ReadonlySet<string>>(new Set());
   const hidden = hide !== 'none';
   const arch = scope === 'arkuak';
@@ -60,10 +61,8 @@ export function ReferenceTables({ scope, quiz }: { scope: TableScope; quiz: bool
 
   const id = arch ? 'arku-sistemak' : `a${scope}-laburrak`;
   return (
-    <section className={styles.section} id={id} aria-labelledby={`${id}-title`}>
+    <section className={styles.section} id={id} aria-label={arch ? 'Arku sistemak' : `${scope}. gaiaren taulak`}>
       <header className={styles.head}>
-        <p className={styles.eyebrow}>{arch ? '8., 9. eta 12. gaiak' : `${scope}. gaia`} · Taula laburrak</p>
-        <h2 id={`${id}-title`}>{arch ? 'Arku sistemak' : 'Taula laburrak'}</h2>
         <p>{arch
           ? 'Arku bakoitzaren nerbioa, muskuluak, hezurrak, arteria eta poltsa, taula bakarrean; gero, egituratik arkura.'
           : 'Jatorria eta eratorria parez pare. Garrantzitsuenak lehenengo, kolorez markatuta.'}</p>

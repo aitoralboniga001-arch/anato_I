@@ -25,8 +25,14 @@ export function MomentBar({
     }, 3400);
     return () => window.clearTimeout(id);
   }, [playing, stage, stages.length, onStage]);
+  // Keep the current moment in view by scrolling the row sideways only; scrollIntoView would also move the page.
   useEffect(() => {
-    tabs.current?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+    const row = tabs.current;
+    const on = row?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (!row || !on) return;
+    const left = on.getBoundingClientRect().left - row.getBoundingClientRect().left + row.scrollLeft;
+    if (left < row.scrollLeft) row.scrollLeft = left;
+    else if (left + on.offsetWidth > row.scrollLeft + row.clientWidth) row.scrollLeft = left + on.offsetWidth - row.clientWidth;
   }, [stage]);
   return (
     <div className={styles.stageBar}>

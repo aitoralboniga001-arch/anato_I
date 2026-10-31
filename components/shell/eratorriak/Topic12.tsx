@@ -50,9 +50,6 @@ const SECTIONS = [
   ['a12-zilborra', 'Zilborra eta iliakoak'],
   ['a12-nahasketak', 'Nahasketak'],
   ['a12-fitxak', 'Fitxak'],
-  // Blocks that follow the room in the same topic tab.
-  ['a12-laburrak', 'Taula laburrak'],
-  ['a12-eskemak', 'Eskemak'],
 ] as const;
 
 /** The adult arteries, in the order the aorta meets them, with the pieces each is made of. */

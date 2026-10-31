@@ -3688,98 +3688,306 @@ a.ln-chip:hover {
   margin-bottom: 24px;
 }
 
-.mg-tab b {
-  padding: 0 5px;
+/* Eratorriak: the topic list on the left, one topic (and one part of it) on the right. */
+.mg {
+  display: grid;
+  grid-template-columns: 228px minmax(0, 1fr);
+  gap: 0 40px;
+  align-items: start;
 }
 
-.mg-bar {
+.mg-side {
   position: sticky;
   top: 60px;
-  z-index: 6;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  margin: 0 calc(-1 * var(--gutter));
-  padding: 10px var(--gutter);
-  background: rgba(10, 10, 11, 0.84);
-  backdrop-filter: blur(16px) saturate(1.2);
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+  padding: 18px 2px 32px 0;
+  scrollbar-width: thin;
 }
 
-.mg-tabs {
-  display: flex;
-  flex: 1 1 520px;
-  flex-wrap: wrap;
-  min-width: 0;
-  gap: 6px;
-}
-
-.mg-tabs::-webkit-scrollbar {
+.mg-side-toggle {
   display: none;
 }
 
-.mg-tab {
-  flex: none;
-  display: inline-flex;
+.mg-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mg-nav-k {
+  margin: 20px 0 6px 10px;
+  font: 600 11px/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+.mg-nav button,
+.mg-side-toggle {
   align-items: center;
-  gap: 9px;
-  height: 38px;
-  padding: 0 14px 0 7px;
+  gap: 10px;
+  border: 1px solid transparent;
   border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  font-size: 13.5px;
-  font-weight: 500;
+  background: transparent;
   color: var(--text-2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
-.mg-tab b {
+.mg-nav button {
+  display: flex;
+  width: 100%;
+  min-height: 40px;
+  padding: 6px 10px 6px 7px;
+}
+
+.mg-nav button b,
+.mg-side-toggle b {
+  flex: none;
   display: grid;
   place-items: center;
-  min-width: 24px;
+  min-width: 26px;
   height: 24px;
+  padding: 0 4px;
   border-radius: 7px;
   background: var(--surface-3);
-  font: 600 12px/1 var(--font-mono);
+  font: 600 11.5px/1 var(--font-mono);
   color: var(--text-3);
-  transition: background 0.15s, color 0.15s;
 }
 
-.mg-tab:hover {
+.mg-nav button:hover {
   color: var(--text);
-  border-color: var(--line-2);
+  background: var(--surface);
 }
 
-.mg-tab.is-on {
+.mg-nav button.is-on {
   color: var(--text);
-  border-color: rgba(255, 106, 61, 0.55);
+  border-color: rgba(255, 106, 61, 0.45);
   background: var(--signal-soft);
 }
 
-.mg-tab.is-on b {
+.mg-nav button.is-on b,
+.mg-side-toggle b {
   background: var(--signal);
   color: #1a0b05;
 }
 
-/* The cross-topic arch view: same tab, warmer so it is found. */
-.mg-tab.is-featured {
-  border-color: rgba(240, 135, 106, 0.45);
+/* The cross-topic arch view: first and warmer, so it is found. */
+.mg-nav button.mg-nav-arch {
+  border-color: rgba(240, 135, 106, 0.4);
+  background: rgba(240, 135, 106, 0.07);
   color: #f6c9b5;
 }
 
-.mg-tab.is-featured b {
-  background: rgba(240, 135, 106, 0.18);
+.mg-nav button.mg-nav-arch b {
+  background: rgba(240, 135, 106, 0.2);
   color: #f0876a;
 }
 
-/* "Follow one origin": a quiet select, so the bar stays one row of topics. */
+.mg-nav button.mg-nav-arch.is-on b {
+  background: #f0876a;
+  color: #1a0b05;
+}
+
+.mg-nav-arch small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--text-3);
+}
+
+.mg-main {
+  min-width: 0;
+}
+
+.mg-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding-top: 20px;
+}
+
+.mg-eyebrow {
+  margin: 0 0 6px;
+  font: 600 11.5px/1.2 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--signal);
+}
+
+.mg-head h2 {
+  margin: 0;
+  font-size: clamp(26px, 2.6vw, 34px);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+/* A topic's parts (taulak · eskemak): only one shows, picked here; its study room is a link to its own page. */
+.mg-parts {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-top: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.mg-parts > div {
+  display: flex;
+  gap: 4px;
+}
+
+.mg-room {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-2);
+  padding: 8px 0;
+}
+
+.mg-room:hover {
+  color: var(--signal);
+}
+
+/* Ikasgela pages: one topic's study room, topics in one row above it. */
+.ik-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 22px var(--gutter) 0;
+}
+
+.ik-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 22px;
+}
+
+.ik-title h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.ik-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ik-topics a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px 0 6px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--text-2);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.ik-topics a b {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--surface-3);
+  font: 600 11.5px/1 var(--font-mono);
+  color: var(--text-3);
+}
+
+.ik-topics a:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.ik-topics a.is-on {
+  color: var(--text);
+  border-color: rgba(255, 106, 61, 0.45);
+  background: var(--signal-soft);
+}
+
+.ik-topics a.is-on b {
+  background: var(--signal);
+  color: #1a0b05;
+}
+
+.ik-links {
+  display: flex;
+  gap: 18px;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.ik-links a {
+  color: var(--text-2);
+}
+
+.ik-links a:hover {
+  color: var(--signal);
+}
+
+.ln-page .land-section.ik-room {
+  padding-top: 0;
+}
+
+.mg-parts button {
+  position: relative;
+  height: 42px;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mg-parts button:hover {
+  color: var(--text);
+}
+
+.mg-parts button.is-on {
+  color: var(--text);
+}
+
+.mg-parts button.is-on::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--signal);
+}
+
+.mg-schemes-head {
+  margin-top: 28px;
+}
+
+/* "Follow one origin": a quiet select in the schemes header. */
 .mg-follow {
   flex: none;
   height: 38px;
-  max-width: 210px;
+  max-width: 320px;
+  margin-bottom: 14px;
   padding: 0 30px 0 12px;
   border-radius: 10px;
   border: 1px solid var(--line);
@@ -3799,58 +4007,6 @@ a.ln-chip:hover {
 
 .mg-schemes-head {
   margin-top: 28px;
-}
-
-/* A topic's parts (ikasgela · taula laburrak · eskemak): only one shows, picked here. */
-.mg-parts {
-  display: flex;
-  flex-basis: 100%;
-  gap: 4px;
-  padding-top: 8px;
-  border-top: 1px solid var(--line);
-}
-
-.mg-parts button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 34px;
-  padding: 0 14px 0 6px;
-  border: 1px solid transparent;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--text-2);
-  font: inherit;
-  font-size: 13.5px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.mg-parts button b {
-  display: grid;
-  place-items: center;
-  min-width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  background: var(--surface-3);
-  font: 600 11.5px/1 var(--font-mono);
-  color: var(--text-3);
-}
-
-.mg-parts button:hover {
-  color: var(--text);
-  background: var(--surface);
-}
-
-.mg-parts button.is-on {
-  color: var(--text);
-  border-color: var(--line-2);
-  background: var(--surface-2, var(--surface));
-}
-
-.mg-parts button.is-on b {
-  background: var(--text);
-  color: var(--bg, #0a0a0b);
 }
 
 /* Slim page header: the topic bar is visible on arrival. */
@@ -4517,35 +4673,59 @@ a.mg-chip:hover {
   }
 }
 
-/* Tablet: compact tabs, then one row with "follow" and "Proba modua", so the sticky bar stays short. */
-@media (max-width: 1000px) {
-  .mg-bar {
-    flex-wrap: wrap;
-    gap: 8px;
-    padding-block: 8px;
+/* Below 1200px the topic list folds into one sticky button that opens it as a panel. */
+@media (max-width: 1199px) {
+  .mg {
+    display: block;
   }
-  .mg-tabs {
-    flex-basis: 100%;
-    gap: 5px;
+  .mg-side {
+    z-index: 6;
+    max-height: none;
+    overflow: visible;
+    margin: 0 calc(-1 * var(--gutter));
+    padding: 8px var(--gutter);
+    background: rgba(10, 10, 11, 0.88);
+    backdrop-filter: blur(16px) saturate(1.2);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
   }
-  .mg-tab {
-    height: 32px;
-    gap: 6px;
-    padding: 0 10px 0 5px;
-    font-size: 12.5px;
+  .mg-side-toggle {
+    display: inline-flex;
+    height: 42px;
+    padding: 0 14px 0 8px;
+    border-color: var(--line-2);
+    background: var(--surface);
+    color: var(--text);
   }
-  .mg-tab b {
-    min-width: 21px;
-    height: 21px;
-    font-size: 11px;
+  .mg-side-toggle span {
+    color: var(--text-3);
+    font-size: 12px;
   }
-  .mg-follow,
-  .mg-quiz {
-    height: 32px;
+  .mg-nav {
+    display: none;
   }
-  .mg-follow {
-    flex: 1;
-    max-width: 260px;
+  .mg.is-menu .mg-nav {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: var(--gutter);
+    right: var(--gutter);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 4px;
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+    padding: 12px;
+    border: 1px solid var(--line-2);
+    border-radius: 14px;
+    background: #111013;
+    box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.85);
+  }
+  .mg.is-menu .mg-nav-k,
+  .mg.is-menu .mg-nav-arch {
+    grid-column: 1 / -1;
+  }
+  .mg.is-menu .mg-nav-k {
+    margin: 8px 0 2px 10px;
   }
 }
 

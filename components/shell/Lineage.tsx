@@ -102,7 +102,7 @@ export function Lineage() {
       <LandNav current="eratorriak" />
       <header className="ln-head">
         <h1>Eratorriak</h1>
-        <p>Aukeratu gaia, gero atala: ikasgela, taula laburrak edo eskemak.</p>
+        <p>Gai bakoitzaren funtsezkoa, taula laburretan: jatorria → eratorria.</p>
       </header>
 
       <section className="land-section ln-migrations" id="migrazioak">

@@ -117,9 +117,6 @@ export function StudyRoom({
     ['irudiak', 'Irudiak'],
     ['nahasketak', 'Nahasketak'],
     ['fitxak', 'Fitxak'],
-    // Blocks that follow the room in the same topic tab.
-    ['laburrak', 'Taula laburrak'],
-    ['eskemak', 'Eskemak'],
   ];
   const heading = (n: number) => (
     <h3 className={styles.h3}>

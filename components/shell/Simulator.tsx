@@ -59,6 +59,7 @@ import { Board } from '@/components/klasea/Board';
 import { ClassDock } from '@/components/klasea/ClassDock';
 import { KimuWalker } from '@/components/klasea/KimuWalker';
 import { useKlasea, type ClassDriver, type ClassLink } from '@/components/klasea/useKlasea';
+import { hasRoom } from './eratorriak/roomWeeks';
 
 interface Pos {
   i: number;
@@ -1834,6 +1835,11 @@ export function Simulator({ weekNumber }: { weekNumber: number }) {
                 <Link role="menuitem" href={`/kronologia?eguna=${Math.round(day)}`} onClick={close}>
                   <IconClock size={16} /> Kronologia <small>zer dago egun honetan?</small>
                 </Link>
+                {hasRoom(weekNumber) && (
+                  <Link role="menuitem" href={`/ikasgela/${weekNumber}`} onClick={close}>
+                    <IconBook size={16} /> Ikasgela <small>gai honen 3D eredua, taula eta fitxak</small>
+                  </Link>
+                )}
                 <Link role="menuitem" href="/eratorriak" onClick={close}>
                   <IconTree size={16} /> Eratorriak <small>nondik datoz, zer bihurtzen dira</small>
                 </Link>
