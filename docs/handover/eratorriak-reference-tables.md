@@ -66,6 +66,17 @@ The following mapping includes every entry once. IDs below are developer-only pr
 - Ductus arteriosus → ligament by month 3, per notes. Caecal bud is the last to return (EO26-03). Added pharyngeal-gut boundary and oesophagus rows (D03). Heart rows use the notes' names (hasierako eskuineko / ezkerreko bentrikulua). Rectum leads with "peritoneo kanpokoa". Removed "ikasgaiko eskeman" hedges.
 - UI: practice mode can hide either column (questions ask both directions); trap notes are prefixed "Kontuz" and stay hidden until the row is revealed.
 
+## Importance levels and Arku sistemak (2026-10-31)
+
+- Every row has `level` 1–3 (Funtsezkoa / Garrantzitsua / Osagarria). Ranking rule (developer-only, never shown): 1 = concept is the answer or a trap option in two or more entries of the compilation; 2 = one entry; 3 = none. Rows render level-first; tables with more level-1 rows come first. Legend chips filter levels. The app never says why a row is ranked.
+- Arch questions were checked: almost all are pairings "arch/pouch number ↔ nerve / muscle / cartilage / artery / derivative" (D04, OH21-13, OH26-15, EO26-10, EO21-15, D02, D05, EO21-13, EO26-09, OH26-16, OH21-15) plus the recurrent-nerve variant (A04, B02, C10). Hence the `ARCH_GRID` master table (arches 1,2,3,4,6 × nerve, muscles, skeleton, aortic arch, pouch, cleft/membrane) with per-cell recall, and the reverse table `arkua-ala-poltsa` (structure → which arch/pouch/cleft). The ★ Arku sistemak view (default) shows the grid plus `ARCH_TABLE_IDS`.
+
+## Declutter (2026-10-31)
+
+- Hero jump nav cut from 11 chips to 3 (Taula laburrak · 7.–13. ikasgelak · 1.–6.); topics are picked inside each section, so the page no longer shows three parallel topic rows.
+- Tables toolbar is two rows: topics (★ Arku sistemak first, Denak last) and search + importance chips + the same "Proba modua" switch the rooms use (`mg-quiz`); "Ezkutatu: Eratorria / Jatorria" appears only while it is on. Visible counts and the hint line were dropped (counts stay in a screen-reader status). Topic eyebrows show only in mixed views. Grid lost its germ-layer subtitles (the laryngeal-cartilage cell made "Gandor neurala" wrong).
+- Not touched: the Gaiz gai rooms below still stack topic tabs, source chips and an 8-step room nav.
+
 ## Verification
 
 All local sentence IDs referenced by the dataset were checked against parsed original-note exports and exist. All 99 PDF entry IDs are represented in the mapping above. Source existence does not by itself prove every claim; the distinctions above record deliberate source interpretation. Image identification remains outside what text-only tables can establish. Existing room diagrams and simulations are preserved.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { REFERENCE_TABLES, type ReferenceRow } from '@/content/eratorriak/reference-tables';
+import { ARCH_GRID, ARCH_SYSTEMS, ARCH_TABLE_IDS, REFERENCE_TABLES, type ReferenceRow } from '@/content/eratorriak/reference-tables';
 import { w7 } from '@/content/notes-text/w7';
 import { w8 } from '@/content/notes-text/w8';
 import { w9 } from '@/content/notes-text/w9';
@@ -98,5 +98,30 @@ describe('Eratorriak · reference relationships', () => {
     const lowerCanal = findRow(14, /proktodeoko ektodermo/i);
     expect(lowerCanal.derivative).toMatch(/uzki.hodiaren beheko atala/i);
     expect(lowerCanal.derivative).toMatch(/lerro pektinatuaren azpitik/i);
+  });
+
+  it('ranks every relationship and arch cell 1–3', () => {
+    for (const table of REFERENCE_TABLES) for (const row of table.rows) expect([1, 2, 3], `${table.id}/${row.id}`).toContain(row.level);
+    for (const column of ARCH_GRID) for (const cell of Object.values(column.cells)) if (cell) expect([1, 2, 3]).toContain(cell.level);
+    expect(REFERENCE_TABLES.flatMap((table) => table.rows).filter((row) => row.level === 1).length).toBeGreaterThan(40);
+  });
+
+  it('builds the arch-systems grid from resolvable sources and the core pairings', () => {
+    expect(ARCH_GRID.map((column) => column.arch)).toEqual(['1. arkua', '2. arkua', '3. arkua', '4. arkua', '6. arkua']);
+    for (const column of ARCH_GRID) for (const system of ARCH_SYSTEMS) {
+      const cell = column.cells[system.id];
+      if (!cell) continue;
+      expect(cell.sources.length, `${column.arch}/${system.id}`).toBeGreaterThan(0);
+      for (const source of cell.sources) if (!source.startsWith('https://')) expect(sentenceIds.has(source), `${column.arch}/${system.id}: ${source}`).toBe(true);
+    }
+    const cell = (arch: number, system: (typeof ARCH_SYSTEMS)[number]['id']) => ARCH_GRID[[1, 2, 3, 4, 6].indexOf(arch)].cells[system]!.text;
+    expect(cell(1, 'muscle')).toMatch(/murtxikatzaile/i);
+    expect(cell(2, 'nerve')).toMatch(/VII/);
+    expect(cell(3, 'pouch')).toMatch(/timoa/i);
+    expect(cell(6, 'nerve')).toMatch(/atzerakaria/i);
+    expect(cell(6, 'artery')).toMatch(/hodi arteriosoa/i);
+    for (const id of ARCH_TABLE_IDS) expect(REFERENCE_TABLES.some((table) => table.id === id), id).toBe(true);
+    const thyroid = findRow(12, /^Tiroidesa/i);
+    expect(thyroid.derivative).toMatch(/ez da poltsa-eratorria/i);
   });
 });
