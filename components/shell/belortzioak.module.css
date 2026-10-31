@@ -240,6 +240,13 @@
   color: #0b0c0f;
 }
 
+/* the heart numbered in red pen on p.12 */
+.num.isRed,
+:global(.num-chip).chipRed {
+  background: #c62828;
+  color: #fff;
+}
+
 .num.isAsked {
   background: var(--signal);
   color: #0b0c0f;

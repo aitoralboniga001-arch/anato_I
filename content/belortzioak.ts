@@ -9,6 +9,9 @@ import geometry from './belortzioak-geometry.json';
  * `scripts/belortzioak/extract.py` into `belortzioak-geometry.json`; the figures themselves into
  * `public/belortzioak-irudiak/`.
  * A number whose name is not given here (crossed out in the legend, or "not visible") is left out.
+ * Where the legend was corrected by hand, the hand-written name wins (the printed one is accepted
+ * when typed); labels that exist only in handwriting are under `hand`, keyed by the id the
+ * extractor gives them.
  */
 
 export type BelSystem = 'azala' | 'blastoak' | 'kardio' | 'arnas' | 'digestio';
@@ -24,9 +27,13 @@ export const BEL_SYSTEMS: { id: BelSystem; title: string; short: string }[] = [
 type Pt = [number, number];
 
 export interface BelItem {
-  /** `${plate}:${n}` — stable across sessions (progress is stored by it). */
+  /** `${plate}:${n}` (or the hand-written label's id) — stable across sessions (progress is stored by it). */
   key: string;
   n: number;
+  /** What the figure shows for it: the printed number, or what was written by hand ("9.2", "10a"). */
+  tag: string;
+  /** A label written in red pen (a numbering of its own, next to the printed one). */
+  ink?: 'red';
   name: string;
   /** The legend heading it hangs from ("Faringe-arkuak"), shown above the name. */
   group?: string;
@@ -36,6 +43,8 @@ export interface BelItem {
   label: Pt;
   /** The point(s) its arrow touches; a number without an arrow sits on its structure (= label). */
   targets: Pt[];
+  /** The number written again by hand on its structure (also among `targets`): drawn there, no line. */
+  marks: { at: Pt; tag?: string }[];
   /** Whether the figure drew an arrow (false: the number was printed on the structure itself). */
   arrow: boolean;
   /** Spotlight radius per target, as a fraction of the figure's longer side. */
@@ -60,7 +69,7 @@ interface Entry {
 }
 type Legend = Record<number, string | Entry>;
 
-const DEFS: { id: string; system: BelSystem; title: string; sub: string; legend: Legend }[] = [
+const DEFS: { id: string; system: BelSystem; title: string; sub: string; legend: Legend; hand?: Record<string, string | Entry> }[] = [
   {
     id: 'p02',
     system: 'azala',
@@ -170,16 +179,22 @@ const DEFS: { id: string; system: BelSystem; title: string; sub: string; legend:
       13: 'Amnios-barrunbea',
       14: 'Endodermoa',
     },
+    hand: {
+      a: { name: 'Aorta-zakua', group: 'Bihotza (eskuz)' },
+      b: { name: 'Enbor arteriosoa', group: 'Bihotza (eskuz)', accept: ['arteria enborra'] },
+      c: { name: 'Barrunbe perikardikoa', group: 'Bihotza (eskuz)', accept: ['perikardio-barrunbea'] },
+      d: { name: 'Erreten aurikulobentrikularra', group: 'Bihotza (eskuz)' },
+    },
   },
   {
     id: 'p07',
     system: 'kardio',
     title: 'Bihotza, arteriak eta zainak',
-    sub: '2. enbrioia',
+    sub: '1. enbrioia',
     legend: {
-      1: { name: 'Sinu benosoa', group: 'Bihotza' },
-      2: { name: 'Aurikula', group: 'Bihotza' },
-      4: { name: 'Bentrikulua', group: 'Bihotza' },
+      1: { name: 'Zain sinua', group: 'Bihotza', accept: ['sinu benosoa'] },
+      2: { name: 'Atal aurikularra', group: 'Bihotza', accept: ['aurikula'] },
+      4: { name: 'Atal bentrikularra', group: 'Bihotza', accept: ['bentrikulua'] },
       5: { name: 'Arteria-bulboa', group: 'Bihotza' },
       8: { name: 'Aorta-zakua', group: 'Arteriak' },
       9: { name: '1. aorta-arkua', group: 'Arteriak' },
@@ -205,7 +220,7 @@ const DEFS: { id: string; system: BelSystem; title: string; sub: string; legend:
       1: 'Bentrikulua',
       2: 'Bulbo arteriosoa',
       3: 'Perikardio-barrunbea',
-      4: 'Enbor arteriosoa',
+      4: { name: 'Arteria enborra', accept: ['enbor arteriosoa'] },
       5: 'Erreten aurikulobentrikularra',
     },
   },
@@ -219,10 +234,11 @@ const DEFS: { id: string; system: BelSystem; title: string; sub: string; legend:
       2: 'Ezkerreko bentrikulua',
       3: 'Bentrikuluarteko zuloa eta trenkada',
       4: 'Muskulu-trabekulak',
+      5: { name: 'Zain sinua', accept: ['sinu benosoa'] },
       6: 'Eskuineko aurikula',
       7: 'Ezkerreko aurikula',
-      8: { name: 'Balbula sinuaurikularrak (benosoak)', accept: ['balbula benosoak', 'balbula sinuaurikularrak'] },
-      9: 'Bihotz-kuxina',
+      8: { name: 'Zain-balbulak', accept: ['zain balbulen', 'balbula benosoak', 'balbula sinuaurikularrak'] },
+      9: { name: 'Kuxin endokardikoa', accept: ['bihotz-kuxina'] },
       10: 'Eskuineko zulo aurikulobentrikularra',
       11: 'Septum primum',
       12: 'Ostium primum',
@@ -243,7 +259,7 @@ const DEFS: { id: string; system: BelSystem; title: string; sub: string; legend:
       7: { name: 'Kanpoko arteria karotida', group: 'Arteria karotidak' },
       8: { name: 'Barneko arteria karotida', group: 'Arteria karotidak' },
       9: 'Segmentuarteko arteriak',
-      10: 'Arteria subklabia',
+      10: { name: 'Lepauztaipeko arteria', accept: ['arteria subklabia'] },
       11: { name: 'Aorta dortsalak (eskuinekoa eta ezkerrekoa)', accept: ['aorta dortsalak'] },
       12: 'Beheranzko aorta',
       13: 'Enbor zeliakoa',
@@ -274,25 +290,34 @@ const DEFS: { id: string; system: BelSystem; title: string; sub: string; legend:
     title: 'Arteriak (3. enbrioia)',
     sub: '3. enbrioia',
     legend: {
-      1: { name: 'Birika-arteriak: enborra, eskuinekoa eta ezkerrekoa', accept: ['birika-arteriak', 'birika-enborra'] },
+      1: { name: 'Birika-arteriak: enborra (1a), eskuinekoa (1b) eta ezkerrekoa (1c)', accept: ['birika-arteriak', 'birika-enborra'] },
       2: 'Goranzko aorta',
-      3: { name: 'Ezkerreko arteria karotida komuna', group: 'Mako aortikoa' },
-      4: { name: 'Ezkerreko arteria subklabia', group: 'Mako aortikoa' },
-      5: { name: 'Enbor brakiozefalikoa', group: 'Mako aortikoa' },
-      6: { name: 'Eskuineko arteria karotida komuna', group: 'Eskuineko arteria karotidak' },
+      3: { name: 'Ezkerreko arteria karotida komuna (batua)', group: 'Mako aortikoa', accept: ['ezkerreko arteria karotida batua'] },
+      4: { name: 'Ezkerreko arteria subklabia (ezkerreko lepauztaipeko arteria)', group: 'Mako aortikoa', accept: ['ezkerreko arteria subklabia', 'ezkerreko lepauztaipeko arteria'] },
+      5: { name: 'Enbor brakiozefalikoa (besoko-buruetako enborra)', group: 'Mako aortikoa', accept: ['enbor brakiozefalikoa', 'besoko buruetako enborra'] },
+      6: { name: 'Eskuineko arteria karotida komuna (batua)', group: 'Eskuineko arteria karotidak', accept: ['eskuineko arteria karotida batua'] },
       7: { name: 'Eskuineko barneko arteria karotida', group: 'Eskuineko arteria karotidak' },
       8: { name: 'Eskuineko kanpoko arteria karotida', group: 'Eskuineko arteria karotidak' },
-      9: { name: 'Beheranzko aorta: sahietsarteko arteriak', accept: ['beheranzko aorta', 'sahietsarteko arteriak'] },
+      9: 'Beheranzko aorta',
       10: 'Enbor zeliakoa',
       11: 'Goiko arteria mesenterikoa',
       12: 'Beheko arteria mesenterikoa',
-      13: { name: 'Arteria iliako komunak', group: 'Arteria iliakoak' },
+      13: { name: 'Arteria iliako komunak (ilio-arteria batuak)', group: 'Arteria iliakoak', accept: ['arteria iliako komunak', 'ilio-arteria batuak'] },
       14: { name: 'Kanpoko arteria iliakoa', group: 'Arteria iliakoak' },
       15: { name: 'Barneko arteria iliakoa', group: 'Arteria iliakoak' },
       16: 'Zilbor-arteriak',
-      17: { name: 'Zulo sinoaurikularra', group: 'Bihotza' },
       19: { name: 'Birika-zain komun primitiboa eta eskuineko birika-zainak', group: 'Zainak', accept: ['birika-zain komun primitiboa', 'birika-zainak'] },
-      20: 'Eskuineko arteria subklabia',
+      20: { name: 'Eskuineko arteria subklabia (lepauztaipeko arteria)', accept: ['eskuineko arteria subklabia', 'eskuineko lepauztaipeko arteria'] },
+    },
+    hand: {
+      '9.2': 'Sahietsarteko arteriak',
+      r5: { name: 'Septum primum', group: 'Bihotza (gorriz)' },
+      r6: { name: 'Ostium secundum', group: 'Bihotza (gorriz)' },
+      r7: { name: 'Septum secundum', group: 'Bihotza (gorriz)' },
+      r8: { name: 'Zulo obalea', group: 'Bihotza (gorriz)' },
+      r9: { name: 'Zain sinua', group: 'Bihotza (gorriz)', accept: ['sinu benosoa'] },
+      r10a: { name: 'Goiko kaba zainaren zuloa', group: 'Bihotza (gorriz)' },
+      r10b: { name: 'Beheko kaba zainaren zuloa', group: 'Bihotza (gorriz)' },
     },
   },
   {
@@ -301,8 +326,8 @@ const DEFS: { id: string; system: BelSystem; title: string; sub: string; legend:
     title: 'Bihotza (3. enbrioia)',
     sub: '3. enbrioia',
     legend: {
-      1: { name: 'Eskuineko bentrikulua', group: 'Bentrikuluak' },
-      2: { name: 'Ezkerreko bentrikulua', group: 'Bentrikuluak' },
+      1: { name: 'Ezkerreko bentrikulua', group: 'Bentrikuluak' },
+      2: { name: 'Eskuineko bentrikulua', group: 'Bentrikuluak' },
       3: { name: 'Eskuineko aurikula', group: 'Aurikulak' },
       4: { name: 'Ezkerreko aurikula', group: 'Aurikulak' },
     },
@@ -317,9 +342,9 @@ const DEFS: { id: string; system: BelSystem; title: string; sub: string; legend:
       2: { name: 'Eskuineko enbor benoso brakiozefalikoa', group: 'Enbor benoso brakiozefalikoak' },
       3: { name: 'Ezkerreko enbor benoso brakiozefalikoa', group: 'Enbor benoso brakiozefalikoak' },
       4: 'Zain subklabia',
-      5: { name: 'Azigo zaina eta sahietsarteko zainak', accept: ['azigo zaina', 'sahietsarteko zainak'] },
+      5: { name: 'Azygo zaina eta sahietsarteko zainak', accept: ['azygo zaina', 'azigo zaina', 'sahietsarteko zainak'] },
       6: 'Beheko kaba zaina',
-      7: { name: 'Hodi benosoa (Arancio)', accept: ['hodi benosoa', 'Arancioren hodia'] },
+      7: 'Hodi benosoa',
       8: 'Ezkerreko zilbor-zaina',
       9: 'Porta zaina',
       10: 'Goiko zain mesenterikoa',
@@ -476,18 +501,18 @@ const DEFS: { id: string; system: BelSystem; title: string; sub: string; legend:
 
 interface Geo {
   size: [number, number];
-  items: { n: number; label: Pt; targets: Pt[]; r: number[] }[];
+  items: { n: number; id?: string; tag?: string; ink?: 'red'; label: Pt; targets: Pt[]; marks?: { at: Pt; tag?: string }[]; r: number[] }[];
 }
 const GEO = geometry as unknown as Record<string, Geo>;
 
 export const BEL_PLATES: BelPlate[] = DEFS.map((d) => {
   const g = GEO[d.id];
   const items = g.items.flatMap((it): BelItem[] => {
-    const raw = d.legend[it.n];
+    const raw = d.hand?.[it.id ?? String(it.n)] ?? (it.id ? undefined : d.legend[it.n]);
     if (!raw) return [];
     const e: Entry = typeof raw === 'string' ? { name: raw } : raw;
     const targets = it.targets.length ? it.targets : [it.label];
-    return [{ key: `${d.id}:${it.n}`, n: it.n, name: e.name, group: e.group, accept: e.accept, label: it.label, targets, arrow: it.targets.length > 0, r: it.r.length ? it.r : [0.05] }];
+    return [{ key: `${d.id}:${it.id ?? it.n}`, n: it.n, tag: it.tag ?? String(it.n), ink: it.ink, name: e.name, group: e.group, accept: e.accept, label: it.label, targets, marks: it.marks ?? [], arrow: it.targets.length > 0, r: it.r.length ? it.r : [0.05] }];
   });
   return { id: d.id, system: d.system, title: d.title, sub: d.sub, size: g.size, items };
 });

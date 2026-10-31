@@ -26,6 +26,40 @@ PAINT_OUT = {12: [(197, 468, 221, 492)]}  # a crossed-out answer box printed ove
 # Label n's arrow really belongs to label m (the arrow joins two labels): use its far end.
 REASSIGN = {21: [(2, 1)]}
 DROP_TARGETS = {15: {3: [1]}}  # a plain bracket line between 2 and 3, not an arrow
+# Corrections written by hand on the figures (the hand-written legend names live in
+# content/belortzioak.ts). Points in PDF points, read off the page at 300–900 dpi:
+#   add   — the number written again by hand elsewhere (x, y[, what was written])
+#   set   — replace a number's targets;  label — move a number (its printed box crossed out)
+#   new   — labels that exist only in handwriting; `id` keys them, `tag` is what was written
+HAND = {
+    6: {"new": [  # the heart, named by hand (no numbers)
+        {"id": "a", "n": 101, "tag": "a", "label": (250.8, 188.8), "targets": [(240.0, 247.6)]},
+        {"id": "b", "n": 102, "tag": "b", "label": (222.0, 274.0), "targets": [(250.8, 272.8)]},
+        {"id": "c", "n": 103, "tag": "c", "label": (327.6, 275.2), "targets": [(271.2, 280.0)]},
+        {"id": "d", "n": 104, "tag": "d", "label": (274.8, 366.4), "targets": [(241.2, 311.2)]},
+    ]},
+    9: {  # numbers written by hand on the heart section (the printed ones sit on the small heart)
+        "add": {1: [(276.3, 309.7)], 2: [(308.7, 309.7)], 6: [(243.5, 269.2)], 7: [(287.6, 265.6)]},
+        "label": {10: (269.6, 294.4)},  # box 10 crossed out in red, circled 10 written on the canal
+        "set": {10: [(269.6, 294.4)]},
+        "new": [{"id": "5", "n": 5, "tag": "5", "label": (231.8, 271.9)}],
+    },
+    11: {"add": {5: [(294.6, 452.8)]}},  # a circled 5 on the vein inside the embryo
+    12: {
+        "add": {1: [(161.0, 402.0, "1a")]},  # "1a" (the trunk) written on the vessel
+        "new": [
+            {"id": "9.2", "n": 9.2, "tag": "9.2", "label": (64.6, 491.1), "targets": [(90.5, 446.5), (93.4, 482.5)]},
+            # the heart, numbered in red (a list of its own under the figure)
+            {"id": "r5", "n": 105, "tag": "5", "ink": "red", "label": (212.0, 429.3), "targets": [(157.4, 430.8)]},
+            {"id": "r6", "n": 106, "tag": "6", "ink": "red", "label": (232.0, 428.0), "targets": [(157.4, 430.8)]},
+            {"id": "r7", "n": 107, "tag": "7", "ink": "red", "label": (182.0, 438.0), "targets": [(151.4, 431.8), (156.0, 440.6)]},
+            {"id": "r8", "n": 108, "tag": "8", "ink": "red", "label": (182.0, 453.0), "targets": [(165.0, 442.8)]},
+            {"id": "r9", "n": 109, "tag": "9", "ink": "red", "label": (144.6, 449.6)},
+            {"id": "r10a", "n": 110.1, "tag": "10a", "ink": "red", "label": (146.2, 412.4), "targets": [(140.2, 423.8), (148.2, 421.4)]},
+            {"id": "r10b", "n": 110.2, "tag": "10b", "ink": "red", "label": (156.2, 462.4), "targets": [(157.4, 447.6), (167.4, 469.2)]},
+        ],
+    },
+}
 
 def rect_dist(p, r):
     dx = max(r.x0 - p[0], 0, p[0] - r.x1)
@@ -35,10 +69,20 @@ def rect_dist(p, r):
 def is_black(c):
     return c is not None and max(c) < 0.15
 
+BLUE_PEN = {7}  # pages where the corrections drew extra arrows in blue (the colour is used elsewhere too)
+
+def is_ink(c, pg):
+    return is_black(c) or (pg in BLUE_PEN and c is not None and max(abs(a - b) for a, b in zip(c, (0.31, 0.506, 0.741))) < 0.03)
+
+def is_overlay(r, page):
+    """The hand-written corrections, saved as a transparent image over the whole page."""
+    return (r & page.rect).get_area() / page.rect.get_area() > 0.9
+
 def page_geometry(page):
     big = []
     for info in page.get_image_info(xrefs=True):
         r = fitz.Rect(info["bbox"])
+        if is_overlay(r, page): continue
         if r.get_area() / page.rect.get_area() > 0.03:
             big.append(r & page.rect)
     area = fitz.Rect(big[0])
@@ -54,7 +98,7 @@ def page_geometry(page):
     for d in page.get_drawings():
         kinds = {it[0] for it in d["items"]}
         fill, stroke = d.get("fill"), d.get("color")
-        if not (is_black(fill) or (fill is None and is_black(stroke))): continue
+        if not (is_ink(fill, page.number + 1) or (fill is None and is_ink(stroke, page.number + 1))): continue
         r = fitz.Rect(d["rect"])
         if kinds == {"re"}:
             if r.width < 40 and r.height < 25: boxes.append(r)
@@ -104,8 +148,9 @@ def clean_render(pdf, pg, crop):
     doc = fitz.open(pdf)
     cp = doc[pg - 1]
     for info in cp.get_image_info(xrefs=True):
-        # the arrows also carry small raster shadows
-        if fitz.Rect(info["bbox"]).get_area() / cp.rect.get_area() <= 0.03 and info["xref"]:
+        # the arrows also carry small raster shadows; the handwriting is drawn again by the app
+        r = fitz.Rect(info["bbox"])
+        if (r.get_area() / cp.rect.get_area() <= 0.03 or is_overlay(r, cp)) and info["xref"]:
             cp.delete_image(info["xref"])
     cp.add_redact_annot(cp.rect, fill=False)
     cp.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE, graphics=fitz.PDF_REDACT_LINE_ART_REMOVE_IF_TOUCHED, text=fitz.PDF_REDACT_TEXT_REMOVE)
@@ -207,6 +252,18 @@ def main():
                 items[n]["targets"].append(fx(ar["target"]))
         for n, drops in DROP_TARGETS.get(pg, {}).items():
             items[n]["targets"] = [t for i, t in enumerate(items[n]["targets"]) if i not in drops]
+        h = HAND.get(pg, {})
+        for n, pt in h.get("label", {}).items(): items[n]["label"] = fx(pt)
+        for n, pts in h.get("set", {}).items(): items[n]["targets"] = [fx(p) for p in pts]
+        # the number written again by hand: another place it names (a number printed on its
+        # structure, with no arrow, keeps pointing there too); `marks` draw it there again
+        for n, pts in h.get("add", {}).items():
+            items[n]["targets"] = (items[n]["targets"] or [items[n]["label"]]) + [fx(p[:2]) for p in pts]
+            items[n]["marks"] = [{"at": fx(p[:2]), **({"tag": p[2]} if len(p) > 2 else {})} for p in pts]
+        for e in h.get("new", []):
+            extra = {k: e[k] for k in ("tag", "ink") if k in e}
+            if e["id"] != str(e["n"]) or "tag" not in e: extra["id"] = e["id"]
+            items[e["id"]] = {"n": e["n"], **extra, "label": fx(e["label"]), "targets": [fx(p) for p in e.get("targets", [])]}
         # Spotlight size: traced outlines are too unreliable to draw (they leak along vessels and
         # shading), but their extent still tells a pit from a limb bud. Clamped, so a leak only
         # widens the light a little.

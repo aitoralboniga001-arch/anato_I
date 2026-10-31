@@ -39,6 +39,36 @@ describe('belortzioak: the figure set', () => {
     for (const k of ['p04:12', 'p07:6', 'p07:21', 'p17:13', 'p21:10', 'p21:11']) expect(has(k), k).toBe(false);
   });
 
+  it('follows the hand-written corrections of the figure set', () => {
+    const at = (k: string) => BEL_ITEMS.find((x) => x.item.key === k)?.item;
+    const name = (k: string) => at(k)?.name;
+    // crossed-out names replaced by the hand-written ones
+    expect(name('p07:1')).toBe('Zain sinua');
+    expect(name('p07:2')).toBe('Atal aurikularra');
+    expect(name('p07:4')).toBe('Atal bentrikularra');
+    expect(BEL_PLATES.find((p) => p.id === 'p07')?.sub).toBe('1. enbrioia');
+    expect(name('p08:4')).toBe('Arteria enborra');
+    expect(name('p09:8')).toBe('Zain-balbulak');
+    expect(name('p09:9')).toBe('Kuxin endokardikoa');
+    expect(name('p10:10')).toBe('Lepauztaipeko arteria');
+    expect(name('p13:1')).toBe('Ezkerreko bentrikulua');
+    expect(name('p13:2')).toBe('Eskuineko bentrikulua');
+    expect(name('p14:7')).toBe('Hodi benosoa');
+    // a legend line scribbled out; numbers and names written only by hand
+    expect(at('p12:17')).toBeUndefined();
+    expect(name('p09:5')).toBe('Zain sinua');
+    expect(at('p12:9.2')).toMatchObject({ tag: '9.2', name: 'Sahietsarteko arteriak' });
+    expect(at('p12:r10b')).toMatchObject({ tag: '10b', ink: 'red', name: 'Beheko kaba zainaren zuloa' });
+    expect(['a', 'b', 'c', 'd'].map((t) => name(`p06:${t}`))).toEqual(['Aorta-zakua', 'Enbor arteriosoa', 'Barrunbe perikardikoa', 'Erreten aurikulobentrikularra']);
+    // box 10 crossed out on p.9: it points at the circled 10 on the canal, with no arrow
+    expect(at('p09:10')!.targets).toEqual([at('p09:10')!.label]);
+    // the same number written again on the section: it points at both places
+    for (const k of ['p09:1', 'p09:2', 'p09:6', 'p09:7']) expect(at(k)!.targets.length, k).toBe(2);
+    // blue arrows added on p.7
+    expect(at('p07:15')!.arrow).toBe(true);
+    expect(at('p07:16')!.targets.length).toBe(2);
+  });
+
   it('links the same structure across figures', () => {
     const sinus = BEL_ITEMS.filter((x) => sameKey(x.item.name) === sameKey('Kloaka'));
     expect(sinus.map((x) => x.plate.id).sort()).toEqual(['p19', 'p20']);

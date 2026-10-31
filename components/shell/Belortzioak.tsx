@@ -177,6 +177,7 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, asked,
     return (best as { key: string } | null)?.key ?? null;
   };
 
+  const isMark = (it: BelItem, t: Pt) => it.marks.some((m) => m.at[0] === t[0] && m.at[1] === t[1]);
   const lineEnd = (pl: Placed): Pt => [pl.side === 'l' ? COL : st.fx + st.fw + GAP, pl.y];
   // A long answer chip near the plate's edge grows inwards instead of off the plate.
   const edge = (x: number) => (x < st.tw * 0.3 ? { transform: 'translate(-12%, -50%)' } : x > st.tw * 0.7 ? { transform: 'translate(-88%, -50%)' } : {});
@@ -279,7 +280,7 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, asked,
                 <g key={it.key} className={`${s.leader} ${s.isNum}${on ? ` ${s.isOn}` : ''}${active && !on ? ` ${s.isFaded}` : ''}`}>
                   {it.targets.map((t, i) => {
                     const [x2, y2] = st.at(t);
-                    if (Math.hypot(x2 - lx, y2 - ly) < 8) return null;
+                    if (Math.hypot(x2 - lx, y2 - ly) < 8 || isMark(it, t)) return null;
                     return (
                       <Fragment key={i}>
                         <line className={s.halo} x1={lx} y1={ly} x2={x2} y2={y2} />
@@ -299,7 +300,7 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, asked,
             {asked.targets.map((t, i) => {
               const [lx, ly] = chipAt(asked);
               const [x2, y2] = st.at(t);
-              if (Math.hypot(x2 - lx, y2 - ly) < 8) return null;
+              if (Math.hypot(x2 - lx, y2 - ly) < 8 || isMark(asked, t)) return null;
               const k = 1 - 10 / Math.hypot(x2 - lx, y2 - ly);
               return (
                 <Fragment key={i}>
@@ -315,7 +316,7 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, asked,
             {asked.targets.map((t, i) => {
               const [lx, ly] = chipAt(asked);
               const [x2, y2] = st.at(t);
-              if (Math.hypot(x2 - lx, y2 - ly) < 8) return null;
+              if (Math.hypot(x2 - lx, y2 - ly) < 8 || isMark(asked, t)) return null;
               return (
                 <Fragment key={i}>
                   <line className={s.halo} x1={lx} y1={ly} x2={x2} y2={y2} />
@@ -349,7 +350,7 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, asked,
               onFocus={() => onHover(it.key)}
               onBlur={() => onHover(null)}
               onClick={() => onPick(it.key)}
-              aria-label={hidden ? `${it.n}: estalita, sakatu ikusteko` : it.name}
+              aria-label={hidden ? `${it.tag}: estalita, sakatu ikusteko` : it.name}
             >
               {hidden ? <span className={s.cover}>?</span> : it.name}
             </button>
@@ -364,17 +365,37 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, asked,
           return (
             <button
               key={it.key}
-              className={`${s.num}${on ? ` ${s.isOn}` : ''}`}
+              className={`${s.num}${on ? ` ${s.isOn}` : ''}${it.ink ? ` ${s.isRed}` : ''}`}
               style={{ left: pct(lx, st.tw), top: pct(ly, H) }}
               onPointerEnter={(e) => e.pointerType !== 'touch' && onHover(it.key)}
               onPointerLeave={(e) => e.pointerType !== 'touch' && onHover(null)}
               onClick={() => onPick(it.key)}
-              aria-label={`${it.n}`}
+              aria-label={it.tag}
             >
-              {it.n}
+              {it.tag}
             </button>
           );
         })}
+      {explore &&
+        numbers &&
+        plate.items.flatMap((it) =>
+          it.marks.map((m, i) => {
+            const [mx, my] = st.at(m.at);
+            return (
+              <button
+                key={`${it.key}-${i}`}
+                className={`${s.num}${active === it.key ? ` ${s.isOn}` : ''}${it.ink ? ` ${s.isRed}` : ''}`}
+                style={{ left: pct(mx, st.tw), top: pct(my, H) }}
+                onPointerEnter={(e) => e.pointerType !== 'touch' && onHover(it.key)}
+                onPointerLeave={(e) => e.pointerType !== 'touch' && onHover(null)}
+                onClick={() => onPick(it.key)}
+                aria-label={m.tag ?? it.tag}
+              >
+                {m.tag ?? it.tag}
+              </button>
+            );
+          }),
+        )}
 
       {mode === 'zer' && asked && (
         <span className={`${s.num} ${s.isAsked}${answered ? ` ${s.isAnswered}` : ''}`} style={{ left: pct(chipAt(asked)[0], st.tw), top: pct(chipAt(asked)[1], H), ...edge(chipAt(asked)[0]) }}>
@@ -743,8 +764,8 @@ export function Belortzioak() {
                       <Fragment key={it.key}>
                         {head && <li className={s.groupHead}>{head}</li>}
                         <li className={`${active === it.key ? s.isOn : ''}${hidden ? ` ${s.isCovered}` : ''}`} onPointerEnter={() => setHovered(it.key)}>
-                          <button onClick={() => pick(it.key)} aria-label={hidden ? `${it.n}: estalita, sakatu ikusteko` : `${it.n}: ${it.name}`}>
-                            <span className="num-chip">{it.n}</span>
+                          <button onClick={() => pick(it.key)} aria-label={hidden ? `${it.tag}: estalita, sakatu ikusteko` : `${it.tag}: ${it.name}`}>
+                            <span className={`num-chip${it.ink ? ` ${s.chipRed}` : ''}`}>{it.tag}</span>
                             <span className={s.legendName}>{hidden ? 'Sakatu ikusteko' : it.name}</span>
                             {cards[it.key] && <span className={`${s.meter} ${b >= KNOWN ? s.isKnown : s.isWeak}`} title={b >= KNOWN ? 'Badakizu' : 'Errepasatzeko'} />}
                           </button>
@@ -911,7 +932,7 @@ export function Belortzioak() {
                         return (
                           <li key={m.key}>
                             <button onClick={() => (setMode('esploratu'), open(x.plate, m.key))}>
-                              <span className="num-chip">{x.item.n}</span> {x.item.name} <small>· {x.plate.title}</small>
+                              <span className={`num-chip${x.item.ink ? ` ${s.chipRed}` : ''}`}>{x.item.tag}</span> {x.item.name} <small>· {x.plate.title}</small>
                             </button>
                           </li>
                         );
