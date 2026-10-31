@@ -4,6 +4,7 @@ import { appearances, structures } from '@/content/registry';
 import { categoryColor } from '@/lib/sim/palette';
 import { LandFoot, LandNav } from './LandNav';
 import { MigrationMap } from './MigrationMap';
+import { ReferenceTables } from './eratorriak/ReferenceTables';
 import { EARLY as ROOT, LAYERS, type LNode } from '@/content/lineage';
 
 /** The page starts the early tree at the blastocyst (cleavage is shown in the simulator). */
@@ -107,6 +108,7 @@ export function Lineage() {
           Blastozistotik hiru ernetze orrietara, eta 7. gaitik aurrera egitura bakoitza nondik datorren, nora migratzen den eta zertan bihurtzen den. Egitura bakoitzean klikatuz, simulagailuan agertzen den etapa irekitzen da.
         </p>
         <nav className="ln-jump" aria-label="Orrialdeko atalak">
+          <a href="#eratorriak-taulak">Taula laburrak <span aria-hidden>↓</span></a>
           <a href="#a7-mapa">7 · Barrunbeak <span aria-hidden>↓</span></a>
           <a href="#a8-mapa">8 · Hezurrak <span aria-hidden>↓</span></a>
           <a href="#a9-mapa">9 · Muskuluak <span aria-hidden>↓</span></a>
@@ -124,6 +126,8 @@ export function Lineage() {
           </a>
         </nav>
       </section>
+
+      <ReferenceTables />
 
       <section className="land-section ln-migrations" id="migrazioak">
         <div className="section-head">
