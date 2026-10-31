@@ -13,12 +13,28 @@ import { Topic8Study } from './eratorriak/Topic8';
 import { Topic9Study } from './eratorriak/Topic9';
 import { Topic10Study } from './eratorriak/Topic10';
 import { Topic11Study } from './eratorriak/Topic11';
+import { ReferenceTables, TABLE_TOPICS } from './eratorriak/ReferenceTables';
 
 /** Topics with a study room above their schemes (tables, time diagram, 3D, flashcards). */
 const STUDY: Record<number, () => ReactNode> = { 7: () => <Topic7Study />, 8: () => <Topic8Study />, 9: () => <Topic9Study />, 10: () => <Topic10Study />, 11: () => <Topic11Study />, 12: () => <Topic12Study />, 13: () => <Topic13Study /> };
 
-/** A topic tab (week 0 = the topics 1–6 germ-layer trees) or one origin followed across topics. */
-type Mode = { week: number; source?: undefined } | { source: string; week?: undefined };
+/** A topic tab (week 0 = the topics 1–6 germ-layer trees), the arch-systems tab, or one origin followed across topics. */
+type Mode = { week: number; part?: Part; source?: undefined; arch?: undefined } | { source: string; week?: undefined; part?: undefined; arch?: undefined } | { arch: true; week?: undefined; part?: undefined; source?: undefined };
+
+/** Inside a topic tab only one part shows at a time, so the page never grows above and below. */
+type Part = 'ikasgela' | 'taulak' | 'eskemak';
+
+/** Topics 7+ in tab order: every topic with schemes or quick tables. */
+const WEEKS = [...new Set([...MIGRATIONS.map((t) => t.week), ...TABLE_TOPICS])].sort((a, b) => a - b);
+const SHORT: Record<number, string> = { 14: 'Digestioa' };
+
+/** The parts a topic has, in reading order. */
+const partsOf = (week: number) =>
+  ([
+    ['ikasgela', 'Ikasgela', !!STUDY[week]],
+    ['taulak', 'Taula laburrak', TABLE_TOPICS.includes(week)],
+    ['eskemak', 'Eskemak', MIGRATIONS.some((t) => t.week === week)],
+  ] as const).filter(([, , has]) => has).map(([id, label]) => ({ id: id as Part, label }));
 
 /** Self-test: the boxes a structure becomes stay hidden until tapped. */
 interface Quiz {
@@ -238,11 +254,12 @@ const legend = (
 const parseHash = (): Mode | null => {
   const h = decodeURIComponent(window.location.hash.slice(1));
   if (h === 'orriak') return { week: 0 };
+  if (h === 'arku-sistemak') return { arch: true };
   const w = /^gaia-(\d+)$/.exec(h);
-  if (w && MIGRATIONS.some((t) => t.week === +w[1])) return { week: +w[1] };
-  // A section of a topic's study room ("a12-taula"): that topic's tab.
-  const room = /^a(\d+)-/.exec(h);
-  if (room && STUDY[+room[1]]) return { week: +room[1] };
+  if (w && WEEKS.includes(+w[1])) return { week: +w[1] };
+  // A topic's quick tables or schemes ("a14-laburrak", "a7-eskemak"), or a section of its study room ("a12-taula").
+  const room = /^a(\d+)-(.+)$/.exec(h);
+  if (room && WEEKS.includes(+room[1])) return { week: +room[1], part: room[2] === 'laburrak' ? 'taulak' : room[2] === 'eskemak' ? 'eskemak' : 'ikasgela' };
   const s = /^iturria-(.+)$/.exec(h);
   if (s && SOURCES.some((x) => x.id === s[1])) return { source: s[1] };
   return null;
@@ -265,9 +282,9 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
       const m = parseHash();
       if (!m) return;
       setMode(m);
-      // A study-room section scrolls itself into view (its own anchor); a tab goes to the top of the map.
+      // A study-room section scrolls itself into view (its own anchor); a tab or part goes to the top of the map.
       const id = decodeURIComponent(window.location.hash.slice(1));
-      if (/^a\d+-/.test(id)) requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }));
+      if (m.part === 'ikasgela' && /^a\d+-/.test(id)) requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }));
       else top.current?.scrollIntoView({ block: 'start' });
     };
     read();
@@ -278,7 +295,18 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
   const pick = (m: Mode) => {
     setMode(m);
     setShown(new Set());
-    history.replaceState(null, '', `#${m.source ? `iturria-${m.source}` : m.week ? `gaia-${m.week}` : 'orriak'}`);
+    const hash = m.arch
+      ? 'arku-sistemak'
+      : m.source
+        ? `iturria-${m.source}`
+        : !m.week
+          ? 'orriak'
+          : m.part === 'taulak'
+            ? `a${m.week}-laburrak`
+            : m.part === 'eskemak'
+              ? `a${m.week}-eskemak`
+              : `gaia-${m.week}`;
+    history.replaceState(null, '', `#${hash}`);
     const el = top.current;
     if (el && el.getBoundingClientRect().top < 0) el.scrollIntoView({ block: 'start' });
   };
@@ -293,7 +321,9 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
     [],
   );
 
-  const topic = mode.week ? MIGRATIONS.find((t) => t.week === mode.week)! : null;
+  const topic = mode.week ? (MIGRATIONS.find((t) => t.week === mode.week) ?? null) : null;
+  const parts = mode.week ? partsOf(mode.week) : [];
+  const part: Part | null = mode.week ? (parts.find((p) => p.id === mode.part) ?? parts[0])?.id ?? null : null;
   const src = mode.source ? bySource.find((s) => s.id === mode.source)! : null;
   const early = src ? findLineage(src.id) : null;
   const layersTab = mode.week === 0;
@@ -314,72 +344,84 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
             <b>1–6</b>
             Ernetze orriak
           </button>
-          {MIGRATIONS.map((t) => (
-            <button key={t.week} role="tab" aria-selected={mode.week === t.week} className={`mg-tab${mode.week === t.week ? ' is-on' : ''}`} onClick={() => pick({ week: t.week })}>
-              <b>{t.week}</b>
-              {t.short}
+          {WEEKS.map((week) => (
+            <button key={week} role="tab" aria-selected={mode.week === week} className={`mg-tab${mode.week === week ? ' is-on' : ''}`} onClick={() => pick({ week })}>
+              <b>{week}</b>
+              {MIGRATIONS.find((t) => t.week === week)?.short ?? SHORT[week] ?? `${week}. gaia`}
             </button>
           ))}
+          <button role="tab" aria-selected={!!mode.arch} className={`mg-tab is-featured${mode.arch ? ' is-on' : ''}`} onClick={() => pick({ arch: true })}>
+            <b aria-hidden>★</b>
+            Arku sistemak
+          </button>
         </div>
+        <select
+          className={`mg-follow${src ? ' is-on' : ''}`}
+          aria-label="Iturri bat jarraitu gai guztietan"
+          value={mode.source ?? ''}
+          onChange={(e) => pick(e.target.value ? { source: e.target.value } : { week: MIGRATIONS[0].week })}
+        >
+          <option value="">Iturri bat jarraitu…</option>
+          {bySource.map((s) => (
+            <option key={s.id} value={s.id}>
+              {structures.get(s.id)?.name ?? s.id} ({s.count})
+            </option>
+          ))}
+        </select>
         {!layersTab && (
-          <button className={`mg-quiz${quizOn ? ' is-on' : ''}`} aria-pressed={quizOn} onClick={toggleQuiz} title="Eratorriak ezkutatu eta zeure burua probatu">
+          <button className={`mg-quiz${quizOn ? ' is-on' : ''}`} aria-pressed={quizOn} onClick={toggleQuiz} title="Erantzunak ezkutatu eta zeure burua probatu">
             <i aria-hidden />
             <span>Proba modua</span>
           </button>
         )}
-      </div>
-
-      <div className="mg-sources">
-        <span className="mg-sources-k">Iturri bat jarraitu</span>
-        {bySource.map((s) => {
-          const st = structures.get(s.id);
-          const on = mode.source === s.id;
-          return (
-            <button key={s.id} className={`mg-src${on ? ' is-on' : ''}`} aria-pressed={on} onClick={() => pick(on ? { week: s.groups[0]?.t.week ?? MIGRATIONS[0].week } : { source: s.id })}>
-              <i style={{ background: st ? (st.color ?? categoryColor[st.category]) : undefined }} />
-              {st?.name ?? s.id}
-              <small>{s.count}</small>
-            </button>
-          );
-        })}
-      </div>
-
-      {!layersTab && !(topic && STUDY[topic.week]) && legend}
-
-      <div className={`mg-list${quizOn ? ' is-quiz' : ''}`} key={mode.source ?? mode.week}>
-        {layersTab && <div className="mg-early">{layers}</div>}
-        {quizOn && !layersTab && (
-          <p className="mg-quiz-hint" aria-live="polite">
-            <b>Proba modua.</b> Iturriak ikusgai daude; sakatu lauki ezkutu bakoitza zer bihurtzen den ikusteko. {Math.min(shown.size, total)} / {total} agerian.
-            {shown.size > 0 && (
-              <button type="button" onClick={() => setShown(new Set())}>
-                Berriro ezkutatu
+        {parts.length > 1 && (
+          <div className="mg-parts" role="tablist" aria-label={`${mode.week}. gaiaren atalak`}>
+            {parts.map((p, i) => (
+              <button key={p.id} role="tab" aria-selected={part === p.id} className={part === p.id ? 'is-on' : undefined} onClick={() => pick({ week: mode.week!, part: p.id })}>
+                <b>{i + 1}</b>
+                {p.label}
               </button>
-            )}
-          </p>
-        )}
-        {topic && (
-          <>
-            {STUDY[topic.week] && (
-              <>
-                {STUDY[topic.week]()}
-                {legend}
-              </>
-            )}
-            <p className="mg-intro">
-              {STUDY[topic.week] && <span className="mg-intro-k">Eskemak · </span>}
-              <b>{getWeek(topic.week)?.title}</b> · {topic.flows.length} eskema
-            </p>
-            {topic.flows.map((f) => (
-              <FlowCard key={f.id} flow={f} week={topic.week} lit={null} quiz={quiz} />
             ))}
-          </>
+          </div>
         )}
+      </div>
+
+
+      <div className={`mg-list${quizOn ? ' is-quiz' : ''}`} key={mode.arch ? 'arch' : (mode.source ?? `${mode.week}-${part}`)}>
+        {layersTab && <div className="mg-early">{layers}</div>}
+        {mode.arch && <ReferenceTables scope="arkuak" quiz={quizOn} />}
+        {part === 'ikasgela' && STUDY[mode.week!]?.()}
+        {part === 'taulak' && <ReferenceTables scope={mode.week!} quiz={quizOn} />}
+        {((topic && part === 'eskemak') || src) && (
+          <header className="mg-schemes-head" id={topic ? `a${topic.week}-eskemak` : undefined}>
+            <p className="mg-intro">
+              <span className="mg-intro-k">Eskemak · </span>
+              {topic ? (
+                <>
+                  <b>{getWeek(topic.week)?.title}</b> · {topic.flows.length} eskema
+                </>
+              ) : (
+                <>
+                  <b>{structures.get(src!.id)?.name ?? src!.id}</b> · {src!.count} eskema {src!.groups.map((g) => `${g.t.week}.`).join(', ')} gaietan. Iturritik datozen egiturak argituta.
+                </>
+              )}
+            </p>
+            {legend}
+            {quizOn && (
+              <p className="mg-quiz-hint" aria-live="polite">
+                Sakatu lauki ezkutu bakoitza zer bihurtzen den ikusteko. {Math.min(shown.size, total)} / {total} agerian.
+                {shown.size > 0 && (
+                  <button type="button" onClick={() => setShown(new Set())}>
+                    Berriro ezkutatu
+                  </button>
+                )}
+              </p>
+            )}
+          </header>
+        )}
+        {topic && part === 'eskemak' && topic.flows.map((f) => <FlowCard key={f.id} flow={f} week={topic.week} lit={null} quiz={quiz} />)}
         {src && (
           <>
-            <p className="mg-intro">
-              <b>{structures.get(src.id)?.name ?? src.id}</b> · {src.count} eskema {src.groups.map((g) => `${g.t.week}.`).join(', ')} gaietan. Iturritik datozen egiturak argituta.
-            </p>
             {early?.kids?.length ? (
               <article className="mg-flow is-early">
                 <header>

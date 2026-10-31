@@ -4,7 +4,6 @@ import { appearances, structures } from '@/content/registry';
 import { categoryColor } from '@/lib/sim/palette';
 import { LandFoot, LandNav } from './LandNav';
 import { MigrationMap } from './MigrationMap';
-import { ReferenceTables } from './eratorriak/ReferenceTables';
 import { EARLY as ROOT, LAYERS, type LNode } from '@/content/lineage';
 
 /** The page starts the early tree at the blastocyst (cleavage is shown in the simulator). */
@@ -101,31 +100,12 @@ export function Lineage() {
   return (
     <div className="landing ln-page">
       <LandNav current="eratorriak" />
-      <section className="ln-hero">
-        <p className="eyebrow">Eratorriak</p>
-        <h1>Nondik datoz eta zer bihurtzen dira</h1>
-        <p className="hero-lead">
-          Blastozistotik hiru ernetze orrietara, eta 7. gaitik aurrera egitura bakoitza nondik datorren, nora migratzen den eta zertan bihurtzen den. Egitura bakoitzean klikatuz, simulagailuan agertzen den etapa irekitzen da.
-        </p>
-        <nav className="ln-jump" aria-label="Orrialdeko atalak">
-          <a href="#eratorriak-taulak">Taula laburrak <span aria-hidden>↓</span></a>
-          <a href="#gaia-7">
-            7.–13. gaiak · Ikasgelak eta migrazioak <span aria-hidden>↓</span>
-          </a>
-          <a href="#orriak">
-            1.–6. gaiak · Ernetze orriak <span aria-hidden>↓</span>
-          </a>
-        </nav>
-      </section>
-
-      <ReferenceTables />
+      <header className="ln-head">
+        <h1>Eratorriak</h1>
+        <p>Aukeratu gaia, gero atala: ikasgela, taula laburrak edo eskemak.</p>
+      </header>
 
       <section className="land-section ln-migrations" id="migrazioak">
-        <div className="section-head">
-          <p className="eyebrow">Gaiz gai</p>
-          <h2>Migrazioak eta bilakaerak</h2>
-          <p>Aukeratu gai bat: 1.–6. gaietan ernetze orrien leinua; 7. gaitik aurrera, egitura bakoitza nondik datorren, nora migratzen den eta zertan bihurtzen den. Iturri bat aukeratuz, haren bidea gai guztietan zehar jarraitzen da.</p>
-        </div>
         <MigrationMap layers={<EarlyLayers />} />
       </section>
       <LandFoot />

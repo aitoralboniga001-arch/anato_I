@@ -3662,8 +3662,8 @@ a.ln-chip:hover {
   color: var(--text-4);
 }
 
-.ln-migrations {
-  padding-top: 80px;
+.ln-page .land-section.ln-migrations {
+  padding-top: 0;
 }
 
 .ln-migrations .section-head {
@@ -3697,6 +3697,7 @@ a.ln-chip:hover {
   top: 60px;
   z-index: 6;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   margin: 0 calc(-1 * var(--gutter));
@@ -3709,11 +3710,10 @@ a.ln-chip:hover {
 
 .mg-tabs {
   display: flex;
-  flex: 1;
+  flex: 1 1 520px;
+  flex-wrap: wrap;
   min-width: 0;
   gap: 6px;
-  overflow-x: auto;
-  scrollbar-width: none;
 }
 
 .mg-tabs::-webkit-scrollbar {
@@ -3762,6 +3762,117 @@ a.ln-chip:hover {
 .mg-tab.is-on b {
   background: var(--signal);
   color: #1a0b05;
+}
+
+/* The cross-topic arch view: same tab, warmer so it is found. */
+.mg-tab.is-featured {
+  border-color: rgba(240, 135, 106, 0.45);
+  color: #f6c9b5;
+}
+
+.mg-tab.is-featured b {
+  background: rgba(240, 135, 106, 0.18);
+  color: #f0876a;
+}
+
+/* "Follow one origin": a quiet select, so the bar stays one row of topics. */
+.mg-follow {
+  flex: none;
+  height: 38px;
+  max-width: 210px;
+  padding: 0 30px 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 12px center;
+  appearance: none;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mg-follow:hover,
+.mg-follow.is-on {
+  color: var(--text);
+  border-color: rgba(255, 106, 61, 0.55);
+}
+
+.mg-schemes-head {
+  margin-top: 28px;
+}
+
+/* A topic's parts (ikasgela · taula laburrak · eskemak): only one shows, picked here. */
+.mg-parts {
+  display: flex;
+  flex-basis: 100%;
+  gap: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.mg-parts button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 14px 0 6px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mg-parts button b {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--surface-3);
+  font: 600 11.5px/1 var(--font-mono);
+  color: var(--text-3);
+}
+
+.mg-parts button:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.mg-parts button.is-on {
+  color: var(--text);
+  border-color: var(--line-2);
+  background: var(--surface-2, var(--surface));
+}
+
+.mg-parts button.is-on b {
+  background: var(--text);
+  color: var(--bg, #0a0a0b);
+}
+
+/* Slim page header: the topic bar is visible on arrival. */
+.ln-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 18px;
+  padding: 22px var(--gutter) 16px;
+}
+
+.ln-head h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.ln-head p {
+  margin: 0;
+  font-size: 14.5px;
+  color: var(--text-2);
 }
 
 .mg-quiz {
@@ -4404,8 +4515,37 @@ a.mg-chip:hover {
   .mg-scroll {
     padding: 18px 16px 20px;
   }
-  .mg-quiz span {
-    display: none;
+}
+
+/* Tablet: compact tabs, then one row with "follow" and "Proba modua", so the sticky bar stays short. */
+@media (max-width: 1000px) {
+  .mg-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-block: 8px;
+  }
+  .mg-tabs {
+    flex-basis: 100%;
+    gap: 5px;
+  }
+  .mg-tab {
+    height: 32px;
+    gap: 6px;
+    padding: 0 10px 0 5px;
+    font-size: 12.5px;
+  }
+  .mg-tab b {
+    min-width: 21px;
+    height: 21px;
+    font-size: 11px;
+  }
+  .mg-follow,
+  .mg-quiz {
+    height: 32px;
+  }
+  .mg-follow {
+    flex: 1;
+    max-width: 260px;
   }
 }
 

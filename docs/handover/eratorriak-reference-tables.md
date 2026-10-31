@@ -71,11 +71,16 @@ The following mapping includes every entry once. IDs below are developer-only pr
 - Every row has `level` 1–3 (Funtsezkoa / Garrantzitsua / Osagarria). Ranking rule (developer-only, never shown): 1 = concept is the answer or a trap option in two or more entries of the compilation; 2 = one entry; 3 = none. Rows render level-first; tables with more level-1 rows come first. Legend chips filter levels. The app never says why a row is ranked.
 - Arch questions were checked: almost all are pairings "arch/pouch number ↔ nerve / muscle / cartilage / artery / derivative" (D04, OH21-13, OH26-15, EO26-10, EO21-15, D02, D05, EO21-13, EO26-09, OH26-16, OH21-15) plus the recurrent-nerve variant (A04, B02, C10). Hence the `ARCH_GRID` master table (arches 1,2,3,4,6 × nerve, muscles, skeleton, aortic arch, pouch, cleft/membrane) with per-cell recall, and the reverse table `arkua-ala-poltsa` (structure → which arch/pouch/cleft). The ★ Arku sistemak view (default) shows the grid plus `ARCH_TABLE_IDS`.
 
-## Declutter (2026-10-31)
+## One page, one thing at a time (2026-10-31)
 
-- Hero jump nav cut from 11 chips to 3 (Taula laburrak · 7.–13. ikasgelak · 1.–6.); topics are picked inside each section, so the page no longer shows three parallel topic rows.
-- Tables toolbar is two rows: topics (★ Arku sistemak first, Denak last) and search + importance chips + the same "Proba modua" switch the rooms use (`mg-quiz`); "Ezkutatu: Eratorria / Jatorria" appears only while it is on. Visible counts and the hint line were dropped (counts stay in a screen-reader status). Topic eyebrows show only in mixed views. Grid lost its germ-layer subtitles (the laryngeal-cartilage cell made "Gandor neurala" wrong).
-- Not touched: the Gaiz gai rooms below still stack topic tabs, source chips and an 8-step room nav.
+Superseded the earlier declutter (hero jump nav, separate tables toolbar, separate "Gaiz gai" section): the owner found the page split in two and disliked content stacked above and below.
+
+- `Lineage.tsx` is now a slim `.ln-head` (title + one line) and `MigrationMap`; no hero, no jump nav, no standalone tables section.
+- `MigrationMap` owns one sticky bar: topic tabs (1–6 … 14, then ★ Arku sistemak), "Iturri bat jarraitu…" select, "Proba modua". Under it, for topics 7–14, a parts row: 1 Ikasgela · 2 Taula laburrak · 3 Eskemak. Only the chosen part renders.
+- Hashes: `#gaia-N` / `#aN-<room anchor>` → Ikasgela, `#aN-laburrak` → Taula laburrak, `#aN-eskemak` → Eskemak, `#arku-sistemak`, `#iturria-X`. A room's own subnav entries "Taula laburrak" / "Eskemak" switch the part through the hash.
+- `ReferenceTables` is an embedded block taking `scope` (topic number or `'arkuak'`) and `quiz` from the page switch; level chips filter; "Ezkutatu: Eratorria / Jatorria" shows only in quiz mode.
+- CSS pitfall: `.ln-page .land-section` (later in `globals.css`) beats `.ln-page .ln-migrations`; the zero top padding needs `.ln-page .land-section.ln-migrations`. `.mg-bar` must `flex-wrap` at every width or the parts row squeezes the tabs into a column.
+- Checked headless at 1280, 1024 and 768: bar fits in 3 rows (4 at 768), each part switches with no JS errors, the room link to Taula laburrak switches part.
 
 ## Verification
 
