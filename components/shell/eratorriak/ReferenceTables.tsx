@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type CSSProperties } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import { REFERENCE_TABLES } from '@/content/eratorriak/reference-tables';
 import styles from './ReferenceTables.module.css';
 
@@ -10,11 +10,14 @@ const TOPICS = [
 ] as const;
 const ACCENTS = ['#81c7af', '#b6bd7a', '#c0b7ac', '#79b5c5', '#d6a06b', '#ac95cf'];
 const normalize = (value: string) => value.toLocaleLowerCase('eu').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+type Hide = 'none' | 'derivative' | 'origin';
+const HIDE_MODES: [Hide, string][] = [['none', 'Biak ikusi'], ['derivative', 'Eratorria ezkutatu'], ['origin', 'Jatorria ezkutatu']];
 
 export function ReferenceTables() {
   const [topic, setTopic] = useState<number | null>(10);
   const [query, setQuery] = useState('');
-  const [hidden, setHidden] = useState(false);
+  const [hide, setHide] = useState<Hide>('none');
+  const hidden = hide !== 'none';
   const [revealed, setRevealed] = useState<ReadonlySet<string>>(new Set());
   const terms = normalize(query).trim().split(/\s+/).filter(Boolean);
   const tables = REFERENCE_TABLES.filter((table) => topic === null || table.topic === topic)
@@ -59,15 +62,17 @@ export function ReferenceTables() {
               resetRevealed();
             }} />
           </label>
-          <button type="button" className={styles.recall} aria-pressed={hidden} onClick={() => { setHidden(!hidden); resetRevealed(); }}>
-            {hidden ? 'Eratorriak erakutsi' : 'Eratorriak ezkutatu'}
-          </button>
+          <div className={styles.recall} role="group" aria-label="Proba modua">
+            {HIDE_MODES.map(([mode, label]) => (
+              <button key={mode} type="button" aria-pressed={hide === mode} onClick={() => { setHide(mode); resetRevealed(); }}>{label}</button>
+            ))}
+          </div>
         </div>
         <div className={styles.status}>
           <p role="status">{tables.length} taula · {rowCount} erlazio{topic !== null ? ` · ${topic}. gaia` : ' · gai guztiak'}</p>
           {(query || topic !== null) && <button type="button" onClick={clearFilters}>Iragazkiak garbitu</button>}
         </div>
-        {hidden && <p className={styles.hint}>Pentsatu eratorria, eta sakatu «Erakutsi» erlazio bakoitza ikusteko.</p>}
+        {hidden && <p className={styles.hint}>{hide === 'derivative' ? 'Zer sortzen da hemendik? Pentsatu eratorria' : 'Nondik sortzen da? Pentsatu jatorria'}, eta sakatu «Erakutsi» erlazio bakoitza ikusteko.</p>}
       </div>
 
       <div className={styles.tables}>
@@ -85,26 +90,35 @@ export function ReferenceTables() {
                   const key = `${table.id}-${row.id}`;
                   const answerId = `reference-answer-${key}`;
                   const visible = !hidden || revealed.has(key);
+                  // The note is the trap line and can give the answer away, so it shows only once the row is answered.
+                  const note = row.note && (!hidden || visible) ? <small>{row.note}</small> : null;
+                  const origin = <span>{row.origin}</span>;
+                  const derivative = <><span>{row.derivative}</span>{hide !== 'origin' && note}</>;
+                  const cue = hide === 'origin' ? row.derivative : row.origin;
+                  const reveal = (content: ReactNode) => (
+                    <>
+                      <button
+                        type="button"
+                        className={styles.reveal}
+                        aria-label={`${cue}: ${hide === 'origin' ? 'jatorria' : 'eratorria'} ${visible ? 'ezkutatu' : 'erakutsi'}`}
+                        aria-expanded={visible}
+                        aria-controls={answerId}
+                        onClick={() => setRevealed((current) => {
+                          const next = new Set(current);
+                          if (next.has(key)) next.delete(key);
+                          else next.add(key);
+                          return next;
+                        })}
+                      >{visible ? 'Ezkutatu' : 'Erakutsi'} <span aria-hidden="true">{visible ? '−' : '+'}</span></button>
+                      <div id={answerId} hidden={!visible} className={styles.answer}>{content}</div>
+                    </>
+                  );
                   return (
                     <tr key={row.id} style={{ '--row-accent': ACCENTS[index % ACCENTS.length] } as CSSProperties}>
-                      <th scope="row">{row.origin}</th>
+                      <th scope="row">{hide === 'origin' ? reveal(origin) : origin}</th>
                       <td>
-                        {hidden && <button
-                          type="button"
-                          className={styles.reveal}
-                          aria-label={`${row.origin}: eratorria ${visible ? 'ezkutatu' : 'erakutsi'}`}
-                          aria-expanded={visible}
-                          aria-controls={answerId}
-                          onClick={() => setRevealed((current) => {
-                            const next = new Set(current);
-                            if (next.has(key)) next.delete(key);
-                            else next.add(key);
-                            return next;
-                          })}
-                        >{visible ? 'Ezkutatu' : 'Erakutsi'} <span aria-hidden="true">{visible ? '−' : '+'}</span></button>}
-                        <div id={answerId} hidden={!visible} className={hidden ? styles.answer : undefined}>
-                          <span>{row.derivative}</span>{row.note && <small>{row.note}</small>}
-                        </div>
+                        {hide === 'derivative' ? reveal(derivative) : derivative}
+                        {hide === 'origin' && note}
                       </td>
                     </tr>
                   );

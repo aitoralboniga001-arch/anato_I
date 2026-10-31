@@ -1,18 +1,19 @@
 .section { scroll-margin-top: 90px; }
 .controls { margin: 24px 0 28px; }
 .topics { display: flex; flex-wrap: wrap; gap: 8px; }
-.topics button, .recall, .status button, .empty button { border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--text-2); cursor: pointer; font: inherit; font-size: 13px; line-height: 1.4; padding: 10px 13px; }
+.topics button, .recall button, .status button, .empty button { border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--text-2); cursor: pointer; font: inherit; font-size: 13px; line-height: 1.4; padding: 10px 13px; }
 .topics button span { color: var(--text-3); margin-right: 5px; font-family: var(--font-mono); }
 .topics button[aria-pressed='true'] { color: #f2e8ff; background: #302737; border-color: #79638e; }
 .topics button[aria-pressed='true'] span { color: #ccb5df; }
-.topics button:hover, .recall:hover, .status button:hover, .empty button:hover { border-color: var(--line-3); color: var(--text); }
+.topics button:hover, .recall button:hover, .status button:hover, .empty button:hover { border-color: var(--line-3); color: var(--text); }
 .tools { display: flex; align-items: end; gap: 18px; margin-top: 22px; }
 .search { display: grid; flex: 1; gap: 8px; }
 .search > span { font-size: 12px; font-weight: 500; color: var(--text-2); }
 .search input { min-width: 0; width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); font: inherit; font-size: 14px; padding: 13px 14px; }
 .search input::placeholder { color: var(--text-3); }
-.recall { min-height: 46px; }
-.recall[aria-pressed='true'] { background: #302737; border-color: #79638e; color: #f2e8ff; }
+.recall { display: flex; flex-wrap: wrap; gap: 6px; }
+.recall button { min-height: 46px; }
+.recall button[aria-pressed='true'] { background: #302737; border-color: #79638e; color: #f2e8ff; }
 .status { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 13px; }
 .status p { margin: 0; color: var(--text-3); font-size: 12px; }
 .status button { padding: 5px 0; border-color: transparent; background: transparent; color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; }
@@ -30,6 +31,7 @@
 .table tbody th { position: relative; border: 1px solid color-mix(in srgb, var(--row-accent) 34%, #211a28); border-left: 5px solid var(--row-accent); background: color-mix(in srgb, var(--row-accent) 11%, #141017); color: #eee9f1; font-weight: 500; }
 .table tbody td { border: 1px solid #302636; background: #1b151f; color: #e2dae9; }
 .table tbody td small { display: block; margin-top: 7px; color: #b8aebf; font-size: 12px; line-height: 1.6; }
+.table tbody td small::before { content: 'Kontuz · '; color: #e0b07c; font-weight: 600; }
 .table tbody tr:hover td { border-color: #6d527e; }
 .reveal { display: flex; align-items: center; justify-content: space-between; width: 100%; border: 1px dashed #756184; border-radius: 7px; padding: 9px 11px; background: transparent; color: #d6c2e6; font: inherit; font-size: 13px; cursor: pointer; text-align: left; }
 .reveal:hover { background: #2c2234; border-style: solid; }
@@ -42,7 +44,6 @@
   .tools { align-items: stretch; flex-direction: column; gap: 12px; }
   .topics { gap: 6px; }
   .topics button { font-size: 12px; padding: 9px 10px; }
-  .recall { align-self: flex-start; }
   .sheet { padding: 17px 8px 12px; border-radius: 13px; }
   .sheetHead { padding-inline: 8px; }
   .table { font-size: 14px; border-spacing: 3px 6px; line-height: 1.5; }

@@ -73,7 +73,23 @@ describe('Eratorriak · reference relationships', () => {
     expect(pressure!.derivative).toMatch(/funtzionalki ixten/i);
     const arterialDuct = rowsOf(13).find((row) => /^Hodi arteriosoa$/i.test(row.origin) && /lotailu arteriosoa/i.test(row.derivative));
     expect(arterialDuct).toBeDefined();
-    expect(arterialDuct!.derivative).toMatch(/itxiera funtzionalaren ondoren.*fibrosi/i);
+    expect(arterialDuct!.derivative).toMatch(/3\. hilabeterako/i);
+    expect(arterialDuct!.note).toMatch(/ez da jaiotzaren unean/i);
+  });
+
+  it('follows the notes where outside schemes differ (left recurrent nerve, IVC renal segment)', () => {
+    const leftNerve = findRow(12, /^Ezkerreko nerbio laringeo atzerakaria$/i).derivative;
+    expect(leftNerve).toMatch(/6\. arkuaren urrutiko atala/i);
+    expect(leftNerve).toMatch(/hodi arteriosoa/i);
+    expect(leftNerve).not.toMatch(/aorta-makoa/i);
+    expect(findRow(13, /^Eskuineko kardinal azpiko zaina/i).derivative).toMatch(/giltzurrun-segmentua/i);
+    const visible = REFERENCE_TABLES.flatMap((table) => [table.lead ?? '', ...table.rows.map(textOf)]).join(' ');
+    expect(visible).not.toMatch(/segmentazio zehatz|prerren|ikasgaiko eskeman/i);
+  });
+
+  it('places fetal mixing at the hepatic level and the caecum last on the return', () => {
+    expect(findRow(13, /^Beheko kaba zaina, gibel-mailan$/i).note).toMatch(/ez giltzurrun-segmentuan/i);
+    expect(findRow(14, /^Abdomenera itzulera$/i).derivative).toMatch(/kolon itsuaren hastapena azkena/i);
   });
 
   it('preserves the mixed duodenal origin and the ectodermal lower anal canal exception', () => {

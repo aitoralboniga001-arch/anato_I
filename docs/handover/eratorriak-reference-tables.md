@@ -50,8 +50,8 @@ The following mapping includes every entry once. IDs below are developer-only pr
 ## Scientific distinctions preserved
 
 - The heart table expands the screenshot's shorthand: proximal bulbus and primitive ventricle yield trabeculated right and left ventricular parts, whereas conus yields smooth outflow parts. Truncus yields the great-vessel roots. Primitive atrium does not account for the whole adult left atrial wall: pulmonary-vein incorporation contributes the smooth part.
-- Left recurrent laryngeal nerve: adult course under the aortic arch next to the ligamentum arteriosum; embryonic relation to distal left VI explains the position. Right nerve loops under right subclavian. Avoid teaching an isolated duct/ligament relation as the entire adult course.
-- IVC names differ between the local three-part teaching scheme and finer segmentation. Local notes call the right-subcardinal contribution the renal segment. The finer scheme distinguishes a prerenal/subcardinal contribution and a renal/subcardinal–supracardinal anastomosis. Both are labelled explicitly; the simplified course term is not silently universalized. The historical human-development source is a primary account, not a claim that all modern models use identical nomenclature.
+- Left recurrent laryngeal nerve: follows the notes (w12/2.4/p10, p14/s4) — it encircles the distal left VI arch, i.e. the ductus arteriosus, later the ligamentum arteriosum. Do not steer it to "under the aortic arch": that is the distractor in the questions. Right nerve loops under the right subclavian (IV arch).
+- IVC: notes prose wins. Three segments only (hepatic / renal / sacrocardinal); right subcardinal → renal segment (w13/3.1/p8/s1). The finer four-segment scheme (prerenal, subcardinal–supracardinal anastomosis) was removed on review because it contradicted the answer the notes teach.
 - Functional closure after birth is separate from later fibrosis. No assertion that ligamentum arteriosum is fully formed at the first breath. Right atrial pressure falls and left atrial pressure rises with the transition.
 - Duodenal first-part shorthand is narrowed to the proximal mobile bulb. Rectal peritoneal coverage is partial and level-dependent. Pancreatic tail and hepatic bare area are explicit exceptions.
 - Iris sphincter/dilator are neuroectodermal; glandular myoepithelium is described as contractile epithelial cells rather than ordinary skeletal muscle.
@@ -59,6 +59,12 @@ The following mapping includes every entry once. IDs below are developer-only pr
 - Tympanic membrane: outer ectoderm, inner endoderm, intermediate mesenchyme. The mesenchymal layer includes neural crest-derived fibroblasts and mesodermal vascular contribution; avoid claiming the entire middle layer is exclusively mesoderm.
 - Gut loop caudal limb is not the hindgut. Distal anal canal is proctodeal ectoderm. Spleen is mesodermal, though supplied by the celiac trunk. The 270-degree rotation is labelled the classical teaching model; direction states anterior view.
 - Limb buds begin late in week 4; week 5 headings in notes describe visibility, not a switch to fetal-period onset.
+
+## Review changes (2026-10-31)
+
+- Fetal circulation: mixing is placed at the hepatic IVC level (OH26-09 distractor says renal); added portal and SVC flow rows; left umbilical vein works until birth (D09); ductus venosus row lists the wrong pairings as a trap.
+- Ductus arteriosus → ligament by month 3, per notes. Caecal bud is the last to return (EO26-03). Added pharyngeal-gut boundary and oesophagus rows (D03). Heart rows use the notes' names (hasierako eskuineko / ezkerreko bentrikulua). Rectum leads with "peritoneo kanpokoa". Removed "ikasgaiko eskeman" hedges.
+- UI: practice mode can hide either column (questions ask both directions); trap notes are prefixed "Kontuz" and stay hidden until the row is revealed.
 
 ## Verification
 
