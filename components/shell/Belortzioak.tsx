@@ -64,6 +64,8 @@ const INTERVAL = [0, 10 * MIN, DAY, 3 * DAY, 7 * DAY, 21 * DAY];
 const KNOWN = 2;
 /** Read only from event handlers (grading), never while rendering. */
 const clock = () => Date.now();
+// Figures made by scripts/belortzioak/extract.py, served from public/.
+const imgOf = (id: string) => `/belortzioak-irudiak/${id}.webp`;
 
 const readCards = (): Cards => {
   try {
@@ -239,7 +241,7 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, asked,
 
         <rect className={s.paper} width={st.tw} height={H} rx="18" />
         {/* keyed: a new element per figure (Chrome may keep painting the old bitmap when only href changes) */}
-        {!missing && <image key={plate.id} href={`/api/belortzioak/${plate.id}`} x={st.fx} y={0} width={st.fw} height={H} className={s.img} />}
+        {!missing && <image key={plate.id} href={imgOf(plate.id)} x={st.fx} y={0} width={st.fw} height={H} className={s.img} />}
 
         {/* the light: everything but the structure dims */}
         <rect className={`${s.dim}${lit ? ` ${s.isOn}` : ''}`} width={st.tw} height={H} rx="18" mask={`url(#bel-mask-${plate.id})`} />
@@ -388,9 +390,9 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, asked,
       {missing && (
         <div className={s.missing}>
           <p>
-            <b>Irudiak ez daude ordenagailu honetan.</b>
+            <b>Irudiak ez dira kargatu.</b>
           </p>
-          <p>Ikasgaiko irudiak dira (egile-eskubideak): ez dira argitaratzen. Zure ordenagailuan sortzeko, PDFa izanda:</p>
+          <p>Sortzeko, PDFa izanda:</p>
           <code>python -I scripts/belortzioak/extract.py &quot;Belortzioak zuzenduta.pdf&quot;</code>
         </div>
       )}
@@ -440,7 +442,7 @@ export function Belortzioak() {
       const want = new URLSearchParams(window.location.search).get('irudia');
       if (want && BEL_PLATES.some((p) => p.id === want)) setPlateId(want);
     });
-    fetch(`/api/belortzioak/${BEL_PLATES[0].id}`, { method: 'HEAD' })
+    fetch(imgOf(BEL_PLATES[0].id), { method: 'HEAD' })
       .then((r) => setMissing(!r.ok))
       .catch(() => setMissing(true));
     return () => cancelAnimationFrame(raf);
@@ -450,7 +452,7 @@ export function Belortzioak() {
   useEffect(() => {
     if (missing) return;
     const next = list[at + 1];
-    if (next) new Image().src = `/api/belortzioak/${next.id}`;
+    if (next) new Image().src = imgOf(next.id);
   }, [at, list, missing]);
 
   useEffect(() => {
@@ -963,7 +965,7 @@ export function Belortzioak() {
         </div>
       </section>
       <LandFoot>
-        <p>Irudiak ikasgaikoak dira (egile-eskubideak): zure ordenagailuan bakarrik daude eta ez dira argitaratzen. Aurrerapena nabigatzaile honetan gordetzen da.</p>
+        <p>Irudiak ikasgaikoak dira. Aurrerapena nabigatzaile honetan gordetzen da.</p>
       </LandFoot>
     </div>
   );

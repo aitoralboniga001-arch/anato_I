@@ -1,7 +1,6 @@
 """Belortzioak: clean figures + arrow geometry from the course PDF ("Belortzioak zuzenduta.pdf").
 
-The figures are copyrighted course images, so they only go to `private-images/belortzioak/`
-(git-ignored, served locally by /api/belortzioak). What is committed is the geometry:
+The figures go to `public/belortzioak-irudiak/` (served as static files), and the geometry to
 `content/belortzioak-geometry.json` — for every numbered label, where the number sat and the
 point(s) its arrow touches, plus an outline of the structure under that point when the drawing
 allows one to be traced.
@@ -173,7 +172,7 @@ def main():
     ap.add_argument("--repo", default=os.getcwd())
     ap.add_argument("--debug")
     a = ap.parse_args()
-    out_img = os.path.join(a.repo, "private-images", "belortzioak")
+    out_img = os.path.join(a.repo, "public", "belortzioak-irudiak")
     os.makedirs(out_img, exist_ok=True)
     if a.debug: os.makedirs(a.debug, exist_ok=True)
     doc = fitz.open(a.pdf)
