@@ -8,6 +8,7 @@ import { MIGRATIONS, SOURCES, flowIds, sourceIds, type Flow, type MNode } from '
 import { categoryColor } from '@/lib/sim/palette';
 import { ReferenceTables, TABLE_TOPICS } from './eratorriak/ReferenceTables';
 import { hasRoom } from './eratorriak/roomWeeks';
+import { LearningMaps } from './eratorriak/LearningMaps';
 
 /** A topic tab (week 0 = the topics 1–6 germ-layer trees), the arch-systems tab, or one origin followed across topics. */
 type Mode = { week: number; part?: Part; source?: undefined; arch?: undefined } | { source: string; week?: undefined; part?: undefined; arch?: undefined } | { arch: true; week?: undefined; part?: undefined; source?: undefined };
@@ -18,6 +19,7 @@ type Part = 'taulak' | 'eskemak';
 /** Topics 7+ in tab order: every topic with schemes or quick tables. */
 const WEEKS = [...new Set([...MIGRATIONS.map((t) => t.week), ...TABLE_TOPICS])].sort((a, b) => a - b);
 const SHORT: Record<number, string> = { 14: 'Digestioa' };
+const resolveStructureName = (id: string) => structures.get(id)?.name ?? id;
 
 /** The parts a topic has, in reading order. */
 const partsOf = (week: number) =>
@@ -227,6 +229,9 @@ const legend = (
       <Edge /> bihurtzen da
     </li>
     <li>
+      <Edge via="erlazioa" /> lotura anatomikoa
+    </li>
+    <li>
       <Edge move /> migratzen da / lekuz aldatzen da
     </li>
     <li>
@@ -404,7 +409,7 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
             <p className="mg-eyebrow">{eyebrow}</p>
             <h2>{short}</h2>
           </div>
-          {!layersTab && (
+          {!layersTab && !(topic && part === 'eskemak') && (
             <button className={`mg-quiz${quizOn ? ' is-on' : ''}`} aria-pressed={quizOn} onClick={toggleQuiz} title="Erantzunak ezkutatu eta zeure burua probatu">
               <i aria-hidden />
               <span>Proba modua</span>
@@ -429,7 +434,7 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
           </div>
         )}
 
-      <div className={`mg-list${quizOn ? ' is-quiz' : ''}`} key={mode.arch ? 'arch' : (mode.source ?? `${mode.week}-${part}`)}>
+      <div className={`mg-list${quizOn && !(topic && part === 'eskemak') ? ' is-quiz' : ''}`} key={mode.arch ? 'arch' : (mode.source ?? `${mode.week}-${part}`)}>
         {layersTab && <div className="mg-early">{layers}</div>}
         {mode.arch && <ReferenceTables scope="arkuak" quiz={quizOn} />}
         {part === 'taulak' && <ReferenceTables scope={mode.week!} quiz={quizOn} />}
@@ -439,7 +444,7 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
               <span className="mg-intro-k">Eskemak · </span>
               {topic ? (
                 <>
-                  <b>{getWeek(topic.week)?.title}</b> · {topic.flows.length} eskema
+                  <b>{getWeek(topic.week)?.title}</b>
                 </>
               ) : (
                 <>
@@ -449,9 +454,9 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
             </p>
             {follow}
             {legend}
-            {quizOn && (
+            {quizOn && !topic && (
               <p className="mg-quiz-hint" aria-live="polite">
-                Sakatu lauki ezkutu bakoitza zer bihurtzen den ikusteko. {Math.min(shown.size, total)} / {total} agerian.
+                Sakatu lauki ezkutu bakoitza eratorria edo erlazioa ikusteko. {Math.min(shown.size, total)} / {total} agerian.
                 {shown.size > 0 && (
                   <button type="button" onClick={() => setShown(new Set())}>
                     Berriro ezkutatu
@@ -461,7 +466,13 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
             )}
           </header>
         )}
-        {topic && part === 'eskemak' && topic.flows.map((f) => <FlowCard key={f.id} flow={f} week={topic.week} lit={null} quiz={quiz} />)}
+        {topic && part === 'eskemak' && <LearningMaps
+          key={topic.week}
+          week={topic.week}
+          resolveName={resolveStructureName}
+          renderScheme={(flow) => <Scheme flow={flow} ctx={{ flow: flow.id, week: topic.week, stage: flow.stage, lit: null, quiz: { ...quiz, on: false } }} />}
+          renderDetail={(flow) => <FlowCard flow={flow} week={topic.week} lit={null} quiz={{ ...quiz, on: false }} />}
+        />}
         {src && (
           <>
             {early?.kids?.length ? (

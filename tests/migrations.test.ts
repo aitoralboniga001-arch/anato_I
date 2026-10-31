@@ -8,13 +8,17 @@ describe('migration maps (Eratorriak, topics 7+)', () => {
     expect(missing).toEqual([]);
   });
 
-  it('covers every built topic from 7 on (a new topic needs its schemes), each flow on a real stage of its topic', () => {
+  it('covers every built topic from 7 on, allowing schemes before their simulator and checking stages when built', () => {
     const built = weeks.map((w) => w.week).filter((w) => w >= 7);
-    expect(MIGRATIONS.map((t) => t.week)).toEqual(built);
+    expect(MIGRATIONS.map((t) => t.week)).toEqual(expect.arrayContaining(built));
     for (const t of MIGRATIONS) {
-      const stages = new Set(getWeek(t.week)!.stages.map((s) => s.id));
+      const week = getWeek(t.week);
+      const stages = new Set(week?.stages.map((s) => s.id));
       expect(t.flows.length, `topic ${t.week}`).toBeGreaterThan(3);
-      for (const f of t.flows) expect(stages.has(f.stage), `${t.week}/${f.id} → ${f.stage}`).toBe(true);
+      for (const f of t.flows) {
+        expect(f.stage.trim().length, `${t.week}/${f.id}: stage`).toBeGreaterThan(0);
+        if (week) expect(stages.has(f.stage), `${t.week}/${f.id} → ${f.stage}`).toBe(true);
+      }
     }
   });
 

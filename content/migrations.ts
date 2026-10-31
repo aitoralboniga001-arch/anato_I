@@ -4,6 +4,8 @@
  * (prose over tables) and the structures' own origin/fate fields; ids are checked by tests/migrations.test.ts.
  */
 import { descendantsOf } from './lineage';
+import { SUPPLEMENTAL_7_11 } from './eratorriak/supplemental-schemes-7-11';
+import { SUPPLEMENTAL_12_14 } from './eratorriak/supplemental-schemes-12-14';
 
 /** One box of a scheme: a structure id (or a plain label when the notes name no structure). */
 export interface MNode {
@@ -43,7 +45,7 @@ export interface MigrationTopic {
 const n = (id: string, kids?: MNode[], extra?: Omit<MNode, 'id' | 'kids'>): MNode => ({ id, kids, ...extra });
 const l = (label: string, kids?: MNode[], extra?: Omit<MNode, 'label' | 'kids'>): MNode => ({ label, kids, ...extra });
 
-export const MIGRATIONS: MigrationTopic[] = [
+const CORE_MIGRATIONS: MigrationTopic[] = [
   {
     week: 7,
     short: 'Barrunbeak',
@@ -891,6 +893,17 @@ export const MIGRATIONS: MigrationTopic[] = [
     ],
   },
 ];
+
+/** Keep all schemes in the same topic so navigation, source following and recall work together. */
+export const MIGRATIONS: MigrationTopic[] = (() => {
+  const topics = CORE_MIGRATIONS.map((topic) => ({ ...topic, flows: [...topic.flows] }));
+  for (const extra of [...SUPPLEMENTAL_7_11, ...SUPPLEMENTAL_12_14]) {
+    const topic = topics.find((item) => item.week === extra.week);
+    if (topic) topic.flows.push(...extra.flows);
+    else topics.push({ ...extra, flows: [...extra.flows] });
+  }
+  return topics.sort((a, b) => a.week - b.week);
+})();
 
 /** Origins worth following across topics; each also matches what its lineage descends into. */
 export const SOURCES: { id: string; also?: string[] }[] = [
