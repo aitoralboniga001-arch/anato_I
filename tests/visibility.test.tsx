@@ -52,6 +52,7 @@ const GONE: Record<string, string> = {
   '12/eguna-27/5/bostgarren-aorta-arkua': 'agertu eta desagertu egiten da urrats honetan (bira-irudian agertuta)',
   '12/laugarren-arkua/6/bostgarren-aorta-arkua': 'agertu eta guztiz desagertzen da urrats honetan: ez du ezer sortzen',
   '12/beste-aldaketak/2/hodi-karotideoa': 'urrats honetan desagertzen da (bira-irudian izendatuta)',
+  '14/mesenterioa/6/mesenterio-dortsala': 'toraxeko zatia desagertzen da urrats honetan (bira-irudian izendatuta, desagertzen ari dela)',
   '10/eskuineko-aurikula/4/eskuineko-zain-balbula': 'goiko aldea desagertzen da urrats honetan; behekoa kaben eta sinu koronarioaren balbulak (izendatuta)',
 };
 

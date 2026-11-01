@@ -296,7 +296,7 @@ export const week9: WeekDef = {
         {
           at: 0.2,
           notes: ['w9/2.1.1/p3/s2', 'w9/2.1/p5/s1'],
-          idea: '1. eta 2. somitomeroak → goiko, beheko eta erdialdeko zuzenak + beheko laprana (gorriz).',
+          idea: '1. eta 2. somitomeroak → begiaren goiko, beheko eta erdialdeko zuzenak + beheko laprana (gorriz).',
           text: '1. eta 2. somitomeroetako mesodermotik begiaren goiko, beheko eta erdialdeko muskulu zuzenak eta beheko muskulu laprana sortzen dira. Lau muskulu, kolore gorri berean.',
           focus: ['begi-goiko-zuzena', 'begi-beheko-zuzena', 'begi-erdiko-zuzena', 'begi-beheko-laprana'],
           view: 'begia',

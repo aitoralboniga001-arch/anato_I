@@ -189,6 +189,8 @@ type ViewProps = {
   caption?: string;
   /** The right column's span (top, bottom); a view can keep it above the camera keys (bottom right). */
   right?: [number, number];
+  /** Other axes than the body's (a section block whose up is dorsal). */
+  axes?: typeof AXES;
 };
 
 /** One 3D heart view: the model for a pose, a camera, and the names. */
@@ -205,13 +207,14 @@ export function ModelView({
   over,
   caption,
   right,
+  axes = AXES,
 }: ViewProps & { model: { items: Scene3['items']; pts: Record<string, V3> }; continuity: string }) {
   const scene: Scene3 = { camera, items: model.items };
   const { mentioned, partsOf } = useScene();
   return (
     <g>
       <rect x={0} y={0} width={1000} height={640} fill="none" />
-      <Stage3D scene={scene} axes={AXES} continuity={continuity}>
+      <Stage3D scene={scene} axes={axes} continuity={continuity}>
         {(at, view) => {
           // Directional captions describe the step's reference camera. After a turn, label that
           // reference explicitly; the frame edges and camera keys describe the current view.

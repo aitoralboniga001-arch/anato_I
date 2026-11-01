@@ -349,7 +349,8 @@ export function placeNote(text: string, x: number, y: number, align: 'start' | '
   const PAD = 8;
   const inBand = (y0: number, y1: number) => chrome.filter((b) => b.y1 > y0 - 2 && b.y0 < y1 + 2);
   const asDrawn = { x, anchor: align, lines: [text], y, lh };
-  if (!inBand(y - lh / 2, y + lh / 2).some((b) => b.x1 + PAD > left && b.x0 - PAD < left + w)) return asDrawn;
+  // Wider than the frame, a sentence wraps even with nothing over it (else it runs off both edges).
+  if (w <= 984 && !inBand(y - lh / 2, y + lh / 2).some((b) => b.x1 + PAD > left && b.x0 - PAD < left + w)) return asDrawn;
   // The gaps along a band of the frame between the things over it.
   const gaps = (y0: number, y1: number) => {
     const spans = inBand(y0, y1).map((b) => [b.x0 - PAD, b.x1 + PAD]).sort((a, b) => a[0] - b[0]);

@@ -972,10 +972,10 @@
     ]
   },
   "14": {
-    "file": "14.GAIA_DIGESTIO APARATUA 1.ATALA (Zuzenduta).pdf",
-    "pages": 12,
-    "characters": 22245,
-    "sha256": "e12a0b1651085ce3d8144d1dbdaf100728a0ffa92065f4db73a03186e84f13be",
+    "file": "14.GAIA_DIGESTIO APARATUA 1.ATALA (Zuzenduta).pdf + 14.GAIA_DIGESTIO APARATUA 2.Atala (Zuzenduta).docx.pdf",
+    "pages": 20,
+    "characters": 37344,
+    "sha256": "295fb1d6d0829f412378c727df6813ab8ed6f1023b639fe0f3e9247b7189d376",
     "removed": [
       {
         "page": 1,

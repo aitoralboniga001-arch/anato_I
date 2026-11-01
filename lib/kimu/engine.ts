@@ -166,7 +166,16 @@ export async function askKimu(question: string, history: KimuTurn[], here: KimuH
   };
   let namedAll = places.filter((h) => h.doc.kind === 'structure' && confident(h) && !!h.doc.structure && namedIn(rq, h.doc.structure));
   if (!namedAll.length) namedAll = places.filter(own);
-  const named = namedAll.find((h) => namedIn(rq, h.doc.structure!, false)) ?? namedAll[0];
+  // …unless only an alias says all of it: "atzeko mesenterioa" is the dorsal mesentery's alias, not the
+  // structure called "Mesenterioa" with a word left over (topic 14 added that one).
+  const whole = (h: Hit) => {
+    const st = structures.get(h.doc.structure!)!;
+    return [st.name, st.es ?? '', ...(st.aka ?? [])].some((n) => {
+      const nt = tokens(n);
+      return nt.length > 0 && queryTokens(rq).every((alts) => alts.some((a) => askingWord(a) || nt.some((w) => match(a, w, true) >= 0.85)));
+    });
+  };
+  const named = namedAll.find((h) => namedIn(rq, h.doc.structure!, false) && whole(h)) ?? namedAll.find(whole) ?? namedAll.find((h) => namedIn(rq, h.doc.structure!, false)) ?? namedAll[0];
   // …and it takes the alias's place among the destinations too.
   if (named && namedAll[0] !== named) places = places.map((h) => (h === namedAll[0] ? named : h === named ? namedAll[0] : h));
   // "Take me to X": the nearest place that shows X at or after the student's position comes first, and

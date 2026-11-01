@@ -3742,5 +3742,2408 @@ export const w14: NotesBlock[] = [
         ]
       }
     ]
+  },
+  {
+    "kind": "h1",
+    "section": "4",
+    "id": "w14/4/p2",
+    "sentences": [
+      {
+        "id": "w14/4/p2/s1",
+        "parts": [
+          {
+            "text": "4. BITARTEKO HESTEA",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4",
+    "id": "w14/4/p3",
+    "sentences": [
+      {
+        "id": "w14/4/p3/s1",
+        "parts": [
+          {
+            "text": "Bitarteko hestea peritoneo barrunbean kokatzen da eta errai peritoneoz inguratuta dago. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4/p3/s2",
+        "parts": [
+          {
+            "text": "Garapenaren 5. astean bitarteko hestearen inguruko errai peritoneoa lotzen da atzekaldeko paretako peritoneoarekin "
+          },
+          {
+            "text": "meso lotura ",
+            "b": true
+          },
+          {
+            "text": "laburraren bitartez."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4",
+    "id": "w14/4/p4",
+    "sentences": [
+      {
+        "id": "w14/4/p4/s1",
+        "parts": [
+          {
+            "text": "Bitarteko hestea hedatzen da aurreko hestearen urrutiko ataletik. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4/p4/s2",
+        "parts": [
+          {
+            "text": "Urrutiko atal honetatik, gibel hastapena sortzen da eta horren hasierako zatia koledokoa da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4/p4/s3",
+        "parts": [
+          {
+            "text": "Bitarteko hestea koledokoaren alde distaletik hasten da eta amaitzen da zeharkako kolonaren aurreko bi herenak urrutiko herenarekin batzen den mailan."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4",
+    "id": "w14/4/p5",
+    "sentences": [
+      {
+        "id": "w14/4/p5/s1",
+        "parts": [
+          {
+            "text": "Bitarteko hestetik sortuko da: dueondenoaren bigarren ataleko urrutiko atala, hirugarren eta laugarren atalak; heste meharreko jejuno eta iliona (lakio guztiak); eta heste lodiaren hasierako atalak: kolon itsua, goranzko kolona eta zeharkako kolonaren hasierako bi herenak. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4/p5/s2",
+        "parts": [
+          {
+            "text": "Ez ahaztu bitarteko hestetik sortzen diren eratorri guztiak goiko arteria mesenterikoen adarrak irrigatzen dituela. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4/p5/s3",
+        "parts": [
+          {
+            "text": "Duodenoak jatorri bikoitza duenez, irrigazio bikoitza du: aurreko",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "hestetik sortu diren atalak (lehenengoa eta bigarrenaren hasiera) ",
+            "i": true
+          },
+          {
+            "text": "enbor zeliakoaren adarrek",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "irrigatuko dute eta bitarteko hestetik sortu diren atalak (gainerakoak) ",
+            "i": true
+          },
+          {
+            "text": "goiko arteria",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "mesenterikoen adarrek",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": "."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "h2",
+    "section": "4.1",
+    "id": "w14/4.1/p2",
+    "sentences": [
+      {
+        "id": "w14/4.1/p2/s1",
+        "parts": [
+          {
+            "text": "4.1 Bitarteko hesteko eratorriak",
+            "b": true,
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.1",
+    "id": "w14/4.1/p3",
+    "sentences": [
+      {
+        "id": "w14/4.1/p3/s1",
+        "parts": [
+          {
+            "text": "Garapenean pilo bat luzatu egiten da; eta luzapen horrengatik hasierako heste lakioa sortzen du. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.1/p3/s2",
+        "parts": [
+          {
+            "text": "Hasierako heste lakio honetan bi adar bereizten dira: adar zefalikoa eta adar kaudala. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.1/p3/s3",
+        "parts": [
+          {
+            "text": "Bi adar hauen artean egongo da kokatuta "
+          },
+          {
+            "text": "hodi onfalomesenterikoa ",
+            "b": true
+          },
+          {
+            "text": "edo"
+          },
+          {
+            "text": " bitelinoa,",
+            "b": true
+          },
+          {
+            "text": " komunikatzeko zaku bitelinoarekin."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.1",
+    "id": "w14/4.1/p4",
+    "sentences": [
+      {
+        "id": "w14/4.1/p4/s1",
+        "parts": [
+          {
+            "text": "Adar zefalikotik:",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.1",
+    "id": "w14/4.1/p5",
+    "sentences": [
+      {
+        "id": "w14/4.1/p5/s1",
+        "parts": [
+          {
+            "text": "Duodenoaren urrutiko atala sortzen da, konkretuki, bigarrenaren atalaren urrutiko atala, hirugarren eta laugarren atalak. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.1/p5/s2",
+        "parts": [
+          {
+            "text": "Baita heste meharreko jeiunoaren lakioak guztiak eta ilionaren hasierako lakioak sortuko dira. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.1/p5/s3",
+        "parts": [
+          {
+            "text": "Ilionaren urrutiko heste lakioak alde kaudaletik sortzen dira."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.1",
+    "id": "w14/4.1/p6",
+    "sentences": [
+      {
+        "id": "w14/4.1/p6/s1",
+        "parts": [
+          {
+            "text": "Adar kaudaletik:",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.1",
+    "id": "w14/4.1/p7",
+    "sentences": [
+      {
+        "id": "w14/4.1/p7/s1",
+        "parts": [
+          {
+            "text": "Heste meharrako ilionaren urrutiko ataleko lakioak eta heste lodiaren hasierako atalak: kolon itsua, goranzko kolona eta zeharkako kolonaren hasierako 2 herenak."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.1",
+    "id": "w14/4.1/p8",
+    "sentences": [
+      {
+        "id": "w14/4.1/p8/s1",
+        "parts": [
+          {
+            "text": "Hoid onfalomesenterikoa egongo da kokatuta ilionaren mailan, hurbileko eta urruneko heste lakioen artean."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.1",
+    "id": "w14/4.1/p9",
+    "sentences": [
+      {
+        "id": "w14/4.1/p9/s1",
+        "parts": [
+          {
+            "text": "Agertutako hasierako heste lakio honek dauka ardatza, "
+          },
+          {
+            "text": "goiko",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "arteria mesenterikoa ",
+            "b": true
+          },
+          {
+            "text": "dena. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.1/p9/s2",
+        "parts": [
+          {
+            "text": "Ardatza dela esaten dugu, adar zefaliko eta kaudaletik eratorriak sortzen ari diren bitartean, bi adar hauek arteria mesenteriko honen inguruan biratzen dutelako (ardatz honen ingurura)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.1",
+    "id": "w14/4.1/p10",
+    "sentences": [
+      {
+        "id": "w14/4.1/p10/s1",
+        "parts": [
+          {
+            "text": "Aurretik ikusita, ikusten badugu heste lakioa aurretik, egiten duen biraketa gertatzen da noranzko antihorarioan. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.1/p10/s2",
+        "parts": [
+          {
+            "text": "Adar hauen biraketak gertatzen dira bai heste lakioak irteten diren bitartean (hernia fisiologikoa), bai heste lakioak itzultzen diren bitartean."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "4.1",
+    "id": "w14/4.1/p11",
+    "sentences": [
+      {
+        "id": "w14/4.1/p11/s1",
+        "parts": [
+          {
+            "text": "●​ Irteten diren bitartean, birkaeta 90º-koa izaten da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "4.1",
+    "id": "w14/4.1/p12",
+    "sentences": [
+      {
+        "id": "w14/4.1/p12/s1",
+        "parts": [
+          {
+            "text": "●​ Itzultzen diren bitartean, biraketa 180º-koa da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.1",
+    "id": "w14/4.1/p13",
+    "sentences": [
+      {
+        "id": "w14/4.1/p13/s1",
+        "parts": [
+          {
+            "text": "Hortaz, guztira 270º biratzen dute heste lakio guztiak."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "h2",
+    "section": "4.2",
+    "id": "w14/4.2/p2",
+    "sentences": [
+      {
+        "id": "w14/4.2/p2/s1",
+        "parts": [
+          {
+            "text": "4.2 Heste lakioen hernia fisiologikoa",
+            "b": true,
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.2",
+    "id": "w14/4.2/p3",
+    "sentences": [
+      {
+        "id": "w14/4.2/p3/s1",
+        "parts": [
+          {
+            "text": "Garapenaren hasieran abdomena/barrunbe abdominala nahiko txikia izaten da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.2/p3/s2",
+        "parts": [
+          {
+            "text": "Momentu horretan gibela hazten ari da, horregatik, barrunbea ez da oso handia oraindik. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.2/p3/s3",
+        "parts": [
+          {
+            "text": "Ez dago tokirik heste lakio guztientzako (sortutako hesta lakioiak izugarri luzatu direlako) eta horregatik, 6. astean heste lakio hauek barrunbe abdominalatik irten eta zilbor hestera sartzen dira, honen enbrioi kanpoko zelomaren atalean kokatuz. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.2/p3/s4",
+        "parts": [
+          {
+            "text": "Horrela, zilbor-hestearen hurbileko atalean goragune bat agertzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.2/p3/s5",
+        "parts": [
+          {
+            "text": "Prozesu hau fisiologikoa da eta "
+          },
+          {
+            "text": "heste lakioen",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "hernia fisiologikoa",
+            "b": true
+          },
+          {
+            "text": " izango da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.2",
+    "id": "w14/4.2/p4",
+    "sentences": [
+      {
+        "id": "w14/4.2/p4/s1",
+        "parts": [
+          {
+            "text": "Beranduago, 3. hilabetan, gutxi gora-behera 12. astean, abdomena gero eta handiago da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.2/p4/s2",
+        "parts": [
+          {
+            "text": "Izan ere, sistema batzuk desagertzen dira (adib: gernu sistema bat, mesonefrosa poliki-poliki endekatzen delako) eta gibelaren hazkuntza motelagoa egiten da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.2/p4/s3",
+        "parts": [
+          {
+            "text": "Horrela, heste lakio guzti horiek barrunbe abdominalaren itzultzen hasten dira (aldiberean biraketak egiten dituzte)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.2",
+    "id": "w14/4.2/p5",
+    "sentences": [
+      {
+        "id": "w14/4.2/p5/s1",
+        "parts": [
+          {
+            "text": "Barrunbe abdominalera itzultzen den lehen atala "
+          },
+          {
+            "text": "jejunoaren hasierako atala ",
+            "b": true
+          },
+          {
+            "text": "da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.2/p5/s2",
+        "parts": [
+          {
+            "text": "Jejuno hau "
+          },
+          {
+            "text": "abdomenaren goi ezkerreko aldean",
+            "b": true
+          },
+          {
+            "text": " kokatzen da, II. orno lunbarraren ezkerraldean (ezkerreko hipokondrioan, gutxi-gorabehera)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.2",
+    "id": "w14/4.2/p6",
+    "sentences": [
+      {
+        "id": "w14/4.2/p6/s1",
+        "parts": [
+          {
+            "text": "Itzultzen den azkeneko atala "
+          },
+          {
+            "text": "kolon itsuaren hastapena ",
+            "b": true
+          },
+          {
+            "text": "(goranzko kolonetik irteten dena) izango da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.2/p6/s2",
+        "parts": [
+          {
+            "text": "Itxuraz konikoa da, eta hasiera batean hastapen hori ez da bere behin betiko tokian kokatuko: hasieran abdomenaren "
+          },
+          {
+            "text": "goi eskuineko aldean ",
+            "b": true
+          },
+          {
+            "text": "kokatuko da (gibelaren beheko aldean, "
+          },
+          {
+            "text": "eskuineko hipokondrioan",
+            "b": true
+          },
+          {
+            "text": "). "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.2/p6/s3",
+        "parts": [
+          {
+            "text": "Baina ez da hor geldituko, poliki-poliki abdomenetik jaisten hasiko da eta "
+          },
+          {
+            "text": "eskuineko hobi iliakoan",
+            "b": true
+          },
+          {
+            "text": " kokatuko da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.2",
+    "id": "w14/4.2/p7",
+    "sentences": [
+      {
+        "id": "w14/4.2/p7/s1",
+        "parts": [
+          {
+            "text": "Kolon itsuaren jeitsiera honen ondorioz, kolon itsuaren hurrengo heste lodiaren atala (goranzko kolona) abdomenaren eskuinaldean gelditzen da, eta eskuineko hipokondrioan tolesten da angelu bat eginez (gibel angelua) jarraitzeko zeharkako kolonarekin. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.2/p7/s2",
+        "parts": [
+          {
+            "text": "Zeharkako kolonaren aurreko bi herenak sortzen dira bitarteko hestetik."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.2",
+    "id": "w14/4.2/p8",
+    "sentences": [
+      {
+        "id": "w14/4.2/p8/s1",
+        "parts": [
+          {
+            "text": "Beraz, hemen dituzue bitarteko hestetik sortutako atal guztiak: duodenoaren bigarren atalaren urrutiko atala; duodenoaren hirugarren eta laugarren atalak; laugarren atala gora eta ezkerrera abiatzen da eta angelu bat eginez jarraitzen da jejunoarekin; jejunoaren lakioak; ilionaren lakioak*; kolon itsua; goranzko kolona eta zeharkako kolonaren lehenengo bi herenak."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.2",
+    "id": "w14/4.2/p9",
+    "sentences": [
+      {
+        "id": "w14/4.2/p9/s1",
+        "parts": [
+          {
+            "text": "*Ilionaren lakioak iristen dira eskuineko hobi iliakoraino, bukatzeko heste lodian. ",
+            "i": true
+          }
+        ]
+      },
+      {
+        "id": "w14/4.2/p9/s2",
+        "parts": [
+          {
+            "text": "Bukaera",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "honen beheko aldean gelditzen den heste lodiaren atala ",
+            "i": true
+          },
+          {
+            "text": "kolon",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " ",
+            "i": true
+          },
+          {
+            "text": "itsua",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": " deitzen da. ",
+            "i": true
+          }
+        ]
+      },
+      {
+        "id": "w14/4.2/p9/s3",
+        "parts": [
+          {
+            "text": "Kolon itsua",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "jarraitzen da goruntz abiatzen den goranzko kolonarekin —eskuineko hipokondriora iristen",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "dena— non angelu bat eginez jarraitzen da zeharkako kolonarekin.",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.2",
+    "id": "w14/4.2/p10",
+    "sentences": [
+      {
+        "id": "w14/4.2/p10/s1",
+        "parts": [
+          {
+            "text": "Aurretik ikusita.",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "h2",
+    "section": "4.4",
+    "id": "w14/4.4/p2",
+    "sentences": [
+      {
+        "id": "w14/4.4/p2/s1",
+        "parts": [
+          {
+            "text": "4.4 Peritoneo barrunbeko egiturak eta loturak",
+            "b": true,
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.4",
+    "id": "w14/4.4/p3",
+    "sentences": [
+      {
+        "id": "w14/4.4/p3/s1",
+        "parts": [
+          {
+            "text": "Heste meharra:",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.4",
+    "id": "w14/4.4/p4",
+    "sentences": [
+      {
+        "id": "w14/4.4/p4/s1",
+        "parts": [
+          {
+            "text": "Duodeno",
+            "b": true
+          },
+          {
+            "text": " osoa, "
+          },
+          {
+            "text": "hasierako zatia izan ezik",
+            "b": true
+          },
+          {
+            "text": " (duodeno bulboa izan ezik), peritoneo atzeko egitura da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.4/p4/s2",
+        "parts": [
+          {
+            "text": "Izan ere, duodenoaren atzeko mesoa eskumara egiten duen biraketaren ondorioz, mesoduodenoa fusionatu egiten da atzekaldeko partea peritoneoarekin eta desagertu egiten da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.4/p4/s3",
+        "parts": [
+          {
+            "text": "Beraz, duodenoaren bigarren, hirugarren eta laugarren atalak barrunbe peritonealaren atzeko aldean gelditzen dira. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.4/p4/s4",
+        "parts": [
+          {
+            "text": "Peritoneo atzeko egiturak",
+            "b": true
+          },
+          {
+            "text": " bihurtzen dira."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.4",
+    "id": "w14/4.4/p5",
+    "sentences": [
+      {
+        "id": "w14/4.4/p5/s1",
+        "parts": [
+          {
+            "text": "Beste aldetik, heste meharra jeiuno mailan (angelu duodeno-jejunal horretan) peritoneo barrunbera itzultzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.4/p5/s2",
+        "parts": [
+          {
+            "text": "Beraz, jeiuno eta ileon osoak "
+          },
+          {
+            "text": "peritoneo barrukoak",
+            "b": true
+          },
+          {
+            "text": " izango dira, errai peritoneoz inguratuta egongo dira, eta atzeko paretako peritoneoarekin elkartuko dira lotura baten bidez: "
+          },
+          {
+            "text": "mesenterioa",
+            "b": true
+          },
+          {
+            "text": "."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.4",
+    "id": "w14/4.4/p6",
+    "sentences": [
+      {
+        "id": "w14/4.4/p6/s1",
+        "parts": [
+          {
+            "text": "Heste lodia:",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "4.4",
+    "id": "w14/4.4/p7",
+    "sentences": [
+      {
+        "id": "w14/4.4/p7/s1",
+        "parts": [
+          {
+            "text": "-​ "
+          },
+          {
+            "text": "Kolon itsua",
+            "b": true
+          },
+          {
+            "text": " peritoneo barruko egitura da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "4.4",
+    "id": "w14/4.4/p8",
+    "sentences": [
+      {
+        "id": "w14/4.4/p8/s1",
+        "parts": [
+          {
+            "text": "-​ "
+          },
+          {
+            "text": "Gorazko kolonak",
+            "b": true
+          },
+          {
+            "text": " ez dauka atzeko mesorik; beraz, peritoneo atzeko egitura da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "4.4",
+    "id": "w14/4.4/p9",
+    "sentences": [
+      {
+        "id": "w14/4.4/p9/s1",
+        "parts": [
+          {
+            "text": "-​ "
+          },
+          {
+            "text": "Zeharkako kolonaren",
+            "b": true
+          },
+          {
+            "text": " lehen 2 herenak errai peritoneoz inguratuta daude eta horizontala den atzeko meso baten bidez atzeko paretako peritoneoarekin lotuko dira. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.4/p9/s2",
+        "parts": [
+          {
+            "text": "Hortaz, peritoneo barruko atalak dira. "
+          }
+        ]
+      },
+      {
+        "id": "w14/4.4/p9/s3",
+        "parts": [
+          {
+            "text": "Zeharkako kolonaren hirugarren herena",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "peritoneo barruko egitura ere bada, baina ez da bitarteko hestetik sortu.",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "4.4",
+    "id": "w14/4.4/p10",
+    "sentences": [
+      {
+        "id": "w14/4.4/p10/s1",
+        "parts": [
+          {
+            "text": "Berriz aipatuko dugu, atal hauek guztiek daukatela irrigazio berdina: goiko arteria mesenterikoaren adarrak."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "h1",
+    "section": "5",
+    "id": "w14/5/p2",
+    "sentences": [
+      {
+        "id": "w14/5/p2/s1",
+        "parts": [
+          {
+            "text": "5. ATZEKO HESTEA",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5",
+    "id": "w14/5/p3",
+    "sentences": [
+      {
+        "id": "w14/5/p3/s1",
+        "parts": [
+          {
+            "text": "Atzeko hestea zeharkako kolonaren aurreko bi herenen urrutiko ataletik kloaka mintzeraino hedatzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p3/s2",
+        "parts": [
+          {
+            "text": "Atzeko hestetik sortzen diren egiturak denak heste lodikoak dira: "
+          },
+          {
+            "text": "zeharkako",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "kolonaren urrutiko atala, beheranzko kolona ",
+            "b": true
+          },
+          {
+            "text": "(abdomenaren ezkerreko atalean kokatzen da)"
+          },
+          {
+            "text": ", kolon sigmoideoa/sigma, ondestea eta ondestearen urrutiko atala/uzki hodia ",
+            "b": true
+          },
+          {
+            "text": "(atal endodermikoa) dira."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5",
+    "id": "w14/5/p4",
+    "sentences": [
+      {
+        "id": "w14/5/p4/s1",
+        "parts": [
+          {
+            "text": "Zeharkako kolonaren urrutiko herena tolesten da, toledura espleniko baten bidez, beheruntz abiatzen den beheranzko kolonarekin jarraitzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p4/s2",
+        "parts": [
+          {
+            "text": "Hau kolon sigmoideoarekin jarraitzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p4/s3",
+        "parts": [
+          {
+            "text": "Kolon sigmoideoa ondestearekin jarraitzen da, eta azken hau, uzki hodiaren hurbileko atalarekin."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5",
+    "id": "w14/5/p5",
+    "sentences": [
+      {
+        "id": "w14/5/p5/s1",
+        "parts": [
+          {
+            "text": "Atzeko hestetik sortutako eratorri guzti hauetaraino iristen diren arteria adarrak beheko arteria mesenterikotik irtendakoak izango dira, atzeko hestearen arteriak baitira. "
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p5/s2",
+        "parts": [
+          {
+            "text": "Beraz arteria honen bitartez irrigatuko dira atzeko hestetik sortzen diren atal guztiak."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5",
+    "id": "w14/5/p6",
+    "sentences": [
+      {
+        "id": "w14/5/p6/s1",
+        "parts": [
+          {
+            "text": "Hurbileko (atal endodermiko) eta urrutiko (ektodermiko) atalen artean kokatuko da uzki mintza, nahiz eta gero desagertzen den. "
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p6/s2",
+        "parts": [
+          {
+            "text": "Ondoren hori desagertu eta uzki zuloa bihurtuko da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5",
+    "id": "w14/5/p7",
+    "sentences": [
+      {
+        "id": "w14/5/p7/s1",
+        "parts": [
+          {
+            "text": "Beraz, nolakoa da atal bakoitza:"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5",
+    "id": "w14/5/p8",
+    "sentences": [
+      {
+        "id": "w14/5/p8/s1",
+        "parts": [
+          {
+            "text": "●​"
+          },
+          {
+            "text": " Zeharkako kolonaren urrutiko atala",
+            "b": true
+          },
+          {
+            "text": ": peritoneo barruko atala da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5",
+    "id": "w14/5/p9",
+    "sentences": [
+      {
+        "id": "w14/5/p9/s1",
+        "parts": [
+          {
+            "text": "●​"
+          },
+          {
+            "text": " Beheranzko kolona",
+            "b": true
+          },
+          {
+            "text": ": peritoneo kanpoko egitura (peritoneo barrunbearen atzekaldean kokatzen da)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5",
+    "id": "w14/5/p10",
+    "sentences": [
+      {
+        "id": "w14/5/p10/s1",
+        "parts": [
+          {
+            "text": "●​"
+          },
+          {
+            "text": " Kolon sigmoideoa:",
+            "b": true
+          },
+          {
+            "text": " peritoneo barruko egitura da, errai peritoneoz inguratuta. "
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p10/s2",
+        "parts": [
+          {
+            "text": "Atzeko meso baten bidez, atzeko meso hori lotu egiten da eta jarraia egiten da atzeko paretako peritoneoarekin."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5",
+    "id": "w14/5/p11",
+    "sentences": [
+      {
+        "id": "w14/5/p11/s1",
+        "parts": [
+          {
+            "text": "●​"
+          },
+          {
+            "text": " Ondestea ",
+            "b": true
+          },
+          {
+            "text": "(uzki-hodia): peritoneo kanpoko egitura"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5",
+    "id": "w14/5/p12",
+    "sentences": [
+      {
+        "id": "w14/5/p12/s1",
+        "parts": [
+          {
+            "text": "Atzeko hestea kloakaraino iristen da, eta bertan "
+          },
+          {
+            "text": "kloaka mintza",
+            "b": true
+          },
+          {
+            "text": " aurkituko da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p12/s2",
+        "parts": [
+          {
+            "text": "Atzeko hestearen bukaerako zatitik ebaginazioa irteten da, "
+          },
+          {
+            "text": "alantoidea ",
+            "b": true
+          },
+          {
+            "text": "(jatorri endodermikoa); alantoidea enbrioiaren gorputzaren barnean gelditzen da enbrioiak egiten dituen tolespenengatik. "
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p12/s3",
+        "parts": [
+          {
+            "text": "Garapenean alantoidearen hurbileko atalaren eta atzeko hestearen artean mesodermoz osatutako trenkada bat sortzen da, "
+          },
+          {
+            "text": "trenkada uroerrektala",
+            "b": true
+          },
+          {
+            "text": ", honen hazkuntzagatik kloaka mintzeraino hedatzen da, eta kloaka bitan banatu egiten du. "
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p12/s4",
+        "parts": [
+          {
+            "text": "Ondorioz, kloakan eta kloaka mintzan bi atal bereiztuko dira:"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5",
+    "id": "w14/5/p13",
+    "sentences": [
+      {
+        "id": "w14/5/p13/s1",
+        "parts": [
+          {
+            "text": "1.​ Aurreko atala: "
+          },
+          {
+            "text": "hasierako sinu urogenitala",
+            "b": true
+          },
+          {
+            "text": ", kloaka mintzatik sortutako "
+          },
+          {
+            "text": "mintz",
+            "b": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "urogenitala",
+            "b": true
+          },
+          {
+            "text": "z inguratuta dagoena"
+          },
+          {
+            "text": ". ",
+            "b": true
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p13/s2",
+        "parts": [
+          {
+            "text": "Alantoidetik sortu egingo da atal hau."
+          },
+          {
+            "text": " ",
+            "b": true
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p13/s3",
+        "parts": [
+          {
+            "text": "Garapenean aurrerago hemendik gernu maskuria eta uretra garatuko dira. "
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p13/s4",
+        "parts": [
+          {
+            "text": "(urdina)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5",
+    "id": "w14/5/p14",
+    "sentences": [
+      {
+        "id": "w14/5/p14/s1",
+        "parts": [
+          {
+            "text": "2.​ Atzeko atala: "
+          },
+          {
+            "text": "hodi anoerrektala/uzki hodia, ",
+            "b": true
+          },
+          {
+            "text": "ondestearen bukaerako zatia izango da (digestio sistemaren bukaerako atala). "
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p14/s2",
+        "parts": [
+          {
+            "text": "Kloaka mintzatik sortutako "
+          },
+          {
+            "text": "uzki mintza",
+            "b": true
+          },
+          {
+            "text": "z inguratuta egongo da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p14/s3",
+        "parts": [
+          {
+            "text": "Hodi anoerrektalean bi azpiatal bereizten dira:"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5",
+    "id": "w14/5/p15",
+    "sentences": [
+      {
+        "id": "w14/5/p15/s1",
+        "parts": [
+          {
+            "text": "a.​ Hurbileko atala: jatorriz endodermikoa den atala da (atzeko hestearen bukaerako ataletik sortu da)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5",
+    "id": "w14/5/p16",
+    "sentences": [
+      {
+        "id": "w14/5/p16/s1",
+        "parts": [
+          {
+            "text": "b.​ Urrutiko atala: jatorriz ektodermikoa den atala da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/5/p16/s2",
+        "parts": [
+          {
+            "text": "Urrutiko atal hau azaleko ektodermoan agertzen den inbaginazio ektodermikotik sortzen da, "
+          },
+          {
+            "text": "proktodeotik ",
+            "b": true
+          },
+          {
+            "text": "(sakonunea) "
+          },
+          {
+            "text": "/ uzki hobitxotik.",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5",
+    "id": "w14/5/p17",
+    "sentences": [
+      {
+        "id": "w14/5/p17/s1",
+        "parts": [
+          {
+            "text": "​",
+            "b": true
+          },
+          {
+            "text": " Hasiera baten bi atal horien artean uzki mintza kokatzen da, baina gero mintz hori desagertu egingo da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5",
+    "id": "w14/5/p18",
+    "sentences": [
+      {
+        "id": "w14/5/p18/s1",
+        "parts": [
+          {
+            "text": "Hasierako sinu urogenitala eta hodi anoerrekatalaren artean geratzen den eremua (trenkada uroerrektalak sortutakoa), "
+          },
+          {
+            "text": "perineoa",
+            "b": true
+          },
+          {
+            "text": " deitzen da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "h2",
+    "section": "5.1",
+    "id": "w14/5.1/p1",
+    "sentences": [
+      {
+        "id": "w14/5.1/p1/s1",
+        "parts": [
+          {
+            "text": "5.1. Hestearen irrigazioa",
+            "b": true,
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5.1",
+    "id": "w14/5.1/p2",
+    "sentences": [
+      {
+        "id": "w14/5.1/p2/s1",
+        "parts": [
+          {
+            "text": "●  Aurreko hestearen irrigazioa "
+          },
+          {
+            "text": "enbor zeliakoaren",
+            "b": true
+          },
+          {
+            "text": " adarrek burutzen dute."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5.1",
+    "id": "w14/5.1/p3",
+    "sentences": [
+      {
+        "id": "w14/5.1/p3/s1",
+        "parts": [
+          {
+            "text": "● Bitarteko hestearen irrigazioa "
+          },
+          {
+            "text": "goiko arteria mesenterikoen ",
+            "b": true
+          },
+          {
+            "text": "adarrek"
+          },
+          {
+            "text": " ",
+            "b": true
+          },
+          {
+            "text": "burutzen dute."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5.1",
+    "id": "w14/5.1/p4",
+    "sentences": [
+      {
+        "id": "w14/5.1/p4/s1",
+        "parts": [
+          {
+            "text": "● Atzeko hestearen irrigazioa "
+          },
+          {
+            "text": "beheko arteria mesenterikoen ",
+            "b": true
+          },
+          {
+            "text": "adarrek burutzen dute."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5.1",
+    "id": "w14/5.1/p5",
+    "sentences": [
+      {
+        "id": "w14/5.1/p5/s1",
+        "parts": [
+          {
+            "text": "Uzki hodiaren irrigazioa bikoitza da.",
+            "b": true
+          },
+          {
+            "text": " "
+          }
+        ]
+      },
+      {
+        "id": "w14/5.1/p5/s2",
+        "parts": [
+          {
+            "text": "Bitan banatzen denez (hurbileko atala eta urrutiko atala), atal bakoitzak bere irrigazioa izango du."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5.1",
+    "id": "w14/5.1/p6",
+    "sentences": [
+      {
+        "id": "w14/5.1/p6/s1",
+        "parts": [
+          {
+            "text": "-​ "
+          },
+          {
+            "text": "Goiko arteria hemorroidalak / ondeste arteriak",
+            "b": true
+          },
+          {
+            "text": ": Hodi anoerrektalaren hurbileko atala (atzeko hestearen atala dena) irrigatuko du, jatorri endodermikoa duen atala."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5.1",
+    "id": "w14/5.1/p7",
+    "sentences": [
+      {
+        "id": "w14/5.1/p7/s1",
+        "parts": [
+          {
+            "text": "-​ "
+          },
+          {
+            "text": "Bitarteko/erdiko ",
+            "b": true
+          },
+          {
+            "text": "eta"
+          },
+          {
+            "text": " beheko arteria hemorroidalak / fte arteriak",
+            "b": true
+          },
+          {
+            "text": ": Hodi anoerrektalaren urrutiko atala irrigatuko du, jatorri ektodermikoa duen atala."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "5.1",
+    "id": "w14/5.1/p8",
+    "sentences": [
+      {
+        "id": "w14/5.1/p8/s1",
+        "parts": [
+          {
+            "text": "Arteria errektal edo hemorroidalek",
+            "b": true
+          },
+          {
+            "text": " jatorri desberdinak dituzte:"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5.1",
+    "id": "w14/5.1/p9",
+    "sentences": [
+      {
+        "id": "w14/5.1/p9/s1",
+        "parts": [
+          {
+            "text": "● Goiko arteria hemorroidala: Beheko arteria mesenterikotik sortua."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5.1",
+    "id": "w14/5.1/p10",
+    "sentences": [
+      {
+        "id": "w14/5.1/p10/s1",
+        "parts": [
+          {
+            "text": "● Bitarteko arteria hemorroidala: Barneko arteria iliakotik sortua."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "5.1",
+    "id": "w14/5.1/p11",
+    "sentences": [
+      {
+        "id": "w14/5.1/p11/s1",
+        "parts": [
+          {
+            "text": "● Beheko arteria hemorroidala: Barneko pudenda arteriatik sortua. "
+          }
+        ]
+      },
+      {
+        "id": "w14/5.1/p11/s2",
+        "parts": [
+          {
+            "text": "Barneko pudenda barneko arteria iliakoaren adarra da."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "h1",
+    "section": "laburpena",
+    "id": "w14/laburpena/p1",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p1/s1",
+        "parts": [
+          {
+            "text": "ERATORRIEN KOKAPENA LABURBILDUTA"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "laburpena",
+    "id": "w14/laburpena/p2",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p2/s1",
+        "parts": [
+          {
+            "text": "Peritoneo barruko egiturak ",
+            "b": true
+          },
+          {
+            "text": "(guztiak errai orriz inguratutak eta atzeko paretarekin lotuta meso lotura baten bidez)",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p3",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p3/s1",
+        "parts": [
+          {
+            "text": "●​ Urdaila."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p4",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p4/s1",
+        "parts": [
+          {
+            "text": "●​ Duodenoaren hasierako atala (bulboa)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p5",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p5/s1",
+        "parts": [
+          {
+            "text": "●​ Jeiunoa."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p6",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p6/s1",
+        "parts": [
+          {
+            "text": "●​ Ileona."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p7",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p7/s1",
+        "parts": [
+          {
+            "text": "●​ Kolon itsua (honen apendize bermiformea)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p8",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p8/s1",
+        "parts": [
+          {
+            "text": "●​ Zeharkako kolon."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p9",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p9/s1",
+        "parts": [
+          {
+            "text": "●​ Kolon sigmoideoa."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p10",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p10/s1",
+        "parts": [
+          {
+            "text": "●​ Barea/Bazoa"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "laburpena",
+    "id": "w14/laburpena/p11",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p11/s1",
+        "parts": [
+          {
+            "text": "Peritoneo atzeko egiturak  ",
+            "b": true
+          },
+          {
+            "text": "(peritoneo",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "barrunbearen kanpoan kokatzen dira)",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p12",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p12/s1",
+        "parts": [
+          {
+            "text": "●​ Duodenoaren gainerako atalak (2, 3 eta 4 zatiak)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p13",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p13/s1",
+        "parts": [
+          {
+            "text": "●​ Area."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p14",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p14/s1",
+        "parts": [
+          {
+            "text": "●​ Goranzko kolona"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p15",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p15/s1",
+        "parts": [
+          {
+            "text": "●​ Beheranzko kolona"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "laburpena",
+    "id": "w14/laburpena/p16",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p16/s1",
+        "parts": [
+          {
+            "text": "Zeharkako mesokolona (2 orriak) atzeko peritoneo paretarekin jarraitu"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "laburpena",
+    "id": "w14/laburpena/p17",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p17/s1",
+        "parts": [
+          {
+            "text": "Jeiunoa eta ileonaren lakio guztiak, errai peritoneoz inguratuta daude eta atzeko meso (laprana) baten",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "bidez (non bi orri bereizten diren: eskumakoa eta ezkerrekoa) atzerantza abiaratu egiten da eta jarraia",
+            "i": true
+          },
+          {
+            "text": " "
+          },
+          {
+            "text": "egiten da inserzio lerroen bidez atzeko paretako peritoneoarekin. ",
+            "i": true
+          }
+        ]
+      },
+      {
+        "id": "w14/laburpena/p17/s2",
+        "parts": [
+          {
+            "text": "Meso hori ",
+            "i": true
+          },
+          {
+            "text": "mesenterio ",
+            "b": true,
+            "i": true
+          },
+          {
+            "text": "du izena.",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "laburpena",
+    "id": "w14/laburpena/p18",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p18/s1",
+        "parts": [
+          {
+            "text": "Peritoneo kanpoko egiturak ",
+            "b": true
+          },
+          {
+            "text": "(aurretik peritoneo barrunbearen pareta bat daukate)",
+            "i": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p19",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p19/s1",
+        "parts": [
+          {
+            "text": "●​ Heste gorria."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p20",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p20/s1",
+        "parts": [
+          {
+            "text": "●​ Ondestea."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "laburpena",
+    "id": "w14/laburpena/p21",
+    "sentences": [
+      {
+        "id": "w14/laburpena/p21/s1",
+        "parts": [
+          {
+            "text": "●​ Uzki hodia. "
+          }
+        ]
+      },
+      {
+        "id": "w14/laburpena/p21/s2",
+        "parts": [
+          {
+            "text": "○  Hurbileko atala (endodermikoa) ○  Urrutiko atala (ektodermikoa)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "h1",
+    "section": "arnas",
+    "id": "w14/arnas/p1",
+    "sentences": [
+      {
+        "id": "w14/arnas/p1/s1",
+        "parts": [
+          {
+            "text": "ARNAS APARATUA",
+            "b": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "arnas",
+    "id": "w14/arnas/p2",
+    "sentences": [
+      {
+        "id": "w14/arnas/p2/s1",
+        "parts": [
+          {
+            "text": "22.egunean (4 astearen hasieran) aurreko hestearen aurreko apretatik ebaginazio bat agertzen da(endodermikoa) : arnas aparatuaren hastapena. "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p2/s2",
+        "parts": [
+          {
+            "text": "Hori luzatu egiten da eta bere urrutiko ataletik bi alboko hastapen agertzen dira: birika-hastapenak (bronkio primarioen hastapenak). "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p2/s3",
+        "parts": [
+          {
+            "text": "Hurrengo asteetan hastapen hauek gero eta gehiago adarkatzen dira, gutxi gorabehera 16 aldiz adarkatu egiten dira, bronkio zuhaitz osoa sortzeko."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "arnas",
+    "id": "w14/arnas/p3",
+    "sentences": [
+      {
+        "id": "w14/arnas/p3/s1",
+        "parts": [
+          {
+            "text": "5.astean, agertzen dira bronkio sekuendarioen hastapenak, eta aste bat beranduago agertzen dira bronkio tertziarioen hastapenak. "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p3/s2",
+        "parts": [
+          {
+            "text": "3 izango dira eskuineko aldean eta hedatu egingo dira honek 3 lobulo ditu. "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p3/s3",
+        "parts": [
+          {
+            "text": "Ezkerreko birikan berriz, bi bronkio hastapen sekundario egongo dira, (zeren bi lobulo ditu). "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p3/s4",
+        "parts": [
+          {
+            "text": "Bronkio tertziarioen hastapenak hedatzen dira lobuluetan dauden segmentu desberdinetan (bronkio segmentarioak dira)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "arnas",
+    "id": "w14/arnas/p4",
+    "sentences": [
+      {
+        "id": "w14/arnas/p4/s1",
+        "parts": [
+          {
+            "text": "Hurrengo asteetan bronkio hastapen tertzarioetatik 16 asterako agertzen diren bronkioak bukaerazko bronkioloak dira (14 aldiz gehiago adarkatzen dira). "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p4/s2",
+        "parts": [
+          {
+            "text": "Arnas bronkioloak dira eta jada ez dago kartilagorik haien artean."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "arnas",
+    "id": "w14/arnas/p5",
+    "sentences": [
+      {
+        "id": "w14/arnas/p5/s1",
+        "parts": [
+          {
+            "text": "Bukaerazko bronkiolo hauetatik arnas bronkioloak agertzen dira 16. astetik 28. astera. "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p5/s2",
+        "parts": [
+          {
+            "text": "Hala ere, 28.astetik aurrera (36.asterarte) arnas bronkioloetatik adarkadura zapalak agertzen dira, bukaerazko zakuak edo hasierako albeoloak deritzotenak. "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p5/s3",
+        "parts": [
+          {
+            "text": "36.aste honetan bukaerazko zaku hauen inguruan alboko mesodermoaren errai orritik kapilarrak agertu egiten dira, eta kontatatzen dute bukaerazko zaku hauekin."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "arnas",
+    "id": "w14/arnas/p6",
+    "sentences": [
+      {
+        "id": "w14/arnas/p6/s1",
+        "parts": [
+          {
+            "text": "Hemen paretan, bi motatako zelula epitalielak daude:"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "arnas",
+    "id": "w14/arnas/p7",
+    "sentences": [
+      {
+        "id": "w14/arnas/p7/s1",
+        "parts": [
+          {
+            "text": "●​ I. Mailako pneumozitoak"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "li",
+    "section": "arnas",
+    "id": "w14/arnas/p8",
+    "sentences": [
+      {
+        "id": "w14/arnas/p8/s1",
+        "parts": [
+          {
+            "text": "●​ II. Mailako pneumzitoak"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "arnas",
+    "id": "w14/arnas/p9",
+    "sentences": [
+      {
+        "id": "w14/arnas/p9/s1",
+        "parts": [
+          {
+            "text": "II. Mailako pneumozito hauetan, 7. hilabetetik aurrera hasten dira fosfolipidoetan oso aberatsa den jariakina ekoizten hasten dira: surfaktantea. "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p9/s2",
+        "parts": [
+          {
+            "text": "Oso garrantztsua da hau albeoloetan dagoen likidoaren ur molekulek sortzen diten gainazaleko tentsioa jeisteko. "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p9/s3",
+        "parts": [
+          {
+            "text": "Gainazaleko tentsioak albeoloen kolapsoa eragiten dute, surfaktantearen bidez arnasketa normala egin daiteke."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "arnas",
+    "id": "w14/arnas/p10",
+    "sentences": [
+      {
+        "id": "w14/arnas/p10/s1",
+        "parts": [
+          {
+            "text": "36.astetik aurrera, eta jaiosteko 2-3 urtera arte, hasierako albeolo hauetan helzte prozesu bat gertatzen da. "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p10/s2",
+        "parts": [
+          {
+            "text": "Parteako I.motako pneumzitoak meheagoak egiten dira eta inguruan kokatzen diren kapilar horiek proktuzioak sortzen dituzte albeolotan. "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p10/s3",
+        "parts": [
+          {
+            "text": "Hasierako albeolo hauek albeolo helduak bihurtzen dira mehetze prozesuaren ondoren."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "arnas",
+    "id": "w14/arnas/p11",
+    "sentences": [
+      {
+        "id": "w14/arnas/p11/s1",
+        "parts": [
+          {
+            "text": "Jaiotzaren momentuan albeolo hauek likidoz beterik daude, likido hori oso aberatsa da kloruroan, proteinetan, mukian, surfaktantean… Normalean, hori guztia zirkulazio sistemara pasatzen da, mukia trakeatik eta laringetik kanporatzen da… eta bakarrik gelditzen da metatuta albeoloetan surfaktantea. "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p11/s2",
+        "parts": [
+          {
+            "text": "Oso garrantzitsua da espirazioan albeoloen kolapsoa ekiditzeko."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "p",
+    "section": "arnas",
+    "id": "w14/arnas/p12",
+    "sentences": [
+      {
+        "id": "w14/arnas/p12/s1",
+        "parts": [
+          {
+            "text": "*Arnas aparatuaren hurbileko ataletik, faringearen jarraipena laringea da, eta hau jarraitzen da trakearekin (zintzurrestearekin) eta hodi laringeottrakelaa osatzen du, jarraia dena birikiekin. "
+          }
+        ]
+      },
+      {
+        "id": "w14/arnas/p12/s2",
+        "parts": [
+          {
+            "text": "Zintzurresteak C itxura daukan kartilago eznerdinez osatuta dago, eta jarraia da, birika kanpoko bronkio nagusiekin (eskuina eta ezkerra), eta hauek, birika barruan jarraiak dira bronkio lobarrekin eta hauek, bronkio segmentarioekin."
+          }
+        ]
+      }
+    ]
   }
 ];

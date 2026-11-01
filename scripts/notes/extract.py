@@ -31,8 +31,12 @@ FILES = [
     '11.GAIA. Zirkulazio sistema.docx.pdf',
     '12. GAIA. ARTERIA SISTEMA.docx.pdf',
     '13. GAIA_ZAIN SISTEMA (zirkulazio-sistema IV) (zuzendu gabe).pdf',
-    '14.GAIA_DIGESTIO APARATUA 1.ATALA (Zuzenduta).pdf',
+    # Topic 14 came in two PDFs (part 2 = sections 4–6 and the respiratory system): one notes file, part 2's blocks after part 1's.
+    ('14.GAIA_DIGESTIO APARATUA 1.ATALA (Zuzenduta).pdf', '14.GAIA_DIGESTIO APARATUA 2.Atala (Zuzenduta).docx.pdf'),
 ]
+
+# Week 14 part 2's unnumbered headings open sections of their own.
+HEADINGS_14 = {'ERATORRIEN KOKAPENA LABURBILDUTA': 'laburpena', 'ARNAS APARATUA': 'arnas'}
 
 
 # Week 12's figure captions are set in body type beside the text: they are recognised by their words.
@@ -73,7 +77,7 @@ def split_sentences(parts, week=0):
         prefix = text[:m.start()]
         token = re.search(r'[\w,]+$', prefix)
         word = token.group() if token else ''
-        if word.isdigit() or re.fullmatch(r'\d+,\d+', word) or len(word) == 1 or word.lower() in {'adib', 'etab', 'etc', 'dr', 'irud', 'vs'} or (week == 12 and word == 'ezk') or (week in {9, 12} and re.fullmatch(r'[IVX]+', word)):
+        if word.isdigit() or re.fullmatch(r'\d+,\d+', word) or len(word) == 1 or word.lower() in {'adib', 'etab', 'etc', 'dr', 'irud', 'vs'} or (week == 12 and word == 'ezk') or (week in {9, 12, 14} and re.fullmatch(r'[IVX]+', word)):
             continue
         ends.append(m.end())
     if not ends or ends[-1] != len(text):
@@ -92,7 +96,7 @@ def split_sentences(parts, week=0):
     return result
 
 
-def extract(path, week):
+def extract(path, week, part=1, counts=None):
     doc = fitz.open(path)
     lines, removed = [], []
     # Preserve PDF reading order, also used by get_text('text'); don't sort columns. Week 12 sets its
@@ -179,6 +183,8 @@ def extract(path, week):
             toc = False
         if toc:
             kind = 'toc'
+        elif week == 14 and text in HEADINGS_14:
+            section, kind = HEADINGS_14[text], 'h1'
         elif line['size'] >= 20 and line['bold'] > .7:
             kind = 'title'
         elif heading:
@@ -188,12 +194,12 @@ def extract(path, week):
                 kind = 'h2' if '.' in section else 'h1'
             else:
                 kind = 'h2'
-        elif re.match(r'^(?:[●•➔\-]|\d+\.\u200b)', text):
+        elif re.match(r'^(?:[●•➔\-]|\d+\.\u200b)', text) or (week == 14 and re.match(r'^[a-z]\.​', text)):
             kind = 'li'
         # Weeks 11–14 wrap body text beside their figures (indented lines); week 12's tables have a right column.
         elif (line['italic'] and line['size'] <= 11.2 and len(text) < 110 and line['box'][0] > 100) or re.match(r'^\d+\.?\s*irudia', text, re.I) or (week not in {11, 12, 13, 14} and line['box'][0] > 150 and len(text) < 100 and not line['bold']):
             kind = 'caption'
-        elif week == 14 and line['all_italic'] and line['size'] <= 11.2 and len(text) < 110:
+        elif week == 14 and part == 1 and line['all_italic'] and line['size'] <= 11.2 and len(text) < 110:
             # Week 14's first caption sits left of its figure, at body indent.
             kind = 'caption'
         elif week == 12 and text.startswith(CAPTIONS_12) and len(text) < 64:
@@ -206,7 +212,7 @@ def extract(path, week):
         same_row = previous and line['page'] == previous['page'] and abs(line['box'][1] - previous['box'][1]) < 3
         block_section = number.group(1) if toc and number else (blocks[-1]['section'] if toc and same_row and blocks else section)
         continuation = blocks and block_section == blocks[-1]['section'] and (
-            (kind == 'p' and blocks[-1]['kind'] in {'p', 'li'} and ((line['page'] == previous['page'] and gap < max(9, line['size'] * .55)) or (line['page'] != previous['page'] and not re.search(r'[.!?:]$', previous['text']) and not (week == 14 and blocks[-1]['kind'] == 'li'))))
+            (kind == 'p' and blocks[-1]['kind'] in {'p', 'li'} and ((line['page'] == previous['page'] and gap < max(9, line['size'] * .55)) or (line['page'] != previous['page'] and not re.search(r'[.!?:]$', previous['text']) and not (week == 14 and blocks[-1]['kind'] == 'li' and text[:1].isupper()))))
             or (same_row and kind in {'p', 'li', 'caption', 'toc'} and blocks[-1]['kind'] in {'p', 'li', 'caption', 'toc'})
             # Week 12 sets its captions beside the body text: a body line after a caption starts a new block.
             or (kind in {'p', 'caption'} and blocks[-1]['kind'] == 'caption' and line['page'] == previous['page'] and gap < 9 and not (week == 10 and kind == 'p' and not line['italic']) and not (week == 12 and kind == 'p'))
@@ -215,12 +221,16 @@ def extract(path, week):
             # Week 9 (2026-10-29) sets one heading number ("2.2.2.") alone and its capital title word by word, wrapping.
             or (kind == 'p' and blocks[-1]['kind'] in {'h1', 'h2'} and line['page'] == previous['page'] and line['bold'] > .7 and (same_row or re.fullmatch(r'[\d.]+', previous['text']) or (gap < 9 and text.upper() == text)))
         )
+        # Week 14 part 2: the line under the summary's last list item is a statement of its own.
+        if week == 14 and text.startswith('Zeharkako mesokolona (2 orriak)'):
+            continuation = False
         if continuation:
             blocks[-1]['parts'].extend([{'text': ' '}, *line['parts']])
         else:
             blocks.append({'kind': kind, 'section': block_section, 'parts': list(line['parts'])})
         previous = line
-    counts = collections.Counter()
+    # A later part of the same topic numbers its blocks on from the earlier parts' (part 1's TOC already holds sections 4–6).
+    counts = counts if counts is not None else collections.Counter()
     for b in blocks:
         counts[b['section']] += 1
         # Week prefix avoids collisions between sections shared by different topics.
@@ -244,7 +254,18 @@ def main():
     args = parser.parse_args()
     metadata = {}
     for week, filename in enumerate(FILES, 1):
-        blocks, meta = extract(args.source_dir / filename, week)
+        if isinstance(filename, tuple):
+            # One topic in several PDFs: each checked against its own PDF, then joined (sections never repeat across parts).
+            counts = collections.Counter()
+            parts = [extract(args.source_dir / f, week, i, counts) for i, f in enumerate(filename, 1)]
+            blocks = [b for bs, _ in parts for b in bs]
+            ids = [b['id'] for b in blocks]
+            if len(ids) != len(set(ids)):
+                raise ValueError(f'w{week}: block ids repeat across parts')
+            text = ' '.join(block_text(b) for b in blocks)
+            meta = {'file': ' + '.join(m['file'] for _, m in parts), 'pages': sum(m['pages'] for _, m in parts), 'characters': len(text), 'sha256': hashlib.sha256(text.encode()).hexdigest(), 'removed': [r for _, m in parts for r in m['removed']]}
+        else:
+            blocks, meta = extract(args.source_dir / filename, week)
         metadata[str(week)] = meta
         source = '// Generated by scripts/notes/extract.py from the ORIGINAL PDF. Do not edit.\nimport type { NotesBlock } from \'./index\';\n\nexport const w%d: NotesBlock[] = %s;\n' % (week, json.dumps(blocks, ensure_ascii=False, indent=2))
         dest = OUT / f'w{week}.ts'

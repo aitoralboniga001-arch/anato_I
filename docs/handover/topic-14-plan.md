@@ -1,4 +1,35 @@
-# Topic 14 plan: "14. GAIA: DIGESTIO APARATUA" (part 1, the foregut)
+# Topic 14 plan: "14. GAIA: DIGESTIO APARATUA" (parts 1 and 2)
+
+> **State on 2026-10-31 (read first).** Part 2 (`14.GAIA_DIGESTIO APARATUA 2.Atala (Zuzenduta).docx.pdf`) arrived;
+> both PDFs are extracted into one `w14.ts` (215 blocks, 391 sentences, 37,344 chars, sha `295fb1d6…`; part 2's
+> block numbers continue after part 1's TOC). Batch 1 is built: stages 1–5 (`components/scenes/week14/`:
+> `Fold3D.tsx` stage 1, `Early3D.tsx` stages 2–5 on `gut3d.ts` + `common.tsx`), `week14.ts`,
+> `week14-structures.ts`, all registration, `NOTES[14]`, notes tests; visibility tests green for topic 14.
+> **The Kimu class is deferred** (owner, 2026-10-31: "not necessary for now"); do stages, 3D and the notes first.
+>
+> **2026-11-01: stages 6–16 built** (batches 2–3, part 1 complete). One trunk model `foregut-model.ts` (`foreModel`,
+> pose fields thorax…veil, opts dim/liverGlass/topCut/clear/diaphragm) posed per step by `Foregut3D.tsx`
+> (`spec6`…`spec16`, each starting from the previous `endPose`; stages 12, 14, 15 rewind fields to replay a
+> process). `NOTES[14]` 3.1–3.6 mapped; exceptions `14/hestegorria/0` (§3) and `14/duodenoa/0` (§3.2 p15); beat
+> count 962. Topic 14 visibility tests green; notes/Kimu tests have only the old baseline failures (topic 7 anchor,
+> figure parity 7–9). Notes-wording traps flagged in the app: 3.2 "bena korda" vs 3.4 "zain porta"; 3.6 p3 "gibelak
+> egiten duen biraketagatik" vs p7 duodenum's rotation (stage `area` caution). Screenshot pass on 11–16 in progress.
+> Next: tablet shots, then part 2 (17–26, §4b) and the summary table.
+>
+> **2026-11-01 (later): part 2 built, stages 17–26 (all notes sections now have stages).** Models:
+> `midgut-model.ts` (`midModel`: straight midgut → primary loop about the SMA axis ROOT→UMB, herniation into the
+> cord, 270° counter-clockwise rotation, staggered return via `returnOrder` (jejunum first, caecum last), caecal
+> descent, hindgut, peritoneal fusion veils, SMA/IMA/coeliac, rectal arteries, PLACE recolouring for the summary),
+> `cloaca-model.ts` (urorectal septum, sinus/anorectal canal, proctodeum, membranes, perineum), `lung-model.ts`
+> (`treeModel` bud → primary → 3+2 lobar → segmental → 4 more generations, C rings, lobes fitted round the
+> full-grown branches; `acinusModel` terminal/respiratory bronchioles, sacs, capillaries, pneumocytes, surfactant,
+> fluid). Specs: `Midgut3D.tsx` (spec17–21, 23, 24), `Cloaca3D.tsx` (spec22), `Lung3D.tsx` (spec25, 26). Stages
+> cite the part-2 file via `src2`. `NOTES[14]`: 4, 4.1, 4.2, 4.4 (the notes have no 4.3), 5 (two stages), 5.1,
+> `n:'6'` summary (exception `14/eratorrien-kokapena` → `laburpena`), `n:'0'` "Arnas aparatua" (exceptions
+> `14/arnas-zuhaitza`, `14/albeoloak` → `arnas`). Beat count 1011. Topic-14 visibility 78/78 green. Traps flagged:
+> descending colon "kanpokoa" (§5) vs "atzekoa" (summary); arnas p4 s2 calls the week-16 bronchi "arnas
+> bronkioloak" (they are terminal). `zilbor-hestea` is the existing structure `zilborrestea`. Still open: tablet
+> shots 768/1024 of 17–26; `inPreparation: true` still set on the week (home card says "Prestatzen"); week quiz empty.
 
 Source: `C:\Users\aitor\Downloads\14.GAIA_DIGESTIO APARATUA 1.ATALA (Zuzenduta).pdf` (12 pages, a Google Docs
 export). The owner's bar: this topic is the culmination of every topic so far: the strengths of each, none of
@@ -238,7 +269,27 @@ artery. It is the topic's natural table and the class board table.
 `NOTES[14]` lists each section with its stages; a stage cites only its own section's sentences or has a
 `NOTES_EXCEPTIONS` entry.
 
-## 5. The Kimu class
+## 4b. Part 2 stages (sections 4, 4.1–4.4, 5, 5.1, the summary, the respiratory system)
+
+| # | stage id | notes | what the student sees |
+|---|---|---|---|
+| 17 | `bitarteko-hestea` | 4 | the midgut's extent and derivatives (from the 2nd part of the duodenum to the transverse colon's 2/3), SMA axis, the vitelline duct at the ileum |
+| 18 | `heste-lakioa` | 4.1 | the primary loop: cephalic and caudal limbs, SMA as the axis, the vitelline duct at the apex; the 270° counter-clockwise rotation seen from the front (about +z) |
+| 19 | `hernia-fisiologikoa` | 4.2 (+ 4.3 content in it) | week 6 herniation into the cord; ~week 12 return: jejunum first, upper left (left of L2); caecal bud last, upper right under the liver, then down to the right iliac fossa; ascending colon, hepatic flexure; the "Beraz, hemen dituzue…" summary |
+| 20 | `peritoneo-egiturak` | 4.4 | which mesenteries persist / fuse (mesentery proper, transverse mesocolon, ascending/descending colon retroperitoneal) |
+| 21 | `atzeko-hestea` | 5 | the hindgut's extent and derivatives, IMA |
+| 22 | `kloaka` | 5 | urorectal septum: urogenital sinus (bladder, urethra) vs anorectal canal; endoderm vs proctodeum ectoderm, the anal membrane, the perineum |
+| 23 | `irrigazioa` | 5.1 | rectal arteries: superior ← IMA, middle ← internal iliac, inferior ← internal pudendal |
+| 24 | `laburpena` | summary | intra / retro / extraperitoneal table, live |
+| 25 | `arnas-zuhaitza` | ARNAS APARATUA | the bronchial tree's branching |
+| 26 | `albeoloak` | ARNAS APARATUA | the lung's periods and alveoli |
+
+Part 2 traps (notes prose wins, flag the conflict on screen): the descending colon is "peritoneo kanpoko" in 5 but
+"peritoneo atzeko" in the summary; the respiratory text calls terminal bronchioles "arnas bronkioloak" and then says
+the respiratory bronchioles come from them (weeks 16–28). `NOTES` for the summary section → `n: '6'` + an exception;
+the unnumbered "arnas" section needs a label rule in `content/notes.ts`/tests.
+
+## 5. The Kimu class (deferred, owner 2026-10-31)
 
 `content/klasea/w14.ts` + generated `content/klasea/importance/w14.ts` (`scripts/klasea/importance.ts`,
 `core-map.ts 14`). Rules as `tests/klasea.test.ts` enforces them (core ≤ 60 %, G1–G4, ≤ 22 words, chunks
@@ -319,6 +370,7 @@ The owner confirmed: **part 2 extends topic 14**. Batch 1 started; only the code
 1. **Skeleton**: wiring, structures, `gut3d.ts` (tube, stations, walls, arteries reused), stages 1–5 usable.
 2. **The signature**: stomach rotations, mesogastria, bursa, live section (stages 6–10).
 3. **Duodenum, liver, gallbladder, pancreas** (stages 11–16) + summary table.
-4. **Class, quiz, guides, chronology, atlas**; drop `inPreparation`; ship usable.
-5. **Polish sweep**: tablet shots, camera audit, walkthrough, perf; handover `docs/handover/topic-14.md`; lessons
+4. **Part 2** (stages 17–26, §4b), same models.
+5. **Quiz, guides, chronology, atlas**; drop `inPreparation`; ship usable. (Class only when the owner asks.)
+6. **Polish sweep**: tablet shots, camera audit, walkthrough, perf; handover `docs/handover/topic-14.md`; lessons
    appended to `memory/topic10-working-lessons.md`.

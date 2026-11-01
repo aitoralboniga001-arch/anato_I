@@ -285,7 +285,7 @@ const CORE_MIGRATIONS: MigrationTopic[] = [
       {
         id: 'somitomeroak',
         title: 'Somitomeroak → begiko eta arkuetako muskuluak',
-        lead: 'Somitomeroen mesodermoa begien inguruan eta faringe arkuetan kokatzen da; arku bakoitzean muskulu jakin batzuk sortzen dira.',
+        lead: 'Somitomeroak mesodermo paraxialetik datoz. 1., 2., 3. eta 5. somitomeroek begia mugitzeko kanpoko muskulu ildaskatuak ematen dituzte; 4., 6. eta 7. somitomeroak, berriz, 1., 2. eta 3. faringe-arkuekin lotzen dira.',
         stage: 'somitomeroak-burua',
         roots: [
           n('somitomeroak', [
@@ -293,7 +293,7 @@ const CORE_MIGRATIONS: MigrationTopic[] = [
             l('3. somitomeroa', [n('begi-goiko-laprana')]),
             l('4. somitomeroa', [n('muskulu-murtsikatzaileak', [n('loki-muskulua'), n('maseter-muskulua'), n('muskulu-pterigoideoak')], { via: '1. arkua · V' })]),
             l('5. somitomeroa', [n('begi-alboko-zuzena')]),
-            l('6. somitomeroa', [n('muskulu-mimikoak', undefined, { via: '2. arkua · VII' }), n('barailaren-muskulu-jeistaileak', undefined, { via: '2. arkua · VII' })]),
+            l('6. somitomeroa · 2. faringe-arkua', [n('muskulu-mimikoak', undefined, { via: '2. arkua · VII' }), n('barailaren-muskulu-jeistaileak', undefined, { via: '2. arkua · VII' })]),
             l('7. somitomeroa', [n('muskulu-estilofaringeoa', undefined, { via: '3. arkua · IX' })]),
           ]),
         ],
@@ -304,7 +304,10 @@ const CORE_MIGRATIONS: MigrationTopic[] = [
         stage: 'okzipitalak',
         roots: [
           n('somita-okzipitalak', [
-            l('1.–2. somitak', [n('laringearen-muskuluak', undefined, { via: '4. eta 6. arkuak · X' })]),
+            l('1.–2. somita okzipitalak', [
+              l('4. faringe-arkua', [l('Muskulu krikotiroideoa', undefined, { via: 'X · goiko nerbio laringeoaren kanpoko adarra' }), l('Faringeko muskulu hertsatzaileak', undefined, { via: 'X · faringeko adarrak' })]),
+              l('6. faringe-arkua', [n('laringearen-muskuluak', undefined, { via: 'X · nerbio laringeo atzekaria', note: 'muskulu intrintsekoak, krikotiroideoa izan ezik' })]),
+            ]),
             l('2.–5. somitak', [n('mihiaren-muskuluak', undefined, { via: 'XII' })]),
           ]),
         ],

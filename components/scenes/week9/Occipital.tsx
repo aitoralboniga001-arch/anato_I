@@ -160,10 +160,10 @@ const OFF: Record<Fib, number> = { s: -5, v: 0, m: 5 };
 
 type Row = { num: string; nerve: string; name: string; y: number; color: string; fib: Fib[]; target: string; text: string; from: string };
 const ROWS: Row[] = [
-  { num: 'III', nerve: 'nerbio-begi-eragilea', name: 'Begi eragilea', y: 176, color: SM_COLOR[0], fib: ['m', 'v'], target: 'begiaren-kanpoko-muskuluak', text: 'Zuzenak + beheko laprana', from: '1–2' },
-  { num: 'IV', nerve: 'nerbio-troklearra', name: 'Troklearra', y: 216, color: SM_COLOR[2], fib: ['m'], target: 'begi-goiko-laprana', text: 'Goiko muskulu laprana', from: '3' },
+  { num: 'III', nerve: 'nerbio-begi-eragilea', name: 'Begi eragilea', y: 176, color: SM_COLOR[0], fib: ['m', 'v'], target: 'begiaren-kanpoko-muskuluak', text: 'Begiaren zuzenak + beheko laprana', from: '1–2' },
+  { num: 'IV', nerve: 'nerbio-troklearra', name: 'Troklearra', y: 216, color: SM_COLOR[2], fib: ['m'], target: 'begi-goiko-laprana', text: 'Begiaren goiko muskulu laprana', from: '3' },
   { num: 'V', nerve: 'nerbio-trigeminoa', name: 'Trigeminoa', y: 256, color: SM_COLOR[3], fib: ['m', 's'], target: 'muskulu-murtsikatzaileak', text: 'Murtsikatzaileak (1. arkua)', from: '4' },
-  { num: 'VI', nerve: 'nerbio-aldentzailea', name: 'Aldentzailea', y: 296, color: SM_COLOR[4], fib: ['m'], target: 'begi-alboko-zuzena', text: 'Alboko muskulu zuzena', from: '5' },
+  { num: 'VI', nerve: 'nerbio-aldentzailea', name: 'Aldentzailea', y: 296, color: SM_COLOR[4], fib: ['m'], target: 'begi-alboko-zuzena', text: 'Begiaren alboko muskulu zuzena', from: '5' },
   { num: 'VII', nerve: 'aurpegi-nerbioa', name: 'Aurpegi nerbioa', y: 336, color: SM_COLOR[5], fib: ['m', 's', 'v'], target: 'muskulu-mimikoak', text: 'Mimikoak + barailaren jeistaileak (2. ark.)', from: '6' },
   { num: 'IX', nerve: 'nerbio-glosofaringeoa', name: 'Glosofaringeoa', y: 376, color: SM_COLOR[6], fib: ['m', 's', 'v'], target: 'muskulu-estilofaringeoa', text: 'Estilofaringeoa (3. arkua)', from: '7' },
   { num: 'X', nerve: 'nerbio-bagoa', name: 'Bagoa', y: 416, color: HUE.os12, fib: ['m', 's', 'v'], target: 'laringearen-muskuluak', text: 'Laringearen muskuluak (4./6. arkuak)', from: 'O1–2' },
@@ -390,10 +390,10 @@ export function CranialWiring({ t }: SceneProps) {
 /* ------------------------------------------------------------------ */
 
 const TROWS: [string, string, string, string, string, number][] = [
-  ['1.–2. somitomeroak · begia', 'begiaren-kanpoko-muskuluak', 'Goiko, beheko, erdiko zuzenak + beheko laprana', 'nerbio-begi-eragilea', 'III · begi eragilea', 0.74],
-  ['3. somitomeroa · begia', 'begi-goiko-laprana', 'Goiko muskulu laprana', 'nerbio-troklearra', 'IV · troklearra (patetikoa)', 0.745],
+  ['1.–2. somitomeroak · begia', 'begiaren-kanpoko-muskuluak', 'Begiaren goiko, beheko, erdiko zuzenak + beheko laprana', 'nerbio-begi-eragilea', 'III · begi eragilea', 0.74],
+  ['3. somitomeroa · begia', 'begi-goiko-laprana', 'Begiaren goiko muskulu laprana', 'nerbio-troklearra', 'IV · troklearra (patetikoa)', 0.745],
   ['4. somitomeroa · 1. arkua', 'muskulu-murtsikatzaileak', 'Barailaren jasotzaileak (murtsikatzaileak)', 'nerbio-trigeminoa', 'V · trigeminoa (3 adar)', 0.75],
-  ['5. somitomeroa · begia', 'begi-alboko-zuzena', 'Alboko muskulu zuzena', 'nerbio-aldentzailea', 'VI · aldentzailea', 0.755],
+  ['5. somitomeroa · begia', 'begi-alboko-zuzena', 'Begiaren alboko muskulu zuzena', 'nerbio-aldentzailea', 'VI · aldentzailea', 0.755],
   ['6. somitomeroa · 2. arkua', 'muskulu-mimikoak', 'Barailaren jeistaileak + muskulu mimikoak', 'aurpegi-nerbioa', 'VII · aurpegi nerbioa', 0.84],
   ['7. somitomeroa · 3. arkua', 'muskulu-estilofaringeoa', 'Estilofaringeoa (faringearen muskulu bat)', 'nerbio-glosofaringeoa', 'IX · glosofaringeoa', 0.845],
   ['Somita okz. 1–2 · 4./6. arkuak', 'laringearen-muskuluak', 'Laringearen muskulu ildaskatuak', 'nerbio-bagoa', 'X · bagoa (vagus)', 0.85],

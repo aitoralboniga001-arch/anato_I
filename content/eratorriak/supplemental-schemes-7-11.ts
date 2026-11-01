@@ -91,9 +91,9 @@ export const SUPPLEMENTAL_7_11: MigrationTopic[] = [
         id: 'begiko-nerbio-motorrak', title: 'Begi inguruko muskulu ildaskatuen nerbioak', stage: 'somitomeroak-burua',
         lead: 'Begiaren mugimenduan III., IV. eta VI. bikoteek parte hartzen dute. V1 adarra sentsitiboa da; ez ditu begi inguruko muskulu ildaskatuak motorrez inerbatzen.',
         roots: [
-          l('III · Nerbio begi-eragilea', [l('Goiko, beheko eta erdiko muskulu zuzenak'), l('Beheko muskulu laprana'), l('Goiko betazalaren jasotzailea')]),
-          l('IV · Nerbio troklearra', [l('Goiko muskulu laprana')]),
-          l('VI · Nerbio aldentzailea', [l('Alboko muskulu zuzena')]),
+          l('III · Nerbio begi-eragilea', [l('Begiaren goiko, beheko eta erdiko muskulu zuzenak'), l('Begiaren beheko muskulu laprana'), l('Goiko betazalaren jasotzailea')]),
+          l('IV · Nerbio troklearra', [l('Begiaren goiko muskulu laprana')]),
+          l('VI · Nerbio aldentzailea', [l('Begiaren alboko muskulu zuzena')]),
           l('V1 · Nerbio oftalmikoa', [l('Sentsibilitatea', undefined, 'ez begiaren mugimendu motorra')]),
         ],
       },

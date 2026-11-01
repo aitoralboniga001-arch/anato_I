@@ -321,9 +321,9 @@ export function OrbitScene({ t }: SceneProps) {
       <Steps
         t={t}
         steps={[
-          [0.2, '1. eta 2. somitomeroak → goiko, beheko eta erdialdeko zuzenak + beheko laprana'],
-          [0.3, '3. somitomeroa → goiko muskulu laprana (troklean barrena)'],
-          [0.38, '5. somitomeroa → alboko muskulu zuzena'],
+          [0.2, '1. eta 2. somitomeroak → begiaren goiko, beheko eta erdialdeko zuzenak + beheko laprana'],
+          [0.3, '3. somitomeroa → begiaren goiko muskulu laprana (troklean barrena)'],
+          [0.38, '5. somitomeroa → begiaren alboko muskulu zuzena'],
           [0.46, 'III → 1–2. somitomeroenak · IV → 3.arena · VI → 5.arena'],
         ]}
       />

@@ -6,7 +6,7 @@ import { createHash } from 'node:crypto';
 import { blockText, expandNotes, firstAnchorInSection, NOTES_EXCEPTIONS, notesOf, sectionMatches, sentence, sentenceAnchors } from '@/content/notes-text';
 
 describe('original notes and reviewed alignment', () => {
-  const lengths = [17921, 10991, 17577, 23697, 13010, 18297, 16479, 23379, 27720, 20337, 25845, 21028, 25568];
+  const lengths = [17921, 10991, 17577, 23697, 13010, 18297, 16479, 23379, 27720, 20337, 25845, 21028, 25568, 37344];
   const hashes = [
     'f8abeb46de6a656b112e6b89b9c99802bab9a7af8affd6c63ed4ac2a6e0524db',
     'fd368f4eb7b398bec5c5275cd244233a86f4f5e099f796bbf42328b3ac32994c',
@@ -21,6 +21,8 @@ describe('original notes and reviewed alignment', () => {
     'b6dc48e720d4e15cb11fc0eab3e5ea8a0266c6ab00d7a7f2e3c01acf669260bc',
     '69a95d546d5a4b1098039876ec8a68b5549afe5f26afb802937ebb34c035540f',
     '816d77d255a1465d856f16a63b9e03939b3513406234c9602125776a6e2c25eb',
+    // Topic 14: both PDFs (part 1, then part 2), joined.
+    '295fb1d6d0829f412378c727df6813ab8ed6f1023b639fe0f3e9247b7189d376',
   ];
 
   it('pins the complete original text of each of the PDFs', () => {
@@ -53,7 +55,7 @@ describe('original notes and reviewed alignment', () => {
       }
       for (const id of refs) expect(sentence(id), `${key}: ${id}`).toBeDefined();
     });
-    expect(count).toBe(881);
+    expect(count).toBe(1011);
     // The second: topic 10 stage 6's summary step (the flat map of the derivatives).
     expect(unmapped).toBe(2);
   });

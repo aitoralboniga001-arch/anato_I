@@ -577,7 +577,9 @@ describe('Kimu: topic named or being studied, atlas-only entries, honest fallbac
     for (const q of ['mesenterio ventrala', 'ligamentu falziformea']) {
       const r = await ask(q, in7);
       expect(r.reply, q).not.toMatch(/\*\*(Bentrala|Erdiko lotailu)/);
-      expect(r.targets, q).toEqual([]);
+      // Topic 14 has the falciform ligament itself: the whole name finds it (never one word of it).
+      if (q === 'ligamentu falziformea') expect(r.targets.map((t) => (t as { structure?: string }).structure), q).toEqual(['lotailu-faltziformea']);
+      else expect(r.targets, q).toEqual([]);
     }
   });
 

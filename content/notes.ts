@@ -168,6 +168,30 @@ export const NOTES: Record<number, NotesSection[]> = {
     { n: '4.3', title: 'Jaio osteko zirkulazioa', depth: 1, stages: ['jaio-ondoren'] },
     { n: '5', title: 'Linfa sistema', depth: 0, stages: ['linfa'] },
   ],
+  // Topic 14 came in two PDFs: part 1 (1–3.6) and part 2 (4–5, the summary of the derivatives' places and the
+  // respiratory system, which the notes do not number). Sections without stages are still being built.
+  14: [
+    { n: '1', title: 'Sarrera', depth: 0, stages: ['sarrera'] },
+    { n: '2', title: 'Hesteen ezaugarriak', depth: 0, stages: [] },
+    { n: '2.1', title: 'Hasierako hestearen atalak', depth: 1, stages: ['heste-atalak', 'arnas-hastapena'] },
+    { n: '2.2', title: 'Hesteen zirkulazioa', depth: 1, stages: ['zirkulazioa'] },
+    { n: '2.3', title: 'Mesenterioa', depth: 1, stages: ['mesenterioa'] },
+    { n: '3', title: 'Aurreko hestearen atalak', depth: 0, stages: [] },
+    { n: '3.1', title: 'Hestegorria', depth: 1, stages: ['hestegorria'] },
+    { n: '3.2', title: 'Urdaila', depth: 1, stages: ['urdail-biraketak', 'poltsa-omentala', 'atzeko-mesogastrioa', 'aurreko-mesogastrioa'] },
+    { n: '3.3', title: 'Duodenoa', depth: 1, stages: ['duodenoa'] },
+    { n: '3.4', title: 'Gibela', depth: 1, stages: ['gibela', 'gibel-lotailuak'] },
+    { n: '3.5', title: 'Behazun-xixkua', depth: 1, stages: ['behazun-xixkua'] },
+    { n: '3.6', title: 'Area edo Pankreasa', depth: 1, stages: ['area', 'area-hodiak'] },
+    { n: '4', title: 'Bitarteko hestea', depth: 0, stages: ['bitarteko-hestea'] },
+    { n: '4.1', title: 'Bitarteko hesteko eratorriak', depth: 1, stages: ['heste-lakioa'] },
+    { n: '4.2', title: 'Heste lakioen hernia fisiologikoa', depth: 1, stages: ['hernia-fisiologikoa'] },
+    { n: '4.4', title: 'Peritoneo barrunbeko egiturak eta loturak', depth: 1, stages: ['peritoneo-egiturak'] },
+    { n: '5', title: 'Atzeko hestea', depth: 0, stages: ['atzeko-hestea-eratorriak', 'kloaka'] },
+    { n: '5.1', title: 'Hestearen irrigazioa', depth: 1, stages: ['irrigazioa'] },
+    { n: '6', title: 'Eratorrien kokapena laburbilduta', depth: 0, stages: ['eratorrien-kokapena'] },
+    { n: '0', title: 'Arnas aparatua', depth: 0, stages: ['arnas-zuhaitza', 'albeoloak'] },
+  ],
 };
 
 /** The notes section a stage belongs to, and its parent heading when it is a sub-heading. */

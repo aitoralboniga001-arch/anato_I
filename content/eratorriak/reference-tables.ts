@@ -138,9 +138,9 @@ export const REFERENCE_TABLES: ReferenceTable[] = [
     id: 'begiaren-inerbazioa', topic: 9, title: 'Begiaren inguruko muskuluen inerbazioa',
     originHeading: 'Nerbioa', derivativeHeading: 'Muskulua / eginkizuna',
     rows: [
-      { id: 'begiIII', level: 2, origin: 'III · nerbio begi-eragilea', derivative: 'Goiko, beheko eta erdialdeko muskulu zuzenak; beheko muskulu laprana.', sources: ['w9/2.1.1/p3/s2', 'w9/2.1.1/p4/s1'] },
-      { id: 'begiIV', level: 2, origin: 'IV · troklea-nerbioa', derivative: 'Goiko muskulu laprana.', sources: ['w9/2.1.1/p4/s1', 'w9/2.1.1/p4/s2'] },
-      { id: 'begiVI', level: 2, origin: 'VI · nerbio aldentzailea', derivative: 'Alboko muskulu zuzena.', sources: ['w9/2.1.1/p4/s2', 'w9/2.1.1/p5/s3'] },
+      { id: 'begiIII', level: 2, origin: 'III · nerbio begi-eragilea', derivative: 'Begiaren goiko, beheko eta erdialdeko muskulu zuzenak; beheko muskulu laprana.', sources: ['w9/2.1.1/p3/s2', 'w9/2.1.1/p4/s1'] },
+      { id: 'begiIV', level: 2, origin: 'IV · troklea-nerbioa', derivative: 'Begiaren goiko muskulu laprana.', sources: ['w9/2.1.1/p4/s1', 'w9/2.1.1/p4/s2'] },
+      { id: 'begiVI', level: 2, origin: 'VI · nerbio aldentzailea', derivative: 'Begiaren alboko muskulu zuzena.', sources: ['w9/2.1.1/p4/s2', 'w9/2.1.1/p5/s3'] },
       { id: 'begiV1', level: 2, origin: 'V1 · nerbio oftalmikoa', derivative: 'Sentsibilitate-adarra; ez du begiaren kanpoko muskuluen inerbazio motorea egiten.', note: 'Begi-mugimenduen nerbio motoreak III, IV eta VI dira.', sources: ['w9/2.1.1/p5/s1', 'w9/2.1.1/p5/s2', CRANIO] },
     ],
   },
