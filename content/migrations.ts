@@ -690,8 +690,14 @@ const CORE_MIGRATIONS: MigrationTopic[] = [
         stage: 'nerbio-atzerakariak',
         roots: [
           n('nerbio-bagoa', [
-            n('eskuineko-nerbio-atzerakaria', [n('eskuineko-subklabioa', undefined, { via: 'gora igo, inguratu', move: true })]),
-            n('ezkerreko-nerbio-atzerakaria', [n('lotailu-arteriosoa', undefined, { via: 'inguratu', note: 'hodi arteriosoa' })]),
+            n('eskuineko-nerbio-atzerakaria', [
+              n('eskuineko-subklabioa', [l('Laringerantz igo', undefined, { via: 'ondoren', move: true })], { via: 'azpitik bira egin', note: 'hasierako atala: eskuineko 4. arkuaren eratorria' }),
+              l('Eskuineko 6. arkuaren urrutiko atala desagertzen da', undefined, { via: 'zergatia', note: 'Nerbioa gorago geratzen da, subklabioaren mailan; 5. arkua ez da garatzen' }),
+            ]),
+            n('ezkerreko-nerbio-atzerakaria', [
+              n('aortaren-makoa', [l('Laringerantz igo', undefined, { via: 'ondoren', move: true })], { via: 'azpitik bira egin', note: 'lotailu arteriosoaren ondoan; eskuinekoa baino beherago' }),
+              l('Ezkerreko 6. arkuaren urrutiko atala mantentzen da', [n('hodi-arteriosoa', [n('lotailu-arteriosoa', undefined, { via: 'jaio ondoren' })])], { via: 'zergatia', note: 'Nerbioaren ibilbidea behean mantentzen du' }),
+            ]),
           ]),
         ],
       },

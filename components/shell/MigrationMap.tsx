@@ -9,6 +9,7 @@ import { categoryColor } from '@/lib/sim/palette';
 import { ReferenceTables, TABLE_TOPICS } from './eratorriak/ReferenceTables';
 import { hasRoom } from './eratorriak/roomWeeks';
 import { LearningMaps } from './eratorriak/LearningMaps';
+import { GridSchemes, hasGridSchemes } from './eratorriak/GridSchemes';
 
 /** A topic tab (week 0 = the topics 1–6 germ-layer trees), the arch-systems tab, or one origin followed across topics. */
 type Mode = { week: number; part?: Part; source?: undefined; arch?: undefined } | { source: string; week?: undefined; part?: undefined; arch?: undefined } | { arch: true; week?: undefined; part?: undefined; source?: undefined };
@@ -347,6 +348,8 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
   const layersTab = mode.week === 0;
   const flows = topic ? topic.flows : (src?.groups.flatMap((g) => g.flows) ?? []);
   const total = answersIn(flows);
+  // Topics with integrated grids show them first; the trees and their legend follow.
+  const grids = !!topic && part === 'eskemak' && hasGridSchemes(topic.week);
   const quiz: Quiz = { on: quizOn, shown, reveal: (k) => setShown((s) => new Set(s).add(k)) };
   const nameOf = (week: number) => MIGRATIONS.find((t) => t.week === week)?.short ?? SHORT[week] ?? `${week}. gaia`;
   const mark = mode.arch ? '★' : src ? '→' : layersTab ? '1–6' : String(mode.week);
@@ -453,7 +456,7 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
               )}
             </p>
             {follow}
-            {legend}
+            {!grids && legend}
             {quizOn && !topic && (
               <p className="mg-quiz-hint" aria-live="polite">
                 Sakatu lauki ezkutu bakoitza eratorria edo erlazioa ikusteko. {Math.min(shown.size, total)} / {total} agerian.
@@ -465,6 +468,16 @@ export function MigrationMap({ layers }: { layers: ReactNode }) {
               </p>
             )}
           </header>
+        )}
+        {topic && part === 'eskemak' && grids && (
+          <>
+            <GridSchemes week={topic.week} />
+            <header className="mg-trees-head">
+              <h3>Zuhaitzak eta errepasoa</h3>
+              <p>Egitura bakoitzaren bilakaera urratsez urrats, eta bi noranzkoetako errepasoa.</p>
+              {legend}
+            </header>
+          </>
         )}
         {topic && part === 'eskemak' && <LearningMaps
           key={topic.week}

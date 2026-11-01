@@ -209,6 +209,19 @@
   color: #55534c;
 }
 
+/* names the student flagged (red: don't know, orange: shaky) — kept on hover and when covered */
+.name.isMarkRed,
+.num.isMarkRed {
+  background: #d32f2f;
+  color: #fff;
+}
+
+.name.isMarkOrange,
+.num.isMarkOrange {
+  background: #f59e0b;
+  color: #1b1c20;
+}
+
 .cover {
   display: inline-block;
   min-width: 4.5em;
@@ -344,6 +357,18 @@
   background: var(--signal);
   border-color: #fff;
   color: #0b0c0f;
+}
+
+.legend li :global(.num-chip).chipMarkRed {
+  background: #d32f2f;
+  border-color: #d32f2f;
+  color: #fff;
+}
+
+.legend li :global(.num-chip).chipMarkOrange {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #1b1c20;
 }
 
 .legend li.isCovered .legendName {

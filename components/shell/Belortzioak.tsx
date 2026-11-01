@@ -58,6 +58,10 @@ interface Quiz {
 
 const STORE = 'enbrioatlas:belortzioak';
 const STYLE_KEY = 'enbrioatlas:belortzioak:style';
+/** Names the student flagged: 1 red (don't know), 2 orange (shaky). Click cycles red → orange → none. */
+const MARKS_KEY = 'enbrioatlas:belortzioak:marks';
+type Marks = Record<string, 1 | 2>;
+const markClass = (m: 1 | 2 | undefined, red: string, orange: string) => (m === 1 ? ` ${red}` : m === 2 ? ` ${orange}` : '');
 const MIN = 60_000;
 const DAY = 86_400_000;
 const INTERVAL = [0, 10 * MIN, DAY, 3 * DAY, 7 * DAY, 21 * DAY];
@@ -137,6 +141,8 @@ interface FigureProps {
   active: string | null;
   onHover: (key: string | null) => void;
   onPick: (key: string) => void;
+  marks: Marks;
+  onMark: (key: string) => void;
   /** The asked item (quiz). */
   asked: BelItem | null;
   answered: boolean;
@@ -145,7 +151,7 @@ interface FigureProps {
   missing: boolean;
 }
 
-function Figure({ plate, mode, numbers, covered, active, onHover, onPick, asked, answered, tap, onTap, missing }: FigureProps) {
+function Figure({ plate, mode, numbers, covered, active, onHover, onPick, marks, onMark, asked, answered, tap, onTap, missing }: FigureProps) {
   const st = stageOf(plate);
   const svg = useRef<SVGSVGElement>(null);
   const placed = useMemo(() => arrange(plate.items), [plate]);
@@ -343,13 +349,13 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, asked,
           return (
             <button
               key={it.key}
-              className={`${s.name} ${pl.side === 'l' ? s.isLeft : s.isRight}${on ? ` ${s.isOn}` : ''}${active && !on ? ` ${s.isFaded}` : ''}${hidden ? ` ${s.isCovered}` : ''}`}
+              className={`${s.name} ${pl.side === 'l' ? s.isLeft : s.isRight}${on ? ` ${s.isOn}` : ''}${active && !on ? ` ${s.isFaded}` : ''}${hidden ? ` ${s.isCovered}` : ''}${markClass(marks[it.key], s.isMarkRed, s.isMarkOrange)}`}
               style={style}
               onPointerEnter={(e) => e.pointerType !== 'touch' && onHover(it.key)}
               onPointerLeave={(e) => e.pointerType !== 'touch' && onHover(null)}
               onFocus={() => onHover(it.key)}
               onBlur={() => onHover(null)}
-              onClick={() => onPick(it.key)}
+              onClick={() => onMark(it.key)}
               aria-label={hidden ? `${it.tag}: estalita, sakatu ikusteko` : it.name}
             >
               {hidden ? <span className={s.cover}>?</span> : it.name}
@@ -365,11 +371,11 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, asked,
           return (
             <button
               key={it.key}
-              className={`${s.num}${on ? ` ${s.isOn}` : ''}${it.ink ? ` ${s.isRed}` : ''}`}
+              className={`${s.num}${on ? ` ${s.isOn}` : ''}${it.ink ? ` ${s.isRed}` : ''}${markClass(marks[it.key], s.isMarkRed, s.isMarkOrange)}`}
               style={{ left: pct(lx, st.tw), top: pct(ly, H) }}
               onPointerEnter={(e) => e.pointerType !== 'touch' && onHover(it.key)}
               onPointerLeave={(e) => e.pointerType !== 'touch' && onHover(null)}
-              onClick={() => onPick(it.key)}
+              onClick={() => onMark(it.key)}
               aria-label={it.tag}
             >
               {it.tag}
@@ -384,11 +390,11 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, asked,
             return (
               <button
                 key={`${it.key}-${i}`}
-                className={`${s.num}${active === it.key ? ` ${s.isOn}` : ''}${it.ink ? ` ${s.isRed}` : ''}`}
+                className={`${s.num}${active === it.key ? ` ${s.isOn}` : ''}${it.ink ? ` ${s.isRed}` : ''}${markClass(marks[it.key], s.isMarkRed, s.isMarkOrange)}`}
                 style={{ left: pct(mx, st.tw), top: pct(my, H) }}
                 onPointerEnter={(e) => e.pointerType !== 'touch' && onHover(it.key)}
                 onPointerLeave={(e) => e.pointerType !== 'touch' && onHover(null)}
-                onClick={() => onPick(it.key)}
+                onClick={() => onMark(it.key)}
                 aria-label={m.tag ?? it.tag}
               >
                 {m.tag ?? it.tag}
@@ -435,6 +441,7 @@ export function Belortzioak() {
   const [pinned, setPinned] = useState<string | null>(null);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [cards, setCards] = useState<Cards>({});
+  const [marks, setMarks] = useState<Marks>({});
   const [now, setNow] = useState(0);
   const [missing, setMissing] = useState(false);
   const input = useRef<HTMLInputElement>(null);
@@ -457,6 +464,7 @@ export function Belortzioak() {
       try {
         const st = window.localStorage.getItem(STYLE_KEY);
         if (st === 'aukerak' || st === 'buruz' || st === 'idatzi') setStyle(st);
+        setMarks(JSON.parse(window.localStorage.getItem(MARKS_KEY) ?? '{}') as Marks);
       } catch {
         // Defaults are fine.
       }
@@ -665,6 +673,20 @@ export function Belortzioak() {
     if (covered(key)) setRevealed((r) => new Set(r).add(key));
     setPinned((p) => (p === key ? null : key));
   };
+  const mark = (key: string) => {
+    // A covered name is uncovered first; marking starts on the next click.
+    if (covered(key)) return setRevealed((r) => new Set(r).add(key));
+    const next = { ...marks };
+    const m = ((marks[key] ?? 0) + 1) % 3;
+    if (m) next[key] = m as 1 | 2;
+    else delete next[key];
+    setMarks(next);
+    try {
+      window.localStorage.setItem(MARKS_KEY, JSON.stringify(next));
+    } catch {
+      // Without storage the marks last until the page closes.
+    }
+  };
   const elsewhere = activeItem ? (SAME.get(sameKey(activeItem.name)) ?? []).filter((x) => x.plate.id !== shown.id) : [];
   const finished = quiz && !q;
 
@@ -727,6 +749,8 @@ export function Belortzioak() {
             active={quiz ? null : active}
             onHover={setHovered}
             onPick={pick}
+            marks={marks}
+            onMark={mark}
             asked={asked}
             answered={!!quiz?.done || !!quiz?.revealed}
             tap={quiz?.tap ?? null}
@@ -764,8 +788,8 @@ export function Belortzioak() {
                       <Fragment key={it.key}>
                         {head && <li className={s.groupHead}>{head}</li>}
                         <li className={`${active === it.key ? s.isOn : ''}${hidden ? ` ${s.isCovered}` : ''}`} onPointerEnter={() => setHovered(it.key)}>
-                          <button onClick={() => pick(it.key)} aria-label={hidden ? `${it.tag}: estalita, sakatu ikusteko` : `${it.tag}: ${it.name}`}>
-                            <span className={`num-chip${it.ink ? ` ${s.chipRed}` : ''}`}>{it.tag}</span>
+                          <button onClick={() => mark(it.key)} aria-label={hidden ? `${it.tag}: estalita, sakatu ikusteko` : `${it.tag}: ${it.name}`}>
+                            <span className={`num-chip${it.ink ? ` ${s.chipRed}` : ''}${markClass(marks[it.key], s.chipMarkRed, s.chipMarkOrange)}`}>{it.tag}</span>
                             <span className={s.legendName}>{hidden ? 'Sakatu ikusteko' : it.name}</span>
                             {cards[it.key] && <span className={`${s.meter} ${b >= KNOWN ? s.isKnown : s.isWeak}`} title={b >= KNOWN ? 'Badakizu' : 'Errepasatzeko'} />}
                           </button>
@@ -792,7 +816,7 @@ export function Belortzioak() {
                     {numbers ? 'Izenak alboan' : 'Zenbakiak irudian'}
                   </button>
                 </div>
-                <p className="lab-keys">Teklak: ← → irudiak · L izenak/zenbakiak · sakatu izen bat finkatzeko</p>
+                <p className="lab-keys">Teklak: ← → irudiak · L izenak/zenbakiak · sakatu izen bat: gorria → laranja → kendu</p>
               </>
             )}
 

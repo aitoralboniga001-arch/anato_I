@@ -4009,6 +4009,23 @@ a.ln-chip:hover {
   margin-top: 28px;
 }
 
+/* Topics with integrated grids: the trees follow under their own heading. */
+.mg-trees-head {
+  margin: 8px 0 18px;
+  padding-top: 26px;
+  border-top: 1px solid #ffffff1a;
+}
+.mg-trees-head h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.mg-trees-head p {
+  margin: 6px 0 0;
+  color: var(--text-3);
+  font-size: 14px;
+}
+
 /* Slim page header: the topic bar is visible on arrival. */
 .ln-head {
   display: flex;
