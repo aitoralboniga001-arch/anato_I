@@ -109,7 +109,7 @@ const week: WeekDef = {
         },
         {
           at: 0.62,
-          notes: ['w10/1/p4/s5-s6'],
+          notes: ['w10/1/p4/s5-s7'],
           idea: 'Hodiek ferra formako sare bat osatzen dute; fusionatzean, ferra formako tutua.',
           exam: 'Odol hodiek ferra formako sarea osatzen dute; fusionatzean, ferra formako tutua.',
           text: 'Beraz, hemendik ferra formako odol hodiz osatutako sare bat sortzen da. Sare horretako odol hodiak fusionatzean, ferra formako tutu itxurako egitura sortzen da.',
@@ -228,7 +228,7 @@ const week: WeekDef = {
       beats: [
         {
           at: 0,
-          notes: ['w10/1/p8/s4-s5'],
+          notes: ['w10/1/p8/s3-s5'],
           idea: 'Diskoa laua da oraindik; 3. aste bukaeran bi tolespen: zefalokaudala eta zeharkakoa.',
           recall: ['plaka-kardiogenikoa', 'odol-irlatxoak'],
           exam: '3. aste bukaeran disko lauak bi tolespen egiten ditu: zefalokaudala eta zeharkakoa.',

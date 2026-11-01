@@ -517,3 +517,102 @@
     max-height: none;
   }
 }
+
+/* ---- merged figures: each kind of structure in its own colour ---- */
+
+.leader.isKind .core {
+  stroke: var(--kc);
+  stroke-width: 1.6;
+}
+
+.leader.isKind .tip {
+  fill: var(--kc);
+}
+
+.leader.isKind.isOn .core {
+  stroke: var(--kc);
+  stroke-width: 2.6;
+}
+
+.leader.isKind.isOn .tip {
+  fill: var(--kc);
+}
+
+/* the colour is a bar on the side facing the figure, so the red/orange study marks stay readable */
+.name.isKind.isLeft {
+  border-right: 4px solid var(--kc);
+}
+
+.name.isKind.isRight {
+  border-left: 4px solid var(--kc);
+}
+
+.legend li :global(.num-chip).chipKind {
+  border-color: var(--kc);
+}
+
+.kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: 2px 4px;
+}
+
+.kinds button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--line, #d8d3c6);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  cursor: pointer;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    color 0.18s;
+}
+
+.kinds button i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--kc);
+}
+
+.kinds button small {
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.kinds button:hover {
+  border-color: var(--kc, #26272b);
+}
+
+.kinds button:global(.is-on) {
+  background: var(--kc, #1b1c20);
+  border-color: var(--kc, #1b1c20);
+  color: #fff;
+}
+
+.kinds button:global(.is-on) i {
+  background: #fff;
+}
+
+.kinds button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.fusioBtn {
+  font-weight: 650;
+}
+
+/* every kind at once on a crowded merged figure: dots (the name pointed at shows in its column) */
+.leader.isDot .tip {
+  stroke-width: 1.6;
+}

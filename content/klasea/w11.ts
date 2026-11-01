@@ -225,7 +225,7 @@ export const LESSON_W11: Lesson = {
         L(0.27, 'Hau ere behera hedatzen da, baina ez da osoa: beheko aldean zulo bat du, zulo obala.', n('2.2/p3/s4'), ['septum-secundum', 'zulo-obala'], { tone: 'emphasis', plain: 'Bigarren horma hau ere behera hazten da, baina ez da bukaeraraino iristen: behean zulo bat uzten du, zulo obala.' }),
         L(
           0.55,
-          'Beraz, bi trenkada daude: septum primuma, goian ostium secundumarekin, eta haren eskuinean septum secunduma, behean zulo obalarekin.',
+          'Beraz: septum primuma, goian ostium secundumarekin; haren eskuinean septum secunduma, behean zulo obalarekin.',
           n('2.2/p4/s1'),
           ['septum-primum', 'ostium-secunduma', 'septum-secundum', 'zulo-obala'],
           {
@@ -239,7 +239,7 @@ export const LESSON_W11: Lesson = {
           writes: 'b-laprana',
           plain: 'Jaio arte, odolak zeharka egiten du bidea: lehenik behean dagoen zulo obaletik pasatzen da, eta gero goian dagoen ostium secundumatik.',
         }),
-        L(0.82, 'Liburu batzuen arabera, septum primumaren goiko ataltxoa desagertzen da, eta beheko atala zulo obalaren balbula bihurtzen da.', n('2.2/p6/s1'), [
+        L(0.82, 'Liburu batzuen arabera, septum primumaren goiko zatia desagertzen da; behekoa zulo obalaren balbula bihurtzen da.', n('2.2/p6/s1'), [
           'septum-primum',
           'zulo-obalaren-balbula',
         ], { plain: 'Liburu batzuek diotenez, septum primumaren goiko zatia desagertu egiten da, eta beheko zatia zulo obalaren balbula bihurtzen da.' }),
@@ -294,7 +294,7 @@ export const LESSON_W11: Lesson = {
       title: 'Jaiotzean',
       stage: 'jaiotza',
       lines: [
-        L(0, 'Jaiotzean birika zirkulazioa eratzen da: odola biriketara doa oxigenatzera, eta ezkerreko aurikulara itzultzen da.', n('2.2/p7/s1'), ['ezkerreko-aurikula-jaiotakoan'], { plain: 'Jaiotzean birikak lanean hasten dira: odola biriketara doa oxigenoa hartzera, eta ezkerreko aurikulara itzultzen da.' }),
+        L(0, 'Jaiotzean birika zirkulazioa eratzen da: odola biriketara doa, eta ezkerreko aurikulara itzultzen da.', n('2.2/p7/s1'), ['ezkerreko-aurikula-jaiotakoan'], { plain: 'Jaiotzean birikak lanean hasten dira: odola biriketara doa oxigenoa hartzera, eta ezkerreko aurikulara itzultzen da.' }),
         L(0.27, 'Horregatik, ezkerreko aurikulara gero eta odol gehiago iristen da, eta bertako presioa handitzen da.', n('2.2/p7/s3'), ['ezkerreko-aurikula-jaiotakoan'], { tone: 'why', plain: 'Biriketatik odol asko itzultzen denez, ezkerreko aurikula betetzen da, eta bertako presioa igotzen da.' }),
         L(0.41, 'Presio horrek zulo obalaren balbula septum secundumaren aurka bultzatzen du.', n('2.2/p7/s4'), ['zulo-obalaren-balbula', 'septum-secundum'], { tone: 'emphasis', plain: 'Presio horrek zulo obalaren balbula septum secundumaren kontra estutzen du, eta zuloa estalita geratzen da.' }),
         L(0.55, 'Bi trenkadak fusionatzen hasten dira, eta komunikazioa ixten da: jaio ondoren eta lehen urtean zehar.', n('2.2/p7/s5'), ['zulo-obalaren-balbula', 'septum-secundum'], {
@@ -364,6 +364,7 @@ export const LESSON_W11: Lesson = {
           n('2.2/p14/s3'),
           ['birika-zainak', 'ezkerreko-aurikularen-atal-lisoa'],
           { tone: 'emphasis', writes: 'tz-ezk-aurikula', plain: 'Azkenean lau birika zain sartzen dira ezkerreko aurikulan, bi birika bakoitzetik, eta haren horma leuna osatzen dute.' }),
+        L(0.88, 'Gainerako pareta, ezkerreko aurikularen atal trabekulatua, hasieratik zegoen paretatik dator.', n('2.2/p15/s1'), ['ezkerreko-aurikularen-atal-trabekulatua'], { plain: 'Gainerako horma, zimurra, hasieratik zegoen hormatik dator.' }),
       ],
       board: [
         TABLE,
@@ -399,10 +400,10 @@ export const LESSON_W11: Lesson = {
           'hasierako-ezkerreko-bentrikulua',
           'aurikula-komuna',
         ], { plain: 'Hasieran pasabide horrek hasierako ezkerreko bentrikulua bakarrik lotzen du aurikula komunarekin.' }),
-        L(0.1, 'Hiru prozesu daude. Lehena: bi atalen arteko ertza, hasieran zorrotza, gero eta zapalagoa egiten da.', n('3/p7/s1'), ['ertz-bulbobentrikularra'], { plain: 'Hiru gauza gertatzen dira. Lehenengoa: bi atalen arteko ertza, hasieran zorrotza, apurka leundu eta zapaldu egiten da.' }),
+        L(0.1, 'Hiru prozesu daude. Lehena: bi atalen arteko ertza, hasieran zorrotza, zapaldu egiten da.', n('3/p7/s1'), ['ertz-bulbobentrikularra'], { plain: 'Hiru gauza gertatzen dira. Lehenengoa: bi atalen arteko ertza, hasieran zorrotza, apurka leundu eta zapaldu egiten da.' }),
         L(
           0.2,
-          'Bigarrena: erretena eskuinerantz mugitzen da, eta bi hasierako bentrikuluak goian dagoen aurikularekin komunikatzen ditu.',
+          'Bigarrena: erretena eskuinerantz mugitzen da, eta bi bentrikuluak goiko aurikularekin komunikatzen ditu.',
           n('3/p7/s1'),
           ['erreten-aurikulubentrikularra', 'hasierako-eskuineko-bentrikulua', 'hasierako-ezkerreko-bentrikulua'],
           { tone: 'emphasis', writes: 'b-eskuinera', plain: 'Bigarrena: erretena eskuinerantz lerratzen da. Horrela, bi bentrikuluek dute aurikularako bidea, ez ezkerrekoak bakarrik.' }),
@@ -423,20 +424,21 @@ export const LESSON_W11: Lesson = {
             plain: 'Goiko eta beheko kuxinak elkartu egiten dira, eta erretena bi zulotan geratzen da: eskuineko eta ezkerreko zulo aurikulubentrikularrak.',
           }),
         L(0.63, 'Zuloak plano frontalean daudelako, kuxin horiei goikoa eta behekoa deitzen zaie.', n('3/p8/s4'), ['zulo-aurikulubentrikularrak', 'goiko-kuxina', 'beheko-kuxina'], { tone: 'why', plain: 'Zuloak zutik daudenez, kuxin bat goian geratzen da eta bestea behean. Horregatik goikoa eta behekoa deitzen zaie.' }),
+        L(0.67, 'Horrela, goi atzeko aurikulak eta behe aurreko bentrikuluak komunikatzen dira.', n('3/p8/s3'), ['eskuineko-zulo-ab', 'ezkerreko-zulo-ab'], { plain: 'Horrela, goian eta atzean dauden aurikulak behean eta aurrean dauden bentrikuluekin lotzen dira.' }),
         L(
           0.74,
-          'Atal bulbarrean azpiatalak bereizten dira: enbor arteriosoa, arteria konoa eta hurbileko atala, eskuineko bentrikuluaren jatorria.',
+          'Atal bulbarrean azpiatalak bereizten dira: enbor arteriosoa, arteria konoa eta hurbileko atala.',
           n('3/p4/s1'),
           ['atal-bulbarra', 'enbor-arteriosoa', 'arteria-konoa', 'bulboaren-hurbileko-atala'],
           { tone: 'recall', plain: 'Atal bulbarra hiru zatitan bereizten da: enbor arteriosoa, arteria konoa eta hurbileko atala. Azken horretatik dator eskuineko bentrikulua.' }),
         L(
           0.74,
-          'Albotik ikusita: atal bulbarra aurrean dago, aurrera, behera eta eskuinera abiatuta; atal bentrikularra haren ezkerrean.',
+          'Albotik ikusita: atal bulbarra aurrean, aurrera, behera eta eskuinera abiatuta; atal bentrikularra haren ezkerrean.',
           n('3/p10/s1', '3/p11/s1', '3/p12/s1', '3/p13/s1'),
           ['atal-bulbarra', 'atal-bentrikularra'],
           { tone: 'emphasis', plain: 'Albotik begiratuta, atal bulbarra aurrealdean dago, eta aurrera, behera eta eskuinera doa. Atal bentrikularra haren ezkerrean dago.' }),
         L(0.74, 'Atal aurikularra eta zain sinua, berriz, atal bulbarraren atzean daude, eta jarraiak dira.', n('3/p14/s1'), ['atal-aurikularra', 'zain-sinua', 'atal-bulbarra'], { plain: 'Atal aurikularra eta zain sinua atal bulbarraren atzean daude, bata bestearen jarraian.' }),
-        L(0.74, 'Kontuz: apunteek haien norabidea bi eratara idazten dute: gora, atzera eta ezkerrera, edo gora, aurrera eta atzera.', n('3/p10/s3', '3/p14/s1'), [], { tone: 'caution', plain: 'Apunteetan bi bertsio daude norabide horretarako. Biak ezagutu, eta eszenan ikusten duzuna gogoratu.' }),
+        L(0.74, 'Kontuz: apunteek norabidea bi eratara idazten dute: gora, atzera eta ezkerrera, edo gora, aurrera eta atzera.', n('3/p10/s3', '3/p14/s1'), [], { tone: 'caution', plain: 'Apunteetan bi bertsio daude norabide horretarako. Biak ezagutu, eta eszenan ikusten duzuna gogoratu.' }),
         L(0.88, 'Bi hasierako bentrikuluen arteko komunikazioari bentrikulu arteko zulo primarioa deitzen zaio.', n('3/p15/s1'), ['bentrikulu-arteko-zulo-primarioa'], { writes: 'b-zulo-primarioa', plain: 'Bi bentrikulu txikien artean zulo bat dago, bata bestearekin lotzen dituena: bentrikulu arteko zulo primarioa.' }),
       ],
       board: [
@@ -449,7 +451,7 @@ export const LESSON_W11: Lesson = {
         {
           id: 'b-zuloak',
           kind: 'line',
-          text: '4 kuxin; goikoa eta behekoa fusionatu: eskuineko eta ezkerreko zulo aurikulubentrikularrak (plano frontalean)',
+          text: 'Lau kuxin; goikoa eta behekoa fusionatu: eskuineko eta ezkerreko zulo aurikulubentrikularrak (plano frontalean)',
           notes: n('3/p9/s1', '3/p9/s3', '3/p7/s5', '3/p8/s4'),
           key: true,
         },
@@ -506,7 +508,7 @@ export const LESSON_W11: Lesson = {
           writes: 'b-sokak',
           plain: 'Balbak ez daude libre: soka tendinosoek muskulu papilarrei lotzen dizkiete. Soka horiek hasieran muskuluak dira, gero zuntz gogorrak.',
         }),
-        L(0.65, 'Muskulu papilarrak uzkurtzean, sokek balbak mugitzen dituzte: zuloa ireki edo itxi egiten da, odola pasa dadin.', n('3/p21/s2'), ['muskulu-papilarrak', 'soka-tendinosoak'], {
+        L(0.65, 'Muskulu papilarrak uzkurtzean, sokek balbak mugitzen dituzte: zuloa ireki edo itxi egiten da.', n('3/p21/s2'), ['muskulu-papilarrak', 'soka-tendinosoak'], {
           tone: 'why',
           plain: 'Muskulu papilarrak uzkurtzean sokei tira egiten diete, eta balbak mugitzen dira: zuloa zabaldu edo itxi egiten da.',
         }),
@@ -632,7 +634,7 @@ export const LESSON_W11: Lesson = {
           plain: 'Arteria konoaren hormetan bi kuxin hazten dira, bata atze eskuinean eta bestea aurre ezkerrean.',
         }),
         L(0.46, 'Bi gandorrak hazi eta fusionatzen dira: arteria konoa trenkadatu egiten da, eta trenkada laprana da.', n('5.1/p4/s3', '5.1/p4/s4'), ['arteria-konoa', 'konoaren-trenkada'], { plain: 'Bi kuxinak elkartu egiten dira, eta konoa bitan banatzen da. Horma hori zeharka dago, ez zuzen.' }),
-        L(0.46, 'Kontuz: apunteen hurrengo esaldiak gandorren aldeak alderantziz idazten ditu; gogoratu atze eskuinean eta aurre ezkerrean.', n('5.1/p4/s2', '5.1/p4/s4'), [], { tone: 'caution', plain: 'Apunteetan esaldi batek aldeak alderantziz jartzen ditu. Zuk gogoratu: bata atze eskuinean, bestea aurre ezkerrean.' }),
+        L(0.46, 'Kontuz: apunteen hurrengo esaldiak aldeak alderantziz idazten ditu; gogoratu atze eskuinean eta aurre ezkerrean.', n('5.1/p4/s2', '5.1/p4/s4'), [], { tone: 'caution', plain: 'Apunteetan esaldi batek aldeak alderantziz jartzen ditu. Zuk gogoratu: bata atze eskuinean, bestea aurre ezkerrean.' }),
         L(0.52, 'Trenkadaren aurre eskuinaldean eskuineko bentrikuluaren infundibulua geratzen da: hortik birika arteria irtengo da.', n('5.1/p4/s5'), ['eskuineko-infundibulua'], {
           tone: 'emphasis',
           plain: 'Hormaren aurre eskuineko aldean geratzen den hutsunea eskuineko infundibulua da: hortik aterako da birika arteria.',
@@ -644,7 +646,7 @@ export const LESSON_W11: Lesson = {
           n('5.1/p4/s7', '5.1/p4/s8'),
           ['eskuineko-infundibulua', 'ezkerreko-infundibulua'],
           { tone: 'emphasis', writes: 'b-infundibuluak', plain: 'Bi hutsune horiek ez daude maila berean: eskuinekoa askoz aurrerago eta eskuinerago dago. Horregatik, bi arteriak ere ez.' }),
-        L(0.74, 'Konoaren trenkada behetik hazten da, eta trenkada muskularrarekin eta beheko kuxinarekin fusionatzen da: hori da mintzezko zatia.', n('5.1/p4/s10', '5.1/p4/s11'), [
+        L(0.74, 'Konoaren trenkada behetik hazi, eta trenkada muskularrarekin eta beheko kuxinarekin fusionatzen da: mintzezko zatia.', n('5.1/p4/s10', '5.1/p4/s11'), [
           'konoaren-trenkada',
           'trenkada-muskularra',
           'beheko-kuxina',
@@ -700,7 +702,7 @@ export const LESSON_W11: Lesson = {
         L(0, 'Orain enbor arteriosoa. Hemen ere trenkada bat sortzen da, eta enborra bitan banatzen du.', n('5.2/p3/s1', '5.2/p3/s2'), ['enbor-arteriosoa'], { plain: 'Orain enbor arteriosoa, bihotzetik irteten den hodi nagusia. Bere barruan ere horma bat hazten da, eta bi hodi bihurtzen da.' }),
         L(
           0.1,
-          'Bi gandor hurbildu eta hazi egiten dira; baina toki desberdinetan finkatzen direnez, trenkada kiribila da.',
+          'Bi gandor hazi egiten dira; baina toki desberdinetan finkatzen direnez, trenkada kiribila da.',
           n('5.2/p3/s5', '5.2/p3/s6'),
           ['enborraren-gandorrak', 'trenkada-aortikopulmonarra'],
           {
@@ -786,7 +788,7 @@ export const LESSON_W11: Lesson = {
           'aorta-balbula',
           'birika-balbula',
         ], { plain: 'Bi arteria horiek hasten diren tokian balbula berriak sortzen dira, kuxinetatik: aorta balbula eta birika balbula.' }),
-        L(0.1, 'Hiru gandor agertzen dira, eta haien goikaldean goraguneak, tuberkuluak. Gero goiko aldetik zulatzen dira.', n('5.2/p9/s2'), ['balbula-semilunarrak'], { plain: 'Lehenik hiru gandor agertzen dira, koskor txikiekin, tuberkuluak. Gero koskor horiek goitik zulatzen dira.' }),
+        L(0.1, 'Hiru gandor agertzen dira, goikaldean tuberkuluekin. Gero goiko aldetik zulatzen dira.', n('5.2/p9/s2'), ['balbula-semilunarrak'], { plain: 'Lehenik hiru gandor agertzen dira, koskor txikiekin, tuberkuluak. Gero koskor horiek goitik zulatzen dira.' }),
         L(0.25, 'Horregatik balbak bereziak dira: enara kabiko forma dute, eta ahurrak dira, goitik zulatuta.', n('5.2/p8/s3'), ['aorta-balbula', 'birika-balbula'], {
           tone: 'emphasis',
           writes: 'b-enara',

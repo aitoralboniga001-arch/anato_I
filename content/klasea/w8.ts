@@ -48,7 +48,7 @@ export const LESSON_W8: Lesson = {
         L(0, 'Kaixo! Gaur hezurrak ikasiko ditugu: nondik sortzen diren eta nola hezurtzen diren.', n('1/p2/s1'), [], {
           plain: 'Gaurko gaia: hezurrak. Nondik datozen, eta nola bihurtzen diren hezur.',
         }),
-        L(0, 'Gure hezurrak hiru jatorritatik sortzen dira: mesodermo paraxialetik, alboko mesodermoaren paretako orritik eta gandor neuraletik.', n('1/p2/s1'), ['mesodermo-paraxiala', 'paretako-orria', 'gandor-neurala'], {
+        L(0, 'Hezurrak hiru jatorritatik datoz: mesodermo paraxiala, alboko mesodermoaren paretako orria eta gandor neurala.', n('1/p2/s1'), ['mesodermo-paraxiala', 'paretako-orria', 'gandor-neurala'], {
           tone: 'emphasis',
           writes: 'b-hiru',
           plain: 'Hiru iturri daude: mesodermo paraxiala, paretako orria eta gandor neurala.',
@@ -64,7 +64,7 @@ export const LESSON_W8: Lesson = {
           writes: 'b-segmentuak',
           plain: 'Buruan somitomeroak sortzen dira; garondotik behera, somitak.',
         }),
-        L(0.31, 'Somitetan bi zelula multzo bereizten dira: esklerotoma, aurrealdeko eta erdialdeko paretatik, eta dermomiotoma, atzealdekotik.', n('1/p5/s4'), ['esklerotoma', 'dermatomiotoma'], {
+        L(0.31, 'Somitetan bi zelula multzo daude: esklerotoma, aurre eta erdialdeko paretatik, eta dermomiotoma, atzealdekotik.', n('1/p5/s4'), ['esklerotoma', 'dermatomiotoma'], {
           plain: 'Somita bakoitzean bi talde: esklerotoma aurrean eta erdian, dermomiotoma atzean.',
         }),
       ],
@@ -112,7 +112,7 @@ export const LESSON_W8: Lesson = {
         L(0.9, 'Hirugarren jatorria: alde zefalikoko gandor neuraleko zelula batzuek ere hezurrak eratzen dituzte.', n('1/p15/s1'), ['gandor-neurala'], {
           plain: 'Hirugarrena: buruko gandor neuraleko zelula batzuek ere hezurrak egiten dituzte.',
         }),
-        L(0.9, 'Buruaren aldera migratzen dute eta mesenkima eratzen dute: hortik aurpegiko eta neurokraneoko hezurrak.', n('1/p15/s2', '1/p15/s3'), ['mesenkima', 'buru-aurpegi-hezurrak'], {
+        L(0.9, 'Burura migratu eta mesenkima eratzen dute: hortik aurpegiko eta neurokraneoko hezurrak.', n('1/p15/s2', '1/p15/s3'), ['mesenkima', 'buru-aurpegi-hezurrak'], {
           writes: 'b-gandorra',
           plain: 'Burura doaz, mesenkima egiten dute, eta hortik aurpegiko eta neurokraneoko hezurrak sortzen dira.',
         }),
@@ -150,7 +150,7 @@ export const LESSON_W8: Lesson = {
           tone: 'emphasis',
           plain: 'Hezurra bi modutara egiten da, mintzezkoa eta endokondrala, eta biak mesenkimatik hasten dira.',
         }),
-        L(0.2, 'Mintzezkoan, mesenkimatik hezurren mintzezko ereduak sortzen dira, eta zuzenean hezurtzapen zentroak agertzen dira.', n('2/p2/s1'), ['mesenkima', 'hezurtzapen-zentroak', 'osteoblastoak'], {
+        L(0.2, 'Mintzezkoan, mesenkimatik mintzezko ereduak sortzen dira, eta zuzenean hezurtzapen zentroak.', n('2/p2/s1'), ['mesenkima', 'hezurtzapen-zentroak', 'osteoblastoak'], {
           plain: 'Lehenengoan, mesenkimazko mintz bat bera hezurtzen da, zentro batzuetatik hasita.',
         }),
         L(0.32, 'Beraz, mintzezko eredu hori zuzenean hezurtzen da, kartilagorik gabe.', n('2/p2/s1'), ['hezur-espikulak'], {
@@ -166,7 +166,7 @@ export const LESSON_W8: Lesson = {
           writes: 'b-bi-motak',
           plain: 'Gero, zentro batzuetatik hasita, kartilagoa hezurrak ordezkatzen du.',
         }),
-        L(0.8, 'Laburbilduz: mintzezkoan mesenkima zuzenean hezurtzen da; endokondralean, lehenik kartilagoa, gero hezurra.', n('2/p2/s1', '2/p3/s1'), ['mesenkima'], {
+        L(0.8, 'Beraz: mintzezkoan mesenkima zuzenean hezurtzen da; endokondralean, lehenik kartilagoa, gero hezurra.', n('2/p2/s1', '2/p3/s1'), ['mesenkima'], {
           tone: 'summary',
           plain: 'Gogoratu: mintzezkoan zuzenean hezurra; endokondralean, kartilagoa lehenik eta hezurra gero.',
         }),
@@ -240,11 +240,14 @@ export const LESSON_W8: Lesson = {
           writes: 'b-fontanelak',
           plain: 'Lambda askoz lehenago ixten da, bizitzako lehen hilabeteetan.',
         }),
+        L(0.68, 'Gangan loki hezurraren ezkata ere badago.', n('3.1.1/p6/s1'), ['tenporalaren-ezkata'], {
+          plain: 'Gangan beste hezur bat ere badago: loki hezurraren ezkata.',
+        }),
         L(0.68, 'Albotik, beste bi fontanela: aurre-albokoa edo esfenoidala, eta atze-albokoa edo tenporala.', n('3.1.1/p13/s1', '3.1.1/p13/s2'), [
           'fontanela-esfenoidala',
           'fontanela-mastoidea',
         ], { plain: 'Alboetan beste bi daude: aurrekoa, esfenoidala, eta atzekoa, tenporala. Bi aldeetan daude.' }),
-        L(0.8, 'Joskurek eta fontanelek entzefaloari hazten uzten diote; erditzean, gainera, hezur plakak gainjarri egiten dira.', n('3.1.1/p14/s1', '3.1.1/p14/s2'), ['joskurak', 'fontanelak'], {
+        L(0.8, 'Joskurek eta fontanelek entzefaloari hazten uzten diote; erditzean, hezur plakak gainjarri egiten dira.', n('3.1.1/p14/s1', '3.1.1/p14/s2'), ['joskurak', 'fontanelak'], {
           tone: 'why',
           plain: 'Hezurren arteko tarte hauei esker burmuina hazi daiteke, eta erditzean buruak tokia egiten du.',
         }),
@@ -283,10 +286,14 @@ export const LESSON_W8: Lesson = {
           writes: 'b-kondro',
           plain: 'Hemen lehenik kartilagoa egiten da, eta gero kartilago hori hezur bihurtzen da.',
         }),
+        L(0.12, 'Kontuz: aurrean eta atzean mesenkimak jatorri desberdina du. Notokorda hipofisi hodiraino iristen da.', n('3.1.2/p9/s1', '3.1.2/p9/s2'), ['notokorda'], {
+          tone: 'caution',
+          plain: 'Kontuz: aurreko eta atzeko hezurren mesenkima ez dator leku beretik. Notokorda hipofisi hodiraino iristen da.',
+        }),
         L(0.235, 'Atzealdean kartilago parakordalak daude, bat eskuinean eta bestea ezkerrean.', n('3.1.2/p5/s3', '3.1.2/p5/s4'), ['kartilago-parakordalak'], {
           plain: 'Atzean bi kartilago parakordal daude, eskuinekoa eta ezkerrekoa.',
         }),
-        L(0.235, 'Hiru somita okzipitalen eta lehen lepoko somitaren esklerotometatik sortzen dira.', n('3.1.2/p5/s3'), ['kartilago-parakordalak'], {
+        L(0.235, 'Hiru somita okzipitalen eta lehen lepoko somitaren esklerotometatik sortzen dira.', n('3.1.2/p5/s1', '3.1.2/p5/s3'), ['kartilago-parakordalak'], {
           plain: 'Garondoko hiru somitetatik eta lepoko lehenengotik datoz.',
         }),
         L(0.26, 'Haietatik hezur okzipitalaren oinaldea eratzen da, lamina basilarra.', n('3.1.2/p5/s5'), ['okzipitalaren-oinaldea'], {
@@ -306,7 +313,7 @@ export const LESSON_W8: Lesson = {
           writes: 'b-erdikoa',
           plain: 'Aurrealdean trenkada kranialak: hortik etmoides hezurra.',
         }),
-        L(0.59, 'Alboetan beste bi plaka daude. Atzealdean kapsula periotikoa: tenporalaren harkaitza eta atal mastoideoa.', n('3.1.2/p6/s1'), ['kapsula-periotikoa', 'harkaitza'], {
+        L(0.59, 'Alboetan beste bi plaka. Atzealdean kapsula periotikoa: tenporalaren harkaitza eta atal mastoideoa.', n('3.1.2/p6/s1'), ['kapsula-periotikoa', 'harkaitza'], {
           plain: 'Alboetako plaketan, atzean, kapsula periotikoa: hortik tenporalaren harkaitza.',
         }),
         L(0.59, 'Harkaitzean barneko belarria kokatuko da.', n('3.1.2/p6/s1'), ['harkaitza', 'barne-belarria'], {
@@ -318,7 +325,7 @@ export const LESSON_W8: Lesson = {
           'begizulo-hegoa',
           'esfenoidesaren-hego-txikia',
         ], { writes: 'b-alboak', plain: 'Hego tenporaletik esfenoidesaren hego handia; begizulo hegotik, hego txikiak.' }),
-        L(0.87, 'Plaka horiek fusionatzean, oinaldean zuloak geratzen dira, eta haietatik 12 bikote nerbio kraneal pasatzen dira.', n('3.1.2/p8/s1', '3.1.2/p8/s2', '3.1.2/p8/s4'), [
+        L(0.87, 'Plakak fusionatzean, oinaldean zuloak geratzen dira: haietatik 12 bikote nerbio kraneal eta odol hodiak pasatzen dira.', n('3.1.2/p8/s1', '3.1.2/p8/s2', '3.1.2/p8/s4', '3.1.2/p8/s6', '3.1.2/p8/s7'), [
           'burezurreko-zuloak',
           'nerbio-kranialak',
         ], { plain: 'Zatiak elkartzean zuloak gelditzen dira: hortik ateratzen dira 12 nerbio kraneal bikoteak.' }),
@@ -367,7 +374,7 @@ export const LESSON_W8: Lesson = {
         L(0, 'Lepo mailaren bi aldeetan faringe arkuak agertzen dira: mesenkimazko goraguneak.', n('3.2/p3/s1', '3.2/p3/s2'), ['faringe-arkuak'], {
           plain: 'Lepoaren bi aldeetan koskor batzuk sortzen dira: faringe arkuak.',
         }),
-        L(0, 'Haietara gandor neuraleko zelulak iristen dira, eta haien mesenkimatik aurpegiko hezurrak garatzen dira, ez mesodermotik.', n('3.2/p3/s4'), ['gandor-neurala', 'faringe-arkuak'], {
+        L(0, 'Haietara gandor neuraleko zelulak iristen dira: haien mesenkimatik datoz aurpegiko hezurrak, ez mesodermotik.', n('3.2/p3/s4'), ['gandor-neurala', 'faringe-arkuak'], {
           tone: 'emphasis',
           writes: 'b-aurpegia',
           plain: 'Arku horietara gandor neuraleko zelulak heltzen dira, eta haiek egiten dituzte aurpegiko hezurrak.',
@@ -427,14 +434,14 @@ export const LESSON_W8: Lesson = {
         L(0.49, 'Ezkata horretatik estiloide apofisia irteten da.', n('3.2/p11/s1'), ['tenporalaren-ezkata', 'apofisi-estiloidea'], {
           plain: 'Ezkata horretatik estiloide apofisia ateratzen da.',
         }),
-        L(0.56, 'Meckel kartilagotik mailua garatzen da; haren inguruko mesenkimatik, beheko maxilarra edo baraila.', n('3.2/p12/s2', '3.2/p14/s1'), ['meckel-kartilagoa', 'mailua', 'beheko-maxilarra'], {
+        L(0.56, 'Meckel kartilagotik mailua garatzen da; haren inguruko mesenkimatik, beheko maxilarra edo baraila.', n('3.2/p12/s2', '3.2/p13/s1', '3.2/p14/s1'), ['meckel-kartilagoa', 'mailua', 'beheko-maxilarra'], {
           tone: 'emphasis',
           plain: 'Meckel kartilagotik mailua; inguruko mesenkimatik, baraila.',
         }),
         L(0.68, 'Reichert kartilagotik hirugarren hezurtxoa: ointokia edo estriboa.', n('3.2/p15/s1'), ['reichert-kartilagoa', 'ointokia'], {
           plain: 'Reichert kartilagotik hirugarren hezurtxoa: ointokia.',
         }),
-        L(0.74, 'Beraz, hiru hezurtxoak hiru kartilagotatik datoz: mailua Meckeletik, ingudea barratik eta ointokia Reichertetik.', n('3.2/p6/s2', '3.2/p12/s2', '3.2/p15/s1'), ['mailua', 'ingudea', 'ointokia'], {
+        L(0.74, 'Beraz, hiru hezurtxo, hiru kartilago: mailua Meckeletik, ingudea barratik eta ointokia Reichertetik.', n('3.2/p6/s2', '3.2/p12/s2', '3.2/p15/s1'), ['mailua', 'ingudea', 'ointokia'], {
           tone: 'emphasis',
           plain: 'Hiru hezurtxo, hiru kartilago: mailua Meckeletik, ingudea barratik, ointokia Reichertetik.',
         }),
@@ -444,7 +451,7 @@ export const LESSON_W8: Lesson = {
         L(0.865, 'Sudur alboko sinuak eta maxilarretako apofisi albeolarrak ez daude oraindik garatuta.', n('3.2/p17/s1', '3.2/p18/s1'), ['sinu-paranasalak', 'apofisi-albeolarrak', 'goiko-maxilarra'], {
           plain: 'Sudurraren ondoko aire hutsuneak eta hortzen hezurra ez daude oraindik eginda.',
         }),
-        L(0.865, 'Apofisi albeolarretan hortzak txertatzen dira, eta hortzekin batera garatzen dira; horrela maxilarrak handitu egiten dira.', n('3.2/p18/s2'), [
+        L(0.865, 'Apofisi albeolarretan hortzak txertatzen dira; hortzekin batera garatzean, maxilarrak handitzen dira.', n('3.2/p18/s2'), [
           'apofisi-albeolarrak',
           'goiko-maxilarra',
           'beheko-maxilarra',
@@ -488,7 +495,7 @@ export const LESSON_W8: Lesson = {
       title: 'Gorputz-adarrak',
       stage: 'gorputz-adarrak',
       lines: [
-        L(0, 'Laugarren astean goiko eta beheko gorputz-adarrak garatzen hasten dira: hasieran zilindrikoak, gero luzatu egiten dira.', n('4/p3/s1'), [
+        L(0, 'Laugarren astean goiko eta beheko gorputz-adarrak hasten dira: lehenik zilindrikoak, gero luzeagoak.', n('4/p3/s1'), [
           'goiko-gorputz-adarraren-hasikina',
           'beheko-gorputz-adarraren-hasikina',
         ], { plain: 'Laugarren astean besoak eta hankak hasten dira: lehenik hodi txikiak, gero luzeagoak.' }),
@@ -537,7 +544,7 @@ export const LESSON_W8: Lesson = {
         L(0.76, 'Goikoek laurogeita hamar gradu biratzen dute albora, kanpora.', n('4/p9/s1'), [], {
           plain: 'Besoek kanpora biratzen dute, angelu zuzen bat.',
         }),
-        L(0.76, 'Ondorioz, aurreko aldean muskulu tolestatzaileak gelditzen dira, eta atzean eta alboetan hedatzaileak.', n('4/p9/s2', '4/p9/s3'), [
+        L(0.76, 'Ondorioz, aurrean muskulu tolestatzaileak gelditzen dira, eta atzean eta alboetan hedatzaileak.', n('4/p9/s2', '4/p9/s3'), [
           'muskulu-tolestatzaileak',
           'muskulu-hedatzaileak',
         ], { writes: 'b-goikoak', plain: 'Besoan, tolesteko muskuluak aurrean gelditzen dira, eta luzatzekoak atzean.' }),
@@ -554,7 +561,7 @@ export const LESSON_W8: Lesson = {
         { id: 'b-hatzak', kind: 'line', text: 'Plaketan 4 ildo erradiatu (apoptosia); tartean hatzetako izpiak', notes: n('4/p5/s6', '4/p5/s7', '4/p5/s8'), key: true },
         { id: 'b-adarrak', kind: 'line', text: '6. asterako kartilagoak: gorputz-adarretako hezurrak endokondralak', notes: n('4/p6/s1', '4/p6/s3'), key: true },
         { id: 'b-goikoak', kind: 'line', text: 'Goikoak 90° albora: tolestatzaileak aurrean, hedatzaileak atzean', notes: n('4/p9/s1', '4/p9/s2', '4/p9/s3'), key: true },
-        { id: 'b-behekoak', kind: 'line', text: 'Behekoak 90° erdialdera: hedatzaileak aurrean, tolestatzaileak atzean', notes: n('4/p10/s3'), key: true },
+        { id: 'b-behekoak', kind: 'line', text: 'Behekoak 90° erdialdera: hedatzaileak aurrean, tolestatzaileak atzean', notes: n('4/p10/s2', '4/p10/s3'), key: true },
       ],
       checks: [
         { kind: 'pool', id: 'mikro:8/gorputz-adarrak:4', after: 6 },
@@ -597,7 +604,7 @@ export const LESSON_W8: Lesson = {
         L(0.42, 'Jaio ondoren, epifisietan hezurtzapen zentro sekundarioak agertzen dira.', n('4/p19/s1'), ['hezurtzapen-zentro-sekundarioak', 'epifisiak'], {
           plain: 'Jaio ondoren muturretan beste zentro batzuk agertzen dira, eta haiek ere hezurtzen dira.',
         }),
-        L(0.56, 'Diafisiaren eta epifisiaren artean eskualde bat hezurtu gabe gelditzen da: hazkuntza plaka edo metafisia.', n('4/p20/s1'), ['hazkuntza-plaka', 'diafisia'], {
+        L(0.56, 'Diafisiaren eta epifisiaren artean hezurtu gabeko eskualde bat geratzen da: hazkuntza plaka edo metafisia.', n('4/p20/s1'), ['hazkuntza-plaka', 'diafisia'], {
           plain: 'Diafisiaren eta muturraren artean marra bat gelditzen da hezurtu gabe: hazkuntza plaka.',
         }),
         L(0.56, 'Ez da hezurtzen, hezurra luzetara hazi dadin.', n('4/p20/s2'), ['hazkuntza-plaka'], {
@@ -710,10 +717,10 @@ export const LESSON_W8: Lesson = {
       title: 'Birsegmentazioa',
       stage: 'bizkarrezurra',
       lines: [
-        L(0, 'Somitetako zelulak berdinak dira hasieran, baina gero miotoma, dermatoma eta esklerotoma bereizten dira.', n('5.2/p2/s1', '5.2/p2/s2'), ['somitak', 'miotoma', 'dermatoma', 'esklerotoma'], {
+        L(0, 'Somitetako zelulak hasieran berdinak dira; gero miotoma, dermatoma eta esklerotoma bereizten dira.', n('5.2/p2/s1', '5.2/p2/s2'), ['somitak', 'miotoma', 'dermatoma', 'esklerotoma'], {
           plain: 'Somitako zelulak hasieran berdinak dira; gero hiru taldetan banatzen dira.',
         }),
-        L(0.08, 'Laugarren astean esklerotomako zelulak erdialdera migratzen dute, hodi neurala eta notokorda inguratzeko.', n('5.2.1/p2/s1'), ['esklerotoma', 'hodi-neurala', 'notokorda'], {
+        L(0.08, 'Laugarren astean esklerotomako zelulak erdialdera doaz, hodi neurala eta notokorda inguratzera.', n('5.2.1/p2/s1'), ['esklerotoma', 'hodi-neurala', 'notokorda'], {
           plain: 'Laugarren astean esklerotomako zelulak erdira doaz, hodi neurala eta notokorda inguratzera.',
         }),
         L(0.08, 'Hor mesenkima zutabea sortzen da, edo esklerotoma zutabea.', n('5.2.1/p2/s1'), ['mesenkima-zutabea'], {
@@ -749,12 +756,15 @@ export const LESSON_W8: Lesson = {
           writes: 'b-diskoa',
           plain: 'Inguruan, eraztun fibrosoa.',
         }),
-        L(0.7, 'Birsegmentazioaren ondorioz, miotomak orno batetik bestera hedatzen dira.', n('5.2.1/p9/s1', '5.2.1/p11/s2'), ['birsegmentazioa', 'miotoma'], {
+        L(0.7, 'Birsegmentazioaren ondorioz, miotomak orno batetik bestera hedatzen dira.', n('5.2.1/p9/s1', '5.2.1/p10/s1', '5.2.1/p11/s2'), ['birsegmentazioa', 'miotoma'], {
           plain: 'Birsegmentazioaren ondorioz, muskulu bakoitzak bi orno lotzen ditu.',
         }),
         L(0.7, 'Zergatik? Muskuluek bizkarrezurra mugitu behar dutelako. Nerbio espinalekin gauza bera gertatzen da.', n('5.2.1/p11/s2', '5.2.1/p11/s1'), ['miotoma', 'nerbio-espinalak'], {
           tone: 'why',
           plain: 'Horrela muskuluek bizkarrezurra mugi dezakete. Nerbioekin ere berdin.',
+        }),
+        L(0.77, 'Hasieran, segmentu arteko arteriak iristen dira bizkarrezurrera.', n('5.2.1/p12/s1'), ['segmentu-arteko-arteriak'], {
+          plain: 'Hasieran, ornoetara segmentu arteko arteriak iristen dira.',
         }),
         L(0.84, 'Bizkarrezurraren makurdurak: zifosia primarioa da, jaio aurrekoa, eta atzerantz ganbila.', n('5.2.1/p14/s1'), ['zifosia'], {
           plain: 'Lehen makurdura, zifosia, jaio aurretik dago, eta atzera irteten da.',
@@ -762,7 +772,7 @@ export const LESSON_W8: Lesson = {
         L(0.84, 'Bi dira: bizkarrekoa eta sakroarena.', n('5.2.1/p14/s2'), ['zifosia'], {
           plain: 'Bizkarrean eta sakroan daude.',
         }),
-        L(0.91, 'Lordosia sekundarioa da, jaio ondoren garatzen dena: burua altxatzean lepokoa, eta ibiltzean gerrikoa.', n('5.2.1/p15/s1', '5.2.1/p15/s2'), ['lordosia'], {
+        L(0.91, 'Lordosia sekundarioa da, jaio ondorengoa: burua altxatzean lepokoa, eta ibiltzean gerrikoa.', n('5.2.1/p15/s1', '5.2.1/p15/s2'), ['lordosia'], {
           writes: 'b-makurdurak',
           plain: 'Lordosia jaio ondoren dator: lepokoa burua altxatzean, gerrikoa ibiltzen hastean.',
         }),
@@ -798,7 +808,7 @@ export const LESSON_W8: Lesson = {
       title: 'Saihetsak eta esternoia',
       stage: 'saihetsak',
       lines: [
-        L(0, 'Saihetsetan bi atal bereizten dira. Atzeko atala hezurrezkoa da, saihets hezurra; aurrekoa, saihets kartilagoa.', n('5.4/p2/s1', '5.4/p3/s1'), ['saihets-hezurra', 'saihets-kartilagoa'], {
+        L(0, 'Saihetsek bi atal dituzte: atzean saihets hezurra; aurrean, saihets kartilagoa.', n('5.4/p2/s1', '5.4/p3/s1'), ['saihets-hezurra', 'saihets-kartilagoa'], {
           plain: 'Saihetsak bi zati ditu: atzean hezurra, aurrean kartilagoa.',
         }),
         L(0.14, 'Saihets hezurrak somiten esklerotomatik eratzen dira.', n('5.4/p4/s1'), ['saihets-hezurra', 'esklerotoma'], {
@@ -818,7 +828,7 @@ export const LESSON_W8: Lesson = {
           writes: 'b-saihets-kartilagoa',
           plain: 'Kontuz: saihets kartilagoa paretako orritik dator zuzenean.',
         }),
-        L(0.56, 'Bularrezurrarekin antzekoa gertatzen da: paretako orritik kartilagoak agertzen dira goitik behera, eta elkarrekin fusionatzen dira.', n('5.4/p5/s3', '5.4/p5/s4'), [
+        L(0.56, 'Bularrezurrean ere paretako orritik kartilagoak agertzen dira goitik behera, eta fusionatzen dira.', n('5.4/p5/s3', '5.4/p5/s4'), [
           'esternoi-barrak',
           'paretako-orria',
         ], { plain: 'Bularrezurra ere paretako orritik dator: kartilago zatiak goitik behera agertu eta elkartu egiten dira.' }),

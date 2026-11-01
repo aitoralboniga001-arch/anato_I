@@ -1189,7 +1189,7 @@ export const week9: WeekDef = {
         },
         {
           at: 0.36,
-          notes: ['w9/2.2.2/p7/s1', 'w9/2.2.2/p7/s2'],
+          notes: ['w9/2.2.2/p7/s1', 'w9/2.2.2/p7/s2', 'w9/2.2.2/p8/s1'],
           idea: 'Atzekaldera abiatutako 2 adarrak: atzeko adarrak; neurona sentsorialak.',
           text: 'Atzekaldera abiatutako 2 adar: atzeko adarrak. Hemen neurona sentsorialak (sentsitiboak) kokatzen dira.',
           focus: ['atzeko-adarra', 'neurona-sentsorialak'],
@@ -1352,7 +1352,7 @@ export const week9: WeekDef = {
         {
           at: 0.26,
           exam: 'Inerbazioak ez du zerikusirik jatorriarekin: adar bakoitzak domeinu bietako muskuluak inerbatzen ditu.',
-          notes: ['w9/2.2.2/p15/s2', 'w9/2.2.2/p15/s3', 'w9/2.2.2/p15/s4'],
+          notes: ['w9/2.2.2/p15/s1', 'w9/2.2.2/p15/s2', 'w9/2.2.2/p15/s3', 'w9/2.2.2/p15/s4'],
           idea: 'KONTUZ: inerbazioak ez du zerikusirik jatorriarekin. Muskuluaren jatorria (domeinua) gauza bat da; zein adarrek inerbatzen duen, beste bat.',
           caution: 'Aurreko adarrak bi domeinuetako muskuluak inerbatzen ditu (saihets artekoak primaxialak, abdomenekoak abaxialak); atzeko adarrak, primaxialak soilik (bizkarreko muskulu sakonak).',
           text: 'Muskuluen inerbazioak ez du zerikusirik jatorriarekin: gauza bat da muskuluek daukaten jatorria, eta beste bat aurreko eta atzeko adarretako zuntz motoreek zein muskulu inerbatzen dituzten. Adibidez, aurreko adarrak domeinu primaxialeko muskuluak (saihets artekoak) zein domeinu abaxialekoak (abdomenekoak) inerbatzen ditu.',

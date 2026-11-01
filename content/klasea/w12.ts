@@ -337,7 +337,7 @@ export const LESSON_W12: Lesson = {
       title: 'Laugarren arkua',
       stage: 'laugarren-arkua',
       lines: [
-        L(0.105, 'Laugarren arkuetan, aldiz, ezkerrekoak eta eskuinekoak garapen desberdina dute.', n('2.3.2/p14/s1'), ['laugarren-aorta-arkua'], {
+        L(0.105, 'Laugarren arkuetan, aldiz, ezkerrekoak eta eskuinekoak garapen desberdina dute.', n('2.3.2/p8/s1', '2.3.2/p14/s1'), ['laugarren-aorta-arkua'], {
           tone: 'emphasis',
           plain: 'Laugarren arkuetan bi aldeak ez dira berdin aldatzen: bakoitzak gauza desberdina ematen du.',
         }),
@@ -586,7 +586,7 @@ export const LESSON_W12: Lesson = {
       title: 'Aorta heldua',
       stage: 'aorta-heldua',
       lines: [
-        L(0.075, 'Ikus dezagun emaitza: ezkerreko bentrikulutik irteten den aorta, eta haren adarrak, desberdinak eskuinean eta ezkerrean.', n('2.3.4/p11/s1'), ['aorta'], {
+        L(0.075, 'Ikus dezagun emaitza: ezkerreko bentrikulutik irteten den aorta, eta haren adarrak, desberdinak eskuinean eta ezkerrean.', n('2.4/p16/s1', '2.3.4/p11/s1'), ['aorta'], {
           plain: 'Hau da azken emaitza: aorta, eta bertatik ateratzen diren arteriak. Eskuinean eta ezkerrean ez dira berdinak.',
         }),
         L(0.19, 'Goranzko aorta, hurbileko zatia, enbor arteriosotik dator.', n('2.4/p16/s2'), ['goranzko-aorta'], { plain: 'Aortaren lehen zatia, gorantz doana, enbor arteriosotik sortzen da: goranzko aorta.' }),
@@ -609,6 +609,9 @@ export const LESSON_W12: Lesson = {
           tone: 'emphasis',
           writes: 'b-makoa',
           plain: 'Ezkerreko karotida eta ezkerreko subklabioa bakoitza bere aldetik ateratzen da makotik.',
+        }),
+        L(0.8, 'Birika arteriak, berriz, bi adar ditu: eskumako eta ezkerreko birika arteriak.', n('2.4/p17/s1'), ['birika-arteria', 'eskuineko-birika-arteria', 'ezkerreko-birika-arteria'], {
+          plain: 'Birika arteria bitan banatzen da: bat birika bakoitzera.',
         }),
       ],
       board: [
@@ -668,7 +671,7 @@ export const LESSON_W12: Lesson = {
         L(0.955, 'Abdomenean hiru arteria daude, hesteko hiru zatientzat: enbor zeliakoa, goiko arteria mesenterikoa eta beheko arteria mesenterikoa.', n('2.5.1/p5/s1'), ['enbor-zeliakoa', 'goiko-arteria-mesenterikoa', 'beheko-arteria-mesenterikoa'], {
           plain: 'Sabelean hiru arteria daude, bakoitza hestearen zati batentzat.',
         }),
-        L(0.955, 'Enbor zeliakoa aurreko hestearen arteria da, eta barea eta gibela irrigatzen ditu.', n('2.5.1/p6/s2'), ['enbor-zeliakoa', 'aurreko-hestea'], {
+        L(0.955, 'Enbor zeliakoa aurreko hestearen arteria da, eta barea eta gibela irrigatzen ditu.', n('2.5.1/p6/s1', '2.5.1/p6/s2'), ['enbor-zeliakoa', 'aurreko-hestea'], {
           plain: 'Enbor zeliakoak hestearen lehen zatia elikatzen du, aurreko hestea: barea eta gibela.',
         }),
         L(0.955, 'Goiko mesenterikoa bitarteko hestearena da; beheko mesenterikoa, atzeko hestearena.', n('2.5.1/p7/s1', '2.5.1/p8/s1'), ['goiko-arteria-mesenterikoa', 'erdiko-hestea', 'beheko-arteria-mesenterikoa', 'atzeko-hestea'], {
@@ -733,6 +736,9 @@ export const LESSON_W12: Lesson = {
           writes: 'b-alboko',
           plain: 'Hirugarrena, arteria gonadalak, gonadetara doaz: obulutegiak edo barrabilak.',
         }),
+        L(0.38, 'Apunteek beste bat ere aipatzen dute: beheko diafragma arteriak, diafragmaren beheko aurpegirako.', n('2.5.2/p7/s1'), [], {
+          plain: 'Apunteetan laugarren bat ere badago: diafragmaren azpiko aldera doazen arteriak.',
+        }),
         L(0.52, 'Segmentu arteko arteriak maila guztietan daude, eta bizkarraldeko muskuluak, orno muina eta larruazala irrigatzen dituzte.', n('2.5.3/p3/s1'), ['segmentu-arteko-arteriak'], {
           plain: 'Atzeko adar hauek leku guztietan daude: bizkarreko muskuluak, bizkarrezur muina eta azala elikatzen dituzte.',
         }),
@@ -748,6 +754,9 @@ export const LESSON_W12: Lesson = {
           tone: 'emphasis',
           writes: 'b-mailak',
           plain: 'Bularrean saihetsen artean doaz; gerrian, arteria lunbarrak dira; sakroan, alboko arteria sakroak.',
+        }),
+        L(0.9, 'Lepoan, gainera, arteria horiek arteria subklabioen eraketan parte hartzen dute.', n('2.5.3/p4/s1'), ['ezkerreko-subklabioa'], {
+          plain: 'Lepoan arteria horiek besoetara doazen arteria subklabioak eratzen laguntzen dute.',
         }),
       ],
       board: [

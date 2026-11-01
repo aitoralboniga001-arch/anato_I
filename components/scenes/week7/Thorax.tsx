@@ -12,7 +12,7 @@ import { CavityKey, Defs7, KEY7, P, Serosa, Sheet, f1, morph, offset, poly, resa
  *    alboko aldeetan sartzen dira; 5. astean mintz pleuroperikardikoak (nerbio frenikoa eta bena kardinal
  *    komuna barnean) erdirantz hazten dira eta elkarren artean eta hestegorri inguruko mesenkimarekin
  *    fusionatzen dira; birikek hazten jarraitzen dute eta mintzen oinaldeak aurrerantz eta alborantz doaz.
- *    Azkenik pleura (paretakoa/erraia) eta perikardioa (fibrosoa/serosoa), espazio birtualak.
+ *    Azkenik pleura eta perikardioa (paretakoa/erraia), espazio birtualak.
  */
 
 // ——— Transverse section of the thorax ———
@@ -247,12 +247,10 @@ function Balloon({ t, a, b, heart }: { t: number; a: number; b: number; heart?: 
   const fist = `M${f1(cx - fr)},${f1(fy)} A${fr},${fr} 0 1 1 ${f1(cx + fr)},${f1(fy)} L${f1(cx + fr - 2)},${cy + R + 22} L${f1(cx - fr + 2)},${cy + R + 22} Z`;
   const sac = heart ? '#ffb3c4' : '#9fd0ff';
   const rows = heart
-    ? ['ukabila → bihotza', 'barneko orria → errai serosoa', 'kanpoko orria → paretako serosoa', 'kanpoan, fibrosoa itsatsita']
+    ? ['ukabila → bihotza', 'barneko orria → errai perikardioa', 'kanpoko orria → paretako perikardioa', 'tartea → perikardio barrunbea']
     : ['ukabila → birika', 'barneko orria → errai pleura', 'kanpoko orria → paretako pleura', 'tartea → pleura barrunbea'];
   return (
     <g opacity={show} pointerEvents="none">
-      {/* The fibrous pericardium the outer serous layer lines. */}
-      {heart && <path d={`M${f1(cx - (R + 5) * Math.sin(a0))},${f1(cy + (R + 5) * Math.cos(a0))} A${R + 5},${R + 5} 0 1 1 ${f1(cx + (R + 5) * Math.sin(a0))},${f1(cy + (R + 5) * Math.cos(a0))}`} fill="none" stroke="#d9c7a4" strokeWidth={6} />}
       <path d={outer + inner} fill={heart ? 'rgba(255,140,170,0.28)' : 'rgba(110,180,255,0.3)'} stroke={sac} strokeWidth={2.6} strokeLinejoin="round" />
       <path d={fist} fill={heart ? P.heart : P.lung} stroke={heart ? P.heartDeep : P.lungDeep} strokeWidth={1.4} />
       {!heart && <path d={`M${f1(cx - fr + 5)},${f1(fy - 4)}h${2 * fr - 10}M${f1(cx - fr + 4)},${f1(fy + 3)}h${2 * fr - 8}`} stroke={P.lungDeep} strokeWidth={1.2} opacity={0.8} />}
@@ -405,7 +403,6 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
   const pleuraNamed = seg(t, 0.72, 0.76);
   const periNamed = seg(t, 0.84, 0.88);
   const memShow = G.m;
-  const memCore = periNamed > 0.5 ? '#d9c7a4' : P.mesench;
   const nerve = along(G.mem, 0.12);
   const vein = along(G.mem, 0.34);
   const heartS = lerp(1, 1.1, G.virt);
@@ -413,7 +410,10 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
   const wallQ = wallAt(lerp(lerp(0.46, 0.105, G.d), 1, 0.3));
   const lungQ = G.lung.reduce((a, q) => (Math.hypot(q[0] - wallQ[0], q[1] - wallQ[1]) < Math.hypot(a[0] - wallQ[0], a[1] - wallQ[1]) ? q : a));
   const pleuraAt: Pt = [lerp(wallQ[0], lungQ[0], 0.45), lerp(wallQ[1], lungQ[1], 0.45)];
-  const serosaAt = heartPts(heartS * 1.02)[3];
+  // The two pericardial layers: the parietal one lines the cavity, the visceral one lies on the heart.
+  const periLine = inset(resample(G.peri, 120), 9);
+  const parietalAt = periLine.reduce((a, q) => (q[0] > a[0] ? q : a));
+  const visceralAt = heartPts(heartS * 1.02)[3];
   // The middle of the right lung (bud or lobe): an edge point would land on its coat or the tissue round it.
   const lungMid = G.lung.map((q) => sideP(q, 1)).reduce<Pt>((a, q, _, all) => [a[0] + q[0] / all.length, a[1] + q[1] / all.length], [0, 0]);
   // Cavity tints: one primitive pericardial cavity, then two pleural + one pericardial.
@@ -555,14 +555,9 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
       </Part>
 
       {/* Pleuropericardial membranes, carrying the phrenic nerve and the common cardinal vein. */}
-      <Part id="mintz-pleuroperikardikoak" show={memShow * (1 - periNamed)}>
+      <Part id="mintz-pleuroperikardikoak" show={memShow}>
         {folds.map((pts, i) => (
           <Fold key={i} pts={pts} />
-        ))}
-      </Part>
-      <Part id="perikardio-fibrosoa" show={periNamed}>
-        {folds.map((pts, i) => (
-          <Fold key={i} pts={pts} core={memCore} />
         ))}
       </Part>
       {/* The cavity lining runs out along one face of each fold, round its tip and back along the other:
@@ -573,9 +568,11 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
           <path key={i} d={smoothPath(pts, true, 0.3)} fill="none" stroke={liningC} strokeWidth={liningW} mask={`url(#w7-th-inW${i})`} />
         ))}
       </g>
-      <Part id="perikardio-serosoa" show={periNamed}>
-        <path d={smoothPath(inset(resample(G.peri, 120), 9), true, 0.3)} fill="none" stroke="#ffb3c4" strokeWidth={2.6} />
-        <path d={heartD(heartS * 1.02)} fill="none" stroke="#ffb3c4" strokeWidth={2.6} />
+      <Part id="paretako-perikardioa" show={periNamed}>
+        <path d={smoothPath(periLine, true, 0.3)} fill="none" stroke="#ffb3c4" strokeWidth={2.6} />
+      </Part>
+      <Part id="errai-perikardioa" show={periNamed}>
+        <path d={heartD(heartS * 1.02)} fill="none" stroke="#ff9fb6" strokeWidth={2.6} />
       </Part>
       <Part id="bena-kardinal-komuna" show={memShow}>
         {both((s) => {
@@ -631,7 +628,7 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
       <Balloon t={t} a={0.84} b={0.93} heart />
       <PushInset t={t} />
       <Note x={500} y={612} tone="accent" show={vis(t, 0.84, 0.93)}>
-        Mintzaren mesenkima → perikardio fibrosoa · somatopleura → perikardio serosoa
+        Errai perikardioa bihotzean; erreflejatu eta paretako perikardioarekin jarraitzen du
       </Note>
       <Note x={500} y={612} tone="accent" show={vis(t, 0.93)}>
         Espazio birtualak: orriak elkarren ondoan, tartean espaziorik gabe
@@ -642,8 +639,7 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
       <Label id="errai-pleura" x={190} y={150} ax={sideP(along(G.lung, 0.3), 1)[0]} ay={sideP(along(G.lung, 0.3), 1)[1]} show={pleuraNamed} small />
       <Label id="birika-hastapenak" x={190} y={200} ax={lungMid[0]} ay={lungMid[1]} show={1 - G.d} />
       <Label id="birikak" x={190} y={200} ax={lungMid[0]} ay={lungMid[1]} show={G.d} />
-      <Label id="mintz-pleuroperikardikoak" x={190} y={260} ax={along(G.mem, 0.62)[0]} ay={along(G.mem, 0.62)[1]} show={memShow * (1 - periNamed)} small />
-      <Label id="perikardio-fibrosoa" x={190} y={260} ax={along(G.mem, 0.62)[0]} ay={along(G.mem, 0.62)[1]} show={periNamed} />
+      <Label id="mintz-pleuroperikardikoak" x={190} y={260} ax={along(G.mem, 0.62)[0]} ay={along(G.mem, 0.62)[1]} show={memShow} small />
       <Label id="nerbio-frenikoa" x={190} y={360} ax={nerve[0]} ay={nerve[1]} show={memShow} />
       <Label id="bena-kardinal-komuna" x={190} y={400} ax={vein[0]} ay={vein[1]} show={memShow} small />
       <CavityKey rows={fused < 0.5 ? [KEY7.hperi] : [KEY7.peri, KEY7.pleura]} quiet />
@@ -658,7 +654,8 @@ export function ThoraxSection({ t, reduced }: SceneProps) {
       <Label id="hasierako-perikardio-barrunbea" x={776} y={380} ax={580} ay={386} show={1 - fused} small />
       <Label id="perikardio-barrunbea" x={810} y={380} ax={553} ay={400} show={fused} />
       <Label id="bihotza" x={810} y={440} ax={HEART[0] + 40} ay={HEART[1]} />
-      <Label id="perikardio-serosoa" x={810} y={500} ax={serosaAt[0]} ay={serosaAt[1]} show={periNamed} />
+      <Label id="errai-perikardioa" x={810} y={500} ax={visceralAt[0]} ay={visceralAt[1]} show={periNamed} />
+      <Label id="paretako-perikardioa" x={810} y={540} ax={parietalAt[0]} ay={parietalAt[1]} show={periNamed} />
     </g>
   );
 }

@@ -132,6 +132,7 @@ export const LESSON_W10: Lesson = {
           tone: 'caution',
           plain: 'Arteria edo zaina izatea norabideak erabakitzen du, ez oxigenoak: bihotzetik irten ala bihotzera etorri.',
         }),
+        L(0.38, 'Garai honetan hiru zain bikote iristen dira zain sinuetara: eskuinekoak eta ezkerrekoak.', n('1/p26/s4', '1/p26/s5', '1/p26/s6', '1/p26/s7'), ['zain-sinua']),
         L(0.38, 'Kardinal komunek enbrioiaren alde zefalikoko eta behe aldeko odola biltzen dute; beraz, bihotzera iristen den odol hori oxigeno gutxikoa da.', n('1/p27/s1', '1/p27/s3'), ['bena-kardinal-komuna', 'zain-sinua'], { cues: { 'zain-sinua': 'bihotzera iristen' }, tone: 'why', writes: 'zt-kardinal', plain: 'Kardinal komunek enbrioiaren gorputzeko odola biltzen dute; horregatik dakarte oxigeno gutxiko odola.' }),
         L(0.48, 'Zain bitelinoek ere oxigeno gutxiko odola dakarte, bitelo zakutik hodiaren beheko ataleraino.', n('1/p23/s2', '1/p28/s1', '1/p28/s2'), ['bitelo-zainak', 'bitelo-zaku-sekundarioa'], { writes: 'zt-bitelo', plain: 'Zain bitelinoek bitelo zakuko odola dakarte, hau ere oxigeno gutxirekin.' }),
         L(0.57, 'Zilborreko zainak, berriz, karenatik datoz; horregatik, odol oxigenatua dute.', n('1/p29/s1'), ['zilbor-zainak', 'karena'], { tone: 'why', writes: 'zt-zilbor', plain: 'Zilborreko zainek, berriz, karenako odola dakarte: oxigenoz betea.' }),
@@ -200,7 +201,7 @@ export const LESSON_W10: Lesson = {
         L(0.13, '21. egunean, bihotz hodian estuguneak eta zabalkuntzak agertzen dira, eta atal desberdinak eratzen dira goitik behera.', n('2/p3/s3'), ['bihotz-hodia'], { tone: 'emphasis', writes: 'b-21', plain: '21. egunean hodia ez da berdina: zati estuagoak eta zabalagoak agertzen dira.' }),
         L(0.27, 'Goiko atala atal bulbarra da, arteria bulboa; haren muturrean aorta zakua dago.', n('2/p4/s1', '2/p4/s4'), ['atal-bulbarra', 'aorta-zakua'], { plain: 'Goiko zatia atal bulbarra da, eta haren puntan aorta zakua dago.' }),
         L(0.4, 'Ondoren atal bentrikularra eta atal aurikularra datoz. Fusioa zefalikotik kaudalera doanez, atal aurikularra oraindik bikoitza da.', n('2/p3/s4', '2/p5/s1', '2/p6/s1', '2/p6/s3'), ['atal-bentrikularra', 'atal-aurikularra'], { tone: 'why', plain: 'Gero atal bentrikularra eta atal aurikularra. Hodiak goitik behera elkartzen direnez, atal aurikularra oraindik bikoitza da.' }),
-        L(0.53, 'Azkena, zain sinuak: bilateralak eta bikoitzak. Enbrioiaren ezker eta eskuineko zainak bertan amaitzen dira.', n('2/p7/s1'), ['zain-sinua', 'zilbor-zainak', 'bitelo-zainak', 'bena-kardinal-komuna'], { cues: { 'bena-kardinal-komuna': 'eskuineko zainak', 'zilbor-zainak': 'eskuineko zainak', 'bitelo-zainak': 'eskuineko zainak' }, plain: 'Azkena, zain sinuak, bat alde bakoitzean: hara iristen dira enbrioiaren zain guztiak.' }),
+        L(0.53, 'Azkena, zain sinuak: bilateralak eta bikoitzak. Enbrioiaren ezker eta eskuineko zainak bertan amaitzen dira.', n('2/p7/s1', '2/p7/s2'), ['zain-sinua', 'zilbor-zainak', 'bitelo-zainak', 'bena-kardinal-komuna'], { cues: { 'bena-kardinal-komuna': 'eskuineko zainak', 'zilbor-zainak': 'eskuineko zainak', 'bitelo-zainak': 'eskuineko zainak' }, plain: 'Azkena, zain sinuak, bat alde bakoitzean: hara iristen dira enbrioiaren zain guztiak.' }),
         L(0.66, 'Atal bulbarra eta atal bentrikularra perikardio barrunbean daude; atal aurikularrak eta zain sinuak, kanpoan, septum transversumean.', n('2/p8/s1', '2/p8/s2'), ['atal-bulbarra', 'atal-bentrikularra', 'perikardio-barrunbea', 'atal-aurikularra', 'zain-sinua', 'septum-transversum'], {
           tone: 'emphasis',
           writes: 'b-non',
@@ -253,14 +254,14 @@ export const LESSON_W10: Lesson = {
         }),
         L(0.8, '28. egunean, atal bulbarra lakioaren aurre eskuinaldean dago, eta atal bentrikularra ezkerrean.', n('2/p18/s1', '2/p18/s2'), ['atal-bulbarra', 'atal-bentrikularra'], { plain: '28. egunean, atal bulbarra aurrean eta eskuinean dago, eta atal bentrikularra ezkerrean.' }),
         L(0.8, 'Atal bentrikularra goi atzekaldeko atal aurikularrarekin jarraia da, erreten aurikulubentrikularraren bidez.', n('2/p18/s2'), ['atal-bentrikularra', 'erreten-aurikulubentrikularra', 'atal-aurikularra'], { plain: 'Atal bentrikularra goian eta atzean dagoen atal aurikularrarekin lotuta dago, erreten aurikulubentrikularraren bidez.' }),
-        L(0.8, 'Atal guztiak jarraiak dira oraindik: ez da trenkadarik agertu.', n(), ['atal-bulbarra', 'atal-bentrikularra', 'atal-aurikularra', 'zain-sinua'], { tone: 'emphasis', writes: 'b-28', plain: 'Oraindik hodi bakarra da: barruan ez dago hormarik.' }),
+        L(0.8, 'Atal aurikularra, berriz, atzealdeko zain sinuarekin komunikatuta jarraitzen du.', n('2/p19/s2'), ['atal-aurikularra', 'zain-sinua'], { tone: 'emphasis', writes: 'b-28', plain: 'Atal aurikularra atzean dagoen zain sinuarekin lotuta geratzen da.' }),
         L(0.92, 'Begiratu orain bihotza aurretik ikusita: hasierako hodi zuzena eta lakioa, bata bestearen gainean.', n('2/p20/s1'), ['bihotz-lakioa'], { hold: 2, plain: 'Begiratu: hasierako hodi zuzena eta lakioa, bata bestearen gainean, aurretik ikusita.' }),
       ],
       board: [
         { id: 'b-lakio-goi', kind: 'line', text: 'Alde zefalikoa (bulboa): aurrera, behera, eskuinera', notes: n('2/p10/s1'), key: true },
         { id: 'b-lakio-behe', kind: 'line', text: 'Alde kaudala (zain sinua, aurikula): atzera, gora, ezkerrera', notes: n('2/p11/s1'), key: true },
         { id: 'b-aurretik', kind: 'line', text: 'Aurretik ikusita: eskuma eta ezkerra alderantziz', notes: n('2/p17/s4'), key: true },
-        { id: 'b-28', kind: 'line', text: '28. eguna: bulbarra aurre-eskuinean, bentrikularra ezkerrean, aurikularra goi-atzean; trenkadarik ez', notes: n('2/p18/s1', '2/p18/s2') },
+        { id: 'b-28', kind: 'line', text: '28. eguna: bulbarra aurre-eskuinean, bentrikularra ezkerrean, aurikularra goi-atzean, zain sinua atzean', notes: n('2/p18/s1', '2/p18/s2', '2/p19/s2') },
       ],
       checks: [
         {
@@ -291,7 +292,7 @@ export const LESSON_W10: Lesson = {
         L(0.38, 'Hori izango da eskuineko bentrikuluaren atalik garrantzitsuena, baina ez bakarra.', n('3.1/p4/s1'), ['hasierako-eskuineko-bentrikulua'], { plain: 'Eskuineko bentrikuluaren zatirik handiena hortik dator, baina ez osoa.' }),
         L(0.38, 'Kontuz: eskuineko bentrikulu primitiboa atal bulbarretik dator, ez atal bentrikularretik.', n('3.1/p4/s1'), ['hasierako-eskuineko-bentrikulua', 'bulboaren-hurbileko-atala', 'atal-bulbarra'], { cues: { 'bulboaren-hurbileko-atala': 'atal bulbarretik' }, tone: 'caution', plain: 'Kontuz: eskuineko bentrikulua atal bulbarretik dator, ez atal bentrikularretik.' }),
         L(0.56, 'Erdiko atala, arteria konoa, trenkada batek bitan banatzen du: bi bentrikuluen atal lisoak dira, infundibuluak.', n('3.1/p5/s1'), ['arteria-konoa', 'infundibuluak'], { tone: 'emphasis', writes: 'tz-konoa', plain: 'Erdiko zatia, konoa, bitan banatzen da: bi bentrikuluen irteera leunak, infundibuluak.' }),
-        L(0.72, 'Urruneko atala, enbor arteriosoa, ere trenkadatu egiten da: hortik birika enborraren eta aortaren sustraiak sortzen dira.', n('3.1/p6/s2'), ['enbor-arteriosoa', 'birika-enborraren-sustraiak', 'aortaren-sustraiak'], { tone: 'emphasis', writes: 'tz-enborra', plain: 'Azken zatia, enborra, ere bitan banatzen da: hortik birika enborraren sustraiak eta aortaren sustraiak.' }),
+        L(0.72, 'Urruneko atala, enbor arteriosoa, ere trenkadatu egiten da: hortik birika enborraren eta aortaren sustraiak sortzen dira.', n('3.1/p6/s1', '3.1/p6/s2'), ['enbor-arteriosoa', 'birika-enborraren-sustraiak', 'aortaren-sustraiak'], { tone: 'emphasis', writes: 'tz-enborra', plain: 'Azken zatia, enborra, ere bitan banatzen da: hortik birika enborraren sustraiak eta aortaren sustraiak.' }),
         L(0.9, 'Laburbilduz: hurbileko atala, eskuineko bentrikulua; konoa, infundibuluak; enborra, sustraiak.', n('3.1/p4/s1', '3.1/p5/s1', '3.1/p6/s2'), ['bulboaren-hurbileko-atala', 'hasierako-eskuineko-bentrikulua', 'arteria-konoa', 'infundibuluak', 'enbor-arteriosoa', 'aortaren-sustraiak', 'birika-enborraren-sustraiak'], { cues: { 'birika-enborraren-sustraiak': 'sustraiak' }, tone: 'summary', plain: 'Hiru zati, hiru emaitza: lehenengotik eskuineko bentrikulua, konotik infundibuluak, enborretik sustraiak.' }),
       ],
       board: [TABLE],
@@ -325,7 +326,7 @@ export const LESSON_W10: Lesson = {
       stage: 'atal-bentrikularra',
       lines: [
         L(0, 'Atal bentrikularraren paretan ere muskulu trenkadak sortzen dira: hortik ezkerreko bentrikuluaren atal trabekulatua, hasierako ezkerreko bentrikulua.', n('3.2/p3/s1', '3.2/p5/s1'), ['hasierako-ezkerreko-bentrikulua', 'muskulu-trenkadak'], { tone: 'emphasis', writes: 'tz-bentrikularra', plain: 'Atal bentrikularreko muskuluetatik ezkerreko bentrikuluaren zati zimurtsua sortzen da.' }),
-        L(0.36, 'Beraz, bi hasierako bentrikuluak jatorri desberdinekoak dira: eskumakoa bulbotik, ezkerrekoa atal bentrikularretik.', n('3.2/p4/s1'), ['hasierako-eskuineko-bentrikulua', 'hasierako-ezkerreko-bentrikulua'], {
+        L(0.36, 'Beraz, bi hasierako bentrikuluak jatorri desberdinekoak dira: hasierako eskuineko bentrikulua bulbotik, ezkerrekoa atal bentrikularretik.', n('3.2/p4/s1'), ['hasierako-eskuineko-bentrikulua', 'hasierako-ezkerreko-bentrikulua'], {
           tone: 'emphasis',
           plain: 'Eskuineko bentrikuluaren atal trabekulatua bulboaren hurbileko ataletik dator; ezkerrekoarena, atal bentrikularretik.',
         }),
@@ -417,7 +418,7 @@ export const LESSON_W10: Lesson = {
             'Ez: atzetik ikusita ez dira alderantzizkatzen.',
             'Ez: aurretik ikusita alderantziz daude.',
           ],
-          notes: n('2/p17/s4', '3.4/p4/s1'),
+          notes: n('2/p17/s4', '3.4/p3/s1', '3.4/p4/s1'),
         },
         {
           kind: 'predict',
@@ -459,7 +460,7 @@ export const LESSON_W10: Lesson = {
         L(0, 'Eskuin atzeko aurikularen pareta zain sinuarekin komunikatuta dago: hori da zulo sinoaurikularra.', n('3.4/p10/s1', '3.4/p10/s2'), ['zulo-sinoaurikularra'], { plain: 'Aurikula honen atzeko horman zulo bat dago, zain sinura irekitzen dena: zulo sinoaurikularra.' }),
         L(0.13, 'Zuloaren ertzeko eskuineko eta ezkerreko zain balbulak goikaldean fusionatzen dira, eta trenkada bat sortzen dute: septum spuriuma.', n('3.4/p10/s3', '3.4/p10/s4'), ['eskuineko-zain-balbula', 'ezkerreko-zain-balbula', 'septum-spurium'], { tone: 'emphasis', plain: 'Zuloaren bi ertzetan bi balbula daude; goian elkartzen dira eta horma txiki bat egiten dute: septum spuriuma.' }),
         L(0.22, 'Gero, septum spuriuma eta ezkerreko zain balbula septum secundumarekin fusionatzen dira: aurikula arteko trenkadaren osagai bihurtzen dira.', n('3.4/p11/s1', '3.4/p11/s2'), ['septum-spurium', 'ezkerreko-zain-balbula', 'septum-secundum'], { writes: 'tz-ezker-balbula', plain: 'Gero horma hori eta ezkerreko balbula septum secundumarekin elkartzen dira, aurikulen arteko horman.' }),
-        L(0.37, 'Eskuineko zain balbula goian desagertzen da; behean bitan banatzen da: beheko kabaren balbula eta sinu koronarioaren balbula.', n('3.4/p10/s3'), ['eskuineko-zain-balbula', 'beheko-kabaren-balbula', 'sinu-koronarioaren-balbula'], { tone: 'emphasis', writes: 'tz-eskuin-balbula', plain: 'Eskuineko balbula goian galtzen da; behean bi balbula txiki uzten ditu: beheko kabaren balbula eta sinu koronarioaren balbula.' }),
+        L(0.37, 'Eskuineko zain balbula goian desagertzen da; behean bitan banatzen da: beheko kabaren balbula eta sinu koronarioaren balbula.', n('3.4/p10/s3', '3.4/p16/s3', '3.4/p17/s1', '3.4/p18/s1'), ['eskuineko-zain-balbula', 'beheko-kabaren-balbula', 'sinu-koronarioaren-balbula'], { tone: 'emphasis', writes: 'tz-eskuin-balbula', plain: 'Eskuineko balbula goian galtzen da; behean bi balbula txiki uzten ditu: beheko kabaren balbula eta sinu koronarioaren balbula.' }),
         L(0.53, 'Bitartean, atzean zegoen sinua aurikularen atzeko paretan inkorporatzen da: horrela sortzen da behin betiko eskuineko aurikula.', n('3.4/p12/s1', '3.4/p12/s2'), ['atal-lisoa', 'eskuineko-aurikula'], { plain: 'Atzean zegoen sinua aurikularen atzeko hormaren parte bihurtzen da. Hortik dator behin betiko eskuineko aurikula.' }),
         L(0.58, 'Atzeko atal lisoa zain sinuaren eskuineko luzapenetik dator: bertan bukatzen dira goiko eta beheko bena kabak, eta sinu koronarioa.', n('3.4/p13/s2', '3.4/p13/s5', '3.4/p13/s6', '3.4/p21/s1'), ['atal-lisoa', 'goiko-kaba-zaina', 'beheko-kaba-zaina', 'sinu-koronarioa'], { tone: 'emphasis', writes: 'tz-eskuin-luzapena', plain: 'Atzeko zati leuna zain sinutik dator: hara iristen dira bi bena kabak eta sinu koronarioa.' }),
         L(0.7, 'Gainerakoa atal trabekulatua da: hasierako eskuineko aurikulatik dator, belarritxoa barne, eta muskulu pektinio finak ditu.', n('3.4/p13/s7'), ['atal-trabekulatua', 'belarritxoa', 'muskulu-pektinioak'], { tone: 'emphasis', writes: 'tz-aurikularra', plain: 'Beste zatiak muskulu finak ditu, zimurtsua da, eta belarritxoa barne hartzen du.' }),

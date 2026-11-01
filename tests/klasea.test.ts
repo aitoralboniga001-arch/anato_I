@@ -170,7 +170,7 @@ const TOPICS: Topic[] = [
   {
     week: 7,
     importance: IMPORTANCE_W7,
-    pinned: ['1/p4/s2', '1/p5/s1', '2/p3/s1', '2/p7/s1', '2/p10/s1', '2.1/p4/s1', '2.1/p12/s2', '2.2/p3/s1', '2.2/p9/s1', '3/p4/s5', '3/p5/s2', '3/p7/s2', '3.1/p8/s1'],
+    pinned: ['1/p4/s2', '1/p5/s1', '2/p3/s1', '2/p8/s1', '2/p10/s1', '2.1/p4/s1', '2.1/p12/s2', '2.2/p4/s1', '2.2/p9/s1', '3/p4/s5', '3/p5/s2', '3/p7/s2', '3.1/p8/s1'],
     contrastFrom: 'orriak',
     shown: {},
     same: {},
@@ -222,10 +222,10 @@ const TOPICS: Topic[] = [
   {
     week: 13,
     importance: IMPORTANCE_W13,
-    pinned: ['1/p3/s1', '1/p5/s2', '2/p3/s2', '2.1.1/p5/s4', '2.2/p6/s2', '2.3/p7/s2', '2.3.1/p5/s1', '3.1/p13/s2', '3.2/p10/s4', '4.1.1/p3/s9', '4.2/p11/s1', '5/p10/s1'],
+    pinned: ['1/p3/s1', '1/p5/s2', '2/p3/s2', '2.1.1/p5/s4', '2.2/p6/s2', '2.3/p7/s4', '2.3.1/p5/s1', '3.1/p13/s2', '3.2/p10/s4', '4.1.1/p3/s9', '4.2/p11/s1', '5/p10/s1'],
     contrastFrom: 'bitelinoak',
     // Cardinal3D names the whole vein ('Beheko bena kaba') from the beheko-kaba stage's first step, over its three toured segments.
-    shown: { 'kabak#3/beheko-kaba-zaina': 'Cardinal3D: beheko kaba izendatuta 1. urratsetik', 'kabak#10/beheko-kaba-zaina': 'Cardinal3D: beheko kaba izendatuta 1. urratsetik' },
+    shown: { 'kabak#3/beheko-kaba-zaina': 'Cardinal3D: beheko kaba izendatuta 1. urratsetik', 'kabak#11/beheko-kaba-zaina': 'Cardinal3D: beheko kaba izendatuta 1. urratsetik' },
     // 4.2/p6–p7: each fetal shunt closes into its ligament; the birth scene draws the vessel under the ligament's name.
     same: { 'ezkerreko-zilbor-zaina': ['gibeleko-lotailu-borobila'], 'hodi-benosoa': ['gibeleko-lotailu-benosoa'], 'hodi-arteriosoa': ['lotailu-arteriosoa'] },
   },

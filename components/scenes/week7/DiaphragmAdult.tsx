@@ -413,7 +413,7 @@ export function DiaphragmProfile({ t, reduced }: SceneProps) {
         })}
       </Part>
       {SPINE.map((n, i) =>
-        ['T6', 'T12', 'L1', 'L3'].includes(n) ? (
+        ['T7', 'T12', 'L1', 'L3'].includes(n) ? (
           <Note key={n} x={SPINE_X + 96} y={spineY(i)} size={12.5} tone={n === 'L1' || n === 'L3' ? 'accent' : 'dim'}>
             {n}
           </Note>

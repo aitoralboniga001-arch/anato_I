@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { BEL_ITEMS, BEL_PLATES, BEL_SYSTEMS, matchesName, sameKey, type BelItem, type BelPlate, type BelSystem } from '@/content/belortzioak';
+import { BEL_ITEMS, BEL_KINDS, BEL_MERGED, BEL_MERGED_PLATES, BEL_PLATES, BEL_SYSTEMS, matchesName, sameKey, type BelItem, type BelKind, type BelMerged, type BelPlate, type BelSystem } from '@/content/belortzioak';
 import { LandFoot, LandNav } from './LandNav';
 import { arrange, H, type Placed } from '@/lib/belortzioakLayout';
 import s from './belortzioak.module.css';
@@ -16,11 +16,15 @@ import s from './belortzioak.module.css';
  * - Non dago? a name: tap where it is.
  * - Errepasoa: a spaced review across every figure (what is due first, then new ones), mixing both
  *   kinds of question. Progress lives in this browser.
+ * - Fusionatuak: a drawing used by several figures, with every name of every copy on it; one kind of
+ *   structure at a time (each on the copy coloured for it), or all together, coloured by kind.
  */
 
 type Mode = 'esploratu' | 'zer' | 'non';
 type Style = 'aukerak' | 'buruz' | 'idatzi';
-type Scope = BelSystem | 'denak';
+type Scope = BelSystem | 'denak' | 'fusio';
+/** Kind picked in the merged figures; null: all of them (or, when crowded, the first kind). */
+type KindPick = BelKind | 'denak' | null;
 type Pt = [number, number];
 
 interface Card {
@@ -100,7 +104,16 @@ const shuffle = <T,>(xs: readonly T[]): T[] => {
   return a;
 };
 
-const plateOf = (id: string) => BEL_PLATES.find((p) => p.id === id) ?? BEL_PLATES[0];
+const plateOf = (id: string) => BEL_PLATES.find((p) => p.id === id) ?? BEL_MERGED_PLATES.find((p) => p.id === id) ?? BEL_PLATES[0];
+const KIND = new Map(BEL_KINDS.map((k) => [k.id, k]));
+const kindColor = (it: BelItem) => (it.kind ? { ['--kc' as string]: KIND.get(it.kind)!.color } : undefined);
+/** More names than this on one merged figure and it opens on one kind instead of all of them. */
+const CROWDED = 24;
+const mergedOf = (p: BelPlate) => (p.merge ? BEL_MERGED.find((g) => g.id === p.merge!.group) : undefined);
+const variant = (g: BelMerged, pick: KindPick): BelPlate => {
+  if (pick === 'denak') return g.all;
+  return g.kinds.find((k) => k.kind === pick)?.plate ?? (g.all.items.length > CROWDED ? g.kinds[0].plate : g.all);
+};
 const itemOf = (plate: BelPlate, key: string) => plate.items.find((i) => i.key === key);
 const findItem = (key: string) => BEL_ITEMS.find((x) => x.item.key === key);
 const SAME = new Map<string, { plate: BelPlate; item: BelItem }[]>();
@@ -154,9 +167,11 @@ interface FigureProps {
 function Figure({ plate, mode, numbers, covered, active, onHover, onPick, marks, onMark, asked, answered, tap, onTap, missing }: FigureProps) {
   const st = stageOf(plate);
   const svg = useRef<SVGSVGElement>(null);
-  const placed = useMemo(() => arrange(plate.items), [plate]);
   const explore = mode === 'esploratu';
   const lit = explore ? (active ? itemOf(plate, active) : undefined) : answered ? (asked ?? undefined) : undefined;
+  // A crowded merged figure with every kind: coloured dots, and only the name pointed at in its column.
+  const dots = explore && !numbers && !!plate.merge && !plate.merge.kind && plate.items.length > CROWDED;
+  const placed = useMemo(() => (dots ? (lit ? arrange([lit]) : []) : arrange(plate.items)), [plate, dots, lit]);
   const pct = (u: number, of: number) => `${(u / of) * 100}%`;
 
   // Pointer → the structure under it (nearest arrow tip within its light), so the figure itself answers hover too.
@@ -248,7 +263,26 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, marks,
 
         <rect className={s.paper} width={st.tw} height={H} rx="18" />
         {/* keyed: a new element per figure (Chrome may keep painting the old bitmap when only href changes) */}
-        {!missing && <image key={plate.id} href={imgOf(plate.id)} x={st.fx} y={0} width={st.fw} height={H} className={s.img} />}
+        {!missing && !plate.imgM && <image key={plate.id} href={imgOf(plate.id)} x={st.fx} y={0} width={st.fw} height={H} className={s.img} />}
+        {/* a merged figure: the copy coloured for what is shown, laid exactly onto the base drawing */}
+        {!missing && plate.imgM && (
+          <>
+            <clipPath id={`bel-clip-${plate.id}`}>
+              <rect x={st.fx} y={0} width={st.fw} height={H} />
+            </clipPath>
+            <g clipPath={`url(#bel-clip-${plate.id})`}>
+              <image
+                key={plate.id}
+                href={imgOf(plate.img!)}
+                width={1}
+                height={1}
+                preserveAspectRatio="none"
+                className={s.img}
+                transform={`matrix(${st.fw * plate.imgM[0][0]} ${H * plate.imgM[1][0]} ${st.fw * plate.imgM[0][1]} ${H * plate.imgM[1][1]} ${st.fx + st.fw * plate.imgM[0][2]} ${H * plate.imgM[1][2]})`}
+              />
+            </g>
+          </>
+        )}
 
         {/* the light: everything but the structure dims */}
         <rect className={`${s.dim}${lit ? ` ${s.isOn}` : ''}`} width={st.tw} height={H} rx="18" mask={`url(#bel-mask-${plate.id})`} />
@@ -260,7 +294,7 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, marks,
               const [x1, y1] = lineEnd(pl);
               const on = active === pl.key;
               return (
-                <g key={pl.key} className={`${s.leader}${on ? ` ${s.isOn}` : ''}${active && !on ? ` ${s.isFaded}` : ''}`}>
+                <g key={pl.key} className={`${s.leader}${on ? ` ${s.isOn}` : ''}${active && !on ? ` ${s.isFaded}` : ''}${it.kind ? ` ${s.isKind}` : ''}`} style={kindColor(it)}>
                   {it.targets.map((t, i) => {
                     const [x2, y2] = st.at(t);
                     return (
@@ -271,6 +305,21 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, marks,
                       </Fragment>
                     );
                   })}
+                </g>
+              );
+            })}
+          </g>
+        )}
+
+        {dots && (
+          <g className={s.leaders}>
+            {plate.items.map((it) => {
+              const on = active === it.key;
+              return (
+                <g key={it.key} className={`${s.leader} ${s.isKind} ${s.isDot}${on ? ` ${s.isOn}` : ''}${active && !on ? ` ${s.isFaded}` : ''}`} style={kindColor(it)}>
+                  {it.targets.map((t, i) => (
+                    <circle key={i} className={s.tip} cx={st.at(t)[0]} cy={st.at(t)[1]} r={on ? 7 : 5.5} />
+                  ))}
                 </g>
               );
             })}
@@ -349,8 +398,8 @@ function Figure({ plate, mode, numbers, covered, active, onHover, onPick, marks,
           return (
             <button
               key={it.key}
-              className={`${s.name} ${pl.side === 'l' ? s.isLeft : s.isRight}${on ? ` ${s.isOn}` : ''}${active && !on ? ` ${s.isFaded}` : ''}${hidden ? ` ${s.isCovered}` : ''}${markClass(marks[it.key], s.isMarkRed, s.isMarkOrange)}`}
-              style={style}
+              className={`${s.name} ${pl.side === 'l' ? s.isLeft : s.isRight}${on ? ` ${s.isOn}` : ''}${active && !on ? ` ${s.isFaded}` : ''}${hidden ? ` ${s.isCovered}` : ''}${markClass(marks[it.key], s.isMarkRed, s.isMarkOrange)}${it.kind ? ` ${s.isKind}` : ''}`}
+              style={{ ...style, ...kindColor(it) }}
               onPointerEnter={(e) => e.pointerType !== 'touch' && onHover(it.key)}
               onPointerLeave={(e) => e.pointerType !== 'touch' && onHover(null)}
               onFocus={() => onHover(it.key)}
@@ -435,6 +484,7 @@ export function Belortzioak() {
   const [mode, setMode] = useState<Mode>('esploratu');
   const [style, setStyle] = useState<Style>('aukerak');
   const [numbers, setNumbers] = useState(false);
+  const [kindPick, setKindPick] = useState<KindPick>(null);
   const [cover, setCover] = useState(false);
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
   const [hovered, setHovered] = useState<string | null>(null);
@@ -450,7 +500,10 @@ export function Belortzioak() {
   const q = quiz && !quiz.total ? null : quiz?.queue[0] ?? null;
   const shown = plateOf(q?.plate ?? plateId);
   const asked = q ? (itemOf(shown, q.key) ?? null) : null;
-  const list = scope === 'denak' ? BEL_PLATES : BEL_PLATES.filter((p) => p.system === scope);
+  const list = scope === 'fusio' ? BEL_MERGED.map((g) => variant(g, kindPick)) : scope === 'denak' ? BEL_PLATES : BEL_PLATES.filter((p) => p.system === scope);
+  const merged = mergedOf(shown);
+  // A merged figure's numbers come from several copies (two "3"s), so it always shows names.
+  const showNumbers = numbers && !merged;
   const at = list.findIndex((p) => p.id === shown.id);
   const active = hovered ?? pinned;
   const activeItem = active ? itemOf(shown, active) : undefined;
@@ -470,6 +523,12 @@ export function Belortzioak() {
       }
       const want = new URLSearchParams(window.location.search).get('irudia');
       if (want && BEL_PLATES.some((p) => p.id === want)) setPlateId(want);
+      const fused = want ? BEL_MERGED_PLATES.find((p) => p.id === want) : undefined;
+      if (fused) {
+        setScope('fusio');
+        setKindPick(fused.merge!.kind ?? 'denak');
+        setPlateId(fused.id);
+      }
     });
     fetch(imgOf(BEL_PLATES[0].id), { method: 'HEAD' })
       .then((r) => setMissing(!r.ok))
@@ -481,7 +540,7 @@ export function Belortzioak() {
   useEffect(() => {
     if (missing) return;
     const next = list[at + 1];
-    if (next) new Image().src = imgOf(next.id);
+    if (next) new Image().src = imgOf(next.img ?? next.id);
   }, [at, list, missing]);
 
   useEffect(() => {
@@ -492,7 +551,7 @@ export function Belortzioak() {
 
   const known = (p: BelPlate) => p.items.filter((it) => (cards[it.key]?.b ?? 0) >= KNOWN).length;
   const pctKnown = (p: BelPlate) => Math.round((100 * known(p)) / Math.max(1, p.items.length));
-  const inScope = (sys: BelSystem) => scope === 'denak' || scope === sys;
+  const inScope = (sys: BelSystem | 'fusio') => scope === 'denak' || scope === 'fusio' || scope === sys;
   const due = BEL_ITEMS.filter((x) => inScope(x.plate.system) && cards[x.item.key] && cards[x.item.key].due <= now);
 
   const open = (p: BelPlate, keep?: string) => {
@@ -658,7 +717,7 @@ export function Belortzioak() {
       if (typing) return;
       if (e.key === 'ArrowRight' && at < list.length - 1) open(list[at + 1]);
       if (e.key === 'ArrowLeft' && at > 0) open(list[at - 1]);
-      if ((e.key === 'l' || e.key === 'L') && mode === 'esploratu') setNumbers((v) => !v);
+      if ((e.key === 'l' || e.key === 'L') && mode === 'esploratu' && !merged) setNumbers((v) => !v);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -705,17 +764,19 @@ export function Belortzioak() {
       <section className="lab plates">
         <div className={`lab-controls ${s.controls}`}>
           <div className="qz-kinds" role="group" aria-label="Sistema">
-            {(['denak', ...BEL_SYSTEMS.map((x) => x.id)] as Scope[]).map((sc) => (
+            {(['denak', ...BEL_SYSTEMS.map((x) => x.id), 'fusio'] as Scope[]).map((sc) => (
               <button
                 key={sc}
-                className={scope === sc ? 'is-on' : ''}
+                className={`${scope === sc ? 'is-on' : ''}${sc === 'fusio' ? ` ${s.fusioBtn}` : ''}`}
+                title={sc === 'fusio' ? 'Irudi berak, kopia guztietako izenak batera' : undefined}
                 onClick={() => {
                   setScope(sc);
+                  if (sc === 'fusio') return void (!merged && open(variant(BEL_MERGED[0], kindPick)));
                   const first = sc === 'denak' ? BEL_PLATES[0] : BEL_PLATES.find((p) => p.system === sc)!;
-                  if (sc !== 'denak' && shown.system !== sc) open(first);
+                  if ((sc !== 'denak' && shown.system !== sc) || merged) open(first);
                 }}
               >
-                {sc === 'denak' ? 'Denak' : BEL_SYSTEMS.find((x) => x.id === sc)!.short}
+                {sc === 'denak' ? 'Denak' : sc === 'fusio' ? 'Fusionatuak' : BEL_SYSTEMS.find((x) => x.id === sc)!.short}
               </button>
             ))}
           </div>
@@ -744,7 +805,7 @@ export function Belortzioak() {
           <Figure
             plate={shown}
             mode={quizMode}
-            numbers={numbers}
+            numbers={showNumbers}
             covered={covered}
             active={quiz ? null : active}
             onHover={setHovered}
@@ -760,7 +821,7 @@ export function Belortzioak() {
 
           <aside className={`lab-side ${s.side}`}>
             <p className="kicker">
-              {BEL_SYSTEMS.find((x) => x.id === shown.system)?.short} · {shown.sub}
+              {merged ? 'Fusionatua' : BEL_SYSTEMS.find((x) => x.id === shown.system)?.short} · {shown.sub}
               {quiz?.review && !finished && <span className={s.reviewTag}>Errepasoa</span>}
             </p>
             <h2 className="lab-q">{shown.title}</h2>
@@ -777,19 +838,38 @@ export function Belortzioak() {
               </button>
             </div>
 
+            {merged && (
+              <div className={s.kinds} role="group" aria-label="Egitura mota">
+                {merged.kinds.map((k) => {
+                  const def = KIND.get(k.kind)!;
+                  return (
+                    <button key={k.kind} className={shown.id === k.plate.id ? 'is-on' : ''} style={{ ['--kc' as string]: def.color }} onClick={() => (setKindPick(k.kind), open(k.plate))} disabled={!!quiz?.review && !finished}>
+                      <i aria-hidden="true" />
+                      {def.title} <small>{k.plate.items.length}</small>
+                    </button>
+                  );
+                })}
+                <button className={shown.id === merged.all.id ? 'is-on' : ''} onClick={() => (setKindPick('denak'), open(merged.all))} disabled={!!quiz?.review && !finished}>
+                  Denak <small>{merged.all.items.length}</small>
+                </button>
+              </div>
+            )}
+
             {!quiz && mode === 'esploratu' && (
               <>
                 <ol className={s.legend} onPointerLeave={() => setHovered(null)}>
                   {shown.items.map((it, i) => {
                     const hidden = covered(it.key);
-                    const head = it.group && it.group !== shown.items[i - 1]?.group ? it.group : null;
+                    // On a merged figure with every kind, the kinds head the list; within one kind, the legend's own headings.
+                    const headOf = (x: BelItem | undefined) => (merged && !shown.merge!.kind ? (x?.kind ? KIND.get(x.kind)!.title : undefined) : x?.group);
+                    const head = headOf(it) && headOf(it) !== headOf(shown.items[i - 1]) ? headOf(it) : null;
                     const b = cards[it.key]?.b ?? 0;
                     return (
                       <Fragment key={it.key}>
                         {head && <li className={s.groupHead}>{head}</li>}
                         <li className={`${active === it.key ? s.isOn : ''}${hidden ? ` ${s.isCovered}` : ''}`} onPointerEnter={() => setHovered(it.key)}>
                           <button onClick={() => mark(it.key)} aria-label={hidden ? `${it.tag}: estalita, sakatu ikusteko` : `${it.tag}: ${it.name}`}>
-                            <span className={`num-chip${it.ink ? ` ${s.chipRed}` : ''}${markClass(marks[it.key], s.chipMarkRed, s.chipMarkOrange)}`}>{it.tag}</span>
+                            <span className={`num-chip${it.ink ? ` ${s.chipRed}` : ''}${markClass(marks[it.key], s.chipMarkRed, s.chipMarkOrange)}${it.kind ? ` ${s.chipKind}` : ''}`} style={kindColor(it)}>{it.tag}</span>
                             <span className={s.legendName}>{hidden ? 'Sakatu ikusteko' : it.name}</span>
                             {cards[it.key] && <span className={`${s.meter} ${b >= KNOWN ? s.isKnown : s.isWeak}`} title={b >= KNOWN ? 'Badakizu' : 'Errepasatzeko'} />}
                           </button>
@@ -812,9 +892,11 @@ export function Belortzioak() {
                   <button className={`btn small ghost${cover ? ' is-on' : ''}`} aria-pressed={cover} onClick={() => (setCover((v) => !v), setRevealed(new Set()))} title="Izenak estali; sakatu bakoitza ikusteko">
                     Estali izenak
                   </button>
-                  <button className={`btn small ghost${numbers ? ' is-on' : ''}`} aria-pressed={numbers} onClick={() => setNumbers((v) => !v)} title="Izenak irudiaren alboan, ala zenbakiak irudian (L)">
-                    {numbers ? 'Izenak alboan' : 'Zenbakiak irudian'}
-                  </button>
+                  {!merged && (
+                    <button className={`btn small ghost${numbers ? ' is-on' : ''}`} aria-pressed={numbers} onClick={() => setNumbers((v) => !v)} title="Izenak irudiaren alboan, ala zenbakiak irudian (L)">
+                      {numbers ? 'Izenak alboan' : 'Zenbakiak irudian'}
+                    </button>
+                  )}
                 </div>
                 <p className="lab-keys">Teklak: ← → irudiak · L izenak/zenbakiak · sakatu izen bat: gorria → laranja → kendu</p>
               </>

@@ -238,7 +238,7 @@ const week: WeekDef = {
         },
         {
           at: P1[2],
-          notes: ['w11/2.1/p3/s5'],
+          notes: ['w11/2.1/p3/s5-s6'],
           idea: 'Septum primuma behera luzatzen da, erreten aurikulubentrikularrera heldu arte.',
           text: 'Gandor hau behera luzatzen da erreten aurikulubentrikularrerantz. Erreten honek aurikula komuna eta hasierako ezkerreko bentrikulua (atal bentrikularra) komunikatzen ditu.',
           focus: ['septum-primum', 'kuxin-aurikulubentrikularrak'],
@@ -816,7 +816,7 @@ const week: WeekDef = {
       beats: [
         {
           at: P6[0],
-          notes: ['w11/3/p3/s1', 'w11/3/p4/s1', 'w11/3/p5/s1-s3'],
+          notes: ['w11/3/p3/s1-s2', 'w11/3/p4/s1', 'w11/3/p5/s1-s3'],
           recall: ['atal-bulbarra', 'atal-bentrikularra', 'atal-aurikularra', 'erreten-aurikulubentrikularra'],
           idea: 'Erreten aurikulubentrikularra hodi bat da: hasieran atal bentrikularra (hasierako ezkerreko bentrikulua) goi-atzeko aurikula komunarekin komunikatzen du.',
           key: 'Hasieran erretenak ezkerreko bentrikulua bakarrik komunikatzen du aurikula komunarekin.',
@@ -829,7 +829,7 @@ const week: WeekDef = {
         },
         {
           at: P6[1],
-          notes: ['w11/3/p7/s1'],
+          notes: ['w11/3/p7/s1-s2'],
           idea: '(1) Atal bulbarraren eta bentrikularraren arteko ertza (gandorra), hasieran zorrotza, gero eta txikiagoa (zapalagoa) egiten da.',
           text: 'Erretenaren trenkadatzeak hiru prozesu ditu. Lehenengoa: bihotz lakioaren atal bulbarraren eta atal bentrikularraren artean dagoen ertza edo gandorra (ertz bulbobentrikularra), hasieran nahiko zorrotza dena, gero eta txikiagoa (zapalagoa) egiten da.',
           focus: ['ertz-bulbobentrikularra'],
@@ -890,7 +890,7 @@ const week: WeekDef = {
         },
         {
           at: P6[5],
-          notes: ['w11/3/p9/s3', 'w11/3/p7/s5', 'w11/3/p8/s3'],
+          notes: ['w11/3/p9/s3', 'w11/3/p7/s3-s5', 'w11/3/p8/s3'],
           idea: 'Goiko eta beheko kuxinak hurbildu eta fusionatzen dira (trenkada): erretena bi zulotan banatzen da, eskuineko eta ezkerreko zulo aurikulubentrikularrak.',
           key: 'Goikoa + behekoa → trenkada → eskuineko eta ezkerreko zulo AB.',
           text: 'Garapenean goiko eta beheko kuxinak elkarrengana hurbiltzen dira, trenkada sortuz, eta erretena bi zulo desberdin bihurtzen dute: eskuineko eta ezkerreko zulo aurikulubentrikularrak. Hauek komunikatzen dituzte goi-atzean dauden aurikulak eta behe-aurrean dauden bentrikuluak: ezkerreko aurikula ezkerreko bentrikuluarekin, eta eskuineko aurikula eskuineko bentrikuluarekin.',
@@ -1007,7 +1007,7 @@ const week: WeekDef = {
         },
         {
           at: P7[1],
-          notes: ['w11/3/p18/s1', 'w11/3/p19/s1'],
+          notes: ['w11/3/p18/s1', 'w11/3/p19/s1', 'w11/3/p16/s1-s2'],
           idea: 'Eskuineko zuloan balbula trikuspidea (3 balba); ezkerrekoan bikuspidea edo mitrala (2 balba).',
           key: 'Eskuinean TRIkuspidea (3), ezkerrean BIkuspidea/mitrala (2).',
           ask: {
@@ -1280,7 +1280,7 @@ const week: WeekDef = {
         },
         {
           at: P9[3],
-          notes: ['w11/5.1/p4/s5-s8'],
+          notes: ['w11/5.1/p4/s5-s8', 'w11/5.1/p4/s15'],
           idea: 'Aurre-eskuinean eskuineko bentrikuluaren infundibulua (birika arteria); atze-ezkerrean ezkerrekoaren infundibulua (aorta). Ez daude plano berean.',
           key: 'Aurre-eskuina → eskuineko infundibulua → birika arteria; atze-ezkerra → ezkerreko infundibulua → aorta.',
           ask: {

@@ -29,10 +29,10 @@ describe('topic 7 thorax: narrated actions are drawn', () => {
     expect(svg).toContain('mask="url(#w7-th-inW1)"');
   });
 
-  it('the serous pericardium reflects onto the fibrous one: the heart-in-balloon comparison', () => {
+  it('the visceral pericardium reflects into the parietal one: the heart-in-balloon comparison', () => {
     expect(at(0.8)).toContain('Ukabila puxikan sakatuta');
     const svg = at(0.89);
     expect(svg).toContain('Bihotza puxikan sakatuta');
-    expect(svg).toContain('kanpoko orria → paretako serosoa');
+    expect(svg).toContain('kanpoko orria → paretako perikardioa');
   });
 });

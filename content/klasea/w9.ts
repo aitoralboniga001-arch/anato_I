@@ -216,7 +216,7 @@ export const LESSON_W9: Lesson = {
         L(0.66, 'Nerbio trigeminoak inerbatzen ditu, bosgarren bikote kranialak.', n('2.1.1/p7/s1'), ['nerbio-trigeminoa'], {
           plain: 'Horien nerbioa bosgarrena da: trigeminoa.',
         }),
-        L(0.76, '6. somitomeroa 2. arkuan kokatzen da: hortik muskulu mimikoak, keinuak egiteko, eta barailaren jeistaileak.', n('2.1.1/p7/s2'), [
+        L(0.76, '6. somitomeroa 2. arkuan kokatzen da: hortik muskulu mimikoak, keinuak egiteko, eta barailaren jeistaileak.', n('2.1/p5/s2', '2.1.1/p7/s2'), [
           'hioide-arkua',
           'muskulu-mimikoak',
           'barailaren-muskulu-jeistaileak',
@@ -276,7 +276,7 @@ export const LESSON_W9: Lesson = {
           writes: 'b-okzipitalak',
           plain: 'Azken somita okzipitaletatik mihiko muskulu guztiak sortzen dira, eta denak ildaskatuak dira.',
         }),
-        L(0.2, 'Nerbio hipoglosoak inerbatzen ditu, 12. bikote kranialak, eta zuntz motoreak bakarrik ditu.', n('2.1.2/p6/s2'), ['nerbio-hipoglosoa'], {
+        L(0.2, 'Nerbio hipoglosoak inerbatzen ditu, hamabigarren bikote kranialak, eta zuntz motoreak bakarrik ditu.', n('2.1.2/p6/s2'), ['nerbio-hipoglosoa'], {
           plain: 'Mihiko muskuluen nerbioa hipoglosoa da, hamabigarrena; zuntz motoreak bakarrik ditu.',
         }),
         L(0.3, 'Beraz, buruko muskulu ildaskatu guztiak nerbio kranialek inerbatzen dituzte.', n('2.1.2/p8/s1'), ['nerbio-kranialak'], {
@@ -325,6 +325,9 @@ export const LESSON_W9: Lesson = {
         L(0.84, '1. eta 2. somita okzipitalak 4. eta 6. faringe arkuetan garatzen dira.', n('2.1.3/p24/s1'), ['somita-okzipitalak', 'laringearen-muskuluak'], {
           view: 'burua',
           plain: 'Lehen bi somita okzipitalak laugarren eta seigarren arkuetan garatzen dira.',
+        }),
+        L(0.84, '2.–5. somita okzipitaletatik mihiko muskulu ildaskatuak sortzen dira, nerbio hipoglosoak inerbatuta.', n('2.1.3/p26/s1'), ['somita-okzipitalak', 'mihiaren-muskuluak', 'nerbio-hipoglosoa'], {
+          plain: 'Bigarrenetik bosgarrenera arteko somita okzipitaletatik mihiaren muskuluak datoz; hipoglosoak inerbatzen ditu.',
         }),
         L(0.92, 'Nerbio batek mota askotako zuntzak izan ditzake; hipoglosoak, aldiz, zuntz motoreak bakarrik ditu.', n('2.1/p5/s3', '2.1/p5/s5'), ['nerbio-hipoglosoa'], {
           plain: 'Nerbio askok zuntz mota asko dituzte; hipoglosoak, ordea, motoreak bakarrik.',
@@ -545,7 +548,7 @@ export const LESSON_W9: Lesson = {
         L(0.36, 'Atzeko adarretan, neurona sentsorialak.', n('2.2.2/p7/s1', '2.2.2/p7/s2'), ['atzeko-adarra', 'neurona-sentsorialak'], {
           plain: 'Atzeko adarretan sentsazioak jasotzen dituztenak: neurona sentsorialak.',
         }),
-        L(0.44, 'Alboko adarretan, ez beti, neurona begetatiboak; eta erdian, enimo hodia.', n('2.2.2/p9/s1'), ['alboko-adarra', 'neurona-begetatiboak', 'enimo-hodia'], {
+        L(0.44, 'Alboko adarretan, ez beti, neurona begetatiboak; eta erdian, enimo hodia.', n('2.2.2/p8/s1', '2.2.2/p9/s1'), ['alboko-adarra', 'neurona-begetatiboak', 'enimo-hodia'], {
           plain: 'Batzuetan alboko adarrak ere badaude, neurona begetatiboekin; erdian, enimo hodia.',
         }),
         L(0.52, 'Gai grisaren kanpoan gai zuria dago, hiru kordoirekin: atzekoa, albokoa eta aurrekoa.', n('2.2.2/p9/s2', '2.2.2/p9/s3'), ['gai-zuria', 'gai-grisa', 'atzeko-kordoia', 'alboko-kordoia', 'aurreko-kordoia'], {
@@ -638,7 +641,7 @@ export const LESSON_W9: Lesson = {
           'aurreko-adarra',
           'atzeko-adarra',
         ], { tone: 'caution', plain: 'Kontuz: hiru adar mota daude izen antzekoekin. Hauek nerbioaren adarrak dira, ez gai grisarenak.' }),
-        L(0.26, 'Muskuluen inerbazioak ez du zerikusirik haien jatorriarekin.', n('2.2.2/p15/s2'), [], {
+        L(0.26, 'Muskuluen inerbazioak ez du zerikusirik haien jatorriarekin.', n('2.2.2/p15/s1', '2.2.2/p15/s2'), [], {
           tone: 'emphasis',
           writes: 'b-jatorria',
           plain: 'Garrantzitsua: muskulu baten jatorriak ez du esaten zein nerbiok mugitzen duen.',

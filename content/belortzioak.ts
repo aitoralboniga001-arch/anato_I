@@ -1,4 +1,5 @@
 import geometry from './belortzioak-geometry.json';
+import merge from './belortzioak-merge.json';
 
 /**
  * Belortzioak: the course's labelled figures (an arrow on a structure → its name), from the skin's
@@ -49,17 +50,24 @@ export interface BelItem {
   arrow: boolean;
   /** Spotlight radius per target, as a fraction of the figure's longer side. */
   r: number[];
+  /** Merged figures only: the kind of structure, and the copy the name comes from. */
+  kind?: BelKind;
+  from?: string;
 }
 
 export interface BelPlate {
   id: string;
-  system: BelSystem;
+  system: BelSystem | 'fusio';
   title: string;
   /** Which of the three embryos of the set, or the kind of view. */
   sub: string;
   /** Figure size in pixels (its aspect ratio). */
   size: [number, number];
   items: BelItem[];
+  /** Merged figures: the copy whose picture is drawn, placed onto this figure by `imgM`. */
+  img?: string;
+  imgM?: [[number, number, number], [number, number, number]];
+  merge?: { group: string; kind: BelKind | null };
 }
 
 interface Entry {
@@ -519,6 +527,7 @@ export const BEL_PLATES: BelPlate[] = DEFS.map((d) => {
 
 export const BEL_ITEMS: { plate: BelPlate; item: BelItem }[] = BEL_PLATES.flatMap((plate) => plate.items.map((item) => ({ plate, item })));
 
+
 /** Lower case, no accents, Roman ordinals as digits, no punctuation: what two spellings share. */
 export function normalizeName(s: string): string {
   return s
@@ -580,3 +589,130 @@ export function matchesName(typed: string, item: Pick<BelItem, 'name' | 'accept'
     return levenshtein(a, b) <= Math.min(2, slack(b.length));
   });
 }
+
+// ---- merged figures: one drawing, every name it carries across its copies -------------------------
+
+/** What kind of structure a name is, so a crowded merged figure can show one kind at a time. */
+export type BelKind = 'bihotza' | 'arteriak' | 'zainak' | 'arnas' | 'linfa' | 'digestio' | 'hostoak';
+
+export const BEL_KINDS: { id: BelKind; title: string; color: string }[] = [
+  { id: 'bihotza', title: 'Bihotza', color: '#b0418f' },
+  { id: 'arteriak', title: 'Arteriak', color: '#d23a2e' },
+  { id: 'zainak', title: 'Zainak', color: '#2f63c9' },
+  { id: 'arnas', title: 'Arnas bidea', color: '#0f8f86' },
+  { id: 'linfa', title: 'Linfa-sistema', color: '#4f9a2e' },
+  { id: 'digestio', title: 'Digestio-hodia', color: '#c77a0a' },
+  { id: 'hostoak', title: 'Hostoak eta barrunbeak', color: '#6b6f7a' },
+];
+
+/** Each copy's own subject; a legend heading that names another kind wins. */
+const PLATE_KIND: Record<string, BelKind> = {
+  p06: 'hostoak', p07: 'bihotza', p08: 'bihotza', p09: 'bihotza', p10: 'arteriak', p11: 'zainak', p12: 'arteriak', p13: 'bihotza', p14: 'zainak',
+  p15: 'arnas', p16: 'arnas', p17: 'arnas', p18: 'digestio', p19: 'digestio', p20: 'digestio', p21: 'digestio', p22: 'digestio', p23: 'digestio',
+};
+const GROUP_KIND: [RegExp, BelKind][] = [
+  [/^Bihotza/, 'bihotza'],
+  [/^Arteriak$/, 'arteriak'],
+  [/^Zainak$/, 'zainak'],
+  [/^Linfa-sistema$/, 'linfa'],
+  [/^Sistema muskulueskeletikoa$/, 'hostoak'],
+];
+const kindOf = (plateId: string, it: BelItem): BelKind => GROUP_KIND.find(([re]) => it.group && re.test(it.group))?.[1] ?? PLATE_KIND[plateId];
+
+const MERGE_TITLES: Record<string, { title: string; sub: string }> = {
+  'f-sagitala': { title: 'Ebaki sagitala, fusionatuta', sub: 'Ebaki sagitala' },
+  'f-1': { title: '1. enbrioia, fusionatuta', sub: '1. enbrioia' },
+  'f-2': { title: '2. enbrioia, fusionatuta', sub: '2. enbrioia' },
+  'f-3': { title: '3. enbrioia, fusionatuta', sub: '3. enbrioia' },
+  'f-birika': { title: 'Birika eta duodenoa, fusionatuta', sub: '3. enbrioia' },
+};
+
+/** Copy fractions → base fractions: x' = a·x + b·y + c, y' = d·x + e·y + f (scripts/belortzioak/merge.py). */
+type Affine = [[number, number, number], [number, number, number]];
+const MERGE = merge as unknown as Record<string, { base: string; members: Record<string, Affine> }>;
+
+export interface BelMerged {
+  /** The group's id ("f-2"); its plates are `${id}` (every kind) and `${id}~${kind}`. */
+  id: string;
+  title: string;
+  sub: string;
+  base: string;
+  /** Every kind present, in BEL_KINDS order, with its figure. */
+  kinds: { kind: BelKind; plate: BelPlate }[];
+  all: BelPlate;
+}
+
+const unit = (v: number) => Math.min(1, Math.max(0, v));
+/** An item carried from one figure's fractions to another's by `m` (its spotlight radii rescaled too). */
+const carry = (it: BelItem, m: Affine, from: [number, number], to: [number, number]): BelItem => {
+  const map = ([x, y]: Pt): Pt => [unit(m[0][0] * x + m[0][1] * y + m[0][2]), unit(m[1][0] * x + m[1][1] * y + m[1][2])];
+  // pixel scale between the two figures, for radii given as a fraction of each one's longer side
+  const det = Math.abs(m[0][0] * m[1][1] - m[0][1] * m[1][0]) * ((to[0] * to[1]) / (from[0] * from[1]));
+  const rk = (Math.sqrt(det) * Math.max(...from)) / Math.max(...to);
+  return { ...it, label: map(it.label), targets: it.targets.map(map), marks: it.marks.map((x) => ({ ...x, at: map(x.at) })), r: it.r.map((r) => r * rk) };
+};
+const invert = ([[a, b, c], [d, e, f]]: Affine): Affine => {
+  const k = a * e - b * d;
+  return [
+    [e / k, -b / k, (b * f - c * e) / k],
+    [-d / k, a / k, (c * d - a * f) / k],
+  ];
+};
+/** Whether every point of these items lies on the figure `m` carries them to (a little slack). */
+const fits = (items: BelItem[], m: Affine) =>
+  items.every((it) => [it.label, ...it.targets].every(([x, y]) => [m[0][0] * x + m[0][1] * y + m[0][2], m[1][0] * x + m[1][1] * y + m[1][2]].every((v) => v > -0.02 && v < 1.02)));
+const IDENTITY: Affine = [
+  [1, 0, 0],
+  [0, 1, 0],
+];
+
+export const BEL_MERGED: BelMerged[] = Object.entries(MERGE).map(([id, g]) => {
+  const base = BEL_PLATES.find((p) => p.id === g.base)!;
+  const pooled: BelItem[] = [];
+  const by = new Map<string, BelItem>();
+  for (const [pid, m] of Object.entries(g.members)) {
+    const plate = BEL_PLATES.find((p) => p.id === pid)!;
+    for (const it of plate.items) {
+      const kind = kindOf(pid, it);
+      // a merged figure renumbers its names, so the red-pen numbering of a copy means nothing here
+      const moved: BelItem = { ...carry(it, m, plate.size, base.size), kind, from: pid, ink: undefined };
+      // The same structure named in two copies is one name here, pointing wherever either pointed.
+      const forms = [it.name, ...(it.accept ?? [])].map(sameKey);
+      const twin = forms.map((f) => by.get(`${kind}|${f}`)).find(Boolean);
+      if (twin) {
+        moved.targets.forEach((t, i) => {
+          if (twin.targets.some((u) => Math.hypot(u[0] - t[0], u[1] - t[1]) < 0.03)) return;
+          twin.targets.push(t);
+          twin.r.push(moved.r[i] ?? 0.05);
+        });
+        twin.accept = [...new Set([...(twin.accept ?? []), it.name, ...(it.accept ?? [])])].filter((n) => n !== twin.name);
+        continue;
+      }
+      pooled.push(moved);
+      for (const f of forms) by.set(`${kind}|${f}`, moved);
+    }
+  }
+  const order = (k: BelKind) => BEL_KINDS.findIndex((x) => x.id === k);
+  pooled.sort((a, b) => order(a.kind!) - order(b.kind!));
+  const t = MERGE_TITLES[id] ?? { title: id, sub: '' };
+  const plateFor = (pid: string, kind: BelKind | null, items: BelItem[]): BelPlate => {
+    // The figure shown is the copy coloured for that kind (the one most of its names come from).
+    const counts = new Map<string, number>();
+    for (const it of items) counts.set(it.from!, (counts.get(it.from!) ?? 0) + 1);
+    const img = kind ? [...counts].sort((a, b) => b[1] - a[1])[0][0] : g.base;
+    // One kind is shown in its own copy's frame (that copy filling the stage, the other copies' names
+    // carried onto it), unless a name would fall off that copy; all kinds together, in the base's.
+    const own = BEL_PLATES.find((p) => p.id === img)!;
+    const back = invert(g.members[img]);
+    const inOwn = kind !== null && fits(items, back);
+    const placed = inOwn ? items.map((it) => carry(it, back, base.size, own.size)) : items;
+    // numbered afresh on each figure (the copies' own numbers clash: two "3"s)
+    const numbered = placed.map((it, i) => ({ ...it, tag: String(i + 1) }));
+    return { id: pid, system: 'fusio', title: t.title, sub: t.sub, size: inOwn ? own.size : base.size, items: numbered, img, imgM: inOwn ? IDENTITY : g.members[img], merge: { group: id, kind } };
+  };
+  const kinds = BEL_KINDS.filter((k) => pooled.some((it) => it.kind === k.id)).map((k) => ({ kind: k.id, plate: plateFor(`${id}~${k.id}`, k.id, pooled.filter((it) => it.kind === k.id)) }));
+  return { id, title: t.title, sub: t.sub, base: g.base, kinds, all: plateFor(id, null, pooled) };
+});
+
+/** Every merged figure, each kind on its own. */
+export const BEL_MERGED_PLATES: BelPlate[] = BEL_MERGED.flatMap((g) => [g.all, ...g.kinds.map((k) => k.plate)]);

@@ -72,7 +72,7 @@ export const LESSON_W13: Lesson = {
         }),
       ],
       board: [
-        { id: 'b-hiru', kind: 'line', text: '5. astean zain sinura 3 zain mota, bikoitzak: bitelinoak, zilborrekoak eta kardinal komunak', notes: n('1/p3/s1'), key: true },
+        { id: 'b-hiru', kind: 'line', text: '5. astean zain sinura hiru zain mota, bikoitzak: bitelinoak, zilborrekoak eta kardinal komunak', notes: n('1/p3/s1'), key: true },
         { id: 'b-zilbor', kind: 'line', text: 'Zilborreko zainak: karenako odol oxigenatua', notes: n('1/p5/s2') },
         { id: 'b-nahasi', kind: 'line', text: 'Zain sinuan odola nahasten da', notes: n('1/p6/s4') },
       ],
@@ -110,7 +110,7 @@ export const LESSON_W13: Lesson = {
         L(0.45, 'Gibelaren barruan adarkatzen dira, eta beste zain sare bat sortzen dute: gibeleko sinusoideak.', n('2.1.1/p4/s4'), ['gibela', 'gibeleko-sinusoideak'], {
           plain: 'Gibelaren barruan zatitu egiten dira, eta hodi txikien sare bat egiten dute.',
         }),
-        L(0.55, 'Gibeletik irteten diren azken atalak hodi hepatokardiakoak dira.', n('2.1.1/p5/s3'), ['gibela', 'hodi-hepatokardiakoak'], {
+        L(0.55, 'Gibeleko odola hodi hepatokardiakoen bidez irteten da: gibeletik irteten diren azken atalak dira.', n('2.1.1/p5/s1', '2.1.1/p5/s3'), ['gibela', 'hodi-hepatokardiakoak'], {
           plain: 'Gibeletik bihotzera doazen azken zatiei hodi hepatokardiakoak deritze.',
         }),
         L(0.68, 'Garrantzitsua: eskuineko hodi hepatokardiakoa ez da galtzen; geroago, kaba zain baten zati bat izango da.', n('2.1.1/p5/s4'), ['eskuineko-hodi-hepatokardiakoa'], {
@@ -239,7 +239,7 @@ export const LESSON_W13: Lesson = {
         L(0.06, 'Hasieran, 5. astera arte, bi zain kardinal mota daude: aurreko kardinalak eta atzeko kardinalak.', n('2.3/p3/s1'), ['aurreko-zain-kardinalak', 'atzeko-zain-kardinalak'], {
           plain: '5. astera arte, bi kardinal mota daude: buruko odola biltzen dutenak eta gorputzeko odola biltzen dutenak.',
         }),
-        L(0.38, '5. eta 7. asteen artean, hiru zain sistema berri agertzen dira, bikoitzak. Lehena, kardinal azpiko zainak: giltzurrunetako odola.', n('2.3/p7/s2'), ['kardinal-azpiko-zainak', 'giltzurruna'], {
+        L(0.38, '5. eta 7. asteen artean, hiru zain sistema berri agertzen dira, bikoitzak. Lehena, kardinal azpiko zainak: giltzurrunetako odola.', n('2.3/p7/s2', '2.3/p7/s4'), ['kardinal-azpiko-zainak', 'giltzurruna'], {
           tone: 'emphasis',
           writes: 'b-hiru-sistema',
           plain: 'Gero hiru zain sistema berri sortzen dira. Lehenak, kardinal azpiko zainek, giltzurrunetako odola biltzen dute.',
@@ -252,6 +252,10 @@ export const LESSON_W13: Lesson = {
         }),
         L(0.85, 'Ondorioz, atzeko kardinalek egiten zuten lana kardinal gaineko zainek egiten dute orain.', n('2.3.1/p3/s4'), ['atzeko-zain-kardinalak', 'kardinal-gaineko-zainak'], {
           plain: 'Atzeko kardinalen lana kardinal gaineko zainek hartzen dute.',
+        }),
+        L(0.9, 'Sistema berri hauetatik eratuko dira gorputzeko zain garrantzitsuenak.', n('2.3/p7/s3'), ['kardinal-azpiko-zainak'], {
+          tone: 'emphasis',
+          plain: 'Hiru sistema hauetatik sortuko dira gorputzeko zain nagusiak.',
         }),
       ],
       board: [{ id: 'b-hiru-sistema', kind: 'line', text: '5.–7. asteak: kardinal azpikoak (giltzurrunak), sakrokardinalak (beheko gorputz adarrak), kardinal gainekoak (gorputz pareta)', notes: n('2.3/p7/s2', '2.3/p7/s6', '2.3.1/p4/s1'), key: true }],
@@ -291,7 +295,7 @@ export const LESSON_W13: Lesson = {
         L(0.8, 'Hemiazigosak 9., 10. eta 11. saihets arteko espazioetako odola eramaten du azigos zainera.', n('2.3.1/p7/s1'), ['hemiazigos-zaina', 'azigos-zaina'], {
           plain: 'Hemiazigosak saihets tarteetako odola, 9.etik 11.era, azigos zainera darama.',
         }),
-        L(0.92, 'Hemiazigos laguntzaileak, goian, 4.etik 8.era bitarteko espazioetako odola darama azigos zainera.', n('2.3.1/p8/s2'), ['hemiazigos-laguntzailea', 'azigos-zaina'], {
+        L(0.92, 'Hemiazigos laguntzailea pixka bat gorago dago, eta 4.etik 8.era bitarteko espazioetako odola darama azigos zainera.', n('2.3.1/p8/s1', '2.3.1/p8/s2'), ['hemiazigos-laguntzailea', 'azigos-zaina'], {
           plain: 'Hemiazigos laguntzaileak goiko saihets tarteetako odola, 4.etik 8.era, azigos zainera darama.',
         }),
       ],
@@ -331,7 +335,7 @@ export const LESSON_W13: Lesson = {
         L(0.25, 'Kardinal azpiko zainen anastomosia agertzen da: ezkerreko odola eskuinera eramaten du.', n('3.1/p6/s1'), ['kardinal-azpiko-anastomosia', 'kardinal-azpiko-zainak'], {
           plain: 'Bi kardinal azpiko zainen artean zubi bat sortzen da, ezkerretik eskuinera.',
         }),
-        L(0.35, 'Hortik ezkerreko giltzurrun zaina sortzen da, eta ezkerreko kardinal azpikoaren urrutiko ataletik, ezkerreko zain gonadala.', n('3.1/p6/s2'), ['ezkerreko-giltzurrun-zaina', 'ezkerreko-zain-gonadala'], {
+        L(0.35, 'Hortik ezkerreko giltzurrun zaina sortzen da, eta ezkerreko kardinal azpikoaren urrutiko ataletik, ezkerreko zain gonadala.', n('3.1/p6/s2', '3.1/p7/s1'), ['ezkerreko-giltzurrun-zaina', 'ezkerreko-zain-gonadala'], {
           writes: 'tz-ezk-giltz',
           plain: 'Zubi hori ezkerreko giltzurrun zaina da. Ezkerreko zain gonadala ere hortik sortzen da.',
         }),
@@ -343,6 +347,9 @@ export const LESSON_W13: Lesson = {
         L(0.65, 'Ezkerreko sakrokardinalaren urrutiko ataletik ezkerreko zain iliako primitiboa sortzen da; eskuinekotik, eskuinekoa.', n('3.1/p9/s2', '3.1/p10/s1'), ['zain-sakrokardinalak', 'ezkerreko-zain-iliako-primitiboa', 'eskuineko-zain-iliako-primitiboa'], {
           writes: 'tz-iliako',
           plain: 'Sakrokardinal bakoitzaren mutur urruna iliako bat bihurtzen da, alde bakoitzean.',
+        }),
+        L(0.7, 'Eskuineko sakrokardinalaren hurbileko ataletik, berriz, kabaren segmentu sakrokardinala sortzen da.', n('3.1/p11/s1'), ['zain-sakrokardinalak', 'kabaren-segmentu-sakrokardinala'], {
+          plain: 'Eskuineko sakrokardinalaren hasierako zatia kabaren azken zatia bihurtzen da.',
         }),
         L(0.85, 'Laburbilduz, beheko kabak hiru atal ditu: gibel segmentua, giltzurrun segmentua eta segmentu sakrokardinala.', n('3.1/p13/s2'), ['beheko-kaba-zaina', 'kabaren-gibel-segmentua', 'kabaren-giltzurrun-segmentua', 'kabaren-segmentu-sakrokardinala'], {
           tone: 'emphasis',
@@ -525,7 +532,7 @@ export const LESSON_W13: Lesson = {
         }),
         L(0.45, 'Ezkerreko zilborreko zaina gibeleko lotailu borobila bihurtzen da.', n('4.2/p8/s1'), ['gibeleko-lotailu-borobila'], { plain: 'Zilborreko zaina lotailu bat bihurtzen da: gibeleko lotailu borobila.' }),
         L(0.55, 'Hodi benosoa gibeleko lotailu benosoa bihurtzen da.', n('4.2/p9/s1'), ['gibeleko-lotailu-benosoa'], { plain: 'Hodi benosoa ere lotailu bihurtzen da.' }),
-        L(0.65, 'Hodi arteriosoa ere ixten da, 2 edo 3 hilabete geroago, eta lotailu arteriosoa bihurtzen da.', n('4.2/p10/s1'), ['lotailu-arteriosoa'], { plain: 'Hodi arteriosoa hilabete batzuk geroago ixten da, eta lotailu bihurtzen da.' }),
+        L(0.65, 'Hodi arteriosoa ere ixten da, hirugarren hilabeterako, eta lotailu arteriosoa bihurtzen da.', n('4.2/p10/s1'), ['lotailu-arteriosoa'], { plain: 'Hodi arteriosoa hilabete batzuk geroago ixten da, eta lotailu bihurtzen da.' }),
         L(0.67, 'Horrela, birika arteriaren eta aortaren arteko komunikazioa eteten da.', n('4.2/p10/s3'), ['birika-arteria'], { plain: 'Birika arteriaren eta aortaren arteko bidea mozten da.' }),
         L(0.75, 'Jaio ostean ezkerreko aurikularen presioa handitzen da, eta zulo obalaren balbula septum secundumaren aurka estutzen da.', n('4.2/p11/s1'), ['ezkerreko-aurikula-jaiotakoan', 'zulo-obalaren-balbula', 'septum-secundum'], {
           tone: 'emphasis',

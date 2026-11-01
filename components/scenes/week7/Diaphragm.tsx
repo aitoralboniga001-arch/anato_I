@@ -9,7 +9,7 @@ import { COELOM_ALL, SideEmbryo, backAt, placeXY, type Place, type SideState } f
  * 7:diafragma-eraketa — apunteen 3. atala eta 3.1en hasiera, 25.–26. orriko irudiak.
  *  - `jaitsiera` (albotik, bizkarrezurra eskuinean): septum transversuma C3–C5 mailan; haren mesenkiman
  *    mioblastoak → miozitoak; C3–C5 nerbio espinalen zuntzak iristen dira eta nerbio frenikoa osatzen dute;
- *    enbrioia atzetik gehiago hazten denez septuma jaisten da (aurrea T6, atzea T12) eta nerbioa luzatzen da.
+ *    enbrioia atzetik gehiago hazten denez septuma jaisten da (aurrea T7, atzea T12) eta nerbioa luzatzen da.
  *  - `zeharkakoa` (diafragmaren mailako zeharkako mozketa, dortsala goian): erreten perikardioperitonealak
  *    zabalik; 5. astean mintz pleuroperitonealak atze-alboko paretetatik hazten dira eta hestegorri inguruko
  *    mesenkimarekin eta septumaren atzeko ertzarekin fusionatzen dira; gorputz paretako muskulua ertzean.
@@ -21,9 +21,9 @@ const LEVELS = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'T1', 'T2', 'T3'
 const iOf = (name: string) => LEVELS.indexOf(name);
 /** Sacral and coccygeal levels below L3, running on into the tail (no names). */
 const ALL_LEVELS = LEVELS.length + 6;
-/** Only the levels the notes name: C3–C5 where the septum forms (4th week), T6 in front and T12 behind at the end of the 5th. */
+/** Only the levels the notes name: C3–C5 where the septum forms (4th week), T7 in front and T12 behind at the end of the 5th. */
 const EARLY = ['C3', 'C4', 'C5'];
-const LATE = ['T6', 'T12'];
+const LATE = ['T7', 'T12'];
 /** Above this bead the back is the head's (no vertebrae): the levels that slide up there fade out. */
 const NECK = 7.5;
 
@@ -34,7 +34,7 @@ const A = placeXY(PLACE);
 const bead = (k: number, d = 0) => backAt(0.06 + (0.9 * k) / 35, d);
 /**
  * The back grows much more than the front, so the column's levels slide past the septum: level L sits at
- * bead L + off(s). At 4 weeks (s = 0) C4 faces the septum; at the end of the 5th week T6 faces its ventral
+ * bead L + off(s). At 4 weeks (s = 0) C4 faces the septum; at the end of the 5th week T7 faces its ventral
  * end and T12 its dorsal end.
  */
 const offAt = (s: number) => lerp(12, 1, s);
@@ -266,13 +266,13 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
   const st: SideState = { upper: P.periSolid, lower: P.peritoSolid, side: P.periSolid, sep: 0, canal: 0, lung: 0, ppm: 0, pom: 0, ids: { upper: 'hasierako-perikardio-barrunbea', lower: 'peritoneo-barrunbea', canal: 'erreten-perikardioperitonealak', gut: 'hestegorria' } };
   const cellAt = (c: (typeof CELLS)[number]) => pl.on(c.u, c.v * 0.75);
   const levels = Array.from({ length: ALL_LEVELS }, (_, i) => ({ i, l: LEVELS[i] ?? '', k: i + off })).filter((q) => q.k <= 35.4);
-  // The tags: C3–C5 while the septum faces them, fading before they would leave the neck; T6 and T12 at the end.
+  // The tags: C3–C5 while the septum faces them, fading before they would leave the neck; T7 and T12 at the end.
   const early = 1 - seg(s, 0.25, 0.5);
   const lateOn = seg(s, 0.6, 0.9);
   const goldOf = (l: string) => (EARLY.includes(l) ? early : LATE.includes(l) ? lateOn : 0);
   // Short gold arrows just outside the back, down to the level each end of the septum reached.
   const arrowsOn = vis(t, 0.5) * lateOn;
-  const front = backArrow(kOf('T6', s) - 1.8, kOf('T6', s) - 0.4, 10);
+  const front = backArrow(kOf('T7', s) - 1.8, kOf('T7', s) - 0.4, 10);
   const back = backArrow(kOf('T12', s) - 1.8, kOf('T12', s) - 0.4, 10);
   const tagAt = (k: number) => A(bead(k, -26).p);
   const tags = [...EARLY.map((l) => ({ l, show: early })), ...LATE.map((l) => ({ l, show: lateOn }))]
@@ -288,7 +288,7 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
   };
   const bands: Band[] = [
     ...tags.map((q) => tagBand(q.x, q.y)),
-    ...(arrowsOn > 0.02 ? [arrowBand(kOf('T6', s) - 1.8, kOf('T6', s) + 0.2), arrowBand(kOf('T12', s) - 1.8, kOf('T12', s) + 0.2)] : []),
+    ...(arrowsOn > 0.02 ? [arrowBand(kOf('T7', s) - 1.8, kOf('T7', s) + 0.2), arrowBand(kOf('T12', s) - 1.8, kOf('T12', s) + 0.2)] : []),
   ];
   const at = (p: Pt) => A(p);
   const cord = (k: number) => A(bead(k, 6).p);
@@ -471,7 +471,7 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
         )}
       </SideEmbryo>
 
-      {/* How far each edge went against the column: the front to T6, the back much further, to T12. */}
+      {/* How far each edge went against the column: the front to T7, the back much further, to T12. */}
       <g opacity={arrowsOn} pointerEvents="none">
         {[front, back].map((a, i) => (
           <g key={i}>
@@ -508,7 +508,7 @@ export function DiaphragmDescent({ t, reduced }: SceneProps) {
         C3, C4 eta C5 nerbio espinalen zuntzak elkartu: nerbio frenikoa
       </Note>
       <Note x={500} y={624} tone="accent" show={vis(t, 0.46)}>
-        Atzea gehiago hazten da: septuma aurrean T6, atzean T12 mailara; nerbio frenikoa luzatzen da
+        Atzea gehiago hazten da: septuma aurrean T7, atzean T12 mailara; nerbio frenikoa luzatzen da
       </Note>
 
       {/* The plate and its cells: the cells' names above and below the plate's, their leaders to the upper and lower surface. */}

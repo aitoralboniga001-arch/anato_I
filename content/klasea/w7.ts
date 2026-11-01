@@ -228,15 +228,15 @@ export const LESSON_W7: Lesson = {
           tone: 'emphasis',
           plain: '4. astean horma lau bat sortzen da, etzanda, lepoaren parean. Horma horri septum transversuma deitzen zaio.',
         }),
-        L(0.14, '3., 4. eta 5. lepo somiten mailan agertzen da: C3, C4 eta C5. Oso altu.', n('2/p3/s1'), ['septum-transversum', 'somitak'], {
+        L(0.14, '3., 4. eta 5. lepo somiten mailan agertzen da: C3, C4 eta C5. Oso altu.', n('2/p3/s1', '2/p4/s1'), ['septum-transversum', 'somitak'], {
           tone: 'emphasis',
           writes: 'b-septum',
           plain: 'Lepoko hirugarren, laugarren eta bosgarren somiten parean agertzen da. Oso altu, beraz.',
         }),
-        L(0.3, 'Septum horrek zeloma bitan banatzen du. Goiko atala hasierako perikardio barrunbea da, torax barrunbe osoa betetzen duena.', n('2/p7/s1'), [
+        L(0.3, 'Septum horrek zeloma bitan banatzen du. Goiko atala, septumaren gainean, hasierako perikardio barrunbea da.', n('2/p7/s1'), [
           'septum-transversum',
           'hasierako-perikardio-barrunbea',
-        ], { tone: 'emphasis', plain: 'Horma horrek zeloma bitan zatitzen du. Goiko zatia hasierako perikardio barrunbea da: torax osoa hartzen du.' }),
+        ], { tone: 'emphasis', plain: 'Horma horrek zeloma bitan zatitzen du. Goiko zatia hasierako perikardio barrunbea da.' }),
         L(0.3, 'Septumaren azpian geratzen den atala, berriz, peritoneo barrunbea da.', n('2/p9/s1'), ['peritoneo-barrunbea'], {
           tone: 'emphasis',
           writes: 'b-bi-barrunbe',
@@ -248,13 +248,13 @@ export const LESSON_W7: Lesson = {
           id: 'b-septum',
           kind: 'line',
           text: 'Septum transversuma: 4. astea, C3–C5 (lepo mailan)',
-          notes: n('2/p3/s1'),
+          notes: n('2/p3/s1', '2/p4/s1'),
           key: true,
         },
         {
           id: 'b-bi-barrunbe',
           kind: 'line',
-          text: 'Gainean hasierako perikardio barrunbea (torax osoa); azpian peritoneo barrunbea',
+          text: 'Gainean hasierako perikardio barrunbea; azpian peritoneo barrunbea',
           notes: n('2/p7/s1', '2/p9/s1'),
           key: true,
         },
@@ -342,10 +342,10 @@ export const LESSON_W7: Lesson = {
         L(0.07, 'Hestea gorputzaren atzeko aldeari lotuta mantentzen da, mesenkimazko lotura zabal baten bitartez.', n('2.1/p3/s2'), [], {
           plain: 'Hestea ez dago libre: lotura zabal batek atzeko paretari eusten dio.',
         }),
-        L(0.15, 'Zelomaren beheko aldean, gorputzaren paretaren eta errai orriaren artean, bi orriko atzeko lotura bat agertzen da.', n('2.1/p4/s1'), [
+        L(0.15, 'Barrunbe horretan, gorputzaren paretaren eta errai orriaren artean, bi orriko atzeko lotura bat agertzen da.', n('2.1/p4/s1'), [
           'errai-orria',
           'mesenterio-dortsala',
-        ], { plain: 'Behean, paretaren eta hestearen artean, lotura hori mehetu egiten da: bi orri dira, bata bestearen ondoan.' }),
+        ], { plain: 'Barrunbe horretan, paretaren eta hestearen artean, lotura hori bi orriz osatuta dago.' }),
         L(0.15, 'Lotura horri mesenterio dortsala edo atzeko mesenterioa deritzo.', n('2.1/p4/s1'), ['mesenterio-dortsala'], {
           tone: 'emphasis',
           writes: 'b-mesenterioa',
@@ -424,6 +424,9 @@ export const LESSON_W7: Lesson = {
           tone: 'emphasis',
           writes: 'b-ez-osoa',
           plain: 'Ondorioz, peritoneo barrunbeak ez du abdomen osoa betetzen: zati bat bakarrik hartzen du.',
+        }),
+        L(0.792, 'Goiko atalarekin berdin gertatzen da: hasierako perikardio barrunbeak ez du torax barrunbe osoa okupatzen.', n('2/p8/s1'), [], {
+          plain: 'Goian ere berdin: hasierako perikardio barrunbeak ez du torax osoa betetzen.',
         }),
         L(0.792, 'Organo batzuk peritoneo kanpokoak dira, eta beste batzuk peritoneo atzekoak: duodenoa, goranzko kolona eta beheranzko kolona.', n('2.1/p13/s1'), [
           'peritoneo-kanpoko-egiturak',
@@ -552,6 +555,10 @@ export const LESSON_W7: Lesson = {
         L(0.36, 'Gorputzaren alboko aldeetatik bi mintz agertzen dira: mintz pleuroperikardikoak.', n('2.2/p8/s1'), ['mintz-pleuroperikardikoak'], {
           plain: 'Gorputzaren bi alboetatik horma mehe bana hazten da: mintz pleuroperikardikoak.',
         }),
+        L(0.36, 'Mintz bakoitzak hiru geruza ditu: erdian gorputz paretako mesenkima, eta inguruan paretako orritik sortutako bi geruza.', n('2.2/p8/s2'), ['mintz-pleuroperikardikoak'], {
+          writes: 'b-geruzak',
+          plain: 'Mintz bakoitza hiru geruzaz egina dago: erdian paretako mesenkima, eta bi aldeetan zelomaren paretako orria.',
+        }),
         L(0.48, '5. astean, bi mintzak erdialderuntz abiatzen dira, eta haien erpinak fusionatzen dira.', n('2.2/p9/s1'), ['mintz-pleuroperikardikoak'], {
           tone: 'emphasis',
           plain: '5. astean bi mintzak erdirantz hazten dira, eta muturrak elkartzean bat egiten dute.',
@@ -581,13 +588,8 @@ export const LESSON_W7: Lesson = {
         L(0.72, 'Pleura barrunbeak atze alboko aldeetan kokatzen dira; perikardio barrunbea erdikaldean.', n('2.2/p13/s1', '2.2/p16/s1'), ['pleura-barrunbea', 'perikardio-barrunbea'], {
           plain: 'Pleura barrunbeak atzean eta alboetan daude; perikardio barrunbea erdian geratzen da.',
         }),
-        L(0.84, 'Mintz pleuroperikardikoen erdiko mesenkimatik perikardio fibrosoa garatzen da.', n('2.2/p16/s2'), ['mintz-pleuroperikardikoak', 'perikardio-fibrosoa'], {
-          tone: 'emphasis',
-          plain: 'Mintz horien erdiko ehunetik perikardio fibrosoa sortzen da.',
-        }),
-        L(0.84, 'Somatopleura geruzatik, berriz, perikardio serosoa garatzen da, bihotz hodiaren inguruan.', n(), ['perikardio-serosoa'], {
-          writes: 'b-perikardioa',
-          plain: 'Perikardio serosoa, aldiz, zelomaren paretako orritik dator, somatopleuratik.',
+        L(0.86, 'Errai perikardioa bihotzarekin kontaktuan dago, eta erreflejatu eta paretako perikardioarekin jarraitzen du.', n('2.2/p16/s2'), ['errai-perikardioa', 'paretako-perikardioa', 'bihotza'], {
+          plain: 'Bihotzaren gaineko orria errai perikardioa da; tolestu egiten da, eta barrunbearen pareta estaltzen du: paretako perikardioa.',
         }),
         L(0.93, 'Bi barrunbe hauek espazio birtualak dira: orriak bata bestearen ondoan daude, tarterik gabe.', n('2.2/p17/s1'), ['pleura-barrunbea', 'perikardio-barrunbea'], {
           plain: 'Barrunbe hauek ia ez dute barrualderik: bi orriak elkar ukitzen dute.',
@@ -599,6 +601,13 @@ export const LESSON_W7: Lesson = {
         }),
       ],
       board: [
+        {
+          id: 'b-geruzak',
+          kind: 'line',
+          text: 'Mintz pleuroperikardikoak: erdian gorputz paretako mesenkima; inguruan paretako orritik bi geruza',
+          notes: n('2.2/p8/s2'),
+          key: true,
+        },
         {
           id: 'b-pleuroperikardikoak',
           kind: 'line',
@@ -620,13 +629,6 @@ export const LESSON_W7: Lesson = {
           notes: n('2.2/p13/s2'),
         },
         {
-          id: 'b-perikardioa',
-          kind: 'line',
-          text: 'Perikardio fibrosoa: mintzen erdiko mesenkimatik. Perikardio serosoa: somatopleuratik',
-          notes: n('2.2/p16/s2'),
-          key: true,
-        },
-        {
           id: 'b-birtualak',
           kind: 'line',
           text: 'Espazio birtualak; errealak egoera patologikoetan bakarrik',
@@ -634,18 +636,18 @@ export const LESSON_W7: Lesson = {
         },
       ],
       checks: [
-        { kind: 'pool', id: 'mikro:7/pleura-perikardioa:4', after: 2 },
         {
           kind: 'contrast',
-          id: 'klasea:7/fibrosoa-serosoa',
-          concept: 'perikardio-serosoa',
-          after: 9,
-          q: 'Perikardio fibrosoa eta perikardio serosoa: nondik dator bakoitza?',
-          options: ['Fibrosoa mintzen erdiko mesenkimatik; serosoa somatopleuratik', 'Fibrosoa somatopleuratik; serosoa mintzen erdiko mesenkimatik', 'Biak somatopleuratik'],
+          id: 'klasea:7/mintz-geruzak',
+          concept: 'mintz-pleuroperikardikoak',
+          after: 1,
+          q: 'Mintz pleuroperikardikoak: zer dago erdian eta zer inguruan?',
+          options: ['Erdian gorputz paretako mesenkima; inguruan paretako orritik bi geruza', 'Erdian paretako orria; inguruan mesenkimazko bi geruza', 'Hiru geruzak errai orritik'],
           answer: 0,
-          why: ['Bai: mintzen erdigunetik fibrosoa; somatopleuratik serosoa.', 'Ez: alderantziz da.', 'Ez: fibrosoa mintzen mesenkimatik dator.'],
-          notes: n('2.2/p16/s2'),
+          why: ['Bai: mesenkima erdian, eta paretako orriak inguratzen du.', 'Ez: alderantziz da.', 'Ez: paretako orritik datoz, ez errai orritik.'],
+          notes: n('2.2/p8/s2'),
         },
+        { kind: 'pool', id: 'mikro:7/pleura-perikardioa:4', after: 3 },
         { kind: 'pool', id: 'mikro:7/pleura-perikardioa:8' },
       ],
     },
@@ -683,10 +685,10 @@ export const LESSON_W7: Lesson = {
           tone: 'why',
           plain: 'Bizkarra azkarrago hazten da sabela baino. Ondorioz, septuma lepotik jaisten hasten da.',
         }),
-        L(0.3956, '5. astearen bukaerarako, septumaren aurreko aldea 6. torax mailan dago, eta atzeko aldea 12. torax mailan.', n('3/p5/s2'), ['septum-transversum'], {
+        L(0.3956, '5. astearen bukaerarako, septumaren aurreko aldea 7. torax mailan dago, eta atzeko aldea 12. torax mailan.', n('3/p5/s2'), ['septum-transversum'], {
           tone: 'emphasis',
           writes: 'b-jaitsiera',
-          plain: '5. astearen bukaeran, septumaren aurrealdea 6. torax mailan dago; atzealdea beherago, 12. torax mailan.',
+          plain: '5. astearen bukaeran, septumaren aurrealdea 7. torax mailan dago; atzealdea beherago, 12. torax mailan.',
         }),
         L(0.3956, 'Jaitsierarekin batera, nerbio frenikoak luzatu egiten dira septumera iristeko.', n('3/p5/s3'), ['nerbio-frenikoa'], {
           tone: 'why',
@@ -704,7 +706,7 @@ export const LESSON_W7: Lesson = {
         {
           id: 'b-jaitsiera',
           kind: 'line',
-          text: 'Jaitsiera (5. astearen bukaera): aurrea T6, atzea T12',
+          text: 'Jaitsiera (5. astearen bukaera): aurrea T7, atzea T12',
           notes: n('3/p5/s2'),
           key: true,
         },
@@ -716,7 +718,7 @@ export const LESSON_W7: Lesson = {
           id: 'klasea:7/aurrea-atzea',
           concept: 'septum-transversum',
           q: 'Jaitsi ondoren, septumaren aurreko eta atzeko aldeak: zein mailatan daude?',
-          options: ['Aurrea 6. torax mailan; atzea 12. torax mailan', 'Aurrea 12. torax mailan; atzea 6. torax mailan', 'Biak 6. torax mailan'],
+          options: ['Aurrea 7. torax mailan; atzea 12. torax mailan', 'Aurrea 12. torax mailan; atzea 7. torax mailan', 'Biak 7. torax mailan'],
           answer: 0,
           why: ['Bai: atzetik gehiago hazten da, eta atzea askoz beherago geratzen da.', 'Ez: alderantziz da.', 'Ez: atzea askoz beherago dago.'],
           notes: n('3/p5/s2'),
@@ -750,7 +752,7 @@ export const LESSON_W7: Lesson = {
           'miozitoak',
           'mintz-pleuroperitonealak',
         ], { plain: 'Diafragma lau zatiz egina dago. Lehena septuma da: bere muskulu zelulak mintzetara mugitzen dira.' }),
-        L(0.79, 'Bigarrena, mintz pleuroperitonealak: pleuren eta peritoneoaren arteko komunikazioa ixten dute.', n('3.1/p4/s1'), ['mintz-pleuroperitonealak'], {
+        L(0.79, 'Bigarrena, mintz pleuroperitonealak: pleuren eta peritoneoaren arteko komunikazioa ixten dute.', n('3.1/p4/s1', '3.1/p4/s2'), ['mintz-pleuroperitonealak'], {
           writes: 'tz-mintzak',
           plain: 'Bigarrena, mintz pleuroperitonealak: bi erretenak ixten dituzte.',
         }),
@@ -805,11 +807,11 @@ export const LESSON_W7: Lesson = {
         L(0, 'Zentro tendinosoan hiru hosto bereizten dira: eskuinekoa, erdikoa eta ezkerrekoa.', n('3.1/p8/s3'), ['zentro-tendinosoa'], {
           plain: 'Zentro tendinosoak hiru zati ditu, hostoak: eskuinekoa, erdikoa eta ezkerrekoa.',
         }),
-        L(0.1493, 'Inguruko zuntzetan, bularrezur atala bularrezurrean insertatzen da, eta saihets-hezur atala saihets hezurretan.', n('3.1/p8/s4', '3.1/p10/s1'), [
+        L(0.1493, 'Inguruko zuntzetan, bularrezur atala bularrezurrean insertatzen da, eta saihets-hezur atala saihets hezurretan.', n('3.1/p8/s4', '3.1/p9/s1', '3.1/p10/s1'), [
           'bularrezur-atala',
           'saihets-hezur-atala',
         ], { plain: 'Muskulu zatien izenak esaten du non lotzen diren: bularrezur atala bularrezurrean, saihets-hezur atala saihetsetan.' }),
-        L(0.2987, 'Gerriko atalean bi zutabe bereizten dira.', n('3.1/p11/s2'), ['gerriko-atala', 'diafragmaren-zutabeak'], {
+        L(0.2987, 'Gerriko atalean bi zutabe bereizten dira.', n('3.1/p11/s1', '3.1/p11/s2'), ['gerriko-atala', 'diafragmaren-zutabeak'], {
           plain: 'Gerriko atala bi zutabetan amaitzen da, ornoetara lotuta.',
         }),
         L(0.2987, 'Eskuineko zutabea hasierako hiru gerri-ornoetan insertatzen da; ezkerrekoa, lehenengo bietan.', n('3.1/p11/s2'), ['diafragmaren-zutabeak'], {
@@ -850,7 +852,7 @@ export const LESSON_W7: Lesson = {
           id: 'b-zutabeak',
           kind: 'line',
           text: 'Zutabeak: eskuinekoa hasierako 3 gerri-ornoetan; ezkerrekoa lehenengo 2etan; tartean erdiko lotailu arkutua',
-          notes: n('3.1/p11/s2', '3.1/p12/s3'),
+          notes: n('3.1/p11/s2', '3.1/p12/s2', '3.1/p12/s3'),
           key: true,
         },
         {

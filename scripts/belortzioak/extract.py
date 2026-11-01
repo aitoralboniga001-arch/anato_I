@@ -26,12 +26,16 @@ PAINT_OUT = {12: [(197, 468, 221, 492)]}  # a crossed-out answer box printed ove
 # Label n's arrow really belongs to label m (the arrow joins two labels): use its far end.
 REASSIGN = {21: [(2, 1)]}
 DROP_TARGETS = {15: {3: [1]}}  # a plain bracket line between 2 and 3, not an arrow
+# Arrows that end on the seam between two structures where carrying the tip on would pick the
+# wrong one: their tip stays where it was printed.
+KEEP_TIP = {12: {19}, 23: {3}}
 # Corrections written by hand on the figures (the hand-written legend names live in
 # content/belortzioak.ts). Points in PDF points, read off the page at 300–900 dpi:
 #   add   — the number written again by hand elsewhere (x, y[, what was written])
 #   set   — replace a number's targets;  label — move a number (its printed box crossed out)
 #   new   — labels that exist only in handwriting; `id` keys them, `tag` is what was written
 HAND = {
+    4: {"set": {11: [(171.3, 324.8)]}},  # the ear canal: the middle of the dark slit, not its yellow rim
     6: {"new": [  # the heart, named by hand (no numbers)
         {"id": "a", "n": 101, "tag": "a", "label": (250.8, 188.8), "targets": [(240.0, 247.6)]},
         {"id": "b", "n": 102, "tag": "b", "label": (222.0, 274.0), "targets": [(250.8, 272.8)]},
@@ -47,6 +51,7 @@ HAND = {
     11: {"add": {5: [(294.6, 452.8)]}},  # a circled 5 on the vein inside the embryo
     12: {
         "add": {1: [(161.0, 402.0, "1a")]},  # "1a" (the trunk) written on the vessel
+        "set": {6: [(136.7, 359.7)]},  # the printed arrow stops in the gap short of the vessel
         "new": [
             {"id": "9.2", "n": 9.2, "tag": "9.2", "label": (64.6, 491.1), "targets": [(90.5, 446.5), (93.4, 482.5)]},
             # the heart, numbered in red (a list of its own under the figure)
@@ -157,6 +162,7 @@ def clean_render(pdf, pg, crop):
     scale = MAX_SIDE / max(crop.width, crop.height)
     pix = cp.get_pixmap(matrix=fitz.Matrix(scale, scale), clip=crop)
     img = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
+    origin = (pix.x, pix.y)  # the pixmap snaps the clip outwards to whole pixels
     doc.close()
     arr = np.asarray(img).copy()
     for (x0, y0, x1, y1) in PAINT_OUT.get(pg, []):
@@ -170,7 +176,66 @@ def clean_render(pdf, pg, crop):
             avg = (np.roll(patch, 1, 0) + np.roll(patch, -1, 0) + np.roll(patch, 1, 1) + np.roll(patch, -1, 1)) / 4
             patch[hole] = avg[hole]
         arr[a[1] - m:a[3] + m, a[0] - m:a[2] + m] = patch.clip(0, 255).astype(np.uint8)
-    return Image.fromarray(arr), scale
+    return Image.fromarray(arr), scale, origin
+
+# ---- arrow tips onto their structures -----------------------------------------------------------
+
+def depth_map(img):
+    """Per pixel: how far it lies from the nearest drawn outline or colour change (pixels), which
+    patch between outlines it belongs to, whether it is bare paper, how deep inside a solid dark
+    area it lies, and its (smoothed) colour."""
+    rgb = np.asarray(img).astype(float) / 255
+    lab = color.rgb2lab(filters.gaussian(rgb, sigma=1.5, channel_axis=2))
+    g = np.sqrt(sum(filters.sobel(lab[..., c]) ** 2 for c in range(3)))
+    edge = (g > 3.0) | (lab[..., 0] < 35)
+    paper = (lab[..., 0] > 92) & (np.hypot(lab[..., 1], lab[..., 2]) < 6)
+    dark = ndi.distance_transform_edt(lab[..., 0] < 35)
+    return ndi.distance_transform_edt(~edge), ndi.label(~edge)[0], paper, dark, lab
+
+def snap(fields, tip, u):
+    """The printed arrows stop on a structure's edge, or a hair short of it: carry the tip on into
+    the structure it points at (a little to either side allowed), to a point well inside it. A tip
+    already inside a patch stays in that patch, a tip on a coloured structure (a thin vessel) stays on
+    that colour, a tip inside a dark area stays put, and a tip on the drawing never moves onto bare paper."""
+    depth, patch, paper, dark, lab = fields
+    k = max(depth.shape) / 1600
+    H, W = depth.shape
+    ds, ls = np.arange(-8 * k, 18 * k), np.arange(-9 * k, 9 * k + 1)
+    D, L = np.meshgrid(ds, ls)
+    xs = tip[0] + u[0] * D - u[1] * L
+    ys = tip[1] + u[1] * D + u[0] * L
+    xi, yi = np.clip(np.rint(xs).astype(int), 0, W - 1), np.clip(np.rint(ys).astype(int), 0, H - 1)
+    score = np.minimum(depth[yi, xi], 7 * k) - 0.25 * np.hypot(D, L)
+    tx, ty = int(round(tip[0])), int(round(tip[1]))
+    if dark[ty, tx] >= 3 * k: return tip
+    # a tip on (or right at the outline of) a coloured structure means that structure, not the grey
+    # tissue beside it, however much wider the grey is
+    r = max(1, int(round(5 * k)))
+    y0, x0 = max(0, ty - r), max(0, tx - r)
+    near = lab[y0:ty + r + 1, x0:tx + r + 1]
+    chroma = np.hypot(near[..., 1], near[..., 2])
+    # the first coloured pixel straight ahead of the arrow names the structure; failing that, the
+    # coloured pixel closest to the tip (two colours may be in reach)
+    c = None
+    for d in np.arange(0, 10 * k):
+        for l in (0, -2 * k, 2 * k):
+            x, y = int(round(tip[0] + u[0] * d - u[1] * l)), int(round(tip[1] + u[1] * d + u[0] * l))
+            if 0 <= y < H and 0 <= x < W and math.hypot(*lab[y, x, 1:]) > 12:
+                c = lab[y, x]
+                break
+        if c is not None: break
+    if c is None and chroma.max() > 10:
+        yy, xx = np.mgrid[y0:y0 + near.shape[0], x0:x0 + near.shape[1]]
+        far = np.where(chroma > 10, np.hypot(yy - ty, xx - tx), np.inf)
+        c = near[np.unravel_index(np.argmin(far), far.shape)]
+    if c is not None:
+        cand = lab[yi, xi]
+        score[(np.linalg.norm(cand - c, axis=-1) > 15) | (np.hypot(cand[..., 1], cand[..., 2]) < 0.6 * math.hypot(c[1], c[2]))] = -1e9
+    if depth[ty, tx] >= 2.5 * k: score[patch[yi, xi] != patch[ty, tx]] = -1e9
+    if not paper[ty, tx]: score[paper[yi, xi]] = -1e9
+    if score.max() < -1e8: return tip
+    j = np.unravel_index(np.argmax(score), score.shape)
+    return (float(xs[j]), float(ys[j]))
 
 # ---- structure outlines -------------------------------------------------------------------------
 
@@ -234,10 +299,18 @@ def main():
             for i, v in enumerate(CROP[pg]):
                 if v is not None: c[i] = v
             crop = fitz.Rect(c)
-        img, scale = clean_render(a.pdf, pg, crop)
+        img, scale, (ox, oy) = clean_render(a.pdf, pg, crop)
         img.save(os.path.join(out_img, f"p{pg:02d}.webp"), quality=84, method=6)
         W, H = img.size
-        fx = lambda p: [round((p[0] - crop.x0) / crop.width, 4), round((p[1] - crop.y0) / crop.height, 4)]
+        px = lambda p: (p[0] * scale - ox, p[1] * scale - oy)
+        frac = lambda q: [round(q[0] / W, 4), round(q[1] / H, 4)]
+        fx = lambda p: frac(px(p))
+        fields = depth_map(img)
+        def tip(ar, far, near, n):
+            t, s0 = px(ar[far]), px(ar[near])
+            if n in KEEP_TIP.get(pg, ()): return frac(t)
+            L = math.dist(t, s0)
+            return frac(snap(fields, t, ((t[0] - s0[0]) / L, (t[1] - s0[1]) / L)))
         moves = dict(REASSIGN.get(pg, []))
         items = {}
         for k, l in enumerate(labels):
@@ -247,13 +320,14 @@ def main():
             if ar["label"] < 0: continue
             n = labels[ar["label"]]["n"]
             if n in moves:
-                items[moves[n]]["targets"].append(fx(ar["start"]))
+                items[moves[n]]["targets"].append(tip(ar, "start", "target", moves[n]))
             else:
-                items[n]["targets"].append(fx(ar["target"]))
+                items[n]["targets"].append(tip(ar, "target", "start", n))
         for n, drops in DROP_TARGETS.get(pg, {}).items():
             items[n]["targets"] = [t for i, t in enumerate(items[n]["targets"]) if i not in drops]
         h = HAND.get(pg, {})
         for n, pt in h.get("label", {}).items(): items[n]["label"] = fx(pt)
+        # hand-written points were read off the page at high zoom, already on their structures
         for n, pts in h.get("set", {}).items(): items[n]["targets"] = [fx(p) for p in pts]
         # the number written again by hand: another place it names (a number printed on its
         # structure, with no arrow, keeps pointing there too); `marks` draw it there again

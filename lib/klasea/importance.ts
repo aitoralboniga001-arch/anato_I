@@ -34,11 +34,15 @@ const stems = (text: string) =>
 
 const numbers = (text: string) => new Set(text.match(NUMBER) ?? []);
 
-/** The prose sentences of a topic, in notes order (headings, contents and captions are not taught as such). */
+/**
+ * The prose sentences of a topic, in notes order (headings, contents and captions are not taught as such,
+ * nor is a "sentence" with no word in it, such as a dashed rule between list items).
+ */
 export function proseOf(week: number): { id: string; text: string }[] {
   return notesOf(week)
     .filter((b) => b.kind === 'p' || b.kind === 'li')
-    .flatMap((b) => b.sentences.map((s) => ({ id: s.id, text: sentenceText(s) })));
+    .flatMap((b) => b.sentences.map((s) => ({ id: s.id, text: sentenceText(s) })))
+    .filter((s) => /\p{L}/u.test(s.text));
 }
 
 export function computeImportance(week: WeekDef): Map<string, Importance> {

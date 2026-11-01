@@ -490,7 +490,7 @@ const stages: StageDef[] = [
       },
       {
         at: S6[3],
-        notes: ['w13/2.3/p7/s2'],
+        notes: ['w13/2.3/p7/s2-s5'],
         recall: ['giltzurruna'],
         idea: '5.–7. asteetan hiru sistema berri, bilateralak; 1. kardinal azpiko zainak: giltzurrunetako zain odola.',
         key: 'Hiru sistema berriak, bakoitza bere lurraldearekin: azpikoak giltzurrunak, sakrokardinalak hankak, gainekoak gorputz paretak.',
@@ -638,7 +638,7 @@ const stages: StageDef[] = [
       },
       {
         at: S7[7],
-        notes: ['w13/2.3.1/p8/s2'],
+        notes: ['w13/2.3.1/p8/s1-s2'],
         idea: 'Hemiazigos laguntzailea: 4.–8. saihets arteko espazioak, beste enbor batetik azigos zainera.',
         key: 'Ezkerrean bi enbor, bakoitza bere espazioekin eta bere zubiarekin azigos zainera: 4.–8. goian, 9.–11. behean.',
         text: 'Goikaldean, hemiazigos laguntzaileak 4., 5., 6., 7. eta 8. saihets arteko espazioetako odola hartzen du. Beste enbor (anastomosi) baten bidez odol hori eskuineko azigos zainera eramaten du.',
@@ -765,7 +765,7 @@ const stages: StageDef[] = [
       },
       {
         at: S9[3],
-        notes: ['w13/3.1/p6/s2', 'w13/3.1/p8/s1'],
+        notes: ['w13/3.1/p6/s2', 'w13/3.1/p7/s1', 'w13/3.1/p8/s1'],
         recall: ['giltzurruna', 'gonadak'],
         idea: 'Anastomositik ezkerreko giltzurrun zaina; ezkerreko kardinal azpikoaren urrutiko ataletik ezkerreko zain gonadala; hurbileko atala desagertzen da.',
         key: 'Ezkerreko giltzurrun zaina luzea da, zubi bat delako: ezkerreko giltzurrunetik eskuineko kabaraino.',

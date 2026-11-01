@@ -78,6 +78,8 @@ export const IMPORTANCE_W8: Record<string, Importance> = {
   'w8/3.1.2/p9/s1': { tier: 'funtsezkoa', rules: ['R2'] },
   'w8/3.1.2/p9/s2': { tier: 'funtsezkoa', rules: ['R2'] },
   'w8/3.2/p2/s1': { tier: 'funtsezkoa', rules: ['R1', 'R6'] },
+  'w8/3.2/p3/s1': { tier: 'garrantzitsua', rules: [] },
+  'w8/3.2/p3/s2': { tier: 'garrantzitsua', rules: [] },
   'w8/3.2/p3/s3': { tier: 'garrantzitsua', rules: [] },
   'w8/3.2/p3/s4': { tier: 'funtsezkoa', rules: ['R1'] },
   'w8/3.2/p3/s7': { tier: 'garrantzitsua', rules: [] },

@@ -1,0 +1,122 @@
+import { c, r, type GridScheme } from './grid-kit';
+
+/** Topic 7, body cavities: the whole notes, §1–4. */
+export const GRID_7: GridScheme[] = [
+  {
+    id: 'zeloma-lau-barrunbe',
+    week: 7,
+    section: '1 · 2 · 2.2 · 3',
+    title: 'Zeloma bakarretik lau barrunbera: nork banatzen duen eta zer geratzen den',
+    lead: 'Tolespenen ondoren enbrioi barruko zeloma gorputz barruan isolatuta geratzen da. Septum transversumak bitan banatzen du; gero bi mintz pareak amaitzen dute banaketa.',
+    stage: 'septum-transversum',
+    path: true,
+    columns: [
+      { label: 'Hasieran', tone: 'jatorria', w: 0.95 },
+      { label: '1. banaketa', tone: 'aldaketa', w: 0.95 },
+      { label: 'Bi atal', tone: 'kokapena', w: 1 },
+      { label: '2. banaketa', tone: 'aldaketa', w: 1.05 },
+      { label: 'Behin betiko barrunbea', tone: 'ondorioa', w: 1 },
+      { label: 'Non · zer dago', tone: 'kokapena', w: 1.1 },
+    ],
+    rows: [
+      r([c('Enbrioi barruko zeloma', { span: 4, note: 'pareta-orriaren eta errai-orriaren artean; tolespenekin enbrioi kanpokotik isolatua' }), c('Septum transversuma', { span: 4, note: '4. astea · C3–C5 · bihotz-hodiaren inguruko errai-orritik' }), c('Hasierako perikardio barrunbea', { span: 2, note: 'goian; ez du torax osoa okupatzen' }), c('Mintz pleuro­perikardikoak', { span: 2, note: '5. astea: erdira, erpinak eta hestegorri inguruko mesenkima fusionatu' }), 'Perikardio barrunbea', c('Aurre-erdian: bihotza', { note: 'bitarteko mediastinoan' })]),
+      r([null, null, null, null, 'Bi pleura barrunbeak', c('Atze-alboetan: birikak', { note: 'birika-hastapenak erretenetan sartuz hazten dira' })]),
+      r([null, null, c('Erreten perikardio­peritonealak', { note: 'septumaren atze-alboetan; goikoa eta behekoa lotzen dituzte' }), c('Mintz pleuro­peritonealak', { note: '5. astean agertu, 7. astean fusionatu' }), c('Itxita', { gone: true }), c('Pleura ↔ peritoneo komunikazioa galtzen da', { note: 'ezkerrekoa handiagoa: diafragma-ernia gehienak ezkerrean' })]),
+      r([null, null, c('Peritoneo barrunbea', { note: 'behean; ez du abdomen osoa okupatzen' }), c('—'), 'Peritoneo barrunbea', 'Abdomena: hestetik sortutako organoak']),
+    ],
+    pitfalls: [
+      'Septum transversumak PARTZIALKI banatzen du: erretenak zabalik daude 7. astera arte.',
+      'Pleuroperikardikoak: pleurak ↔ perikardioa. Pleuroperitonealak: pleurak ↔ peritoneoa.',
+      'Pleura eta perikardio barrunbeak espazio birtualak dira; errealak patologian bakarrik (airea, odola).',
+    ],
+  },
+  {
+    id: 'bi-mintz-pareak',
+    week: 7,
+    section: '2.2 · 3',
+    title: 'Bi mintz pareak, alderatuta',
+    lead: 'Izenak esaten du zer bereizten duen: pleuro-perikardikoa eta pleuro-peritoneala.',
+    stage: 'pleura-perikardioa',
+    path: false,
+    columns: [
+      { label: 'Ezaugarria', tone: 'neutral', w: 0.8 },
+      { label: 'Mintz pleuro­perikardikoak', tone: 'aldaketa', w: 1.2 },
+      { label: 'Mintz pleuro­peritonealak', tone: 'aldaketa', w: 1.2 },
+    ],
+    rows: [
+      r(['Noiz', '4. astean agertu; 5. astean erdira', '5. astean agertu; 7. astean fusionatu']),
+      r(['Nondik', 'Gorputzaren alboko paretetatik', 'Gorputzaren atze-alboko paretetatik']),
+      r(['Zerekin fusionatzen dira', c('Elkarren artean (erpinak) + hestegorri inguruko mesenkimarekin'), c('Septum transversumaren atzeko ertzarekin + hestegorri inguruko mesenkimarekin')]),
+      r(['Zer bereizten dute', c('Pleura barrunbeak ↔ perikardio barrunbea'), c('Pleura barrunbeak ↔ peritoneo barrunbea', { note: 'erreten perikardio­peritonealak ixten dituzte' })]),
+      r(['Bertatik', c('Nerbio frenikoak jaisten dira', { note: 'erdian gorputz-paretako mesenkima; bi geruza paretako orritik' }), c('Diafragmaren osagai bat', { note: 'septumeko miozitoak bertara migratzen dira', move: true })]),
+    ],
+  },
+  {
+    id: 'diafragma-osagaiak',
+    week: 7,
+    section: '3 · 3.1',
+    title: 'Diafragma: lau osagai → zati helduak',
+    lead: 'Zentroa septum transversumetik; inguruko eraztun muskularra beste hiru osagaietatik.',
+    stage: 'diafragma-eraketa',
+    path: true,
+    columns: [
+      { label: 'Osagaia', tone: 'jatorria', w: 1 },
+      { label: 'Nondik', tone: 'jatorria', w: 1 },
+      { label: 'Zati heldua', tone: 'muskulua', w: 1.4 },
+      { label: 'Oharra', tone: 'neutral', w: 1.1 },
+    ],
+    rows: [
+      r(['Septum transversuma', c('Bihotz-hodiaren inguruko errai-orria', { note: 'C3–C5 mailan' }), c('Zentro tendinosoa (frenikoa)', { note: 'eskuineko, erdiko eta ezkerreko hostoak' }), c('Bertako miozitoak mintz pleuro­peritonealetara migratzen dira', { move: true })]),
+      r(['Mintz pleuro­peritonealak', 'Atze-alboko gorputz-paretak', c('Erretenak ixten dituen zatia', { note: 'muskulu-zelulak septumetik datoz' }), c('7. astean fusionatu: septumaren atzeko ertza + hestegorri ingurua')]),
+      r([c('Aurreko hestearen inguruko mesenkima', { note: 'hestegorriarena' }), 'Mesenkima', c('Atal lunbarra: bi zutabe', { note: 'eskuinekoa L1–L3 (luzeagoa) · ezkerrekoa L1–L2 · tartean erdiko lotailu arkuatua' }), c('Atzean, beherago insertatzen da')]),
+      r(['Gorputz-pareta', c('Mesodermo paraxiala', { note: 'toraxeko beheko sei somitak' }), c('Atal muskular periferikoa (eraztuna)', { note: 'bularrezur atala (atzeko aurpegia) + saihets atala (7.–12. saihetsak)' }), c('Aurretik gorago insertatzen da atzetik baino')]),
+    ],
+    pitfalls: [
+      'Inerbazioa: nerbio frenikoak, C3–C5 nerbio espinalen aurreko adarrak. Septuma lepoan zegoelako; jaistean luzatzen dira.',
+      'Jaitsiera: 5. astearen bukaeran septumaren aurrealdea T7an, atzealdea T12an.',
+      'Zentro tendinosoa = septum transversuma. Zutabeak = hestegorri inguruko mesenkima.',
+    ],
+  },
+  {
+    id: 'diafragma-zeharkatu',
+    week: 7,
+    section: '3.1',
+    title: 'Diafragma zeharkatzen duten hiru egiturak',
+    stage: 'diafragma-heldua',
+    path: false,
+    columns: [
+      { label: 'Egitura', tone: 'arteria', w: 0.9 },
+      { label: 'Non zeharkatzen du', tone: 'kokapena', w: 1.3 },
+      { label: 'Norantz', tone: 'aldaketa', w: 1.3 },
+    ],
+    rows: [
+      r(['Toraxeko aorta', c('Aortaren hiatoa', { note: 'erdiko lotailu arkuatuaren azpitik · T12' }), c('Toraxetik abdomenera', { note: 'amaieran arteria iliako primitiboak' })]),
+      r(['Beheko kaba zaina', c('Zentro tendinosoan', { note: 'erdiko eta eskuineko hostoen artean' }), c('Abdomenetik toraxera', { note: 'zuzenean eskuineko aurikulara' })]),
+      r(['Hestegorria', 'Hestegorriaren hiatoa', c('Toraxetik abdomenera', { note: 'ibilbide laburra, gero urdaila' })]),
+    ],
+  },
+  {
+    id: 'peritoneo-kokapena',
+    week: 7,
+    section: '2.1 · 4',
+    title: 'Peritoneoarekiko kokapena: barrukoa, atzekoa, kanpokoa',
+    lead: 'Hestetik sortutakoak hasieran peritoneo barrukoak dira; batzuk gero atzera finkatzen dira. Hestetik ez datozenak barrunbetik kanpo daude.',
+    stage: 'peritoneo-barrunbea',
+    path: false,
+    columns: [
+      { label: 'Mota', tone: 'kokapena', w: 0.9 },
+      { label: 'Zergatik', tone: 'aldaketa', w: 1.35 },
+      { label: 'Adibideak', tone: 'neutral', w: 1.2 },
+      { label: 'Mesoa', tone: 'jatorria', w: 0.8 },
+    ],
+    rows: [
+      r([c('Peritoneo barrukoak'), c('Hestetik sortuak, errai-peritoneoz inguratuta'), c('Urdaila · jejunoa eta ileona · zeharkako kolona · sigmoidea'), c('Mantentzen da', { note: 'mesenterio dortsala' })]),
+      r([c('Bigarren mailako peritoneo atzekoak'), c('Hasieran barrukoak; posizioz aldatu eta mesoa atzeko paretako peritoneoarekin fusionatzen da', { move: true }), c('Duodenoa (gehiena) · goranzko eta beheranzko kolona · area'), c('Desagertzen da', { gone: true, note: 'biak, mesoa eta paretakoa' })]),
+      r([c('Peritoneo kanpokoak / atzekoak hasieratik'), c('Ez dira hestetik sortzen; barrunbearen atzean daude'), c('Giltzurrunak (bitarteko mesodermoa) · abdomeneko aorta · beheko kaba'), c('Ez dute', { gone: true })]),
+    ],
+    pitfalls: [
+      'Peritoneo barrunbeak ez du abdomen osoa okupatzen.',
+      'Paretako peritoneoa = barrunbearen pareta · errai-peritoneoa = hestearen ingurukoa · mesenterio dortsala = bien arteko lotura.',
+    ],
+  },
+];

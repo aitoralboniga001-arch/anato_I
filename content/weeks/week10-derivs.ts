@@ -85,7 +85,7 @@ export const stageBulbus: StageDef = {
     },
     {
       at: S6[2],
-      notes: ['w10/3.1/p4/s1-s2'],
+      notes: ['w10/3.1/p4/s1-s3'],
       idea: 'Hurbileko atalaren paretan muskulu trenkadak → hasierako eskuineko bentrikulua (behin betiko eskuineko bentrikuluaren atal trabekulatua).',
       key: 'Eskuineko bentrikulua bulbotik dator, ez atal bentrikularretik.',
       exam: 'Bulboaren hurbileko atala: muskulu trenkadak → hasierako eskuineko bentrikulua = eskuineko bentrikuluaren atal trabekulatua (atal garrantzitsuena, baina ez bakarra).',
@@ -117,7 +117,7 @@ export const stageBulbus: StageDef = {
     },
     {
       at: S6[4],
-      notes: ['w10/3.1/p6/s2'],
+      notes: ['w10/3.1/p6/s1', 'w10/3.1/p6/s2'],
       idea: 'Enbor arteriosoa trenkadatu → birika enborraren hasierako zatia eta sustraiak (eskuineko infundibulutik) eta aortarenak (ezkerrekotik).',
       key: 'Konoa: atal lisoak; enborra: arteria handien sustraiak.',
       exam: 'Enbor arteriosoa (urruneko atala) trenkadatu → birika enborraren eta aortaren hasierako zatiak eta sustraiak.',
@@ -332,7 +332,7 @@ export const stageAtrium: StageDef = {
     },
     {
       at: S8[3],
-      notes: ['w10/3.3/p4/s2'],
+      notes: ['w10/3.3/p3/s3', 'w10/3.3/p4/s2'],
       idea: 'Atzekaldean aurikulak zain sinuarekin komunikatuta mantentzen dira, eta hortaz zain guztiekin.',
       exam: 'Aurikulak atzekaldean zain sinuarekin komunikatuta mantentzen dira, eta hortaz zain guztiekin.',
       text: 'Gogoratu atzekaldean aurikulak zain sinuarekin komunikatuta mantentzen direla, eta hortaz zain guztiekin: zilborrekoekin, bitelinoekin eta kardinal komunekin. Kamera atzetik begira dago; hurrengo etapan atzeko ikuspegi hau erabiliko dugu.',
@@ -398,7 +398,7 @@ export const stageSinus: StageDef = {
     },
     {
       at: S9[1],
-      notes: ['w10/3.4/p4/s6', 'w10/3.4/p5/s1-s3'],
+      notes: ['w10/3.4/p4/s4', 'w10/3.4/p4/s6', 'w10/3.4/p5/s1-s3'],
       idea: 'Zain sinuaren eta aurikularen arteko komunikazioa: zulo sinoaurikularra (hasieran oso zabala). Bertatik odol oxigenatua (zilborrekoa) eta gutxikoa (bitelinoa) nahasten dira.',
       key: 'Odol nahasketa zulo sinoaurikularrean: zelula gorriak eta urdinak elkarrekin.',
       exam: 'Zulo sinoaurikularra: zain sinua ↔ aurikula (hasieran oso zabala); zain desberdinen odola nahasten da (zilborrekoa O₂ altua, bitelinoa O₂ gutxi).',

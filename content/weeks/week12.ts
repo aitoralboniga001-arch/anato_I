@@ -1007,7 +1007,7 @@ const week: WeekDef = {
         },
         {
           at: S11[5],
-          notes: ['w12/2.5.1/p5/s1-s2', 'w12/2.5.1/p6/s2', 'w12/2.5.1/p7/s1', 'w12/2.5.1/p8/s1'],
+          notes: ['w12/2.5.1/p5/s1-s2', 'w12/2.5.1/p6/s1-s2', 'w12/2.5.1/p7/s1-s2', 'w12/2.5.1/p8/s1'],
           idea: 'Abdomenean 3 arteria: enbor zeliakoa (aurreko hestea), goiko arteria mesenterikoa (bitarteko hestea), beheko arteria mesenterikoa (atzeko hestea).',
           key: 'Enbor zeliakoa → aurreko hestea; goiko mesenterikoa → bitarteko hestea; beheko mesenterikoa → atzeko hestea.',
           ask: {
@@ -1066,7 +1066,7 @@ const week: WeekDef = {
         },
         {
           at: S12[2],
-          notes: ['w12/2.5.2/p6/s1-s2'],
+          notes: ['w12/2.5.2/p6/s1-s2', 'w12/2.5.2/p7/s1'],
           idea: 'Arteria gonadalak: emakumeetan obulutegi arteriak, gizonetan arteria espermatikoak (luzeagoak, beherago daudelako).',
           text: 'Arteria gonadalek obulutegiak edo barrabilak irrigatzen dituzte. Emakumeetan obulutegi arteriak dira, eta gizonetan arteria espermatikoak edo barrabiletako arteriak (luzeagoak dira, barrabilak beherago daudelako).',
           focus: ['arteria-gonadalak', 'gonadak'],
@@ -1105,7 +1105,7 @@ const week: WeekDef = {
         },
         {
           at: S12[5],
-          notes: ['w12/2.5.3/p5/s1', 'w12/2.5.3/p6/s1', 'w12/2.5.3/p7/s1', 'w12/2.5.3/p8/s1'],
+          notes: ['w12/2.5.3/p5/s1', 'w12/2.5.3/p6/s1', 'w12/2.5.3/p7/s1-s2', 'w12/2.5.3/p8/s1'],
           idea: 'Toraxean saihets arteko arteriak; gerrian arteria lunbarrak (gerriko arteriak); sakroan alboko arteria sakroak.',
           text: 'Torax mailan saihets arteko arteriak dira; gerri eskualdean arteria lunbarrak edo gerriko arteriak; sakroan alboko arteria sakroak.',
           focus: ['saihets-arteko-arteriak', 'arteria-lunbarrak', 'alboko-arteria-sakroak'],
@@ -1114,7 +1114,7 @@ const week: WeekDef = {
         },
         {
           at: S12[6],
-          notes: ['w12/2.5.3/p10/s1'],
+          notes: ['w12/2.5.3/p4/s1', 'w12/2.5.3/p10/s1'],
           idea: 'Ez ahaztu: 7. mailan garatzen dira arteria subklabioak.',
           text: 'Ez ahaztu: zazpigarren mailan garatzen dira arteria subklabioak. Kamera lepora itzultzen da: ezkerreko subklabioa 7. segmentu arteko arteria da, makora igota.',
           focus: ['ezkerreko-subklabioa'],

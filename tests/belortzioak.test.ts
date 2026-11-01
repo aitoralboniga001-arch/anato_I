@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { BEL_ITEMS, BEL_PLATES, BEL_SYSTEMS, matchesName, normalizeName, sameKey } from '@/content/belortzioak';
+import { BEL_ITEMS, BEL_KINDS, BEL_MERGED, BEL_PLATES, BEL_SYSTEMS, matchesName, normalizeName, sameKey } from '@/content/belortzioak';
+import mergeJson from '@/content/belortzioak-merge.json';
 import { arrange, H } from '@/lib/belortzioakLayout';
 
 const inUnit = ([x, y]: [number, number]) => x >= 0 && x <= 1 && y >= 0 && y <= 1;
@@ -123,4 +124,66 @@ describe('belortzioak: name columns', () => {
       }
     }
   });
+});
+
+describe('belortzioak: merged figures (one drawing, the names of all its copies)', () => {
+  const members = (id: string) => Object.keys((mergeJson as Record<string, { members: Record<string, unknown> }>)[id].members);
+
+  it('merges each repeated drawing, every copy once, no figure in two groups', () => {
+    const all = BEL_MERGED.flatMap((g) => members(g.id));
+    expect(new Set(all).size).toBe(all.length);
+    expect(BEL_MERGED.map((g) => g.id)).toEqual(['f-sagitala', 'f-1', 'f-2', 'f-3', 'f-birika']);
+  });
+
+  it('keeps every name of every copy (a name in two copies once), placed on the figure', () => {
+    for (const g of BEL_MERGED) {
+      const names = new Set(g.all.items.flatMap((it) => [it.name, ...(it.accept ?? [])].map(sameKey)));
+      for (const pid of members(g.id))
+        for (const it of BEL_PLATES.find((p) => p.id === pid)!.items) expect(names.has(sameKey(it.name)), `${g.id} ${it.key} ${it.name}`).toBe(true);
+      const keys = g.all.items.map((it) => it.key);
+      expect(new Set(keys).size, g.id).toBe(keys.length);
+      for (const it of g.all.items) {
+        expect(it.targets.every(inUnit) && inUnit(it.label), it.key).toBe(true);
+        expect(it.r.length, it.key).toBe(it.targets.length);
+      }
+    }
+  });
+
+  it('gives every name a kind, and each kind its own figure with only that kind', () => {
+    for (const g of BEL_MERGED) {
+      for (const it of g.all.items) expect(BEL_KINDS.some((k) => k.id === it.kind), it.key).toBe(true);
+      expect(g.kinds.reduce((a, k) => a + k.plate.items.length, 0), g.id).toBe(g.all.items.length);
+      for (const k of g.kinds) {
+        expect(k.plate.items.every((it) => it.kind === k.kind), k.plate.id).toBe(true);
+        // the picture drawn is a copy of this drawing, coloured for the kind
+        expect(members(g.id), k.plate.id).toContain(k.plate.img);
+      }
+    }
+    const kindOf = (g: string, name: string) => BEL_MERGED.find((x) => x.id === g)!.all.items.find((it) => it.name === name)?.kind;
+    expect(kindOf('f-3', 'Zain sinua')).toBe('bihotza');
+    expect(kindOf('f-3', 'Birika-zain komun primitiboa eta eskuineko birika-zainak')).toBe('zainak');
+    expect(kindOf('f-2', 'Barea')).toBe('linfa');
+    expect(kindOf('f-1', 'Bitelo-zainak')).toBe('zainak');
+    expect(kindOf('f-1', '1. aorta-arkua')).toBe('arteriak');
+  });
+
+  it('lays the copies onto each other: one structure named in two copies points at one spot', () => {
+    // Different copies put their arrows on the same structure; once aligned, the nearest tips of the
+    // two must agree within a few % of the figure (an arrow touches the structure, not one pixel).
+    const M = mergeJson as unknown as Record<string, { members: Record<string, number[][]> }>;
+    const map = (m: number[][], [x, y]: number[]) => [m[0][0] * x + m[0][1] * y + m[0][2], m[1][0] * x + m[1][1] * y + m[1][2]];
+    const seen: string[] = [];
+    for (const g of BEL_MERGED) {
+      const placed = members(g.id).flatMap((pid) => BEL_PLATES.find((p) => p.id === pid)!.items.map((it) => ({ pid, it, at: it.targets.map((t) => map(M[g.id].members[pid], t)) })));
+      for (let i = 0; i < placed.length; i++)
+        for (let j = i + 1; j < placed.length; j++) {
+          const [a, b] = [placed[i], placed[j]];
+          if (a.pid === b.pid || sameKey(a.it.name) !== sameKey(b.it.name)) continue;
+          const d = Math.min(...a.at.flatMap((p) => b.at.map((q) => Math.hypot(p[0] - q[0], p[1] - q[1]))));
+          seen.push(`${a.it.key}~${b.it.key}`);
+          expect(d, `${g.id}: ${a.it.key} ${b.it.key} ${a.it.name}`).toBeLessThan(0.06);
+        }
+    }
+    expect(seen.length).toBeGreaterThan(0);
+});
 });

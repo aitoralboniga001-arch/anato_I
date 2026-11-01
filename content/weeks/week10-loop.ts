@@ -105,7 +105,7 @@ export const stageSegments: StageDef = {
     },
     {
       at: S4[5],
-      notes: ['w10/2/p8/s1-s2'],
+      notes: ['w10/2/p8/s1-s3'],
       idea: 'Atal bulbarra eta bentrikularra perikardio barrunbean; aurikulak eta zain sinuak septum transversumean.',
       key: 'Bihotzaren goiko erdia barrunbean dago; beheko erdia, oraindik, septum transversumaren mesenkiman.',
       caution: 'Izendatzean esan «odol hodiaren atal aurikularra eta bentrikularra», ez bakarrik aurikula edo bentrikulua: oraindik ez dira behin-betiko barrunbeak.',
