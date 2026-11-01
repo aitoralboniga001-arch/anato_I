@@ -618,7 +618,7 @@ const CORE_MIGRATIONS: MigrationTopic[] = [
       {
         id: 'aorta-arkuak',
         title: 'Sei aorta arkuak → arteria helduak',
-        lead: 'Arku bakoitzak bere eratorriak ditu; bosgarrena guztiz desagertzen da.',
+        lead: 'Arku bakoitzak bere eratorriak ditu; bosgarrena guztiz desagertzen da. Enbor arteriosoa trenkadatu ondoren goranzko aortaren hasiera eta birika-enborra bereizten dira; seigarren arkuak birika-enborrarekin kontaktatzen du.',
         stage: 'beste-aldaketak',
         roots: [
           n('aorta-arkuak', [
@@ -626,17 +626,18 @@ const CORE_MIGRATIONS: MigrationTopic[] = [
             n('bigarren-aorta-arkua', [n('hioide-arteria', undefined, { via: 'hondarra' }), n('ointokiko-arteria', undefined, { via: 'hondarra' })]),
             n('hirugarren-aorta-arkua', [n('karotida-komuna'), n('barneko-karotida', undefined, { note: 'hurbileko zatia' })]),
             n('laugarren-aorta-arkua', [
-              n('makoaren-urrutiko-atala', undefined, { via: 'ezkerrekoa' }),
+              n('makoaren-urrutiko-atala', undefined, { via: 'ezkerrekoa', note: 'ezkerreko karotida komunaren eta ezkerreko subklabioaren arteko zatia' }),
               n('eskuineko-subklabioa', undefined, { via: 'eskuinekoa', note: 'hurbileko atala' }),
             ]),
             n('bostgarren-aorta-arkua', [l('Ez du ezer sortzen', undefined, { via: 'desagertu', gone: true })]),
-            n('seigarren-aorta-arkua', [
+            n('seigarren-aorta-arkua', [l('Birika-enborra', undefined, { via: 'kontaktua', note: 'Enbor arteriosoaren trenkadatzetik dator; ez da 6. arkuaren eratorri osoa' }),
               n('ezkerreko-birika-arteria', undefined, { via: 'ezk. hurbilekoa' }),
               n('hodi-arteriosoa', [n('lotailu-arteriosoa', undefined, { via: 'jaio ondoren' })], { via: 'ezk. urrutikoa' }),
               n('eskuineko-birika-arteria', undefined, { via: 'esk. hurbilekoa' }),
               l('Eskuineko urrutikoa', undefined, { via: 'desagertu', gone: true }),
             ]),
           ]),
+          n('zazpigarren-segmentu-arteko-arteria', [n('ezkerreko-subklabioa', undefined, { via: 'eratu', note: 'Garapenean gorago kokatzen da, ezkerreko karotidatik gertu; ez da 4. arkuaren eratorria' })], { note: 'ezkerreko lepokoa' }),
         ],
       },
       {
@@ -662,12 +663,12 @@ const CORE_MIGRATIONS: MigrationTopic[] = [
       {
         id: 'eskuineko-subklabioa',
         title: 'Eskuineko subklabioa: hiru zati',
-        lead: 'Ezkerrekoa, aldiz, ezkerreko 7. segmentu arteko arteria osoa da.',
+        lead: 'Eskuineko subklabioak hiru jatorri ditu: hurbileko atala eskuineko 4. arkutik, bitartekoa eskuineko aorta dortsaletik eta urrutikoa eskuineko 7. lepoko segmentu arteko arteriatik. Ezkerrekoa ezkerreko 7. segmentu arteko arteriatik dator, ez 4. arkutik.',
         stage: 'laugarren-arkua',
         roots: [
-          n('laugarren-aorta-arkua', undefined, { note: 'eskuinekoa' }),
-          n('aorta-dortsalak', undefined, { note: 'eskuinekoa' }),
-          n('zazpigarren-segmentu-arteko-arteria', undefined, { note: 'eskuinekoa' }),
+          n('laugarren-aorta-arkua', undefined, { note: 'eskuinekoa → hurbileko / hasierako atala' }),
+          n('aorta-dortsalak', undefined, { note: 'eskuinekoa → bitarteko atala' }),
+          n('zazpigarren-segmentu-arteko-arteria', undefined, { note: 'eskuineko lepokoa → urrutiko atala' }),
         ],
         join: n('eskuineko-subklabioa'),
       },

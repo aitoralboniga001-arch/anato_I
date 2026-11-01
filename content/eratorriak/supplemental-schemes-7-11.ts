@@ -153,10 +153,13 @@ export const SUPPLEMENTAL_7_11: MigrationTopic[] = [
       },
       {
         id: 'irteera-bideen-banaketa', title: 'Konoa eta enbor arteriosoa: bi irteera bereizi', stage: 'enbor-arteriosoa',
-        lead: 'Trenkada tronkokonalak aortaren eta birika-enborraren bideak banatzen ditu; ez ditu elkarrekin komunikatzen.',
+        lead: 'Enbor arteriosoa trenkada aortikopulmonarraren bidez bi arteria-bidetan banatzen da: goranzko aortaren hasierako atala eta birika-enborra. Seigarren aorta-arkuek birika-enborrarekin kontaktatzen dute; trenkadak bi irteerak bereizten ditu, ez elkarrekin komunikatu.',
         roots: [
           n('arteria-konoa', [l('Bi bentrikuluetako atal lisoak: infundibuluak')]),
-          n('enbor-arteriosoa', [l('Aortaren hasierako atala eta birika-enborra')]),
+          n('enbor-arteriosoa', [
+            { label: 'Goranzko aorta · aortaren hasierako atala', via: 'trenkadatu' },
+            { label: 'Birika-enborra', via: 'trenkadatu', kids: [{ label: '6. aorta-arkuak', via: 'kontaktua', note: 'Birika-enborrarekin kontaktatzen dute; ez dute enbor osoa sortzen' }] },
+          ]),
           l('Trenkada aortikopulmonar kiribila', [l('Ezkerreko bentrikulua → aorta'), l('Eskuineko bentrikulua → birika-enborra')]),
         ],
       },
