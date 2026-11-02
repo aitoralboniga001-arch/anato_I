@@ -2,7 +2,9 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 /**
- * Course figures (Langman, lecture slides…) are copyrighted: they are never committed nor deployed.
+ * Private course figures (Langman, lecture slides…) are never committed nor deployed.
+ * The seven PDF page sets explicitly selected by the user are the exception: they are
+ * served separately from public/irudiak-pdf, and are not read through this manifest.
  * A student can keep them on their own computer, in `private-images/` (git-ignored) with a
  * `manifest.json`, and the image lab reads them from there through `/api/irudiak`. On the public
  * site the folder does not exist and the lab only shows the atlas's own figures.

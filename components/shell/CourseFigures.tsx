@@ -56,7 +56,7 @@ export function CourseFigures() {
 
   useEffect(() => {
     let active = true;
-    fetch(`/api/irudi-orriak/${id}.json`).then(r => {
+    fetch(`/irudiak-pdf/${id}.jpg.json`).then(r => {
       if (!r.ok) throw new Error('unavailable');
       return r.json();
     }).then(data => { if (active) { setPageLines({ id, lines: Array.isArray(data.lines) ? groupLines(data.lines) : [] }); setAvailable(true); } })
@@ -76,7 +76,7 @@ export function CourseFigures() {
   }
   return <div className={styles.root}>
     <p>Irudietako izenak sakatu: <strong>gorria → laranja → kendu</strong>. Markak gailu honetan gordetzen dira.</p>
-    <p className={styles.note}>Testua automatikoki detektatu da; baliteke izen batzuk ez antzematea. Irudiak ordenagailu honetan bakarrik daude.</p>
+    <p className={styles.note}>Testua automatikoki detektatu da; baliteke izen batzuk ez antzematea.</p>
     <label htmlFor="figure-doc">Dokumentua</label>{' '}
     <select id="figure-doc" value={doc} onChange={e => { setDoc(Number(e.target.value)); setPage(1); }}>
       {documents.map((d, i) => <option key={d.title} value={i}>{d.title}</option>)}
@@ -89,8 +89,8 @@ export function CourseFigures() {
     {available ? <div className={styles.figure}>
       {/* Source page is kept as an image so the original figure remains unchanged. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/api/irudi-orriak/${id}.jpg`} alt={`${documents[doc].title}, ${page}. orria`} />
+      <img src={`/irudiak-pdf/${id}.jpg`} alt={`${documents[doc].title}, ${page}. orria`} />
       {(pageLines.id === id ? pageLines.lines : []).map((line, i) => <button key={i} type="button" className={`${styles.spot} ${marks[`${id}-${i}`] === 1 ? styles.red : marks[`${id}-${i}`] === 2 ? styles.orange : ''}`} style={{ left: `${line.x * 100}%`, top: `${line.y * 100}%`, width: `${line.w * 100}%`, height: `${line.h * 100}%` }} aria-label={`${line.text}: ${marks[`${id}-${i}`] === 1 ? 'gorria' : marks[`${id}-${i}`] === 2 ? 'laranja' : 'markatu gabe'}`} onClick={() => mark(i)} />)}
-    </div> : <p>Irudi pribatuak ez daude eskuragarri ordenagailu honetan.</p>}
+    </div> : <p>Irudia ezin izan da kargatu. Saiatu berriro.</p>}
   </div>;
 }

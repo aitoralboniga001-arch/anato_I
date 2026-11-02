@@ -699,7 +699,7 @@ export function ImageLab() {
         )}
       </section>
       <LandFoot>
-        <p>Irudi hauek atlasaren eszenak dira (geureak). Ikasgaiko irudiak (Langman…) ez dira hemen argitaratzen: zure ordenagailuan bakarrik kargatzen dira, «Ikasgaiko irudiak» fitxan.</p>
+        <p>«Atlaseko irudiak» gure eszenak dira; «PDFetako irudiak» hautatutako zazpi dokumentuetako orriak dira. Gainerako irudi pribatuak zure ordenagailuan bakarrik kargatzen dira, «Ikasgaiko irudiak» fitxan.</p>
       </LandFoot>
     </div>
   );
