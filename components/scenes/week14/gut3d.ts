@@ -194,7 +194,7 @@ const L = (kps: V3[], n = 20) => curve3(kps, n);
 
 /** The gut's radius at sample i (pharynx wide and flat, the stomach's dilation, the cloaca). */
 function gutRadius(th: number, pose: GutPose): number {
-  let r = 0.12;
+  let r = 0.155;
   // Pharynx: wide (flattened sideways by `around`).
   r += 0.06 * ss(TH.resp - 0.05, TH.resp + 0.08, th);
   // The stomach's fusiform dilation.
@@ -277,7 +277,7 @@ export function gutModel(pose: GutPose, o: GutOpts = {}): GutModel {
       const heart = it.groups?.includes('bihotz-lakioa');
       // The vessels run right behind the gut: faint context, so they never hide it (full when lit).
       const vessel = it.tissue === 'vessel' && !(dim && dim.k > 0.001 && lit(it.id ?? '', it.groups));
-      const k = heart ? (o.heart ?? 1) : vessel ? (o.vessels ?? 0.3) : 1;
+      const k = heart ? (o.heart ?? 1) : vessel ? (o.vessels ?? 0.15) : 1;
       items.push(k === 1 ? it : { ...it, opacity: (it.opacity ?? 1) * k });
     }
     for (const [k, v] of Object.entries(E.pts)) pts[k] = v;
@@ -340,12 +340,12 @@ export function gutModel(pose: GutPose, o: GutOpts = {}): GutModel {
   const apex = P(TH.apex, -1.0, 0);
   const duct = L([apex, add(apex, [0, -0.45, 0.95]), add(apex, [0, -1.05, 1.85])], 14);
   if (yolk > 0.01) {
-    const rd = lerp(0.17, 0.055, ss(0, 1, pose.narrow));
+    const rd = lerp(0.19, 0.075, ss(0, 1, pose.narrow));
     const m = tubeOf(duct, (u) => rd * (1 + 0.6 * (1 - u) ** 3 * (1 - pose.narrow)), 14);
-    items.push({ key: 'duct', id: 'hodi-onfalomesenterikoa', ...m, color: GC.yolk, deep: GC.yolkDeep, tissue: 'epithelium', opacity: 0.75 * yolk * fade('hodi-onfalomesenterikoa') });
+    items.push({ key: 'duct', id: 'hodi-onfalomesenterikoa', ...m, color: GC.yolk, deep: GC.yolkDeep, tissue: 'epithelium', opacity: yolk * fade('hodi-onfalomesenterikoa') });
     pts['hodi-onfalomesenterikoa'] = duct[7];
     const yc = add(duct[duct.length - 1], [0, -0.4, 0.55]);
-    items.push({ key: 'yolk', id: 'bitelo-zaku-sekundarioa', ...blobParts({ center: yc, radii: [0.55, 0.6, 0.55], rings: 14, sides: 18 }), color: GC.yolk, deep: GC.yolkDeep, tissue: 'epithelium', opacity: 0.45 * yolk * fade('bitelo-zaku-sekundarioa'), outline: false });
+    items.push({ key: 'yolk', id: 'bitelo-zaku-sekundarioa', ...blobParts({ center: yc, radii: [0.55, 0.6, 0.55], rings: 14, sides: 18 }), color: GC.yolk, deep: GC.yolkDeep, tissue: 'epithelium', opacity: 0.8 * yolk * fade('bitelo-zaku-sekundarioa') });
     pts['bitelo-zaku-sekundarioa'] = add(yc, [0.35, 0.1, 0.3]);
     lines.duct = duct;
   }
@@ -353,7 +353,7 @@ export function gutModel(pose: GutPose, o: GutOpts = {}): GutModel {
   // ———— the allantois: from the cloaca's ventral wall into the connecting stalk ————
   {
     const al = L([P(TH.cloaca + 0.06, -0.3, 0), P(-1.75, -0.62, 0), P(-1.3, -0.92, 0), P(-0.92, -1.02, 0), add(P(-0.75, -0.98, 0), [0, -0.6, 0.95]), add(P(-0.75, -0.98, 0), [0, -1.1, 1.75])], 30);
-    items.push({ key: 'allantois', id: 'alantoidea', ...tubeOf(al, (u) => 0.045 * (1 - 0.3 * u), 10), color: GC.endo, deep: GC.endoDeep, tissue: 'epithelium', opacity: 0.8 * tube * fade('alantoidea') });
+    items.push({ key: 'allantois', id: 'alantoidea', ...tubeOf(al, (u) => 0.065 * (1 - 0.3 * u), 12), color: GC.endo, deep: GC.endoDeep, tissue: 'epithelium', opacity: tube * fade('alantoidea') });
     pts['alantoidea'] = al[9];
     lines.allantois = al;
   }
@@ -363,9 +363,9 @@ export function gutModel(pose: GutPose, o: GutOpts = {}): GutModel {
   if (pouch > 0.01)
     TH.pouches.forEach((th, k) => {
       for (const s of [-1, 1]) {
-        const root = P(th, -0.1, s * 0.16);
-        const tip = P(th + 0.01, -0.1, s * (0.16 + 0.42 * pouch * (1 - 0.15 * k)));
-        const m = tubeOf(L([root, mix3(root, tip, 0.5), tip], 6), (u) => 0.06 * (1 - 0.3 * u), 10);
+        const root = P(th, -0.1, s * 0.2);
+        const tip = P(th + 0.01, -0.1, s * (0.2 + 0.42 * pouch * (1 - 0.15 * k)));
+        const m = tubeOf(L([root, mix3(root, tip, 0.5), tip], 6), (u) => 0.075 * (1 - 0.3 * u), 12);
         // A lighter teal than the pharynx they bud from, so the four pairs read as their own.
         const c = mixHex(colourOf('pharynx'), '#ffffff', 0.3);
         items.push({ key: `pouch${k}${s}`, id: 'faringe-poltsak', ...m, color: c, deep: darker(c), tissue: 'epithelium', opacity: (pouch > 0.99 ? 1 : 0.85 * pouch) * fade('faringe-poltsak') });
@@ -379,13 +379,13 @@ export function gutModel(pose: GutPose, o: GutOpts = {}): GutModel {
     const bud = ss(0, 0.35, resp);
     const grow = ss(0.35, 0.7, resp);
     const split = ss(0.7, 1, resp);
-    const root = P(TH.resp + 0.02, -0.16, 0);
+    const root = P(TH.resp + 0.02, -0.2, 0);
     // The tube runs caudally in front of the foregut (between the gut and the heart).
-    const end = P(lerp(TH.resp - 0.06, 1.0, grow), lerp(-0.26, -0.36, grow), 0);
-    const trunk = L([root, P(TH.resp - 0.02, lerp(-0.2, -0.32, bud), 0), mix3(P(TH.resp - 0.05, -0.33, 0), end, 0.5), end], 12);
+    const end = P(lerp(TH.resp - 0.06, 1.0, grow), lerp(-0.34, -0.48, grow), 0);
+    const trunk = L([root, P(TH.resp - 0.02, lerp(-0.24, -0.4, bud), 0), mix3(P(TH.resp - 0.05, -0.43, 0), end, 0.5), end], 12);
     const shown = bud < 0.999 ? trunk.slice(0, Math.max(3, Math.round(trunk.length * (0.25 + 0.75 * Math.max(bud * 0.35, grow))))) : trunk.slice(0, Math.max(3, Math.round(trunk.length * (0.3 + 0.7 * grow))));
-    const c = mixHex(GC.endo, GC.resp, 0.6 * clamp01(pose.parts) + 0.4 * bud);
-    items.push({ key: 'resp', id: 'hodi-laringotrakeala', groups: ['arnas-hastapena'], ...tubeOf(shown, (u) => lerp(0.07, 0.05, u) * (0.6 + 0.4 * bud), 12), color: c, deep: darker(c), tissue: 'epithelium', opacity: 0.9 * fade('hodi-laringotrakeala', ['arnas-hastapena']) });
+    const c = mixHex(GC.endo, mixHex(GC.resp, '#ffffff', 0.12), 0.6 * clamp01(pose.parts) + 0.4 * bud);
+    items.push({ key: 'resp', id: 'hodi-laringotrakeala', groups: ['arnas-hastapena'], ...tubeOf(shown, (u) => lerp(0.085, 0.065, u) * (0.6 + 0.4 * bud), 14), color: c, deep: mixHex(c, GC.respDeep, 0.6), tissue: 'epithelium', opacity: fade('hodi-laringotrakeala', ['arnas-hastapena']) });
     pts['arnas-hastapena'] = shown[Math.min(shown.length - 1, 3)];
     pts['hodi-laringotrakeala'] = trunk[5];
     pts['laringea'] = trunk[2];
@@ -394,7 +394,7 @@ export function gutModel(pose: GutPose, o: GutOpts = {}): GutModel {
       for (const s of [-1, 1]) {
         const tip = add(end, [s * 0.26 * split, -0.04 * split, 0]);
         const lb = L([end, add(end, [s * 0.12 * split, -0.015, 0]), tip], 8);
-        items.push({ key: `lung${s}`, id: 'birika-hastapenak', groups: ['arnas-hastapena'], ...tubeOf(lb, (u) => 0.05 + 0.05 * ss(0.5, 1, u) * split, 12), color: c, deep: darker(c), tissue: 'epithelium', opacity: 0.9 * split * fade('birika-hastapenak', ['arnas-hastapena']) });
+        items.push({ key: `lung${s}`, id: 'birika-hastapenak', groups: ['arnas-hastapena'], ...tubeOf(lb, (u) => 0.065 + 0.06 * ss(0.5, 1, u) * split, 14), color: c, deep: mixHex(c, GC.respDeep, 0.6), tissue: 'epithelium', opacity: split * fade('birika-hastapenak', ['arnas-hastapena']) });
         if (s > 0) pts['birika-hastapenak'] = tip;
       }
   }
@@ -405,7 +405,7 @@ export function gutModel(pose: GutPose, o: GutOpts = {}): GutModel {
   const sf = frameAt(sth);
   const sc = P(sth, -0.74, 0);
   if (septum > 0.01) {
-    items.push({ key: 'septum', id: 'septum-transversum', ...blobParts({ center: sc, radii: [0.62, 0.3, 0.36], axes: [[1, 0, 0], sf.along, sf.dorsal], rings: 14, sides: 22 }), color: GC.septum, deep: GC.septumDeep, tissue: 'mesenchyme', opacity: 0.3 * septum * fade('septum-transversum', undefined, 0.6), outline: false });
+    items.push({ key: 'septum', id: 'septum-transversum', ...blobParts({ center: sc, radii: [0.56, 0.3, 0.42], axes: [[1, 0, 0], sf.along, sf.dorsal], rings: 18, sides: 26 }), color: GC.septum, deep: GC.septumDeep, tissue: 'mesenchyme', opacity: 0.36 * septum * fade('septum-transversum', undefined, 0.6), outline: false });
     pts['septum-transversum'] = add(sc, [0.45, 0.05, 0.1]);
   }
   const lb = clamp01(pose.liverBud);
@@ -413,7 +413,7 @@ export function gutModel(pose: GutPose, o: GutOpts = {}): GutModel {
     const root = P(TH.liverBud + 0.02, -0.2, 0);
     const tip = P(lerp(TH.liverBud + 0.04, sth - 0.02, lb), lerp(-0.3, -0.66, lb), 0);
     const stem = L([root, mix3(root, tip, 0.5), tip], 8);
-    items.push({ key: 'liverBud', id: 'gibel-hastapena', ...tubeOf(stem, (u) => lerp(0.06, 0.07 + 0.05 * lb, u), 12), color: GC.endo, deep: GC.endoDeep, tissue: 'epithelium', opacity: 0.9 * fade('gibel-hastapena') });
+    items.push({ key: 'liverBud', id: 'gibel-hastapena', ...tubeOf(stem, (u) => lerp(0.075, 0.09 + 0.06 * lb, u), 14), color: GC.endo, deep: GC.endoDeep, tissue: 'epithelium', opacity: fade('gibel-hastapena') });
     pts['gibel-hastapena'] = stem[3];
   }
 
@@ -426,18 +426,18 @@ export function gutModel(pose: GutPose, o: GutOpts = {}): GutModel {
       lines[key] = line;
     };
     const ce = L([P(0.64, 0.4, 0), P(0.62, 0.15, 0), P(0.6, -0.04, 0), P(0.58, -0.14 - 0.1, 0.04)], 12);
-    vessel('celiac', 'enbor-zeliakoa', ce, GC.fore, 0.045);
+    vessel('celiac', 'enbor-zeliakoa', ce, GC.fore, 0.062);
     // Branches along the abdominal foregut: up to the stomach, down to the duodenum.
-    vessel('celiacUp', 'enbor-zeliakoa', L([ce[9], P(0.68, -0.05, 0.1), P(0.76, -0.04, 0.12)], 8), GC.fore, 0.028);
-    vessel('celiacDown', 'enbor-zeliakoa', L([ce[9], P(0.48, -0.06, 0.1), P(0.36, -0.08, 0.12)], 8), GC.fore, 0.028);
+    vessel('celiacUp', 'enbor-zeliakoa', L([ce[9], P(0.68, -0.05, 0.1), P(0.76, -0.04, 0.12)], 8), GC.fore, 0.04);
+    vessel('celiacDown', 'enbor-zeliakoa', L([ce[9], P(0.48, -0.06, 0.1), P(0.36, -0.08, 0.12)], 8), GC.fore, 0.04);
     pts['enbor-zeliakoa'] = ce[4];
     const sma = L([P(0.12, 0.4, 0), P(0.05, 0.12, 0), P(-0.12, -0.25, 0), P(-0.32, -0.62, 0), P(-0.45, -0.85, 0.02), add(apex, [0.04, -0.1, 0.2]), add(duct[6], [0.06, 0, 0])], 18);
-    vessel('sma', 'goiko-arteria-mesenterikoa', sma, GC.mid, 0.045);
+    vessel('sma', 'goiko-arteria-mesenterikoa', sma, GC.mid, 0.062);
     pts['goiko-arteria-mesenterikoa'] = sma[6];
     const ima = L([P(-1.0, 0.4, 0), P(-1.06, 0.2, 0), P(-1.15, 0.02, 0), P(-1.25, -0.02, 0.08)], 12);
-    vessel('ima', 'beheko-arteria-mesenterikoa', ima, GC.hind, 0.04);
-    vessel('imaUp', 'beheko-arteria-mesenterikoa', L([ima[10], P(-1.05, -0.04, 0.11), P(-0.92, -0.06, 0.12)], 8), GC.hind, 0.026);
-    vessel('imaDown', 'beheko-arteria-mesenterikoa', L([ima[10], P(-1.5, -0.04, 0.11), P(-1.78, -0.06, 0.12)], 8), GC.hind, 0.026);
+    vessel('ima', 'beheko-arteria-mesenterikoa', ima, GC.hind, 0.056);
+    vessel('imaUp', 'beheko-arteria-mesenterikoa', L([ima[10], P(-1.05, -0.04, 0.11), P(-0.92, -0.06, 0.12)], 8), GC.hind, 0.038);
+    vessel('imaDown', 'beheko-arteria-mesenterikoa', L([ima[10], P(-1.5, -0.04, 0.11), P(-1.78, -0.06, 0.12)], 8), GC.hind, 0.038);
     pts['beheko-arteria-mesenterikoa'] = ima[4];
   }
 
@@ -448,10 +448,10 @@ export function gutModel(pose: GutPose, o: GutOpts = {}): GutModel {
     const r = (u: number) => lerp(0.5, 0.36, u) * Math.sin(Math.PI * Math.min(1, 0.06 + u * 0.94)) ** 0.35;
     const around = (a: number) => 1 + 0.55 * Math.cos(a) ** 2;
     const m = cachedMesh2('cavity', () => tubeOf(axis, r, 24, around));
-    items.push({ key: 'cavity', id: 'peritoneo-barrunbea', ...m, color: GC.cavity, deep: '#2f7a45', tissue: 'membrane', opacity: 0.16 * cav * fade('peritoneo-barrunbea', undefined, 0.5), outline: false, thin: 0.8 });
+    items.push({ key: 'cavity', id: 'peritoneo-barrunbea', ...m, color: GC.cavity, deep: '#2f7a45', tissue: 'membrane', opacity: 0.26 * cav * fade('peritoneo-barrunbea', undefined, 0.5), outline: false, thin: 0.8 });
     pts['peritoneo-barrunbea'] = P(-0.05, -0.7, 0.55);
     const wall = cachedMesh2('parietal', () => tubeOf(axis, (u) => r(u) * 1.04, 24, around));
-    items.push({ key: 'parietal', id: 'paretako-peritoneoa', ...wall, color: GC.parietal, deep: darker(GC.parietal), tissue: 'membrane', opacity: 0.14 * cav * fade('paretako-peritoneoa', undefined, 0.5), outline: false, thin: 0.9 });
+    items.push({ key: 'parietal', id: 'paretako-peritoneoa', ...wall, color: GC.parietal, deep: darker(GC.parietal), tissue: 'membrane', opacity: 0.22 * cav * fade('paretako-peritoneoa', undefined, 0.5), outline: false, thin: 0.9 });
     pts['paretako-peritoneoa'] = P(-1.2, -0.12, 0.62);
   }
 
@@ -492,7 +492,7 @@ export function gutModel(pose: GutPose, o: GutOpts = {}): GutModel {
       }
       const groups = id === 'mesenterio-dortsala' ? undefined : ['mesenterio-dortsala'];
       const s = sheet(key, wall, gut, 0.018);
-      const op = 0.55 * meso * show * fade(id, groups, 0.7);
+      const op = 0.78 * meso * show * fade(id, groups, 0.7);
       items.push({ key: `${key}a`, id, groups, mesh: s.lo, color: GC.visceral, deep: darker(GC.visceral), tissue: 'membrane', opacity: op, thin: 0.6, outline: false });
       items.push({ key: `${key}b`, id, groups, mesh: s.hi, color: GC.visceral, deep: darker(GC.visceral), tissue: 'membrane', opacity: op, thin: 0.6, outline: false });
       const mid = Math.round(n / 2);
@@ -525,7 +525,7 @@ export function gutModel(pose: GutPose, o: GutOpts = {}): GutModel {
   if (retro > 0.01) {
     for (const s of [-1, 1]) {
       const f = frameAt(-0.75);
-      items.push({ key: `kid${s}`, id: 'giltzurruna', ...blobParts({ center: P(-0.75, 0.32, s * 0.36), radii: [0.13, 0.3, 0.12], axes: [[1, 0, 0], f.along, f.dorsal], rings: 12, sides: 16 }), color: GC.kidney, deep: darker(GC.kidney), tissue: 'epithelium', opacity: 0.85 * retro * fade('giltzurruna') });
+      items.push({ key: `kid${s}`, id: 'giltzurruna', ...blobParts({ center: P(-0.75, 0.32, s * 0.36), radii: [0.17, 0.4, 0.15], axes: [[1, 0, 0], f.along, f.dorsal], rings: 16, sides: 20 }), color: GC.kidney, deep: darker(GC.kidney), tissue: 'epithelium', opacity: retro * fade('giltzurruna') });
     }
     pts['giltzurruna'] = P(-0.75, 0.32, 0.4);
     const ivc = L([P(0.55, 0.3, -0.2), P(0.0, 0.32, -0.2), P(-0.8, 0.32, -0.2), P(-1.3, 0.3, -0.18)], 16);

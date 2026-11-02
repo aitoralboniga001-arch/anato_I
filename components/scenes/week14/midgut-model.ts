@@ -27,8 +27,10 @@ import { FC, FP_DONE, duodenumLine, foreModel, ss, type ForePose } from './foreg
 export const MC = {
   ...FC,
   /** The primary loop's two limbs. */
-  cephalic: mixHex(FC.mid, '#ffffff', 0.42),
-  caudal: mixHex(FC.mid, '#000000', 0.28),
+  cephalic: mixHex(FC.mid, '#ffffff', 0.5),
+  caudal: mixHex(FC.mid, '#ff7a3a', 0.5),
+  /** The rotation arrow round the SMA. */
+  arc: '#ffe08a',
   cord: '#d9c7a6',
   ecto: T.ecto,
   iliac: mixHex(T.aorta, '#ffffff', 0.25),
@@ -48,8 +50,8 @@ const dot = (a: V3, b: V3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const tubeOf = (pts: readonly V3[], r: (u: number) => number, sides = 14) => tubeParts(pts, { radius: r, ref: [0, 0, 1], sides, capStart: true, capEnd: true });
 
 /** A polyline resampled by arc length to exactly n points. */
-function resample(keys: readonly V3[], n: number): V3[] {
-  const fine = curve3(keys, Math.max(40, keys.length * 16));
+function resample(keys: readonly V3[], n: number, smooth = true): V3[] {
+  const fine = smooth ? curve3(keys, Math.max(40, keys.length * 16)) : keys;
   const cum = [0];
   for (let i = 1; i < fine.length; i++) {
     const d = sub(fine[i], fine[i - 1]);
@@ -135,13 +137,15 @@ export interface MidPose {
   summary: number;
   /** The anterior abdominal wall. */
   front: number;
+  /** The rotation arrow round the SMA (how far the loop has turned). */
+  arc: number;
   /** The retroperitoneal veil over the duodenum and pancreas (foregut model). */
   veil: number;
 }
 
 export const MP0: MidPose = {
   fore: 1, loop: 0, hern: 0, rot: 0, ret: 0, cDesc: 0, limbs: 0, parts: 0, vit: 1, cord: 0, meso: 1, fuseA: 0, fuseD: 0,
-  hind: 1, sma: 0, ima: 0, celiac: 0, rectal: 0, anal: 0, summary: 0, front: 0, veil: 0,
+  hind: 1, sma: 0, ima: 0, celiac: 0, rectal: 0, anal: 0, summary: 0, front: 0, veil: 0, arc: 0,
 };
 
 /** The adult end of the midgut and hindgut. */
@@ -162,7 +166,7 @@ export interface MidModel {
 
 // ———————————————————————————— the midgut line ————————————————————————————
 
-const N = 150;
+const N = 240;
 /** Where the parts end along the midgut (fractions of the line). */
 const S_JEJ = 0.3;
 const S_ILE = 0.56;
@@ -203,39 +207,92 @@ const HEP_FLEX: V3 = [-1.12, 0.1, -0.45];
 /** Week 5: short and straight, on a short dorsal meso. */
 const STRAIGHT = resample([DJ, [0.12, -0.45, -0.62], [0.02, -0.62, -0.32], [-0.02, -0.75, -0.42], [0.04, -0.8, -0.66], B23_EARLY], N);
 
+/**
+ * Intestinal loops: a prolate trochoid along a base path (each turn a loop that crosses its neighbour, as the
+ * notes' jejunal loops), lifted in and out of the frontal plane so the crossings pass over each other.
+ */
+function coils(keys: readonly V3[], n: number, turns: number, d: number): V3[] {
+  const M = 360;
+  const base = resample(keys, M);
+  const out: V3[] = [];
+  for (let i = 0; i < M; i++) {
+    const t = i / (M - 1);
+    const T = norm(sub(base[Math.min(M - 1, i + 1)], base[Math.max(0, i - 1)]));
+    const Nr = norm(cross([0, 0, 1], T));
+    const env = ss(0, 0.07, t) * (1 - ss(0.93, 1, t));
+    const ph = 2 * Math.PI * turns * t;
+    const off = add(add(mul(T, -d * Math.sin(ph)), mul(Nr, d * (1 - Math.cos(ph)) * 0.8)), [0, 0, 0.13 * Math.sin(ph)]);
+    out.push(add(base[i], mul(off, env)));
+  }
+  return resample(out, n, false);
+}
+
 /** The adult frame (the caecum's descent moves the junction and stretches the ascending colon). */
+const finalMemo = new Map<number, V3[]>();
 function finalLine(c: number): V3[] {
+  const key = Math.round(c * 200);
+  const hit = finalMemo.get(key);
+  if (hit) return hit;
+  const line = finalLineOf(key / 200);
+  if (finalMemo.size > 240) finalMemo.clear();
+  finalMemo.set(key, line);
+  return line;
+}
+function finalLineOf(c: number): V3[] {
   const J = lerp3(J_HI, J_LO, c);
   const nJ = Math.round(N * S_JEJ);
   const nI = Math.round(N * S_ILE) - nJ;
   const nC = Math.round(N * S_CAE) - nJ - nI;
   const nA = Math.round(N * S_ASC) - nJ - nI - nC;
   const nT = N - nJ - nI - nC - nA;
-  const jej = resample([DJ, [0.55, -0.32, -0.55], [0.86, -0.52, -0.08], [0.46, -0.66, 0.38], [0.92, -0.92, 0.34], [0.46, -1.08, 0.16], [0.96, -1.3, 0.26], [0.42, -1.46, 0.45]], nJ + 1);
+  const jej = coils([DJ, [0.62, -0.38, -0.42], [0.82, -0.72, 0.02], [0.58, -1.06, 0.3], [0.74, -1.38, 0.3], [0.4, -1.52, 0.38]], nJ + 1, 5.5, 0.17);
   const ileEnd = add(J, [0.12, 0.02, 0.18]);
-  const ileKeys: V3[] = [jej[jej.length - 1], [-0.08, -1.3, 0.42], [0.2, -1.72, 0.38], [-0.32, -1.6, 0.32], [-0.08, -2.02, 0.32], lerp3([-0.52, -1.92, 0.24], [-0.5, -0.9, 0.3], 1 - c), ileEnd];
-  const ile = resample(ileKeys, nI + 1);
+  const ileKeys: V3[] = [jej[jej.length - 1], [0.12, -1.66, 0.4], [-0.16, -1.88, 0.34], lerp3([-0.5, -1.86, 0.26], [-0.5, -0.9, 0.3], 1 - c), ileEnd];
+  const ile = coils(ileKeys, nI + 1, 4, 0.15);
   const cae = resample([ileEnd, J], nC + 1);
   const asc = resample([J, lerp3(J, HEP_FLEX, 0.5), HEP_FLEX], nA + 1);
   const tra = resample([HEP_FLEX, [-0.78, -0.18, 0.22], [-0.12, -0.46, 0.44], B23], nT);
   return [...jej.slice(0, nJ), ...ile.slice(0, nI), ...cae.slice(0, nC), ...asc.slice(0, nA), ...tra];
 }
 
-/** The primary loop: a hairpin round the axis (cranial limb on +e, caudal on −e), turned by θ about it. */
-function loopLine(dLen: number, th: number, coil: number): { line: V3[]; axis: V3[] } {
+/** The loop's half width (limb to axis): wider once out in the cord. */
+const loopW = (hern: number) => lerp(0.36, 0.5, hern);
+
+/**
+ * The primary loop round the axis (cranial limb on +e, caudal on −e), turned by θ about it: two limbs with a
+ * narrow neck at the root and a rounded apex (the notes' U), the cranial limb coiling as it lengthens.
+ */
+function loopLine(dLen: number, th: number, coil: number, W: number): { line: V3[]; axis: V3[] } {
   const e = add(mul(E0, Math.cos(th)), mul(F0, Math.sin(th)));
   const f = cross(AX, e);
   const line: V3[] = [];
   const axis: V3[] = [];
+  const d0 = dLen * 0.08;
+  const Ls = Math.max(0.05, dLen - W - d0);
+  const Lt = Ls + (Math.PI / 2) * W;
   for (let i = 0; i < N; i++) {
     const s = i / (N - 1);
     const cranial = s <= S_APEX;
     const k = cranial ? s / S_APEX : (1 - s) / (1 - S_APEX);
-    const d = dLen * (0.08 + 0.92 * k);
-    const w = (cranial ? 1 : -1) * 0.3 * Math.sqrt(Math.max(0, 1 - Math.pow(d / (dLen * 1.02), 2)));
-    // The cranial limb grows faster: its coils (the future jejunum and ileum) bulge sideways.
-    const wig = cranial ? coil * 0.13 * Math.sin(2 * Math.PI * 7 * s) * Math.sin(Math.PI * k) : 0;
-    const q = add(add(add(ROOT, mul(AX, d)), mul(e, w)), mul(f, wig));
+    const a = k * Lt;
+    let d: number;
+    let w: number;
+    if (a <= Ls) {
+      d = d0 + a;
+      w = W * (0.42 + 0.58 * ss(0, 0.4, a / Ls));
+    } else {
+      const ph = (a - Ls) / W;
+      d = d0 + Ls + W * Math.sin(ph);
+      w = W * Math.cos(ph);
+    }
+    w *= cranial ? 1 : -1;
+    // The cranial limb grows faster: its coils (the future jejunum and ileum) wind round it.
+    let q = add(add(ROOT, mul(AX, d)), mul(e, w));
+    if (cranial && coil > 0.001) {
+      const env = ss(0.12, 0.3, k) * (1 - ss(0.72, 0.9, k));
+      const ph = 2 * Math.PI * 6 * k;
+      q = add(q, mul(add(mul(e, 0.16 * (Math.cos(ph) - 1)), mul(f, 0.16 * Math.sin(ph))), coil * env));
+    }
     line.push(q);
     axis.push(add(ROOT, mul(AX, d)));
   }
@@ -326,7 +383,8 @@ export function midModel(pose: MidPose, o: MidOpts = {}): MidModel {
   const th = clamp01(pose.rot) * 1.5 * Math.PI;
   const ret = clamp01(pose.ret);
   const dLen = lerp(1.35, 3.35, hern);
-  const { line: loopL, axis } = loopLine(dLen, th, lp * hern);
+  const W = loopW(hern);
+  const { line: loopL, axis } = loopLine(dLen, th, lp * hern, W);
   const fin = finalLine(clamp01(pose.cDesc));
   const w = Array.from({ length: N }, (_, i) => {
     const o0 = returnOrder(i / (N - 1));
@@ -340,21 +398,20 @@ export function midModel(pose: MidPose, o: MidOpts = {}): MidModel {
   const MID = 'erdiko-hestea';
   const pieces: { id: string; groups?: string[]; a: number; b: number; color: string; r: number }[] = named
     ? [
-        { id: 'jejunoa', groups: [MID], a: 0, b: S_JEJ, color: FC.mid, r: 0.075 },
-        { id: 'ileona', groups: [MID], a: S_JEJ, b: S_ILE, color: mixHex(FC.mid, '#ffffff', 0.18), r: 0.07 },
+        { id: 'jejunoa', groups: [MID], a: 0, b: S_JEJ, color: FC.mid, r: 0.085 },
+        { id: 'ileona', groups: [MID], a: S_JEJ, b: S_ILE, color: mixHex(FC.mid, '#ffffff', 0.18), r: 0.08 },
         { id: 'goranzko-kolona', groups: [MID], a: S_CAE, b: S_ASC, color: FC.colon, r: 0.13 },
         { id: 'zeharkako-kolona', groups: [MID], a: S_ASC, b: 1, color: FC.colon, r: 0.13 },
       ]
     : [
-        { id: limbNamed ? 'adar-zefalikoa' : MID, groups: limbNamed ? [MID, 'heste-lakioa'] : lp > 0.5 ? ['heste-lakioa'] : undefined, a: 0, b: S_APEX, color: mixHex(FC.mid, MC.cephalic, limbs), r: 0.075 },
-        { id: limbNamed ? 'adar-kaudala' : MID, groups: limbNamed ? [MID, 'heste-lakioa'] : lp > 0.5 ? ['heste-lakioa'] : undefined, a: S_APEX, b: 1, color: mixHex(FC.mid, MC.caudal, limbs), r: 0.08 },
+        { id: limbNamed ? 'adar-zefalikoa' : MID, groups: limbNamed ? [MID, 'heste-lakioa'] : lp > 0.5 ? ['heste-lakioa'] : undefined, a: 0, b: S_APEX, color: mixHex(FC.mid, MC.cephalic, limbs), r: 0.1 },
+        { id: limbNamed ? 'adar-kaudala' : MID, groups: limbNamed ? [MID, 'heste-lakioa'] : lp > 0.5 ? ['heste-lakioa'] : undefined, a: S_APEX, b: 1, color: mixHex(FC.mid, MC.caudal, limbs), r: 0.105 },
       ];
   // Between the ileum and the ascending colon the line runs through the caecum (drawn as the blob below).
   if (named) pieces.splice(2, 0, { id: 'kolon-itsua', groups: [MID], a: S_ILE, b: S_CAE, color: FC.colon, r: 0.12 });
   for (const pc of pieces) {
     const seg = span(mid, pc.a, pc.b);
-    const r0 = named ? pc.r : lerp(0.07, pc.r, ret);
-    items.push({ key: `mg-${pc.id}-${pc.a}`, id: pc.id, groups: pc.groups, ...tubeOf(seg, () => r0, 12), color: place(pc.id, pc.groups, pc.color), deep: darker(pc.color), tissue: 'epithelium', opacity: solid(pc.id, pc.groups) });
+    items.push({ key: `mg-${pc.id}-${pc.a}`, id: pc.id, groups: pc.groups, ...tubeOf(seg, () => pc.r, 12), color: place(pc.id, pc.groups, pc.color), deep: darker(pc.color), tissue: 'epithelium', opacity: solid(pc.id, pc.groups) });
   }
   const mpt = (u: number, lift = 0.1): V3 => add(at(mid, u), [0, 0.02, lift]);
   if (named) {
@@ -373,12 +430,18 @@ export function midModel(pose: MidPose, o: MidOpts = {}): MidModel {
   // The caecal bud on the caudal limb → the caecum (and its appendix) at the junction.
   {
     const c = at(mid, (S_ILE + S_CAE) / 2);
+    const bud = 1 - ss(0.35, 0.6, ret);
+    if (!named && bud > 0.01) {
+      // The caecal bud: a conical swelling on the caudal limb (blunt towards the colon, tapering to the ileum).
+      const seg = span(mid, S_ILE - 0.04, S_CAE + 0.03);
+      items.push({ key: 'caecalBud', id: 'kolon-itsuaren-hastapena', groups: [MID], ...tubeOf(seg, (u) => 0.105 + 0.11 * Math.pow(Math.sin(Math.PI * Math.min(1, u * 1.15)), 1.4) * ss(0, 0.7, u), 14), color: mixHex(MC.caudal, '#ffd0a8', 0.4), deep: darker(MC.caudal), tissue: 'epithelium', opacity: bud * solid('kolon-itsuaren-hastapena', [MID]) });
+    }
     const grow = lerp(0.07, 0.17, ret);
     const down: V3 = ret > 0.5 ? [-0.06, -0.16, 0.06] : mul(norm(sub(at(mid, S_CAE + 0.02), at(mid, S_ILE - 0.02))), -0.02);
     const centre = add(c, mul(down, ret > 0.5 ? 1 : 0));
     const id = named ? 'kolon-itsua' : 'kolon-itsuaren-hastapena';
-    items.push({ key: 'caecum', id, groups: [MID], ...blobParts({ center: centre, radii: [grow, grow * 1.15, grow], rings: 12, sides: 14 }), color: place('kolon-itsua', undefined, FC.colon), deep: darker(FC.colon), tissue: 'epithelium', opacity: solid(id, [MID]) });
-    pts[id] = add(centre, [0, 0, grow * 0.6]);
+    if (named || ret > 0.3) items.push({ key: 'caecum', id, groups: [MID], ...blobParts({ center: centre, radii: [grow, grow * 1.15, grow], rings: 12, sides: 14 }), color: place('kolon-itsua', undefined, FC.colon), deep: darker(FC.colon), tissue: 'epithelium', opacity: solid(id, [MID]) });
+    pts[id] = add(centre, named ? [0, 0, grow * 0.6] : [0, 0, 0.12]);
     if (ret > 0.6) {
       const ap = resample([add(centre, [0, -grow * 0.9, 0]), add(centre, [0.08, -grow * 1.6, 0.05]), add(centre, [0.16, -grow * 1.8, 0.12])], 8);
       items.push({ key: 'appendix', id: 'kolon-itsua', groups: [MID], ...tubeOf(ap, (u) => 0.04 * (1 - 0.4 * u), 10), color: place('kolon-itsua', undefined, FC.colon), deep: darker(FC.colon), tissue: 'epithelium', opacity: ss(0.6, 0.9, ret) * solid('kolon-itsua', [MID]) });
@@ -389,21 +452,26 @@ export function midModel(pose: MidPose, o: MidOpts = {}): MidModel {
   const vit = clamp01(pose.vit) * (1 - ss(0.1, 0.4, ret));
   if (vit > 0.01) {
     const apex = at(mid, S_APEX);
-    const far: V3 = add(UMB, [0, -0.45, 2.2]);
+    const far: V3 = add(UMB, [0, -0.5, 2.35]);
     const vd = resample([apex, lerp3(apex, UMB, 0.5), add(UMB, [0, -0.12, 0.6]), far], 16);
-    items.push({ key: 'vit', id: 'hodi-onfalomesenterikoa', ...tubeOf(vd, (u) => 0.045 * (1 - 0.3 * u), 10), color: FC.yolk, deep: FC.yolkDeep, tissue: 'epithelium', opacity: vit * solid('hodi-onfalomesenterikoa') });
+    items.push({ key: 'vit', id: 'hodi-onfalomesenterikoa', ...tubeOf(vd, (u) => 0.05 * (1 - 0.3 * u), 10), color: FC.yolk, deep: FC.yolkDeep, tissue: 'epithelium', opacity: vit * solid('hodi-onfalomesenterikoa') });
     pts['hodi-onfalomesenterikoa'] = vd[5];
+    // The yolk sac at its end (shrinking as the duct thins out).
+    const ys = add(far, [0, -0.12, 0.3]);
+    const yr = 0.34 * (1 - 0.35 * hern);
+    items.push({ key: 'yolkSac', id: 'bitelo-zaku-sekundarioa', ...blobParts({ center: ys, radii: [yr, yr * 1.05, yr], rings: 14, sides: 18 }), color: FC.yolk, deep: FC.yolkDeep, tissue: 'epithelium', opacity: vit * solid('bitelo-zaku-sekundarioa') });
+    pts['bitelo-zaku-sekundarioa'] = add(ys, [0, yr * 0.3, -yr * 0.6]);
   }
 
   // ———— the umbilical cord (the loop herniates into its proximal part) ————
   const cord = clamp01(pose.cord);
   if (cord > 0.01) {
     const cl = resample([add(UMB, [0, 0.05, -0.2]), add(UMB, [0, -0.12, 0.8]), add(UMB, [0, -0.35, 1.9]), add(UMB, [0, -0.6, 2.8])], 18);
-    items.push({ key: 'cord', id: 'zilborrestea', ...tubeOf(cl, (u) => lerp(0.62, 0.34, ss(0.2, 0.7, u)), 20), color: MC.cord, deep: darker(MC.cord), tissue: 'membrane', opacity: 0.22 * cord * fade('zilborrestea', undefined, 0.6), thin: 0.8, outline: false });
+    items.push({ key: 'cord', id: 'zilborrestea', ...tubeOf(cl, (u) => lerp(0.62, 0.34, ss(0.2, 0.7, u)), 20), color: MC.cord, deep: darker(MC.cord), tissue: 'membrane', opacity: 0.14 * cord * fade('zilborrestea', undefined, 0.6), thin: 0.8, outline: false });
     pts['zilborrestea'] = add(cl[13], [0.3, 0, 0]);
     // The extraembryonic coelom it holds there, where the loops lie.
     const coel = add(UMB, [0, -0.15, 0.7]);
-    items.push({ key: 'coelomX', id: 'enbrioi-kanpoko-zeloma', ...blobParts({ center: coel, radii: [0.48, 0.5, 0.75], rings: 12, sides: 16 }), color: FC.cavity, deep: darker(FC.cavity), tissue: 'membrane', opacity: 0.18 * cord * hern * fade('enbrioi-kanpoko-zeloma', undefined, 0.7), thin: 0.8, outline: false });
+    items.push({ key: 'coelomX', id: 'enbrioi-kanpoko-zeloma', ...blobParts({ center: coel, radii: [0.48, 0.5, 0.75], rings: 12, sides: 16 }), color: FC.cavity, deep: darker(FC.cavity), tissue: 'membrane', opacity: 0.11 * cord * hern * fade('enbrioi-kanpoko-zeloma', undefined, 0.7), thin: 0.8, outline: false });
     pts['enbrioi-kanpoko-zeloma'] = add(coel, [-0.42, 0.1, 0.2]);
   }
 
@@ -423,7 +491,7 @@ export function midModel(pose: MidPose, o: MidOpts = {}): MidModel {
       else adult = [fin[i][0] * 0.82, lerp(-0.28, fin[i][1], 0.4), -1.2];
       return lerp3(early, adult, w[i]);
     };
-    const rows = (a: number, b: number, step = 3) => {
+    const rows = (a: number, b: number, step = 4) => {
       const out: V3[][] = [];
       const i0 = Math.round((N - 1) * a);
       const i1 = Math.round((N - 1) * b);
@@ -440,7 +508,7 @@ export function midModel(pose: MidPose, o: MidOpts = {}): MidModel {
       // Ascending colon: its meso flattens onto the posterior wall and takes the parietal colour.
       const mc = mixHex(FC.visceral, FC.parietal, fuseA);
       const opA = 0.42 * ms * (1 - 0.55 * fuseA) * fade('goranzko-kolona', undefined, 0.7);
-      if (opA > 0.01) items.push({ key: 'mesoAsc', id: 'goranzko-kolona', mesh: sheetMesh('mesoAsc', rows(S_CAE, S_ASC, 2)), color: mc, deep: darker(mc), tissue: 'membrane', opacity: opA, thin: 0.6, outline: false });
+      if (opA > 0.01) items.push({ key: 'mesoAsc', id: 'goranzko-kolona', mesh: sheetMesh('mesoAsc', rows(S_CAE, S_ASC, 3)), color: mc, deep: darker(mc), tissue: 'membrane', opacity: opA, thin: 0.6, outline: false });
       items.push({ key: 'mesoTra', id: 'zeharkako-mesokolona', mesh: sheetMesh('mesoTra', rows(S_ASC + 0.02, 0.99)), color: FC.visceral, deep: darker(FC.visceral), tissue: 'membrane', opacity: 0.42 * ms * fade('zeharkako-mesokolona', undefined, 0.7), thin: 0.6, outline: false });
       pts['zeharkako-mesokolona'] = lerp3(rootOf(Math.round(N * 0.87)), at(mid, 0.87), 0.5);
     } else {
@@ -521,18 +589,20 @@ export function midModel(pose: MidPose, o: MidOpts = {}): MidModel {
     const k = ss(0.2, 0.9, ret);
     const keys = straight.map((p, i) => lerp3(lerp3(p, loopAx[i], lp), adult[i], k));
     const tr = resample(keys, 22);
-    items.push({ key: 'smaTrunk', id: 'goiko-arteria-mesenterikoa', ...tubeOf(tr, () => 0.045, 10), color: EC.sma, deep: darker(EC.sma), tissue: 'vessel', opacity: smaK * solid('goiko-arteria-mesenterikoa') });
+    items.push({ key: 'smaTrunk', id: 'goiko-arteria-mesenterikoa', ...tubeOf(tr, () => 0.055, 10), color: EC.sma, deep: darker(EC.sma), tissue: 'vessel', opacity: smaK * solid('goiko-arteria-mesenterikoa') });
     pts['goiko-arteria-mesenterikoa'] = tr[9];
     // Its branches to every midgut derivative.
     const br = clamp01(pose.sma);
     if (br > 0.01) {
       const parts: Mesh[] = [];
       const hits: Mesh[] = [];
-      for (let i = 6; i < N - 3; i += 9) {
-        const from = tr[Math.min(tr.length - 1, Math.round((i / N) * 18) + 3)];
+      for (let i = 8; i < N - 4; i += 14) {
         const to = mid[i];
+        // From the nearest point of the trunk (past its origin on the aorta): a fan to both limbs.
+        let from = tr[4];
+        for (let j = 4; j < tr.length; j++) if (dot(sub(tr[j], to), sub(tr[j], to)) < dot(sub(from, to), sub(from, to))) from = tr[j];
         const b = resample([from, lerp3(from, to, 0.5), to], 6);
-        const t = tubeOf(b, () => 0.018, 6);
+        const t = tubeOf(b, () => 0.024, 6);
         parts.push(t.mesh);
         hits.push(t.hit);
       }
@@ -575,5 +645,35 @@ export function midModel(pose: MidPose, o: MidOpts = {}): MidModel {
     vessel('supRect', 'goiko-arteria-hemorroidala', [[0.08, -2.62, -0.98], [0.06, -2.8, -1.05], [0.05, -3.02, -1.0], [0.03, -3.2, -0.88]], 0.024, MC.rectal, 0.45);
   }
 
+  // ———— the rotation arrow round the SMA (the cranial limb's path, counter-clockwise from the front) ————
+  const ra = rotArc(pose);
+  if (ra) {
+    items.push({ key: 'rotArc', ...tubeOf(ra.line, () => 0.032, 10), color: MC.arc, deep: darker(MC.arc), tissue: 'vessel', opacity: ra.k });
+    items.push({ key: 'rotHead', ...tubeOf(ra.head, (u) => lerp(0.1, 0.004, u), 14), color: MC.arc, deep: darker(MC.arc), tissue: 'vessel', opacity: ra.k });
+  }
+
   return { items, pts };
+}
+
+/**
+ * The rotation arrow: an arc round the loop's axis from where the cranial limb started to where it is now
+ * (0..270°), its head, the point for the degree readout and the angle. Null while there is nothing to show.
+ */
+export function rotArc(pose: MidPose): { line: V3[]; head: V3[]; label: V3; deg: number; k: number } | null {
+  const k = clamp01(pose.arc);
+  const th = clamp01(pose.rot) * 1.5 * Math.PI;
+  if (k <= 0.01 || th < 0.08) return null;
+  const hern = clamp01(pose.hern);
+  const dLen = lerp(1.35, 3.35, hern);
+  const C = add(ROOT, mul(AX, dLen * 0.5));
+  const R = loopW(hern) + 0.34;
+  const P = (ph: number): V3 => add(C, mul(add(mul(E0, Math.cos(ph)), mul(F0, Math.sin(ph))), R));
+  const n = Math.max(6, Math.ceil(th / 0.06));
+  const end = Math.max(0.02, th - 0.16 / R);
+  const line = Array.from({ length: n + 1 }, (_, i) => P((end * i) / n));
+  const tan = norm(add(mul(E0, -Math.sin(end)), mul(F0, Math.cos(end))));
+  const h0 = P(end);
+  const head = Array.from({ length: 6 }, (_, i) => add(h0, mul(tan, (0.26 * i) / 5)));
+  const label = add(C, mul(add(mul(E0, Math.cos(th)), mul(F0, Math.sin(th))), R + 0.32));
+  return { line, head, label, deg: (th * 180) / Math.PI, k };
 }

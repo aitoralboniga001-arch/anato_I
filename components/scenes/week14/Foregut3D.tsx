@@ -2,6 +2,7 @@
 
 import { FC, FP0, foreModel, type ForeOpts, type ForePose } from './foregut-model';
 import { endPose, orbit, poseStage, type StageSpec } from './common';
+import { ForeSection, SECTION_LEFT, sectionShow, type SectionLevel } from './Section14';
 
 /**
  * Topic 14, stages 6–16 (notes 3–3.6): the foregut's derivatives in the trunk, one 3D model (foregut-model) posed
@@ -12,6 +13,14 @@ import { endPose, orbit, poseStage, type StageSpec } from './common';
 
 const SH: [number, number] = [30, 0];
 const fore = (spec: StageSpec<ForePose, ForeOpts>) => poseStage(spec, (pose, opts) => foreModel(pose, opts));
+
+/** The live transverse section (notes p3, p5) beside the 3D for the listed steps (0-based), from the same pose. */
+const section =
+  (level: SectionLevel, S: readonly number[], steps: readonly number[]): StageSpec<ForePose, ForeOpts>['section'] =>
+  (t, pose, lit) => {
+    const show = sectionShow(S, steps, t);
+    return show > 0.01 ? { show, node: <ForeSection pose={pose} level={level} lit={lit} show={show} />, left: SECTION_LEFT } : null;
+  };
 
 /** From above (a transverse section seen from the head: dorsal up, embryo's left on the viewer's right). */
 const TOP = (target: [number, number, number], dist = 6.4, yaw = 0) => orbit(yaw, 78, dist, target, SH);
@@ -128,6 +137,7 @@ const spec7: StageSpec<ForePose, ForeOpts> = {
   pose: END6,
   opts: { diaphragm: 0.34 },
   caption: 'Urdaila: bi biraketa (3D eredua, aurretik; enbrioiaren ezkerra zure eskuinean)',
+  section: section('stomach', S7, [1, 6]),
   key: KEY_F.walls,
   keyTitle: 'Urdailaren paretak',
   steps: [
@@ -145,13 +155,14 @@ const spec7: StageSpec<ForePose, ForeOpts> = {
       note: 'Urdaila aurreko hestetik sortzen da: hasieran zabalkuntza bat; bi biraketaren ondorioz itxura eta posizioa aldatzen ditu',
     },
     {
-      to: { rotL: 1 },
+      to: { rotL: 1, axisL: 1 },
       run: [0.12, 0.8],
       opts: { topCut: 1 },
       cam: TOP([0.15, 0.7, -0.4], 3.6),
       glide: 0.07,
-      dim: STOM,
+      dim: [...STOM, 'urdail-ardatza'],
       names: [
+        { id: 'urdail-ardatza', text: 'Luzetarako ardatza', sub: '(biraketa: 90º eskuinera)', small: true, from: 0.1 },
         { id: 'urdaila', key: 'post', p: 'urdail-atzeko-pareta', text: 'Hasierako atzeko pareta', sub: '→ ezkerrera', from: 0.2 },
         { id: 'urdaila', key: 'ant', p: 'urdail-aurreko-pareta', text: 'Hasierako aurreko pareta', sub: '→ eskuinera', from: 0.3 },
       ],
@@ -159,7 +170,7 @@ const spec7: StageSpec<ForePose, ForeOpts> = {
       note: '1. biraketa: luzetarako ardatzaren inguruan 90º eskuinera; hasierako atzeko pareta ezkerrean, aurrekoa eskuinean (goitik ikusita)',
     },
     {
-      to: { grow: 1, curv: 1 },
+      to: { grow: 1, curv: 1, axisL: 0 },
       run: [0.1, 0.7],
       opts: { topCut: 0 },
       cam: FRONT,
@@ -172,12 +183,13 @@ const spec7: StageSpec<ForePose, ForeOpts> = {
       note: 'Ezkerreko pareta (hasierako atzekoa) eskuinekoa baino askoz gehiago hazten da: makurdura handia; eskuinekoa makurdura txikia',
     },
     {
-      to: { rotAP: 1 },
+      to: { rotAP: 1, axisAP: 1 },
       run: [0.1, 0.75],
       cam: orbit(0, 6, 6.8, [0.3, 0.65, -0.25], SH),
       glide: 0.05,
-      dim: [...STOM, 'kardiasa', 'piloroa'],
+      dim: [...STOM, 'kardiasa', 'piloroa', 'urdail-ardatza'],
       names: [
+        { id: 'urdail-ardatza', text: 'Aurretik atzerako ardatza', small: true, from: 0.05 },
         { id: 'kardiasa', sub: '→ behera eta ezkerrera', from: 0.2 },
         { id: 'piloroa', sub: '→ gora eta eskuinera', from: 0.3 },
         { id: 'makurdura-handia', small: true },
@@ -185,6 +197,8 @@ const spec7: StageSpec<ForePose, ForeOpts> = {
       note: '2. biraketa: aurretik atzera doan ardatzaren inguruan; kardiasa behera eta ezkerrera, piloroa kontrako noranzkoan, gora eta eskuinera',
     },
     {
+      to: { axisAP: 0 },
+      run: [0, 0.2],
       cam: orbit(0, 6, 6.8, [0.3, 0.65, -0.25], SH),
       warn: true,
       names: [{ id: 'urdaila', small: true }],
@@ -232,6 +246,7 @@ const spec8: StageSpec<ForePose, ForeOpts> = {
   pose: END7,
   opts: { diaphragm: 0.34 },
   caption: 'Poltsa omentala: zeharkako ebaketa, goitik (bizkarra goian; enbrioiaren ezkerra zure eskuinean)',
+  section: section('stomach', S8, [0, 1, 2, 3]),
   key: KEY_F.peri,
   keyTitle: 'Kolorea',
   steps: [
@@ -296,6 +311,7 @@ const spec9: StageSpec<ForePose, ForeOpts> = {
   pose: END8.pose,
   opts: { ...END8.opts, diaphragm: 0.3 },
   caption: 'Atzeko mesogastrioa: barea, bi lotailu eta epiploi handia (3D eredua)',
+  section: section('stomach', S9, [0, 1]),
   key: KEY_F.peri,
   keyTitle: 'Kolorea',
   steps: [
@@ -380,6 +396,7 @@ const spec10: StageSpec<ForePose, ForeOpts> = {
   pose: END9,
   opts: { diaphragm: 0.34 },
   caption: 'Aurreko mesogastrioa: epiploi txikia eta lotailu faltziformea (3D eredua)',
+  section: section('stomach', S10, [0, 1, 2, 3]),
   key: KEY_F.ventral,
   keyTitle: 'Kolorea',
   steps: [
@@ -455,6 +472,7 @@ const spec11: StageSpec<ForePose, ForeOpts> = {
   pose: END10.pose,
   opts: { ...END10.opts, diaphragm: 0.3 },
   caption: 'Duodenoa: lau atal, jatorri bikoitza eta fusioa (3D eredua, aurretik; aurrealdeko egiturak gardenak)',
+  section: section('duodenum', S11, [3, 4, 5]),
   steps: [
     {
       to: { liver: 1 },
@@ -735,6 +753,7 @@ const spec15: StageSpec<ForePose, ForeOpts> = {
   pose: END14.pose,
   opts: { ...END14.opts, liverGlass: 0.75, clear: 1 },
   caption: 'Area: bi hastapen, biraketa eta fusioa (3D eredua; urdaila eta gibela gardenak)',
+  section: section('duodenum', S15, [1, 2]),
   key: KEY_PANC,
   keyTitle: 'Kolorea = hastapena',
   steps: [

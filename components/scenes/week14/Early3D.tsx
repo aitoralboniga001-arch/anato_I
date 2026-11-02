@@ -1,6 +1,8 @@
 'use client';
 
 import { GP0, type GutPose } from './gut3d';
+import { FP0 } from './foregut-model';
+import { ForeSection, SECTION_LEFT, sectionShow } from './Section14';
 import { KEY14, gutStage, orbit } from './common';
 
 /**
@@ -29,7 +31,7 @@ const MID = { id: 'erdiko-hestea', text: 'Bitarteko hestea' };
 export const GutParts3D = gutStage({
   S: S2,
   pose: { ...GP0 },
-  opts: { body: 1, heart: 0.55, septum: 0 },
+  opts: { body: 0.6, heart: 0.35, septum: 0 },
   caption: '4. astea · hasierako hestea, alde zefalikotik kaudalera (3D eredua, ezkerretik)',
   key: KEY14.endo,
   keyTitle: 'Kolorea = jatorria',
@@ -91,7 +93,7 @@ const CLOSE = orbit(76, 8, 6.2, [0, 1.75, -0.2], SH);
 export const Respiratory3D = gutStage({
   S: S3,
   pose: END2,
-  opts: { body: 1, heart: 0.45, septum: 0.6 },
+  opts: { body: 0.6, heart: 0.3, septum: 0.6 },
   caption: '4. astea · arnas aparatuaren hastapena eta hestearen lau atalak (3D eredua, ezkerretik)',
   key: KEY14.three,
   keyTitle: 'Kolorea = atala',
@@ -131,8 +133,9 @@ export const Respiratory3D = gutStage({
     {
       to: { four: 1, pouches: 1 },
       run: [0.08, 0.7],
-      // From the front and left: the paired pouches stand out on both side walls.
-      cam: orbit(26, 12, 7, [0, 1.6, -0.1], SH),
+      // From below (ventral) and a little cranial: the pharynx runs away from the eye, so the four pairs of
+      // pouches spread out on both side walls like a comb instead of lining up behind each other.
+      cam: orbit(14, -58, 6.4, [0, 2.0, 0.05], SH),
       glide: 0.06,
       dim: ['faringe-hestea', 'faringe-poltsak', 'mintz-bukofaringeoa', 'arnas-hastapena'],
       names: [{ id: 'faringe-hestea', from: 0.2 }, { id: 'faringe-poltsak', from: 0.5 }, { ...OPM, small: true }],
@@ -149,9 +152,9 @@ export const Respiratory3D = gutStage({
         { id: 'atzeko-hestea', sub: 'kolonaren 2/3 → kloaka mintza' },
       ],
       marks: [
-        { p: 'st-resp', text: 'arnas h.', dx: -34, dy: -6 },
+        { p: 'st-resp', text: 'arnas h.', dx: -30, dy: -18 },
         { p: 'st-liver', text: 'gibel h.', dx: -30, dy: -4 },
-        { p: 'st-colon', text: '2/3 | 1/3', dx: 30, dy: 4 },
+        { p: 'st-colon', text: '2/3 | 1/3', dx: -46, dy: 8 },
       ],
       note: 'Aurreko hestea arnas hastapenetik gibel hastapeneraino; bitarteko hestea zeharkako kolonaren 2/3 eta 1/3 artera arte; atzekoa kloaka mintzeraino',
       key: KEY14.four,
@@ -176,7 +179,7 @@ export const S4 = [0, 0.24, 0.48, 0.72] as const;
 export const Arteries3D = gutStage({
   S: S4,
   pose: END3,
-  opts: { body: 1, heart: 0.4, septum: 0.4, vessels: 0.8 },
+  opts: { body: 0.6, heart: 0.3, septum: 0.4, vessels: 1 },
   caption: 'Hestearen hiru arteriak: kolorea = arteria (3D eredua, ezkerretik)',
   key: KEY14.arteries,
   keyTitle: 'Kolorea = arteria',
@@ -223,8 +226,15 @@ const MESO = ['mesenterio-dortsala', 'mesogastrio-dortsala', 'mesoduodeno-dortsa
 export const Mesentery3D = gutStage({
   S: S5,
   pose: END4,
-  opts: { body: 1, heart: 0.35, septum: 0.55 },
+  opts: { body: 0.6, heart: 0.25, septum: 0.55 },
   caption: 'Peritoneo barrunbea eta mesenterioa (3D eredua)',
+  // The notes' transverse section beside the 3D, from the same pose (p1 C, p2): cavity, peritoneum, mesos, retro.
+  section: (t, pose, lit) => {
+    const show = sectionShow(S5, [0, 1, 2, 3, 4, 5, 6], t);
+    if (show <= 0.01) return null;
+    const early = { cavity: pose.cavity, visceral: pose.visceral, meso: pose.meso, ventral: pose.ventral, retro: pose.retro };
+    return { show, node: <ForeSection pose={FP0} level="early" early={early} lit={lit} show={show} />, left: SECTION_LEFT };
+  },
   key: KEY14.peritoneum,
   keyTitle: 'Kolorea',
   steps: [

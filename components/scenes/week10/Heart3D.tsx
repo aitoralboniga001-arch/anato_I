@@ -189,6 +189,8 @@ type ViewProps = {
   caption?: string;
   /** The right column's span (top, bottom); a view can keep it above the camera keys (bottom right). */
   right?: [number, number];
+  /** The left column's span (top, bottom); a view can keep it above an inset (bottom left). */
+  left?: [number, number];
   /** Other axes than the body's (a section block whose up is dorsal). */
   axes?: typeof AXES;
 };
@@ -207,6 +209,7 @@ export function ModelView({
   over,
   caption,
   right,
+  left,
   axes = AXES,
 }: ViewProps & { model: { items: Scene3['items']; pts: Record<string, V3> }; continuity: string }) {
   const scene: Scene3 = { camera, items: model.items };
@@ -247,7 +250,7 @@ export function ModelView({
           return (
             <>
               {over?.(at, asked)}
-              <Callouts items={items} left={[120, 580]} right={right ?? [240, 580]} />
+              <Callouts items={items} left={left ?? [120, 580]} right={right ?? [240, 580]} />
               {caption && (
                 <Note x={24} y={24} size={12.5} align="start">
                   {asked < 0.5 ? `Hasierako ikuspegia: ${caption}` : caption}

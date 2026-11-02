@@ -13,6 +13,7 @@ import { LandFoot, LandNav, isWip } from './LandNav';
 import { PLANE_TEXT } from './Locator';
 import { PrivateImages, PrivateTab } from './PrivateImages';
 import { SceneView } from '@/components/kit';
+import { CourseFigures } from './CourseFigures';
 
 /**
  * Image lab: our own scenes shown as plain figures (black and white, no labels, sometimes turned or
@@ -212,7 +213,7 @@ export function ImageLab() {
   const [color, setColor] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
   const [score, setScore] = useState({ ok: 0, n: 0 });
-  const [tab, setTab] = useState<'geureak' | 'pribatuak'>('geureak');
+  const [tab, setTab] = useState<'geureak' | 'pribatuak' | 'orriak'>('geureak');
   const box = useRef<HTMLDivElement>(null);
   const svg = useRef<SVGSVGElement>(null);
   const retries = useRef(0);
@@ -546,10 +547,13 @@ export function ImageLab() {
           <button role="tab" aria-selected={tab === 'geureak'} className={tab === 'geureak' ? 'is-on' : ''} onClick={() => setTab('geureak')}>
             Atlaseko irudiak
           </button>
+          <button role="tab" aria-selected={tab === 'orriak'} className={tab === 'orriak' ? 'is-on' : ''} onClick={() => setTab('orriak')}>PDFetako irudiak</button>
           <PrivateTab active={tab === 'pribatuak'} onOpen={() => setTab('pribatuak')} />
         </div>
 
-        {tab === 'pribatuak' ? (
+        {tab === 'orriak' ? (
+          <CourseFigures />
+        ) : tab === 'pribatuak' ? (
           <PrivateImages />
         ) : (
           <>

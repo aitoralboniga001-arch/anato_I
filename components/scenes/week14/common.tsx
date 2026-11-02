@@ -92,6 +92,11 @@ export interface StageSpec<P = GutPose, O = GutOpts> {
   keyTitle?: string;
   /** Extra overlay. */
   over?: (t: number, at: At3, pose: P) => React.ReactNode;
+  /**
+   * A 2D inset synced with the pose (the live transverse section): how much it shows and what it draws, given
+   * the step's lit ids. While it shows, the left name column keeps above it (`left`).
+   */
+  section?: (t: number, pose: P, lit: readonly string[] | null) => { show: number; node: React.ReactNode; left: [number, number] } | null;
 }
 
 const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
@@ -169,6 +174,8 @@ export function poseStage<P, O extends { dim?: { ids: readonly string[]; k: numb
     });
     const names: CalloutSpec[] = runs.map(({ n, a, b, k }) => ({ id: n.id, p: n.p ?? n.id, show: vis2(t, a, b), text: n.text, sub: n.sub, small: n.small, key: `${n.key ?? n.id}:${k}` }));
     const key = st.key ?? spec.key;
+    const sec = spec.section?.(t, pose, st.dim ?? null);
+    const secOn = !!sec && sec.show > 0.05;
     return (
       <ModelView
         model={m}
@@ -176,6 +183,7 @@ export function poseStage<P, O extends { dim?: { ids: readonly string[]; k: numb
         camera={camera}
         names={names}
         caption={st.caption ?? spec.caption}
+        left={secOn ? sec.left : undefined}
         over={(at) => (
           <>
             {key && <ColourKey items={[...key]} show={1} title={st.keyTitle ?? spec.keyTitle ?? 'Kolorea'} y={46} />}
@@ -201,6 +209,7 @@ export function poseStage<P, O extends { dim?: { ids: readonly string[]; k: numb
               }),
             )}
             {spec.over?.(t, at, pose)}
+            {secOn && sec.node}
           </>
         )}
       />

@@ -95,6 +95,9 @@ export interface ForePose {
   curv: number;
   /** Rotation 2: about the anteroposterior axis (cardia down-left, pylorus up-right). */
   rotAP: number;
+  /** The rotation axes drawn while the stomach turns about them: the long axis (rotation 1), the AP axis (rotation 2). */
+  axisL: number;
+  axisAP: number;
   /** The dorsal mesogastrium (two layers). */
   meso: number;
   /** The omental bursa (the recess behind the stomach). */
@@ -146,7 +149,7 @@ export interface ForePose {
 }
 
 export const FP0: ForePose = {
-  thorax: 0, oeso: 1, musc: 0, dil: 1, rotL: 0, grow: 0, curv: 0, rotAP: 0, meso: 0, bursa: 0, spleen: 0, omentum: 0, omFuse: 0,
+  thorax: 0, oeso: 1, musc: 0, dil: 1, rotL: 0, grow: 0, curv: 0, rotAP: 0, axisL: 0, axisAP: 0, meso: 0, bursa: 0, spleen: 0, omentum: 0, omFuse: 0,
   vmeso: 0, lesser: 0, edge: 0, duod: 0, duodRot: 0, fuse: 0, duodParts: 0, origin: 0, liver: 1, falc: 0, round: 0, coron: 0, gall: 0,
   pancD: 0, pancV: 0, pancRot: 0, pancParts: 0, ducts: 0, abdomen: 1, bowel: 0, front: 0, islets: 0, veil: 0,
 };
@@ -234,17 +237,39 @@ function stomachFrame(p: ForePose) {
   return { R, at: (q: V3) => add(centre, R(q)), centre };
 }
 
+/**
+ * The stomach's centreline in its local frame (y from the cardia down to the pylorus). Straight while it is a
+ * plain dilation; as the left (dorsal) wall outgrows the right one it bends into a J: the body bows towards the
+ * greater curvature and the pyloric part turns back up towards the lesser curvature (p3 C–E).
+ */
+export function stomachAxis(p: ForePose, u: number): V3 {
+  const g = clamp01(p.grow);
+  return [0, ST_LEN - 2 * ST_LEN * u + 0.36 * g * ss(0.58, 1, u), g * (-0.12 * Math.sin(Math.PI * u) + 0.3 * u * u * u)];
+}
+
 /** A local point of the stomach's wall: u from the cardia (0) to the pylorus (1), a round the axis (0 = left, π/2 = ventral). */
 function stomachLocal(p: ForePose, u: number, a: number, k = 1): V3 {
-  const y = ST_LEN - 2 * ST_LEN * u;
-  const s = Math.sin(Math.PI * u);
+  const c = stomachAxis(p, u);
+  // The ring is square to the bent centreline (its normal in the y–z plane).
+  const c1 = stomachAxis(p, Math.max(0, u - 0.01));
+  const c2 = stomachAxis(p, Math.min(1, u + 0.01));
+  const ty = c2[1] - c1[1];
+  const tz = c2[2] - c1[2];
+  const tl = Math.hypot(ty, tz) || 1;
+  const ny = tz / tl;
+  const nz = -ty / tl;
   const dil = clamp01(p.dil);
   const g = clamp01(p.grow);
-  const r = (lerp(0.11, 0.12, u) + dil * (0.19 + 0.07 * g) * Math.pow(s, 0.75)) * k;
-  // The dorsal wall grows more: its border bulges (the future greater curvature).
+  // Widest in the body, tapering to the narrow pyloric canal.
+  const prof = Math.pow(Math.sin(Math.PI * Math.pow(u, 0.82)), 0.72);
+  const r = (lerp(0.11, 0.1, u) + dil * (0.19 + 0.06 * g) * prof) * k;
+  // The dorsal wall grows more: its border bulges (the future greater curvature), most of all in the fundus,
+  // which rises above the cardia.
   const dorsal = Math.max(0, -Math.sin(a));
-  const bulge = 1 + 0.7 * g * s * dorsal * dorsal;
-  return [r * Math.cos(a), y, r * Math.sin(a) * bulge - 0.06 * g * s];
+  const d2 = dorsal * dorsal;
+  const fund = g * Math.exp(-(((u - 0.18) / 0.13) ** 2));
+  const side = r * Math.sin(a) * (1 + 0.5 * g * prof * d2) - 0.1 * fund * d2 * k;
+  return [r * Math.cos(a), c[1] + ny * side + 0.09 * fund * d2, c[2] + nz * side];
 }
 
 /** A wall of the stomach (a0..a0+π) as a mesh. */
@@ -295,7 +320,7 @@ const N_LOOP = 60;
 export function duodenumLine(p: ForePose) {
   const F = stomachFrame(p);
   // The pylorus point is the centre of the stomach's end ring.
-  const end = F.at([0, -ST_LEN, 0]);
+  const end = F.at(stomachAxis(p, 1));
   const th = (Math.PI / 2) * clamp01(p.duodRot);
   const D: V3 = [-Math.sin(th), 0, Math.cos(th)];
   const fuse = clamp01(p.fuse);
@@ -395,7 +420,7 @@ export function foreModel(pose: ForePose, o: ForeOpts = {}): ForeModel {
   }
 
   // ———— the oesophagus: from the pharynx down through the diaphragm to the cardia ————
-  const cardia = F.at([0, ST_LEN, 0]);
+  const cardia = F.at(stomachAxis(pose, 0));
   {
     const topP: V3 = [0, lerp(3.95, 4.55, oe), -0.32];
     const keys: V3[] = Array.from({ length: 7 }, (_, k): V3 => {
@@ -450,7 +475,7 @@ export function foreModel(pose: ForePose, o: ForeOpts = {}): ForeModel {
     items.push({ key: 'stAnt', id: 'urdaila', groups: ['aurreko-hestea', 'errai-peritoneoa'], mesh: stomachHalf(pose, 0, 'ant', cut), color: FC.antWall, deep: FC.antWallDeep, tissue: 'epithelium', opacity: op });
     if (cut > 0.01) {
       // The cut face, filled like a sliced specimen: each half in its own wall's colour, and the cut edge.
-      const centre = F.at([0, ST_LEN - 2 * ST_LEN * cut, 0]);
+      const centre = F.at(stomachAxis(pose, cut));
       for (const [key, a0, c] of [['capP', Math.PI, FC.postWall], ['capA', 0, FC.antWall]] as const) {
         const rim = Array.from({ length: 17 }, (_, i) => F.at(stomachLocal(pose, cut, a0 + (Math.PI * i) / 16, 1.0)));
         const cap = cachedMesh(`stcap:${key}`, rim.flat().map(r3), () => {
@@ -469,7 +494,7 @@ export function foreModel(pose: ForePose, o: ForeOpts = {}): ForeModel {
     // The two ends as their own short sleeves (named parts are drawn pieces): cardia above, pylorus below.
     const sleeve = (key: string, id: string, u0: number, u1: number) => {
       const n = 8;
-      const line = Array.from({ length: n + 1 }, (_, i) => F.at([0, ST_LEN - 2 * ST_LEN * lerp(u0, u1, i / n), 0]));
+      const line = Array.from({ length: n + 1 }, (_, i) => F.at(stomachAxis(pose, lerp(u0, u1, i / n))));
       const rad = (u: number) => {
         const q = stomachLocal(pose, lerp(u0, u1, u), 0);
         return Math.hypot(q[0], 0) * 1.05 + 0.006;
@@ -488,6 +513,20 @@ export function foreModel(pose: ForePose, o: ForeOpts = {}): ForeModel {
       items.push({ key: 'lesser', id: 'makurdura-txikia', groups: ['urdaila'], ...tubeOf(ll, () => 0.03, 8), color: FC.lesser, deep: darker(FC.lesser), tissue: 'epithelium', opacity: cv * solid('makurdura-txikia', ['urdaila']) });
       pts['makurdura-handia'] = gl[Math.round(gl.length * 0.45)];
       pts['makurdura-txikia'] = ll[Math.round(ll.length * 0.5)];
+    }
+    // The axis of the turn in progress, as the notes' figures draw it (p3 A, D): a rod through the stomach.
+    const axL = ss(0, 0.3, clamp01(pose.axisL));
+    if (axL > 0.01) {
+      const rod = [F.at([0, ST_LEN + 0.42, 0]), F.at([0, 0, 0]), F.at([0, -ST_LEN - 0.42, 0])];
+      items.push({ key: 'axisL', id: 'urdail-ardatza', ...tubeOf(L(rod, 6), () => 0.018, 10), color: '#eef3ff', deep: '#6a7390', tissue: 'tendon', opacity: axL * solid('urdail-ardatza') });
+      pts['urdail-ardatza'] = rod[0];
+    }
+    const axA = ss(0, 0.3, clamp01(pose.axisAP));
+    if (axA > 0.01) {
+      const c = F.at(stomachAxis(pose, 0.45));
+      const rod = [add(c, [0, 0, 0.75]), c, add(c, [0, 0, -0.75])];
+      items.push({ key: 'axisAP', id: 'urdail-ardatza', ...tubeOf(L(rod, 6), () => 0.018, 10), color: '#eef3ff', deep: '#6a7390', tissue: 'tendon', opacity: axA * solid('urdail-ardatza') });
+      pts['urdail-ardatza'] = rod[0];
     }
   }
 

@@ -154,6 +154,18 @@ export const structures14: StructureDef[] = [
     related: ['urdaila', 'makurdura-handia', 'mesogastrio-bentrala', 'epiploi-txikia'],
   },
   {
+    id: 'urdail-ardatza',
+    name: 'Biraketa ardatza',
+    es: 'Eje de rotación del estómago',
+    category: 'ardatza',
+    color: '#eef3ff',
+    definition: 'Urdaila biratzen den ardatza: 1. biraketan luzetarako ardatza (goitik behera), 2. biraketan aurretik atzerako ardatza.',
+    location: 'Urdailaren erditik igarotzen da (biraketa bitartean bakarrik marrazten da).',
+    origin: 'Ez da egitura bat: biraketaren erreferentzia da.',
+    fate: '1. biraketa: 90º eskuinera luzetarako ardatzaren inguruan; 2. biraketa: aurretik atzerako ardatzaren inguruan.',
+    related: ['urdaila', 'kardiasa', 'piloroa'],
+  },
+  {
     id: 'poltsa-omentala',
     name: 'Poltsa omentala',
     es: 'Bolsa omental (transcavidad de los epiplones)',

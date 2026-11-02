@@ -27,7 +27,7 @@ import { GC } from './gut3d';
 
 const S = 1 / 100;
 /** Half-length of the block along the body axis. */
-const ZL = 1.15;
+const ZL = 0.5;
 /** The section's height centre (section px, y down = ventral). */
 const MY = 150;
 
@@ -93,7 +93,7 @@ function foldModel(g: FoldX, dimIds: readonly string[] | null) {
   const push = (key: string, id: string | undefined, m: Mesh | null, color: string, op: number, tissue: Item3['tissue'] = 'epithelium', quiet = false, groups?: string[]) => {
     if (!m) return;
     const on = !id || lit(id) || !!groups?.some(lit);
-    items.push({ key, id, groups, mesh: m, color, deep: mixHex(color, '#000000', 0.5), tissue, opacity: op * (on ? 1 : 0.25), quiet, outline: false });
+    items.push({ key, id, groups, mesh: m, color, deep: mixHex(color, '#000000', 0.32), tissue, opacity: op * (on ? 1 : 0.25), quiet, outline: false });
   };
   const ZF = ZL - 0.02;
   const atFace = (p: Pt, side: 1 | -1 = 1): V3 => W(p, side, ZF);
@@ -159,10 +159,12 @@ export function Fold3D({ t }: SceneProps) {
   const dim = i === 2 ? ['endodermoa', 'heste-lumena', 'hodi-onfalomesenterikoa', 'bitelo-zaku-sekundarioa', 'errai-orria'] : i === 3 ? ['endodermoa', 'errai-orria', 'mesenterio-dortsala', 'heste-lumena'] : null;
   const m = foldModel(g, dim && t > (i === 2 ? S1[2] : S1[3]) + 0.02 ? dim : null);
   const camera = cameraAt(t, [
-    [0, orbit(-24, 22, 10.5, [0, 0.0, 0.2], [0, -10])],
-    [S1[1], orbit(-14, 14, 10, [0, -0.2, 0.3], [0, -10]), 0.08],
-    [S1[2], orbit(10, 10, 9, [0, -0.5, 0.4], [0, -10]), 0.08],
-    [S1[3], orbit(-4, 6, 8, [0, 0.0, 0.5], [0, -10]), 0.08],
+    // Nearly face-on to the cut face (the notes' figure), a little from above so the block still reads as 3D;
+    // far enough down that the yolk sac stays in frame while it is pinched off.
+    [0, orbit(-16, 16, 9.6, [0, -0.2, 0.2], [0, -10])],
+    [S1[1], orbit(-9, 9, 9.8, [0, -0.5, 0.2], [0, -10]), 0.08],
+    [S1[2], orbit(7, 7, 11, [0, -0.95, 0.2], [0, -10]), 0.08],
+    [S1[3], orbit(-4, 6, 8, [0, -0.1, 0.3], [0, -10]), 0.08],
   ]);
   const names: CalloutSpec[] = [
     { id: 'azaleko-ektodermoa', p: 'azaleko-ektodermoa', show: vis(t, 0, S1[2]) },

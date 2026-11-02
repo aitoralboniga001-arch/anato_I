@@ -1,7 +1,8 @@
 'use client';
 
+import type { At3 } from '@/components/kit/three/Stage3D';
 import { endPose, orbit, poseStage, type StageSpec } from './common';
-import { MC, MP0, midModel, type MidOpts, type MidPose } from './midgut-model';
+import { MC, MP0, midModel, rotArc, type MidOpts, type MidPose } from './midgut-model';
 
 /**
  * Topic 14, stages 17–21, 23 and 24 (notes 4–5.1 and the summary): the midgut and the hindgut in the trunk,
@@ -15,6 +16,18 @@ const SH: [number, number] = [30, 0];
 const mid = (spec: StageSpec<MidPose, MidOpts>) => poseStage(spec, (pose, opts) => midModel(pose, opts));
 
 const FRONT = (target: [number, number, number], dist = 8.6, yaw = -6, elev = 4) => orbit(yaw, elev, dist, target, SH);
+
+/** The degree readout at the rotation arrow's head (how far the loop has turned, counter-clockwise from the front). */
+const arcOver = (_t: number, at: At3, pose: MidPose) => {
+  const ra = rotArc(pose);
+  if (!ra) return null;
+  const q = at(ra.label);
+  return (
+    <text x={q.x} y={q.y + 7} textAnchor="middle" className="note note-accent" opacity={ra.k} style={{ fontSize: 21, fontWeight: 700 }} pointerEvents="none">
+      {Math.round(ra.deg / 5) * 5}°
+    </text>
+  );
+};
 
 export const KEY_M = {
   regions: [
@@ -125,12 +138,13 @@ const END17 = endPose(spec17);
 
 export const S18 = [0, 0.16, 0.32, 0.46, 0.6, 0.74] as const;
 
-const SIDE = orbit(-84, 4, 8.2, [0, -0.95, 0.15], SH);
+const SIDE = orbit(-84, 4, 8.6, [0, -1.05, 0.85], SH);
 
 const spec18: StageSpec<MidPose, MidOpts> = {
   S: S18,
   pose: END17.pose,
   opts: END17.opts,
+  over: arcOver,
   caption: 'Hasierako heste lakioa: bi adar, ardatza eta biraketa (3D eredua; eskuinetik eta aurretik)',
   steps: [
     {
@@ -139,7 +153,7 @@ const spec18: StageSpec<MidPose, MidOpts> = {
       run: [0.04, 0.7],
       cam: SIDE,
       glide: 0.08,
-      dim: ['heste-lakioa', 'erdiko-hestea', 'hodi-onfalomesenterikoa'],
+      dim: ['heste-lakioa', 'erdiko-hestea', 'hodi-onfalomesenterikoa', 'bitelo-zaku-sekundarioa'],
       names: [{ id: 'heste-lakioa', text: 'Hasierako heste lakioa', sub: '(asko luzatzean)', from: 0.55 }],
       note: 'Garapenean bitarteko hestea asko luzatzen da, eta luzapen horrengatik hasierako heste lakioa sortzen da (eskuinetik ikusita; aurrea zure eskuinean)',
     },
@@ -147,11 +161,12 @@ const spec18: StageSpec<MidPose, MidOpts> = {
       to: { limbs: 1 },
       run: [0.05, 0.4],
       cam: SIDE,
-      dim: ['adar-zefalikoa', 'adar-kaudala', 'hodi-onfalomesenterikoa'],
+      dim: ['adar-zefalikoa', 'adar-kaudala', 'hodi-onfalomesenterikoa', 'bitelo-zaku-sekundarioa'],
       names: [
         { id: 'adar-zefalikoa', sub: '(goian)', from: 0.1 },
         { id: 'adar-kaudala', sub: '(behean)', from: 0.25 },
         { id: 'hodi-onfalomesenterikoa', sub: 'bi adarren artean → zaku bitelinoa', from: 0.4 },
+        { id: 'bitelo-zaku-sekundarioa', text: 'Bitelo zakua', small: true, from: 0.55 },
       ],
       note: 'Bi adar: zefalikoa eta kaudala. Bien artean hodi onfalomesenterikoa (bitelinoa), zaku bitelinoarekin komunikatzeko',
       key: KEY_M.limbs,
@@ -167,7 +182,7 @@ const spec18: StageSpec<MidPose, MidOpts> = {
       keyTitle: 'Kolorea',
     },
     {
-      cam: orbit(-96, -6, 7.2, [0, -1.15, 0.0], SH),
+      cam: orbit(-100, 6, 6.6, [0, -0.98, 0.1], SH),
       glide: 0.05,
       dim: ['adar-kaudala', 'hodi-onfalomesenterikoa', 'kolon-itsuaren-hastapena'],
       names: [
@@ -180,6 +195,8 @@ const spec18: StageSpec<MidPose, MidOpts> = {
       keyTitle: 'Kolorea',
     },
     {
+      to: { sma: 1 },
+      run: [0.05, 0.5],
       cam: orbit(-60, 8, 7.6, [0, -0.85, -0.2], SH),
       glide: 0.05,
       dim: ['goiko-arteria-mesenterikoa', 'heste-lakioa', 'adar-zefalikoa', 'adar-kaudala'],
@@ -190,9 +207,10 @@ const spec18: StageSpec<MidPose, MidOpts> = {
     },
     {
       // Out into the cord, turning the first 90° (counter-clockwise from the front).
-      to: { hern: 1, rot: 1 / 3, cord: 1, front: 1 },
+      to: { hern: 1, rot: 1 / 3, cord: 1, front: 1, arc: 1 },
       run: [0.08, 0.8],
-      cam: FRONT([0, -1.0, 0.7], 9.4, -10, 6),
+      // Three-quarter from the front and above: the loop's length and its turn round the SMA both read.
+      cam: orbit(-30, 22, 9.6, [0, -1.0, 0.9], SH),
       glide: 0.08,
       dim: ['adar-zefalikoa', 'adar-kaudala', 'goiko-arteria-mesenterikoa', 'zilborrestea'],
       names: [
@@ -217,6 +235,7 @@ const spec19: StageSpec<MidPose, MidOpts> = {
   S: S19,
   pose: END18.pose,
   opts: END18.opts,
+  over: arcOver,
   caption: 'Heste lakioen hernia fisiologikoa eta itzulera (3D eredua, aurretik; enbrioiaren ezkerra zure eskuinean)',
   key: KEY_M.limbs,
   keyTitle: 'Kolorea',
@@ -247,7 +266,8 @@ const spec19: StageSpec<MidPose, MidOpts> = {
     {
       to: { ret: 0.55, rot: 0.78, hern: 0.3, parts: 1 },
       run: [0.06, 0.8],
-      cam: FRONT([0.15, -0.8, 0.2], 8.6),
+      // Follow the jejunum in: the upper left of the abdomen (on your right).
+      cam: FRONT([0.4, -0.85, 0.35], 7.6, -4, 6),
       glide: 0.05,
       dim: ['jejunoa'],
       names: [{ id: 'jejunoa', sub: 'lehena itzultzen; goi-ezkerrean (L2aren ezkerrean)', from: 0.55 }],
@@ -256,14 +276,15 @@ const spec19: StageSpec<MidPose, MidOpts> = {
     {
       to: { ret: 1, rot: 1, hern: 0, cord: 0.35 },
       run: [0.06, 0.8],
-      cam: FRONT([-0.25, -0.6, 0.1], 8.2, -14),
+      // Then the caecal bud, last, under the liver (upper right: on your left).
+      cam: FRONT([-0.45, -0.5, 0.2], 7.4, -16, 6),
       glide: 0.05,
       dim: ['kolon-itsua'],
       names: [{ id: 'kolon-itsua', text: 'Kolon itsuaren hastapena', sub: 'azkena; goi-eskuinean, gibelaren azpian', from: 0.6 }],
       note: 'Azkena kolon itsuaren hastapena (konikoa): hasieran abdomenaren goi-eskuinean geratzen da, gibelaren beheko aldean (eskuineko hipokondrioan)',
     },
     {
-      to: { cDesc: 1, cord: 0, front: 0 },
+      to: { cDesc: 1, cord: 0, front: 0, arc: 0 },
       run: [0.06, 0.75],
       cam: FRONT([-0.35, -0.9, 0.0], 8.6, -12),
       glide: 0.05,

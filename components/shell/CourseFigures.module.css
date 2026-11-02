@@ -1,0 +1,13 @@
+.root { padding: 1rem 0; }
+.root p { margin: .5rem 0; }
+.note { font-size: .9rem; opacity: .72; }
+.root select { max-width: 100%; padding: .5rem; }
+.paging { display: flex; align-items: center; justify-content: center; gap: 1.25rem; margin: 1rem 0; }
+.paging button { padding: .45rem .8rem; cursor: pointer; }
+.paging button:disabled { opacity: .4; cursor: default; }
+.figure { width: min(100%, 900px); margin: auto; position: relative; line-height: 0; }
+.figure img { display: block; width: 100%; height: auto; }
+.spot { position: absolute; padding: 0; border: 0; background: transparent; cursor: pointer; mix-blend-mode: multiply; }
+.spot:hover, .spot:focus-visible { outline: 2px solid #2659a0; outline-offset: 1px; }
+.red { background: rgba(211, 47, 47, .55); }
+.orange { background: rgba(245, 158, 11, .6); }
