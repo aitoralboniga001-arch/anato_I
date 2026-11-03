@@ -289,12 +289,17 @@ const CORE_MIGRATIONS: MigrationTopic[] = [
         stage: 'somitomeroak-burua',
         roots: [
           n('somitomeroak', [
-            l('1.–2. somitomeroak', [n('begi-goiko-zuzena'), n('begi-beheko-zuzena'), n('begi-erdiko-zuzena'), n('begi-beheko-laprana')]),
-            l('3. somitomeroa', [n('begi-goiko-laprana')]),
-            l('4. somitomeroa', [n('muskulu-murtsikatzaileak', [n('loki-muskulua'), n('maseter-muskulua'), n('muskulu-pterigoideoak')], { via: '1. arkua · V' })]),
-            l('5. somitomeroa', [n('begi-alboko-zuzena')]),
-            l('6. somitomeroa · 2. faringe-arkua', [n('muskulu-mimikoak', undefined, { via: '2. arkua · VII' }), n('barailaren-muskulu-jeistaileak', undefined, { via: '2. arkua · VII' })]),
-            l('7. somitomeroa', [n('muskulu-estilofaringeoa', undefined, { via: '3. arkua · IX' })]),
+            l('1.–2. somitomeroak', [
+              n('begi-goiko-zuzena', undefined, { via: 'III · begi-eragilea' }),
+              n('begi-beheko-zuzena', undefined, { via: 'III · begi-eragilea' }),
+              n('begi-erdiko-zuzena', undefined, { via: 'III · begi-eragilea' }),
+              n('begi-beheko-laprana', undefined, { via: 'III · begi-eragilea' }),
+            ]),
+            l('3. somitomeroa', [n('begi-goiko-laprana', undefined, { via: 'IV · troklearra' })]),
+            l('4. somitomeroa', [n('muskulu-murtsikatzaileak', [n('loki-muskulua'), n('maseter-muskulua'), n('muskulu-pterigoideoak')], { via: '1. arkua · V · trigeminoa (V3)' })]),
+            l('5. somitomeroa', [n('begi-alboko-zuzena', undefined, { via: 'VI · aldentzailea' })]),
+            l('6. somitomeroa · 2. faringe-arkua', [n('muskulu-mimikoak', undefined, { via: '2. arkua · VII · aurpegi-nerbioa' }), n('barailaren-muskulu-jeistaileak', undefined, { via: '2. arkua · VII · aurpegi-nerbioa' })]),
+            l('7. somitomeroa', [n('muskulu-estilofaringeoa', undefined, { via: '3. arkua · IX · glosofaringeoa' })]),
           ]),
         ],
       },
